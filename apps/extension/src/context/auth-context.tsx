@@ -42,7 +42,7 @@ import React, {
   useRef,
   useState,
 } from 'react'
-import KeyboardEventHandler from 'react-keyboard-event-handler'
+import { HotKeys } from 'react-hotkeys'
 import { Navigate, useLocation } from 'react-router-dom'
 import { favNftStore, hiddenNftStore } from 'stores/manage-nft-store'
 import { passwordStore } from 'stores/password-store'
@@ -397,74 +397,88 @@ const RequireAuthView = ({
 
   const views = extension.getViews({ type: 'popup' })
 
+  const keyMap = {
+    OPEN_SEARCH_META: 'meta+k',
+    OPEN_SEARCH_CTRL: 'ctrl+k',
+    MOVE_UP: 'up',
+    MOVE_DOWN: 'down',
+    SELECT_ENTER: 'enter',
+  }
+
+  const handlers = {
+    OPEN_SEARCH_META: (event: KeyboardEvent) => {
+      event.preventDefault()
+      event.stopPropagation()
+      searchModalStore.setShowModal(!searchModalStore.showModal)
+      searchModalStore.setEnteredOption(null)
+    },
+    OPEN_SEARCH_CTRL: (event: KeyboardEvent) => {
+      event.preventDefault()
+      event.stopPropagation()
+      searchModalStore.setShowModal(!searchModalStore.showModal)
+      searchModalStore.setEnteredOption(null)
+    },
+    MOVE_UP: (event: KeyboardEvent) => {
+      if (searchModalStore.showModal) {
+        event.preventDefault()
+        event.stopPropagation()
+
+        const newActive = searchModalStore.activeOption.active - 1
+
+        if (
+          newActive >= searchModalStore.activeOption.lowLimit &&
+          newActive < searchModalStore.activeOption.highLimit
+        ) {
+          searchModalStore.updateActiveOption({
+            active: newActive,
+          })
+          document
+            .querySelector(`[data-search-active-option-id=search-active-option-id-${newActive}]`)
+            ?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+        }
+
+        searchModalStore.setEnteredOption(null)
+      }
+    },
+    MOVE_DOWN: (event: KeyboardEvent) => {
+      if (searchModalStore.showModal) {
+        event.preventDefault()
+        event.stopPropagation()
+
+        const newActive = searchModalStore.activeOption.active + 1
+
+        if (
+          newActive >= searchModalStore.activeOption.lowLimit &&
+          newActive < searchModalStore.activeOption.highLimit
+        ) {
+          searchModalStore.updateActiveOption({
+            active: newActive,
+          })
+          document
+            .querySelector(`[data-search-active-option-id=search-active-option-id-${newActive}]`)
+            ?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+        }
+
+        searchModalStore.setEnteredOption(null)
+      }
+    },
+    SELECT_ENTER: (event: KeyboardEvent) => {
+      if (searchModalStore.showModal) {
+        event.preventDefault()
+        event.stopPropagation()
+        searchModalStore.setEnteredOption(searchModalStore.activeOption.active)
+      }
+    },
+  }
+
   const Children =
     QUICK_SEARCH_DISABLED_PAGES.includes(location.pathname) || activeChain === 'aggregated' ? (
       children
     ) : (
-      <>
-        <KeyboardEventHandler
-          handleKeys={['meta+k', 'ctrl+k', 'up', 'down', 'enter']}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          onKeyEvent={(key: string, event: any) => {
-            switch (key) {
-              case 'down':
-              case 'up':
-                {
-                  if (searchModalStore.showModal) {
-                    event.stopPropagation()
-                    event.preventDefault()
-
-                    const newActive =
-                      key === 'down'
-                        ? searchModalStore.activeOption.active + 1
-                        : searchModalStore.activeOption.active - 1
-
-                    if (
-                      newActive >= searchModalStore.activeOption.lowLimit &&
-                      newActive < searchModalStore.activeOption.highLimit
-                    ) {
-                      searchModalStore.updateActiveOption({
-                        active: newActive,
-                      })
-                      document
-                        .querySelector(
-                          `[data-search-active-option-id=search-active-option-id-${newActive}]`,
-                        )
-                        ?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-                    }
-
-                    searchModalStore.setEnteredOption(null)
-                  }
-                }
-                break
-
-              case 'enter':
-                {
-                  if (searchModalStore.showModal) {
-                    event.stopPropagation()
-                    event.preventDefault()
-
-                    searchModalStore.setEnteredOption(searchModalStore.activeOption.active)
-                  }
-                }
-                break
-
-              case 'meta+k':
-              case 'ctrl+k':
-                {
-                  event.stopPropagation()
-                  event.preventDefault()
-                  searchModalStore.setShowModal(!searchModalStore.showModal)
-                  searchModalStore.setEnteredOption(null)
-                }
-                break
-            }
-          }}
-          handleFocusableElements={true}
-        />
+      <HotKeys keyMap={keyMap} handlers={handlers} allowChanges>
         {children}
         <SearchModal />
-      </>
+      </HotKeys>
     )
 
   if (hideBorder) {

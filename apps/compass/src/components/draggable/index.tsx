@@ -1,5 +1,5 @@
 import React from 'react'
-import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd'
+import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd'
 
 interface PropTypes {
   children?: React.ReactNode

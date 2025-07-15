@@ -84,7 +84,7 @@
     "patch-package": "8.0.0",
     "postinstall-postinstall": "2.1.0",
     "prettier": "2.7.1",
-    "vitepress": "1.0.0-alpha.29",
+    "vitepress": "^1.0.0-alpha.65",
     "vue": "3.3.4"
   },
   "dependencies": {
