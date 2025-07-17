@@ -1,17 +1,17 @@
-import ChoosePasswordView from 'components/choose-password-view'
-import { AnimatePresence } from 'framer-motion'
-import { observer } from 'mobx-react-lite'
-import React from 'react'
-import { passwordStore } from 'stores/password-store'
+import ChoosePasswordView from 'components/choose-password-view';
+import { AnimatePresence } from 'framer-motion';
+import { observer } from 'mobx-react-lite';
+import React from 'react';
+import { passwordStore } from 'stores/password-store';
 
-import { CreateWalletProvider, useCreateWalletContext } from './create-wallet-context'
-import { CreatingWalletLoader } from './creating-wallet-loader'
-import { CreateWalletLayout } from './layout'
-import { ConfirmSecretPhrase } from './steps/confirm-secret-phrase'
-import { SeedPhrase } from './steps/seed-phrase'
+import { CreateWalletProvider, useCreateWalletContext } from './create-wallet-context';
+import { CreatingWalletLoader } from './creating-wallet-loader';
+import { CreateWalletLayout } from './layout';
+import { ConfirmSecretPhrase } from './steps/confirm-secret-phrase';
+import { SeedPhrase } from './steps/seed-phrase';
 
 const OnboardingCreateWalletView = observer(function OnboardingCreateWallet() {
-  const { onOnboardingCompleted, currentStep, loading, prevStep } = useCreateWalletContext()
+  const { onOnboardingCompleted, currentStep, loading, prevStep } = useCreateWalletContext();
 
   return (
     <AnimatePresence mode='wait' presenceAffectsLayout>
@@ -29,8 +29,8 @@ const OnboardingCreateWalletView = observer(function OnboardingCreateWallet() {
         />
       )}
     </AnimatePresence>
-  )
-})
+  );
+});
 
 const OnboardingCreateWallet = observer(() => (
   <CreateWalletProvider>
@@ -38,6 +38,6 @@ const OnboardingCreateWallet = observer(() => (
       <OnboardingCreateWalletView />
     </CreateWalletLayout>
   </CreateWalletProvider>
-))
+));
 
-export default OnboardingCreateWallet
+export default OnboardingCreateWallet;

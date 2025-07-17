@@ -1,1 +1,1 @@
-export * from './useHardCodedActions'
+export * from './useHardCodedActions';

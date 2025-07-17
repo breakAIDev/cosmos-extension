@@ -1,67 +1,63 @@
-import { Key } from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { Buttons, Header, HeaderActionType } from '@leapwallet/leap-ui'
-import { MinusCircle } from '@phosphor-icons/react'
-import BottomModal from 'components/bottom-modal'
-import DraggableContainer from 'components/draggable'
-import { ManageChainDraggables, ManageChainNonDraggables } from 'components/draggable/manage-chains'
-import PopupLayout from 'components/layout/popup-layout'
-import NoSearchResults from 'components/no-search-results'
-import Text from 'components/text'
-import { BETA_CHAINS } from 'config/storage-keys'
-import { useSetActiveChain } from 'hooks/settings/useActiveChain'
-import useActiveWallet, { useUpdateKeyStore } from 'hooks/settings/useActiveWallet'
-import { useChainInfos, useSetChainInfos } from 'hooks/useChainInfos'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import React, { ReactElement } from 'react'
-import { DropResult } from '@hello-pangea/dnd'
-import { useNavigate } from 'react-router-dom'
-import { deleteChainStore } from 'stores/delete-chain-store'
-import { ManageChainSettings, manageChainsStore } from 'stores/manage-chains-store'
-import { Colors } from 'theme/colors'
-import browser from 'webextension-polyfill'
+import { DropResult } from '@hello-pangea/dnd';
+import { Key } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { Buttons, Header, HeaderActionType } from '@leapwallet/leap-ui';
+import { MinusCircle } from '@phosphor-icons/react';
+import BottomModal from 'components/bottom-modal';
+import DraggableContainer from 'components/draggable';
+import { ManageChainDraggables, ManageChainNonDraggables } from 'components/draggable/manage-chains';
+import PopupLayout from 'components/layout/popup-layout';
+import NoSearchResults from 'components/no-search-results';
+import Text from 'components/text';
+import { BETA_CHAINS } from 'config/storage-keys';
+import { useSetActiveChain } from 'hooks/settings/useActiveChain';
+import useActiveWallet, { useUpdateKeyStore } from 'hooks/settings/useActiveWallet';
+import { useChainInfos, useSetChainInfos } from 'hooks/useChainInfos';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import React, { ReactElement } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { deleteChainStore } from 'stores/delete-chain-store';
+import { ManageChainSettings, manageChainsStore } from 'stores/manage-chains-store';
+import { Colors } from 'theme/colors';
+import browser from 'webextension-polyfill';
 
 // a function to help us with reordering the result
-const reorder = (
-  list: ManageChainSettings[],
-  startIndex: number,
-  endIndex: number,
-): ManageChainSettings[] => {
-  const result: ManageChainSettings[] = Array.from(list)
-  const [removed] = result.splice(startIndex, 1)
-  result.splice(endIndex, 0, removed)
-  return result
-}
+const reorder = (list: ManageChainSettings[], startIndex: number, endIndex: number): ManageChainSettings[] => {
+  const result: ManageChainSettings[] = Array.from(list);
+  const [removed] = result.splice(startIndex, 1);
+  result.splice(endIndex, 0, removed);
+  return result;
+};
 
 const RemoveChain = observer(({ defaultChain }: { defaultChain: SupportedChain }) => {
-  const setActiveChain = useSetActiveChain()
-  const setChainInfos = useSetChainInfos()
-  const chainInfos = useChainInfos()
+  const setActiveChain = useSetActiveChain();
+  const setChainInfos = useSetChainInfos();
+  const chainInfos = useChainInfos();
 
-  const { activeWallet, setActiveWallet } = useActiveWallet()
+  const { activeWallet, setActiveWallet } = useActiveWallet();
 
-  const updateKeyStore = useUpdateKeyStore()
+  const updateKeyStore = useUpdateKeyStore();
   const handleRemove = async () => {
     await browser.storage.local.get([BETA_CHAINS]).then(async (resp) => {
-      const _betaChains = JSON.parse(resp['beta-chains'])
-      delete _betaChains[deleteChainStore.chainInfo?.chainName as string]
-      await browser.storage.local.set({ [BETA_CHAINS]: JSON.stringify(_betaChains) })
+      const _betaChains = JSON.parse(resp['beta-chains']);
+      delete _betaChains[deleteChainStore.chainInfo?.chainName as string];
+      await browser.storage.local.set({ [BETA_CHAINS]: JSON.stringify(_betaChains) });
 
-      const _newChains = { ...chainInfos }
-      delete _newChains[deleteChainStore.chainInfo?.chainName as keyof typeof _newChains]
-      setChainInfos(_newChains)
+      const _newChains = { ...chainInfos };
+      delete _newChains[deleteChainStore.chainInfo?.chainName as keyof typeof _newChains];
+      setChainInfos(_newChains);
 
       const updatedKeystore = await updateKeyStore(
         activeWallet as Key,
         deleteChainStore.chainInfo?.chainName as unknown as SupportedChain,
         'DELETE',
-      )
-      await setActiveWallet(updatedKeystore[activeWallet?.id as string] as Key)
-      setActiveChain(defaultChain)
-      deleteChainStore.setChainInfo(null)
-    })
-  }
+      );
+      await setActiveWallet(updatedKeystore[activeWallet?.id as string] as Key);
+      setActiveChain(defaultChain);
+      deleteChainStore.setChainInfo(null);
+    });
+  };
   return (
     <BottomModal
       isOpen={!!deleteChainStore.chainInfo}
@@ -99,33 +95,29 @@ const RemoveChain = observer(({ defaultChain }: { defaultChain: SupportedChain }
         </div>
       </div>
     </BottomModal>
-  )
-})
+  );
+});
 
 export default observer(function ManageChain(): ReactElement {
-  const [searchQuery, setSearchQuery] = React.useState('')
-  const navigate = useNavigate()
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const navigate = useNavigate();
 
-  const _chains = manageChainsStore.chains.filter((chain) => !chain.beta)
-  const _betaChains = manageChainsStore.chains.filter((chain) => chain.beta)
+  const _chains = manageChainsStore.chains.filter((chain) => !chain.beta);
+  const _betaChains = manageChainsStore.chains.filter((chain) => chain.beta);
   const _filteredBetaChains = _betaChains.filter((chain) =>
     chain.chainName.toLowerCase().includes(searchQuery.toLowerCase()),
-  )
+  );
 
   // function that defines what happens when a draggable is dropped
   const onDragEnd = async (result: DropResult) => {
     // dropped outside the list
     if (!result.destination) {
-      return
+      return;
     }
-    const items: ManageChainSettings[] = reorder(
-      _chains,
-      result.source.index,
-      result.destination.index,
-    )
+    const items: ManageChainSettings[] = reorder(_chains, result.source.index, result.destination.index);
 
-    manageChainsStore.updatePreferenceOrder(items)
-  }
+    manageChainsStore.updatePreferenceOrder(items);
+  };
 
   return (
     <div className='relative'>
@@ -135,7 +127,7 @@ export default observer(function ManageChain(): ReactElement {
             title={'Manage chains'}
             action={{
               onClick: () => {
-                navigate(-1)
+                navigate(-1);
               },
               type: HeaderActionType.BACK,
             }}
@@ -153,18 +145,13 @@ export default observer(function ManageChain(): ReactElement {
             {searchQuery.length === 0 ? (
               <img src={Images.Misc.Search} />
             ) : (
-              <img
-                className='cursor-pointer'
-                src={Images.Misc.CrossFilled}
-                onClick={() => setSearchQuery('')}
-              />
+              <img className='cursor-pointer' src={Images.Misc.CrossFilled} onClick={() => setSearchQuery('')} />
             )}
           </div>
           <div className='align-middle flex flex-col items-center justify-center mt-[20px] mb-10'>
             <DraggableContainer onDragEnd={onDragEnd}>
-              {_chains.filter((chain) =>
-                chain.chainName.toLowerCase().includes(searchQuery.toLowerCase()),
-              ).length === 0 && <NoSearchResults searchQuery={searchQuery} />}
+              {_chains.filter((chain) => chain.chainName.toLowerCase().includes(searchQuery.toLowerCase())).length ===
+                0 && <NoSearchResults searchQuery={searchQuery} />}
               {searchQuery.length === 0 ? (
                 <ManageChainDraggables
                   chains={_chains}
@@ -194,5 +181,5 @@ export default observer(function ManageChain(): ReactElement {
       </PopupLayout>
       <RemoveChain defaultChain={manageChainsStore.chains[0].chainName} />
     </div>
-  )
-})
+  );
+});

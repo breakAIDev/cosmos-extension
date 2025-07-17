@@ -1,40 +1,40 @@
-import { EyeSlash } from '@phosphor-icons/react'
-import { EventName, PageName } from 'config/analytics'
-import { Images } from 'images'
-import mixpanel from 'mixpanel-browser'
-import React, { useCallback } from 'react'
+import { EyeSlash } from '@phosphor-icons/react';
+import { EventName, PageName } from 'config/analytics';
+import { Images } from 'images';
+import mixpanel from 'mixpanel-browser';
+import React, { useCallback } from 'react';
 
-import { useFilters } from '../context/filter-context'
-import { CategoryIcon } from '../utils/filters'
-import FilterItem from './FilterItem'
+import { useFilters } from '../context/filter-context';
+import { CategoryIcon } from '../utils/filters';
+import FilterItem from './FilterItem';
 
 export default function CategoryFilter({
   categoryFilters,
   pageName,
 }: {
-  categoryFilters: string[]
-  pageName: PageName
+  categoryFilters: string[];
+  pageName: PageName;
 }) {
-  const { selectedOpportunities, selectedEcosystems, setOpportunities } = useFilters()
+  const { selectedOpportunities, selectedEcosystems, setOpportunities } = useFilters();
 
   const handleCategoryToggle = useCallback(
     (category: string) => {
       try {
         const newCategories = selectedOpportunities?.includes(category)
           ? selectedOpportunities.filter((o) => o !== category)
-          : [...(selectedOpportunities || []), category]
+          : [...(selectedOpportunities || []), category];
 
-        setOpportunities(newCategories)
+        setOpportunities(newCategories);
         mixpanel.track(EventName.Filters, {
           filterSelected: [...(newCategories || []), ...(selectedEcosystems || [])],
           filterApplySource: pageName,
-        })
+        });
       } catch (err) {
         // ignore
       }
     },
     [selectedOpportunities, selectedEcosystems, setOpportunities, pageName],
-  )
+  );
 
   return (
     <div className='flex flex-col gap-5'>
@@ -69,5 +69,5 @@ export default function CategoryFilter({
         />
       </div>
     </div>
-  )
+  );
 }

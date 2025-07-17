@@ -1,76 +1,74 @@
-import type { CategoryId, InvestData } from '@leapwallet/cosmos-wallet-hooks'
-import BottomModal from 'components/bottom-modal'
-import { TxFee } from 'images/activity'
-import { HelpIcon } from 'images/misc'
-import React, { useMemo, useState } from 'react'
+import type { CategoryId, InvestData } from '@leapwallet/cosmos-wallet-hooks';
+import BottomModal from 'components/bottom-modal';
+import { TxFee } from 'images/activity';
+import { HelpIcon } from 'images/misc';
+import React, { useMemo, useState } from 'react';
 
-import { DisplaySettings } from '../types'
-import { InvestmentProductList } from './investment-product-list'
+import { DisplaySettings } from '../types';
+import { InvestmentProductList } from './investment-product-list';
 
 type InvestViewProps = {
-  data: InvestData
-  displaySettings: DisplaySettings
-}
+  data: InvestData;
+  displaySettings: DisplaySettings;
+};
 
 export const InvestView: React.FC<InvestViewProps> = ({ data, displaySettings }) => {
-  const [showDescription, setShowDescription] = useState<CategoryId>()
+  const [showDescription, setShowDescription] = useState<CategoryId>();
 
-  const { dappCategories, dapps: _dapps, products: _products, disclaimer } = data
+  const { dappCategories, dapps: _dapps, products: _products, disclaimer } = data;
 
   const dapps = useMemo(() => {
-    return Object.values(_dapps)
-  }, [_dapps])
+    return Object.values(_dapps);
+  }, [_dapps]);
 
   const products = useMemo(() => {
-    return Object.values(_products)
-  }, [_products])
+    return Object.values(_products);
+  }, [_products]);
 
   const visibleDappCategories = useMemo(() => {
     return Object.entries(dappCategories)
       .filter(([categoryId, categoryData]) => {
         // if category is disabled, don't show it
         if (!categoryData.visible) {
-          return false
+          return false;
         }
         // if category is not disabled, but there are not products with the given category id, don't show it
         if (
           !products.some((product) => {
-            const productBelongsToCategory = product.dappCategory === categoryId
-            const productIsVisible = product.visible
+            const productBelongsToCategory = product.dappCategory === categoryId;
+            const productIsVisible = product.visible;
             const productsDappIsVisible =
               dapps.find((dapp) => {
-                return product.chain === dapp.chain && product.dappName === dapp.name
-              })?.visible ?? false
-            return productBelongsToCategory && productIsVisible && productsDappIsVisible
+                return product.chain === dapp.chain && product.dappName === dapp.name;
+              })?.visible ?? false;
+            return productBelongsToCategory && productIsVisible && productsDappIsVisible;
           })
         ) {
-          return false
+          return false;
         }
-        return true
+        return true;
       })
       .sort(([, a], [, b]) => {
-        return a.position - b.position
-      })
-  }, [dappCategories, dapps, products])
+        return a.position - b.position;
+      });
+  }, [dappCategories, dapps, products]);
 
   return (
     <>
       <div className='space-y-5'>
         {visibleDappCategories.map(([categoryId, categoryData], index) => {
-          const isFirstOfList = index === 0
+          const isFirstOfList = index === 0;
 
           return (
             <div key={categoryId}>
               {isFirstOfList ? (
                 <div className='flex-[6] flex items-center pr-10 gap-2 my-3'>
                   <div className='flex w-[184px] items-center'>
-                    <h3 className='text-sm font-medium text-gray-700 dark:text-gray-400'>
-                      {categoryData.label}
-                    </h3>
+                    <h3 className='text-sm font-medium text-gray-700 dark:text-gray-400'>{categoryData.label}</h3>
                     <button
                       className='ml-2 opacity-40'
                       onClick={() => {
-                        setShowDescription(categoryId)
+                        setShowDescription(categoryId);
                       }}
                     >
                       <img src={HelpIcon} alt='help' className='h-[14px] w-[14px]' />
@@ -85,13 +83,11 @@ export const InvestView: React.FC<InvestViewProps> = ({ data, displaySettings })
                 </div>
               ) : (
                 <div className='flex items-center'>
-                  <h3 className='text-sm font-medium text-gray-700 dark:text-gray-300'>
-                    {categoryData.label}
-                  </h3>
+                  <h3 className='text-sm font-medium text-gray-700 dark:text-gray-300'>{categoryData.label}</h3>
                   <button
                     className='ml-2 opacity-40'
                     onClick={() => {
-                      setShowDescription(categoryId)
+                      setShowDescription(categoryId);
                     }}
                   >
                     <img src={HelpIcon} alt='help' className='h-[14px] w-[14px]' />
@@ -105,7 +101,7 @@ export const InvestView: React.FC<InvestViewProps> = ({ data, displaySettings })
                 sortBy={displaySettings.sortBy}
               />
             </div>
-          )
+          );
         })}
       </div>
       <div className='mt-4'>
@@ -131,5 +127,5 @@ export const InvestView: React.FC<InvestViewProps> = ({ data, displaySettings })
         ) : null}
       </BottomModal>
     </>
-  )
-}
+  );
+};

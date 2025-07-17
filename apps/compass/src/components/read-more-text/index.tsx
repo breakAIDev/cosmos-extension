@@ -1,21 +1,21 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 
-import Text, { TextProps } from '../text'
+import Text, { TextProps } from '../text';
 
 type ReadMoreProps = {
-  textProps: TextProps
-  children: string
-  readMoreColor: string
-}
+  textProps: TextProps;
+  children: string;
+  readMoreColor: string;
+};
 
 export default function ReadMoreText({ children, textProps, readMoreColor: color }: ReadMoreProps) {
-  const text = children
-  const [isReadMore, setIsReadMore] = useState(true)
+  const text = children;
+  const [isReadMore, setIsReadMore] = useState(true);
   const toggleReadMore = () => {
-    setIsReadMore(!isReadMore)
-  }
+    setIsReadMore(!isReadMore);
+  };
 
-  const isPossible = text && text.length > 150
+  const isPossible = text && text.length > 150;
 
   return (
     <div>
@@ -32,5 +32,5 @@ export default function ReadMoreText({ children, textProps, readMoreColor: color
         </span>
       )}
     </div>
-  )
+  );
 }

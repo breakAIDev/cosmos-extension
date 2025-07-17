@@ -1,10 +1,10 @@
-import { useChains } from '@leapwallet/elements-hooks'
-import { WarningCircle } from '@phosphor-icons/react'
-import { useCaptureUIException } from 'hooks/perf-monitoring/useCaptureUIException'
-import React, { useMemo } from 'react'
+import { useChains } from '@leapwallet/elements-hooks';
+import { WarningCircle } from '@phosphor-icons/react';
+import { useCaptureUIException } from 'hooks/perf-monitoring/useCaptureUIException';
+import React, { useMemo } from 'react';
 
-import { RoutingInfo, useGetChainsToShow, useOnline } from '../hooks'
-import { getChainIdsFromRoute } from '../utils'
+import { RoutingInfo, useGetChainsToShow, useOnline } from '../hooks';
+import { getChainIdsFromRoute } from '../utils';
 
 export function TxErrorSection({
   ledgerError,
@@ -13,54 +13,54 @@ export function TxErrorSection({
   unableToTrackError,
   routingInfo,
 }: {
-  firstTxnError?: string
-  ledgerError?: string
-  timeoutError?: boolean
-  unableToTrackError?: boolean | null
-  routingInfo: RoutingInfo
+  firstTxnError?: string;
+  ledgerError?: string;
+  timeoutError?: boolean;
+  unableToTrackError?: boolean | null;
+  routingInfo: RoutingInfo;
 }) {
-  const isOnline = useOnline()
-  const { chainsToShow: chains } = useGetChainsToShow()
+  const isOnline = useOnline();
+  const { chainsToShow: chains } = useGetChainsToShow();
 
   const intermediateChainsInvolved = useMemo(
     () =>
       getChainIdsFromRoute(routingInfo?.route)
         ?.slice(1, -1)
         ?.reduce((acc: string[], chainID: string) => {
-          const chainName = chains?.find((chain) => chain.chainId === chainID)?.chainName ?? chainID
+          const chainName = chains?.find((chain) => chain.chainId === chainID)?.chainName ?? chainID;
           if (chainName) {
-            return [...acc, chainName]
+            return [...acc, chainName];
           }
-          return acc
+          return acc;
         }, [] as string[]),
     [chains, routingInfo?.route],
-  )
+  );
 
   const errorMessage = useMemo(() => {
     if (!isOnline) {
-      return 'Please check your internet connection'
+      return 'Please check your internet connection';
     }
 
     if (ledgerError) {
-      return ledgerError
+      return ledgerError;
     }
 
     if (unableToTrackError) {
-      return "We couldn't track the status of your transaction due to a technical error."
+      return "We couldn't track the status of your transaction due to a technical error.";
     }
 
     if (firstTxnError) {
-      return firstTxnError
+      return firstTxnError;
     }
 
     if (timeoutError) {
-      return 'Request timed out'
+      return 'Request timed out';
     }
 
-    return undefined
-  }, [isOnline, ledgerError, unableToTrackError, firstTxnError, timeoutError])
+    return undefined;
+  }, [isOnline, ledgerError, unableToTrackError, firstTxnError, timeoutError]);
 
-  useCaptureUIException(errorMessage)
+  useCaptureUIException(errorMessage);
 
   return (
     <div className='w-full p-4 flex flex-col dark:bg-gray-950 bg-white-100 justify-start items-start gap-3 rounded-xl overflow-x-auto hide-scrollbar'>
@@ -78,18 +78,13 @@ export function TxErrorSection({
               <p>You can check your funds in the following places</p>
               <ol className='list-decimal list-inside text-sm dark:text-gray-200 text-gray-800 !leading-[22.4px] font-medium mt-2 [&>li::marker]:opacity-80 [&>li::marker]:text-sm [&>li::marker]:normal-nums space-y-1'>
                 <li>
-                  {routingInfo.route.sourceAsset.symbol} on{' '}
-                  {routingInfo.route.sourceAssetChain.chainName}.
+                  {routingInfo.route.sourceAsset.symbol} on {routingInfo.route.sourceAssetChain.chainName}.
                 </li>
                 <li>
-                  {routingInfo.route.destinationAsset.symbol} on{' '}
-                  {routingInfo.route.destinationAssetChain.chainName}.
+                  {routingInfo.route.destinationAsset.symbol} on {routingInfo.route.destinationAssetChain.chainName}.
                 </li>
                 {intermediateChainsInvolved.length > 0 ? (
-                  <li>
-                    Your funds may be on these intermediate chains -{' '}
-                    {intermediateChainsInvolved.join(', ')}.
-                  </li>
+                  <li>Your funds may be on these intermediate chains - {intermediateChainsInvolved.join(', ')}.</li>
                 ) : null}
               </ol>
             </div>
@@ -97,12 +92,7 @@ export function TxErrorSection({
           <div className='dark:bg-gray-900 bg-gray-50 rounded-xl p-3'>
             <p className='text-sm dark:text-white-100 text-black-100 !leading-[22.4px] font-medium'>
               In case you aren&apos;t able to track your funds, kindly get in touch with us at{' '}
-              <a
-                href='https://leapwallet.io/support'
-                target='_blank'
-                rel='noreferrer'
-                className='underline'
-              >
+              <a href='https://leapwallet.io/support' target='_blank' rel='noreferrer' className='underline'>
                 leapwallet.io
               </a>
             </p>
@@ -110,5 +100,5 @@ export function TxErrorSection({
         </>
       )}
     </div>
-  )
+  );
 }

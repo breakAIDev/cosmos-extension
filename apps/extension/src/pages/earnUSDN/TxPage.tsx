@@ -1,14 +1,14 @@
-import { EARN_MODE, Token, useTxHandler } from '@leapwallet/cosmos-wallet-hooks'
-import { CaretRight, X } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import PopupLayout from 'components/layout/popup-layout'
-import Text from 'components/text'
-import { Wallet } from 'hooks/wallet/useWallet'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import React, { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router'
-import { rootBalanceStore } from 'stores/root-store'
+import { EARN_MODE, Token, useTxHandler } from '@leapwallet/cosmos-wallet-hooks';
+import { CaretRight, X } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import PopupLayout from 'components/layout/popup-layout';
+import Text from 'components/text';
+import { Wallet } from 'hooks/wallet/useWallet';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router';
+import { rootBalanceStore } from 'stores/root-store';
 
 const TxPage = observer(
   ({
@@ -18,18 +18,18 @@ const TxPage = observer(
     sourceToken,
     destinationToken,
   }: {
-    txHash: string
-    onClose: () => void
-    txType: EARN_MODE
-    sourceToken?: Token
-    destinationToken?: Token
+    txHash: string;
+    onClose: () => void;
+    txType: EARN_MODE;
+    sourceToken?: Token;
+    destinationToken?: Token;
   }) => {
-    const navigate = useNavigate()
-    const [txStatus, setTxStatus] = useState<'loading' | 'success' | 'failed'>('loading')
-    const getWallet = Wallet.useGetWallet()
+    const navigate = useNavigate();
+    const [txStatus, setTxStatus] = useState<'loading' | 'success' | 'failed'>('loading');
+    const getWallet = Wallet.useGetWallet();
     const getTxHandler = useTxHandler({
       forceChain: 'noble',
-    })
+    });
 
     const { title, subtitle, btnText } = useMemo(() => {
       if (txType === 'deposit') {
@@ -38,19 +38,19 @@ const TxPage = observer(
             title: 'Deposit in-progress...',
             subtitle: '',
             btnText: 'View details',
-          }
+          };
         } else if (txStatus === 'success') {
           return {
             title: 'Deposit successful!',
             subtitle: 'You will now earn rewards on your deposited USDC.',
             btnText: 'View details',
-          }
+          };
         } else {
           return {
             title: 'Deposit failed',
             subtitle: '',
             btnText: 'Try Again',
-          }
+          };
         }
       } else if (txType === 'withdraw') {
         if (txStatus === 'loading') {
@@ -58,15 +58,15 @@ const TxPage = observer(
             title: 'Withdrawal in-progress...',
             subtitle: 'Your tokens are being swapped back to USDC from USDN.',
             btnText: 'Done',
-          }
+          };
         } else if (txStatus === 'success') {
           return {
             title: 'Withdrawal successful!',
             subtitle: '',
             btnText: 'Done',
-          }
+          };
         } else {
-          return { title: 'Withdraw failed', subtitle: '', btnText: 'Try Again' }
+          return { title: 'Withdraw failed', subtitle: '', btnText: 'Try Again' };
         }
       } else {
         if (txStatus === 'loading') {
@@ -74,43 +74,43 @@ const TxPage = observer(
             title: 'Claim in-progress...',
             subtitle: 'Your rewards are being claimed.',
             btnText: 'Done',
-          }
+          };
         } else if (txStatus === 'success') {
           return {
             title: 'Tokens claimed!',
             subtitle: '',
             btnText: 'Done',
-          }
+          };
         } else {
-          return { title: 'Claim failed', subtitle: '', btnText: 'Try Again' }
+          return { title: 'Claim failed', subtitle: '', btnText: 'Try Again' };
         }
       }
-    }, [txStatus, txType])
+    }, [txStatus, txType]);
 
     const invalidateBalances = () => {
-      rootBalanceStore.refetchBalances('noble')
-    }
+      rootBalanceStore.refetchBalances('noble');
+    };
 
     useEffect(() => {
       async function pollForTx() {
         try {
-          const wallets = await getWallet('noble')
-          const txHandler = await getTxHandler(wallets)
-          const res = await txHandler.pollForTx(txHash)
+          const wallets = await getWallet('noble');
+          const txHandler = await getTxHandler(wallets);
+          const res = await txHandler.pollForTx(txHash);
           if (res.code === 0) {
-            setTxStatus('success')
-            invalidateBalances()
+            setTxStatus('success');
+            invalidateBalances();
           } else {
-            setTxStatus('failed')
+            setTxStatus('failed');
           }
         } catch (error) {
           //
         }
       }
       if (txHash) {
-        pollForTx()
+        pollForTx();
       }
-    }, [txHash])
+    }, [txHash]);
 
     return (
       <div className='relative h-full w-full'>
@@ -141,11 +141,7 @@ const TxPage = observer(
                 <Text size='xl' color='text-black-100 dark:text-white-100' className='font-bold'>
                   {title}
                 </Text>
-                <Text
-                  size='sm'
-                  color='text-gray-800 dark:text-gray-200'
-                  className='font-normal text-center'
-                >
+                <Text size='sm' color='text-gray-800 dark:text-gray-200' className='font-normal text-center'>
                   {subtitle}
                 </Text>
               </div>
@@ -154,7 +150,7 @@ const TxPage = observer(
                 <div
                   className='flex gap-x-1 items-center cursor-pointer'
                   onClick={() => {
-                    window.open('https://www.mintscan.io/noble/tx/' + txHash, '_blank')
+                    window.open('https://www.mintscan.io/noble/tx/' + txHash, '_blank');
                   }}
                 >
                   <Text size='sm' color='text-green-600' className='font-medium'>
@@ -183,11 +179,11 @@ const TxPage = observer(
                   navigate('/assetDetails?assetName=uusdn&tokenChain=noble', {
                     replace: true,
                     state: JSON.parse(JSON.stringify(destinationToken)),
-                  })
+                  });
                 } else if (txType === 'withdraw') {
-                  navigate('/home', { replace: true })
+                  navigate('/home', { replace: true });
                 }
-                onClose()
+                onClose();
               }}
             >
               {btnText}
@@ -195,8 +191,8 @@ const TxPage = observer(
           </div>
         </PopupLayout>
       </div>
-    )
+    );
   },
-)
+);
 
-export default TxPage
+export default TxPage;

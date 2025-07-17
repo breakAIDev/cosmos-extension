@@ -1,5 +1,5 @@
-import { PerChainDelegations, sliceSearchWord, useGetChains } from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
+import { PerChainDelegations, sliceSearchWord, useGetChains } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import {
   AggregateStakeStore,
   ChainTagsStore,
@@ -9,39 +9,39 @@ import {
   RootDenomsStore,
   UndelegationsStore,
   ValidatorsStore,
-} from '@leapwallet/cosmos-wallet-store'
-import { CaretDown, CaretUp, X } from '@phosphor-icons/react'
-import BigNumber from 'bignumber.js'
-import { AggregatedLoadingList } from 'components/aggregated'
-import { EmptyCard } from 'components/empty-card'
-import { SearchInput } from 'components/ui/input/search-input'
-import currency from 'currency.js'
-import { decodeChainIdToChain } from 'extension-scripts/utils'
-import { useFormatCurrency } from 'hooks/settings/useCurrency'
-import { useSelectedNetwork } from 'hooks/settings/useNetwork'
-import useQuery from 'hooks/useQuery'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+} from '@leapwallet/cosmos-wallet-store';
+import { CaretDown, CaretUp, X } from '@phosphor-icons/react';
+import BigNumber from 'bignumber.js';
+import { AggregatedLoadingList } from 'components/aggregated';
+import { EmptyCard } from 'components/empty-card';
+import { SearchInput } from 'components/ui/input/search-input';
+import currency from 'currency.js';
+import { decodeChainIdToChain } from 'extension-scripts/utils';
+import { useFormatCurrency } from 'hooks/settings/useCurrency';
+import { useSelectedNetwork } from 'hooks/settings/useNetwork';
+import useQuery from 'hooks/useQuery';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { StakeHeader } from '../stake-header'
-import StakePage from '../StakePage'
-import { AggregatedValues } from './AggregatedValues'
-import { StakeTokenCard } from './StakeTokenCard'
+import { StakeHeader } from '../stake-header';
+import StakePage from '../StakePage';
+import { AggregatedValues } from './AggregatedValues';
+import { StakeTokenCard } from './StakeTokenCard';
 
-const NETWORK = 'mainnet'
-type DelegationsToConsider = PerChainDelegations & { chain: SupportedChain }
+const NETWORK = 'mainnet';
+type DelegationsToConsider = PerChainDelegations & { chain: SupportedChain };
 
 type AggregatedStakeProps = {
-  aggregateStakeStore: AggregateStakeStore
-  rootDenomsStore: RootDenomsStore
-  delegationsStore: DelegationsStore
-  validatorsStore: ValidatorsStore
-  unDelegationsStore: UndelegationsStore
-  claimRewardsStore: ClaimRewardsStore
-  rootBalanceStore: RootBalanceStore
-  chainTagsStore: ChainTagsStore
-}
+  aggregateStakeStore: AggregateStakeStore;
+  rootDenomsStore: RootDenomsStore;
+  delegationsStore: DelegationsStore;
+  validatorsStore: ValidatorsStore;
+  unDelegationsStore: UndelegationsStore;
+  claimRewardsStore: ClaimRewardsStore;
+  rootBalanceStore: RootBalanceStore;
+  chainTagsStore: ChainTagsStore;
+};
 
 export const AggregatedStake = observer(
   ({
@@ -61,34 +61,34 @@ export const AggregatedStake = observer(
       totalClaimRewardsAmount,
       isEveryChainLoading,
       isSomeChainLoading,
-    } = aggregateStakeStore.aggregatedStake
+    } = aggregateStakeStore.aggregatedStake;
 
-    const [searchedText, setSearchedText] = useState('')
-    const [showSearchInput, setShowSearchInput] = useState(false)
-    const [formatCurrency] = useFormatCurrency()
-    const chains = useGetChains()
-    const [showAprInDescending, setShowAprInDescending] = useState(true)
-    const [showAmountInDescending, setShowAmountInDescending] = useState(true)
-    const [sortBy, setSortBy] = useState<'apr' | 'amount'>('amount')
-    const selectedNetwork = useSelectedNetwork()
+    const [searchedText, setSearchedText] = useState('');
+    const [showSearchInput, setShowSearchInput] = useState(false);
+    const [formatCurrency] = useFormatCurrency();
+    const chains = useGetChains();
+    const [showAprInDescending, setShowAprInDescending] = useState(true);
+    const [showAmountInDescending, setShowAmountInDescending] = useState(true);
+    const [sortBy, setSortBy] = useState<'apr' | 'amount'>('amount');
+    const selectedNetwork = useSelectedNetwork();
 
-    const [selectedChain, setSelectedChain] = useState<SupportedChain | null>(null)
+    const [selectedChain, setSelectedChain] = useState<SupportedChain | null>(null);
 
-    const query = useQuery()
-    const paramChainId = query.get('chainId') ?? undefined
+    const query = useQuery();
+    const paramChainId = query.get('chainId') ?? undefined;
 
     const averageAprValue = useMemo(() => {
       if (averageApr) {
-        return `${currency((averageApr * 100).toString(), { precision: 2, symbol: '' }).format()}%`
+        return `${currency((averageApr * 100).toString(), { precision: 2, symbol: '' }).format()}%`;
       }
 
-      return '-'
-    }, [averageApr])
+      return '-';
+    }, [averageApr]);
 
-    const stakingDenomsPriority = ['ATOM', 'TIA', 'CORE', 'OSMO', 'INJ', 'BABY', 'NIBI', 'OM']
+    const stakingDenomsPriority = ['ATOM', 'TIA', 'CORE', 'OSMO', 'INJ', 'BABY', 'NIBI', 'OM'];
 
     const delegationsToConsider = useMemo(() => {
-      const formattedSearchText = searchedText.trim().toLowerCase()
+      const formattedSearchText = searchedText.trim().toLowerCase();
 
       const formattedDelegations = Object.keys(perChainDelegations)
         .reduce((acc: DelegationsToConsider[], chain) => {
@@ -102,102 +102,98 @@ export const AggregatedStake = observer(
                 ...perChainDelegations[chain],
                 chain: chain as SupportedChain,
               },
-            ]
+            ];
           }
 
-          return acc
+          return acc;
         }, [])
         .sort((a, b) => {
-          const aIndex = stakingDenomsPriority.indexOf(a.stakingDenom)
-          const bIndex = stakingDenomsPriority.indexOf(b.stakingDenom)
-          return aIndex === -1 ? 1 : bIndex === -1 ? -1 : aIndex - bIndex
-        })
+          const aIndex = stakingDenomsPriority.indexOf(a.stakingDenom);
+          const bIndex = stakingDenomsPriority.indexOf(b.stakingDenom);
+          return aIndex === -1 ? 1 : bIndex === -1 ? -1 : aIndex - bIndex;
+        });
 
       switch (sortBy) {
         case 'apr': {
           return formattedDelegations.sort((itemA, itemB) => {
             if (showAprInDescending) {
-              return itemB.apr - itemA.apr
+              return itemB.apr - itemA.apr;
             }
 
-            return itemA.apr - itemB.apr
-          })
+            return itemA.apr - itemB.apr;
+          });
         }
 
         case 'amount': {
           return formattedDelegations.sort((itemA, itemB) => {
-            const isAValid =
-              itemA.currencyAmountDelegation && !isNaN(Number(itemA.currencyAmountDelegation))
-            const isBValid =
-              itemB.currencyAmountDelegation && !isNaN(Number(itemB.currencyAmountDelegation))
+            const isAValid = itemA.currencyAmountDelegation && !isNaN(Number(itemA.currencyAmountDelegation));
+            const isBValid = itemB.currencyAmountDelegation && !isNaN(Number(itemB.currencyAmountDelegation));
 
             if (!isBValid) {
               if (isAValid) {
-                return showAmountInDescending ? -1 : 1
+                return showAmountInDescending ? -1 : 1;
               }
 
-              const aDelegation: undefined | BigNumber = itemA.totalDelegation
-              const bDelegation: undefined | BigNumber = itemB.totalDelegation
+              const aDelegation: undefined | BigNumber = itemA.totalDelegation;
+              const bDelegation: undefined | BigNumber = itemB.totalDelegation;
 
               if (!bDelegation || bDelegation.isNaN() || bDelegation.isZero()) {
                 if (!(!aDelegation || aDelegation.isNaN() || aDelegation.isZero())) {
-                  return showAmountInDescending ? -1 : 1
+                  return showAmountInDescending ? -1 : 1;
                 }
 
-                return showAmountInDescending ? 1 : -1
+                return showAmountInDescending ? 1 : -1;
               }
 
               if (!aDelegation || aDelegation.isNaN() || aDelegation.isZero()) {
-                return showAmountInDescending ? 1 : -1
+                return showAmountInDescending ? 1 : -1;
               }
 
               if (showAmountInDescending) {
-                return bDelegation.minus(aDelegation).toNumber()
+                return bDelegation.minus(aDelegation).toNumber();
               }
 
-              return itemA.totalDelegation.minus(itemB.totalDelegation).toNumber()
+              return itemA.totalDelegation.minus(itemB.totalDelegation).toNumber();
             }
 
             if (!isAValid) {
-              return showAmountInDescending ? 1 : -1
+              return showAmountInDescending ? 1 : -1;
             }
 
             if (showAmountInDescending) {
-              return Number(itemB.currencyAmountDelegation) - Number(itemA.currencyAmountDelegation)
+              return Number(itemB.currencyAmountDelegation) - Number(itemA.currencyAmountDelegation);
             }
 
-            return Number(itemA.currencyAmountDelegation) - Number(itemB.currencyAmountDelegation)
-          })
+            return Number(itemA.currencyAmountDelegation) - Number(itemB.currencyAmountDelegation);
+          });
         }
       }
-    }, [perChainDelegations, searchedText, showAmountInDescending, showAprInDescending, sortBy])
+    }, [perChainDelegations, searchedText, showAmountInDescending, showAprInDescending, sortBy]);
 
     const handleTokenCardClick = useCallback(
       (chain: SupportedChain) => {
-        setSelectedChain(chain)
-        if (
-          (validatorsStore.validatorsForChain(chain).validatorData?.validators ?? []).length === 0
-        ) {
-          validatorsStore.loadValidators(chain, selectedNetwork)
+        setSelectedChain(chain);
+        if ((validatorsStore.validatorsForChain(chain).validatorData?.validators ?? []).length === 0) {
+          validatorsStore.loadValidators(chain, selectedNetwork);
         }
       },
       [selectedNetwork, validatorsStore],
-    )
+    );
 
-    const handleBackClick = useCallback(() => setSelectedChain(null), [])
+    const handleBackClick = useCallback(() => setSelectedChain(null), []);
 
     useEffect(() => {
       async function updateChain() {
         if (paramChainId) {
-          const chainIdToChain = await decodeChainIdToChain()
-          const chain = chainIdToChain[paramChainId] as SupportedChain
-          setSelectedChain(chain)
-          query.delete('chainId')
+          const chainIdToChain = await decodeChainIdToChain();
+          const chain = chainIdToChain[paramChainId] as SupportedChain;
+          setSelectedChain(chain);
+          query.delete('chainId');
         }
       }
-      updateChain()
+      updateChain();
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [paramChainId])
+    }, [paramChainId]);
 
     if (selectedChain) {
       return (
@@ -214,7 +210,7 @@ export const AggregatedStake = observer(
           rootBalanceStore={rootBalanceStore}
           chainTagsStore={chainTagsStore}
         />
-      )
+      );
     }
 
     return (
@@ -233,8 +229,8 @@ export const AggregatedStake = observer(
                 size={24}
                 className='text-muted-foreground  cursor-pointer p-3.5 h-auto w-12 rounded-full bg-secondary-100 hover:bg-secondary-200'
                 onClick={() => {
-                  setShowSearchInput(false)
-                  setSearchedText('')
+                  setShowSearchInput(false);
+                  setSearchedText('');
                 }}
               />
             </div>
@@ -261,8 +257,8 @@ export const AggregatedStake = observer(
               <button
                 className='flex items-center justify-between gap-1'
                 onClick={() => {
-                  setShowAprInDescending(!showAprInDescending)
-                  setSortBy('apr')
+                  setShowAprInDescending(!showAprInDescending);
+                  setSortBy('apr');
                 }}
               >
                 APR
@@ -280,8 +276,8 @@ export const AggregatedStake = observer(
               <button
                 className='w-[90px] text-right flex items-center justify-end gap-1'
                 onClick={() => {
-                  setShowAmountInDescending(!showAmountInDescending)
-                  setSortBy('amount')
+                  setShowAmountInDescending(!showAmountInDescending);
+                  setSortBy('amount');
                 }}
               >
                 Amount
@@ -306,20 +302,14 @@ export const AggregatedStake = observer(
                 delegationsToConsider.length > 0 ? (
                   <>
                     {delegationsToConsider.map((delegation) => {
-                      const {
-                        totalDelegationAmount,
-                        currencyAmountDelegation,
-                        stakingDenom,
-                        apr,
-                        chain,
-                      } = delegation
+                      const { totalDelegationAmount, currencyAmountDelegation, stakingDenom, apr, chain } = delegation;
 
                       const aprValue = apr
                         ? `${currency((apr * 100).toString(), {
                             precision: 2,
                             symbol: '',
                           }).format()} %`
-                        : '-'
+                        : '-';
 
                       return (
                         <StakeTokenCard
@@ -332,7 +322,7 @@ export const AggregatedStake = observer(
                           amount={totalDelegationAmount}
                           onClick={() => handleTokenCardClick(chain)}
                         />
-                      )
+                      );
                     })}
                   </>
                 ) : (
@@ -351,6 +341,6 @@ export const AggregatedStake = observer(
           </div>
         </div>
       </>
-    )
+    );
   },
-)
+);

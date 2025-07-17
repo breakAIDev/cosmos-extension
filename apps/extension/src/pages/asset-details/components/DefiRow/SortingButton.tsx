@@ -1,6 +1,6 @@
-import { ArrowDown, ArrowUp } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import React, { Dispatch, SetStateAction, useMemo, useState } from 'react'
+import { ArrowDown, ArrowUp } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import React, { Dispatch, SetStateAction, useMemo, useState } from 'react';
 
 export function SortingButton({
   sortBy,
@@ -14,32 +14,32 @@ export function SortingButton({
   sortName,
   showEmptySymbolArea = false,
 }: {
-  sortBy: string
-  sortDir: string
-  defaultSortBy?: string
-  defaultSortDir?: string
-  setSortDir: Dispatch<SetStateAction<string>>
-  setSortBy: Dispatch<SetStateAction<string>>
+  sortBy: string;
+  sortDir: string;
+  defaultSortBy?: string;
+  defaultSortDir?: string;
+  setSortDir: Dispatch<SetStateAction<string>>;
+  setSortBy: Dispatch<SetStateAction<string>>;
   classNamesObj?: {
-    outerContainer?: string
-    symbol?: string
-  }
-  sortName: string
-  label: string
-  showEmptySymbolArea?: boolean
+    outerContainer?: string;
+    symbol?: string;
+  };
+  sortName: string;
+  label: string;
+  showEmptySymbolArea?: boolean;
 }) {
-  const [isHovered] = useState<boolean>(false)
+  const [isHovered] = useState<boolean>(false);
 
   const symbol = useMemo(() => {
     if (sortBy === sortName) {
       if (sortDir === 'asc') {
-        return isHovered === true ? <ArrowDown size={12} /> : <ArrowUp size={12} />
+        return isHovered === true ? <ArrowDown size={12} /> : <ArrowUp size={12} />;
       } else {
-        return isHovered === true ? null : <ArrowDown size={12} />
+        return isHovered === true ? null : <ArrowDown size={12} />;
       }
     }
-    return isHovered === true ? <ArrowUp size={12} /> : null
-  }, [isHovered, sortBy, sortDir, sortName])
+    return isHovered === true ? <ArrowUp size={12} /> : null;
+  }, [isHovered, sortBy, sortDir, sortName]);
 
   return (
     <button
@@ -51,14 +51,14 @@ export function SortingButton({
       onClick={() => {
         if (sortBy === sortName) {
           if (sortDir === 'asc') {
-            setSortDir('dsc')
+            setSortDir('dsc');
           } else {
-            setSortDir(defaultSortDir)
-            setSortBy(defaultSortBy)
+            setSortDir(defaultSortDir);
+            setSortBy(defaultSortBy);
           }
         } else {
-          setSortBy(sortName)
-          setSortDir('asc')
+          setSortBy(sortName);
+          setSortDir('asc');
         }
       }}
     >
@@ -75,5 +75,5 @@ export function SortingButton({
         </div>
       }
     </button>
-  )
+  );
 }

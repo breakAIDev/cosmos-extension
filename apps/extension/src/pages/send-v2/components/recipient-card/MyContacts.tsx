@@ -1,27 +1,27 @@
-import { SelectedAddress, sliceAddress } from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { Avatar } from '@leapwallet/leap-ui'
-import { UserList } from '@phosphor-icons/react'
-import { SearchInput } from 'components/ui/input/search-input'
-import { useChainInfos } from 'hooks/useChainInfos'
-import { useContactsSearch } from 'hooks/useContacts'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import React, { useState } from 'react'
-import { AddressBook } from 'utils/addressbook'
+import { SelectedAddress, sliceAddress } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { Avatar } from '@leapwallet/leap-ui';
+import { UserList } from '@phosphor-icons/react';
+import { SearchInput } from 'components/ui/input/search-input';
+import { useChainInfos } from 'hooks/useChainInfos';
+import { useContactsSearch } from 'hooks/useContacts';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import React, { useState } from 'react';
+import { AddressBook } from 'utils/addressbook';
 
-import { useSendContext } from '../../context'
+import { useSendContext } from '../../context';
 
 interface MyContactsProps {
-  handleContactSelect: (contact: SelectedAddress) => void
+  handleContactSelect: (contact: SelectedAddress) => void;
 }
 
 function MyContacts({ handleContactSelect }: MyContactsProps) {
-  const [searchQuery, setSearchQuery] = useState('')
-  const trimmedSearchQuery = searchQuery.trim()
-  const contacts = useContactsSearch(trimmedSearchQuery)
-  const chainInfos = useChainInfos()
-  const { setMemo } = useSendContext()
-  const defaultTokenLogo = useDefaultTokenLogo()
+  const [searchQuery, setSearchQuery] = useState('');
+  const trimmedSearchQuery = searchQuery.trim();
+  const contacts = useContactsSearch(trimmedSearchQuery);
+  const chainInfos = useChainInfos();
+  const { setMemo } = useSendContext();
+  const defaultTokenLogo = useDefaultTokenLogo();
 
   const handleAvatarClick = (contact: AddressBook.SavedAddress, chainImage: string | undefined) => {
     handleContactSelect({
@@ -32,9 +32,9 @@ function MyContacts({ handleContactSelect }: MyContactsProps) {
       address: contact.address,
       emoji: contact.emoji,
       selectionType: 'saved',
-    })
-    setMemo(contact.memo ?? '')
-  }
+    });
+    setMemo(contact.memo ?? '');
+  };
 
   return (
     <>
@@ -48,9 +48,8 @@ function MyContacts({ handleContactSelect }: MyContactsProps) {
       <div className='mt-4 w-full h-[calc(100%-300px)]] overflow-auto'>
         {contacts.length > 0 ? (
           contacts.map((contact, index) => {
-            const chainImage =
-              chainInfos[contact.blockchain]?.chainSymbolImageUrl ?? defaultTokenLogo
-            const isLast = index === contacts.length - 1
+            const chainImage = chainInfos[contact.blockchain]?.chainSymbolImageUrl ?? defaultTokenLogo;
+            const isLast = index === contacts.length - 1;
 
             return (
               <React.Fragment key={contact.address}>
@@ -61,9 +60,7 @@ function MyContacts({ handleContactSelect }: MyContactsProps) {
                   <Avatar chainIcon={chainImage} emoji={contact.emoji ?? 0} />
 
                   <div>
-                    <p className='font-bold text-left dark:text-white-100 text-gray-700 capitalize'>
-                      {contact.name}
-                    </p>
+                    <p className='font-bold text-left dark:text-white-100 text-gray-700 capitalize'>{contact.name}</p>
 
                     <p className='text-sm font-medium dark:text-gray-400 text-gray-600'>
                       {sliceAddress(contact.ethAddress ? contact.ethAddress : contact.address)}
@@ -71,11 +68,9 @@ function MyContacts({ handleContactSelect }: MyContactsProps) {
                   </div>
                 </button>
 
-                {!isLast && (
-                  <div className='border-b w-full border-gray-100 dark:border-gray-850' />
-                )}
+                {!isLast && <div className='border-b w-full border-gray-100 dark:border-gray-850' />}
               </React.Fragment>
-            )
+            );
           })
         ) : (
           <div className='py-[88px] w-full flex-col flex  justify-center items-center gap-4'>
@@ -98,7 +93,7 @@ function MyContacts({ handleContactSelect }: MyContactsProps) {
         )}
       </div>
     </>
-  )
+  );
 }
 
-export default MyContacts
+export default MyContacts;

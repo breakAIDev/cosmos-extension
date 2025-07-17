@@ -1,26 +1,26 @@
-import { getLeapapiBaseUrl } from '@leapwallet/cosmos-wallet-hooks'
-import { X } from '@phosphor-icons/react'
-import { CheckCircle } from '@phosphor-icons/react/dist/ssr'
-import axios from 'axios'
-import BottomModal from 'components/new-bottom-modal'
-import Text from 'components/text'
-import { Button } from 'components/ui/button'
-import { Separator } from 'components/ui/separator'
-import { ButtonName, EventName, PageName } from 'config/analytics'
-import { VIEWED_RAFFLE_WINS } from 'config/storage-keys'
-import dayjs from 'dayjs'
-import { AnimatePresence, motion } from 'framer-motion'
-import { usePageView } from 'hooks/analytics/usePageView'
-import { RaffleStatus, useRaffleWins } from 'hooks/useAlphaOpportunities'
-import { useRaffleEntry } from 'hooks/useRaffleEntry'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { mixpanelTrack } from 'utils/tracking'
-import browser from 'webextension-polyfill'
+import { getLeapapiBaseUrl } from '@leapwallet/cosmos-wallet-hooks';
+import { X } from '@phosphor-icons/react';
+import { CheckCircle } from '@phosphor-icons/react/dist/ssr';
+import axios from 'axios';
+import BottomModal from 'components/new-bottom-modal';
+import Text from 'components/text';
+import { Button } from 'components/ui/button';
+import { Separator } from 'components/ui/separator';
+import { ButtonName, EventName, PageName } from 'config/analytics';
+import { VIEWED_RAFFLE_WINS } from 'config/storage-keys';
+import dayjs from 'dayjs';
+import { AnimatePresence, motion } from 'framer-motion';
+import { usePageView } from 'hooks/analytics/usePageView';
+import { RaffleStatus, useRaffleWins } from 'hooks/useAlphaOpportunities';
+import { useRaffleEntry } from 'hooks/useRaffleEntry';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { mixpanelTrack } from 'utils/tracking';
+import browser from 'webextension-polyfill';
 
-import { ChadDescription } from '../components/AlphaDescription'
-import Tags from '../components/Tags'
-import { useChadProvider } from '../context/chad-exclusives-context'
-import { endsInUTC } from '../utils'
+import { ChadDescription } from '../components/AlphaDescription';
+import Tags from '../components/Tags';
+import { useChadProvider } from '../context/chad-exclusives-context';
+import { endsInUTC } from '../utils';
 import {
   IneligibleRaffle,
   NotRaffleWinner,
@@ -29,38 +29,32 @@ import {
   RaffleWinner,
   ResultSoon,
   SubscriptionCountdown,
-} from './RaffleEntry'
-import { RaffleListingProps } from './RaffleListing'
+} from './RaffleEntry';
+import { RaffleListingProps } from './RaffleListing';
 
 type RaffleDetailsDrawerProps = {
-  isShown: boolean
-  onClose: () => void
-  raffle: RaffleListingProps | null
-}
+  isShown: boolean;
+  onClose: () => void;
+  raffle: RaffleListingProps | null;
+};
 
-const now = dayjs()
-export default function RaffleDetailsDrawer({
-  isShown,
-  onClose,
-  raffle,
-}: RaffleDetailsDrawerProps) {
-  const { alphaUser } = useChadProvider()
+const now = dayjs();
+export default function RaffleDetailsDrawer({ isShown, onClose, raffle }: RaffleDetailsDrawerProps) {
+  const { alphaUser } = useChadProvider();
   usePageView(PageName.ChadExclusivesDetail, isShown, {
     isChad: alphaUser?.isChad ?? false,
     ecosystem: [...new Set(raffle?.ecosystem ?? [])],
     categories: [...new Set(raffle?.categories ?? [])],
-  })
+  });
 
-  const { raffleWins } = useRaffleWins(alphaUser?.id ?? '')
-  const [toast, setToast] = useState('')
+  const { raffleWins } = useRaffleWins(alphaUser?.id ?? '');
+  const [toast, setToast] = useState('');
 
-  const end = useMemo(() => dayjs(raffle?.endsAt), [raffle?.endsAt])
-  const start = useMemo(() => dayjs(raffle?.startsAt), [raffle?.startsAt])
+  const end = useMemo(() => dayjs(raffle?.endsAt), [raffle?.endsAt]);
+  const start = useMemo(() => dayjs(raffle?.startsAt), [raffle?.startsAt]);
 
-  const [isUpcoming, setIsUpcoming] = useState(start.isAfter(now))
-  const [diff, setDiff] = useState(
-    raffle?.status === RaffleStatus.COMPLETED ? 0 : end.diff(now, 'second'),
-  )
+  const [isUpcoming, setIsUpcoming] = useState(start.isAfter(now));
+  const [diff, setDiff] = useState(raffle?.status === RaffleStatus.COMPLETED ? 0 : end.diff(now, 'second'));
 
   const isLive = useMemo(
     () =>
@@ -71,74 +65,69 @@ export default function RaffleDetailsDrawer({
           endsInUTC(raffle?.endsAt) !== 'Ended',
       ),
     [diff, raffle?.endsAt, raffle?.status],
-  )
+  );
 
   useEffect(() => {
     const updateStates = () => {
-      const currentNow = dayjs()
-      const isCurrentlyUpcoming = start.isAfter(currentNow)
-      const currentDiff =
-        raffle?.status === RaffleStatus.COMPLETED ? 0 : end.diff(currentNow, 'second')
+      const currentNow = dayjs();
+      const isCurrentlyUpcoming = start.isAfter(currentNow);
+      const currentDiff = raffle?.status === RaffleStatus.COMPLETED ? 0 : end.diff(currentNow, 'second');
 
-      setIsUpcoming(isCurrentlyUpcoming)
-      setDiff(currentDiff)
-    }
+      setIsUpcoming(isCurrentlyUpcoming);
+      setDiff(currentDiff);
+    };
 
-    updateStates()
-    const interval = setInterval(updateStates, 1000)
-    return () => clearInterval(interval)
-  }, [raffle?.status, start, end])
+    updateStates();
+    const interval = setInterval(updateStates, 1000);
+    return () => clearInterval(interval);
+  }, [raffle?.status, start, end]);
 
-  const {
-    hasEntered: raffleEntered,
-    isLoading,
-    refetch,
-  } = useRaffleEntry(raffle?.id, alphaUser?.id)
+  const { hasEntered: raffleEntered, isLoading, refetch } = useRaffleEntry(raffle?.id, alphaUser?.id);
 
   const isWinner = useMemo(() => {
-    return raffleWins.find((win) => win.id === raffle?.id)
-  }, [raffleWins, raffle?.id])
+    return raffleWins.find((win) => win.id === raffle?.id);
+  }, [raffleWins, raffle?.id]);
 
   useEffect(() => {
     if (toast) {
-      setTimeout(() => setToast(''), 2000)
+      setTimeout(() => setToast(''), 2000);
     }
-  }, [toast])
+  }, [toast]);
 
   // adds winner raffle ID in storage to mark as viewed
   useEffect(() => {
     const markRaffleAsViewed = async () => {
       if (isShown && isWinner && raffle?.id) {
-        const result = await browser.storage.local.get(VIEWED_RAFFLE_WINS)
-        const viewedRaffles = result[VIEWED_RAFFLE_WINS] || []
+        const result = await browser.storage.local.get(VIEWED_RAFFLE_WINS);
+        const viewedRaffles = result[VIEWED_RAFFLE_WINS] || [];
 
         if (!viewedRaffles.includes(raffle.id)) {
-          const updatedViewedRaffles = [...viewedRaffles, raffle.id]
-          await browser.storage.local.set({ [VIEWED_RAFFLE_WINS]: updatedViewedRaffles })
+          const updatedViewedRaffles = [...viewedRaffles, raffle.id];
+          await browser.storage.local.set({ [VIEWED_RAFFLE_WINS]: updatedViewedRaffles });
         }
       }
-    }
-    markRaffleAsViewed()
-  }, [isShown, isWinner, raffle?.id])
+    };
+    markRaffleAsViewed();
+  }, [isShown, isWinner, raffle?.id]);
 
   const handleEnterRaffle = useCallback(async () => {
     try {
-      const baseUrl = getLeapapiBaseUrl()
-      const url = `${baseUrl}/alpha-insights/raffle-entries`
+      const baseUrl = getLeapapiBaseUrl();
+      const url = `${baseUrl}/alpha-insights/raffle-entries`;
       await axios.post(url, {
         raffleId: raffle?.id,
         userId: alphaUser?.id,
-      })
+      });
       mixpanelTrack(EventName.ButtonClick, {
         buttonName: ButtonName.ENTER_RAFFLE,
         ButtonPageName: PageName.ChadExclusivesDetail,
         isChad: alphaUser?.isChad ?? false,
-      })
-      await refetch()
+      });
+      await refetch();
     } catch (err) {
       // gentle catch
     }
-  }, [alphaUser?.id, raffle?.id, refetch])
+  }, [alphaUser?.id, raffle?.id, refetch]);
 
   return (
     <>
@@ -189,7 +178,7 @@ export default function RaffleDetailsDrawer({
               key='subscription-countdown'
               endDate={raffle?.startsAt ?? ''}
               onExpire={() => {
-                setIsUpcoming(false)
+                setIsUpcoming(false);
               }}
             />
           ) : !raffleEntered && alphaUser?.isChad && diff > 0 ? (
@@ -198,7 +187,7 @@ export default function RaffleDetailsDrawer({
               key='subscription-countdown'
               endDate={raffle?.endsAt ?? ''}
               onExpire={() => {
-                setDiff(0)
+                setDiff(0);
               }}
             />
           ) : raffleEntered && raffle?.status !== RaffleStatus.COMPLETED ? (
@@ -244,5 +233,5 @@ export default function RaffleDetailsDrawer({
         </AnimatePresence>
       )}
     </>
-  )
+  );
 }

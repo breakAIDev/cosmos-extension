@@ -1,15 +1,15 @@
-import CanvasTextBox from 'components/canvas-box/CanvasTextBox'
-import BottomModal from 'components/new-bottom-modal'
-import { CopyButton } from 'components/ui/button/copy-button'
-import { SeedPhrase } from 'hooks/wallet/seed-phrase/useSeedPhrase'
-import { UserKeyIcon } from 'icons/user-key'
-import React, { ReactElement, useState } from 'react'
-import { UserClipboard } from 'utils/clipboard'
+import CanvasTextBox from 'components/canvas-box/CanvasTextBox';
+import BottomModal from 'components/new-bottom-modal';
+import { CopyButton } from 'components/ui/button/copy-button';
+import { SeedPhrase } from 'hooks/wallet/seed-phrase/useSeedPhrase';
+import { UserKeyIcon } from 'icons/user-key';
+import React, { ReactElement, useState } from 'react';
+import { UserClipboard } from 'utils/clipboard';
 
-import { EnterPasswordView } from './EnterPasswordView'
+import { EnterPasswordView } from './EnterPasswordView';
 
 function SeedPhraseView({ password }: { password: Uint8Array }): ReactElement {
-  const mnemonic = SeedPhrase.useMnemonic(password)
+  const mnemonic = SeedPhrase.useMnemonic(password);
 
   return (
     <div className='flex flex-col items-center gap-4'>
@@ -32,24 +32,24 @@ function SeedPhraseView({ password }: { password: Uint8Array }): ReactElement {
         </CopyButton>
       )}
     </div>
-  )
+  );
 }
 
 export default function ExportSeedPhrase({
   isVisible,
   onClose,
 }: {
-  isVisible: boolean
-  onClose: () => void
+  isVisible: boolean;
+  onClose: () => void;
 }): ReactElement {
-  const [password, setPassword] = useState<Uint8Array>()
-  const [isRevealed, setRevealed] = useState(false)
+  const [password, setPassword] = useState<Uint8Array>();
+  const [isRevealed, setRevealed] = useState(false);
 
   const goBack = () => {
-    onClose()
-    setPassword(undefined)
-    setRevealed(false)
-  }
+    onClose();
+    setPassword(undefined);
+    setRevealed(false);
+  };
 
   return (
     <BottomModal
@@ -70,5 +70,5 @@ export default function ExportSeedPhrase({
         />
       )}
     </BottomModal>
-  )
+  );
 }

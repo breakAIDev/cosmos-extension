@@ -1,62 +1,62 @@
-import { formatPercentAmount } from '@leapwallet/cosmos-wallet-hooks'
-import BigNumber from 'bignumber.js'
-import Text from 'components/text'
-import { PageName } from 'config/analytics'
-import { useActiveChain } from 'hooks/settings/useActiveChain'
-import { useFormatCurrency } from 'hooks/settings/useCurrency'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import React, { useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { marketDataStore } from 'stores/balance-store'
-import { chainInfoStore, compassTokensAssociationsStore } from 'stores/chain-infos-store'
-import { rootDenomsStore } from 'stores/denoms-store-instance'
-import { cn } from 'utils/cn'
-import { formatForSubstring } from 'utils/strings'
+import { formatPercentAmount } from '@leapwallet/cosmos-wallet-hooks';
+import BigNumber from 'bignumber.js';
+import Text from 'components/text';
+import { PageName } from 'config/analytics';
+import { useActiveChain } from 'hooks/settings/useActiveChain';
+import { useFormatCurrency } from 'hooks/settings/useCurrency';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import React, { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { marketDataStore } from 'stores/balance-store';
+import { chainInfoStore, compassTokensAssociationsStore } from 'stores/chain-infos-store';
+import { rootDenomsStore } from 'stores/denoms-store-instance';
+import { cn } from 'utils/cn';
+import { formatForSubstring } from 'utils/strings';
 
-import { AssetType } from '..'
-import { TimeFilter } from './AllAssets'
+import { AssetType } from '..';
+import { TimeFilter } from './AllAssets';
 
 const TokenCard = observer(({ token, timeFilter }: { token: string; timeFilter: TimeFilter }) => {
-  const navigate = useNavigate()
-  const [formatCurrency] = useFormatCurrency()
-  const denomInfo = rootDenomsStore.allDenoms[token]
+  const navigate = useNavigate();
+  const [formatCurrency] = useFormatCurrency();
+  const denomInfo = rootDenomsStore.allDenoms[token];
 
-  const chains = chainInfoStore.chainInfos
-  const marketData = marketDataStore.data
-  const compassSeiToEvmMapping = compassTokensAssociationsStore.compassSeiToEvmMapping
-  const activeChain = useActiveChain()
+  const chains = chainInfoStore.chainInfos;
+  const marketData = marketDataStore.data;
+  const compassSeiToEvmMapping = compassTokensAssociationsStore.compassSeiToEvmMapping;
+  const activeChain = useActiveChain();
 
   const marketDataForToken = useMemo(() => {
-    let key = denomInfo.coinMinimalDenom
+    let key = denomInfo.coinMinimalDenom;
     if (marketData?.[key]) {
-      return marketData[key]
+      return marketData[key];
     }
-    const chainId = chains[activeChain]?.chainId
-    key = `${chainId}-${denomInfo.coinMinimalDenom}`
-    const _marketData = marketData?.[key] ?? marketData?.[key?.toLowerCase()]
+    const chainId = chains[activeChain]?.chainId;
+    key = `${chainId}-${denomInfo.coinMinimalDenom}`;
+    const _marketData = marketData?.[key] ?? marketData?.[key?.toLowerCase()];
     if (_marketData) {
-      return _marketData
+      return _marketData;
     }
     if (!compassSeiToEvmMapping[denomInfo.coinMinimalDenom]) {
-      return undefined
+      return undefined;
     }
-    key = `${chainId}-${compassSeiToEvmMapping[denomInfo.coinMinimalDenom]}`
-    return marketData?.[key] ?? marketData?.[key?.toLowerCase()]
-  }, [denomInfo.coinMinimalDenom, marketData, chains, activeChain, compassSeiToEvmMapping])
+    key = `${chainId}-${compassSeiToEvmMapping[denomInfo.coinMinimalDenom]}`;
+    return marketData?.[key] ?? marketData?.[key?.toLowerCase()];
+  }, [denomInfo.coinMinimalDenom, marketData, chains, activeChain, compassSeiToEvmMapping]);
 
   const percentChange = useMemo(() => {
     switch (timeFilter) {
       case TimeFilter['1D']:
-        return marketDataForToken?.price_change_percentage_24h
+        return marketDataForToken?.price_change_percentage_24h;
       case TimeFilter['7D']:
-        return marketDataForToken?.price_change_percentage_7d_in_currency
+        return marketDataForToken?.price_change_percentage_7d_in_currency;
     }
   }, [
     marketDataForToken?.price_change_percentage_24h,
     marketDataForToken?.price_change_percentage_7d_in_currency,
     timeFilter,
-  ])
+  ]);
 
   return (
     <div
@@ -97,8 +97,8 @@ const TokenCard = observer(({ token, timeFilter }: { token: string; timeFilter: 
         ) : null}
       </div>
     </div>
-  )
-})
+  );
+});
 
 const TrendingTokens = observer(
   ({
@@ -109,12 +109,12 @@ const TrendingTokens = observer(
     isExpanded = false,
     timeFilter = TimeFilter['1D'],
   }: {
-    tokens: string[]
-    showHeading?: boolean
-    onExpand?: (val: AssetType) => void
-    isSearched?: boolean
-    isExpanded?: boolean
-    timeFilter?: TimeFilter
+    tokens: string[];
+    showHeading?: boolean;
+    onExpand?: (val: AssetType) => void;
+    isSearched?: boolean;
+    isExpanded?: boolean;
+    timeFilter?: TimeFilter;
   }) => {
     return (
       <div className={cn('flex flex-col gap-3 w-full cursor-pointer', { 'pb-4': showHeading })}>
@@ -138,8 +138,8 @@ const TrendingTokens = observer(
           ))}
         </div>
       </div>
-    )
+    );
   },
-)
+);
 
-export default TrendingTokens
+export default TrendingTokens;

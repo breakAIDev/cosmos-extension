@@ -1,11 +1,11 @@
-import { isLedgerUnlocked } from '@leapwallet/cosmos-wallet-sdk'
-import { type IconProps } from '@phosphor-icons/react'
-import { Button } from 'components/ui/button'
-import { motion } from 'framer-motion'
-import { onboardingWrapperVariants } from 'pages/onboarding/wrapper'
-import React, { useEffect } from 'react'
+import { isLedgerUnlocked } from '@leapwallet/cosmos-wallet-sdk';
+import { type IconProps } from '@phosphor-icons/react';
+import { Button } from 'components/ui/button';
+import { motion } from 'framer-motion';
+import { onboardingWrapperVariants } from 'pages/onboarding/wrapper';
+import React, { useEffect } from 'react';
 
-import { LEDGER_NETWORK, useImportWalletContext } from '../import-wallet-context'
+import { LEDGER_NETWORK, useImportWalletContext } from '../import-wallet-context';
 
 export const HoldState = ({
   Icon,
@@ -14,35 +14,33 @@ export const HoldState = ({
   moveToNextApp,
   appType,
 }: {
-  Icon: (props: IconProps) => React.JSX.Element
-  title: React.ReactNode
-  cta?: React.ReactNode
-  moveToNextApp: (appType: LEDGER_NETWORK) => void
-  appType: LEDGER_NETWORK
+  Icon: (props: IconProps) => React.JSX.Element;
+  title: React.ReactNode;
+  cta?: React.ReactNode;
+  moveToNextApp: (appType: LEDGER_NETWORK) => void;
+  appType: LEDGER_NETWORK;
 }) => {
-  const { getLedgerAccountDetails } = useImportWalletContext()
+  const { getLedgerAccountDetails } = useImportWalletContext();
 
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
-        const unlocked = await isLedgerUnlocked(
-          appType === LEDGER_NETWORK.ETH ? 'Ethereum' : 'Cosmos',
-        )
+        const unlocked = await isLedgerUnlocked(appType === LEDGER_NETWORK.ETH ? 'Ethereum' : 'Cosmos');
         if (unlocked) {
-          await getLedgerAccountDetails(appType)
-          moveToNextApp(appType)
-          clearInterval(interval)
+          await getLedgerAccountDetails(appType);
+          moveToNextApp(appType);
+          clearInterval(interval);
         }
       } catch (error) {
         // eslint-disable-next-line no-console
-        console.error(error)
+        console.error(error);
       }
-    }, 1000)
+    }, 1000);
 
     return () => {
-      clearInterval(interval)
-    }
-  }, [appType])
+      clearInterval(interval);
+    };
+  }, [appType]);
 
   return (
     <motion.div
@@ -70,5 +68,5 @@ export const HoldState = ({
         </Button>
       )}
     </motion.div>
-  )
-}
+  );
+};

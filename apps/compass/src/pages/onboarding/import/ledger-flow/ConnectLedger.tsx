@@ -1,56 +1,50 @@
-import { isLedgerUnlocked } from '@leapwallet/cosmos-wallet-sdk'
-import Text from 'components/text'
-import { Button } from 'components/ui/button'
-import { AnimatePresence, motion, Variants } from 'framer-motion'
-import { LedgerDriveIcon } from 'icons/ledger-drive-icon'
-import { Images } from 'images'
-import React, { useState } from 'react'
+import { isLedgerUnlocked } from '@leapwallet/cosmos-wallet-sdk';
+import Text from 'components/text';
+import { Button } from 'components/ui/button';
+import { AnimatePresence, motion, Variants } from 'framer-motion';
+import { LedgerDriveIcon } from 'icons/ledger-drive-icon';
+import { Images } from 'images';
+import React, { useState } from 'react';
 
-import { OnboardingWrapper } from '../../wrapper'
-import { useImportWalletContext } from '../import-wallet-context'
-import { LEDGER_CONNECTION_STEP } from '../types'
+import { OnboardingWrapper } from '../../wrapper';
+import { useImportWalletContext } from '../import-wallet-context';
+import { LEDGER_CONNECTION_STEP } from '../types';
 
 type ImportLedgerViewProps = {
-  onNext: () => void
-}
+  onNext: () => void;
+};
 
 const transition = {
   duration: 0.75,
   ease: 'easeInOut',
-}
+};
 
 const walletCableVariants: Variants = {
   hidden: { opacity: 0, x: -100 },
   visible: { opacity: 1, x: 0 },
-}
+};
 
 const walletUsbVariants: Variants = {
   hidden: { opacity: 0, x: 100 },
   visible: { opacity: 1, x: 0 },
-}
+};
 
 export function ConnectLedger({ onNext }: ImportLedgerViewProps) {
-  const { prevStep, currentStep } = useImportWalletContext()
-  const [connectingLedger, setConnectingLedger] = useState(false)
-  const entry = prevStep <= currentStep ? 'right' : 'left'
+  const { prevStep, currentStep } = useImportWalletContext();
+  const [connectingLedger, setConnectingLedger] = useState(false);
+  const entry = prevStep <= currentStep ? 'right' : 'left';
 
   const connectLedger = async () => {
-    setConnectingLedger(true)
+    setConnectingLedger(true);
     isLedgerUnlocked('Ethereum', true).then((unlocked) => {
-      if (unlocked) onNext()
-    })
-  }
+      if (unlocked) onNext();
+    });
+  };
 
   if (connectingLedger) {
     return (
       <div className='flex flex-col w-full relative mt-28 items-center'>
-        <img
-          src={Images.Misc.LedgerLoader}
-          className='mb-6'
-          width='134'
-          height='134'
-          alt='ledger-loader'
-        />
+        <img src={Images.Misc.LedgerLoader} className='mb-6' width='134' height='134' alt='ledger-loader' />
         <Text size={'xl'} className='font-bold justify-center mb-2'>
           Searching for Ledger...
         </Text>
@@ -58,7 +52,7 @@ export function ConnectLedger({ onNext }: ImportLedgerViewProps) {
           Connect and unlock your hardware wallet.
         </Text>
       </div>
-    )
+    );
   }
 
   return (
@@ -102,5 +96,5 @@ export function ConnectLedger({ onNext }: ImportLedgerViewProps) {
         Continue
       </Button>
     </OnboardingWrapper>
-  )
+  );
 }

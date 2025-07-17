@@ -1,21 +1,21 @@
-import { Action, RouteAggregator } from '@leapwallet/elements-hooks'
-import { motion } from 'framer-motion'
-import React from 'react'
-import { SwapTxnStatus } from 'types/swap'
+import { Action, RouteAggregator } from '@leapwallet/elements-hooks';
+import { motion } from 'framer-motion';
+import React from 'react';
+import { SwapTxnStatus } from 'types/swap';
 
-import { RoutingInfo, useTransactions } from '../hooks'
-import { TxPageStepsType } from './index'
+import { RoutingInfo, useTransactions } from '../hooks';
+import { TxPageStepsType } from './index';
 
 type TxPageStepsProps = {
-  routingInfo: RoutingInfo
-  txStatus: SwapTxnStatus[]
-}
+  routingInfo: RoutingInfo;
+  txStatus: SwapTxnStatus[];
+};
 
 export function TxPageSteps({ routingInfo, txStatus }: TxPageStepsProps) {
-  const { groupedTransactions } = useTransactions(routingInfo)
+  const { groupedTransactions } = useTransactions(routingInfo);
 
   if (Object.keys(groupedTransactions).length === 0) {
-    return null
+    return null;
   }
 
   return (
@@ -32,23 +32,17 @@ export function TxPageSteps({ routingInfo, txStatus }: TxPageStepsProps) {
           <React.Fragment key={txIndex}>
             {value?.map((action: Action, actionIndex: number, self) => {
               const seqReducer = (acc: number, curr: Action) => {
-                if (
-                  curr.type === 'TRANSFER' ||
-                  curr.type === 'SEND' ||
-                  (curr.type === 'SWAP' && actionIndex === 0)
-                ) {
-                  return acc + 1
+                if (curr.type === 'TRANSFER' || curr.type === 'SEND' || (curr.type === 'SWAP' && actionIndex === 0)) {
+                  return acc + 1;
                 }
-                return acc
-              }
+                return acc;
+              };
 
-              const transferSequenceIndex = self.slice(0, actionIndex + 1).reduce(seqReducer, -1)
+              const transferSequenceIndex = self.slice(0, actionIndex + 1).reduce(seqReducer, -1);
 
-              const previousActionTransferSequenceIndex = self
-                .slice(0, actionIndex)
-                .reduce(seqReducer, -1)
+              const previousActionTransferSequenceIndex = self.slice(0, actionIndex).reduce(seqReducer, -1);
 
-              const prevAction = actionIndex === 0 ? undefined : self[actionIndex - 1]
+              const prevAction = actionIndex === 0 ? undefined : self[actionIndex - 1];
 
               return (
                 <TxPageStepsType
@@ -62,11 +56,11 @@ export function TxPageSteps({ routingInfo, txStatus }: TxPageStepsProps) {
                   transferSequenceIndex={transferSequenceIndex}
                   actionIndex={actionIndex}
                 />
-              )
+              );
             })}
           </React.Fragment>
-        )
+        );
       })}
     </motion.div>
-  )
+  );
 }

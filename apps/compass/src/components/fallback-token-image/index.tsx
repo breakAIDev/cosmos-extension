@@ -1,25 +1,23 @@
-import { sliceWord } from '@leapwallet/cosmos-wallet-hooks'
-import classNames from 'classnames'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { sliceWord } from '@leapwallet/cosmos-wallet-hooks';
+import classNames from 'classnames';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 export function FallbackTokenImage({
   containerClassName = '',
   textClassName = '',
   text,
 }: {
-  containerClassName?: string
-  textClassName?: string
-  text: string
+  containerClassName?: string;
+  textClassName?: string;
+  text: string;
 }) {
-  const [textWidth, setTextWidth] = useState<{ clientWidth: number; scrollWidth: number } | null>(
-    null,
-  )
+  const [textWidth, setTextWidth] = useState<{ clientWidth: number; scrollWidth: number } | null>(null);
   const [containerWidth, setContainerWidth] = useState<{
-    clientWidth: number
-    scrollWidth: number
-  } | null>(null)
+    clientWidth: number;
+    scrollWidth: number;
+  } | null>(null);
 
-  const [slicePrefixLength, setSlicePrefixLength] = useState<number>(5)
+  const [slicePrefixLength, setSlicePrefixLength] = useState<number>(5);
 
   const isOverflowing = useMemo(() => {
     return (
@@ -28,26 +26,26 @@ export function FallbackTokenImage({
       (textWidth?.clientWidth > containerWidth?.clientWidth ||
         textWidth?.scrollWidth > textWidth?.clientWidth ||
         containerWidth?.scrollWidth > containerWidth?.clientWidth)
-    )
-  }, [textWidth, containerWidth])
+    );
+  }, [textWidth, containerWidth]);
 
   useEffect(() => {
     if (isOverflowing) {
-      setSlicePrefixLength((prevSlicePrefixLength) => prevSlicePrefixLength - 1)
+      setSlicePrefixLength((prevSlicePrefixLength) => prevSlicePrefixLength - 1);
     }
-  }, [isOverflowing])
+  }, [isOverflowing]);
 
   const handleTextRef = useCallback((el: HTMLSpanElement) => {
     if (el) {
-      setTextWidth({ clientWidth: el.clientWidth, scrollWidth: el.scrollWidth })
+      setTextWidth({ clientWidth: el.clientWidth, scrollWidth: el.scrollWidth });
     }
-  }, [])
+  }, []);
 
   const handleContainerRef = useCallback((el: HTMLDivElement) => {
     if (el) {
-      setContainerWidth({ clientWidth: el.clientWidth, scrollWidth: el.scrollWidth })
+      setContainerWidth({ clientWidth: el.clientWidth, scrollWidth: el.scrollWidth });
     }
-  }, [])
+  }, []);
 
   return (
     <div
@@ -69,5 +67,5 @@ export function FallbackTokenImage({
         {sliceWord(text, slicePrefixLength, 0, '..')}
       </span>
     </div>
-  )
+  );
 }

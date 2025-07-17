@@ -1,12 +1,12 @@
-import { Images } from 'images'
+import { Images } from 'images';
 
 export const IMPORT_WALLET_DATA: {
   [name: string]: {
-    imgSrc: string
-    title: string | undefined
-    'data-testing-id': string
-    mixpanelMethod: string
-  }
+    imgSrc: string;
+    title: string | undefined;
+    'data-testing-id': string;
+    mixpanelMethod: string;
+  };
 } = {
   Keplr: {
     imgSrc: Images.Logos.Keplr,
@@ -26,4 +26,4 @@ export const IMPORT_WALLET_DATA: {
     'data-testing-id': 'import-private-key',
     mixpanelMethod: 'existing-pk',
   },
-}
+};

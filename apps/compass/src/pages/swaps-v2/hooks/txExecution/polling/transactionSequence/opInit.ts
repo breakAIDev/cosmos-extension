@@ -1,25 +1,23 @@
-import { OPInitTransferInfoJSON, OPInitTransferState, TransferState } from '@skip-go/client'
-import { OPInitPacketTxnSeq } from 'types/swap'
+import { OPInitTransferInfoJSON, OPInitTransferState, TransferState } from '@skip-go/client';
+import { OPInitPacketTxnSeq } from 'types/swap';
 
-import { convertPacketFromJSON } from './convertPackageFromJson'
+import { convertPacketFromJSON } from './convertPackageFromJson';
 
 export function convertOPInitTransferState(state: OPInitTransferState): TransferState {
   switch (state) {
     case 'OPINIT_TRANSFER_SENT':
-      return 'TRANSFER_PENDING'
+      return 'TRANSFER_PENDING';
     case 'OPINIT_TRANSFER_RECEIVED':
-      return 'TRANSFER_SUCCESS'
+      return 'TRANSFER_SUCCESS';
     case 'OPINIT_TRANSFER_UNKNOWN':
-      return 'TRANSFER_UNKNOWN'
+      return 'TRANSFER_UNKNOWN';
     default:
-      return 'TRANSFER_UNKNOWN'
+      return 'TRANSFER_UNKNOWN';
   }
 }
 
-export function getOPInitTransactionSequence(
-  transferInfo: OPInitTransferInfoJSON,
-): OPInitPacketTxnSeq {
-  const opInitState: TransferState = convertOPInitTransferState(transferInfo.state)
+export function getOPInitTransactionSequence(transferInfo: OPInitTransferInfoJSON): OPInitPacketTxnSeq {
+  const opInitState: TransferState = convertOPInitTransferState(transferInfo.state);
 
   return {
     type: 'opInitTransfer' as const,
@@ -31,5 +29,5 @@ export function getOPInitTransactionSequence(
     },
     state: opInitState,
     originalState: transferInfo.state,
-  }
+  };
 }

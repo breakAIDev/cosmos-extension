@@ -1,18 +1,15 @@
-import React from 'react'
-import { UserClipboard } from 'utils/clipboard'
-import { cn } from 'utils/cn'
+import React from 'react';
+import { UserClipboard } from 'utils/clipboard';
+import { cn } from 'utils/cn';
 
-import { buttonRingClass } from '../button'
-import { Textarea } from './textarea'
+import { buttonRingClass } from '../button';
+import { Textarea } from './textarea';
 
-type TextareaWithPasteProps = Omit<
-  React.TextareaHTMLAttributes<HTMLTextAreaElement>,
-  'onChange'
-> & {
-  value: string
-  onChange: (value: string) => void
-  error?: string
-}
+type TextareaWithPasteProps = Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, 'onChange'> & {
+  value: string;
+  onChange: (value: string) => void;
+  error?: string;
+};
 
 export const TextareaWithPaste = ({ error, onChange, ...props }: TextareaWithPasteProps) => {
   return (
@@ -32,15 +29,15 @@ export const TextareaWithPaste = ({ error, onChange, ...props }: TextareaWithPas
           buttonRingClass,
         )}
         onClick={async (e) => {
-          e.preventDefault()
-          const text = await UserClipboard.pasteText()
+          e.preventDefault();
+          const text = await UserClipboard.pasteText();
           if (text) {
-            onChange?.(text)
+            onChange?.(text);
           }
         }}
       >
         Paste
       </button>
     </div>
-  )
-}
+  );
+};

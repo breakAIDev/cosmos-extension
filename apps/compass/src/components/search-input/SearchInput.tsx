@@ -1,20 +1,20 @@
-import { MagnifyingGlass } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import Text from 'components/text'
-import React, { useEffect, useRef } from 'react'
+import { MagnifyingGlass } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import Text from 'components/text';
+import React, { useEffect, useRef } from 'react';
 
 type SearchInputProps = {
-  value: string
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  action?: string
-  actionHandler?: () => void
-  onClear: () => void
-  autoFocus?: boolean
-  placeholder?: string
-  divClassName?: string
-  inputClassName?: string
-  inputDisabled?: boolean
-}
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  action?: string;
+  actionHandler?: () => void;
+  onClear: () => void;
+  autoFocus?: boolean;
+  placeholder?: string;
+  divClassName?: string;
+  inputClassName?: string;
+  inputDisabled?: boolean;
+};
 
 export function SearchInput({
   value,
@@ -29,15 +29,15 @@ export function SearchInput({
   actionHandler,
   ...rest
 }: SearchInputProps) {
-  const inputRef = useRef<HTMLInputElement | null>(null)
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (inputRef.current && autoFocus) {
       setTimeout(() => {
-        inputRef.current?.focus()
-      }, 100)
+        inputRef.current?.focus();
+      }, 100);
     }
-  }, [autoFocus])
+  }, [autoFocus]);
 
   return (
     <div
@@ -86,5 +86,5 @@ export function SearchInput({
         </div>
       )}
     </div>
-  )
+  );
 }

@@ -1,5 +1,5 @@
-import React from 'react'
-import Skeleton from 'react-loading-skeleton'
+import React from 'react';
+import Skeleton from 'react-loading-skeleton';
 
 /**
  * Skeleton loader for Alpha page
@@ -31,7 +31,7 @@ export default function AlphaSkeleton() {
         <Skeleton circle width={16} height={16} />
       </div>
     </div>
-  )
+  );
 }
 
 export function AlphaSkeletonList() {
@@ -40,5 +40,5 @@ export function AlphaSkeletonList() {
       <AlphaSkeleton />
       <AlphaSkeleton />
     </>
-  )
+  );
 }

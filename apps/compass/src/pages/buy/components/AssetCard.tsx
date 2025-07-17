@@ -1,19 +1,19 @@
-import { sliceWord } from '@leapwallet/cosmos-wallet-hooks'
-import { ThemeName, useTheme } from '@leapwallet/leap-ui'
-import Text from 'components/text'
-import { ImgNotAvailableDark, ImgNotAvailableLight } from 'images/logos'
-import React from 'react'
-import { imgOnError } from 'utils/imgOnError'
+import { sliceWord } from '@leapwallet/cosmos-wallet-hooks';
+import { ThemeName, useTheme } from '@leapwallet/leap-ui';
+import Text from 'components/text';
+import { ImgNotAvailableDark, ImgNotAvailableLight } from 'images/logos';
+import React from 'react';
+import { imgOnError } from 'utils/imgOnError';
 
 export type AssetCardProps = {
-  id?: string
-  symbol: string
-  assetImg?: string
-  onClick: () => void
-}
+  id?: string;
+  symbol: string;
+  assetImg?: string;
+  onClick: () => void;
+};
 
 export default function AssetCard({ symbol, assetImg, onClick }: AssetCardProps) {
-  const { theme } = useTheme()
+  const { theme } = useTheme();
   return (
     <div className='flex gap-x-3 items-center py-5 cursor-pointer' onClick={onClick}>
       <img
@@ -27,5 +27,5 @@ export default function AssetCard({ symbol, assetImg, onClick }: AssetCardProps)
         {sliceWord(symbol)}
       </Text>
     </div>
-  )
+  );
 }

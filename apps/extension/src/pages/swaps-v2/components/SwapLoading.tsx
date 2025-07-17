@@ -1,9 +1,9 @@
-import { LoaderAnimation } from 'components/loader/Loader'
-import React from 'react'
+import { LoaderAnimation } from 'components/loader/Loader';
+import React from 'react';
 
 type SwapLoadingProps = {
-  loadingMsg: string
-}
+  loadingMsg: string;
+};
 
 export function SwapLoading({ loadingMsg }: SwapLoadingProps) {
   return (
@@ -11,5 +11,5 @@ export function SwapLoading({ loadingMsg }: SwapLoadingProps) {
       <LoaderAnimation color='' className='h-[26px] w-[26px]' />
       <span>{loadingMsg}</span>
     </div>
-  )
+  );
 }

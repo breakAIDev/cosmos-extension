@@ -1,19 +1,19 @@
-import React from 'react'
-import { cn } from 'utils/cn'
+import React from 'react';
+import { cn } from 'utils/cn';
 
 type TabsProps = {
   tabsList: {
-    id: string
-    label: string
-  }[]
+    id: string;
+    label: string;
+  }[];
   tabsContent: {
-    [key: string]: React.ReactNode
-  }
-  className?: string
-}
+    [key: string]: React.ReactNode;
+  };
+  className?: string;
+};
 
 export const Tabs: React.FC<TabsProps> = ({ tabsList, tabsContent, className }) => {
-  const [activeTab, setActiveTab] = React.useState(tabsList[0].id)
+  const [activeTab, setActiveTab] = React.useState(tabsList[0].id);
 
   return (
     <div className={cn('w-full', className)}>
@@ -34,5 +34,5 @@ export const Tabs: React.FC<TabsProps> = ({ tabsList, tabsContent, className }) 
       </div>
       <div className='w-full'>{tabsContent[activeTab]}</div>
     </div>
-  )
-}
+  );
+};

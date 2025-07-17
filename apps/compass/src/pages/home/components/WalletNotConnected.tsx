@@ -1,17 +1,17 @@
-import { Buttons } from '@leapwallet/leap-ui'
-import Text from 'components/text'
-import { FrogPanic } from 'images/misc'
-import React from 'react'
-import { useNavigate } from 'react-router-dom'
-import { closeSidePanel } from 'utils/closeSidePanel'
-import { isSidePanel } from 'utils/isSidePanel'
-import Browser from 'webextension-polyfill'
+import { Buttons } from '@leapwallet/leap-ui';
+import Text from 'components/text';
+import { FrogPanic } from 'images/misc';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { closeSidePanel } from 'utils/closeSidePanel';
+import { isSidePanel } from 'utils/isSidePanel';
+import Browser from 'webextension-polyfill';
 
 export function WalletNotConnected({ visible }: { visible: boolean }) {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   if (!visible) {
-    return null
+    return null;
   }
 
   return (
@@ -30,12 +30,12 @@ export function WalletNotConnected({ visible }: { visible: boolean }) {
         <Buttons.Generic
           className='w-[344px]'
           onClick={() => {
-            const views = Browser.extension.getViews({ type: 'popup' })
+            const views = Browser.extension.getViews({ type: 'popup' });
             if (views.length === 0 && !isSidePanel) {
-              navigate('/onboardEvmLedger')
+              navigate('/onboardEvmLedger');
             } else {
-              window.open(Browser.runtime.getURL('index.html#/onboardEvmLedger'))
-              closeSidePanel()
+              window.open(Browser.runtime.getURL('index.html#/onboardEvmLedger'));
+              closeSidePanel();
             }
           }}
         >
@@ -43,5 +43,5 @@ export function WalletNotConnected({ visible }: { visible: boolean }) {
         </Buttons.Generic>
       </div>
     </div>
-  )
+  );
 }

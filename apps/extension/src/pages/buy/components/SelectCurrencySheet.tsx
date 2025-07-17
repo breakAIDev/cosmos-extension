@@ -1,24 +1,24 @@
-import { MagnifyingGlassMinus } from '@phosphor-icons/react'
-import BottomModal from 'components/new-bottom-modal'
-import TokenListSkeleton from 'components/Skeletons/TokenListSkeleton'
-import { SearchInput } from 'components/ui/input/search-input'
-import { useSwappedAssets } from 'hooks/useGetSwappedDetails'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { MagnifyingGlassMinus } from '@phosphor-icons/react';
+import BottomModal from 'components/new-bottom-modal';
+import TokenListSkeleton from 'components/Skeletons/TokenListSkeleton';
+import { SearchInput } from 'components/ui/input/search-input';
+import { useSwappedAssets } from 'hooks/useGetSwappedDetails';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import CurrencyCard from './CurrencyCard'
+import CurrencyCard from './CurrencyCard';
 
 type SelectCurrencySheetProps = {
-  isVisible: boolean
-  onClose: () => void
-  onCurrencySelect: (code: string) => void
-  selectedCurrency?: string
-}
+  isVisible: boolean;
+  onClose: () => void;
+  onCurrencySelect: (code: string) => void;
+  selectedCurrency?: string;
+};
 
 type CurrencyProps = {
-  code: string
-  name: string
-  logo: string
-}
+  code: string;
+  name: string;
+  logo: string;
+};
 
 export default function SelectCurrencySheet({
   isVisible,
@@ -26,10 +26,10 @@ export default function SelectCurrencySheet({
   onCurrencySelect,
   selectedCurrency,
 }: SelectCurrencySheetProps) {
-  const [searchedCurrency, setSearchedCurrency] = useState('')
-  const { isLoading, data: data } = useSwappedAssets()
-  const { fiatAssets = [] } = data ?? {}
-  const searchInputRef = useRef<HTMLInputElement>(null)
+  const [searchedCurrency, setSearchedCurrency] = useState('');
+  const { isLoading, data: data } = useSwappedAssets();
+  const { fiatAssets = [] } = data ?? {};
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const currencyList = useMemo<CurrencyProps[] | []>(
     () =>
       fiatAssets.filter(
@@ -38,25 +38,19 @@ export default function SelectCurrencySheet({
           currency.name.toLowerCase().includes(searchedCurrency),
       ),
     [fiatAssets, searchedCurrency],
-  )
+  );
 
   useEffect(() => {
     if (isVisible) {
-      setSearchedCurrency('')
+      setSearchedCurrency('');
       setTimeout(() => {
-        searchInputRef.current?.focus()
-      }, 200)
+        searchInputRef.current?.focus();
+      }, 200);
     }
-  }, [isVisible])
+  }, [isVisible]);
 
   return (
-    <BottomModal
-      isOpen={isVisible}
-      onClose={onClose}
-      title='Select currency'
-      className='!p-6'
-      fullScreen={true}
-    >
+    <BottomModal isOpen={isVisible} onClose={onClose} title='Select currency' className='!p-6' fullScreen={true}>
       <div className='flex flex-col items-center w-full pb-2'>
         <SearchInput
           ref={searchInputRef}
@@ -102,5 +96,5 @@ export default function SelectCurrencySheet({
         </div>
       )}
     </BottomModal>
-  )
+  );
 }

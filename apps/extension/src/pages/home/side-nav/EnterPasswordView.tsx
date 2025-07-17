@@ -1,30 +1,30 @@
-import { useActiveWallet } from '@leapwallet/cosmos-wallet-hooks'
-import { Button } from 'components/ui/button'
-import { PasswordInput } from 'components/ui/input/password-input'
-import { SeedPhrase } from 'hooks/wallet/seed-phrase/useSeedPhrase'
-import { LockIcon } from 'icons/lock'
-import React, { Dispatch, ReactElement, SetStateAction, useEffect, useRef } from 'react'
-import { useForm } from 'react-hook-form'
+import { useActiveWallet } from '@leapwallet/cosmos-wallet-hooks';
+import { Button } from 'components/ui/button';
+import { PasswordInput } from 'components/ui/input/password-input';
+import { SeedPhrase } from 'hooks/wallet/seed-phrase/useSeedPhrase';
+import { LockIcon } from 'icons/lock';
+import React, { Dispatch, ReactElement, SetStateAction, useEffect, useRef } from 'react';
+import { useForm } from 'react-hook-form';
 
 type FormData = {
-  readonly rawPassword: string
-}
+  readonly rawPassword: string;
+};
 
 type EnterPasswordViewProps = {
-  readonly passwordTo: string
-  readonly setRevealed: Dispatch<SetStateAction<boolean>>
-  readonly setPassword: Dispatch<SetStateAction<Uint8Array | undefined>>
-  readonly autoFocus?: boolean
-}
+  readonly passwordTo: string;
+  readonly setRevealed: Dispatch<SetStateAction<boolean>>;
+  readonly setPassword: Dispatch<SetStateAction<Uint8Array | undefined>>;
+  readonly autoFocus?: boolean;
+};
 export function EnterPasswordView({
   setRevealed,
   setPassword,
   passwordTo,
   autoFocus = false,
 }: EnterPasswordViewProps): ReactElement {
-  const testPassword = SeedPhrase.useTestPassword()
-  const activeWallet = useActiveWallet()
-  const formRef = useRef<HTMLFormElement>(null)
+  const testPassword = SeedPhrase.useTestPassword();
+  const activeWallet = useActiveWallet();
+  const formRef = useRef<HTMLFormElement>(null);
 
   const {
     register,
@@ -33,43 +33,43 @@ export function EnterPasswordView({
     formState: { errors },
     setValue,
     watch,
-  } = useForm<FormData>({ mode: 'onChange' })
+  } = useForm<FormData>({ mode: 'onChange' });
 
-  const password = watch('rawPassword')
+  const password = watch('rawPassword');
 
   const onSubmit = async (values: FormData) => {
     try {
-      const cipher = activeWallet?.cipher
-      if (!cipher) throw new Error('No cipher')
-      const password = new TextEncoder().encode(values.rawPassword)
-      await testPassword(password, cipher)
-      setPassword(password)
-      setRevealed(true)
+      const cipher = activeWallet?.cipher;
+      if (!cipher) throw new Error('No cipher');
+      const password = new TextEncoder().encode(values.rawPassword);
+      await testPassword(password, cipher);
+      setPassword(password);
+      setRevealed(true);
     } catch (err) {
       setError('rawPassword', {
         type: 'validate',
         message: 'Incorrect Password',
-      })
+      });
     } finally {
       // to clear password from heap
-      setValue('rawPassword', '__')
-      setValue('rawPassword', '')
+      setValue('rawPassword', '__');
+      setValue('rawPassword', '');
     }
-  }
+  };
 
   // delay auto focus to prevent jitter
   useEffect(() => {
-    const passwordInput = formRef.current?.querySelector('#password') as HTMLInputElement
+    const passwordInput = formRef.current?.querySelector('#password') as HTMLInputElement;
     if (!passwordInput || !autoFocus) {
-      return
+      return;
     }
 
     const timeout = setTimeout(() => {
-      passwordInput.focus()
-    }, 250)
+      passwordInput.focus();
+    }, 250);
 
-    return () => clearTimeout(timeout)
-  }, [autoFocus])
+    return () => clearTimeout(timeout);
+  }, [autoFocus]);
 
   return (
     <div className='flex flex-col gap-6 h-full'>
@@ -82,11 +82,7 @@ export function EnterPasswordView({
         <span className='text-sm'>Enter your wallet password to {passwordTo}</span>
       </header>
 
-      <form
-        ref={formRef}
-        onSubmit={handleSubmit(onSubmit)}
-        className='mt-2 flex-grow flex flex-col justify-start'
-      >
+      <form ref={formRef} onSubmit={handleSubmit(onSubmit)} className='mt-2 flex-grow flex flex-col justify-start'>
         <PasswordInput
           id='password'
           type='password'
@@ -107,5 +103,5 @@ export function EnterPasswordView({
         </Button>
       </form>
     </div>
-  )
+  );
 }

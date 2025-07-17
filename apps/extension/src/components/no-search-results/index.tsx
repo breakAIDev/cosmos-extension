@@ -1,14 +1,14 @@
-import { EmptyCard } from 'components/empty-card'
-import { Images } from 'images'
-import React from 'react'
+import { EmptyCard } from 'components/empty-card';
+import { Images } from 'images';
+import React from 'react';
 
 interface PropsType {
-  searchQuery: string
-  classname?: string
+  searchQuery: string;
+  classname?: string;
 }
 
 const NoSearchResults = (props: PropsType) => {
-  const { searchQuery, classname = undefined } = props
+  const { searchQuery, classname = undefined } = props;
   return (
     <EmptyCard
       isRounded
@@ -17,7 +17,7 @@ const NoSearchResults = (props: PropsType) => {
       src={Images.Misc.Explore}
       classname={classname}
     />
-  )
-}
+  );
+};
 
-export default NoSearchResults
+export default NoSearchResults;

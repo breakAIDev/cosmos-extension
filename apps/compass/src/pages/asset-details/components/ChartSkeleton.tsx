@@ -1,6 +1,6 @@
-import classNames from 'classnames'
-import React from 'react'
-import Skeleton from 'react-loading-skeleton'
+import classNames from 'classnames';
+import React from 'react';
+import Skeleton from 'react-loading-skeleton';
 
 export default function ChartSkeleton({ className }: { className?: string }) {
   return (
@@ -10,5 +10,5 @@ export default function ChartSkeleton({ className }: { className?: string }) {
         <Skeleton count={1} height={28} width={324} />
       </div>
     </div>
-  )
+  );
 }

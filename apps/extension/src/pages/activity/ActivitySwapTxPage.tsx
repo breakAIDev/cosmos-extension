@@ -1,28 +1,23 @@
-import { TxPage } from 'pages/swaps-v2/components'
-import React, { useEffect, useMemo } from 'react'
-import { rootCW20DenomsStore, rootDenomsStore } from 'stores/denoms-store-instance'
-import { generateObjectKey, removePendingSwapTxs, TxStoreObject } from 'utils/pendingSwapsTxsStore'
+import { TxPage } from 'pages/swaps-v2/components';
+import React, { useEffect, useMemo } from 'react';
+import { rootCW20DenomsStore, rootDenomsStore } from 'stores/denoms-store-instance';
+import { generateObjectKey, removePendingSwapTxs, TxStoreObject } from 'utils/pendingSwapsTxsStore';
 
 export function ActivitySwapTxPage({
   onClose,
   ...rest
 }: {
-  onClose: (
-    sourceChain?: string,
-    sourceToken?: string,
-    destinationChain?: string,
-    destinationToken?: string,
-  ) => void
+  onClose: (sourceChain?: string, sourceToken?: string, destinationChain?: string, destinationToken?: string) => void;
 } & TxStoreObject) {
   const txKey = useMemo(() => {
-    return generateObjectKey(rest?.routingInfo ?? { messages: (rest as any)?.route?.messages })
-  }, [rest])
+    return generateObjectKey(rest?.routingInfo ?? { messages: (rest as any)?.route?.messages });
+  }, [rest]);
 
   useEffect(() => {
     if (txKey) {
-      removePendingSwapTxs(txKey)
+      removePendingSwapTxs(txKey);
     }
-  }, [txKey])
+  }, [txKey]);
 
   return (
     <TxPage
@@ -32,5 +27,5 @@ export function ActivitySwapTxPage({
       rootDenomsStore={rootDenomsStore}
       rootCW20DenomsStore={rootCW20DenomsStore}
     />
-  )
+  );
 }

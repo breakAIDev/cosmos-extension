@@ -1,29 +1,23 @@
-import { useChainId } from '@leapwallet/cosmos-wallet-hooks'
-import { CheckCircle } from '@phosphor-icons/react'
-import BottomModal from 'components/new-bottom-modal'
-import { useActiveChain } from 'hooks/settings/useActiveChain'
-import { useSelectedNetwork, useSetNetwork } from 'hooks/settings/useNetwork'
-import { useChainInfos } from 'hooks/useChainInfos'
-import React, { useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { sendMessageToTab } from 'utils'
-import { cn } from 'utils/cn'
+import { useChainId } from '@leapwallet/cosmos-wallet-hooks';
+import { CheckCircle } from '@phosphor-icons/react';
+import BottomModal from 'components/new-bottom-modal';
+import { useActiveChain } from 'hooks/settings/useActiveChain';
+import { useSelectedNetwork, useSetNetwork } from 'hooks/settings/useNetwork';
+import { useChainInfos } from 'hooks/useChainInfos';
+import React, { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { sendMessageToTab } from 'utils';
+import { cn } from 'utils/cn';
 
-export default function NetworkDropUp({
-  goBack,
-  isVisible,
-}: {
-  isVisible: boolean
-  goBack: () => void
-}) {
-  const chainInfos = useChainInfos()
-  const activeChain = useActiveChain()
-  const setNetwork = useSetNetwork()
+export default function NetworkDropUp({ goBack, isVisible }: { isVisible: boolean; goBack: () => void }) {
+  const chainInfos = useChainInfos();
+  const activeChain = useActiveChain();
+  const setNetwork = useSetNetwork();
 
-  const navigate = useNavigate()
-  const currentChainName = useSelectedNetwork()
-  const mainnetEvmChainId = useChainId(activeChain, 'mainnet', true)
-  const testnetEvmChainId = useChainId(activeChain, 'testnet', true)
+  const navigate = useNavigate();
+  const currentChainName = useSelectedNetwork();
+  const mainnetEvmChainId = useChainId(activeChain, 'mainnet', true);
+  const testnetEvmChainId = useChainId(activeChain, 'testnet', true);
 
   const chains = useMemo(
     () => [
@@ -34,10 +28,10 @@ export default function NetworkDropUp({
         enabled: !!chainInfos[activeChain]?.apis?.rpc,
         onClick: async () => {
           if (chainInfos[activeChain]?.apis?.rpc) {
-            setNetwork('mainnet')
-            navigate('/', { replace: true })
+            setNetwork('mainnet');
+            navigate('/', { replace: true });
             try {
-              await sendMessageToTab({ event: 'chainChanged', data: mainnetEvmChainId })
+              await sendMessageToTab({ event: 'chainChanged', data: mainnetEvmChainId });
             } catch (_) {
               //
             }
@@ -51,11 +45,11 @@ export default function NetworkDropUp({
         enabled: !!chainInfos[activeChain]?.apis?.rpcTest,
         onClick: async () => {
           if (chainInfos[activeChain]?.apis?.rpcTest) {
-            setNetwork('testnet')
-            navigate('/', { replace: true })
+            setNetwork('testnet');
+            navigate('/', { replace: true });
 
             try {
-              await sendMessageToTab({ event: 'chainChanged', data: testnetEvmChainId })
+              await sendMessageToTab({ event: 'chainChanged', data: testnetEvmChainId });
             } catch (_) {
               //
             }
@@ -66,18 +60,13 @@ export default function NetworkDropUp({
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [activeChain, currentChainName],
-  )
+  );
 
   return (
-    <BottomModal
-      isOpen={isVisible}
-      onClose={goBack}
-      title={'Network'}
-      className='flex flex-col gap-3 !py-7 !px-5'
-    >
+    <BottomModal isOpen={isVisible} onClose={goBack} title={'Network'} className='flex flex-col gap-3 !py-7 !px-5'>
       <div className='flex flex-col gap-2'>
         {chains.map((chain) => {
-          const unavailable = !chain.enabled ? '(Unavailable)' : ''
+          const unavailable = !chain.enabled ? '(Unavailable)' : '';
           return (
             <button
               key={chain.title}
@@ -85,9 +74,7 @@ export default function NetworkDropUp({
               data-testing-id={chain.title === 'Testnet' ? 'network-testnet-option' : ''}
               className={cn(
                 'flex items-center justify-between text-start w-full p-4 bg-secondary-100 transition-colors rounded-xl',
-                chain.enabled
-                  ? 'hover:bg-secondary-200'
-                  : 'cursor-not-allowed text-muted-foreground',
+                chain.enabled ? 'hover:bg-secondary-200' : 'cursor-not-allowed text-muted-foreground',
               )}
             >
               <div className='flex flex-col gap-1 flex-1'>
@@ -100,9 +87,9 @@ export default function NetworkDropUp({
                 <CheckCircle weight='fill' size={24} className='text-accent-foreground shrink-0' />
               ) : null}
             </button>
-          )
+          );
         })}
       </div>
     </BottomModal>
-  )
+  );
 }

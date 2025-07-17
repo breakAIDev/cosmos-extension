@@ -1,9 +1,9 @@
-import { sleep } from '@leapwallet/cosmos-wallet-sdk'
-import { LifiAPI, TXN_STATUS } from '@leapwallet/elements-core'
-import { TransferAssetRelease } from '@skip-go/client'
-import { convertLifiStatusToTxnStatus, getLifiTransferSequence } from 'pages/swaps-v2/utils'
-import { useCallback, useEffect, useRef } from 'react'
-import { SourceChain, SwapTxnStatus, TransferSequence } from 'types/swap'
+import { sleep } from '@leapwallet/cosmos-wallet-sdk';
+import { LifiAPI, TXN_STATUS } from '@leapwallet/elements-core';
+import { TransferAssetRelease } from '@skip-go/client';
+import { convertLifiStatusToTxnStatus, getLifiTransferSequence } from 'pages/swaps-v2/utils';
+import { useCallback, useEffect, useRef } from 'react';
+import { SourceChain, SwapTxnStatus, TransferSequence } from 'types/swap';
 
 export function usePollLifiTx(
   setTrackingInSync: (value: boolean) => void,
@@ -19,14 +19,14 @@ export function usePollLifiTx(
   refetchSourceBalances: (() => void) | undefined,
   refetchDestinationBalances: (() => void) | undefined,
 ) {
-  const isMounted = useRef(true)
+  const isMounted = useRef(true);
 
   useEffect(() => {
-    isMounted.current = true
+    isMounted.current = true;
     return () => {
-      isMounted.current = false
-    }
-  }, [])
+      isMounted.current = false;
+    };
+  }, []);
 
   return useCallback(
     async ({
@@ -34,74 +34,66 @@ export function usePollLifiTx(
       messageIndex,
       messageChain,
     }: {
-      txHash: string
-      messageIndex: number
-      messageChain: SourceChain
+      txHash: string;
+      messageIndex: number;
+      messageChain: SourceChain;
     }) => {
-      let transferAssetRelease
-      let transferSequence: TransferSequence[] | undefined
-      let retryCount = 0
+      let transferAssetRelease;
+      let transferSequence: TransferSequence[] | undefined;
+      let retryCount = 0;
 
       try {
         while (isMounted.current) {
           if (!isMounted.current) {
-            break
+            break;
           }
           const res = await LifiAPI.trackTransaction({
             tx_hash: txHash,
-          })
+          });
 
           if (res.success === false) {
-            throw new Error(res.error)
+            throw new Error(res.error);
           }
 
-          const _res = res.response
+          const _res = res.response;
 
-          const overallStatus = convertLifiStatusToTxnStatus(_res.status, _res.substatus)
+          const overallStatus = convertLifiStatusToTxnStatus(_res.status, _res.substatus);
           const txnStatus: SwapTxnStatus = {
             status: overallStatus,
             responses: [getLifiTransferSequence(_res)],
             isComplete: [TXN_STATUS.SUCCESS, TXN_STATUS.FAILED].includes(overallStatus),
-          }
-          const isInvalid = ['INVALID', 'NOT_FOUND'].includes(_res.status)
+          };
+          const isInvalid = ['INVALID', 'NOT_FOUND'].includes(_res.status);
           if (overallStatus !== TXN_STATUS.FAILED || retryCount > 20) {
-            updateTxStatus(messageIndex, txnStatus)
-            setTrackingInSync(true)
+            updateTxStatus(messageIndex, txnStatus);
+            setTrackingInSync(true);
             if ([TXN_STATUS.SUCCESS, TXN_STATUS.FAILED].includes(overallStatus)) {
-              break
+              break;
             }
           }
           if (overallStatus === TXN_STATUS.FAILED) {
             if (isInvalid) {
-              retryCount += 1
-              await sleep(3000)
+              retryCount += 1;
+              await sleep(3000);
             } else {
-              retryCount += 10
+              retryCount += 10;
             }
           }
-          await sleep(2000)
+          await sleep(2000);
         }
       } catch (err) {
-        const error = err as Error
-        if (
-          ['Failed to fetch', 'tx not found', 'Unable to get txn status']?.includes(error.message)
-        ) {
-          setUnableToTrackError(true)
+        const error = err as Error;
+        if (['Failed to fetch', 'tx not found', 'Unable to get txn status']?.includes(error.message)) {
+          setUnableToTrackError(true);
         }
-        handleTxError(
-          messageIndex,
-          error.message,
-          messageChain,
-          transferSequence,
-          transferAssetRelease,
-        )
-        setTrackingInSync(true)
-        return
+        handleTxError(messageIndex, error.message, messageChain, transferSequence, transferAssetRelease);
+        setTrackingInSync(true);
+        return;
       }
 
       try {
-        refetchSourceBalances && refetchSourceBalances()
-        refetchDestinationBalances && refetchDestinationBalances()
+        refetchSourceBalances && refetchSourceBalances();
+        refetchDestinationBalances && refetchDestinationBalances();
       } catch (_) {
         //
       }
@@ -114,5 +106,5 @@ export function usePollLifiTx(
       setUnableToTrackError,
       updateTxStatus,
     ],
-  )
+  );
 }

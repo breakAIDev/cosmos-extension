@@ -3,29 +3,29 @@ import {
   Key,
   NftPage,
   useFractionalizedNftContracts,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { CardDivider, Header, HeaderActionType } from '@leapwallet/leap-ui'
-import { UploadSimple } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import { AlertStrip } from 'components/alert-strip'
-import PopupLayout from 'components/layout/popup-layout'
-import { useChainPageInfo } from 'hooks'
-import useActiveWallet from 'hooks/settings/useActiveWallet'
-import { useChainInfos } from 'hooks/useChainInfos'
-import { Wallet } from 'hooks/wallet/useWallet'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import React, { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { rootDenomsStore } from 'stores/denoms-store-instance'
-import { favNftStore, hiddenNftStore } from 'stores/manage-nft-store'
-import { rootBalanceStore } from 'stores/root-store'
-import { Colors } from 'theme/colors'
-import { getChainName } from 'utils/getChainName'
-import { isSidePanel } from 'utils/isSidePanel'
-import { normalizeImageSrc } from 'utils/normalizeImageSrc'
-import { sessionGetItem, sessionRemoveItem } from 'utils/sessionStorage'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { CardDivider, Header, HeaderActionType } from '@leapwallet/leap-ui';
+import { UploadSimple } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import { AlertStrip } from 'components/alert-strip';
+import PopupLayout from 'components/layout/popup-layout';
+import { useChainPageInfo } from 'hooks';
+import useActiveWallet from 'hooks/settings/useActiveWallet';
+import { useChainInfos } from 'hooks/useChainInfos';
+import { Wallet } from 'hooks/wallet/useWallet';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { rootDenomsStore } from 'stores/denoms-store-instance';
+import { favNftStore, hiddenNftStore } from 'stores/manage-nft-store';
+import { rootBalanceStore } from 'stores/root-store';
+import { Colors } from 'theme/colors';
+import { getChainName } from 'utils/getChainName';
+import { isSidePanel } from 'utils/isSidePanel';
+import { normalizeImageSrc } from 'utils/normalizeImageSrc';
+import { sessionGetItem, sessionRemoveItem } from 'utils/sessionStorage';
 
 import {
   Chip,
@@ -33,81 +33,73 @@ import {
   NftCardCarousel,
   NftDetailsMenu,
   NonFractionalizedNftDescription,
-} from './components'
-import { SendNftCard } from './components/send-nft'
-import { useNftContext } from './context'
+} from './components';
+import { SendNftCard } from './components/send-nft';
+import { useNftContext } from './context';
 
 export const NftDetails = observer(() => {
-  const chainInfos = useChainInfos()
-  const fractionalizedNftContracts = useFractionalizedNftContracts()
+  const chainInfos = useChainInfos();
+  const fractionalizedNftContracts = useFractionalizedNftContracts();
 
-  const { topChainColor } = useChainPageInfo()
-  const navigate = useNavigate()
-  const { activeWallet, setActiveWallet } = useActiveWallet()
-  const [alertMsg, setAlertMsg] = useState({ body: '', status: '' })
+  const { topChainColor } = useChainPageInfo();
+  const navigate = useNavigate();
+  const { activeWallet, setActiveWallet } = useActiveWallet();
+  const [alertMsg, setAlertMsg] = useState({ body: '', status: '' });
 
-  const [showMenu, setShowMenu] = useState(false)
-  const [coverImage, setCoverImage] = useState(true)
-  const { setActivePage, nftDetails, setNftDetails } = useNftContext()
+  const [showMenu, setShowMenu] = useState(false);
+  const [coverImage, setCoverImage] = useState(true);
+  const { setActivePage, nftDetails, setNftDetails } = useNftContext();
 
-  const [showSendNFT, setShowSendNFT] = useState(false)
+  const [showSendNFT, setShowSendNFT] = useState(false);
 
   const giveSendOption = useMemo(() => {
-    return ['mainCoreum', 'coreum'].includes(nftDetails?.chain ?? '')
-  }, [nftDetails?.chain])
+    return ['mainCoreum', 'coreum'].includes(nftDetails?.chain ?? '');
+  }, [nftDetails?.chain]);
 
   const isFractionalizedNft = useMemo(() => {
-    return fractionalizedNftContracts.includes(nftDetails?.collection.address ?? '')
-  }, [fractionalizedNftContracts, nftDetails?.collection.address])
+    return fractionalizedNftContracts.includes(nftDetails?.collection.address ?? '');
+  }, [fractionalizedNftContracts, nftDetails?.collection.address]);
 
   const nftImages = useMemo(() => {
     if (isFractionalizedNft) {
-      const _nftDetails = nftDetails as unknown as FractionalizedNftInformation
+      const _nftDetails = nftDetails as unknown as FractionalizedNftInformation;
       if (_nftDetails?.Images && _nftDetails.Images.length > 0) {
-        return _nftDetails.Images.map((image) =>
-          normalizeImageSrc(image, nftDetails?.collection.address ?? ''),
-        )
+        return _nftDetails.Images.map((image) => normalizeImageSrc(image, nftDetails?.collection.address ?? ''));
       }
     }
 
-    return [normalizeImageSrc(nftDetails?.image ?? '', nftDetails?.collection.address ?? '')]
-  }, [isFractionalizedNft, nftDetails])
+    return [normalizeImageSrc(nftDetails?.image ?? '', nftDetails?.collection.address ?? '')];
+  }, [isFractionalizedNft, nftDetails]);
 
   const nftIndex = useMemo(() => {
-    return `${nftDetails?.collection.address ?? ''}-:-${
-      nftDetails?.tokenId ?? nftDetails?.domain ?? ''
-    }`
-  }, [nftDetails?.collection.address, nftDetails?.domain, nftDetails?.tokenId])
+    return `${nftDetails?.collection.address ?? ''}-:-${nftDetails?.tokenId ?? nftDetails?.domain ?? ''}`;
+  }, [nftDetails?.collection.address, nftDetails?.domain, nftDetails?.tokenId]);
 
-  const isInFavNfts = favNftStore.favNfts.includes(nftIndex)
+  const isInFavNfts = favNftStore.favNfts.includes(nftIndex);
 
   const isInProfile = useMemo(() => {
-    return activeWallet?.avatarIndex === nftIndex
-  }, [activeWallet?.avatarIndex, nftIndex])
+    return activeWallet?.avatarIndex === nftIndex;
+  }, [activeWallet?.avatarIndex, nftIndex]);
 
-  const isInHiddenNfts = hiddenNftStore.hiddenNfts.includes(nftIndex)
+  const isInHiddenNfts = hiddenNftStore.hiddenNfts.includes(nftIndex);
 
   const showProfileOption = useMemo(() => {
-    return (
-      !!nftDetails?.image &&
-      !nftDetails.image.includes('mp4') &&
-      !nftDetails.media_type?.includes('mp4')
-    )
-  }, [nftDetails?.image, nftDetails?.media_type])
+    return !!nftDetails?.image && !nftDetails.image.includes('mp4') && !nftDetails.media_type?.includes('mp4');
+  }, [nftDetails?.image, nftDetails?.media_type]);
 
   const handleFavNftClick = async () => {
     if (!activeWallet) {
-      return
+      return;
     }
 
     if (isInFavNfts) {
-      await favNftStore.removeFavNFT(nftIndex, activeWallet.id)
-      setAlertMsg({ status: 'remove', body: 'Removed from favourites' })
+      await favNftStore.removeFavNFT(nftIndex, activeWallet.id);
+      setAlertMsg({ status: 'remove', body: 'Removed from favourites' });
     } else {
-      await favNftStore.addFavNFT(nftIndex, activeWallet.id)
-      setAlertMsg({ status: 'add', body: 'Added to favourites' })
+      await favNftStore.addFavNFT(nftIndex, activeWallet.id);
+      setAlertMsg({ status: 'add', body: 'Added to favourites' });
     }
-  }
+  };
 
   const handleProfileClick = async () => {
     if (activeWallet) {
@@ -115,32 +107,32 @@ export const NftDetails = observer(() => {
         ...activeWallet,
         avatar: normalizeImageSrc(nftDetails?.image ?? '', nftDetails?.collection.address ?? ''),
         avatarIndex: nftIndex,
-      }
+      };
       if (isInProfile) {
         newWallet = {
           ...activeWallet,
           avatar: undefined,
           avatarIndex: undefined,
-        }
+        };
       }
 
-      setActiveWallet(newWallet)
-      await Wallet.storeWallets({ [newWallet.id]: newWallet })
-      navigate('/home?walletAvatarChanged=true')
+      setActiveWallet(newWallet);
+      await Wallet.storeWallets({ [newWallet.id]: newWallet });
+      navigate('/home?walletAvatarChanged=true');
     }
-  }
+  };
 
   const handleHideNftClick = async () => {
-    if (!activeWallet) return
+    if (!activeWallet) return;
 
     if (isInHiddenNfts) {
-      await hiddenNftStore.removeHiddenNFT(nftIndex, activeWallet.id)
-      setAlertMsg({ status: 'remove', body: 'Removed from hidden' })
+      await hiddenNftStore.removeHiddenNFT(nftIndex, activeWallet.id);
+      setAlertMsg({ status: 'remove', body: 'Removed from hidden' });
     } else {
-      await hiddenNftStore.addHiddenNFT(nftIndex, activeWallet.id)
-      setAlertMsg({ status: 'add', body: 'Added to hidden' })
+      await hiddenNftStore.addHiddenNFT(nftIndex, activeWallet.id);
+      setAlertMsg({ status: 'add', body: 'Added to hidden' });
     }
-  }
+  };
 
   return (
     <div className='relative w-full overflow-clip panel-height'>
@@ -150,12 +142,12 @@ export const NftDetails = observer(() => {
             action={{
               onClick: () => {
                 if (showSendNFT) {
-                  setShowSendNFT(false)
+                  setShowSendNFT(false);
                 } else {
-                  const lastActivePage = sessionGetItem('nftLastActivePage') ?? 'ShowNfts'
-                  setActivePage(lastActivePage as NftPage)
-                  sessionRemoveItem('nftLastActivePage')
-                  setNftDetails(null)
+                  const lastActivePage = sessionGetItem('nftLastActivePage') ?? 'ShowNfts';
+                  setActivePage(lastActivePage as NftPage);
+                  sessionRemoveItem('nftLastActivePage');
+                  setNftDetails(null);
                 }
               },
               type: HeaderActionType.BACK,
@@ -188,8 +180,7 @@ export const NftDetails = observer(() => {
             textNft={{
               name: nftDetails?.domain ?? '',
               description:
-                nftDetails?.extension?.description ??
-                `${nftDetails?.collection?.name ?? ''} - ${nftDetails?.name}`,
+                nftDetails?.extension?.description ?? `${nftDetails?.collection?.name ?? ''} - ${nftDetails?.name}`,
             }}
             imgClassName={classNames('h-[200px] w-full', {
               'object-contain': !coverImage,
@@ -203,12 +194,9 @@ export const NftDetails = observer(() => {
           <div className='my-4 flex items-center justify-between'>
             <div className='flex flex-col flex-1'>
               <p
-                className={classNames(
-                  'text-gray-800 dark:text-white-100 truncate max-w-[200px] text-lg font-bold',
-                  {
-                    '!max-w-[160px]': isSidePanel(),
-                  },
-                )}
+                className={classNames('text-gray-800 dark:text-white-100 truncate max-w-[200px] text-lg font-bold', {
+                  '!max-w-[160px]': isSidePanel(),
+                })}
                 title={nftDetails?.name ?? ''}
               >
                 {nftDetails?.name ?? ''}
@@ -264,22 +252,14 @@ export const NftDetails = observer(() => {
                 )}
                 onClick={() =>
                   window.open(
-                    normalizeImageSrc(
-                      nftDetails?.tokenUri ?? '',
-                      nftDetails?.collection?.address ?? '',
-                    ),
+                    normalizeImageSrc(nftDetails?.tokenUri ?? '', nftDetails?.collection?.address ?? ''),
                     '_blank',
                   )
                 }
                 disabled={!nftDetails?.tokenUri}
               >
                 <div className='flex flex-row items-center'>
-                  <img
-                    className='mr-2 invert dark:invert-0'
-                    src={Images.Misc.OpenLink}
-                    alt='open'
-                  />{' '}
-                  View
+                  <img className='mr-2 invert dark:invert-0' src={Images.Misc.OpenLink} alt='open' /> View
                 </div>
                 <span className='ml-1'>{isFractionalizedNft ? 'details' : 'on marketplace'}</span>
               </button>
@@ -289,26 +269,18 @@ export const NftDetails = observer(() => {
                   title='send'
                   className='w-[20px] h-[20px] dark:text-gray-100 mx-1 text-black-100'
                   onClick={() => {
-                    setShowSendNFT(true)
+                    setShowSendNFT(true);
                   }}
                 >
                   <UploadSimple size={16} weight='bold' className='text-current' />
                 </button>
               )}
 
-              <button
-                title='favourite'
-                className='w-[20px] h-[20px] mx-[12px]'
-                onClick={handleFavNftClick}
-              >
+              <button title='favourite' className='w-[20px] h-[20px] mx-[12px]' onClick={handleFavNftClick}>
                 {isInFavNfts ? (
                   <img src={Images.Misc.FilledFavStar} alt='star' />
                 ) : (
-                  <img
-                    className='invert dark:invert-0'
-                    src={Images.Misc.OutlinedFavStar}
-                    alt='star'
-                  />
+                  <img className='invert dark:invert-0' src={Images.Misc.OutlinedFavStar} alt='star' />
                 )}
               </button>
 
@@ -335,10 +307,7 @@ export const NftDetails = observer(() => {
                   {isFractionalizedNft ? (
                     <FractionalizedNftDescription nftDetails={nftDetails} color={topChainColor} />
                   ) : (
-                    <NonFractionalizedNftDescription
-                      nftDetails={nftDetails}
-                      color={topChainColor}
-                    />
+                    <NonFractionalizedNftDescription nftDetails={nftDetails} color={topChainColor} />
                   )}
                 </>
               )}
@@ -347,5 +316,5 @@ export const NftDetails = observer(() => {
         </div>
       </PopupLayout>
     </div>
-  )
-})
+  );
+});

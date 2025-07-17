@@ -1,40 +1,29 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  fetchEvmChainId,
-  Key,
-  removeTrailingSlash,
-  useCustomChains,
-} from '@leapwallet/cosmos-wallet-hooks'
-import {
-  chainIdToChain,
-  ChainInfo,
-  defaultGasPriceStep,
-  sleep,
-  SupportedChain,
-} from '@leapwallet/cosmos-wallet-sdk'
-import { ArrowLeft, ExclamationMark } from '@phosphor-icons/react'
-import { captureException } from '@sentry/react'
-import axios from 'axios'
-import { ErrorCard } from 'components/ErrorCard'
-import { InputComponent } from 'components/input-component/InputComponent'
-import Loader from 'components/loader/Loader'
-import NewBottomModal from 'components/new-bottom-modal'
-import { Button } from 'components/ui/button'
-import { ButtonName, ButtonType, EventName } from 'config/analytics'
-import { BETA_CHAINS } from 'config/storage-keys'
-import { useSetActiveChain } from 'hooks/settings/useActiveChain'
-import useActiveWallet, { useUpdateKeyStore } from 'hooks/settings/useActiveWallet'
-import { useChainInfos, useSetChainInfos } from 'hooks/useChainInfos'
-import { Images } from 'images'
-import mixpanel from 'mixpanel-browser'
-import { observer } from 'mobx-react-lite'
-import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { chainTagsStore } from 'stores/chain-infos-store'
-import { rootStore } from 'stores/root-store'
-import { isNotValidNumber, isNotValidURL } from 'utils/regex'
-import browser from 'webextension-polyfill'
+import { fetchEvmChainId, Key, removeTrailingSlash, useCustomChains } from '@leapwallet/cosmos-wallet-hooks';
+import { chainIdToChain, ChainInfo, defaultGasPriceStep, sleep, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { ArrowLeft, ExclamationMark } from '@phosphor-icons/react';
+import { captureException } from '@sentry/react';
+import axios from 'axios';
+import { ErrorCard } from 'components/ErrorCard';
+import { InputComponent } from 'components/input-component/InputComponent';
+import Loader from 'components/loader/Loader';
+import NewBottomModal from 'components/new-bottom-modal';
+import { Button } from 'components/ui/button';
+import { ButtonName, ButtonType, EventName } from 'config/analytics';
+import { BETA_CHAINS } from 'config/storage-keys';
+import { useSetActiveChain } from 'hooks/settings/useActiveChain';
+import useActiveWallet, { useUpdateKeyStore } from 'hooks/settings/useActiveWallet';
+import { useChainInfos, useSetChainInfos } from 'hooks/useChainInfos';
+import { Images } from 'images';
+import mixpanel from 'mixpanel-browser';
+import { observer } from 'mobx-react-lite';
+import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { chainTagsStore } from 'stores/chain-infos-store';
+import { rootStore } from 'stores/root-store';
+import { isNotValidNumber, isNotValidURL } from 'utils/regex';
+import browser from 'webextension-polyfill';
 
 type TAddChainFormProps = {
   updateKeyStore: (
@@ -42,23 +31,23 @@ type TAddChainFormProps = {
     activeChain: SupportedChain,
     actionType?: 'UPDATE' | 'DELETE',
     chainInfo?: ChainInfo,
-  ) => Promise<Record<string, Key>>
-  activeWallet: Key
-  setActiveWallet: (wallet: Key) => Promise<void>
-  setActiveChain: (chain: SupportedChain, chainInfo?: ChainInfo) => Promise<void>
-}
+  ) => Promise<Record<string, Key>>;
+  activeWallet: Key;
+  setActiveWallet: (wallet: Key) => Promise<void>;
+  setActiveChain: (chain: SupportedChain, chainInfo?: ChainInfo) => Promise<void>;
+};
 const AddChainForm = observer(
   ({ updateKeyStore, activeWallet, setActiveWallet, setActiveChain }: TAddChainFormProps) => {
-    const chainInfos = useChainInfos()
-    const navigate = useNavigate()
-    const customChains = useCustomChains()
-    const [loading, setLoading] = useState(false)
+    const chainInfos = useChainInfos();
+    const navigate = useNavigate();
+    const customChains = useCustomChains();
+    const [loading, setLoading] = useState(false);
 
-    const setChainInfos = useSetChainInfos()
+    const setChainInfos = useSetChainInfos();
     const [evmChainInfo, setEvmChainInfo] = useState({
       isEvmChain: true,
       chainId: '',
-    })
+    });
     const [chainInfo, setChainInfo] = useState({
       chainName: '',
       chainId: '',
@@ -69,22 +58,12 @@ const AddChainForm = observer(
       addressPrefix: '',
       explorerUrl: '',
       decimals: '',
-    })
+    });
 
-    const [errors, setErrors] = useState<{ [key: string]: string }>({})
-    const {
-      chainName,
-      chainId,
-      denom,
-      coinType,
-      rpcUrl,
-      restUrl,
-      addressPrefix,
-      explorerUrl,
-      decimals,
-    } = chainInfo
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const { chainName, chainId, denom, coinType, rpcUrl, restUrl, addressPrefix, explorerUrl, decimals } = chainInfo;
 
-    const customChainIds = useMemo(() => customChains.map((chain) => chain.chainId), [customChains])
+    const customChainIds = useMemo(() => customChains.map((chain) => chain.chainId), [customChains]);
 
     const fetchChainInfo = useCallback(
       async (chainId: string) => {
@@ -93,31 +72,27 @@ const AddChainForm = observer(
             setErrors((val) => ({
               ...val,
               chainId: `Please add ${chainId} from switch chain list`,
-            }))
-            return
+            }));
+            return;
           }
-          const chain = chainIdToChain[chainId.trim()]
+          const chain = chainIdToChain[chainId.trim()];
           if (!chain) {
-            return
+            return;
           }
-          const mainnetBaseURL = 'https://chains.cosmos.directory'
-          const { data: mainnetData }: any = await axios
-            .get(`${mainnetBaseURL}/${chain}`)
-            .catch(() => ({}))
+          const mainnetBaseURL = 'https://chains.cosmos.directory';
+          const { data: mainnetData }: any = await axios.get(`${mainnetBaseURL}/${chain}`).catch(() => ({}));
 
-          const testnetBaseURL = 'https://chains.testcosmos.directory'
+          const testnetBaseURL = 'https://chains.testcosmos.directory';
           const { data: testnetData }: any = mainnetData
             ? { data: null }
-            : await axios.get(`${testnetBaseURL}/${chain}`).catch(() => ({}))
+            : await axios.get(`${testnetBaseURL}/${chain}`).catch(() => ({}));
 
-          const info = mainnetData?.chain || testnetData?.chain
+          const info = mainnetData?.chain || testnetData?.chain;
           if (!info) {
-            return
+            return;
           }
-          setEvmChainInfo((val) => ({ ...val, isEvmChain: false }))
-          const mintscanExplorer = info.explorers.find(
-            (explorer: any) => explorer.kind === 'mintscan',
-          )
+          setEvmChainInfo((val) => ({ ...val, isEvmChain: false }));
+          const mintscanExplorer = info.explorers.find((explorer: any) => explorer.kind === 'mintscan');
 
           setChainInfo({
             chainId: info.chain_id,
@@ -131,29 +106,29 @@ const AddChainForm = observer(
             explorerUrl: mintscanExplorer
               ? mintscanExplorer.tx_page.slice(0, -10)
               : info.explorers[0].tx_page.slice(0, -10),
-          })
+          });
         } catch (_) {
-          return
+          return;
         }
       },
       [customChainIds],
-    )
+    );
 
     const fetchChainId = useCallback(async (rpcUrl: string) => {
       if (!rpcUrl) {
-        setEvmChainInfo((val) => ({ ...val, isEvmChain: true }))
-        return
+        setEvmChainInfo((val) => ({ ...val, isEvmChain: true }));
+        return;
       }
-      const chainId = await fetchEvmChainId(rpcUrl)
+      const chainId = await fetchEvmChainId(rpcUrl);
       if (!chainId) {
-        setEvmChainInfo((val) => ({ ...val, isEvmChain: false }))
-        return
+        setEvmChainInfo((val) => ({ ...val, isEvmChain: false }));
+        return;
       }
       setEvmChainInfo({
         isEvmChain: true,
         chainId: chainId.toString(),
-      })
-    }, [])
+      });
+    }, []);
 
     const trackCTAEvent = useCallback(
       (buttonName: string, redirectURL?: string) => {
@@ -164,65 +139,61 @@ const AddChainForm = observer(
             addedChainName: chainName,
             redirectURL,
             time: Date.now() / 1000,
-          })
+          });
         } catch (e) {
-          captureException(e)
+          captureException(e);
         }
       },
       [chainName],
-    )
+    );
 
     const handleChange = useCallback(
       (event: ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = event.currentTarget
-        const chains = Object.values(chainInfos).filter((chain) => chain.enabled)
+        const { name, value } = event.currentTarget;
+        const chains = Object.values(chainInfos).filter((chain) => chain.enabled);
 
-        let error = ''
+        let error = '';
         if (value) {
           if (['coinType', 'decimals'].includes(name) && isNotValidNumber(value)) {
-            error = `Invalid ${name} provided`
+            error = `Invalid ${name} provided`;
           } else if (
             ['rpcUrl', 'restUrl', 'explorerUrl'].includes(name) &&
             isNotValidURL(value.replace(/ /g, '')) &&
             value.replace(/ /g, '')?.length > 0
           ) {
-            error = `Invalid ${name} provided`
+            error = `Invalid ${name} provided`;
           } else if (
             name === 'chainName' &&
             chains.some((chain) => chain.chainName.toLowerCase() === value.toLowerCase())
           ) {
-            error = 'Chain with same name already exists'
+            error = 'Chain with same name already exists';
           } else if (name === 'chainId') {
             if (chains.some((chain) => chain.chainId.toLowerCase() === value.toLowerCase())) {
-              error = 'Chain with same id already exists'
-            } else if (
-              chains.some(
-                (chain) => (chain.testnetChainId ?? '').toLowerCase() === value.toLowerCase(),
-              )
-            ) {
-              error = 'Test chain with same id already exists'
+              error = 'Chain with same id already exists';
+            } else if (chains.some((chain) => (chain.testnetChainId ?? '').toLowerCase() === value.toLowerCase())) {
+              error = 'Test chain with same id already exists';
             }
           }
         }
 
         if (error) {
-          setErrors((s) => ({ ...s, [name]: error }))
+          setErrors((s) => ({ ...s, [name]: error }));
         } else if (errors[name]) {
-          delete errors[name]
-          setErrors(errors)
+          delete errors[name];
+          setErrors(errors);
         }
 
         if (['rpcUrl', 'restUrl', 'explorerUrl'].includes(name)) {
-          setChainInfo((s) => ({ ...s, [name]: value.replace(/ /g, '') }))
+          setChainInfo((s) => ({ ...s, [name]: value.replace(/ /g, '') }));
         } else {
-          setChainInfo((s) => ({ ...s, [name]: value }))
+          setChainInfo((s) => ({ ...s, [name]: value }));
         }
       },
       [chainInfos, errors],
-    )
+    );
 
     const handleSubmit = useCallback(async () => {
-      setLoading(true)
+      setLoading(true);
       const data: any = {
         chainId: chainId,
         chainName: chainName,
@@ -258,25 +229,24 @@ const AddChainForm = observer(
         },
         theme: {
           primaryColor: '#E18881',
-          gradient:
-            'linear-gradient(180deg, rgba(225, 136, 129, 0.32) 0%, rgba(225, 136, 129, 0) 100%)',
+          gradient: 'linear-gradient(180deg, rgba(225, 136, 129, 0.32) 0%, rgba(225, 136, 129, 0) 100%)',
         },
         enabled: true,
         beta: true,
         features: [],
-      }
+      };
 
       if (evmChainInfo.isEvmChain) {
-        data.evmChainId = chainId
-        data.apis.evmJsonRpc = removeTrailingSlash(rpcUrl)
-        data.evmOnlyChain = true
-        data.chainRegistryPath = chainId
-        data.addressPrefix = denom
+        data.evmChainId = chainId;
+        data.apis.evmJsonRpc = removeTrailingSlash(rpcUrl);
+        data.evmOnlyChain = true;
+        data.chainRegistryPath = chainId;
+        data.addressPrefix = denom;
       }
 
-      setChainInfos({ ...chainInfos, [chainName]: data })
-      rootStore.setChains({ ...chainInfos, [chainName]: data })
-      await sleep(500)
+      setChainInfos({ ...chainInfos, [chainName]: data });
+      rootStore.setChains({ ...chainInfos, [chainName]: data });
+      await sleep(500);
 
       browser.storage.local.get([BETA_CHAINS]).then(async (resp) => {
         try {
@@ -285,30 +255,30 @@ const AddChainForm = observer(
             chainName as unknown as SupportedChain,
             'UPDATE',
             data,
-          )
-          let betaChains = resp?.[BETA_CHAINS]
+          );
+          let betaChains = resp?.[BETA_CHAINS];
 
-          betaChains = typeof betaChains === 'string' ? JSON.parse(betaChains) : {}
-          betaChains[chainName] = data
-          await browser.storage.local.set({ [BETA_CHAINS]: JSON.stringify(betaChains) })
+          betaChains = typeof betaChains === 'string' ? JSON.parse(betaChains) : {};
+          betaChains[chainName] = data;
+          await browser.storage.local.set({ [BETA_CHAINS]: JSON.stringify(betaChains) });
 
           if (data.evmOnlyChain) {
-            chainTagsStore.setBetaChainTags(data.chainId, ['EVM'])
+            chainTagsStore.setBetaChainTags(data.chainId, ['EVM']);
           } else {
-            chainTagsStore.setBetaChainTags(data.chainId, ['Cosmos'])
+            chainTagsStore.setBetaChainTags(data.chainId, ['Cosmos']);
           }
 
-          await setActiveWallet(updatedKeystore[activeWallet.id])
-          await setActiveChain(chainName as unknown as SupportedChain, data)
-          navigate('/')
+          await setActiveWallet(updatedKeystore[activeWallet.id]);
+          await setActiveChain(chainName as unknown as SupportedChain, data);
+          navigate('/');
         } catch (error) {
-          setErrors((s) => ({ ...s, submit: 'Unable to add chain' }))
+          setErrors((s) => ({ ...s, submit: 'Unable to add chain' }));
           // do nothing
         } finally {
-          setLoading(false)
+          setLoading(false);
         }
-      })
-      trackCTAEvent(ButtonName.ADD_NEW_CHAIN, '/add-chain')
+      });
+      trackCTAEvent(ButtonName.ADD_NEW_CHAIN, '/add-chain');
     }, [
       activeWallet,
       addressPrefix,
@@ -328,21 +298,21 @@ const AddChainForm = observer(
       setChainInfos,
       trackCTAEvent,
       updateKeyStore,
-    ])
+    ]);
 
     const handleOnBlurChainId = useCallback(
       (event: React.ChangeEvent<HTMLInputElement>) => {
-        fetchChainInfo(event.currentTarget.value)
+        fetchChainInfo(event.currentTarget.value);
       },
       [fetchChainInfo],
-    )
+    );
 
     const handleOnBlurRpcUrl = useCallback(
       (event: React.ChangeEvent<HTMLInputElement>) => {
-        fetchChainId(event.currentTarget.value)
+        fetchChainId(event.currentTarget.value);
       },
       [fetchChainId],
-    )
+    );
 
     const disableSubmit =
       !chainId ||
@@ -350,16 +320,16 @@ const AddChainForm = observer(
       !denom ||
       !rpcUrl ||
       (!evmChainInfo.isEvmChain && (!coinType || !decimals || !restUrl || !addressPrefix)) ||
-      Object.values(errors).length > 0
+      Object.values(errors).length > 0;
 
     useEffect(() => {
       if (evmChainInfo.chainId && chainInfo.chainId && chainInfo.chainId !== evmChainInfo.chainId) {
         setErrors((error) => ({
           ...error,
           chainId: `The RPC URL you have entered returned a different chain ID ${evmChainInfo.chainId}`,
-        }))
+        }));
       }
-    }, [chainInfo.chainId, evmChainInfo.chainId])
+    }, [chainInfo.chainId, evmChainInfo.chainId]);
 
     return (
       <React.Fragment>
@@ -416,12 +386,7 @@ const AddChainForm = observer(
               />
             )}
 
-            <InputComponent
-              placeholder='Native denom (Ex: ujuno)'
-              value={denom}
-              name='denom'
-              onChange={handleChange}
-            />
+            <InputComponent placeholder='Native denom (Ex: ujuno)' value={denom} name='denom' onChange={handleChange} />
 
             {!evmChainInfo.isEvmChain && (
               <InputComponent
@@ -470,14 +435,14 @@ const AddChainForm = observer(
           )}
         </div>
       </React.Fragment>
-    )
+    );
   },
-)
+);
 
 export default function AddChain({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
-  const updateKeyStore = useUpdateKeyStore()
-  const { activeWallet, setActiveWallet } = useActiveWallet()
-  const setActiveChain = useSetActiveChain()
+  const updateKeyStore = useUpdateKeyStore();
+  const { activeWallet, setActiveWallet } = useActiveWallet();
+  const setActiveChain = useSetActiveChain();
   return (
     <NewBottomModal
       isOpen={isOpen}
@@ -497,5 +462,5 @@ export default function AddChain({ isOpen, onClose }: { isOpen: boolean; onClose
         setActiveChain={setActiveChain}
       />
     </NewBottomModal>
-  )
+  );
 }

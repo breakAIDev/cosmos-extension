@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { ReactNode } from 'react';
 
 export enum HeaderActionType {
   BACK = 'back',
@@ -7,20 +7,17 @@ export enum HeaderActionType {
 }
 
 export type HeaderAction = {
-  type: HeaderActionType
-  onClick: () => void
-  className?: string
-}
+  type: HeaderActionType;
+  onClick: () => void;
+  className?: string;
+};
 
 export type PageHeaderProps = {
-  title: ReactNode
-  titleIcon?: ReactNode
-  action?: HeaderAction
-  imgSrc?: ReactNode
-  onImgClick?: (
-    event?: React.MouseEvent<HTMLDivElement>,
-    props?: { defaultFilter?: string },
-  ) => void
-  dontShowFilledArrowIcon?: boolean
-  dontShowBottomDivider?: boolean
-}
+  title: ReactNode;
+  titleIcon?: ReactNode;
+  action?: HeaderAction;
+  imgSrc?: ReactNode;
+  onImgClick?: (event?: React.MouseEvent<HTMLDivElement>, props?: { defaultFilter?: string }) => void;
+  dontShowFilledArrowIcon?: boolean;
+  dontShowBottomDivider?: boolean;
+};

@@ -1,21 +1,21 @@
-import { CardDivider } from '@leapwallet/leap-ui'
-import { Clock } from '@phosphor-icons/react'
-import BottomModal from 'components/new-bottom-modal'
-import { Switch } from 'components/ui/switch'
-import { DollarCircleIcon } from 'icons/dollar-icon'
-import { NetworkNodeIcon } from 'icons/network-node'
-import { ThemeIcon } from 'icons/theme'
-import { WalletIcon } from 'icons/wallet-icon'
-import { observer } from 'mobx-react-lite'
-import React, { useState } from 'react'
-import { hidePercentChangeStore } from 'stores/hide-percent-change'
-import { hideSmallBalancesStore } from 'stores/hide-small-balances-store'
+import { CardDivider } from '@leapwallet/leap-ui';
+import { Clock } from '@phosphor-icons/react';
+import BottomModal from 'components/new-bottom-modal';
+import { Switch } from 'components/ui/switch';
+import { DollarCircleIcon } from 'icons/dollar-icon';
+import { NetworkNodeIcon } from 'icons/network-node';
+import { ThemeIcon } from 'icons/theme';
+import { WalletIcon } from 'icons/wallet-icon';
+import { observer } from 'mobx-react-lite';
+import React, { useState } from 'react';
+import { hidePercentChangeStore } from 'stores/hide-percent-change';
+import { hideSmallBalancesStore } from 'stores/hide-small-balances-store';
 
-import { SideNavSection } from '.'
-import ChangeCurrency from './ChangeCurrency'
-import { CustomEndpoints } from './CustomEndpoints'
-import { NavItem } from './NavItem'
-import ThemeDropUp from './Theme'
+import { SideNavSection } from '.';
+import ChangeCurrency from './ChangeCurrency';
+import { CustomEndpoints } from './CustomEndpoints';
+import { NavItem } from './NavItem';
+import ThemeDropUp from './Theme';
 
 enum PreferencesTab {
   Currency = 'Currency',
@@ -24,22 +24,12 @@ enum PreferencesTab {
 }
 
 const SmallBalancesToggle = observer(() => {
-  return (
-    <Switch
-      className='data-[state=unchecked]:bg-secondary-400'
-      checked={hideSmallBalancesStore.isHidden}
-    />
-  )
-})
+  return <Switch className='data-[state=unchecked]:bg-secondary-400' checked={hideSmallBalancesStore.isHidden} />;
+});
 
 const PercentChangeToggle = observer(() => {
-  return (
-    <Switch
-      className='data-[state=unchecked]:bg-secondary-400'
-      checked={hidePercentChangeStore.isHidden}
-    />
-  )
-})
+  return <Switch className='data-[state=unchecked]:bg-secondary-400' checked={hidePercentChangeStore.isHidden} />;
+});
 
 const preferences = [
   [
@@ -75,10 +65,10 @@ const preferences = [
       onClick: () => hideSmallBalancesStore.setHidden(!hideSmallBalancesStore.isHidden),
     },
   ],
-]
+];
 
 const PreferencesView = ({ isVisible, goBack }: { isVisible: boolean; goBack: () => void }) => {
-  const [selectedTab, setSelectedTab] = useState<PreferencesTab | null>(null)
+  const [selectedTab, setSelectedTab] = useState<PreferencesTab | null>(null);
 
   return (
     <>
@@ -86,8 +76,8 @@ const PreferencesView = ({ isVisible, goBack }: { isVisible: boolean; goBack: ()
         fullScreen
         isOpen={isVisible}
         onClose={() => {
-          setSelectedTab(null)
-          goBack()
+          setSelectedTab(null);
+          goBack();
         }}
         title='Preferences'
         className='pb-7 pt-2 !px-5'
@@ -104,36 +94,27 @@ const PreferencesView = ({ isVisible, goBack }: { isVisible: boolean; goBack: ()
                     trailingIcon={item.trailingIcon}
                     onClick={() => {
                       if (item.tab) {
-                        setSelectedTab(item.tab)
+                        setSelectedTab(item.tab);
                       }
                       if (item.onClick) {
-                        item.onClick()
+                        item.onClick();
                       }
                     }}
                   />
                 </React.Fragment>
-              )
+              );
             })}
           </SideNavSection>
         ))}
       </BottomModal>
 
-      <CustomEndpoints
-        isVisible={selectedTab === PreferencesTab.CustomEndpoints}
-        goBack={() => setSelectedTab(null)}
-      />
+      <CustomEndpoints isVisible={selectedTab === PreferencesTab.CustomEndpoints} goBack={() => setSelectedTab(null)} />
 
-      <ThemeDropUp
-        isVisible={selectedTab === PreferencesTab.Theme}
-        onCloseHandler={() => setSelectedTab(null)}
-      />
+      <ThemeDropUp isVisible={selectedTab === PreferencesTab.Theme} onCloseHandler={() => setSelectedTab(null)} />
 
-      <ChangeCurrency
-        isVisible={selectedTab === PreferencesTab.Currency}
-        goBack={() => setSelectedTab(null)}
-      />
+      <ChangeCurrency isVisible={selectedTab === PreferencesTab.Currency} goBack={() => setSelectedTab(null)} />
     </>
-  )
-}
+  );
+};
 
-export const Preferences = observer(PreferencesView)
+export const Preferences = observer(PreferencesView);

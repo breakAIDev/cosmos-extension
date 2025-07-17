@@ -1,7 +1,7 @@
-import React from 'react'
+import React from 'react';
 
-import { OnboardingLayout } from './layout'
+import { OnboardingLayout } from './layout';
 
 export const OnboardingSuspenseLoader = () => {
-  return <OnboardingLayout />
-}
+  return <OnboardingLayout />;
+};

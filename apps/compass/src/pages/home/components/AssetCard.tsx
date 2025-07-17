@@ -1,25 +1,21 @@
-import { isTerraClassic, Token, useActiveChain } from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import {
-  ChainInfosStore,
-  CompassSeiTokensAssociationStore,
-  MarketDataStore,
-} from '@leapwallet/cosmos-wallet-store'
-import { PageName } from 'config/analytics'
-import { observer } from 'mobx-react-lite'
-import React, { useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { isTerraClassic, Token, useActiveChain } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { ChainInfosStore, CompassSeiTokensAssociationStore, MarketDataStore } from '@leapwallet/cosmos-wallet-store';
+import { PageName } from 'config/analytics';
+import { observer } from 'mobx-react-lite';
+import React, { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-import { AggregatedTokenCard } from './index'
+import { AggregatedTokenCard } from './index';
 
 type AssetCardProps = {
-  asset: Token
-  marketDataStore: MarketDataStore
-  compassTokensAssociationsStore: CompassSeiTokensAssociationStore
-  chainInfosStore: ChainInfosStore
-  isPlaceholder?: boolean
-  className?: string
-}
+  asset: Token;
+  marketDataStore: MarketDataStore;
+  compassTokensAssociationsStore: CompassSeiTokensAssociationStore;
+  chainInfosStore: ChainInfosStore;
+  isPlaceholder?: boolean;
+  className?: string;
+};
 
 export const AssetCard = observer(
   ({
@@ -30,62 +26,52 @@ export const AssetCard = observer(
     isPlaceholder,
     className,
   }: AssetCardProps) => {
-    const {
-      symbol,
-      amount,
-      usdValue,
-      img,
-      ibcChainInfo,
-      coinMinimalDenom,
-      name,
-      chain,
-      isEvm,
-      tokenBalanceOnChain,
-    } = asset
-    const chains = chainInfosStore.chainInfos
-    const marketData = marketDataStore.data
-    const compassSeiToEvmMapping = compassTokensAssociationsStore.compassSeiToEvmMapping
+    const { symbol, amount, usdValue, img, ibcChainInfo, coinMinimalDenom, name, chain, isEvm, tokenBalanceOnChain } =
+      asset;
+    const chains = chainInfosStore.chainInfos;
+    const marketData = marketDataStore.data;
+    const compassSeiToEvmMapping = compassTokensAssociationsStore.compassSeiToEvmMapping;
 
     const marketDataForToken = useMemo(() => {
-      let key = asset.coinGeckoId ?? asset.coinMinimalDenom
+      let key = asset.coinGeckoId ?? asset.coinMinimalDenom;
       if (marketData?.[key]) {
-        return marketData[key]
+        return marketData[key];
       }
       if (!asset.chain) {
-        return undefined
+        return undefined;
       }
-      const chainId = chains[asset.chain as SupportedChain]?.chainId
-      key = `${chainId}-${asset.coinMinimalDenom}`
-      const _marketData = marketData?.[key] ?? marketData?.[key?.toLowerCase()]
+      const chainId = chains[asset.chain as SupportedChain]?.chainId;
+      key = `${chainId}-${asset.coinMinimalDenom}`;
+      const _marketData = marketData?.[key] ?? marketData?.[key?.toLowerCase()];
       if (_marketData) {
-        return _marketData
+        return _marketData;
       }
       if (!compassSeiToEvmMapping[asset.coinMinimalDenom]) {
-        return undefined
+        return undefined;
       }
-      key = `${chainId}-${compassSeiToEvmMapping[asset.coinMinimalDenom]}`
-      return marketData?.[key] ?? marketData?.[key?.toLowerCase()]
-    }, [asset, marketData, chains, compassSeiToEvmMapping])
+      key = `${chainId}-${compassSeiToEvmMapping[asset.coinMinimalDenom]}`;
+      return marketData?.[key] ?? marketData?.[key?.toLowerCase()];
+    }, [asset, marketData, chains, compassSeiToEvmMapping]);
 
-    const navigate = useNavigate()
-    const activeChain = useActiveChain()
+    const navigate = useNavigate();
+    const activeChain = useActiveChain();
 
     const handleCardClick = () => {
-      let tokenChain = chain?.replace('cosmoshub', 'cosmos')
+      let tokenChain = chain?.replace('cosmoshub', 'cosmos');
       if (isTerraClassic(ibcChainInfo?.pretty_name ?? '') && coinMinimalDenom === 'uluna') {
-        tokenChain = 'terra-classic'
+        tokenChain = 'terra-classic';
       }
 
-      if (!tokenChain) return
+      if (!tokenChain) return;
 
-      sessionStorage.setItem('navigate-assetDetails-state', JSON.stringify(asset))
+      sessionStorage.setItem('navigate-assetDetails-state', JSON.stringify(asset));
       navigate(
         `/assetDetails?assetName=${
           coinMinimalDenom.length > 0 ? coinMinimalDenom : symbol
         }&tokenChain=${tokenChain}&pageSource=${PageName.Home}`,
         { state: asset },
-      )
-    }
+      );
+    };
 
     return (
       <AggregatedTokenCard
@@ -103,6 +89,6 @@ export const AssetCard = observer(
         percentChange24={marketDataForToken?.price_change_percentage_24h}
         className={className}
       />
-    )
+    );
   },
-)
+);

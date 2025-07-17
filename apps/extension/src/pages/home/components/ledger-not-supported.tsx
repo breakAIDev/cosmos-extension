@@ -1,15 +1,15 @@
-import { useChainInfo } from '@leapwallet/cosmos-wallet-hooks'
-import { Button } from 'components/ui/button'
-import { useActiveChain } from 'hooks/settings/useActiveChain'
-import { LedgerDriveIcon } from 'icons/ledger-drive-icon'
-import React, { useState } from 'react'
-import { AggregatedSupportedChain } from 'types/utility'
+import { useChainInfo } from '@leapwallet/cosmos-wallet-hooks';
+import { Button } from 'components/ui/button';
+import { useActiveChain } from 'hooks/settings/useActiveChain';
+import { LedgerDriveIcon } from 'icons/ledger-drive-icon';
+import React, { useState } from 'react';
+import { AggregatedSupportedChain } from 'types/utility';
 
-import CreateImportActions from '../SelectWallet/CreateImportActions'
+import CreateImportActions from '../SelectWallet/CreateImportActions';
 
 export const LedgerNotSupported = () => {
-  const chainInfo = useChainInfo()
-  const [showCreateImportActions, setShowCreateImportActions] = useState(false)
+  const chainInfo = useChainInfo();
+  const [showCreateImportActions, setShowCreateImportActions] = useState(false);
 
   return (
     <>
@@ -21,8 +21,8 @@ export const LedgerNotSupported = () => {
         <header className='text-center mt-4 mb-8 space-y-3'>
           <h1 className='text-mdl font-bold'>Ledger not supported on {chainInfo?.chainName}</h1>
           <p className='text-xs text-secondary-800'>
-            In the meanwhile, you can import your wallet using a <br /> recovery phrase or private
-            key to access {chainInfo?.chainName}.
+            In the meanwhile, you can import your wallet using a <br /> recovery phrase or private key to access{' '}
+            {chainInfo?.chainName}.
           </p>
         </header>
 
@@ -37,9 +37,9 @@ export const LedgerNotSupported = () => {
         title='Create / Import Wallet'
         isVisible={showCreateImportActions}
         onClose={() => {
-          setShowCreateImportActions(false)
+          setShowCreateImportActions(false);
         }}
       />
     </>
-  )
-}
+  );
+};

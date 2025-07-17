@@ -1,16 +1,9 @@
-import { IconProps } from '@phosphor-icons/react'
-import React from 'react'
+import { IconProps } from '@phosphor-icons/react';
+import React from 'react';
 
 export const SwapIcon = (props: IconProps) => {
   return (
-    <svg
-      width='24'
-      height='24'
-      viewBox='0 0 24 24'
-      fill='none'
-      xmlns='http://www.w3.org/2000/svg'
-      {...props}
-    >
+    <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
       <g clipPath='url(#clip0_5007_6264)'>
         <g clipPath='url(#clip1_5007_6264)'>
           <path
@@ -30,19 +23,12 @@ export const SwapIcon = (props: IconProps) => {
         </clipPath>
       </defs>
     </svg>
-  )
-}
+  );
+};
 
 export const SwapIconBottomNav = (props: IconProps) => {
   return (
-    <svg
-      width='18'
-      height='18'
-      viewBox='0 0 18 18'
-      fill='none'
-      xmlns='http://www.w3.org/2000/svg'
-      {...props}
-    >
+    <svg width='18' height='18' viewBox='0 0 18 18' fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
       <g clipPath='url(#clip0_2151_11160)'>
         <path
           fillRule='evenodd'
@@ -57,5 +43,5 @@ export const SwapIconBottomNav = (props: IconProps) => {
         </clipPath>
       </defs>
     </svg>
-  )
-}
+  );
+};

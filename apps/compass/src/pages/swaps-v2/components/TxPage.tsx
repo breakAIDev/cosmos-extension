@@ -1,53 +1,48 @@
-import { GasOptions } from '@leapwallet/cosmos-wallet-hooks'
-import { GasPrice, NativeDenom } from '@leapwallet/cosmos-wallet-sdk'
-import { RootCW20DenomsStore, RootDenomsStore } from '@leapwallet/cosmos-wallet-store'
-import { TRANSFER_STATE, TXN_STATUS } from '@leapwallet/elements-core'
-import { CaretRight } from '@phosphor-icons/react'
-import BottomModal from 'components/bottom-modal'
-import LedgerConfirmationPopup from 'components/ledger-confirmation/LedgerConfirmationPopup'
-import Loader from 'components/loader/Loader'
-import Text from 'components/text'
-import { Button } from 'components/ui/button'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { SourceChain, SourceToken, SwapFeeInfo, SwapTxAction } from 'types/swap'
+import { GasOptions } from '@leapwallet/cosmos-wallet-hooks';
+import { GasPrice, NativeDenom } from '@leapwallet/cosmos-wallet-sdk';
+import { RootCW20DenomsStore, RootDenomsStore } from '@leapwallet/cosmos-wallet-store';
+import { TRANSFER_STATE, TXN_STATUS } from '@leapwallet/elements-core';
+import { CaretRight } from '@phosphor-icons/react';
+import BottomModal from 'components/bottom-modal';
+import LedgerConfirmationPopup from 'components/ledger-confirmation/LedgerConfirmationPopup';
+import Loader from 'components/loader/Loader';
+import Text from 'components/text';
+import { Button } from 'components/ui/button';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { SourceChain, SourceToken, SwapFeeInfo, SwapTxAction } from 'types/swap';
 
-import { RoutingInfo, useExecuteTx, useOnline, useTransactions } from '../hooks'
+import { RoutingInfo, useExecuteTx, useOnline, useTransactions } from '../hooks';
 
 export type TxPageProps = {
-  onClose: (
-    sourceChain?: string,
-    sourceToken?: string,
-    destinationChain?: string,
-    destinationToken?: string,
-  ) => void
-  setLedgerError?: (ledgerError?: string) => void
-  sourceToken: SourceToken | null
-  destinationToken: SourceToken | null
-  sourceChain: SourceChain | undefined
-  destinationChain: SourceChain | undefined
-  inAmount: string
-  amountOut: string
-  routingInfo: RoutingInfo
-  userPreferredGasLimit: number | undefined
-  userPreferredGasPrice: GasPrice | undefined
-  gasEstimate: number
+  onClose: (sourceChain?: string, sourceToken?: string, destinationChain?: string, destinationToken?: string) => void;
+  setLedgerError?: (ledgerError?: string) => void;
+  sourceToken: SourceToken | null;
+  destinationToken: SourceToken | null;
+  sourceChain: SourceChain | undefined;
+  destinationChain: SourceChain | undefined;
+  inAmount: string;
+  amountOut: string;
+  routingInfo: RoutingInfo;
+  userPreferredGasLimit: number | undefined;
+  userPreferredGasPrice: GasPrice | undefined;
+  gasEstimate: number;
   feeDenom: NativeDenom & {
-    ibcDenom?: string | undefined
-  }
-  gasOption: GasOptions
-  feeAmount?: string
-  refetchSourceBalances?: () => void
-  refetchDestinationBalances?: () => void
-  ledgerError?: string
-  callbackPostTx?: () => void
-  isTrackingPage?: boolean
-  rootDenomsStore: RootDenomsStore
-  rootCW20DenomsStore: RootCW20DenomsStore
-  swapFeeInfo?: SwapFeeInfo
-}
+    ibcDenom?: string | undefined;
+  };
+  gasOption: GasOptions;
+  feeAmount?: string;
+  refetchSourceBalances?: () => void;
+  refetchDestinationBalances?: () => void;
+  ledgerError?: string;
+  callbackPostTx?: () => void;
+  isTrackingPage?: boolean;
+  rootDenomsStore: RootDenomsStore;
+  rootCW20DenomsStore: RootCW20DenomsStore;
+  swapFeeInfo?: SwapFeeInfo;
+};
 
 export const TxPage = observer(
   ({
@@ -75,15 +70,15 @@ export const TxPage = observer(
     rootCW20DenomsStore,
     swapFeeInfo,
   }: TxPageProps) => {
-    const [showLedgerPopup, setShowLedgerPopup] = useState(false)
-    const [showLedgerPopupText, setShowLedgerPopupText] = useState('')
-    const [isSigningComplete, setIsSigningComplete] = useState(false)
-    const [initialFeeAmount, setFeeAmount] = useState('')
+    const [showLedgerPopup, setShowLedgerPopup] = useState(false);
+    const [showLedgerPopupText, setShowLedgerPopupText] = useState('');
+    const [isSigningComplete, setIsSigningComplete] = useState(false);
+    const [initialFeeAmount, setFeeAmount] = useState('');
 
-    const isOnline = useOnline()
-    const prevIsOnline = useRef<boolean | null>(null)
+    const isOnline = useOnline();
+    const prevIsOnline = useRef<boolean | null>(null);
 
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     const {
       initialSourceToken,
@@ -114,108 +109,105 @@ export const TxPage = observer(
         initialUserPreferredGasLimit: userPreferredGasLimit,
         initialUserPreferredGasPrice: userPreferredGasPrice,
         initialSwapFeeInfo: swapFeeInfo,
-      }
+      };
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, []);
 
-    const [isSuccessFull, setIsSuccessFull] = useState(false)
-    const [isTrackingInSync, setTrackingInSync] = useState(false)
+    const [isSuccessFull, setIsSuccessFull] = useState(false);
+    const [isTrackingInSync, setTrackingInSync] = useState(false);
 
-    const { groupedTransactions } = useTransactions(initialRoutingInfo)
-    const cw20Denoms = rootCW20DenomsStore.allCW20Denoms
-    const denoms = rootDenomsStore.allDenoms
+    const { groupedTransactions } = useTransactions(initialRoutingInfo);
+    const cw20Denoms = rootCW20DenomsStore.allCW20Denoms;
+    const denoms = rootDenomsStore.allDenoms;
 
-    const { callExecuteTx, txStatus, firstTxnError, timeoutError, isLoading, unableToTrackError } =
-      useExecuteTx({
-        denoms,
-        setShowLedgerPopup,
-        setLedgerError,
-        routingInfo: initialRoutingInfo,
-        sourceChain: initialSourceChain,
-        sourceToken: initialSourceToken,
-        destinationChain: initialDestinationChain,
-        destinationToken: initialDestinationToken,
-        feeDenom: initialFeeDenom,
-        gasEstimate: initialGasEstimate,
-        gasOption: initialGasOption,
-        userPreferredGasLimit: initialUserPreferredGasLimit,
-        userPreferredGasPrice: initialUserPreferredGasPrice,
-        inAmount: initialInAmount,
-        amountOut: initialAmountOut,
-        setFeeAmount,
-        feeAmount,
-        callbackPostTx,
-        refetchDestinationBalances,
-        refetchSourceBalances,
-        setTrackingInSync,
-        cw20Denoms,
-        swapFeeInfo: initialSwapFeeInfo,
-        setIsSigningComplete,
-        setShowLedgerPopupText,
-      })
+    const { callExecuteTx, txStatus, firstTxnError, timeoutError, isLoading, unableToTrackError } = useExecuteTx({
+      denoms,
+      setShowLedgerPopup,
+      setLedgerError,
+      routingInfo: initialRoutingInfo,
+      sourceChain: initialSourceChain,
+      sourceToken: initialSourceToken,
+      destinationChain: initialDestinationChain,
+      destinationToken: initialDestinationToken,
+      feeDenom: initialFeeDenom,
+      gasEstimate: initialGasEstimate,
+      gasOption: initialGasOption,
+      userPreferredGasLimit: initialUserPreferredGasLimit,
+      userPreferredGasPrice: initialUserPreferredGasPrice,
+      inAmount: initialInAmount,
+      amountOut: initialAmountOut,
+      setFeeAmount,
+      feeAmount,
+      callbackPostTx,
+      refetchDestinationBalances,
+      refetchSourceBalances,
+      setTrackingInSync,
+      cw20Denoms,
+      swapFeeInfo: initialSwapFeeInfo,
+      setIsSigningComplete,
+      setShowLedgerPopupText,
+    });
 
     const failedActionWasSwap = useMemo(() => {
       // !: Here 0 is hardcoded since we allow only one step transactions
-      const transferSequence = txStatus?.[0]?.responses
-      const actions = Object.values(groupedTransactions ?? {})?.[0]
-      const releaseAsset = txStatus?.[0]?.transferAssetRelease
+      const transferSequence = txStatus?.[0]?.responses;
+      const actions = Object.values(groupedTransactions ?? {})?.[0];
+      const releaseAsset = txStatus?.[0]?.transferAssetRelease;
 
-      if (!transferSequence || !actions || !releaseAsset) return false
+      if (!transferSequence || !actions || !releaseAsset) return false;
 
-      let _failedActionWasSwap = false
+      let _failedActionWasSwap = false;
 
       for (let i = 0; i < transferSequence.length; i++) {
-        const transfer = transferSequence[i]
+        const transfer = transferSequence[i];
         if (transfer.state === TRANSFER_STATE.TRANSFER_FAILURE) {
-          const swapAction = actions.find((a): a is SwapTxAction => a.type === 'SWAP')
+          const swapAction = actions.find((a): a is SwapTxAction => a.type === 'SWAP');
           if (!!swapAction && releaseAsset.denom === swapAction?.sourceAsset) {
-            _failedActionWasSwap = true
+            _failedActionWasSwap = true;
           }
         }
       }
 
-      return _failedActionWasSwap
-    }, [groupedTransactions, txStatus])
+      return _failedActionWasSwap;
+    }, [groupedTransactions, txStatus]);
 
     const isCTADisabled = useMemo(() => {
-      return isLoading
-    }, [isLoading])
+      return isLoading;
+    }, [isLoading]);
 
     useEffect(() => {
       if (prevIsOnline.current !== isOnline) {
-        prevIsOnline.current = isOnline
-        setIsSuccessFull(false)
-        callExecuteTx()
+        prevIsOnline.current = isOnline;
+        setIsSuccessFull(false);
+        callExecuteTx();
       }
 
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isOnline])
+    }, [isOnline]);
 
     useEffect(() => {
       if (!isLoading && !ledgerError && !timeoutError && !firstTxnError && txStatus) {
-        const isTxnComplete = txStatus.every((txn) => txn.isComplete)
-        const isFailed = txStatus.some((txn) => txn.status === TXN_STATUS.FAILED)
+        const isTxnComplete = txStatus.every((txn) => txn.isComplete);
+        const isFailed = txStatus.some((txn) => txn.status === TXN_STATUS.FAILED);
 
         if (isTxnComplete || isFailed) {
-          setIsSuccessFull(
-            txStatus.every((txn: { status: TXN_STATUS }) => txn.status === TXN_STATUS.SUCCESS),
-          )
+          setIsSuccessFull(txStatus.every((txn: { status: TXN_STATUS }) => txn.status === TXN_STATUS.SUCCESS));
         }
       }
-    }, [firstTxnError, ledgerError, isLoading, timeoutError, txStatus, unableToTrackError])
+    }, [firstTxnError, ledgerError, isLoading, timeoutError, txStatus, unableToTrackError]);
 
     const handleHomeBtnClick = useCallback(() => {
       if (isCTADisabled) {
-        return
+        return;
       }
-      onClose()
-      navigate('/home')
-    }, [isCTADisabled, onClose, navigate])
+      onClose();
+      navigate('/home');
+    }, [isCTADisabled, onClose, navigate]);
 
     const handleSwapAgainClick = useCallback(() => {
-      if (isLoading) return
-      onClose()
-    }, [isLoading, onClose])
+      if (isLoading) return;
+      onClose();
+    }, [isLoading, onClose]);
 
     if (isTrackingPage && !isTrackingInSync) {
       return (
@@ -223,7 +215,7 @@ export const TxPage = observer(
           title={''}
           fullScreen={true}
           onClose={() => {
-            onClose()
+            onClose();
           }}
           isOpen={true}
           containerClassName='h-full'
@@ -234,7 +226,7 @@ export const TxPage = observer(
             <Loader />
           </div>
         </BottomModal>
-      )
+      );
     }
 
     if (showLedgerPopup) {
@@ -243,7 +235,7 @@ export const TxPage = observer(
           title={''}
           fullScreen={true}
           onClose={() => {
-            onClose()
+            onClose();
           }}
           isOpen={true}
           containerClassName='h-full'
@@ -252,7 +244,7 @@ export const TxPage = observer(
         >
           <LedgerConfirmationPopup showLedgerPopup showLedgerPopupText={showLedgerPopupText} />
         </BottomModal>
-      )
+      );
     }
 
     return (
@@ -260,7 +252,7 @@ export const TxPage = observer(
         title={''}
         fullScreen={true}
         onClose={() => {
-          onClose()
+          onClose();
         }}
         isOpen={true}
         containerClassName='h-full'
@@ -287,11 +279,7 @@ export const TxPage = observer(
           <div className='flex flex-col items-center gap-y-6'>
             <div className='flex flex-col items-center gap-y-3'>
               <Text size='xl' color='text-monochrome' className='font-bold'>
-                {isLoading
-                  ? 'Swap in progress'
-                  : isSuccessFull
-                  ? 'Swap successful!'
-                  : 'Swap failed'}
+                {isLoading ? 'Swap in progress' : isSuccessFull ? 'Swap successful!' : 'Swap failed'}
               </Text>
               <Text size='sm' color='text-secondary-800' className='font-normal text-center'>
                 {isLoading
@@ -310,7 +298,7 @@ export const TxPage = observer(
               <div
                 className='flex gap-x-1 items-center cursor-pointer'
                 onClick={() => {
-                  navigate('/activity')
+                  navigate('/activity');
                 }}
               >
                 <Text size='sm' color='text-accent-blue' className='font-medium'>
@@ -322,12 +310,7 @@ export const TxPage = observer(
           </div>
         </div>
         <div className=' flex flex-row items-center justify-between gap-4 absolute bottom-0 left-0 right-0 p-6 max-[350px]:!px-4 !z-[1000]'>
-          <Button
-            className={'flex-1'}
-            variant={'mono'}
-            onClick={handleHomeBtnClick}
-            disabled={isCTADisabled}
-          >
+          <Button className={'flex-1'} variant={'mono'} onClick={handleHomeBtnClick} disabled={isCTADisabled}>
             Home
           </Button>
           <Button className={'flex-1'} onClick={handleSwapAgainClick} disabled={isCTADisabled}>
@@ -336,6 +319,6 @@ export const TxPage = observer(
         </div>
         {/* </div> */}
       </BottomModal>
-    )
+    );
   },
-)
+);

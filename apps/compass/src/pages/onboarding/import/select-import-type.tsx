@@ -1,20 +1,20 @@
-import { IconProps } from '@phosphor-icons/react'
-import { GoogleIcon } from 'icons/google-icon'
-import { KeyIcon } from 'icons/key'
-import { LedgerDriveIcon } from 'icons/ledger-icon'
-import { RecoveryPhraseIcon } from 'icons/recovery-phrase'
-import { WalletIcon } from 'icons/wallet-icon'
-import { OnboardingWrapper } from 'pages/onboarding/wrapper'
-import React from 'react'
-import { cn } from 'utils/cn'
+import { IconProps } from '@phosphor-icons/react';
+import { GoogleIcon } from 'icons/google-icon';
+import { KeyIcon } from 'icons/key';
+import { LedgerDriveIcon } from 'icons/ledger-icon';
+import { RecoveryPhraseIcon } from 'icons/recovery-phrase';
+import { WalletIcon } from 'icons/wallet-icon';
+import { OnboardingWrapper } from 'pages/onboarding/wrapper';
+import React from 'react';
+import { cn } from 'utils/cn';
 
-import { useImportWalletContext } from './import-wallet-context'
+import { useImportWalletContext } from './import-wallet-context';
 
 const ImportTypeButton = (props: {
-  title: string
-  icon: (props: IconProps) => JSX.Element
-  onClick: () => void
-  className?: string
+  title: string;
+  icon: (props: IconProps) => JSX.Element;
+  onClick: () => void;
+  className?: string;
 }) => {
   return (
     <button
@@ -27,8 +27,8 @@ const ImportTypeButton = (props: {
       <props.icon className='size-6 text-muted-foreground' />
       <span>{props.title}</span>
     </button>
-  )
-}
+  );
+};
 
 const importMethods = [
   {
@@ -46,17 +46,11 @@ const importMethods = [
     title: 'Connect via Ledger',
     icon: LedgerDriveIcon,
   },
-] as const
+] as const;
 
 const SelectImportType = () => {
-  const {
-    prevStep,
-    currentStep,
-    setCurrentStep,
-    setWalletName,
-    socialLogin,
-    moveToNextStepSocial,
-  } = useImportWalletContext()
+  const { prevStep, currentStep, setCurrentStep, setWalletName, socialLogin, moveToNextStepSocial } =
+    useImportWalletContext();
 
   return (
     <OnboardingWrapper
@@ -85,8 +79,8 @@ const SelectImportType = () => {
           <ImportTypeButton
             key={method.id}
             onClick={() => {
-              setWalletName(method.id)
-              setCurrentStep(currentStep + 1)
+              setWalletName(method.id);
+              setCurrentStep(currentStep + 1);
             }}
             icon={method.icon}
             title={method.title}
@@ -94,7 +88,7 @@ const SelectImportType = () => {
         ))}
       </div>
     </OnboardingWrapper>
-  )
-}
+  );
+};
 
-export default SelectImportType
+export default SelectImportType;

@@ -1,24 +1,24 @@
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { NftInfo } from '@leapwallet/cosmos-wallet-store'
-import { EyeSlash } from '@phosphor-icons/react'
-import { LoaderAnimation } from 'components/loader/Loader'
-import { useChainPageInfo } from 'hooks'
-import { useChainInfos } from 'hooks/useChainInfos'
-import React from 'react'
-import { getChainName } from 'utils/getChainName'
-import { normalizeImageSrc } from 'utils/normalizeImageSrc'
-import { sessionStoreItem } from 'utils/sessionStorage'
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { NftInfo } from '@leapwallet/cosmos-wallet-store';
+import { EyeSlash } from '@phosphor-icons/react';
+import { LoaderAnimation } from 'components/loader/Loader';
+import { useChainPageInfo } from 'hooks';
+import { useChainInfos } from 'hooks/useChainInfos';
+import React from 'react';
+import { getChainName } from 'utils/getChainName';
+import { normalizeImageSrc } from 'utils/normalizeImageSrc';
+import { sessionStoreItem } from 'utils/sessionStorage';
 
-import { useNftContext } from '../context'
-import { Chip, NftCard, Text, ViewAllButton } from './index'
+import { useNftContext } from '../context';
+import { Chip, NftCard, Text, ViewAllButton } from './index';
 
 type ChainHeaderCollectionCardProps = {
-  chain: SupportedChain
-  nfts: NftInfo[]
-  nftsCount: number
-  haveToShowLoader?: boolean
-  isFetchingMore?: boolean
-}
+  chain: SupportedChain;
+  nfts: NftInfo[];
+  nftsCount: number;
+  haveToShowLoader?: boolean;
+  isFetchingMore?: boolean;
+};
 
 export function ChainHeaderCollectionCard({
   chain,
@@ -27,19 +27,18 @@ export function ChainHeaderCollectionCard({
   haveToShowLoader,
   isFetchingMore,
 }: ChainHeaderCollectionCardProps) {
-  const chainInfos = useChainInfos()
-  const { topChainColor } = useChainPageInfo()
-  const { activePage, setActivePage, setNftDetails, activeTab, setShowChainNftsFor } =
-    useNftContext()
-  const chainInfo = chainInfos[chain]
+  const chainInfos = useChainInfos();
+  const { topChainColor } = useChainPageInfo();
+  const { activePage, setActivePage, setNftDetails, activeTab, setShowChainNftsFor } = useNftContext();
+  const chainInfo = chainInfos[chain];
 
   const handleViewOnClick = () => {
-    setShowChainNftsFor(chain)
-    setActivePage('ChainNftsDetails')
-  }
+    setShowChainNftsFor(chain);
+    setActivePage('ChainNftsDetails');
+  };
 
   if (activePage !== 'CollectionDetails' && nfts.length === 0) {
-    return <></>
+    return <></>;
   }
 
   return (
@@ -75,32 +74,29 @@ export function ChainHeaderCollectionCard({
             <EyeSlash size={24} className='w-6 h-6 text-gray-200' />
           </div>
           <div className='font-bold text-white-100 text-base mt-3'>NFTs hidden</div>
-          <div className='text-gray-400 font-medium text-xs'>
-            All NFTs are hidden of this collection
-          </div>
+          <div className='text-gray-400 font-medium text-xs'>All NFTs are hidden of this collection</div>
         </div>
       ) : (
         <div className='grid grid-cols-2 gap-4 p-4'>
           {nfts.map((nft, index) => {
             if (activeTab === 'All') {
               if (index == 6) {
-                return <ViewAllButton key={`${nft.tokenId}-${index}`} onClick={handleViewOnClick} />
+                return <ViewAllButton key={`${nft.tokenId}-${index}`} onClick={handleViewOnClick} />;
               }
 
-              if (index > 6) return null
+              if (index > 6) return null;
             }
 
-            const nftName =
-              activePage === 'CollectionDetails' ? nft.name : nft.collection?.name ?? nft.name
-            const nftId = activePage === 'CollectionDetails' ? nft.tokenId : nft.tokenId ?? nft.name
+            const nftName = activePage === 'CollectionDetails' ? nft.name : nft.collection?.name ?? nft.name;
+            const nftId = activePage === 'CollectionDetails' ? nft.tokenId : nft.tokenId ?? nft.name;
 
             return (
               <div
                 key={`${nft.tokenId}-${index}`}
                 onClick={() => {
-                  sessionStoreItem('nftLastActivePage', activePage)
-                  setActivePage('NftDetails')
-                  setNftDetails({ ...nft, chain: chain as SupportedChain })
+                  sessionStoreItem('nftLastActivePage', activePage);
+                  setActivePage('NftDetails');
+                  setNftDetails({ ...nft, chain: chain as SupportedChain });
                 }}
                 className='cursor-pointer'
               >
@@ -110,8 +106,7 @@ export function ChainHeaderCollectionCard({
                   imgSrc={normalizeImageSrc(nft.image ?? '', nft.collection?.address ?? '')}
                   textNft={{
                     name: nft?.domain ?? '',
-                    description:
-                      nft.extension?.description ?? `${nft.collection?.name ?? ''} - ${nft.name}`,
+                    description: nft.extension?.description ?? `${nft.collection?.name ?? ''} - ${nft.name}`,
                   }}
                   imgClassName='aspect-square w-[150px] object-contain'
                 />
@@ -126,7 +121,7 @@ export function ChainHeaderCollectionCard({
                   </Text>
                 )}
               </div>
-            )
+            );
           })}
 
           {haveToShowLoader && (
@@ -142,5 +137,5 @@ export function ChainHeaderCollectionCard({
         </div>
       )}
     </div>
-  )
+  );
 }

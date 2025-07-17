@@ -1,17 +1,17 @@
-import { RaffleAndTestnetAlertStrip } from 'components/alert-strip'
-import { ApiStatusWarningStrip } from 'components/alert-strip/ApiStatusWarningStrip'
-import { AlertStrip } from 'components/alert-strip/v2'
-import { useQueryParams } from 'hooks/useQuery'
-import React from 'react'
-import { queryParams } from 'utils/query-params'
+import { RaffleAndTestnetAlertStrip } from 'components/alert-strip';
+import { ApiStatusWarningStrip } from 'components/alert-strip/ApiStatusWarningStrip';
+import { AlertStrip } from 'components/alert-strip/v2';
+import { useQueryParams } from 'hooks/useQuery';
+import React from 'react';
+import { queryParams } from 'utils/query-params';
 
 export const GeneralHomeAlertStirps = ({ balanceError }: { balanceError: boolean }) => {
-  const query = useQueryParams()
+  const query = useQueryParams();
 
-  const txDeclined = query.get(queryParams.txDeclined)
-  const walletAvatarChanged = query.get(queryParams.walletAvatarChanged)
-  const faucetError = query.get(queryParams.faucetError)
-  const faucetSuccess = query.get(queryParams.faucetSuccess)
+  const txDeclined = query.get(queryParams.txDeclined);
+  const walletAvatarChanged = query.get(queryParams.walletAvatarChanged);
+  const faucetError = query.get(queryParams.faucetError);
+  const faucetSuccess = query.get(queryParams.faucetSuccess);
 
   return (
     <>
@@ -30,7 +30,7 @@ export const GeneralHomeAlertStirps = ({ balanceError }: { balanceError: boolean
           timeOut={6000}
           type={faucetSuccess ? 'success' : 'error'}
           onHide={() => {
-            query.remove([queryParams.faucetSuccess, queryParams.faucetError])
+            query.remove([queryParams.faucetSuccess, queryParams.faucetError]);
           }}
         >
           {faucetSuccess || faucetError}
@@ -38,14 +38,10 @@ export const GeneralHomeAlertStirps = ({ balanceError }: { balanceError: boolean
       ) : null}
 
       {walletAvatarChanged ? (
-        <AlertStrip
-          timeOut={2500}
-          type='success'
-          onHide={() => query.remove(queryParams.walletAvatarChanged)}
-        >
+        <AlertStrip timeOut={2500} type='success' onHide={() => query.remove(queryParams.walletAvatarChanged)}>
           Profile picture changed successfully
         </AlertStrip>
       ) : null}
     </>
-  )
-}
+  );
+};

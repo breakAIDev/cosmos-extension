@@ -1,16 +1,16 @@
-import { motion, Variants } from 'framer-motion'
-import React, { ReactNode } from 'react'
-import { cn } from 'utils/cn'
-import { transition } from 'utils/motion-variants'
+import { motion, Variants } from 'framer-motion';
+import React, { ReactNode } from 'react';
+import { cn } from 'utils/cn';
+import { transition } from 'utils/motion-variants';
 
 type OnboardingWrapperProps = {
-  children: ReactNode
-  heading: ReactNode
-  subHeading?: ReactNode
-  entry?: 'left' | 'right'
-  className?: string
-  headerIcon?: ReactNode
-}
+  children: ReactNode;
+  heading: ReactNode;
+  subHeading?: ReactNode;
+  entry?: 'left' | 'right';
+  className?: string;
+  headerIcon?: ReactNode;
+};
 
 export const onboardingWrapperVariants: Variants = {
   fromLeft: {
@@ -33,7 +33,7 @@ export const onboardingWrapperVariants: Variants = {
     x: 0,
     transition: { ...transition, duration: 0.15 },
   },
-}
+};
 
 export const OnboardingWrapper = ({
   children,
@@ -53,9 +53,7 @@ export const OnboardingWrapper = ({
     >
       <header className='flex flex-col items-center gap-2'>
         {headerIcon && (
-          <div className='size-16 bg-secondary-200 rounded-full grid place-content-center'>
-            {headerIcon}
-          </div>
+          <div className='size-16 bg-secondary-200 rounded-full grid place-content-center'>{headerIcon}</div>
         )}
 
         <h1 className='font-bold text-[1.5rem] text-center'>{heading}</h1>
@@ -68,5 +66,5 @@ export const OnboardingWrapper = ({
 
       {children}
     </motion.div>
-  )
-}
+  );
+};

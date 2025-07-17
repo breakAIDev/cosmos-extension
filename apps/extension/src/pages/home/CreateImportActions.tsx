@@ -1,18 +1,18 @@
-import { CardDivider, ThemeName, useTheme } from '@leapwallet/leap-ui'
-import { DownloadSimple, PlusCircle, Usb } from '@phosphor-icons/react'
-import { ButtonName, EventName } from 'config/analytics'
-import { Images } from 'images'
-import mixpanel from 'mixpanel-browser'
-import { observer } from 'mobx-react-lite'
-import React, { useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { closeSidePanel } from 'utils/closeSidePanel'
-import { hasMnemonicWallet } from 'utils/hasMnemonicWallet'
-import { isSidePanel } from 'utils/isSidePanel'
-import extension from 'webextension-polyfill'
+import { CardDivider, ThemeName, useTheme } from '@leapwallet/leap-ui';
+import { DownloadSimple, PlusCircle, Usb } from '@phosphor-icons/react';
+import { ButtonName, EventName } from 'config/analytics';
+import { Images } from 'images';
+import mixpanel from 'mixpanel-browser';
+import { observer } from 'mobx-react-lite';
+import React, { useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { closeSidePanel } from 'utils/closeSidePanel';
+import { hasMnemonicWallet } from 'utils/hasMnemonicWallet';
+import { isSidePanel } from 'utils/isSidePanel';
+import extension from 'webextension-polyfill';
 
-import Text from '../../components/text'
-import { Wallet } from '../../hooks/wallet/useWallet'
+import Text from '../../components/text';
+import { Wallet } from '../../hooks/wallet/useWallet';
 
 const CreateImportActions = observer(
   ({
@@ -21,40 +21,40 @@ const CreateImportActions = observer(
     setShowImportWatchWallet,
     setIsNewWalletFormVisible,
   }: {
-    setShowImportSeedPhrase: (show: boolean) => void
-    setShowImportPrivateKey: (show: boolean) => void
-    setShowImportWatchWallet: (show: boolean) => void
-    setIsNewWalletFormVisible: (show: boolean) => void
+    setShowImportSeedPhrase: (show: boolean) => void;
+    setShowImportPrivateKey: (show: boolean) => void;
+    setShowImportWatchWallet: (show: boolean) => void;
+    setIsNewWalletFormVisible: (show: boolean) => void;
   }) => {
-    const { theme } = useTheme()
-    const navigate = useNavigate()
-    const wallets = Wallet.useWallets()
+    const { theme } = useTheme();
+    const navigate = useNavigate();
+    const wallets = Wallet.useWallets();
 
     const handleCreateNewWalletClick = useCallback(() => {
       if (hasMnemonicWallet(wallets as Wallet.Keystore)) {
-        setIsNewWalletFormVisible(true)
+        setIsNewWalletFormVisible(true);
       } else {
-        window.open(extension.runtime.getURL(`index.html#/onboarding`))
-        closeSidePanel()
+        window.open(extension.runtime.getURL(`index.html#/onboarding`));
+        closeSidePanel();
       }
-    }, [setIsNewWalletFormVisible, wallets])
+    }, [setIsNewWalletFormVisible, wallets]);
 
     const handleWatchWalletClick = useCallback(() => {
-      setShowImportWatchWallet(true)
+      setShowImportWatchWallet(true);
       mixpanel.track(EventName.ButtonClick, {
         buttonName: ButtonName.WATCH_WALLET,
-      })
-    }, [setShowImportWatchWallet])
+      });
+    }, [setShowImportWatchWallet]);
 
     const handleConnectLedgerClick = useCallback(() => {
-      const views = extension.extension.getViews({ type: 'popup' })
+      const views = extension.extension.getViews({ type: 'popup' });
       if (views.length === 0 && !isSidePanel()) {
-        navigate('/onboardingImport?walletName=ledger')
+        navigate('/onboardingImport?walletName=ledger');
       } else {
-        window.open('index.html#/onboardingImport?walletName=ledger')
-        closeSidePanel()
+        window.open('index.html#/onboardingImport?walletName=ledger');
+        closeSidePanel();
       }
-    }, [navigate])
+    }, [navigate]);
 
     return (
       <>
@@ -105,9 +105,7 @@ const CreateImportActions = observer(
               <Text size='md' className='font-bold'>
                 Watch wallet
               </Text>
-              <div className='text-xs font-medium text-green-500 bg-green-500/10 py-1 px-2.5 rounded-2xl ml-2'>
-                NEW
-              </div>
+              <div className='text-xs font-medium text-green-500 bg-green-500/10 py-1 px-2.5 rounded-2xl ml-2'>NEW</div>
             </div>
           </>
         </div>
@@ -122,8 +120,8 @@ const CreateImportActions = observer(
           </Text>
         </div>
       </>
-    )
+    );
   },
-)
+);
 
-export default CreateImportActions
+export default CreateImportActions;

@@ -1,41 +1,41 @@
-import { Faders, X } from '@phosphor-icons/react'
-import { Button } from 'components/ui/button'
-import { AGGREGATED_CHAIN_KEY } from 'config/constants'
-import { AnimatePresence } from 'framer-motion'
-import { motion } from 'framer-motion'
-import { useActiveChain } from 'hooks/settings/useActiveChain'
-import { useSelectedNetwork } from 'hooks/settings/useNetwork'
-import { SearchIcon } from 'icons/search-icon'
-import React, { useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { AggregatedSupportedChain } from 'types/utility'
-import { transition250 } from 'utils/motion-variants'
+import { Faders, X } from '@phosphor-icons/react';
+import { Button } from 'components/ui/button';
+import { AGGREGATED_CHAIN_KEY } from 'config/constants';
+import { AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+import { useActiveChain } from 'hooks/settings/useActiveChain';
+import { useSelectedNetwork } from 'hooks/settings/useNetwork';
+import { SearchIcon } from 'icons/search-icon';
+import React, { useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { AggregatedSupportedChain } from 'types/utility';
+import { transition250 } from 'utils/motion-variants';
 
 const searchButtonVariants = {
   hidden: { opacity: 0, scale: 0.95, rotate: 90 },
   visible: { opacity: 1, scale: 1, rotate: 0 },
-}
+};
 
 export const TokenSectionHeader = ({
   showSearch,
   toggleSearchTokensInput,
 }: {
-  showSearch: boolean
-  toggleSearchTokensInput: () => void
+  showSearch: boolean;
+  toggleSearchTokensInput: () => void;
 }) => {
-  const activeChain = useActiveChain() as AggregatedSupportedChain
-  const selectedNetwork = useSelectedNetwork()
+  const activeChain = useActiveChain() as AggregatedSupportedChain;
+  const selectedNetwork = useSelectedNetwork();
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleGearActionButtonClick = useCallback(() => {
     if (activeChain === 'secret' && selectedNetwork === 'mainnet') {
-      navigate('/snip20-manage-tokens?')
-      return
+      navigate('/snip20-manage-tokens?');
+      return;
     }
 
-    navigate('/manage-tokens')
-  }, [activeChain, navigate, selectedNetwork])
+    navigate('/manage-tokens');
+  }, [activeChain, navigate, selectedNetwork]);
 
   return (
     <>
@@ -89,5 +89,5 @@ export const TokenSectionHeader = ({
         </div>
       </header>
     </>
-  )
-}
+  );
+};

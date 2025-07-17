@@ -1,18 +1,18 @@
-import { SeedPhraseInput } from 'components/seed-phrase-input'
-import { Button } from 'components/ui/button'
-import React, { useEffect, useState } from 'react'
-import { validateSeedPhrase } from 'utils/validateSeedPhrase'
+import { SeedPhraseInput } from 'components/seed-phrase-input';
+import { Button } from 'components/ui/button';
+import React, { useEffect, useState } from 'react';
+import { validateSeedPhrase } from 'utils/validateSeedPhrase';
 
-import { useImportWalletContext } from '../import/import-wallet-context'
-import { OnboardingWrapper } from '../wrapper'
+import { useImportWalletContext } from '../import/import-wallet-context';
+import { OnboardingWrapper } from '../wrapper';
 
 type SeedPhraseViewProps = {
-  onProceed: () => void
-  secret: string
-  setSecret: React.Dispatch<React.SetStateAction<string>>
-  privateKeyError?: string
-  setPrivateKeyError?: React.Dispatch<React.SetStateAction<string>>
-}
+  onProceed: () => void;
+  secret: string;
+  setSecret: React.Dispatch<React.SetStateAction<string>>;
+  privateKeyError?: string;
+  setPrivateKeyError?: React.Dispatch<React.SetStateAction<string>>;
+};
 
 export const SeedPhraseView = ({
   onProceed,
@@ -21,26 +21,26 @@ export const SeedPhraseView = ({
   privateKeyError,
   setPrivateKeyError,
 }: SeedPhraseViewProps) => {
-  const [error, setError] = useState(privateKeyError ?? '')
-  const { currentStep, prevStep } = useImportWalletContext()
+  const [error, setError] = useState(privateKeyError ?? '');
+  const { currentStep, prevStep } = useImportWalletContext();
 
   useEffect(() => {
     if (privateKeyError?.length) {
-      setError(privateKeyError)
+      setError(privateKeyError);
     }
-  }, [privateKeyError])
+  }, [privateKeyError]);
 
   const onChangeHandler = (value: string) => {
-    setError('')
-    setPrivateKeyError && setPrivateKeyError('')
-    setSecret(value)
-  }
+    setError('');
+    setPrivateKeyError && setPrivateKeyError('');
+    setSecret(value);
+  };
 
   const handleImportWalletClick = () => {
     if (validateSeedPhrase({ phrase: secret, isPrivateKey: false, setError, setSecret })) {
-      onProceed()
+      onProceed();
     }
-  }
+  };
 
   return (
     <OnboardingWrapper
@@ -52,10 +52,7 @@ export const SeedPhraseView = ({
         <SeedPhraseInput onChangeHandler={onChangeHandler} isError={!!error} />
 
         {error && (
-          <span
-            className='text-xs font-medium text-destructive-100 block text-center'
-            data-testing-id='error-text-ele'
-          >
+          <span className='text-xs font-medium text-destructive-100 block text-center' data-testing-id='error-text-ele'>
             {error}
           </span>
         )}
@@ -70,5 +67,5 @@ export const SeedPhraseView = ({
         Continue
       </Button>
     </OnboardingWrapper>
-  )
-}
+  );
+};

@@ -1,10 +1,10 @@
-import React from 'react'
+import React from 'react';
 
 export type BadgeProps = {
-  text: string
-  isImgRounded?: boolean
-  title?: string
-}
+  text: string;
+  isImgRounded?: boolean;
+  title?: string;
+};
 
 export default function Badge({ text, title }: BadgeProps) {
   return (
@@ -16,5 +16,5 @@ export default function Badge({ text, title }: BadgeProps) {
         {text}
       </div>
     </div>
-  )
+  );
 }

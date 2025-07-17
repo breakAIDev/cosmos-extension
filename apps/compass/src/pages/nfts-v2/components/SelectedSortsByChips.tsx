@@ -1,35 +1,29 @@
-import { sortStringArr } from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { useChainPageInfo } from 'hooks'
-import { useChainInfos } from 'hooks/useChainInfos'
-import { Images } from 'images'
-import React from 'react'
-import { getChainName } from 'utils/getChainName'
+import { sortStringArr } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { useChainPageInfo } from 'hooks';
+import { useChainInfos } from 'hooks/useChainInfos';
+import { Images } from 'images';
+import React from 'react';
+import { getChainName } from 'utils/getChainName';
 
-import { Chip } from './index'
+import { Chip } from './index';
 
 type SelectedSortsByChipsProps = {
-  selectedSortsBy: SupportedChain[]
-  setSelectedSortsBy: React.Dispatch<React.SetStateAction<SupportedChain[]>>
-}
+  selectedSortsBy: SupportedChain[];
+  setSelectedSortsBy: React.Dispatch<React.SetStateAction<SupportedChain[]>>;
+};
 
-export function SelectedSortsByChips({
-  selectedSortsBy,
-  setSelectedSortsBy,
-}: SelectedSortsByChipsProps) {
-  const chainInfos = useChainInfos()
-  const { topChainColor } = useChainPageInfo()
+export function SelectedSortsByChips({ selectedSortsBy, setSelectedSortsBy }: SelectedSortsByChipsProps) {
+  const chainInfos = useChainInfos();
+  const { topChainColor } = useChainPageInfo();
 
   return (
     <div className='flex overflow-auto whitespace-nowrap scroll-smooth mb-4'>
       {sortStringArr(selectedSortsBy).map((chain) => {
-        const chainInfo = chainInfos[chain as SupportedChain]
+        const chainInfo = chainInfos[chain as SupportedChain];
 
         return (
-          <Chip
-            key={chain}
-            className='bg-gray-100 dark:bg-gray-950 py-[8px] px-[14px] mr-3 min-w-[125px]'
-          >
+          <Chip key={chain} className='bg-gray-100 dark:bg-gray-950 py-[8px] px-[14px] mr-3 min-w-[125px]'>
             <Chip.Image
               className='w-[15px] h-[15px] mr-2'
               src={chainInfo.chainSymbolImageUrl}
@@ -47,14 +41,10 @@ export function SelectedSortsByChips({
               className='w-[12px] h-[12px] ml-2 cursor-pointer'
               src={Images.Misc.Cross}
               alt='close'
-              onClick={() =>
-                setSelectedSortsBy((prevValue) =>
-                  prevValue.filter((prevChain) => prevChain !== chain),
-                )
-              }
+              onClick={() => setSelectedSortsBy((prevValue) => prevValue.filter((prevChain) => prevChain !== chain))}
             />
           </Chip>
-        )
+        );
       })}
 
       <Chip
@@ -70,5 +60,5 @@ export function SelectedSortsByChips({
         </Chip.Text>
       </Chip>
     </div>
-  )
+  );
 }

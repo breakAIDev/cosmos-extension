@@ -1,13 +1,13 @@
-import { sliceWord } from '@leapwallet/cosmos-wallet-hooks'
-import Text from 'components/text'
-import React from 'react'
+import { sliceWord } from '@leapwallet/cosmos-wallet-hooks';
+import Text from 'components/text';
+import React from 'react';
 
 export type CurrencyCardProps = {
-  code: string
-  name: string
-  logo: string
-  onClick: () => void
-}
+  code: string;
+  name: string;
+  logo: string;
+  onClick: () => void;
+};
 
 export default function CurrencyCard({ code, name, logo, onClick }: CurrencyCardProps) {
   return (
@@ -22,5 +22,5 @@ export default function CurrencyCard({ code, name, logo, onClick }: CurrencyCard
         </Text>
       </div>
     </div>
-  )
+  );
 }

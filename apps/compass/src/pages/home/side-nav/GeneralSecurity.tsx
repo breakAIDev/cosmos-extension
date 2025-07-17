@@ -1,28 +1,28 @@
-import { useActiveChain } from '@leapwallet/cosmos-wallet-hooks'
-import { CardDivider, Header, HeaderActionType, NavCard, ToggleCard } from '@leapwallet/leap-ui'
-import { AGGREGATED_CHAIN_KEY } from 'config/constants'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import React, { ReactElement, useMemo, useState } from 'react'
-import { hideAssetsStore } from 'stores/hide-assets-store'
-import { autoLockTimeStore, TimerLockPeriodRev } from 'stores/password-store'
-import { AggregatedSupportedChain } from 'types/utility'
+import { useActiveChain } from '@leapwallet/cosmos-wallet-hooks';
+import { CardDivider, Header, HeaderActionType, NavCard, ToggleCard } from '@leapwallet/leap-ui';
+import { AGGREGATED_CHAIN_KEY } from 'config/constants';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import React, { ReactElement, useMemo, useState } from 'react';
+import { hideAssetsStore } from 'stores/hide-assets-store';
+import { autoLockTimeStore, TimerLockPeriodRev } from 'stores/password-store';
+import { AggregatedSupportedChain } from 'types/utility';
 
-import { SideNavSection } from '.'
-import ConnectedSites from './ConnectedSites'
-import { ManageAuthZ } from './ManageAuthZ'
-import SetLockTimerDropUp from './SetLockTimer'
+import { SideNavSection } from '.';
+import ConnectedSites from './ConnectedSites';
+import { ManageAuthZ } from './ManageAuthZ';
+import SetLockTimerDropUp from './SetLockTimer';
 
 export const GENERAL_SECURITY_PAGES = {
   DEFAULT: 0,
   CONNECTED_SITES: 1,
   MANAGE_AUTHZ: 2,
-}
+};
 
 const GeneralSecurity = observer(({ goBack }: { goBack: () => void }): ReactElement => {
-  const activeChain = useActiveChain()
-  const [showLockTimeDropUp, setShowLockTimeDropUp] = useState(false)
-  const [page, setPage] = useState(GENERAL_SECURITY_PAGES.DEFAULT)
+  const activeChain = useActiveChain();
+  const [showLockTimeDropUp, setShowLockTimeDropUp] = useState(false);
+  const [page, setPage] = useState(GENERAL_SECURITY_PAGES.DEFAULT);
 
   const NavOptions = useMemo(
     () => [
@@ -31,7 +31,7 @@ const GeneralSecurity = observer(({ goBack }: { goBack: () => void }): ReactElem
         property: 'Auto-lock timer',
         value: TimerLockPeriodRev[autoLockTimeStore.time],
         onClick: () => {
-          setShowLockTimeDropUp(true)
+          setShowLockTimeDropUp(true);
         },
         disabled: false,
       },
@@ -40,7 +40,7 @@ const GeneralSecurity = observer(({ goBack }: { goBack: () => void }): ReactElem
         property: 'Connected Sites',
         value: '',
         onClick: () => {
-          setPage(GENERAL_SECURITY_PAGES.CONNECTED_SITES)
+          setPage(GENERAL_SECURITY_PAGES.CONNECTED_SITES);
         },
         disabled: (activeChain as AggregatedSupportedChain) === AGGREGATED_CHAIN_KEY,
       },
@@ -50,20 +50,20 @@ const GeneralSecurity = observer(({ goBack }: { goBack: () => void }): ReactElem
         property: 'Manage AuthZ',
         value: '',
         onClick: () => {
-          setPage(GENERAL_SECURITY_PAGES.MANAGE_AUTHZ)
+          setPage(GENERAL_SECURITY_PAGES.MANAGE_AUTHZ);
         },
         disabled: false,
       },
     ],
     [activeChain],
-  )
+  );
 
   if (page === GENERAL_SECURITY_PAGES.CONNECTED_SITES) {
-    return <ConnectedSites setPage={setPage} />
+    return <ConnectedSites setPage={setPage} />;
   }
 
   if (page === GENERAL_SECURITY_PAGES.MANAGE_AUTHZ) {
-    return <ManageAuthZ goBack={() => setPage(GENERAL_SECURITY_PAGES.DEFAULT)} />
+    return <ManageAuthZ goBack={() => setPage(GENERAL_SECURITY_PAGES.DEFAULT)} />;
   }
 
   return (
@@ -81,14 +81,14 @@ const GeneralSecurity = observer(({ goBack }: { goBack: () => void }): ReactElem
               title='Hide Assets'
               subtitle='Balances will be hidden upon loading wallet'
               onClick={() => {
-                hideAssetsStore.setHidden(!hideAssetsStore.isHidden)
+                hideAssetsStore.setHidden(!hideAssetsStore.isHidden);
               }}
             />
           </div>
 
           {NavOptions.map((navOption) => {
             if (navOption.disabled) {
-              return null
+              return null;
             }
 
             return (
@@ -103,16 +103,13 @@ const GeneralSecurity = observer(({ goBack }: { goBack: () => void }): ReactElem
                   />
                 </div>
               </React.Fragment>
-            )
+            );
           })}
         </SideNavSection>
       </div>
-      <SetLockTimerDropUp
-        isVisible={showLockTimeDropUp}
-        onCloseHandler={() => setShowLockTimeDropUp(false)}
-      />
+      <SetLockTimerDropUp isVisible={showLockTimeDropUp} onCloseHandler={() => setShowLockTimeDropUp(false)} />
     </div>
-  )
-})
+  );
+});
 
-export default GeneralSecurity
+export default GeneralSecurity;

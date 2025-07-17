@@ -1,42 +1,40 @@
-import { useActiveWallet } from '@leapwallet/cosmos-wallet-hooks'
-import { useTabIndicatorPosition } from 'hooks/utility/useTabIndicatorPosition'
-import Lottie from 'lottie-react'
-import React, { memo, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { cn } from 'utils/cn'
+import { useActiveWallet } from '@leapwallet/cosmos-wallet-hooks';
+import { useTabIndicatorPosition } from 'hooks/utility/useTabIndicatorPosition';
+import Lottie from 'lottie-react';
+import React, { memo, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { cn } from 'utils/cn';
 
-import { allBottomNavItems, bottomNavItemsForWatchWallet, BottomNavLabel } from './bottom-nav-items'
+import { allBottomNavItems, bottomNavItemsForWatchWallet, BottomNavLabel } from './bottom-nav-items';
 
 type BottomNavProps = {
-  label: BottomNavLabel
-  disableLottie?: boolean
-}
+  label: BottomNavLabel;
+  disableLottie?: boolean;
+};
 
 const indicatorDefaultScale = {
   transform: 'translateX(12px) scaleX(0.14)',
-}
+};
 
 const BottomNav = ({ label, disableLottie }: BottomNavProps) => {
-  const activeWallet = useActiveWallet()
+  const activeWallet = useActiveWallet();
 
-  const bottomNavItems = activeWallet?.watchWallet
-    ? bottomNavItemsForWatchWallet
-    : allBottomNavItems
+  const bottomNavItems = activeWallet?.watchWallet ? bottomNavItemsForWatchWallet : allBottomNavItems;
 
   const { containerRef, indicatorRef, childRefs } = useTabIndicatorPosition({
     navItems: bottomNavItems,
     activeLabel: label,
     widthScale: 0.7,
-  })
+  });
 
-  const [showLottie, setShowLottie] = useState(false)
+  const [showLottie, setShowLottie] = useState(false);
 
   useEffect(() => {
     setTimeout(() => {
       // to hide initial lottie animation on page load
-      setShowLottie(true)
-    }, 300)
-  }, [])
+      setShowLottie(true);
+    }, 300);
+  }, []);
 
   return (
     <div
@@ -53,9 +51,7 @@ const BottomNav = ({ label, disableLottie }: BottomNavProps) => {
             to={`${path}?${params || ''}`}
             className={cn(
               'flex flex-col gap-1 py-3 flex-1 justify-between items-center cursor-pointer relative disabled:cursor-not-allowed transition-colors duration-75 group',
-              label === l
-                ? 'text-accent-blue-200'
-                : 'text-muted-foreground hover:text-secondary-800 group',
+              label === l ? 'text-accent-blue-200' : 'text-muted-foreground hover:text-secondary-800 group',
             )}
           >
             <LottieWrapper
@@ -68,7 +64,7 @@ const BottomNav = ({ label, disableLottie }: BottomNavProps) => {
 
             <span className='text-[10px] leading-3 font-bold'>{l}</span>
           </Link>
-        )
+        );
       })}
 
       <div
@@ -77,11 +73,11 @@ const BottomNav = ({ label, disableLottie }: BottomNavProps) => {
         className='absolute top-0 origin-left scale-0 translate-x-3 transition-transform duration-200 w-full h-1 bg-accent-blue-200 rounded-[50vmin/10vmin]'
       />
     </div>
-  )
-}
+  );
+};
 
-BottomNav.displayName = 'BottomNav'
-export default memo(BottomNav)
+BottomNav.displayName = 'BottomNav';
+export default memo(BottomNav);
 
 const LottieWrapper = ({
   showLottie,
@@ -90,11 +86,11 @@ const LottieWrapper = ({
   active,
   lottie,
 }: {
-  showLottie: boolean
-  disableLottie?: boolean
-  lottie: { on: unknown; off: unknown }
-  active: boolean
-  Icon: (props: { className?: string }) => JSX.Element
+  showLottie: boolean;
+  disableLottie?: boolean;
+  lottie: { on: unknown; off: unknown };
+  active: boolean;
+  Icon: (props: { className?: string }) => JSX.Element;
 }) => {
   return (
     <>
@@ -108,5 +104,5 @@ const LottieWrapper = ({
         />
       )}
     </>
-  )
-}
+  );
+};

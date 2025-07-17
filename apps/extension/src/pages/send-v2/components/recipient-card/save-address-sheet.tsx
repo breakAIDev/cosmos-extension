@@ -1,39 +1,39 @@
-import { SelectedAddress, useAddressPrefixes, useGetChains } from '@leapwallet/cosmos-wallet-hooks'
-import { getBlockChainFromAddress, SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { Avatar, Buttons, Input } from '@leapwallet/leap-ui'
-import { CaretLeft, CaretRight } from '@phosphor-icons/react'
-import BottomModal from 'components/bottom-modal'
-import { CustomCheckbox } from 'components/custom-checkbox'
-import { LoaderAnimation } from 'components/loader/Loader'
-import Text from 'components/text'
-import { useActiveChain } from 'hooks/settings/useActiveChain'
-import { useContacts } from 'hooks/useContacts'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import React, { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react'
-import { Colors } from 'theme/colors'
-import { AddressBook } from 'utils/addressbook'
-import { sliceAddress } from 'utils/strings'
+import { SelectedAddress, useAddressPrefixes, useGetChains } from '@leapwallet/cosmos-wallet-hooks';
+import { getBlockChainFromAddress, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { Avatar, Buttons, Input } from '@leapwallet/leap-ui';
+import { CaretLeft, CaretRight } from '@phosphor-icons/react';
+import BottomModal from 'components/bottom-modal';
+import { CustomCheckbox } from 'components/custom-checkbox';
+import { LoaderAnimation } from 'components/loader/Loader';
+import Text from 'components/text';
+import { useActiveChain } from 'hooks/settings/useActiveChain';
+import { useContacts } from 'hooks/useContacts';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import React, { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { Colors } from 'theme/colors';
+import { AddressBook } from 'utils/addressbook';
+import { sliceAddress } from 'utils/strings';
 
-import { SendContextType, useSendContext } from '../../context'
+import { SendContextType, useSendContext } from '../../context';
 
 type SaveAddressSheetProps = {
-  title?: string
-  isOpen: boolean
-  address: string
-  ethAddress?: string
-  sendActiveChain?: SupportedChain
-  onClose: () => void
+  title?: string;
+  isOpen: boolean;
+  address: string;
+  ethAddress?: string;
+  sendActiveChain?: SupportedChain;
+  onClose: () => void;
   // eslint-disable-next-line no-unused-vars
-  onSave?: (s: SelectedAddress) => void
-}
+  onSave?: (s: SelectedAddress) => void;
+};
 
 const subtract = (a: number) => {
-  return ((a - 1) % 20) + (a >= 1 ? 0 : 20)
-}
+  return ((a - 1) % 20) + (a >= 1 ? 0 : 20);
+};
 
 const add = (a: number) => {
-  return (a + 1) % 20
-}
+  return (a + 1) % 20;
+};
 
 export default function SaveAddressSheet({
   title = 'Save Contact',
@@ -44,63 +44,63 @@ export default function SaveAddressSheet({
   onSave,
   sendActiveChain,
 }: SaveAddressSheetProps) {
-  const [memo, setMemo] = useState<string>('')
-  const [name, setName] = useState<string>('')
-  const [emoji, setEmoji] = useState<number>(1)
-  const [saveAsCEX, setSaveAsCEX] = useState<boolean>(false)
-  const [error, setError] = useState('')
+  const [memo, setMemo] = useState<string>('');
+  const [name, setName] = useState<string>('');
+  const [emoji, setEmoji] = useState<number>(1);
+  const [saveAsCEX, setSaveAsCEX] = useState<boolean>(false);
+  const [error, setError] = useState('');
 
-  const [isSaving, setIsSaving] = useState<boolean>(false)
-  const { setMemo: setNewMemo } = useSendContext() as SendContextType
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const { setMemo: setNewMemo } = useSendContext() as SendContextType;
 
-  const existingContact = AddressBook.useGetContact(address)
-  const { contacts: savedContacts, loading: savedContactsLoading } = useContacts()
-  const addressPrefixes = useAddressPrefixes()
-  const defaultTokenLogo = useDefaultTokenLogo()
-  const enterNameRef = useRef<HTMLInputElement | null>(null)
+  const existingContact = AddressBook.useGetContact(address);
+  const { contacts: savedContacts, loading: savedContactsLoading } = useContacts();
+  const addressPrefixes = useAddressPrefixes();
+  const defaultTokenLogo = useDefaultTokenLogo();
+  const enterNameRef = useRef<HTMLInputElement | null>(null);
 
-  const chains = useGetChains()
-  const _activeChain = useActiveChain()
+  const chains = useGetChains();
+  const _activeChain = useActiveChain();
 
   const activeChain = useMemo(() => {
-    return sendActiveChain ?? _activeChain
-  }, [sendActiveChain, _activeChain])
+    return sendActiveChain ?? _activeChain;
+  }, [sendActiveChain, _activeChain]);
 
   const chain = useMemo(() => {
     try {
       if (chains[activeChain]?.evmOnlyChain && address.toLowerCase().startsWith('0x')) {
-        return activeChain
+        return activeChain;
       }
 
-      const prefix = getBlockChainFromAddress(address)
-      const _chain = addressPrefixes[prefix ?? '']
+      const prefix = getBlockChainFromAddress(address);
+      const _chain = addressPrefixes[prefix ?? ''];
       if (_chain === 'cosmoshub') {
-        return 'cosmos'
+        return 'cosmos';
       }
-      return _chain as SupportedChain
+      return _chain as SupportedChain;
     } catch (e) {
-      return 'cosmos'
+      return 'cosmos';
     }
-  }, [activeChain, address, addressPrefixes, chains])
+  }, [activeChain, address, addressPrefixes, chains]);
 
   useEffect(() => {
     if (existingContact) {
-      setName(existingContact.name)
-      setEmoji(existingContact.emoji)
-      setMemo(existingContact.memo ?? '')
-      setSaveAsCEX(existingContact?.saveAsCEX ?? false)
+      setName(existingContact.name);
+      setEmoji(existingContact.emoji);
+      setMemo(existingContact.memo ?? '');
+      setSaveAsCEX(existingContact?.saveAsCEX ?? false);
     }
-  }, [existingContact])
+  }, [existingContact]);
 
   useEffect(() => {
     if (isOpen && enterNameRef.current) {
-      enterNameRef.current.focus()
+      enterNameRef.current.focus();
     }
-  }, [isOpen])
+  }, [isOpen]);
 
   const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
-    error && setError('')
-    const value = event.target.value
+    error && setError('');
+    const value = event.target.value;
 
     if (value.length < 24) {
       if (
@@ -111,16 +111,16 @@ export default function SaveAddressSheet({
             sCAddress !== address && name.trim().toLowerCase() === value.trim().toLowerCase(),
         )
       ) {
-        setError('Contact with same name already exists')
+        setError('Contact with same name already exists');
       }
 
-      setName(value)
+      setName(value);
     }
-  }
+  };
 
   const handleSubmit = async () => {
     if (name && !isSaving) {
-      setIsSaving(true)
+      setIsSaving(true);
       await AddressBook.save({
         address: address,
         blockchain: chain,
@@ -129,9 +129,9 @@ export default function SaveAddressSheet({
         memo: memo,
         ethAddress,
         saveAsCEX: saveAsCEX,
-      })
+      });
 
-      setNewMemo(memo)
+      setNewMemo(memo);
       onSave?.({
         ethAddress,
         address: address,
@@ -141,11 +141,11 @@ export default function SaveAddressSheet({
         avatarIcon: '',
         chainName: chains[chain]?.chainName,
         selectionType: 'saved',
-      })
-      onClose()
-      setIsSaving(false)
+      });
+      onClose();
+      setIsSaving(false);
     }
-  }
+  };
 
   return (
     <BottomModal
@@ -160,8 +160,8 @@ export default function SaveAddressSheet({
       <form
         className='flex flex-col items-center w-full gap-y-4'
         onSubmit={(event) => {
-          event.preventDefault()
-          handleSubmit()
+          event.preventDefault();
+          handleSubmit();
         }}
       >
         <div className='flex flex-col gap-y-4 w-full bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 justify-center items-center'>
@@ -172,11 +172,7 @@ export default function SaveAddressSheet({
             >
               <CaretLeft size={32} className='text-black-100 dark:text-white-100' />
             </div>
-            <Avatar
-              size='lg'
-              chainIcon={chains[chain]?.chainSymbolImageUrl ?? defaultTokenLogo}
-              emoji={emoji ?? 0}
-            />
+            <Avatar size='lg' chainIcon={chains[chain]?.chainSymbolImageUrl ?? defaultTokenLogo} emoji={emoji ?? 0} />
             <div
               className='p-1 bg-gray-100 dark:bg-gray-850 rounded-full cursor-pointer'
               onClick={() => setEmoji(add(emoji))}
@@ -221,10 +217,7 @@ export default function SaveAddressSheet({
             </div>
 
             <div className='flex gap-3 p-4 rounded-2xl bg-gray-50 dark:bg-gray-900 w-full'>
-              <CustomCheckbox
-                checked={saveAsCEX}
-                onClick={() => setSaveAsCEX((prevValue) => !prevValue)}
-              />
+              <CustomCheckbox checked={saveAsCEX} onClick={() => setSaveAsCEX((prevValue) => !prevValue)} />
               <p className='text-sm font-medium text-gray-800 dark:text-gray-200'>
                 Save as Centralized Exchange Address
               </p>
@@ -248,5 +241,5 @@ export default function SaveAddressSheet({
         )}
       </form>
     </BottomModal>
-  )
+  );
 }

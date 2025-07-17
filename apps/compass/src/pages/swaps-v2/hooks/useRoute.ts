@@ -1,5 +1,5 @@
-import { WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks'
-import { isAptosChain, pubKeyToEvmAddressToShow } from '@leapwallet/cosmos-wallet-sdk'
+import { WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks';
+import { isAptosChain, pubKeyToEvmAddressToShow } from '@leapwallet/cosmos-wallet-sdk';
 import {
   BRIDGES,
   getDecimalPower10,
@@ -9,28 +9,23 @@ import {
   LifiRouteResponse,
   RouteResponse,
   SwapVenue,
-} from '@leapwallet/elements-core'
-import {
-  RouteAggregator,
-  RouteError,
-  SkipSupportedChainData,
-  useRouteV2,
-} from '@leapwallet/elements-hooks'
-import BigNumber from 'bignumber.js'
-import useActiveWallet from 'hooks/settings/useActiveWallet'
-import { useMemo } from 'react'
-import { compassSeiEvmConfigStore } from 'stores/balance-store'
-import useSWR, { SWRConfiguration, unstable_serialize, useSWRConfig } from 'swr'
-import { isCompassWallet } from 'utils/isCompassWallet'
+} from '@leapwallet/elements-core';
+import { RouteAggregator, RouteError, SkipSupportedChainData, useRouteV2 } from '@leapwallet/elements-hooks';
+import BigNumber from 'bignumber.js';
+import useActiveWallet from 'hooks/settings/useActiveWallet';
+import { useMemo } from 'react';
+import { compassSeiEvmConfigStore } from 'stores/balance-store';
+import useSWR, { SWRConfiguration, unstable_serialize, useSWRConfig } from 'swr';
+import { isCompassWallet } from 'utils/isCompassWallet';
 
-import { MergedAsset } from './useAssets'
-import { useProviderFeatureFlags } from './useProviderFeatureFlags'
+import { MergedAsset } from './useAssets';
+import { useProviderFeatureFlags } from './useProviderFeatureFlags';
 
 function onErrorRetry(err: unknown) {
   if (err instanceof RouteError) {
-    return false
+    return false;
   }
-  return true
+  return true;
 }
 
 /**
@@ -38,17 +33,17 @@ function onErrorRetry(err: unknown) {
  */
 
 export type LifiRouteOverallResponse = {
-  aggregator: RouteAggregator.LIFI
-  response: LifiRouteResponse
-  sourceAssetChain: SkipSupportedChainData
-  sourceAsset: MergedAsset
-  transactionCount: number
-  operations: IncludedStep[]
-  amountIn: string
-  amountOut: string
-  destinationAssetChain: SkipSupportedChainData
-  destinationAsset: MergedAsset
-}
+  aggregator: RouteAggregator.LIFI;
+  response: LifiRouteResponse;
+  sourceAssetChain: SkipSupportedChainData;
+  sourceAsset: MergedAsset;
+  transactionCount: number;
+  operations: IncludedStep[];
+  amountIn: string;
+  amountOut: string;
+  destinationAssetChain: SkipSupportedChainData;
+  destinationAsset: MergedAsset;
+};
 
 async function getLifiRoute({
   amountIn,
@@ -67,67 +62,57 @@ async function getLifiRoute({
   slippage,
   shouldCallLifi = true,
 }: {
-  amountIn: string
-  sourceAsset?: MergedAsset
-  sourceAssetChain?: SkipSupportedChainData
-  destinationAsset?: MergedAsset
-  destinationAssetChain?: SkipSupportedChainData
-  enabled?: boolean
-  smartRelay: boolean
-  isDirectTransfer?: boolean
-  basesPointFee?: string
-  sourceChainAddress?: string
-  shouldCallLifi?: boolean
-  integrator?: string
-  feePercentage?: number
-  slippage?: number
-  maxPriceImpact?: number
+  amountIn: string;
+  sourceAsset?: MergedAsset;
+  sourceAssetChain?: SkipSupportedChainData;
+  destinationAsset?: MergedAsset;
+  destinationAssetChain?: SkipSupportedChainData;
+  enabled?: boolean;
+  smartRelay: boolean;
+  isDirectTransfer?: boolean;
+  basesPointFee?: string;
+  sourceChainAddress?: string;
+  shouldCallLifi?: boolean;
+  integrator?: string;
+  feePercentage?: number;
+  slippage?: number;
+  maxPriceImpact?: number;
 }) {
   if (!shouldCallLifi) {
-    return
+    return;
   }
 
-  if (
-    !amountIn ||
-    !sourceAsset ||
-    !sourceAssetChain ||
-    !destinationAsset ||
-    !destinationAssetChain ||
-    !enabled
-  ) {
-    return
+  if (!amountIn || !sourceAsset || !sourceAssetChain || !destinationAsset || !destinationAssetChain || !enabled) {
+    return;
     // throw new RouteError('Missing parameters to fetch swap route')
   }
 
   // Input validation & data preparation pipeline:
   if (!isDirectTransfer && sourceAsset.evmTokenContract === destinationAsset.evmTokenContract) {
-    throw new RouteError('Source and destination token cannot be same')
+    throw new RouteError('Source and destination token cannot be same');
   }
 
-  const amountInBN = new BigNumber(amountIn)
+  const amountInBN = new BigNumber(amountIn);
 
   if (amountInBN.isNaN() || amountInBN.isZero() || amountInBN.isNegative()) {
-    throw new RouteError('Please enter a valid amount')
+    throw new RouteError('Please enter a valid amount');
   }
 
   if (!sourceAsset?.decimals || !destinationAsset?.decimals) {
-    throw new RouteError('Asset metadata unavailable')
+    throw new RouteError('Asset metadata unavailable');
   }
 
   const formattedAmountIn = amountInBN
     .multipliedBy(getDecimalPower10(sourceAsset.evmDecimals ?? sourceAsset.decimals))
-    .toFixed(0, BigNumber.ROUND_FLOOR)
+    .toFixed(0, BigNumber.ROUND_FLOOR);
 
   // LI.FI API route request payload preparation:
   const lifiRouteData: LifiRouteRequest = {
     source_wallet_address: sourceChainAddress ?? undefined,
-    source_asset_denom:
-      sourceAsset.evmTokenContract ?? sourceAsset.tokenContract ?? sourceAsset.originDenom,
+    source_asset_denom: sourceAsset.evmTokenContract ?? sourceAsset.tokenContract ?? sourceAsset.originDenom,
     source_asset_chain_id: sourceAssetChain.chainId.toString(),
     dest_asset_denom:
-      destinationAsset.evmTokenContract ??
-      destinationAsset.tokenContract ??
-      destinationAsset.originDenom,
+      destinationAsset.evmTokenContract ?? destinationAsset.tokenContract ?? destinationAsset.originDenom,
     dest_asset_chain_id: destinationAssetChain.chainId.toString(),
     amount_in: formattedAmountIn,
     cumulative_affiliate_fee_bps: basesPointFee ?? '0',
@@ -139,17 +124,17 @@ async function getLifiRoute({
     max_price_impact: maxPriceImpact,
     slippage: slippage,
     fee_percentage: feePercentage,
-  }
+  };
 
   const lifiResponse:
     | {
-        success: false
-        error: string
+        success: false;
+        error: string;
       }
     | {
-        success: true
-        route: LifiRouteResponse
-      } = await LifiAPI.getRoute(lifiRouteData)
+        success: true;
+        route: LifiRouteResponse;
+      } = await LifiAPI.getRoute(lifiRouteData);
 
   if (lifiResponse.success) {
     const routeResponse: LifiRouteOverallResponse = {
@@ -167,10 +152,10 @@ async function getLifiRoute({
         ),
       ),
       response: lifiResponse.route,
-    }
-    return routeResponse
+    };
+    return routeResponse;
   } else {
-    throw new RouteError(lifiResponse.error)
+    throw new RouteError(lifiResponse.error);
   }
 }
 
@@ -194,25 +179,25 @@ function useLifiRoute(
     maxPriceImpact,
     slippage,
   }: {
-    enabled: boolean
-    smartRelay: boolean
-    amountIn: string
-    sourceAsset?: MergedAsset
-    sourceAssetChain?: SkipSupportedChainData
-    destinationAsset?: MergedAsset
-    destinationAssetChain?: SkipSupportedChainData
-    isDirectTransfer?: boolean
-    sourceChainAddress?: string
-    integrator?: string
-    feePercentage?: number
-    maxPriceImpact?: number
-    slippage?: number
+    enabled: boolean;
+    smartRelay: boolean;
+    amountIn: string;
+    sourceAsset?: MergedAsset;
+    sourceAssetChain?: SkipSupportedChainData;
+    destinationAsset?: MergedAsset;
+    destinationAssetChain?: SkipSupportedChainData;
+    isDirectTransfer?: boolean;
+    sourceChainAddress?: string;
+    integrator?: string;
+    feePercentage?: number;
+    maxPriceImpact?: number;
+    slippage?: number;
   },
   config?: SWRConfiguration,
 ) {
-  const { mutate } = useSWRConfig()
+  const { mutate } = useSWRConfig();
 
-  const shouldCallLifi = !!isCompassWallet() && enabled
+  const shouldCallLifi = !!isCompassWallet() && enabled;
 
   const key = enabled
     ? unstable_serialize([
@@ -227,7 +212,7 @@ function useLifiRoute(
         integrator ? `${integrator}-lifi-integrator` : 'no-lifi-integrator',
         feePercentage ? `${feePercentage}-lifi-fee-percentage` : 'no-lifi-fee-percentage',
       ])
-    : null
+    : null;
 
   const {
     data: routeResponse,
@@ -260,11 +245,11 @@ function useLifiRoute(
       : {
           onErrorRetry,
         },
-  )
+  );
 
   const amountOut = useMemo(() => {
     if (!routeResponse || !destinationAsset) {
-      return '-'
+      return '-';
     }
 
     if (routeResponse?.response?.toAmount) {
@@ -272,11 +257,11 @@ function useLifiRoute(
         new BigNumber(routeResponse.response.toAmount).dividedBy(
           getDecimalPower10(destinationAsset?.evmDecimals ?? destinationAsset?.decimals ?? 6),
         ),
-      )
+      );
     }
 
-    return amountIn
-  }, [amountIn, destinationAsset, routeResponse])
+    return amountIn;
+  }, [amountIn, destinationAsset, routeResponse]);
 
   return useMemo(() => {
     return {
@@ -286,22 +271,22 @@ function useLifiRoute(
       isLoadingRoute,
       routeKey: key,
       refresh: () => mutate(key),
-    } as const
-  }, [amountOut, isLoadingRoute, key, mutate, routeError, routeResponse])
+    } as const;
+  }, [amountOut, isLoadingRoute, key, mutate, routeError, routeResponse]);
 }
 
 export type SkipRouteResponse = {
-  aggregator: RouteAggregator.SKIP
-  response: RouteResponse
-  sourceAssetChain: SkipSupportedChainData
-  sourceAsset: MergedAsset
-  destinationAssetChain: SkipSupportedChainData
-  destinationAsset: MergedAsset
-  transactionCount: number
-  operations: any[]
-  amountIn: string
-  amountOut: string
-}
+  aggregator: RouteAggregator.SKIP;
+  response: RouteResponse;
+  sourceAssetChain: SkipSupportedChainData;
+  sourceAsset: MergedAsset;
+  destinationAssetChain: SkipSupportedChainData;
+  destinationAsset: MergedAsset;
+  transactionCount: number;
+  operations: any[];
+  amountIn: string;
+  amountOut: string;
+};
 
 function useSkipRoute(
   {
@@ -322,22 +307,22 @@ function useSkipRoute(
     leapFeeAddresses,
     leapFeeBps,
   }: {
-    enabled: boolean
-    smartRelay: boolean
-    amountIn: string
-    sourceAsset?: MergedAsset
-    sourceAssetChain?: SkipSupportedChainData
-    destinationAsset?: MergedAsset
-    destinationAssetChain?: SkipSupportedChainData
-    allowedBridges?: BRIDGES[]
-    swapVenues?: SwapVenue[]
-    enableSmartSwap?: boolean
-    enableEvmSwap?: boolean
-    enableGoFast?: boolean
-    isDirectTransfer?: boolean
-    isSwapFeeEnabled?: boolean
-    leapFeeAddresses?: Record<string, string>
-    leapFeeBps: string
+    enabled: boolean;
+    smartRelay: boolean;
+    amountIn: string;
+    sourceAsset?: MergedAsset;
+    sourceAssetChain?: SkipSupportedChainData;
+    destinationAsset?: MergedAsset;
+    destinationAssetChain?: SkipSupportedChainData;
+    allowedBridges?: BRIDGES[];
+    swapVenues?: SwapVenue[];
+    enableSmartSwap?: boolean;
+    enableEvmSwap?: boolean;
+    enableGoFast?: boolean;
+    isDirectTransfer?: boolean;
+    isSwapFeeEnabled?: boolean;
+    leapFeeAddresses?: Record<string, string>;
+    leapFeeBps: string;
   },
   config?: SWRConfiguration,
 ) {
@@ -368,7 +353,7 @@ function useSkipRoute(
       enableGoFast,
     },
     config,
-  )
+  );
 
   const {
     amountOut: amountOutWithoutFees,
@@ -394,7 +379,7 @@ function useSkipRoute(
       basisPointsFees: undefined,
     },
     config,
-  )
+  );
 
   const {
     amountOut,
@@ -404,17 +389,15 @@ function useSkipRoute(
     refresh,
     appliedLeapFeeBps,
   }: {
-    amountOut: string
-    routeResponse: undefined | SkipRouteResponse
-    routeError: RouteError
-    isLoadingRoute: boolean
-    refresh: () => Promise<void>
-    appliedLeapFeeBps: string
+    amountOut: string;
+    routeResponse: undefined | SkipRouteResponse;
+    routeError: RouteError;
+    isLoadingRoute: boolean;
+    refresh: () => Promise<void>;
+    appliedLeapFeeBps: string;
   } = useMemo(() => {
     const finalResponse = {
-      isLoadingRoute: isSwapFeeEnabled
-        ? loadingRoutesWithoutFees || loadingRoutesWithFees
-        : loadingRoutesWithoutFees,
+      isLoadingRoute: isSwapFeeEnabled ? loadingRoutesWithoutFees || loadingRoutesWithFees : loadingRoutesWithoutFees,
       appliedLeapFeeBps: '0',
       amountOut: amountOutWithoutFees,
       routeResponse: routeResponseWithoutFees
@@ -422,23 +405,21 @@ function useSkipRoute(
         : undefined,
       routeError: routeErrorWithoutFees,
       refresh: refreshRouteWithoutFees,
-    }
+    };
     if (!isSwapFeeEnabled) {
       return {
         ...finalResponse,
         isLoadingRoute: loadingRoutesWithoutFees,
-      }
+      };
     }
     if (routeResponseWithFees) {
       if ('does_swap' in routeResponseWithFees.response) {
-        let lastSwapVenue = routeResponseWithFees.response.swap_venue
+        let lastSwapVenue = routeResponseWithFees.response.swap_venue;
         if (!lastSwapVenue) {
           lastSwapVenue =
-            routeResponseWithFees.response.swap_venues?.[
-              routeResponseWithFees.response.swap_venues.length - 1
-            ]
+            routeResponseWithFees.response.swap_venues?.[routeResponseWithFees.response.swap_venues.length - 1];
         }
-        const swapChainId = lastSwapVenue?.chain_id
+        const swapChainId = lastSwapVenue?.chain_id;
         if (leapFeeAddresses && swapChainId && leapFeeAddresses[swapChainId]) {
           return {
             ...finalResponse,
@@ -449,12 +430,12 @@ function useSkipRoute(
             routeError: routeErrorWithFees,
             appliedLeapFeeBps: leapFeeBps,
             refresh: refreshRouteWithFees,
-          }
+          };
         } else {
-          return finalResponse
+          return finalResponse;
         }
       } else {
-        return finalResponse
+        return finalResponse;
       }
     }
     if (!!routeErrorWithFees || !!routeErrorWithoutFees) {
@@ -464,9 +445,9 @@ function useSkipRoute(
         routeResponse: undefined,
         routeError: routeErrorWithFees || routeErrorWithoutFees,
         refresh: () => {
-          return Promise.resolve()
+          return Promise.resolve();
         },
-      }
+      };
     }
     return {
       ...finalResponse,
@@ -474,9 +455,9 @@ function useSkipRoute(
       routeResponse: undefined,
       routeError: undefined,
       refresh: () => {
-        return Promise.resolve()
+        return Promise.resolve();
       },
-    }
+    };
   }, [
     isSwapFeeEnabled,
     loadingRoutesWithoutFees,
@@ -491,7 +472,7 @@ function useSkipRoute(
     amountOutWithFees,
     leapFeeBps,
     refreshRouteWithFees,
-  ])
+  ]);
 
   return {
     routeResponse,
@@ -500,7 +481,7 @@ function useSkipRoute(
     isLoadingRoute,
     refresh,
     appliedLeapFeeBps,
-  }
+  };
 }
 
 /**
@@ -508,16 +489,16 @@ function useSkipRoute(
  */
 
 type BasicRouteResponse = {
-  routeError: RouteError | undefined
-  amountOut: string
-  isLoadingRoute: boolean
-  refresh: () => Promise<void>
-  appliedLeapFeeBps: string
-}
+  routeError: RouteError | undefined;
+  amountOut: string;
+  isLoadingRoute: boolean;
+  refresh: () => Promise<void>;
+  appliedLeapFeeBps: string;
+};
 
 export type AggregatedRouteResponse = BasicRouteResponse & {
-  routeResponse: undefined | SkipRouteResponse | ReturnType<typeof useLifiRoute>['routeResponse']
-}
+  routeResponse: undefined | SkipRouteResponse | ReturnType<typeof useLifiRoute>['routeResponse'];
+};
 
 export const useAggregatedRoute = (
   {
@@ -540,33 +521,30 @@ export const useAggregatedRoute = (
     slippage,
     maxPriceImpact,
   }: {
-    enabled: boolean
-    smartRelay: boolean
-    amountIn: string
-    sourceAsset?: MergedAsset
-    sourceAssetChain?: SkipSupportedChainData
-    destinationAsset?: MergedAsset
-    destinationAssetChain?: SkipSupportedChainData
-    allowedBridges?: BRIDGES[]
-    swapVenues?: SwapVenue[]
-    enableSmartSwap?: boolean
-    enableEvmSwap?: boolean
-    enableGoFast?: boolean
-    isDirectTransfer?: boolean
-    isSwapFeeEnabled?: boolean
-    leapFeeAddresses?: Record<string, string>
-    leapFeeBps: string
-    maxPriceImpact?: number
-    slippage?: number
+    enabled: boolean;
+    smartRelay: boolean;
+    amountIn: string;
+    sourceAsset?: MergedAsset;
+    sourceAssetChain?: SkipSupportedChainData;
+    destinationAsset?: MergedAsset;
+    destinationAssetChain?: SkipSupportedChainData;
+    allowedBridges?: BRIDGES[];
+    swapVenues?: SwapVenue[];
+    enableSmartSwap?: boolean;
+    enableEvmSwap?: boolean;
+    enableGoFast?: boolean;
+    isDirectTransfer?: boolean;
+    isSwapFeeEnabled?: boolean;
+    leapFeeAddresses?: Record<string, string>;
+    leapFeeBps: string;
+    maxPriceImpact?: number;
+    slippage?: number;
   },
   config?: SWRConfiguration,
 ): AggregatedRouteResponse => {
-  const { isLifiEnabled, isSkipEnabled } = useProviderFeatureFlags()
+  const { isLifiEnabled, isSkipEnabled } = useProviderFeatureFlags();
   const isAptos =
-    sourceAsset &&
-    destinationAsset &&
-    isAptosChain(sourceAsset?.chainId) &&
-    isAptosChain(destinationAsset?.chainId)
+    sourceAsset && destinationAsset && isAptosChain(sourceAsset?.chainId) && isAptosChain(destinationAsset?.chainId);
 
   const {
     routeResponse: skipRouteResponse,
@@ -595,13 +573,11 @@ export const useAggregatedRoute = (
       isSwapFeeEnabled,
     },
     config,
-  )
+  );
 
-  const { activeWallet } = useActiveWallet()
+  const { activeWallet } = useActiveWallet();
   const sei0xAddress =
-    isCompassWallet() && activeWallet
-      ? pubKeyToEvmAddressToShow(activeWallet.pubKeys?.['seiTestnet2'])
-      : undefined
+    isCompassWallet() && activeWallet ? pubKeyToEvmAddressToShow(activeWallet.pubKeys?.['seiTestnet2']) : undefined;
 
   const formattedSourceChain = useMemo(() => {
     return isCompassWallet()
@@ -612,8 +588,8 @@ export const useAggregatedRoute = (
             chainId: String(compassSeiEvmConfigStore.compassSeiEvmConfig.PACIFIC_ETH_CHAIN_ID),
           } as SkipSupportedChainData)
         : undefined
-      : sourceAssetChain
-  }, [sourceAssetChain])
+      : sourceAssetChain;
+  }, [sourceAssetChain]);
 
   const formattedDestinationChain = useMemo(() => {
     return isCompassWallet()
@@ -624,14 +600,14 @@ export const useAggregatedRoute = (
             chainId: String(compassSeiEvmConfigStore.compassSeiEvmConfig.PACIFIC_ETH_CHAIN_ID),
           } as SkipSupportedChainData)
         : undefined
-      : destinationAssetChain
-  }, [destinationAssetChain])
+      : destinationAssetChain;
+  }, [destinationAssetChain]);
 
   const sourceAndDestinationBothLifiSupported = useMemo(() => {
-    const sourceTokenLifiSupported = !!sourceAsset?.evmTokenContract
-    const destinationTokenLifiSupported = !!destinationAsset?.evmTokenContract
-    return sourceTokenLifiSupported && destinationTokenLifiSupported
-  }, [sourceAsset?.evmTokenContract, destinationAsset?.evmTokenContract])
+    const sourceTokenLifiSupported = !!sourceAsset?.evmTokenContract;
+    const destinationTokenLifiSupported = !!destinationAsset?.evmTokenContract;
+    return sourceTokenLifiSupported && destinationTokenLifiSupported;
+  }, [sourceAsset?.evmTokenContract, destinationAsset?.evmTokenContract]);
 
   const isLifiRouteEnabled = useMemo(() => {
     return (
@@ -640,8 +616,8 @@ export const useAggregatedRoute = (
       !!isCompassWallet() &&
       activeWallet?.walletType !== WALLETTYPE.LEDGER &&
       isLifiEnabled
-    )
-  }, [enabled, sourceAndDestinationBothLifiSupported, activeWallet, isLifiEnabled])
+    );
+  }, [enabled, sourceAndDestinationBothLifiSupported, activeWallet, isLifiEnabled]);
 
   const {
     routeResponse: lifiRouteResponse,
@@ -666,7 +642,7 @@ export const useAggregatedRoute = (
       slippage,
     },
     config,
-  )
+  );
 
   return useMemo(() => {
     /**
@@ -684,7 +660,7 @@ export const useAggregatedRoute = (
       amountOut: skipAmountOut,
       isLoadingRoute: skipIsLoadingRoute,
       refresh: skipRefresh,
-    }
+    };
 
     if (lifiRouteResponse) {
       // lifi route is available and either skip route is not available or has lower amountOut
@@ -694,10 +670,10 @@ export const useAggregatedRoute = (
         amountOut: lifiAmountOut,
         isLoadingRoute: lifiIsLoadingRoute || skipIsLoadingRoute,
         refresh: async () => {
-          await Promise.all([lifiRefresh(), skipRefresh()])
+          await Promise.all([lifiRefresh(), skipRefresh()]);
         },
         appliedLeapFeeBps: leapFeeBps,
-      }
+      };
     }
 
     // Skip route is available and has higher amountOut and isCompassWallet consider LIFI Route Loading and Refresh
@@ -707,13 +683,13 @@ export const useAggregatedRoute = (
         isLoadingRoute: lifiIsLoadingRoute || skipIsLoadingRoute,
         routeError: lifiIsLoadingRoute ? undefined : skipRouteError,
         refresh: async () => {
-          await Promise.all([lifiRefresh(), skipRefresh()])
+          await Promise.all([lifiRefresh(), skipRefresh()]);
         },
-      }
+      };
     }
 
     // skip route is available and has higher amountOut
-    return defaultResponse
+    return defaultResponse;
   }, [
     skipAppliedLeapFeeBps,
     skipRouteResponse,
@@ -727,5 +703,5 @@ export const useAggregatedRoute = (
     lifiAmountOut,
     lifiIsLoadingRoute,
     lifiRefresh,
-  ])
-}
+  ]);
+};

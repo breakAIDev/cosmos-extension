@@ -1,11 +1,11 @@
-import classNames from 'classnames'
-import { Images } from 'images'
-import React from 'react'
+import classNames from 'classnames';
+import { Images } from 'images';
+import React from 'react';
 
 type SwapErrorProps = {
-  errorMsg: string
-  className?: string
-}
+  errorMsg: string;
+  className?: string;
+};
 
 export function SwapError({ errorMsg, className }: SwapErrorProps) {
   return (
@@ -18,5 +18,5 @@ export function SwapError({ errorMsg, className }: SwapErrorProps) {
       <img src={Images.Misc.FilledExclamationMark} />
       <span>{errorMsg}</span>
     </div>
-  )
+  );
 }

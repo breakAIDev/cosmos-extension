@@ -1,31 +1,31 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ThemeName, useTheme } from '@leapwallet/leap-ui'
-import classNames from 'classnames'
-import { LoaderAnimation } from 'components/loader/Loader'
-import BottomModal from 'components/new-bottom-modal'
-import Text from 'components/text'
-import { Button } from 'components/ui/button'
-import { Input } from 'components/ui/input'
-import React, { ChangeEvent, useEffect, useMemo, useState } from 'react'
-import { Colors } from 'theme/colors'
-import { cn } from 'utils/cn'
+import { ThemeName, useTheme } from '@leapwallet/leap-ui';
+import classNames from 'classnames';
+import { LoaderAnimation } from 'components/loader/Loader';
+import BottomModal from 'components/new-bottom-modal';
+import Text from 'components/text';
+import { Button } from 'components/ui/button';
+import { Input } from 'components/ui/input';
+import React, { ChangeEvent, useEffect, useMemo, useState } from 'react';
+import { Colors } from 'theme/colors';
+import { cn } from 'utils/cn';
 
 function removeLeadingZero(input: string) {
-  return Number(input).toString()
+  return Number(input).toString();
 }
 
 interface LedgerAdvancedModeProps {
-  isAdvanceModeEnabled: boolean
-  setIsAdvanceModeEnabled: React.Dispatch<React.SetStateAction<boolean>>
+  isAdvanceModeEnabled: boolean;
+  setIsAdvanceModeEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   getCustomLedgerAccountDetails: (
     useEvmApp: boolean,
     customDerivationPath: string,
     name: string,
     existingAddresses: string[] | undefined,
-  ) => Promise<void>
-  existingAddresses: string[] | undefined
-  setSelectedIds: (val: { [id: number]: boolean }) => void
-  selectedIds: { [id: string]: boolean }
+  ) => Promise<void>;
+  existingAddresses: string[] | undefined;
+  setSelectedIds: (val: { [id: number]: boolean }) => void;
+  selectedIds: { [id: string]: boolean };
 }
 
 export const LedgerAdvancedMode = ({
@@ -36,23 +36,23 @@ export const LedgerAdvancedMode = ({
   setSelectedIds,
   selectedIds,
 }: LedgerAdvancedModeProps) => {
-  const [walletName, setWalletName] = useState<string>('')
+  const [walletName, setWalletName] = useState<string>('');
   const [derivationInput, setDerivationInput] = useState<{
-    index1: string
-    index2: '0' | '1'
-    index3: string
+    index1: string;
+    index2: '0' | '1';
+    index3: string;
   }>({
     index1: '0',
     index2: '0',
     index3: '0',
-  })
-  const [isLoading, setIsLoading] = useState(false)
+  });
+  const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{
-    walletName?: string
-    derivationInput?: string
-    addError?: string
-  }>({})
-  const { theme } = useTheme()
+    walletName?: string;
+    derivationInput?: string;
+    addError?: string;
+  }>({});
+  const { theme } = useTheme();
   const isDisabled = useMemo(() => {
     return (
       !walletName ||
@@ -60,65 +60,64 @@ export const LedgerAdvancedMode = ({
       !!Object.values(derivationInput).some((value) => value === undefined || value === '') ||
       !!errors['derivationInput'] ||
       isLoading
-    )
-  }, [derivationInput, errors, walletName, isLoading])
+    );
+  }, [derivationInput, errors, walletName, isLoading]);
 
   const handleDerivationInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const inputName = e.target.name
-    const value = e.target.value
-    const index2Range = (input: string) => parseInt(input) === 0 || parseInt(input) === 1
-    if (inputName === 'index2' && !index2Range(value)) return
+    const inputName = e.target.name;
+    const value = e.target.value;
+    const index2Range = (input: string) => parseInt(input) === 0 || parseInt(input) === 1;
+    if (inputName === 'index2' && !index2Range(value)) return;
 
-    setDerivationInput({ ...derivationInput, [e.target.name]: removeLeadingZero(e.target.value) })
-  }
+    setDerivationInput({ ...derivationInput, [e.target.name]: removeLeadingZero(e.target.value) });
+  };
 
   const clearFields = () => {
-    setErrors({})
-    setWalletName('')
+    setErrors({});
+    setWalletName('');
 
     setDerivationInput({
       index1: '0',
       index2: '0',
       index3: '0',
-    })
-  }
+    });
+  };
 
   useEffect(() => {
     if (!isAdvanceModeEnabled) {
-      clearFields()
+      clearFields();
     }
-  }, [isAdvanceModeEnabled])
+  }, [isAdvanceModeEnabled]);
 
   useEffect(() => {
     if (Object.values(derivationInput).every((value) => !value || parseInt(value) >= 0)) {
-      setErrors((prevValue: any) => ({ ...prevValue, derivationInput: undefined }))
-      return
+      setErrors((prevValue: any) => ({ ...prevValue, derivationInput: undefined }));
+      return;
     }
     setErrors((prevValue: any) => ({
       ...prevValue,
       derivationInput: 'Kindly enter a valid derivation path',
-    }))
-  }, [derivationInput])
+    }));
+  }, [derivationInput]);
 
   const onAdd = async () => {
     try {
-      setIsLoading(true)
+      setIsLoading(true);
       if (!walletName) {
         setErrors((prevValue: any) => ({
           ...(prevValue ?? {}),
           walletName: 'Kindly enter wallet name to continue',
-        }))
-        setIsLoading(false)
-        return
+        }));
+        setIsLoading(false);
+        return;
       }
       if (parseInt(derivationInput.index1) > 100 || parseInt(derivationInput.index3) > 100) {
         setErrors((prevValue) => ({
           ...(prevValue ?? {}),
-          derivationInput:
-            'Please enter a value between 0 - 100 for Account and Address index fields',
-        }))
-        setIsLoading(false)
-        return
+          derivationInput: 'Please enter a value between 0 - 100 for Account and Address index fields',
+        }));
+        setIsLoading(false);
+        return;
       }
 
       // if (Object.values(derivationInput).includes(undefined)) {
@@ -129,30 +128,26 @@ export const LedgerAdvancedMode = ({
       //   setIsLoading(false)
       //   return
       // }
-      const input = `${derivationInput.index1}'/${derivationInput.index2}/${derivationInput.index3}`
-      await getCustomLedgerAccountDetails(false, input, walletName, existingAddresses)
+      const input = `${derivationInput.index1}'/${derivationInput.index2}/${derivationInput.index3}`;
+      await getCustomLedgerAccountDetails(false, input, walletName, existingAddresses);
 
-      const hdPath = `m/44'/118'/${input}`
-      setSelectedIds({ ...selectedIds, [hdPath]: true })
-      setIsLoading(false)
-      clearFields()
-      setIsAdvanceModeEnabled(false)
+      const hdPath = `m/44'/118'/${input}`;
+      setSelectedIds({ ...selectedIds, [hdPath]: true });
+      setIsLoading(false);
+      clearFields();
+      setIsAdvanceModeEnabled(false);
     } catch (error) {
-      setIsLoading(false)
+      setIsLoading(false);
       // eslint-disable-next-line no-console
-      console.error('ledger advanced mode error', error)
+      console.error('ledger advanced mode error', error);
       setErrors((prevValue: any) => ({
         ...(prevValue ?? {}),
         addError: (error as Error)?.message ?? 'Path does not seem to be valid',
-      }))
+      }));
     }
-  }
+  };
   return (
-    <BottomModal
-      isOpen={isAdvanceModeEnabled}
-      onClose={() => setIsAdvanceModeEnabled(false)}
-      title='Advanced mode'
-    >
+    <BottomModal isOpen={isAdvanceModeEnabled} onClose={() => setIsAdvanceModeEnabled(false)} title='Advanced mode'>
       <Text className='font-medium mb-4' size='md'>
         Wallet name
       </Text>
@@ -162,8 +157,8 @@ export const LedgerAdvancedMode = ({
         value={walletName}
         name='walletName'
         onChange={(e) => {
-          setErrors((prevValue: any) => ({ ...prevValue, walletName: undefined }))
-          setWalletName(e.target.value)
+          setErrors((prevValue: any) => ({ ...prevValue, walletName: undefined }));
+          setWalletName(e.target.value);
         }}
         className={classNames('w-full h-[58px] !text-md', {
           '!border-gray-800 mb-10': !errors?.walletName,
@@ -254,12 +249,8 @@ export const LedgerAdvancedMode = ({
         onClick={onAdd}
         disabled={isDisabled}
       >
-        {isLoading ? (
-          <LoaderAnimation color={Colors.white100} className='w-10 h-10' />
-        ) : (
-          <>Confirm and proceed</>
-        )}
+        {isLoading ? <LoaderAnimation color={Colors.white100} className='w-10 h-10' /> : <>Confirm and proceed</>}
       </Button>
     </BottomModal>
-  )
-}
+  );
+};

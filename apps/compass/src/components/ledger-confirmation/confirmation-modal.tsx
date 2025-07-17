@@ -1,13 +1,13 @@
-import BottomModal from 'components/bottom-modal'
-import React from 'react'
+import BottomModal from 'components/bottom-modal';
+import React from 'react';
 
-import RadarAnimation from '../loader/Radar'
-import Text from '../text'
+import RadarAnimation from '../loader/Radar';
+import Text from '../text';
 
 type Props = {
-  showLedgerPopup: boolean
-  onClose: () => void
-}
+  showLedgerPopup: boolean;
+  onClose: () => void;
+};
 
 export default function LedgerConfirmationModal({ showLedgerPopup, onClose }: Props) {
   return (
@@ -21,5 +21,5 @@ export default function LedgerConfirmationModal({ showLedgerPopup, onClose }: Pr
         </Text>
       </div>
     </BottomModal>
-  )
+  );
 }

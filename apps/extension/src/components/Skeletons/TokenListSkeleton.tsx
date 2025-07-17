@@ -1,5 +1,5 @@
-import React from 'react'
-import Skeleton from 'react-loading-skeleton'
+import React from 'react';
+import Skeleton from 'react-loading-skeleton';
 
 export function TokenItemSkeleton() {
   return (
@@ -10,7 +10,7 @@ export function TokenItemSkeleton() {
         <Skeleton count={1} height={14} width={77} containerClassName='block !leading-none' />
       </div>
     </div>
-  )
+  );
 }
 
 export default function TokenListSkeleton() {
@@ -22,5 +22,5 @@ export default function TokenListSkeleton() {
       <TokenItemSkeleton />
       <TokenItemSkeleton />
     </>
-  )
+  );
 }

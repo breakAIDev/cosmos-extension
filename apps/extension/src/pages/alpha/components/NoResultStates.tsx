@@ -1,8 +1,8 @@
-import React from 'react'
+import React from 'react';
 
-import EmptyBookmarks from './EmptyBookmarks'
+import EmptyBookmarks from './EmptyBookmarks';
 
-type FilterType = 'upcoming' | 'live' | 'ended' | 'search' | 'no-results'
+type FilterType = 'upcoming' | 'live' | 'ended' | 'search' | 'no-results';
 
 const filterTypeMap: Record<FilterType, { title: string; subTitle: string }> = {
   upcoming: {
@@ -25,14 +25,14 @@ const filterTypeMap: Record<FilterType, { title: string; subTitle: string }> = {
     title: 'No Results Found',
     subTitle: 'Try clearing filters',
   },
-}
+};
 
 export const NoFilterResult = ({
   filterType = 'no-results',
   className,
 }: {
-  filterType?: FilterType
-  className?: string
+  filterType?: FilterType;
+  className?: string;
 }) => {
   return (
     <EmptyBookmarks
@@ -40,5 +40,5 @@ export const NoFilterResult = ({
       title={filterTypeMap[filterType].title}
       subTitle={filterTypeMap[filterType].subTitle}
     />
-  )
-}
+  );
+};

@@ -1,26 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import {
-  AddressWarning,
-  INITIAL_ADDRESS_WARNING,
-  useAddress,
-} from '@leapwallet/cosmos-wallet-hooks'
+import { AddressWarning, INITIAL_ADDRESS_WARNING, useAddress } from '@leapwallet/cosmos-wallet-hooks';
 import {
   isAptosAddress,
   isEthAddress,
   isSolanaAddress,
   isValidAddress,
   SupportedChain,
-} from '@leapwallet/cosmos-wallet-sdk'
-import { useEffect } from 'react'
+} from '@leapwallet/cosmos-wallet-sdk';
+import { useEffect } from 'react';
 
 export type UseCheckAddressErrorParams = {
-  setAddressError: React.Dispatch<React.SetStateAction<string | undefined>>
-  setAddressWarning: React.Dispatch<React.SetStateAction<AddressWarning>>
-  recipientInputValue: string
-  showNameServiceResults: boolean
-  sendActiveChain: SupportedChain
-}
+  setAddressError: React.Dispatch<React.SetStateAction<string | undefined>>;
+  setAddressWarning: React.Dispatch<React.SetStateAction<AddressWarning>>;
+  recipientInputValue: string;
+  showNameServiceResults: boolean;
+  sendActiveChain: SupportedChain;
+};
 
 export function useCheckAddressError({
   setAddressError,
@@ -29,14 +25,14 @@ export function useCheckAddressError({
   showNameServiceResults,
   sendActiveChain,
 }: UseCheckAddressErrorParams) {
-  const currentWalletAddress = useAddress(sendActiveChain)
+  const currentWalletAddress = useAddress(sendActiveChain);
 
   useEffect(() => {
-    ;(async function () {
+    (async function () {
       if (!recipientInputValue || currentWalletAddress === recipientInputValue) {
-        setAddressWarning(INITIAL_ADDRESS_WARNING)
-        setAddressError(undefined)
-        return
+        setAddressWarning(INITIAL_ADDRESS_WARNING);
+        setAddressError(undefined);
+        return;
       } else if (
         !isValidAddress(recipientInputValue) &&
         !isEthAddress(recipientInputValue) &&
@@ -44,12 +40,12 @@ export function useCheckAddressError({
         !isSolanaAddress(recipientInputValue) &&
         !showNameServiceResults
       ) {
-        setAddressError('The entered address is invalid')
+        setAddressError('The entered address is invalid');
       } else {
-        setAddressWarning(INITIAL_ADDRESS_WARNING)
-        setAddressError(undefined)
+        setAddressWarning(INITIAL_ADDRESS_WARNING);
+        setAddressError(undefined);
       }
-    })()
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentWalletAddress, recipientInputValue, showNameServiceResults])
+  }, [currentWalletAddress, recipientInputValue, showNameServiceResults]);
 }

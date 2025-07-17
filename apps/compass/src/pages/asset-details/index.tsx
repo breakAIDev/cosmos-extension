@@ -6,8 +6,8 @@ import {
   useActiveWallet,
   useAssetDetails,
   useformatCurrency,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { NativeDenom, SupportedDenoms } from '@leapwallet/cosmos-wallet-sdk'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { NativeDenom, SupportedDenoms } from '@leapwallet/cosmos-wallet-sdk';
 import {
   CompassSeiEvmConfigStore,
   CompassSeiTokensAssociationStore,
@@ -15,39 +15,39 @@ import {
   DenomsStore,
   MarketDataStore,
   RootDenomsStore,
-} from '@leapwallet/cosmos-wallet-store'
-import { ArrowLeft } from '@phosphor-icons/react'
-import { BigNumber } from 'bignumber.js'
-import classNames from 'classnames'
-import ReadMoreText from 'components/read-more-text'
-import Text from 'components/text'
-import { useActiveChain } from 'hooks/settings/useActiveChain'
-import { useChainInfos } from 'hooks/useChainInfos'
-import useQuery from 'hooks/useQuery'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import { DiscoverHeader } from 'pages/discover/components/discover-header'
-import React, { useEffect, useMemo, useState } from 'react'
-import Skeleton from 'react-loading-skeleton'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { coingeckoIdsStore } from 'stores/balance-store'
-import { cn } from 'utils/cn'
-import { imgOnError } from 'utils/imgOnError'
-import { capitalize, formatForSubstring } from 'utils/strings'
+} from '@leapwallet/cosmos-wallet-store';
+import { ArrowLeft } from '@phosphor-icons/react';
+import { BigNumber } from 'bignumber.js';
+import classNames from 'classnames';
+import ReadMoreText from 'components/read-more-text';
+import Text from 'components/text';
+import { useActiveChain } from 'hooks/settings/useActiveChain';
+import { useChainInfos } from 'hooks/useChainInfos';
+import useQuery from 'hooks/useQuery';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import { DiscoverHeader } from 'pages/discover/components/discover-header';
+import React, { useEffect, useMemo, useState } from 'react';
+import Skeleton from 'react-loading-skeleton';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { coingeckoIdsStore } from 'stores/balance-store';
+import { cn } from 'utils/cn';
+import { imgOnError } from 'utils/imgOnError';
+import { capitalize, formatForSubstring } from 'utils/strings';
 
-import { AssetCtas } from './components/asset-ctas'
-import ChartSkeleton from './components/ChartSkeleton'
-import { TokensChart } from './components/token-chart'
+import { AssetCtas } from './components/asset-ctas';
+import ChartSkeleton from './components/ChartSkeleton';
+import { TokensChart } from './components/token-chart';
 
 type TokenDetailsProps = {
-  denomsStore: DenomsStore
-  rootDenomsStore: RootDenomsStore
-  compassTokensAssociationsStore: CompassSeiTokensAssociationStore
-  compassSeiEvmConfigStore: CompassSeiEvmConfigStore
-  marketDataStore: MarketDataStore
-  compassTokenTagsStore: CompassTokenTagsStore
-}
+  denomsStore: DenomsStore;
+  rootDenomsStore: RootDenomsStore;
+  compassTokensAssociationsStore: CompassSeiTokensAssociationStore;
+  compassSeiEvmConfigStore: CompassSeiEvmConfigStore;
+  marketDataStore: MarketDataStore;
+  compassTokenTagsStore: CompassTokenTagsStore;
+};
 
 const AssetDetails = observer(
   ({
@@ -57,39 +57,37 @@ const AssetDetails = observer(
     marketDataStore,
     compassTokenTagsStore,
   }: TokenDetailsProps) => {
-    const [assetsId, setAssetsId] = useState<string | undefined>()
-    const chainInfos = useChainInfos()
-    const _activeChain = useActiveChain()
-    const queryAssetsId = useQuery().get('assetName') ?? undefined
-    const pageSource = useQuery().get('pageSource') ?? undefined
-    const navigate = useNavigate()
-    const activeWallet = useActiveWallet()
-    const location = useLocation()
+    const [assetsId, setAssetsId] = useState<string | undefined>();
+    const chainInfos = useChainInfos();
+    const _activeChain = useActiveChain();
+    const queryAssetsId = useQuery().get('assetName') ?? undefined;
+    const pageSource = useQuery().get('pageSource') ?? undefined;
+    const navigate = useNavigate();
+    const activeWallet = useActiveWallet();
+    const location = useLocation();
     const portfolio = useMemo(() => {
-      const navigateAssetDetailsState = JSON.parse(
-        sessionStorage.getItem('navigate-assetDetails-state') ?? 'null',
-      )
+      const navigateAssetDetailsState = JSON.parse(sessionStorage.getItem('navigate-assetDetails-state') ?? 'null');
 
-      return (location?.state ?? navigateAssetDetailsState) as Token
-    }, [location?.state])
+      return (location?.state ?? navigateAssetDetailsState) as Token;
+    }, [location?.state]);
 
     const activeChain = useMemo(() => {
-      return portfolio?.tokenBalanceOnChain ?? _activeChain
-    }, [_activeChain, portfolio?.tokenBalanceOnChain])
+      return portfolio?.tokenBalanceOnChain ?? _activeChain;
+    }, [_activeChain, portfolio?.tokenBalanceOnChain]);
 
     useEffect(() => {
       if (queryAssetsId) {
-        setAssetsId(queryAssetsId)
+        setAssetsId(queryAssetsId);
       }
-    }, [queryAssetsId])
+    }, [queryAssetsId]);
 
-    const [formatCurrency] = useformatCurrency()
+    const [formatCurrency] = useformatCurrency();
 
-    const seiEvmRpcUrl = compassSeiEvmConfigStore.compassSeiEvmConfig.PACIFIC_EVM_RPC_URL
-    const seiEvmChainId = String(compassSeiEvmConfigStore.compassSeiEvmConfig.PACIFIC_ETH_CHAIN_ID)
-    const seiCosmosChainId = compassSeiEvmConfigStore.compassSeiEvmConfig.PACIFIC_COSMOS_CHAIN_ID
-    const compassEvmToSeiMapping = compassTokensAssociationsStore.compassEvmToSeiMapping
-    const compassSeiToEvmMapping = compassTokensAssociationsStore.compassSeiToEvmMapping
+    const seiEvmRpcUrl = compassSeiEvmConfigStore.compassSeiEvmConfig.PACIFIC_EVM_RPC_URL;
+    const seiEvmChainId = String(compassSeiEvmConfigStore.compassSeiEvmConfig.PACIFIC_ETH_CHAIN_ID);
+    const seiCosmosChainId = compassSeiEvmConfigStore.compassSeiEvmConfig.PACIFIC_COSMOS_CHAIN_ID;
+    const compassEvmToSeiMapping = compassTokensAssociationsStore.compassEvmToSeiMapping;
+    const compassSeiToEvmMapping = compassTokensAssociationsStore.compassSeiToEvmMapping;
 
     const compassParams: CompassDenomInfoParams = useMemo(() => {
       return {
@@ -99,14 +97,8 @@ const AssetDetails = observer(
         seiEvmRpcUrl,
         seiEvmChainId,
         seiCosmosChainId,
-      }
-    }, [
-      compassEvmToSeiMapping,
-      compassSeiToEvmMapping,
-      seiCosmosChainId,
-      seiEvmChainId,
-      seiEvmRpcUrl,
-    ])
+      };
+    }, [compassEvmToSeiMapping, compassSeiToEvmMapping, seiCosmosChainId, seiEvmChainId, seiEvmRpcUrl]);
 
     const {
       info,
@@ -120,17 +112,13 @@ const AssetDetails = observer(
       selectedDays,
       denomInfo: _denomInfo,
     } = useAssetDetails({
-      denoms: Object.assign(
-        {},
-        rootDenomsStore.allDenoms,
-        compassTokenTagsStore.compassTokenDenomInfo,
-      ),
+      denoms: Object.assign({}, rootDenomsStore.allDenoms, compassTokenTagsStore.compassTokenDenomInfo),
       denom: assetsId as unknown as SupportedDenoms,
       tokenChain: activeChain,
       compassParams,
       marketDataStore,
       coingeckoIdsStore,
-    })
+    });
 
     const denomInfo: NativeDenom = _denomInfo ?? {
       chain: portfolio?.chain ?? '',
@@ -139,60 +127,57 @@ const AssetDetails = observer(
       coinDecimals: portfolio?.coinDecimals ?? 6,
       icon: portfolio?.img ?? '',
       coinGeckoId: portfolio?.coinGeckoId ?? '',
-    }
+    };
 
     const { chartsData, chartsLoading, chartsErrors } = useMemo(() => {
-      return { chartsData: data, chartsLoading: loadingCharts, chartsErrors: errorCharts }
-    }, [data, errorCharts, loadingCharts])
+      return { chartsData: data, chartsLoading: loadingCharts, chartsErrors: errorCharts };
+    }, [data, errorCharts, loadingCharts]);
 
     const { price, details, priceChange } = {
       price: info?.price ?? Number(portfolio?.usdPrice),
       details: info?.details,
       priceChange: info?.priceChange,
-    }
+    };
 
-    const { chartData, minMax } = chartsData ?? { chartData: undefined, minMax: undefined }
-    const totalHoldingsInUsd = portfolio?.usdValue
-    const filteredChartDays = ChartDays
-    const defaultIconLogo = useDefaultTokenLogo()
+    const { chartData, minMax } = chartsData ?? { chartData: undefined, minMax: undefined };
+    const totalHoldingsInUsd = portfolio?.usdValue;
+    const filteredChartDays = ChartDays;
+    const defaultIconLogo = useDefaultTokenLogo();
 
     const percentChange = useMemo(() => {
       if (selectedDays === '1D' && !!priceChange) {
-        return Number(priceChange)
+        return Number(priceChange);
       }
       if (chartData && chartData.length > 0) {
-        const firstPrice = chartData[0].smoothedPrice
-        const lastPrice = price
-        const percentChange = ((lastPrice - firstPrice) / firstPrice) * 100
+        const firstPrice = chartData[0].smoothedPrice;
+        const lastPrice = price;
+        const percentChange = ((lastPrice - firstPrice) / firstPrice) * 100;
 
-        return percentChange
+        return percentChange;
       }
-    }, [chartData, price, priceChange, selectedDays])
+    }, [chartData, price, priceChange, selectedDays]);
 
     const changeInPrice = useMemo(() => {
-      const olderPrice = new BigNumber(price ?? 0).dividedBy(1 + (percentChange ?? 0) / 100)
+      const olderPrice = new BigNumber(price ?? 0).dividedBy(1 + (percentChange ?? 0) / 100);
 
-      return new BigNumber(price ?? 0).minus(olderPrice).toNumber()
-    }, [price, percentChange])
+      return new BigNumber(price ?? 0).minus(olderPrice).toNumber();
+    }, [price, percentChange]);
 
     const handleBackClick = () => {
-      navigate(-1)
-    }
+      navigate(-1);
+    };
 
     const handleScroll = () => {
-      const tooltip = document.getElementsByClassName('rdk-portal')[0]
+      const tooltip = document.getElementsByClassName('rdk-portal')[0];
       if (tooltip && !tooltip.classList.contains('hidden')) {
-        tooltip.classList.add('hidden')
+        tooltip.classList.add('hidden');
       }
-    }
+    };
 
     return (
       <>
         <DiscoverHeader />
-        <div
-          className={classNames('overflow-y-scroll h-[calc(100%-140px)]')}
-          onScroll={handleScroll}
-        >
+        <div className={classNames('overflow-y-scroll h-[calc(100%-140px)]')} onScroll={handleScroll}>
           <div className='flex justify-between items-center py-1.5 px-3'>
             <ArrowLeft
               size={48}
@@ -209,9 +194,7 @@ const AssetDetails = observer(
             {!loadingPrice ? (
               <>
                 <Text size='jumbo' color='text-monochrome' className='font-black !leading-[48px]'>
-                  {price && new BigNumber(price).gt(0)
-                    ? '$' + formatForSubstring(price.toString())
-                    : '-'}
+                  {price && new BigNumber(price).gt(0) ? '$' + formatForSubstring(price.toString()) : '-'}
                 </Text>
 
                 {chartsLoading ? (
@@ -287,12 +270,12 @@ const AssetDetails = observer(
                         },
                       )}
                       onClick={() => {
-                        setSelectedDays(val)
+                        setSelectedDays(val);
                       }}
                     >
                       {val}
                     </div>
-                  )
+                  );
                 })}
               </div>
             )}
@@ -357,8 +340,8 @@ const AssetDetails = observer(
           )}
         </div>
       </>
-    )
+    );
   },
-)
+);
 
-export default AssetDetails
+export default AssetDetails;

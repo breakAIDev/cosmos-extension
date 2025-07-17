@@ -1,23 +1,23 @@
-import { Token, useChainInfo } from '@leapwallet/cosmos-wallet-hooks'
-import { DenomsRecord } from '@leapwallet/cosmos-wallet-sdk'
-import { MagnifyingGlassMinus } from '@phosphor-icons/react'
-import BottomModal from 'components/bottom-modal'
-import { SearchInput } from 'components/ui/input/search-input'
-import useQuery from 'hooks/useQuery'
-import { TokenCard } from 'pages/send/components/TokenCard'
-import { useSendContext } from 'pages/send/context'
-import React, { useMemo, useState } from 'react'
-import { useLocation } from 'react-router-dom'
-import { SourceToken } from 'types/swap'
+import { Token, useChainInfo } from '@leapwallet/cosmos-wallet-hooks';
+import { DenomsRecord } from '@leapwallet/cosmos-wallet-sdk';
+import { MagnifyingGlassMinus } from '@phosphor-icons/react';
+import BottomModal from 'components/bottom-modal';
+import { SearchInput } from 'components/ui/input/search-input';
+import useQuery from 'hooks/useQuery';
+import { TokenCard } from 'pages/send/components/TokenCard';
+import { useSendContext } from 'pages/send/context';
+import React, { useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import { SourceToken } from 'types/swap';
 
 type SelectTokenSheetProps = {
-  assets: Token[]
-  isOpen: boolean
-  onClose: () => void
-  selectedToken: Token
-  onTokenSelect: (token: Token) => void
-  denoms: DenomsRecord
-}
+  assets: Token[];
+  isOpen: boolean;
+  onClose: () => void;
+  selectedToken: Token;
+  onTokenSelect: (token: Token) => void;
+  denoms: DenomsRecord;
+};
 
 export const SelectTokenSheet = ({
   assets,
@@ -27,22 +27,22 @@ export const SelectTokenSheet = ({
   onTokenSelect,
   denoms,
 }: SelectTokenSheetProps) => {
-  const [searchQuery, setSearchQuery] = useState('')
-  const { sendActiveChain } = useSendContext()
-  const locationState = useLocation().state
-  const activeChainInfo = useChainInfo(sendActiveChain)
+  const [searchQuery, setSearchQuery] = useState('');
+  const { sendActiveChain } = useSendContext();
+  const locationState = useLocation().state;
+  const activeChainInfo = useChainInfo(sendActiveChain);
 
   // TODO: remove this if unused please?
-  let assetCoinDenom = useQuery().get('assetCoinDenom') ?? undefined
+  let assetCoinDenom = useQuery().get('assetCoinDenom') ?? undefined;
   assetCoinDenom = useMemo(() => {
     if (locationState && (locationState as Token).coinMinimalDenom) {
-      const token = locationState as Token
+      const token = locationState as Token;
 
-      return token.ibcDenom || token.coinMinimalDenom
+      return token.ibcDenom || token.coinMinimalDenom;
     }
 
-    return assetCoinDenom
-  }, [assetCoinDenom, locationState])
+    return assetCoinDenom;
+  }, [assetCoinDenom, locationState]);
 
   const _assets = useMemo(() => {
     return assets.filter((token) => {
@@ -52,9 +52,9 @@ export const SelectTokenSheet = ({
           Object.values(activeChainInfo.nativeDenoms).find(
             (_denom) => _denom.coinMinimalDenom === token.coinMinimalDenom,
           ))
-      )
-    })
-  }, [activeChainInfo.nativeDenoms, assets, denoms])
+      );
+    });
+  }, [activeChainInfo.nativeDenoms, assets, denoms]);
 
   const transferableTokens = useMemo(
     () =>
@@ -64,12 +64,12 @@ export const SelectTokenSheet = ({
           asset.symbol.toLowerCase().includes(searchQuery.trim().toLowerCase()),
       ),
     [_assets, searchQuery, selectedToken?.coinMinimalDenom],
-  )
+  );
 
   const handleSelectToken = (token: Token) => {
-    onTokenSelect(token)
-    onClose()
-  }
+    onTokenSelect(token);
+    onClose();
+  };
 
   return (
     <BottomModal
@@ -94,14 +94,14 @@ export const SelectTokenSheet = ({
         >
           {transferableTokens.length > 0 ? (
             transferableTokens.map((asset, index) => {
-              const isLast = index === transferableTokens.length - 1
+              const isLast = index === transferableTokens.length - 1;
 
-              let isSelected = selectedToken?.coinMinimalDenom === asset.coinMinimalDenom
+              let isSelected = selectedToken?.coinMinimalDenom === asset.coinMinimalDenom;
               if (selectedToken?.ibcDenom || asset.ibcDenom) {
-                isSelected = selectedToken?.ibcDenom === asset.ibcDenom
+                isSelected = selectedToken?.ibcDenom === asset.ibcDenom;
               }
               if (selectedToken?.isEvm || asset?.isEvm) {
-                isSelected = isSelected && selectedToken?.isEvm === asset?.isEvm
+                isSelected = isSelected && selectedToken?.isEvm === asset?.isEvm;
               }
 
               return (
@@ -114,11 +114,9 @@ export const SelectTokenSheet = ({
                     selectedChain={undefined}
                     showRedirection={false}
                   />
-                  {!isLast && (
-                    <div className='border-b w-full border-gray-100 dark:border-gray-850' />
-                  )}
+                  {!isLast && <div className='border-b w-full border-gray-100 dark:border-gray-850' />}
                 </React.Fragment>
-              )
+              );
             })
           ) : (
             <div className='py-[80px] px-4 w-full flex-col flex  justify-center items-center gap-4'>
@@ -139,7 +137,7 @@ export const SelectTokenSheet = ({
         </div>
       </div>
     </BottomModal>
-  )
-}
+  );
+};
 
-SelectTokenSheet.displayName = 'SelectTokenSheet'
+SelectTokenSheet.displayName = 'SelectTokenSheet';

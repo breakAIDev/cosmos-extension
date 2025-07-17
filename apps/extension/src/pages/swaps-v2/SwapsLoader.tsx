@@ -1,15 +1,15 @@
-import { Buttons } from '@leapwallet/leap-ui'
-import { ArrowsLeftRight } from '@phosphor-icons/react'
-import { useSelectedNetwork } from 'hooks/settings/useNetwork'
-import React from 'react'
-import Skeleton from 'react-loading-skeleton'
-import { cn } from 'utils/cn'
+import { Buttons } from '@leapwallet/leap-ui';
+import { ArrowsLeftRight } from '@phosphor-icons/react';
+import { useSelectedNetwork } from 'hooks/settings/useNetwork';
+import React from 'react';
+import Skeleton from 'react-loading-skeleton';
+import { cn } from 'utils/cn';
 
-import { InterchangeButton } from './components'
-import { SwapHeader } from './components/swap-header'
+import { InterchangeButton } from './components';
+import { SwapHeader } from './components/swap-header';
 
 export const SwapsLoader = () => {
-  const selectedNetwork = useSelectedNetwork()
+  const selectedNetwork = useSelectedNetwork();
 
   return (
     <div className='panel-width panel-height enclosing-panel'>
@@ -30,9 +30,7 @@ export const SwapsLoader = () => {
             <div className='w-full bg-secondary-100 rounded-xl p-5 flex flex-col gap-3'>
               <p className='text-muted-foreground text-sm font-medium !leading-[22px]'>You pay</p>
               <div className='flex rounded-2xl justify-between w-full items-center gap-2 h-[34px]'>
-                <div className='text-[24px] text-foreground font-bold text-monochrome !leading-[34px]'>
-                  0
-                </div>
+                <div className='text-[24px] text-foreground font-bold text-monochrome !leading-[34px]'>0</div>
                 <Skeleton
                   width={90}
                   height={32}
@@ -42,9 +40,7 @@ export const SwapsLoader = () => {
 
               <div className='flex flex-row items-center justify-between max-[399px]:!items-start text-gray-200 text-xs font-normal w-full min-h-[22px] mt-1'>
                 <div className='flex items-center gap-1'>
-                  <div className='text-muted-foreground font-normal text-sm !leading-[22.4px]'>
-                    $0.00
-                  </div>
+                  <div className='text-muted-foreground font-normal text-sm !leading-[22.4px]'>$0.00</div>
                   <button
                     disabled={true}
                     onClick={() => {
@@ -74,9 +70,7 @@ export const SwapsLoader = () => {
             <div className='w-full bg-secondary-100 rounded-xl p-5 flex flex-col gap-3'>
               <p className='text-muted-foreground text-sm font-medium !leading-[22px]'>You get</p>
               <div className='flex rounded-2xl justify-between w-full items-center gap-2 h-[34px]'>
-                <div className='text-[24px] text-foreground font-bold text-monochrome !leading-[34px]'>
-                  0
-                </div>
+                <div className='text-[24px] text-foreground font-bold text-monochrome !leading-[34px]'>0</div>
                 <Skeleton
                   width={90}
                   height={32}
@@ -108,5 +102,5 @@ export const SwapsLoader = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};

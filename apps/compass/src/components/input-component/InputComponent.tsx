@@ -1,19 +1,19 @@
-import classNames from 'classnames'
-import Text from 'components/text'
-import React, { ChangeEvent, forwardRef } from 'react'
+import classNames from 'classnames';
+import Text from 'components/text';
+import React, { ChangeEvent, forwardRef } from 'react';
 
 type InputProps = {
-  placeholder: string
-  value: string
+  placeholder: string;
+  value: string;
   // eslint-disable-next-line no-unused-vars
-  onChange: (event: ChangeEvent<HTMLInputElement>) => void
-  name: string
-  warning?: string
-  error?: string
+  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  name: string;
+  warning?: string;
+  error?: string;
   // eslint-disable-next-line no-unused-vars
-  onBlur?: (event: ChangeEvent<HTMLInputElement>) => void
-  className?: string
-}
+  onBlur?: (event: ChangeEvent<HTMLInputElement>) => void;
+  className?: string;
+};
 
 const InputComponent = forwardRef<HTMLInputElement, InputProps>(
   ({ placeholder, value, onChange, name, error, warning, onBlur }, ref) => {
@@ -56,10 +56,10 @@ const InputComponent = forwardRef<HTMLInputElement, InputProps>(
           </Text>
         )}
       </>
-    )
+    );
   },
-)
+);
 
-InputComponent.displayName = 'InputComponent'
+InputComponent.displayName = 'InputComponent';
 
-export { InputComponent }
+export { InputComponent };

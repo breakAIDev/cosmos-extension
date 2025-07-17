@@ -1,1 +1,1 @@
-export * from './reduceActivityInSections'
+export * from './reduceActivityInSections';

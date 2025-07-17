@@ -1,13 +1,13 @@
-import { LSProvider, SelectedNetwork } from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { Buttons, ThemeName, useTheme } from '@leapwallet/leap-ui'
-import Text from 'components/text'
-import { observer } from 'mobx-react-lite'
-import React from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Colors } from 'theme/colors'
+import { LSProvider, SelectedNetwork } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { Buttons, ThemeName, useTheme } from '@leapwallet/leap-ui';
+import Text from 'components/text';
+import { observer } from 'mobx-react-lite';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Colors } from 'theme/colors';
 
-import { StakeInputPageState } from '../StakeInputPage'
+import { StakeInputPageState } from '../StakeInputPage';
 
 const StakingCTAs = observer(
   ({
@@ -17,14 +17,14 @@ const StakingCTAs = observer(
     activeChain,
     activeNetwork,
   }: {
-    tokenLSProviders: LSProvider[]
-    isLSProvidersLoading: boolean
-    setShowSelectLSProvider: (show: boolean) => void
-    activeChain: SupportedChain
-    activeNetwork: SelectedNetwork
+    tokenLSProviders: LSProvider[];
+    isLSProvidersLoading: boolean;
+    setShowSelectLSProvider: (show: boolean) => void;
+    activeChain: SupportedChain;
+    activeNetwork: SelectedNetwork;
   }) => {
-    const { theme } = useTheme()
-    const navigate = useNavigate()
+    const { theme } = useTheme();
+    const navigate = useNavigate();
 
     return (
       <>
@@ -50,14 +50,14 @@ const StakingCTAs = observer(
                 forceChain: activeChain,
                 forceNetwork: activeNetwork,
               } as StakeInputPageState,
-            })
+            });
           }}
         >
           Stake
         </Buttons.Generic>
       </>
-    )
+    );
   },
-)
+);
 
-export default StakingCTAs
+export default StakingCTAs;

@@ -1,17 +1,17 @@
-import { useAirdropsEligibilityData } from '@leapwallet/cosmos-wallet-hooks'
-import { CaretDown, CaretUp } from '@phosphor-icons/react'
-import Text from 'components/text'
-import React, { useState } from 'react'
-import { cn } from 'utils/cn'
-import { isSidePanel } from 'utils/isSidePanel'
-import { trim } from 'utils/strings'
+import { useAirdropsEligibilityData } from '@leapwallet/cosmos-wallet-hooks';
+import { CaretDown, CaretUp } from '@phosphor-icons/react';
+import Text from 'components/text';
+import React, { useState } from 'react';
+import { cn } from 'utils/cn';
+import { isSidePanel } from 'utils/isSidePanel';
+import { trim } from 'utils/strings';
 
 export default function InEligibleAirdrops() {
-  const [showMore, setShowMore] = useState<boolean>(false)
-  const airdropsEligibilityData = useAirdropsEligibilityData() || {}
+  const [showMore, setShowMore] = useState<boolean>(false);
+  const airdropsEligibilityData = useAirdropsEligibilityData() || {};
   const inEligibleAirdrops = Object.values(airdropsEligibilityData).filter(
     (d) => !d?.isEligible && d?.status !== 'failed' && !d?.isHidden,
-  )
+  );
 
   return (
     <div>
@@ -19,10 +19,7 @@ export default function InEligibleAirdrops() {
         <Text size='sm' className='font-bold'>
           Ineligible Airdrops
         </Text>
-        <div
-          className='flex items-center cursor-pointer gap-1'
-          onClick={() => setShowMore((prev) => !prev)}
-        >
+        <div className='flex items-center cursor-pointer gap-1' onClick={() => setShowMore((prev) => !prev)}>
           <Text size='sm' color='text-gray-600 dark:text-gray-400' className='font-bold'>
             Show {showMore ? 'less' : 'more'}
           </Text>
@@ -47,9 +44,7 @@ export default function InEligibleAirdrops() {
               <Text size='sm' className='flex-1 font-medium'>
                 {trim(
                   d.name,
-                  isSidePanel()
-                    ? 28 + Math.floor(((Math.min(window.innerWidth, 400) - 320) / 81) * 7)
-                    : 34,
+                  isSidePanel() ? 28 + Math.floor(((Math.min(window.innerWidth, 400) - 320) / 81) * 7) : 34,
                 )}
               </Text>
             </div>
@@ -57,5 +52,5 @@ export default function InEligibleAirdrops() {
         </div>
       )}
     </div>
-  )
+  );
 }

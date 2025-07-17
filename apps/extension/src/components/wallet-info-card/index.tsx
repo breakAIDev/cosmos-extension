@@ -1,42 +1,42 @@
-import { sliceAddress } from '@leapwallet/cosmos-wallet-hooks'
-import { CaretDown, CheckCircle } from '@phosphor-icons/react'
-import { Checkbox } from 'components/ui/check-box'
-import { Skeleton } from 'components/ui/skeleton'
-import { AnimatePresence, motion } from 'framer-motion'
-import { useDefaultTokenLogo } from 'hooks'
-import { useCopy } from 'hooks/useCopy'
-import { getChainImage } from 'images/logos'
-import React, { HTMLAttributes, PropsWithoutRef, useEffect, useMemo, useState } from 'react'
-import { getDerivationPathToShow } from 'utils'
-import { cn } from 'utils/cn'
-import { imgOnError } from 'utils/imgOnError'
-import { opacityFadeInOut, transition150, transition250 } from 'utils/motion-variants'
+import { sliceAddress } from '@leapwallet/cosmos-wallet-hooks';
+import { CaretDown, CheckCircle } from '@phosphor-icons/react';
+import { Checkbox } from 'components/ui/check-box';
+import { Skeleton } from 'components/ui/skeleton';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useDefaultTokenLogo } from 'hooks';
+import { useCopy } from 'hooks/useCopy';
+import { getChainImage } from 'images/logos';
+import React, { HTMLAttributes, PropsWithoutRef, useEffect, useMemo, useState } from 'react';
+import { getDerivationPathToShow } from 'utils';
+import { cn } from 'utils/cn';
+import { imgOnError } from 'utils/imgOnError';
+import { opacityFadeInOut, transition150, transition250 } from 'utils/motion-variants';
 
-import { useBalances } from './use-balances'
+import { useBalances } from './use-balances';
 
 type WalletInfoCardPrps = {
-  walletName: string
-  index: number
-  onSelectChange: (id: number, flag: boolean) => void
-  isExistingAddress: boolean
-  isLedger?: boolean
-  isChosen: boolean
-  showDerivationPath?: boolean
-  path?: string
-  name?: string
-  cosmosAddress?: string
-  evmAddress?: string
-  bitcoinAddress?: string
-  moveAddress?: string
-  solanaAddress?: string
-  suiAddress?: string
-  className?: string
-} & HTMLAttributes<HTMLLabelElement>
+  walletName: string;
+  index: number;
+  onSelectChange: (id: number, flag: boolean) => void;
+  isExistingAddress: boolean;
+  isLedger?: boolean;
+  isChosen: boolean;
+  showDerivationPath?: boolean;
+  path?: string;
+  name?: string;
+  cosmosAddress?: string;
+  evmAddress?: string;
+  bitcoinAddress?: string;
+  moveAddress?: string;
+  solanaAddress?: string;
+  suiAddress?: string;
+  className?: string;
+} & HTMLAttributes<HTMLLabelElement>;
 
 const cardListVariants = {
   hidden: { opacity: 0, height: 0 },
   visible: { opacity: 1, height: 'auto' },
-}
+};
 
 function WalletInfoCard({
   walletName,
@@ -56,7 +56,7 @@ function WalletInfoCard({
   className,
   ...props
 }: PropsWithoutRef<WalletInfoCardPrps>) {
-  const [isExpanded, setIsExpanded] = useState(true)
+  const [isExpanded, setIsExpanded] = useState(true);
 
   const { data, nonZeroData, zeroBalance, isLoading } = useBalances({
     cosmosAddress,
@@ -65,37 +65,37 @@ function WalletInfoCard({
     evmAddress,
     solanaAddress,
     suiAddress,
-  })
+  });
 
-  const balances = zeroBalance ? data : nonZeroData
+  const balances = zeroBalance ? data : nonZeroData;
 
   const derivationPath = useMemo(() => {
-    return getDerivationPathToShow(path ?? '')
-  }, [path])
+    return getDerivationPathToShow(path ?? '');
+  }, [path]);
 
   useEffect(() => {
     if (zeroBalance && !isLoading) {
-      setIsExpanded(false)
+      setIsExpanded(false);
     }
-  }, [zeroBalance, isLoading])
+  }, [zeroBalance, isLoading]);
 
   useEffect(() => {
     if (isLoading) {
-      return
+      return;
     }
 
     if (isLedger && isExistingAddress) {
-      onSelectChange((path || index) as any, true)
-      return
+      onSelectChange((path || index) as any, true);
+      return;
     }
 
-    onSelectChange((path || index) as any, !zeroBalance)
+    onSelectChange((path || index) as any, !zeroBalance);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [zeroBalance, isLoading, index, isLedger, isExistingAddress])
+  }, [zeroBalance, isLoading, index, isLedger, isExistingAddress]);
 
   const addressesToShow = useMemo(() => {
-    return isLedger ? data : balances
-  }, [isLedger, data, balances])
+    return isLedger ? data : balances;
+  }, [isLedger, data, balances]);
 
   return (
     <label
@@ -112,43 +112,34 @@ function WalletInfoCard({
           className='flex items-center gap-2'
           onClick={(e) => {
             if (!addressesToShow || !addressesToShow.length) {
-              return
+              return;
             }
 
-            e.preventDefault()
-            e.stopPropagation()
-            setIsExpanded((prev) => !prev)
+            e.preventDefault();
+            e.stopPropagation();
+            setIsExpanded((prev) => !prev);
           }}
         >
           <span className='font-bold text-mdl select-none'>{walletName}</span>
           {showDerivationPath && (
-            <span className='text-xs font-medium py-px px-[6px] rounded bg-secondary-300'>
-              {derivationPath}
-            </span>
+            <span className='text-xs font-medium py-px px-[6px] rounded bg-secondary-300'>{derivationPath}</span>
           )}
 
           {!isLoading && !!addressesToShow?.length && (
             <CaretDown
               size={14}
-              className={cn(
-                'text-muted-foreground transition-transform',
-                isExpanded && '-rotate-180',
-              )}
+              className={cn('text-muted-foreground transition-transform', isExpanded && '-rotate-180')}
             />
           )}
           {isExistingAddress && !isLedger && (
-            <span className='text-xs font-medium py-px px-[6px] rounded bg-secondary-300'>
-              Already exists
-            </span>
+            <span className='text-xs font-medium py-px px-[6px] rounded bg-secondary-300'>Already exists</span>
           )}
         </div>
 
         <Checkbox
           disabled={isExistingAddress}
           checked={isChosen}
-          onCheckedChange={(flag) =>
-            onSelectChange((path || index) as any, flag !== 'indeterminate' && !!flag)
-          }
+          onCheckedChange={(flag) => onSelectChange((path || index) as any, flag !== 'indeterminate' && !!flag)}
           className='ml-auto'
         />
       </div>
@@ -179,25 +170,20 @@ function WalletInfoCard({
               transition={transition250}
             >
               {addressesToShow.map((chain) => (
-                <AddressAndBalanceCard
-                  {...chain}
-                  chainKey={chain.key}
-                  name={chain.name}
-                  key={chain.key}
-                />
+                <AddressAndBalanceCard {...chain} chainKey={chain.key} name={chain.name} key={chain.key} />
               ))}
             </motion.div>
           )
         )}
       </AnimatePresence>
     </label>
-  )
+  );
 }
 
-export default WalletInfoCard
+export default WalletInfoCard;
 
 const AddressText = ({ address }: { address: string }) => {
-  const { copy, isCopied } = useCopy()
+  const { copy, isCopied } = useCopy();
 
   return (
     <AnimatePresence mode='wait'>
@@ -223,26 +209,26 @@ const AddressText = ({ address }: { address: string }) => {
           variants={opacityFadeInOut}
           transition={transition150}
           onClick={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            copy(address)
+            e.preventDefault();
+            e.stopPropagation();
+            copy(address);
           }}
         >
           {sliceAddress(address)}
         </motion.span>
       )}
     </AnimatePresence>
-  )
-}
+  );
+};
 
 const AddressAndBalanceCard = (props: {
-  name: string
-  chainKey: string
-  denom: string
-  address?: string
-  amount: string
+  name: string;
+  chainKey: string;
+  denom: string;
+  address?: string;
+  amount: string;
 }) => {
-  const defaultTokenLogo = useDefaultTokenLogo()
+  const defaultTokenLogo = useDefaultTokenLogo();
   return (
     <motion.div
       className='px-5 py-4 flex items-center gap-2.5 w-full border-b border-secondary-600/25 last:border-b-0 overflow-hidden shrink-0'
@@ -267,8 +253,8 @@ const AddressAndBalanceCard = (props: {
 
       {props.address && <AddressText address={props.address} />}
     </motion.div>
-  )
-}
+  );
+};
 
 export const AddressAndBalanceSkeleton = () => {
   return (
@@ -282,8 +268,8 @@ export const AddressAndBalanceSkeleton = () => {
 
       <Skeleton className='w-20 h-3 ml-auto' />
     </div>
-  )
-}
+  );
+};
 
 export const AddressAndBalanceCardSkeleton = ({ walletName }: { walletName: string }) => {
   return (
@@ -298,17 +284,17 @@ export const AddressAndBalanceCardSkeleton = ({ walletName }: { walletName: stri
 
       <AddressAndBalanceSkeleton />
     </div>
-  )
-}
+  );
+};
 
 export const SelectWalletsLabel = ({
   count,
   total,
   onSelectAllToggle,
 }: {
-  count: number
-  total: number
-  onSelectAllToggle: (flag: boolean) => void
+  count: number;
+  total: number;
+  onSelectAllToggle: (flag: boolean) => void;
 }) => {
   return (
     <label className='bg-secondary-200 rounded-xl flex items-center justify-between p-5 select-none'>
@@ -321,5 +307,5 @@ export const SelectWalletsLabel = ({
         <Checkbox checked={count === total} onCheckedChange={onSelectAllToggle} />
       </div>
     </label>
-  )
-}
+  );
+};

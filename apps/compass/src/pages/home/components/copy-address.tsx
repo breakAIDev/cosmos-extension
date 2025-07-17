@@ -1,44 +1,43 @@
-import { sliceAddress, useActiveWallet } from '@leapwallet/cosmos-wallet-hooks'
-import { pubKeyToEvmAddressToShow } from '@leapwallet/cosmos-wallet-sdk'
-import { WALLETTYPE } from '@leapwallet/leap-keychain'
-import { useActiveChain } from 'hooks/settings/useActiveChain'
-import useQuery from 'hooks/useQuery'
-import { CopyIcon } from 'icons/copy-icon'
-import { observer } from 'mobx-react-lite'
-import React, { useEffect, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { globalSheetsStore } from 'stores/ui/global-sheets-store'
+import { sliceAddress, useActiveWallet } from '@leapwallet/cosmos-wallet-hooks';
+import { pubKeyToEvmAddressToShow } from '@leapwallet/cosmos-wallet-sdk';
+import { WALLETTYPE } from '@leapwallet/leap-keychain';
+import { useActiveChain } from 'hooks/settings/useActiveChain';
+import useQuery from 'hooks/useQuery';
+import { CopyIcon } from 'icons/copy-icon';
+import { observer } from 'mobx-react-lite';
+import React, { useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { globalSheetsStore } from 'stores/ui/global-sheets-store';
 
 export const CopyAddress = observer(() => {
-  const navigate = useNavigate()
-  const query = useQuery()
-  const activeChain = useActiveChain()
-  const activeWallet = useActiveWallet()
+  const navigate = useNavigate();
+  const query = useQuery();
+  const activeChain = useActiveChain();
+  const activeWallet = useActiveWallet();
 
   const address = useMemo(() => {
     if (!activeWallet) {
-      return ''
+      return '';
     }
 
     if (activeWallet.walletType === WALLETTYPE.LEDGER && activeWallet.app !== 'sei') {
-      return activeWallet?.addresses?.[activeChain]
+      return activeWallet?.addresses?.[activeChain];
     }
 
     return (
-      pubKeyToEvmAddressToShow(activeWallet.pubKeys?.[activeChain], true) ||
-      activeWallet?.addresses?.[activeChain]
-    )
-  }, [activeChain, activeWallet])
+      pubKeyToEvmAddressToShow(activeWallet.pubKeys?.[activeChain], true) || activeWallet?.addresses?.[activeChain]
+    );
+  }, [activeChain, activeWallet]);
 
   useEffect(() => {
     if (query.get('openLinkAddress')) {
-      navigate('/home')
-      globalSheetsStore.setCopyAddressSheetOpen(true)
+      navigate('/home');
+      globalSheetsStore.setCopyAddressSheetOpen(true);
     }
-  }, [navigate, query])
+  }, [navigate, query]);
 
   if (!address) {
-    return null
+    return null;
   }
 
   return (
@@ -49,5 +48,5 @@ export const CopyAddress = observer(() => {
       {sliceAddress(address)}
       <CopyIcon />
     </button>
-  )
-})
+  );
+});

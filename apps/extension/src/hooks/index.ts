@@ -1,3 +1,3 @@
-export * from './useNonNativeCustomChains'
-export * from './useWalletInfo'
-export * from './utility'
+export * from './useNonNativeCustomChains';
+export * from './useWalletInfo';
+export * from './utility';

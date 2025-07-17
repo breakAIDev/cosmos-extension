@@ -1,2 +1,2 @@
-export * from './DiscoverBannerSkeleton'
-export * from './WalletInfoCardSkeleton'
+export * from './DiscoverBannerSkeleton';
+export * from './WalletInfoCardSkeleton';

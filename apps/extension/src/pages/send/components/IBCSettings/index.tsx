@@ -1,46 +1,41 @@
-import {
-  useChainsStore,
-  useCustomChannels,
-  useDefaultChannelId,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { SkipMsg, SkipMsgV2, UseRouteResponse, useTransactions } from '@leapwallet/elements-hooks'
-import { Buttons, ThemeName, useTheme } from '@leapwallet/leap-ui'
-import { Info, Minus, Plus, Warning } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import Tooltip from 'components/better-tooltip'
-import { CustomCheckbox } from 'components/custom-checkbox'
-import { LoaderAnimation } from 'components/loader/Loader'
-import BottomModal from 'components/new-bottom-modal'
-import Text from 'components/text'
-import { useSendContext } from 'pages/send/context'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { Colors } from 'theme/colors'
+import { useChainsStore, useCustomChannels, useDefaultChannelId } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { SkipMsg, SkipMsgV2, UseRouteResponse, useTransactions } from '@leapwallet/elements-hooks';
+import { Buttons, ThemeName, useTheme } from '@leapwallet/leap-ui';
+import { Info, Minus, Plus, Warning } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import Tooltip from 'components/better-tooltip';
+import { CustomCheckbox } from 'components/custom-checkbox';
+import { LoaderAnimation } from 'components/loader/Loader';
+import BottomModal from 'components/new-bottom-modal';
+import Text from 'components/text';
+import { useSendContext } from 'pages/send/context';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Colors } from 'theme/colors';
 
-import RadioGroupSend from './RadioGroup'
+import RadioGroupSend from './RadioGroup';
 
 type IBCSettingsProps = {
-  className?: string
-  targetChain: SupportedChain
-  sourceChain: SupportedChain
-}
+  className?: string;
+  targetChain: SupportedChain;
+  sourceChain: SupportedChain;
+};
 
 const IBCSettings: React.FC<IBCSettingsProps> = ({ targetChain, sourceChain }) => {
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   // this will be null when data is loading
-  const [defaultChannelId, setDefaultChannelId] = useState<string | undefined | null>(null)
-  const [sendViaUnverifiedChannel, setSendViaUnverifiedChannel] = useState<boolean>(false)
-  const [isAddChannel, setIsAddChannel] = useState<boolean>(false)
-  const [customChannelId, setCustomChannelId] = useState<string>()
-  const { theme } = useTheme()
-  const { chains } = useChainsStore()
-  const sourceChainInfo = chains[sourceChain]
-  const targetChainInfo = chains[targetChain]
+  const [defaultChannelId, setDefaultChannelId] = useState<string | undefined | null>(null);
+  const [sendViaUnverifiedChannel, setSendViaUnverifiedChannel] = useState<boolean>(false);
+  const [isAddChannel, setIsAddChannel] = useState<boolean>(false);
+  const [customChannelId, setCustomChannelId] = useState<string>();
+  const { theme } = useTheme();
+  const { chains } = useChainsStore();
+  const sourceChainInfo = chains[sourceChain];
+  const targetChainInfo = chains[targetChain];
 
-  const customChannels = useCustomChannels()
-  const { data, status } = useDefaultChannelId(sourceChain, targetChain)
-  const { transferData, setIsIbcUnwindingDisabled, customIbcChannelId, setCustomIbcChannelId } =
-    useSendContext()
+  const customChannels = useCustomChannels();
+  const { data, status } = useDefaultChannelId(sourceChain, targetChain);
+  const { transferData, setIsIbcUnwindingDisabled, customIbcChannelId, setCustomIbcChannelId } = useSendContext();
 
   const routeWithMessages = useMemo(
     () =>
@@ -57,46 +52,46 @@ const IBCSettings: React.FC<IBCSettingsProps> = ({ targetChain, sourceChain }) =
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
     [transferData?.isSkipTransfer, transferData?.messages, transferData?.routeResponse],
-  )
+  );
 
   const { groupedTransactions } = useTransactions(
     routeWithMessages as (UseRouteResponse & { messages?: SkipMsg[] | SkipMsgV2[] }) | null,
-  )
+  );
 
-  const path: string[] = []
+  const path: string[] = [];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Object.values(groupedTransactions)?.forEach((d: any[], index1: number) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     d.forEach((f: any, index2: number) => {
       if (index1 == 0 && index2 == 0) {
-        path.push(f.sourceChain)
+        path.push(f.sourceChain);
       }
-      path.push(f.destinationChain)
-    })
-  })
+      path.push(f.destinationChain);
+    });
+  });
 
   useEffect(() => {
     if (status === 'success') {
-      setDefaultChannelId(data)
+      setDefaultChannelId(data);
     } else if (status === 'error') {
-      setDefaultChannelId(undefined)
+      setDefaultChannelId(undefined);
     }
-  }, [data, status])
+  }, [data, status]);
 
   const handleClick = useCallback(() => {
-    setIsSettingsOpen((prev) => !prev)
-  }, [setIsSettingsOpen])
+    setIsSettingsOpen((prev) => !prev);
+  }, [setIsSettingsOpen]);
 
   const handleSelectChannel = useCallback(
     (value: string) => {
       if (value === customChannelId && customChannelId !== undefined) {
-        setCustomChannelId(undefined)
+        setCustomChannelId(undefined);
       } else {
-        setCustomChannelId(value)
+        setCustomChannelId(value);
       }
     },
     [customChannelId, setCustomChannelId],
-  )
+  );
 
   const customChannelsForTargetChain = useMemo(
     () =>
@@ -109,11 +104,11 @@ const IBCSettings: React.FC<IBCSettingsProps> = ({ targetChain, sourceChain }) =
         }))
         .sort((a, b) => a.title.localeCompare(b.title)),
     [customChannels, targetChain],
-  )
+  );
 
   const allOptions = useMemo(() => {
     if (!defaultChannelId) {
-      return customChannelsForTargetChain
+      return customChannelsForTargetChain;
     }
     return [
       {
@@ -122,39 +117,33 @@ const IBCSettings: React.FC<IBCSettingsProps> = ({ targetChain, sourceChain }) =
         value: defaultChannelId,
       },
       ...customChannelsForTargetChain,
-    ]
-  }, [customChannelsForTargetChain, defaultChannelId])
+    ];
+  }, [customChannelsForTargetChain, defaultChannelId]);
 
-  const hasChannelId = allOptions.length > 0
+  const hasChannelId = allOptions.length > 0;
 
   const handleAddChannel = useCallback(() => {
     if (hasChannelId) {
-      setIsAddChannel((prev) => !prev)
-      setCustomChannelId(undefined)
+      setIsAddChannel((prev) => !prev);
+      setCustomChannelId(undefined);
     }
-  }, [hasChannelId, setIsAddChannel])
+  }, [hasChannelId, setIsAddChannel]);
 
   const onProceed = () => {
-    setIsIbcUnwindingDisabled(true)
-    setIsSettingsOpen(false)
-    setCustomIbcChannelId(customChannelId)
-  }
+    setIsIbcUnwindingDisabled(true);
+    setIsSettingsOpen(false);
+    setCustomIbcChannelId(customChannelId);
+  };
 
   return (
     <>
       <div
-        className={classNames(
-          'p-4 rounded-2xl bg-red-100 dark:bg-red-900 items-center flex gap-2',
-          {
-            'bg-orange-200 dark:bg-orange-900': customIbcChannelId,
-          },
-        )}
+        className={classNames('p-4 rounded-2xl bg-red-100 dark:bg-red-900 items-center flex gap-2', {
+          'bg-orange-200 dark:bg-orange-900': customIbcChannelId,
+        })}
       >
         {customIbcChannelId ? (
-          <Info
-            size={16}
-            className={classNames('text-[#FFB33D] dark:text-orange-300 self-start')}
-          />
+          <Info size={16} className={classNames('text-[#FFB33D] dark:text-orange-300 self-start')} />
         ) : (
           <Warning size={16} className={classNames('text-red-400 dark:text-red-300 self-start')} />
         )}
@@ -193,8 +182,8 @@ const IBCSettings: React.FC<IBCSettingsProps> = ({ targetChain, sourceChain }) =
               <Tooltip
                 content={
                   <p className='text-gray-500 dark:text-gray-100 text-sm'>
-                    ID of the channel that will relay your tokens from {sourceChainInfo.chainName}{' '}
-                    to {targetChainInfo?.chainName}.
+                    ID of the channel that will relay your tokens from {sourceChainInfo.chainName} to{' '}
+                    {targetChainInfo?.chainName}.
                   </p>
                 }
               >
@@ -244,11 +233,7 @@ const IBCSettings: React.FC<IBCSettingsProps> = ({ targetChain, sourceChain }) =
 
         <div className='p-4 rounded-2xl bg-red-100 dark:bg-red-900 my-4'>
           <div className='items-center flex gap-2'>
-            <Warning
-              size={20}
-              weight='bold'
-              className='text-red-400 dark:text-red-300 self-start'
-            />
+            <Warning size={20} weight='bold' className='text-red-400 dark:text-red-300 self-start' />
             <Text size='sm' className='font-bold mb-2'>
               Sending via unverified channel.
             </Text>
@@ -262,8 +247,7 @@ const IBCSettings: React.FC<IBCSettingsProps> = ({ targetChain, sourceChain }) =
               />
             </div>
             <Text size='xs' color='text-gray-800 dark:text-gray-200' className='font-medium'>
-              Usability of tokens sent via unverified channels is not guaranteed. I understand and
-              wish to proceed.
+              Usability of tokens sent via unverified channels is not guaranteed. I understand and wish to proceed.
             </Text>
           </div>
         </div>
@@ -280,7 +264,7 @@ const IBCSettings: React.FC<IBCSettingsProps> = ({ targetChain, sourceChain }) =
         </Buttons.Generic>
       </BottomModal>
     </>
-  )
-}
+  );
+};
 
-export default IBCSettings
+export default IBCSettings;

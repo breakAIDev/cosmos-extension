@@ -1,26 +1,26 @@
-import { useAirdropsEligibilityData } from '@leapwallet/cosmos-wallet-hooks'
-import { Buttons } from '@leapwallet/leap-ui'
-import { ArrowCounterClockwise } from '@phosphor-icons/react'
-import { captureException } from '@sentry/react'
-import Loader from 'components/loader/Loader'
-import Text from 'components/text'
-import { ButtonName, ButtonType, EventName } from 'config/analytics'
-import { useAirdropsData } from 'hooks/useAirdropsData'
-import { Images } from 'images'
-import mixpanel from 'mixpanel-browser'
-import React, { useEffect, useState } from 'react'
+import { useAirdropsEligibilityData } from '@leapwallet/cosmos-wallet-hooks';
+import { Buttons } from '@leapwallet/leap-ui';
+import { ArrowCounterClockwise } from '@phosphor-icons/react';
+import { captureException } from '@sentry/react';
+import Loader from 'components/loader/Loader';
+import Text from 'components/text';
+import { ButtonName, ButtonType, EventName } from 'config/analytics';
+import { useAirdropsData } from 'hooks/useAirdropsData';
+import { Images } from 'images';
+import mixpanel from 'mixpanel-browser';
+import React, { useEffect, useState } from 'react';
 
 export default function FailedAirdropsDetails() {
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [numberOfRetries, setNumberOfRetries] = useState<number>(1)
-  const fetchAirdropsData = useAirdropsData()
-  const airdropsEligibilityData = useAirdropsEligibilityData()
-  const isDataNull = airdropsEligibilityData === null
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [numberOfRetries, setNumberOfRetries] = useState<number>(1);
+  const fetchAirdropsData = useAirdropsData();
+  const airdropsEligibilityData = useAirdropsEligibilityData();
+  const isDataNull = airdropsEligibilityData === null;
 
   useEffect(() => {
-    setIsLoading(isDataNull)
-    return () => setIsLoading(false)
-  }, [isDataNull])
+    setIsLoading(isDataNull);
+    return () => setIsLoading(false);
+  }, [isDataNull]);
 
   const trackCTAEvent = () => {
     try {
@@ -30,21 +30,21 @@ export default function FailedAirdropsDetails() {
         redirectURL: '',
         numberOfRetries,
         time: Date.now() / 1000,
-      })
+      });
     } catch (e) {
-      captureException(e)
+      captureException(e);
     }
-  }
+  };
 
   const onRetry = () => {
-    setIsLoading(true)
-    setNumberOfRetries((prevState) => prevState + 1)
-    fetchAirdropsData()
-    trackCTAEvent()
+    setIsLoading(true);
+    setNumberOfRetries((prevState) => prevState + 1);
+    fetchAirdropsData();
+    trackCTAEvent();
     setTimeout(() => {
-      setIsLoading(false)
-    }, 10000)
-  }
+      setIsLoading(false);
+    }, 10000);
+  };
 
   return (
     <div className='flex flex-col gap-6 h-full'>
@@ -60,11 +60,7 @@ export default function FailedAirdropsDetails() {
             <Text size='xl' className='font-bold mb-2'>
               Woops!
             </Text>
-            <Text
-              size='sm'
-              color='text-gray-800 dark:text-gray-200'
-              className='font-medium text-center'
-            >
+            <Text size='sm' color='text-gray-800 dark:text-gray-200' className='font-medium text-center'>
               We aren’t able to load details for this <br /> Airdrop. You can try again later.
             </Text>
           </>
@@ -87,5 +83,5 @@ export default function FailedAirdropsDetails() {
         )}
       </Buttons.Generic>
     </div>
-  )
+  );
 }

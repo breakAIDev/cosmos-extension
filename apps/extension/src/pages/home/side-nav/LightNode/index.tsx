@@ -1,103 +1,97 @@
-import { useAddressStore, useFeatureFlags } from '@leapwallet/cosmos-wallet-hooks'
-import { checkMintEligibility, getNFTBalance, NFTMetadata } from '@leapwallet/cosmos-wallet-sdk'
-import { Key } from '@leapwallet/leap-keychain'
-import { GearSix } from '@phosphor-icons/react'
-import { LoaderAnimation } from 'components/loader/Loader'
-import BottomModal, { BottomModalClose } from 'components/new-bottom-modal'
-import { AnimatePresence, motion } from 'framer-motion'
-import useActiveWallet from 'hooks/settings/useActiveWallet'
-import { Wallet } from 'hooks/wallet/useWallet'
-import React, { useCallback, useEffect, useState } from 'react'
-import semver from 'semver'
-import { balanceStore, evmBalanceStore } from 'stores/balance-store'
-import { lightNodeStore } from 'stores/light-node-store'
-import { opacityFadeInOut, transition150 } from 'utils/motion-variants'
-import { slideVariants } from 'utils/motion-variants/global-layout-motions'
-import browser from 'webextension-polyfill'
+import { useAddressStore, useFeatureFlags } from '@leapwallet/cosmos-wallet-hooks';
+import { checkMintEligibility, getNFTBalance, NFTMetadata } from '@leapwallet/cosmos-wallet-sdk';
+import { Key } from '@leapwallet/leap-keychain';
+import { GearSix } from '@phosphor-icons/react';
+import { LoaderAnimation } from 'components/loader/Loader';
+import BottomModal, { BottomModalClose } from 'components/new-bottom-modal';
+import { AnimatePresence, motion } from 'framer-motion';
+import useActiveWallet from 'hooks/settings/useActiveWallet';
+import { Wallet } from 'hooks/wallet/useWallet';
+import React, { useCallback, useEffect, useState } from 'react';
+import semver from 'semver';
+import { balanceStore, evmBalanceStore } from 'stores/balance-store';
+import { lightNodeStore } from 'stores/light-node-store';
+import { opacityFadeInOut, transition150 } from 'utils/motion-variants';
+import { slideVariants } from 'utils/motion-variants/global-layout-motions';
+import browser from 'webextension-polyfill';
 
-import LightNodeHeader from './components/Header'
-import LightNode from './LightNode'
-import LumisNFT from './LumisNFT'
+import LightNodeHeader from './components/Header';
+import LightNode from './LightNode';
+import LumisNFT from './LumisNFT';
 
-const lightNodeTabs = ['Light Node', 'Lumi NFT'] as const
-type LightNodeTab = typeof lightNodeTabs[number]
+const lightNodeTabs = ['Light Node', 'Lumi NFT'] as const;
+type LightNodeTab = typeof lightNodeTabs[number];
 
-const LightNodePage = ({
-  isVisible,
-  goBack,
-}: {
-  isVisible: boolean
-  goBack: (toHome?: boolean) => void
-}) => {
-  const [activeTab, setActiveTab] = useState<LightNodeTab>('Light Node')
-  const [showLightNodeSettings, setShowLightNodeSettings] = useState(false)
-  const [isEligible, setIsEligible] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const { activeWallet } = useActiveWallet()
-  const [metadata, setMetadata] = useState<NFTMetadata>()
-  const { data: featureFlags } = useFeatureFlags()
-  const { primaryAddress } = useAddressStore()
-  const [mintedWallet, setMintedWallet] = useState<Key<string> | null>(null)
-  const version = browser.runtime.getManifest().version
+const LightNodePage = ({ isVisible, goBack }: { isVisible: boolean; goBack: (toHome?: boolean) => void }) => {
+  const [activeTab, setActiveTab] = useState<LightNodeTab>('Light Node');
+  const [showLightNodeSettings, setShowLightNodeSettings] = useState(false);
+  const [isEligible, setIsEligible] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { activeWallet } = useActiveWallet();
+  const [metadata, setMetadata] = useState<NFTMetadata>();
+  const { data: featureFlags } = useFeatureFlags();
+  const { primaryAddress } = useAddressStore();
+  const [mintedWallet, setMintedWallet] = useState<Key<string> | null>(null);
+  const version = browser.runtime.getManifest().version;
   const isFeatureFlagEnabled =
     featureFlags?.lightNodeNFT?.extension === 'active' ||
-    semver.satisfies(version, featureFlags?.lightNodeNFT?.extension_v2 || '=0.0.1')
-  const showBanner = isFeatureFlagEnabled && !loading && isEligible
+    semver.satisfies(version, featureFlags?.lightNodeNFT?.extension_v2 || '=0.0.1');
+  const showBanner = isFeatureFlagEnabled && !loading && isEligible;
 
   const handleTabChange = (tab: LightNodeTab) => {
-    setActiveTab(tab)
-  }
+    setActiveTab(tab);
+  };
 
   const checkNFTBalance = useCallback(async () => {
-    const wallets = await Wallet.getAllWallets()
+    const wallets = await Wallet.getAllWallets();
     for (const wallet of Object.values(wallets)) {
-      const balance = await getNFTBalance(wallet.addresses?.forma ?? '')
+      const balance = await getNFTBalance(wallet.addresses?.forma ?? '');
       if (balance.hasNFT) {
-        setMintedWallet(wallet)
+        setMintedWallet(wallet);
         if (balance.metadata) {
-          setMetadata(balance.metadata)
+          setMetadata(balance.metadata);
         }
-        return true
+        return true;
       }
     }
-    return false
-  }, [])
+    return false;
+  }, []);
 
   const checkEligibility = useCallback(async () => {
     if (primaryAddress) {
-      const isEligible = await checkMintEligibility(primaryAddress)
-      setIsEligible(isEligible)
+      const isEligible = await checkMintEligibility(primaryAddress);
+      setIsEligible(isEligible);
     }
-  }, [primaryAddress])
+  }, [primaryAddress]);
 
   const fetcher = useCallback(async () => {
-    if (!activeWallet?.addresses.forma) return
-    setLoading(true)
-    const balance = await getNFTBalance(activeWallet?.addresses.forma ?? '')
+    if (!activeWallet?.addresses.forma) return;
+    setLoading(true);
+    const balance = await getNFTBalance(activeWallet?.addresses.forma ?? '');
     if (!balance.hasNFT) {
-      const isMinted = await checkNFTBalance()
+      const isMinted = await checkNFTBalance();
       if (!isMinted) {
-        checkEligibility()
+        checkEligibility();
       }
     }
     if (balance.metadata) {
-      setMetadata(balance.metadata)
+      setMetadata(balance.metadata);
     }
-    setLoading(false)
-  }, [activeWallet?.addresses.forma, checkEligibility, checkNFTBalance])
+    setLoading(false);
+  }, [activeWallet?.addresses.forma, checkEligibility, checkNFTBalance]);
 
   useEffect(() => {
-    fetcher()
-  }, [fetcher])
+    fetcher();
+  }, [fetcher]);
 
   useEffect(() => {
     if (lightNodeStore.isLightNodeRunning) {
       setTimeout(() => {
-        checkEligibility()
-      }, 3000)
+        checkEligibility();
+      }, 3000);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [checkEligibility, lightNodeStore.isLightNodeRunning])
+  }, [checkEligibility, lightNodeStore.isLightNodeRunning]);
 
   return (
     <BottomModal
@@ -195,7 +189,7 @@ const LightNodePage = ({
         )}
       </AnimatePresence>
     </BottomModal>
-  )
-}
+  );
+};
 
-export default LightNodePage
+export default LightNodePage;

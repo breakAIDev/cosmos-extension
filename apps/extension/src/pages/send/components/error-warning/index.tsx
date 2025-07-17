@@ -1,26 +1,22 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { useAddress, useAddressPrefixes, useChainsStore } from '@leapwallet/cosmos-wallet-hooks'
-import { getBlockChainFromAddress, SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import {
-  CosmosChainData,
-  Prettify,
-  SupportedChain as SupportedChains,
-} from '@leapwallet/elements-core'
-import { SkipCosmosMsg, useSkipSupportedChains } from '@leapwallet/elements-hooks'
-import { Info, Warning } from '@phosphor-icons/react'
-import BigNumber from 'bignumber.js'
-import Text from 'components/text'
-import { Button } from 'components/ui/button'
-import useActiveWallet from 'hooks/settings/useActiveWallet'
-import { useChainInfos } from 'hooks/useChainInfos'
-import { useSendContext } from 'pages/send/context'
-import React, { useEffect, useMemo, useState } from 'react'
+import { useAddress, useAddressPrefixes, useChainsStore } from '@leapwallet/cosmos-wallet-hooks';
+import { getBlockChainFromAddress, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { CosmosChainData, Prettify, SupportedChain as SupportedChains } from '@leapwallet/elements-core';
+import { SkipCosmosMsg, useSkipSupportedChains } from '@leapwallet/elements-hooks';
+import { Info, Warning } from '@phosphor-icons/react';
+import BigNumber from 'bignumber.js';
+import Text from 'components/text';
+import { Button } from 'components/ui/button';
+import useActiveWallet from 'hooks/settings/useActiveWallet';
+import { useChainInfos } from 'hooks/useChainInfos';
+import { useSendContext } from 'pages/send/context';
+import React, { useEffect, useMemo, useState } from 'react';
 
-import IBCSettings from '../IBCSettings'
+import IBCSettings from '../IBCSettings';
 
 export function ErrorChannel() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [assetChain, setAssetChain] = useState<any>(null)
+  const [assetChain, setAssetChain] = useState<any>(null);
 
   const {
     amountError,
@@ -33,18 +29,16 @@ export function ErrorChannel() {
     selectedAddress,
     customIbcChannelId,
     sendActiveChain,
-  } = useSendContext()
-  const { chains } = useChainsStore()
-  const addressPrefixes = useAddressPrefixes()
+  } = useSendContext();
+  const { chains } = useChainsStore();
+  const addressPrefixes = useAddressPrefixes();
 
   // getting the wallet address from the assets for auto fill
-  const chainInfos = useChainInfos()
-  const wallet = useActiveWallet().activeWallet
-  const asssetChainKey = Object.values(chainInfos).find(
-    (chain) => chain.chainId === assetChain?.chainId,
-  )?.key
+  const chainInfos = useChainInfos();
+  const wallet = useActiveWallet().activeWallet;
+  const asssetChainKey = Object.values(chainInfos).find((chain) => chain.chainId === assetChain?.chainId)?.key;
 
-  const autoFillAddress = wallet?.addresses?.[asssetChainKey as SupportedChain]
+  const autoFillAddress = wallet?.addresses?.[asssetChainKey as SupportedChain];
 
   const onAutoFillAddress = () => {
     setSelectedAddress({
@@ -56,19 +50,19 @@ export function ErrorChannel() {
       chainName: assetChain?.addressPrefix,
       selectionType: 'notSaved',
       information: { autofill: true },
-    })
-  }
+    });
+  };
 
-  const { data: skipSupportedChains } = useSkipSupportedChains()
+  const { data: skipSupportedChains } = useSkipSupportedChains();
 
   // checking if the token selected is pfmEnbled
   useEffect(() => {
     if (transferData?.isSkipTransfer && transferData?.routeResponse) {
-      const allMessages = transferData?.messages?.[1] as SkipCosmosMsg
+      const allMessages = transferData?.messages?.[1] as SkipCosmosMsg;
 
       const _skipChain = skipSupportedChains?.find(
         (d) => d.chainId === allMessages?.multi_chain_msg?.chain_id,
-      ) as Prettify<CosmosChainData & SupportedChains>
+      ) as Prettify<CosmosChainData & SupportedChains>;
       setAssetChain(
         _skipChain?.addressPrefix === 'sei'
           ? {
@@ -76,16 +70,16 @@ export function ErrorChannel() {
               addressPrefix: 'seiTestnet2',
             }
           : _skipChain,
-      )
-      setPfmEnabled(_skipChain?.pfmEnabled === false ? false : true)
+      );
+      setPfmEnabled(_skipChain?.pfmEnabled === false ? false : true);
     } else {
-      setAssetChain(null)
-      setPfmEnabled(true)
+      setAssetChain(null);
+      setPfmEnabled(true);
     }
 
     return () => {
-      setPfmEnabled(true)
-    }
+      setPfmEnabled(true);
+    };
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -95,12 +89,10 @@ export function ErrorChannel() {
     transferData?.routeResponse,
     // @ts-ignore
     transferData?.messages,
-  ])
+  ]);
 
-  const cw20Error = (amountError || '').includes('IBC transfers are not supported')
-  const isAddressNotSupported = (amountError || '').includes(
-    'You can only send this token to a SEI address',
-  )
+  const cw20Error = (amountError || '').includes('IBC transfers are not supported');
+  const isAddressNotSupported = (amountError || '').includes('You can only send this token to a SEI address');
 
   if (cw20Error || isAddressNotSupported) {
     return (
@@ -110,38 +102,33 @@ export function ErrorChannel() {
           {amountError}
         </Text>
       </div>
-    )
+    );
   }
 
-  const isIBCError = (addressError || '').includes('IBC transfers are not supported')
+  const isIBCError = (addressError || '').includes('IBC transfers are not supported');
 
   // Error warning for IBC transfers
   if (isIBCError || customIbcChannelId) {
     const destChainInfo = () => {
       if (!selectedAddress?.address) {
-        return null
+        return null;
       }
 
-      const destChainAddrPrefix = getBlockChainFromAddress(selectedAddress.address)
+      const destChainAddrPrefix = getBlockChainFromAddress(selectedAddress.address);
       if (!destChainAddrPrefix) {
-        return null
+        return null;
       }
 
-      const destinationChainKey = addressPrefixes[destChainAddrPrefix] as SupportedChain | undefined
+      const destinationChainKey = addressPrefixes[destChainAddrPrefix] as SupportedChain | undefined;
       if (!destinationChainKey) {
-        return null
+        return null;
       }
 
       // we are sure that the key is there in the chains object due to previous checks
-      return chains[destinationChainKey]
-    }
+      return chains[destinationChainKey];
+    };
 
-    return (
-      <IBCSettings
-        targetChain={destChainInfo()?.key as SupportedChain}
-        sourceChain={sendActiveChain}
-      />
-    )
+    return <IBCSettings targetChain={destChainInfo()?.key as SupportedChain} sourceChain={sendActiveChain} />;
   }
 
   // warning to show if PFM is not enabled on the chain
@@ -156,35 +143,34 @@ export function ErrorChannel() {
           Autofill address
         </Button>
       </div>
-    )
+    );
   }
-  return null
+  return null;
 }
 
 export function useSwitchToUSDDisabled() {
-  const { selectedToken } = useSendContext()
+  const { selectedToken } = useSendContext();
 
   const selectedAssetUSDPrice = useMemo(() => {
     if (selectedToken && selectedToken.usdPrice && selectedToken.usdPrice !== '0') {
-      return selectedToken.usdPrice
+      return selectedToken.usdPrice;
     }
 
-    return undefined
-  }, [selectedToken])
+    return undefined;
+  }, [selectedToken]);
 
   const switchToUSDDisabled = useMemo(() => {
-    return !selectedAssetUSDPrice || new BigNumber(selectedAssetUSDPrice ?? 0).isLessThan(10 ** -6)
-  }, [selectedAssetUSDPrice])
+    return !selectedAssetUSDPrice || new BigNumber(selectedAssetUSDPrice ?? 0).isLessThan(10 ** -6);
+  }, [selectedAssetUSDPrice]);
 
-  return switchToUSDDisabled
+  return switchToUSDDisabled;
 }
 
 export function ErrorWarning() {
-  const { isCexIbcTransferWarningNeeded, selectedAddress, selectedToken, sendActiveChain } =
-    useSendContext()
-  const currentWalletAddress = useAddress(sendActiveChain)
-  const switchToUSDDisabled = useSwitchToUSDDisabled()
-  const isSendingToSameWallet = currentWalletAddress === selectedAddress?.address
+  const { isCexIbcTransferWarningNeeded, selectedAddress, selectedToken, sendActiveChain } = useSendContext();
+  const currentWalletAddress = useAddress(sendActiveChain);
+  const switchToUSDDisabled = useSwitchToUSDDisabled();
+  const isSendingToSameWallet = currentWalletAddress === selectedAddress?.address;
 
   // warning to show if sending to same wallet address
   if (isSendingToSameWallet) {
@@ -195,12 +181,12 @@ export function ErrorWarning() {
           You&apos;re transferring funds to the same address within your own wallet
         </Text>
       </div>
-    )
+    );
   }
 
   // warning to show if USD value cannot be calculated
   if (switchToUSDDisabled && selectedToken?.chain) {
-    return null
+    return null;
   }
 
   if (isCexIbcTransferWarningNeeded) {
@@ -211,21 +197,21 @@ export function ErrorWarning() {
           Avoid transferring IBC tokens to centralised exchanges.
         </Text>
       </div>
-    )
+    );
   }
 
-  return null
+  return null;
 }
 
 export function ErrorWarningTokenCard() {
-  const switchToUSDDisabled = useSwitchToUSDDisabled()
-  const { selectedAddress, selectedToken, sendActiveChain } = useSendContext()
-  const currentWalletAddress = useAddress(sendActiveChain)
-  const isSendingToSameWallet = currentWalletAddress === selectedAddress?.address
+  const switchToUSDDisabled = useSwitchToUSDDisabled();
+  const { selectedAddress, selectedToken, sendActiveChain } = useSendContext();
+  const currentWalletAddress = useAddress(sendActiveChain);
+  const isSendingToSameWallet = currentWalletAddress === selectedAddress?.address;
 
   // warning to show if sending to same wallet address
   if (isSendingToSameWallet) {
-    return null
+    return null;
   }
 
   // warning to show if USD value cannot be calculated
@@ -237,8 +223,8 @@ export function ErrorWarningTokenCard() {
           USD value cannot be calculated for this transaction
         </Text>
       </div>
-    )
+    );
   }
 
-  return null
+  return null;
 }

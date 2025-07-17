@@ -1,34 +1,34 @@
-import { CheckCircle } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import Text from 'components/text'
-import { Images } from 'images'
-import React, { useEffect, useState } from 'react'
+import { CheckCircle } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import Text from 'components/text';
+import { Images } from 'images';
+import React, { useEffect, useState } from 'react';
 
 export interface StepCardProps {
-  stepNo: number
-  description: string
-  suggestion?: string
-  status: 'pending' | 'processing' | 'done'
+  stepNo: number;
+  description: string;
+  suggestion?: string;
+  status: 'pending' | 'processing' | 'done';
 }
 
 export default function StepCard({ stepNo, description, suggestion, status }: StepCardProps) {
-  const [showSuggestions, setShowSuggestions] = useState<boolean>(false)
+  const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
 
   useEffect(() => {
     if (status === 'pending') {
-      let timer = 0
+      let timer = 0;
       const timerId = setInterval(() => {
         if (timer >= 4) {
-          clearInterval(timerId)
-          setShowSuggestions(true)
+          clearInterval(timerId);
+          setShowSuggestions(true);
         }
-        timer = timer + 1
-      }, 1000)
-      return () => clearInterval(timerId)
+        timer = timer + 1;
+      }, 1000);
+      return () => clearInterval(timerId);
     }
-  }, [status])
+  }, [status]);
 
-  const transition = 'transition-all duration-300 ease'
+  const transition = 'transition-all duration-300 ease';
 
   return (
     <div
@@ -55,12 +55,8 @@ export default function StepCard({ stepNo, description, suggestion, status }: St
                 <button />
               </>
             )}
-            <div
-              className={`h-6 w-6 rounded-full bg-white-100 z-[10] flex items-center justify-center ${transition}`}
-            >
-              {status === 'done' && (
-                <CheckCircle weight='fill' size={32} className='text-green-600' />
-              )}
+            <div className={`h-6 w-6 rounded-full bg-white-100 z-[10] flex items-center justify-center ${transition}`}>
+              {status === 'done' && <CheckCircle weight='fill' size={32} className='text-green-600' />}
             </div>
           </div>
         )}
@@ -76,17 +72,14 @@ export default function StepCard({ stepNo, description, suggestion, status }: St
       </div>
       {suggestion && (
         <div
-          className={classNames(
-            `px-4 rounded-b-[12px] font-medium text-white-100 dark:text-black-100 ${transition}`,
-            {
-              'opacity-0 h-0 py-0': !(showSuggestions && status === 'done'),
-              'opacity-1 h-[54px] py-4': showSuggestions && status === 'done',
-            },
-          )}
+          className={classNames(`px-4 rounded-b-[12px] font-medium text-white-100 dark:text-black-100 ${transition}`, {
+            'opacity-0 h-0 py-0': !(showSuggestions && status === 'done'),
+            'opacity-1 h-[54px] py-4': showSuggestions && status === 'done',
+          })}
         >
           {suggestion}
         </div>
       )}
     </div>
-  )
+  );
 }

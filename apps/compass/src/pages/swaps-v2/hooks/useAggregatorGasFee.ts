@@ -1,7 +1,7 @@
-import { StdFee } from '@cosmjs/stargate'
-import { useChainApis, useGasPriceStepForChain } from '@leapwallet/cosmos-wallet-hooks'
-import { AptosTx, SeiEvmTx, SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { SkipMsg, SkipMsgV2, TransactionRequestType } from '@leapwallet/elements-core'
+import { StdFee } from '@cosmjs/stargate';
+import { useChainApis, useGasPriceStepForChain } from '@leapwallet/cosmos-wallet-hooks';
+import { AptosTx, SeiEvmTx, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { SkipMsg, SkipMsgV2, TransactionRequestType } from '@leapwallet/elements-core';
 import {
   LifiRouteOverallResponse,
   RouteAggregator,
@@ -9,37 +9,33 @@ import {
   SkipRouteResponse,
   useAggregatorGasFeeSWR as useAggregatorGasFeeSWRBase,
   UseSkipGasFeeReturnType,
-} from '@leapwallet/elements-hooks'
-import { BigNumber } from 'bignumber.js'
-import { Wallet } from 'hooks/wallet/useWallet'
-import { useState } from 'react'
-import { compassSeiEvmConfigStore } from 'stores/balance-store'
-import useSWR, { SWRConfiguration, unstable_serialize } from 'swr'
-import { SourceChain } from 'types/swap'
-import { isCompassWallet } from 'utils/isCompassWallet'
+} from '@leapwallet/elements-hooks';
+import { BigNumber } from 'bignumber.js';
+import { Wallet } from 'hooks/wallet/useWallet';
+import { useState } from 'react';
+import { compassSeiEvmConfigStore } from 'stores/balance-store';
+import useSWR, { SWRConfiguration, unstable_serialize } from 'swr';
+import { SourceChain } from 'types/swap';
+import { isCompassWallet } from 'utils/isCompassWallet';
 
-import { SWAP_NETWORK } from './useSwapsTx'
+import { SWAP_NETWORK } from './useSwapsTx';
 
-const tenMillion = new BigNumber(10).pow(6 + 1)
+const tenMillion = new BigNumber(10).pow(6 + 1);
 
-export const formatAmount = (
-  amount: BigNumber.Value,
-  minimumFractionDigits = 0,
-  maximumFractionDigits = 2,
-) => {
-  const x = new BigNumber(amount)
-  const lowest = new BigNumber(10).pow(-maximumFractionDigits)
+export const formatAmount = (amount: BigNumber.Value, minimumFractionDigits = 0, maximumFractionDigits = 2) => {
+  const x = new BigNumber(amount);
+  const lowest = new BigNumber(10).pow(-maximumFractionDigits);
 
   if (x.isNaN()) {
-    return ''
+    return '';
   }
 
   if (x.isZero()) {
-    return '0'
+    return '0';
   }
 
   if (x.isLessThan(lowest)) {
-    return `< ${lowest}`
+    return `< ${lowest}`;
   }
 
   return Intl.NumberFormat('en-US', {
@@ -50,8 +46,8 @@ export const formatAmount = (
     minimumFractionDigits,
   })
     .format(x.toNumber())
-    .slice(1)
-}
+    .slice(1);
+};
 
 /**
  * React hook to get gas fee data for supported Aggregators:
@@ -75,11 +71,11 @@ export function useAggregatorGasFeeSWR(
     enabled && routeResponse?.aggregator !== RouteAggregator.LIFI,
     undefined,
     undefined,
-  )
+  );
 
-  const { evmJsonRpc } = useChainApis((sourceChain?.key ?? '') as SupportedChain, SWAP_NETWORK)
+  const { evmJsonRpc } = useChainApis((sourceChain?.key ?? '') as SupportedChain, SWAP_NETWORK);
 
-  const isEvmTx = !!skipMessages?.[0] && 'evm_tx' in skipMessages[0]
+  const isEvmTx = !!skipMessages?.[0] && 'evm_tx' in skipMessages[0];
 
   const skipEvmGasFeeSWR = useSWR<SkipGasFeeData>(
     enabled && !!routeResponse && routeResponse?.aggregator !== RouteAggregator.LIFI && isEvmTx
@@ -95,17 +91,17 @@ export function useAggregatorGasFeeSWR(
     async function calculateGasFee() {
       try {
         if (!routeResponse?.response || !skipMessages || !userAddressesMap || !isMainnet) {
-          throw new Error('missing data')
+          throw new Error('missing data');
         }
 
-        const message = skipMessages[0]
+        const message = skipMessages[0];
 
         if (!('evm_tx' in message)) {
-          throw new Error('missing data')
+          throw new Error('missing data');
         }
 
-        const evmTx = message.evm_tx
-        const address = (evmTx as any).signer_address
+        const evmTx = message.evm_tx;
+        const address = (evmTx as any).signer_address;
 
         const gasUsed = await SeiEvmTx.SimulateTransaction(
           evmTx.to,
@@ -114,50 +110,41 @@ export function useAggregatorGasFeeSWR(
           `0x${evmTx.data}`,
           undefined,
           address,
-        )
+        );
 
         const gasFeesAmount: StdFee[] = [
           {
             gas: new BigNumber(gasUsed).integerValue(BigNumber.ROUND_UP).toFixed(0),
             amount: [],
           },
-        ]
+        ];
         return {
           gasFees: [],
           gasFeesAmount,
           gasFeesError: '',
           usdGasFees: [],
-        }
+        };
       } catch (e) {
         // eslint-disable-next-line no-console
-        console.error(e)
+        console.error(e);
         return {
           gasFees: [],
           gasFeesAmount: [],
           gasFeesError: '',
           usdGasFees: [],
-        }
+        };
       }
     },
     config,
-  )
+  );
 
-  const defaultSeiGasPriceSteps = useGasPriceStepForChain('seiTestnet2', SWAP_NETWORK)
-  const seiEvmRpc = compassSeiEvmConfigStore.compassSeiEvmConfig.PACIFIC_EVM_RPC_URL
+  const defaultSeiGasPriceSteps = useGasPriceStepForChain('seiTestnet2', SWAP_NETWORK);
+  const seiEvmRpc = compassSeiEvmConfigStore.compassSeiEvmConfig.PACIFIC_EVM_RPC_URL;
 
-  const defaultSeiGasPrice = defaultSeiGasPriceSteps.low
+  const defaultSeiGasPrice = defaultSeiGasPriceSteps.low;
   const lifiGasFeeSWRResponse = useSWR<SkipGasFeeData>(
-    !!routeResponse &&
-      routeResponse?.aggregator === RouteAggregator.LIFI &&
-      enabled &&
-      !!defaultSeiGasPrice
-      ? unstable_serialize([
-          skipMessages,
-          userAddressesMap,
-          routeResponse?.aggregator,
-          routeResponse,
-          isMainnet,
-        ])
+    !!routeResponse && routeResponse?.aggregator === RouteAggregator.LIFI && enabled && !!defaultSeiGasPrice
+      ? unstable_serialize([skipMessages, userAddressesMap, routeResponse?.aggregator, routeResponse, isMainnet])
       : null,
     async function calculateGasFee() {
       if (
@@ -165,35 +152,33 @@ export function useAggregatorGasFeeSWR(
         (routeResponse && routeResponse?.aggregator !== RouteAggregator.LIFI) ||
         !defaultSeiGasPrice
       ) {
-        throw new Error('missing data')
+        throw new Error('missing data');
       }
 
-      const response = routeResponse.response
+      const response = routeResponse.response;
 
       if (!response) {
-        throw new Error('missing data')
+        throw new Error('missing data');
       }
 
-      const gasFees: string[] = []
+      const gasFees: string[] = [];
       for (const step of response.steps) {
-        const decimals = step.estimate?.gasCosts?.[0]?.token.decimals ?? 18
-        const amount = new BigNumber(step.estimate?.gasCosts?.[0]?.amount ?? 0)
-        const gasFee = amount.dividedBy(new BigNumber(10).pow(decimals)).toString()
-        const formattedFee = formatAmount(gasFee, 2, 6)
+        const decimals = step.estimate?.gasCosts?.[0]?.token.decimals ?? 18;
+        const amount = new BigNumber(step.estimate?.gasCosts?.[0]?.amount ?? 0);
+        const gasFee = amount.dividedBy(new BigNumber(10).pow(decimals)).toString();
+        const formattedFee = formatAmount(gasFee, 2, 6);
 
-        gasFees.push(`${formattedFee} ${step.estimate?.gasCosts?.[0].token.symbol}`)
+        gasFees.push(`${formattedFee} ${step.estimate?.gasCosts?.[0].token.symbol}`);
       }
 
-      const usdGasFees = response.steps.map(
-        (step) => new BigNumber(step.estimate.gasCosts?.[0].amountUSD ?? '0'),
-      )
+      const usdGasFees = response.steps.map((step) => new BigNumber(step.estimate.gasCosts?.[0].amountUSD ?? '0'));
 
-      const message = (skipMessages as TransactionRequestType[])?.[0]
-      let gasUsed = 0
+      const message = (skipMessages as TransactionRequestType[])?.[0];
+      let gasUsed = 0;
 
       try {
         if (!message) {
-          throw new Error('missing message')
+          throw new Error('missing message');
         }
         gasUsed = await SeiEvmTx.SimulateTransaction(
           message.tokenContract,
@@ -202,14 +187,14 @@ export function useAggregatorGasFeeSWR(
           message.data,
           undefined,
           message.from,
-        )
+        );
       } catch (e) {
         // eslint-disable-next-line no-console
-        console.error(e)
+        console.error(e);
       }
 
-      const gasLimit = Math.max(Number(message?.gasLimit), gasUsed).toString()
-      const gasPrice = Number(message?.gasPrice).toString()
+      const gasLimit = Math.max(Number(message?.gasLimit), gasUsed).toString();
+      const gasPrice = Number(message?.gasPrice).toString();
 
       const gasFeesAmount = [
         {
@@ -227,30 +212,28 @@ export function useAggregatorGasFeeSWR(
                   .toFixed(0, 2)
               : undefined,
         } as StdFee,
-      ]
+      ];
 
       return {
         gasFees: gasFees,
         usdGasFees: usdGasFees,
         gasFeesAmount: gasFeesAmount,
-        gasFeesError: response.steps.find((step) => !step.estimate.gasCosts)
-          ? 'Cannot determine gas cost'
-          : '',
-      } as unknown as SkipGasFeeData
+        gasFeesError: response.steps.find((step) => !step.estimate.gasCosts) ? 'Cannot determine gas cost' : '',
+      } as unknown as SkipGasFeeData;
     },
     config,
-  )
+  );
 
   if (routeResponse?.aggregator === RouteAggregator.LIFI) {
-    return lifiGasFeeSWRResponse
+    return lifiGasFeeSWRResponse;
   }
 
   if (isEvmTx) {
-    return skipEvmGasFeeSWR
+    return skipEvmGasFeeSWR;
   }
 
   return {
     ...skipGasFeeSWRResponse,
     isLoading: skipGasFeeSWRResponse.isLoading,
-  }
+  };
 }

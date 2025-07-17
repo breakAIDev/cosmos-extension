@@ -1,19 +1,19 @@
-import { AvatarCard, Buttons, ThemeName, useTheme } from '@leapwallet/leap-ui'
-import BottomModal from 'components/bottom-modal'
-import { SelectedAddress } from 'pages/send/types'
-import React, { ReactElement, useCallback, useState } from 'react'
-import { Colors } from 'theme/colors'
-import { AddressBook } from 'utils/addressbook'
-import { sliceAddress } from 'utils/strings'
+import { AvatarCard, Buttons, ThemeName, useTheme } from '@leapwallet/leap-ui';
+import BottomModal from 'components/bottom-modal';
+import { SelectedAddress } from 'pages/send/types';
+import React, { ReactElement, useCallback, useState } from 'react';
+import { Colors } from 'theme/colors';
+import { AddressBook } from 'utils/addressbook';
+import { sliceAddress } from 'utils/strings';
 
-import SaveAddressSheet from '../recipient-card/save-address-sheet'
+import SaveAddressSheet from '../recipient-card/save-address-sheet';
 
 export type WalletDetailsSheetProps = {
-  isOpen: boolean
-  selectedAddress: SelectedAddress
-  onDelete: () => void
-  onCloseHandler: () => void
-}
+  isOpen: boolean;
+  selectedAddress: SelectedAddress;
+  onDelete: () => void;
+  onCloseHandler: () => void;
+};
 
 export default function WalletDetailsSheet({
   isOpen,
@@ -21,13 +21,13 @@ export default function WalletDetailsSheet({
   onDelete,
   selectedAddress,
 }: WalletDetailsSheetProps): ReactElement {
-  const [showSaveAddressSheet, setShowSaveAddressSheet] = useState<boolean>(false)
-  const contact = AddressBook.useGetContact(selectedAddress.address ?? '')
-  const { theme } = useTheme()
+  const [showSaveAddressSheet, setShowSaveAddressSheet] = useState<boolean>(false);
+  const contact = AddressBook.useGetContact(selectedAddress.address ?? '');
+  const { theme } = useTheme();
 
   const stopPropagation = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    e.stopPropagation()
-  }, [])
+    e.stopPropagation();
+  }, []);
 
   // do not remove stopPropagation, it is needed to prevent the modal from closing when clicking on the modal itself
   // this happens due to the address input component
@@ -63,9 +63,9 @@ export default function WalletDetailsSheet({
               title='Delete contact'
               color={Colors.red300}
               onClick={async () => {
-                await AddressBook.removeEntry(selectedAddress.address ?? '')
-                onDelete()
-                onCloseHandler()
+                await AddressBook.removeEntry(selectedAddress.address ?? '');
+                onDelete();
+                onCloseHandler();
               }}
               className='flex-1'
             >
@@ -91,5 +91,5 @@ export default function WalletDetailsSheet({
         onClose={() => setShowSaveAddressSheet(false)}
       />
     </div>
-  )
+  );
 }

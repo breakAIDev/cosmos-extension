@@ -8,45 +8,45 @@ import {
   useSelectedNetwork,
   useStakeTx,
   useValidatorImage,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain, UnbondingDelegationEntry, Validator } from '@leapwallet/cosmos-wallet-sdk'
-import { useTheme } from '@leapwallet/leap-ui'
-import BigNumber from 'bignumber.js'
-import GasPriceOptions, { useDefaultGasPrice } from 'components/gas-price-options'
-import { GasPriceOptionValue } from 'components/gas-price-options/context'
-import { DisplayFee } from 'components/gas-price-options/display-fee'
-import { FeesSettingsSheet } from 'components/gas-price-options/fees-settings-sheet'
-import LedgerConfirmationPopup from 'components/ledger-confirmation/LedgerConfirmationPopup'
-import BottomModal from 'components/new-bottom-modal'
-import { Button } from 'components/ui/button'
-import { EventName } from 'config/analytics'
-import { useCaptureUIException } from 'hooks/perf-monitoring/useCaptureUIException'
-import { useFormatCurrency } from 'hooks/settings/useCurrency'
-import { useCaptureTxError } from 'hooks/utility/useCaptureTxError'
-import { Wallet } from 'hooks/wallet/useWallet'
-import { Images } from 'images'
-import loadingImage from 'lottie-files/swaps-btn-loading.json'
-import Lottie from 'lottie-react'
-import mixpanel from 'mixpanel-browser'
-import { observer } from 'mobx-react-lite'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { rootDenomsStore } from 'stores/denoms-store-instance'
-import { rootBalanceStore } from 'stores/root-store'
-import { isSidePanel } from 'utils/isSidePanel'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain, UnbondingDelegationEntry, Validator } from '@leapwallet/cosmos-wallet-sdk';
+import { useTheme } from '@leapwallet/leap-ui';
+import BigNumber from 'bignumber.js';
+import GasPriceOptions, { useDefaultGasPrice } from 'components/gas-price-options';
+import { GasPriceOptionValue } from 'components/gas-price-options/context';
+import { DisplayFee } from 'components/gas-price-options/display-fee';
+import { FeesSettingsSheet } from 'components/gas-price-options/fees-settings-sheet';
+import LedgerConfirmationPopup from 'components/ledger-confirmation/LedgerConfirmationPopup';
+import BottomModal from 'components/new-bottom-modal';
+import { Button } from 'components/ui/button';
+import { EventName } from 'config/analytics';
+import { useCaptureUIException } from 'hooks/perf-monitoring/useCaptureUIException';
+import { useFormatCurrency } from 'hooks/settings/useCurrency';
+import { useCaptureTxError } from 'hooks/utility/useCaptureTxError';
+import { Wallet } from 'hooks/wallet/useWallet';
+import { Images } from 'images';
+import loadingImage from 'lottie-files/swaps-btn-loading.json';
+import Lottie from 'lottie-react';
+import mixpanel from 'mixpanel-browser';
+import { observer } from 'mobx-react-lite';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { rootDenomsStore } from 'stores/denoms-store-instance';
+import { rootBalanceStore } from 'stores/root-store';
+import { isSidePanel } from 'utils/isSidePanel';
 
-import { transitionTitleMap } from '../utils/stake-text'
-import { ClaimCard } from './ReviewClaimTx'
+import { transitionTitleMap } from '../utils/stake-text';
+import { ClaimCard } from './ReviewClaimTx';
 
-import useGetWallet = Wallet.useGetWallet
+import useGetWallet = Wallet.useGetWallet;
 interface ReviewCancelUnstakeTxProps {
-  isOpen: boolean
-  onClose: () => void
-  validator: Validator
-  unbondingDelegationEntry?: UnbondingDelegationEntry
-  forceChain?: SupportedChain
-  forceNetwork?: SelectedNetwork
-  setClaimTxMode: (mode: STAKE_MODE | 'CLAIM_AND_DELEGATE' | null) => void
+  isOpen: boolean;
+  onClose: () => void;
+  validator: Validator;
+  unbondingDelegationEntry?: UnbondingDelegationEntry;
+  forceChain?: SupportedChain;
+  forceNetwork?: SelectedNetwork;
+  setClaimTxMode: (mode: STAKE_MODE | 'CLAIM_AND_DELEGATE' | null) => void;
 }
 
 const ReviewCancelUnstakeTx = observer(
@@ -59,27 +59,24 @@ const ReviewCancelUnstakeTx = observer(
     forceNetwork,
     setClaimTxMode,
   }: ReviewCancelUnstakeTxProps) => {
-    const denoms = rootDenomsStore.allDenoms
-    const getWallet = useGetWallet()
+    const denoms = rootDenomsStore.allDenoms;
+    const getWallet = useGetWallet();
 
-    const _activeChain = useActiveChain()
-    const activeChain = useMemo(() => forceChain || _activeChain, [_activeChain, forceChain])
+    const _activeChain = useActiveChain();
+    const activeChain = useMemo(() => forceChain || _activeChain, [_activeChain, forceChain]);
 
-    const _activeNetwork = useSelectedNetwork()
-    const activeNetwork = useMemo(
-      () => forceNetwork || _activeNetwork,
-      [_activeNetwork, forceNetwork],
-    )
+    const _activeNetwork = useSelectedNetwork();
+    const activeNetwork = useMemo(() => forceNetwork || _activeNetwork, [_activeNetwork, forceNetwork]);
 
     const defaultGasPrice = useDefaultGasPrice(denoms, {
       activeChain,
       selectedNetwork: activeNetwork,
-    })
+    });
 
-    const [formatCurrency] = useFormatCurrency()
-    const [activeStakingDenom] = useActiveStakingDenom(denoms, activeChain, activeNetwork)
+    const [formatCurrency] = useFormatCurrency();
+    const [activeStakingDenom] = useActiveStakingDenom(denoms, activeChain, activeNetwork);
 
-    const { theme } = useTheme()
+    const { theme } = useTheme();
 
     const {
       showLedgerPopup,
@@ -108,93 +105,83 @@ const ReviewCancelUnstakeTx = observer(
       undefined,
       activeChain,
       activeNetwork,
-    )
+    );
 
-    const [showFeesSettingSheet, setShowFeesSettingSheet] = useState<boolean>(false)
-    const [gasError, setGasError] = useState<string | null>(null)
+    const [showFeesSettingSheet, setShowFeesSettingSheet] = useState<boolean>(false);
+    const [gasError, setGasError] = useState<string | null>(null);
     const [gasPriceOption, setGasPriceOption] = useState<GasPriceOptionValue>({
       option: gasOption,
       gasPrice: userPreferredGasPrice ?? defaultGasPrice.gasPrice,
-    })
-    const navigate = useNavigate()
-    const { data: validatorImage } = useValidatorImage(validator?.image ? undefined : validator)
-    const imageUrl = validator?.image || validatorImage || Images.Misc.Validator
+    });
+    const navigate = useNavigate();
+    const { data: validatorImage } = useValidatorImage(validator?.image ? undefined : validator);
+    const imageUrl = validator?.image || validatorImage || Images.Misc.Validator;
 
-    useCaptureTxError(error)
+    useCaptureTxError(error);
 
     useEffect(() => {
-      setCreationHeight((unbondingDelegationEntry as UnbondingDelegationEntry).creation_height)
-      setAmount((unbondingDelegationEntry as UnbondingDelegationEntry).balance)
+      setCreationHeight((unbondingDelegationEntry as UnbondingDelegationEntry).creation_height);
+      setAmount((unbondingDelegationEntry as UnbondingDelegationEntry).balance);
 
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [unbondingDelegationEntry])
+    }, [unbondingDelegationEntry]);
 
     useEffect(() => {
       if (gasPriceOption.option) {
-        setGasOption(gasPriceOption.option)
+        setGasOption(gasPriceOption.option);
       }
       if (gasPriceOption.gasPrice) {
-        setUserPreferredGasPrice(gasPriceOption.gasPrice)
+        setUserPreferredGasPrice(gasPriceOption.gasPrice);
       }
-    }, [gasPriceOption, setGasOption, setUserPreferredGasPrice])
+    }, [gasPriceOption, setGasOption, setUserPreferredGasPrice]);
 
     const onGasPriceOptionChange = useCallback(
       (value: GasPriceOptionValue, feeBaseDenom: FeeTokenData) => {
-        setGasPriceOption(value)
-        setFeeDenom(feeBaseDenom.denom)
+        setGasPriceOption(value);
+        setFeeDenom(feeBaseDenom.denom);
       },
       [setFeeDenom],
-    )
+    );
 
     const handleCloseFeeSettingSheet = useCallback(() => {
-      setShowFeesSettingSheet(false)
-    }, [])
+      setShowFeesSettingSheet(false);
+    }, []);
 
     const txCallback = useCallback(() => {
-      setClaimTxMode('CANCEL_UNDELEGATION')
+      setClaimTxMode('CANCEL_UNDELEGATION');
       // mixpanel.track(EventName.TransactionSigned, {
       //   transactionType: 'stake_cancel_undelegate',
       // })
-      onClose()
-    }, [onClose, setClaimTxMode])
+      onClose();
+    }, [onClose, setClaimTxMode]);
 
     const onSubmit = useCallback(async () => {
       try {
-        const wallet = await getWallet(activeChain)
+        const wallet = await getWallet(activeChain);
         onReviewTransaction(wallet, txCallback, false, {
           stdFee: customFee,
           feeDenom: feeDenom,
-        })
+        });
       } catch (error) {
-        const _error = error as Error
-        setLedgerError(_error.message)
+        const _error = error as Error;
+        setLedgerError(_error.message);
 
         setTimeout(() => {
-          setLedgerError('')
-        }, 6000)
+          setLedgerError('');
+        }, 6000);
       }
-    }, [
-      customFee,
-      feeDenom,
-      getWallet,
-      onReviewTransaction,
-      setLedgerError,
-      txCallback,
-      activeChain,
-    ])
+    }, [customFee, feeDenom, getWallet, onReviewTransaction, setLedgerError, txCallback, activeChain]);
 
     useCaptureUIException(ledgerError || error, {
       activeChain,
       activeNetwork,
-    })
+    });
 
     return (
       <GasPriceOptions
         recommendedGasLimit={recommendedGasLimit}
         gasLimit={userPreferredGasLimit?.toString() ?? recommendedGasLimit}
-        setGasLimit={(value: number | string | BigNumber) =>
-          setUserPreferredGasLimit(Number(value.toString()))
-        }
+        setGasLimit={(value: number | string | BigNumber) => setUserPreferredGasLimit(Number(value.toString()))}
         gasPriceOption={gasPriceOption}
         onGasPriceOptionChange={onGasPriceOptionChange}
         error={gasError}
@@ -204,12 +191,7 @@ const ReviewCancelUnstakeTx = observer(
         rootBalanceStore={rootBalanceStore}
         rootDenomsStore={rootDenomsStore}
       >
-        <BottomModal
-          isOpen={isOpen}
-          onClose={onClose}
-          title={transitionTitleMap.CANCEL_UNDELEGATION}
-          className='p-6'
-        >
+        <BottomModal isOpen={isOpen} onClose={onClose} title={transitionTitleMap.CANCEL_UNDELEGATION} className='p-6'>
           <div className='flex flex-col items-center w-full gap-y-4'>
             {/* <div className='flex items-start gap-1.5 px-3 py-2.5 rounded-xl text-orange-500 dark:text-orange-300 bg-orange-500/10 dark:bg-orange-400/10'>
               <Info size={16} className='shrink-0' />
@@ -244,9 +226,7 @@ const ReviewCancelUnstakeTx = observer(
             <ClaimCard
               title={sliceWord(
                 validator?.moniker,
-                isSidePanel()
-                  ? 15 + Math.floor(((Math.min(window.innerWidth, 400) - 320) / 81) * 7)
-                  : 10,
+                isSidePanel() ? 15 + Math.floor(((Math.min(window.innerWidth, 400) - 320) / 81) * 7) : 10,
                 3,
               )}
               subText='Validator'
@@ -260,9 +240,7 @@ const ReviewCancelUnstakeTx = observer(
           </div>
 
           <div className='flex flex-col items-center w-full gap-y-2'>
-            {ledgerError && (
-              <p className='text-sm font-bold text-destructive-100 px-2'>{ledgerError}</p>
-            )}
+            {ledgerError && <p className='text-sm font-bold text-destructive-100 px-2'>{ledgerError}</p>}
             {error && <p className='text-sm font-bold text-destructive-100 px-2'>{error}</p>}
             {gasError && !showFeesSettingSheet && (
               <p className='text-sm font-bold text-destructive-100 px-2'>{gasError}</p>
@@ -297,8 +275,8 @@ const ReviewCancelUnstakeTx = observer(
           gasError={gasError}
         />
       </GasPriceOptions>
-    )
+    );
   },
-)
+);
 
-export default ReviewCancelUnstakeTx
+export default ReviewCancelUnstakeTx;

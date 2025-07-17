@@ -1,8 +1,8 @@
-import { GasPrice } from '@leapwallet/cosmos-wallet-sdk'
-import BigNumber from 'bignumber.js'
+import { GasPrice } from '@leapwallet/cosmos-wallet-sdk';
+import BigNumber from 'bignumber.js';
 
-import { getStdFee } from './get-fee'
-import { getMilkywayMemo } from './get-milkyway-memo'
+import { getStdFee } from './get-fee';
+import { getMilkywayMemo } from './get-milkyway-memo';
 
 export function getAminoSignDoc({
   signRequestData,
@@ -13,18 +13,18 @@ export function getAminoSignDoc({
   isGasOptionSelected,
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  signRequestData: Record<string, any>
-  gasPrice: GasPrice
-  gasLimit: string
-  memo: string
-  isAdr36?: boolean
-  isGasOptionSelected: boolean
+  signRequestData: Record<string, any>;
+  gasPrice: GasPrice;
+  gasLimit: string;
+  memo: string;
+  isAdr36?: boolean;
+  isGasOptionSelected: boolean;
 }) {
-  const signDoc = signRequestData['sign-request'].signDoc
-  const signOptions = signRequestData['sign-request'].signOptions
+  const signDoc = signRequestData['sign-request'].signDoc;
+  const signOptions = signRequestData['sign-request'].signOptions;
 
-  const defaultFee = signDoc.fee
-  const defaultMemo = getMilkywayMemo(signRequestData['sign-request'], signDoc, signDoc.memo)
+  const defaultFee = signDoc.fee;
+  const defaultMemo = getMilkywayMemo(signRequestData['sign-request'], signDoc, signDoc.memo);
 
   const sortedSignDoc = {
     chain_id: signDoc.chain_id ?? signDoc.chainId,
@@ -34,10 +34,10 @@ export function getAminoSignDoc({
     msgs: signDoc.msgs,
     ...signDoc,
     memo: defaultMemo,
-  }
+  };
 
   if (!isAdr36) {
-    const customGasLimit = new BigNumber(gasLimit)
+    const customGasLimit = new BigNumber(gasLimit);
 
     const fee =
       signOptions?.preferNoSetFee && !isGasOptionSelected
@@ -51,19 +51,19 @@ export function getAminoSignDoc({
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             gasPrice,
-          )
+          );
 
-    sortedSignDoc.fee = fee
+    sortedSignDoc.fee = fee;
     if (defaultFee.granter) {
-      sortedSignDoc.fee.granter = defaultFee.granter
+      sortedSignDoc.fee.granter = defaultFee.granter;
     }
     if (defaultFee.payer) {
-      sortedSignDoc.fee.payer = defaultFee.payer
+      sortedSignDoc.fee.payer = defaultFee.payer;
     }
   }
 
   if (!defaultMemo) {
-    sortedSignDoc.memo = memo
+    sortedSignDoc.memo = memo;
   }
 
   return {
@@ -72,5 +72,5 @@ export function getAminoSignDoc({
     allowSetFee: !signOptions?.preferNoSetFee,
     defaultFee,
     defaultMemo,
-  }
+  };
 }

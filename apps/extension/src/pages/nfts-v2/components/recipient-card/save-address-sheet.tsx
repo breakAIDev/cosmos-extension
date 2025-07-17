@@ -1,35 +1,35 @@
-import { SelectedAddress, useAddressPrefixes } from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { Avatar, Buttons, Input, Memo } from '@leapwallet/leap-ui'
-import { bech32 } from 'bech32'
-import BottomModal from 'components/bottom-modal'
-import IconButton from 'components/icon-button'
-import { LoaderAnimation } from 'components/loader/Loader'
-import Text from 'components/text'
-import { useChainInfos } from 'hooks/useChainInfos'
-import { useContacts } from 'hooks/useContacts'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import { Images } from 'images'
-import React, { ChangeEvent, useEffect, useMemo, useState } from 'react'
-import { Colors } from 'theme/colors'
-import { AddressBook } from 'utils/addressbook'
+import { SelectedAddress, useAddressPrefixes } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { Avatar, Buttons, Input, Memo } from '@leapwallet/leap-ui';
+import { bech32 } from 'bech32';
+import BottomModal from 'components/bottom-modal';
+import IconButton from 'components/icon-button';
+import { LoaderAnimation } from 'components/loader/Loader';
+import Text from 'components/text';
+import { useChainInfos } from 'hooks/useChainInfos';
+import { useContacts } from 'hooks/useContacts';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { Images } from 'images';
+import React, { ChangeEvent, useEffect, useMemo, useState } from 'react';
+import { Colors } from 'theme/colors';
+import { AddressBook } from 'utils/addressbook';
 
 type SaveAddressSheetProps = {
-  title?: string
-  isOpen: boolean
-  address: string
-  onClose: () => void
+  title?: string;
+  isOpen: boolean;
+  address: string;
+  onClose: () => void;
   // eslint-disable-next-line no-unused-vars
-  onSave?: (s: SelectedAddress) => void
-}
+  onSave?: (s: SelectedAddress) => void;
+};
 
 const getPrevEmojiIndex = (a: number) => {
-  return ((a - 1) % 20) + (a >= 1 ? 0 : 20)
-}
+  return ((a - 1) % 20) + (a >= 1 ? 0 : 20);
+};
 
 const getNextEmojiIndex = (a: number) => {
-  return (a + 1) % 20
-}
+  return (a + 1) % 20;
+};
 
 export default function SaveAddressSheet({
   title = 'Save Contact',
@@ -38,45 +38,45 @@ export default function SaveAddressSheet({
   address,
   onSave,
 }: SaveAddressSheetProps) {
-  const [memo, setMemo] = useState<string>('')
-  const [name, setName] = useState<string>('')
-  const [emoji, setEmoji] = useState<number>(1)
-  const [error, setError] = useState('')
+  const [memo, setMemo] = useState<string>('');
+  const [name, setName] = useState<string>('');
+  const [emoji, setEmoji] = useState<number>(1);
+  const [error, setError] = useState('');
 
-  const [isSaving, setIsSaving] = useState<boolean>(false)
+  const [isSaving, setIsSaving] = useState<boolean>(false);
 
-  const existingContact = AddressBook.useGetContact(address)
-  const { contacts: savedContacts, loading: savedContactsLoading } = useContacts()
-  const chainInfos = useChainInfos()
-  const addressPrefixes = useAddressPrefixes()
-  const defaultTokenLogo = useDefaultTokenLogo()
+  const existingContact = AddressBook.useGetContact(address);
+  const { contacts: savedContacts, loading: savedContactsLoading } = useContacts();
+  const chainInfos = useChainInfos();
+  const addressPrefixes = useAddressPrefixes();
+  const defaultTokenLogo = useDefaultTokenLogo();
 
   const chain = useMemo(() => {
     try {
-      const { prefix } = bech32.decode(address)
-      const _chain = addressPrefixes[prefix]
+      const { prefix } = bech32.decode(address);
+      const _chain = addressPrefixes[prefix];
       if (_chain === 'cosmoshub') {
-        return 'cosmos'
+        return 'cosmos';
       }
-      return _chain as SupportedChain
+      return _chain as SupportedChain;
     } catch (e) {
-      return 'cosmos'
+      return 'cosmos';
     }
-  }, [address, addressPrefixes])
+  }, [address, addressPrefixes]);
 
-  const chainIcon = chainInfos[chain].chainSymbolImageUrl ?? defaultTokenLogo
+  const chainIcon = chainInfos[chain].chainSymbolImageUrl ?? defaultTokenLogo;
 
   useEffect(() => {
     if (existingContact) {
-      setName(existingContact.name)
-      setEmoji(existingContact.emoji)
-      setMemo(existingContact.memo ?? '')
+      setName(existingContact.name);
+      setEmoji(existingContact.emoji);
+      setMemo(existingContact.memo ?? '');
     }
-  }, [existingContact])
+  }, [existingContact]);
 
   const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
-    error && setError('')
-    const value = event.target.value
+    error && setError('');
+    const value = event.target.value;
 
     if (value.length < 24) {
       if (
@@ -87,23 +87,23 @@ export default function SaveAddressSheet({
             sCAddress !== address && name.trim().toLowerCase() === value.trim().toLowerCase(),
         )
       ) {
-        setError('Contact with same name already exists')
+        setError('Contact with same name already exists');
       }
 
-      setName(value)
+      setName(value);
     }
-  }
+  };
 
   const onClickSave = async () => {
     if (name && !isSaving) {
-      setIsSaving(true)
+      setIsSaving(true);
       await AddressBook.save({
         address: address,
         blockchain: chain,
         emoji: emoji,
         name: name,
         memo: memo,
-      })
+      });
 
       onSave?.({
         address: address,
@@ -113,11 +113,11 @@ export default function SaveAddressSheet({
         avatarIcon: '',
         chainName: chainInfos[chain].chainName,
         selectionType: 'saved',
-      })
-      onClose()
-      setIsSaving(false)
+      });
+      onClose();
+      setIsSaving(false);
     }
-  }
+  };
 
   return (
     <BottomModal isOpen={isOpen} onClose={onClose} title={title} closeOnBackdropClick={true}>
@@ -127,7 +127,7 @@ export default function SaveAddressSheet({
             <IconButton
               className='mx-2 p-2 rotate-180'
               onClick={() => {
-                setEmoji(getPrevEmojiIndex(emoji))
+                setEmoji(getPrevEmojiIndex(emoji));
               }}
               image={{ src: Images.Misc.RightArrow, alt: 'left' }}
             />
@@ -135,7 +135,7 @@ export default function SaveAddressSheet({
             <IconButton
               className='mx-2 p-2'
               onClick={() => {
-                setEmoji(getNextEmojiIndex(emoji))
+                setEmoji(getNextEmojiIndex(emoji));
               }}
               image={{ src: Images.Misc.RightArrow, alt: 'right' }}
             />
@@ -143,12 +143,7 @@ export default function SaveAddressSheet({
 
           <div className='w-full'>
             <div className='w-full flex shrink relative justify-center'>
-              <Input
-                width={312}
-                placeholder={'enter name'}
-                value={name}
-                onChange={handleNameChange}
-              />
+              <Input width={312} placeholder={'enter name'} value={name} onChange={handleNameChange} />
               <div className='absolute right-[16px] top-[14px] text-gray-400 text-sm font-medium'>{`${name.length}/24`}</div>
             </div>
 
@@ -163,7 +158,7 @@ export default function SaveAddressSheet({
         <Memo
           value={memo}
           onChange={(e) => {
-            setMemo(e.target.value)
+            setMemo(e.target.value);
           }}
         />
 
@@ -177,7 +172,7 @@ export default function SaveAddressSheet({
             disabled={!name || !!error}
             title='Send'
             onClick={async () => {
-              await onClickSave()
+              await onClickSave();
             }}
           >
             Save contact
@@ -185,5 +180,5 @@ export default function SaveAddressSheet({
         )}
       </div>
     </BottomModal>
-  )
+  );
 }

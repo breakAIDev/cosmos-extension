@@ -1,33 +1,33 @@
-import { LSProvider, SelectedNetwork, useActiveStakingDenom } from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { RootDenomsStore } from '@leapwallet/cosmos-wallet-store'
-import { GenericCard } from '@leapwallet/leap-ui'
-import { ArrowSquareOut } from '@phosphor-icons/react'
-import BottomModal from 'components/bottom-modal'
-import { ValidatorItemSkeleton } from 'components/Skeletons/StakeSkeleton'
-import Text from 'components/text'
-import { EventName } from 'config/analytics'
-import currency from 'currency.js'
-import { GenericLight } from 'images/logos'
-import mixpanel from 'mixpanel-browser'
-import React from 'react'
-import { imgOnError } from 'utils/imgOnError'
+import { LSProvider, SelectedNetwork, useActiveStakingDenom } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { RootDenomsStore } from '@leapwallet/cosmos-wallet-store';
+import { GenericCard } from '@leapwallet/leap-ui';
+import { ArrowSquareOut } from '@phosphor-icons/react';
+import BottomModal from 'components/bottom-modal';
+import { ValidatorItemSkeleton } from 'components/Skeletons/StakeSkeleton';
+import Text from 'components/text';
+import { EventName } from 'config/analytics';
+import currency from 'currency.js';
+import { GenericLight } from 'images/logos';
+import mixpanel from 'mixpanel-browser';
+import React from 'react';
+import { imgOnError } from 'utils/imgOnError';
 
 interface SelectLSProviderProps {
-  isVisible: boolean
-  onClose: () => void
-  providers: LSProvider[]
-  rootDenomsStore: RootDenomsStore
-  forceChain?: SupportedChain
-  forceNetwork?: SelectedNetwork
+  isVisible: boolean;
+  onClose: () => void;
+  providers: LSProvider[];
+  rootDenomsStore: RootDenomsStore;
+  forceChain?: SupportedChain;
+  forceNetwork?: SelectedNetwork;
 }
 
 interface ProviderCardProps {
-  provider: LSProvider
-  backgroundColor: string
-  rootDenomsStore: RootDenomsStore
-  activeChain?: SupportedChain
-  activeNetwork?: SelectedNetwork
+  provider: LSProvider;
+  backgroundColor: string;
+  rootDenomsStore: RootDenomsStore;
+  activeChain?: SupportedChain;
+  activeNetwork?: SelectedNetwork;
 }
 
 export function ProviderCard({
@@ -37,16 +37,12 @@ export function ProviderCard({
   activeChain,
   activeNetwork,
 }: ProviderCardProps) {
-  const [activeStakingDenom] = useActiveStakingDenom(
-    rootDenomsStore.allDenoms,
-    activeChain,
-    activeNetwork,
-  )
+  const [activeStakingDenom] = useActiveStakingDenom(rootDenomsStore.allDenoms, activeChain, activeNetwork);
 
   return (
     <GenericCard
       onClick={() => {
-        window.open(provider.url, '_blank')
+        window.open(provider.url, '_blank');
       }}
       className={`${backgroundColor} w-full`}
       img={
@@ -61,11 +57,7 @@ export function ProviderCard({
       isRounded
       size='md'
       title={
-        <Text
-          size='sm'
-          color='text-black-100 dark:text-white-100'
-          className='font-bold overflow-hidden'
-        >
+        <Text size='sm' color='text-black-100 dark:text-white-100' className='font-bold overflow-hidden'>
           {provider.name}
         </Text>
       }
@@ -79,11 +71,9 @@ export function ProviderCard({
             : 'N/A'}
         </Text>
       }
-      icon={
-        <ArrowSquareOut size={16} weight='bold' className='dark:text-white-100 text-black-100' />
-      }
+      icon={<ArrowSquareOut size={16} weight='bold' className='dark:text-white-100 text-black-100' />}
     />
-  )
+  );
 }
 
 export default function SelectLSProvider({
@@ -108,9 +98,7 @@ export default function SelectLSProvider({
               )}
               <ProviderCard
                 provider={provider}
-                backgroundColor={`${
-                  provider.priority ? '!bg-[#29A87426]' : 'bg-white-100 dark:bg-gray-950'
-                }`}
+                backgroundColor={`${provider.priority ? '!bg-[#29A87426]' : 'bg-white-100 dark:bg-gray-950'}`}
                 rootDenomsStore={rootDenomsStore}
                 activeChain={forceChain}
                 activeNetwork={forceNetwork}
@@ -119,5 +107,5 @@ export default function SelectLSProvider({
           ))}
       </div>
     </BottomModal>
-  )
+  );
 }

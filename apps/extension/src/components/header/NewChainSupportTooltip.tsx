@@ -1,99 +1,93 @@
-import { useCustomChains } from '@leapwallet/cosmos-wallet-hooks'
-import { ChainInfo } from '@leapwallet/cosmos-wallet-sdk'
-import { useTheme } from '@leapwallet/leap-ui'
-import { captureException } from '@sentry/react'
-import { useSetActiveChain } from 'hooks/settings/useActiveChain'
-import { useChainInfos } from 'hooks/useChainInfos'
-import useNewChainTooltip from 'hooks/useNewChainTooltip'
-import AddFromChainStore from 'pages/home/AddFromChainStore'
-import React, { useCallback, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { AggregatedSupportedChain } from 'types/utility'
-import { uiErrorTags } from 'utils/sentry'
+import { useCustomChains } from '@leapwallet/cosmos-wallet-hooks';
+import { ChainInfo } from '@leapwallet/cosmos-wallet-sdk';
+import { useTheme } from '@leapwallet/leap-ui';
+import { captureException } from '@sentry/react';
+import { useSetActiveChain } from 'hooks/settings/useActiveChain';
+import { useChainInfos } from 'hooks/useChainInfos';
+import useNewChainTooltip from 'hooks/useNewChainTooltip';
+import AddFromChainStore from 'pages/home/AddFromChainStore';
+import React, { useCallback, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { AggregatedSupportedChain } from 'types/utility';
+import { uiErrorTags } from 'utils/sentry';
 
 const NewChainSupportTooltip = () => {
-  const { toolTipData, handleToolTipClose, showToolTip } = useNewChainTooltip()
+  const { toolTipData, handleToolTipClose, showToolTip } = useNewChainTooltip();
 
-  const [newChain, setNewChain] = useState<string | null>(null)
+  const [newChain, setNewChain] = useState<string | null>(null);
 
-  const { theme } = useTheme()
-  const navigate = useNavigate()
-  const customChains = useCustomChains()
-  const chainInfos = useChainInfos()
-  const setActiveChain = useSetActiveChain()
+  const { theme } = useTheme();
+  const navigate = useNavigate();
+  const customChains = useCustomChains();
+  const chainInfos = useChainInfos();
+  const setActiveChain = useSetActiveChain();
 
   const handleAddChainClick = useCallback(
     (chain: string) => {
-      const item = customChains.find((customChain) => customChain.chainRegistryPath === chain)
-      let chainKey
+      const item = customChains.find((customChain) => customChain.chainRegistryPath === chain);
+      let chainKey;
       for (const [key, chainInfo] of Object.entries(chainInfos)) {
-        if (
-          chainInfo.chainRegistryPath === item?.chainRegistryPath ||
-          chainInfo.key === item?.chainRegistryPath
-        ) {
-          chainKey = key
-          break
+        if (chainInfo.chainRegistryPath === item?.chainRegistryPath || chainInfo.key === item?.chainRegistryPath) {
+          chainKey = key;
+          break;
         }
       }
       if (chainKey) {
-        setActiveChain(chainKey as AggregatedSupportedChain, item)
+        setActiveChain(chainKey as AggregatedSupportedChain, item);
       } else if (item) {
-        setNewChain(item.chainName)
+        setNewChain(item.chainName);
       } else {
         captureException(`${chain} chain not found when clicked on tooltip`, {
           tags: uiErrorTags,
-        })
+        });
       }
     },
     [chainInfos, customChains, setActiveChain, setNewChain],
-  )
+  );
 
   const handleSwitchChainClick = useCallback(
     (chainRegistryPath: string) => {
-      let chainKey
+      let chainKey;
       for (const [key, chainInfo] of Object.entries(chainInfos)) {
-        if (
-          chainInfo.chainRegistryPath === chainRegistryPath ||
-          chainInfo.key === chainRegistryPath
-        ) {
-          chainKey = key
-          break
+        if (chainInfo.chainRegistryPath === chainRegistryPath || chainInfo.key === chainRegistryPath) {
+          chainKey = key;
+          break;
         }
       }
       if (chainKey) {
-        setActiveChain(chainKey as AggregatedSupportedChain)
+        setActiveChain(chainKey as AggregatedSupportedChain);
       } else {
         captureException(`${chainRegistryPath} chain not found when clicked on banners`, {
           tags: uiErrorTags,
-        })
+        });
       }
     },
     [chainInfos, setActiveChain],
-  )
+  );
 
   const handleCTAClick = useCallback(() => {
-    handleToolTipClose()
+    handleToolTipClose();
 
     switch (toolTipData?.ctaAction?.type) {
       case 'redirect-internally': {
-        navigate(`${toolTipData?.ctaAction.redirectUrl}&toolTipId=${toolTipData?.id}`)
-        break
+        navigate(`${toolTipData?.ctaAction.redirectUrl}&toolTipId=${toolTipData?.id}`);
+        break;
       }
       case 'redirect-externally': {
-        window.open(toolTipData?.ctaAction.redirectUrl, '_blank')
-        break
+        window.open(toolTipData?.ctaAction.redirectUrl, '_blank');
+        break;
       }
       case 'add-chain': {
-        handleAddChainClick(toolTipData?.ctaAction.chainRegistryPath)
-        break
+        handleAddChainClick(toolTipData?.ctaAction.chainRegistryPath);
+        break;
       }
       case 'switch-chain': {
-        handleSwitchChainClick(toolTipData?.ctaAction.chainRegistryPath)
-        break
+        handleSwitchChainClick(toolTipData?.ctaAction.chainRegistryPath);
+        break;
       }
       default: {
-        navigate(`/home?openChainSwitch=true`)
-        break
+        navigate(`/home?openChainSwitch=true`);
+        break;
       }
     }
   }, [
@@ -103,28 +97,22 @@ const NewChainSupportTooltip = () => {
     navigate,
     handleAddChainClick,
     handleSwitchChainClick,
-  ])
+  ]);
 
   if (!showToolTip || !toolTipData) {
-    return null
+    return null;
   }
 
   return (
     <>
       <div
         onClick={(e) => {
-          e.stopPropagation()
+          e.stopPropagation();
         }}
         className='cursor-default z-[2] p-3 rounded-xl absolute bg-white-100 !w-[272px] border border-gray-200 dark:border-gray-850 dark:bg-gray-950 top-[56px] right-0 flex flex-col justify-start items-start gap-3 !max-w-max'
       >
         <div className='absolute bottom-[100%] right-4'>
-          <svg
-            width='28'
-            height='8'
-            viewBox='0 0 28 8'
-            fill='none'
-            xmlns='http://www.w3.org/2000/svg'
-          >
+          <svg width='28' height='8' viewBox='0 0 28 8' fill='none' xmlns='http://www.w3.org/2000/svg'>
             <path
               d='M12.5858 0.653454L9.74904 3.81789C8.36542 5.36134 7.67361 6.13306 6.86628 6.68494C6.1505 7.17424 5.37015 7.53481 4.55386 7.75342C3.63316 8 2.65479 8 0.698067 8L27.3019 8C25.3452 8 24.3668 8 23.4461 7.75343C22.6299 7.53481 21.8495 7.17424 21.1337 6.68494C20.3264 6.13306 19.6346 5.36134 18.251 3.81789L15.4142 0.653452C14.6332 -0.217819 13.3668 -0.217816 12.5858 0.653454Z'
               fill={theme !== 'dark' ? '#F4F4F4' : '#141414'}
@@ -170,7 +158,7 @@ const NewChainSupportTooltip = () => {
         newAddChain={customChains.find((d) => d.chainName === newChain) as ChainInfo}
       />
     </>
-  )
-}
+  );
+};
 
-export default NewChainSupportTooltip
+export default NewChainSupportTooltip;

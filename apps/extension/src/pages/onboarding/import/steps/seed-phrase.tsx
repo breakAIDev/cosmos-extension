@@ -1,10 +1,10 @@
-import { SeedPhraseInput } from 'components/seed-phrase-input'
-import { Button } from 'components/ui/button'
-import React, { useEffect, useState } from 'react'
-import { validateSeedPhrase } from 'utils/validateSeedPhrase'
+import { SeedPhraseInput } from 'components/seed-phrase-input';
+import { Button } from 'components/ui/button';
+import React, { useEffect, useState } from 'react';
+import { validateSeedPhrase } from 'utils/validateSeedPhrase';
 
-import { OnboardingWrapper } from '../../wrapper'
-import { useImportWalletContext } from '../import-wallet-context'
+import { OnboardingWrapper } from '../../wrapper';
+import { useImportWalletContext } from '../import-wallet-context';
 
 export const SeedPhrase = () => {
   const {
@@ -16,31 +16,31 @@ export const SeedPhrase = () => {
     importWalletFromSeedPhrase,
     prevStep,
     currentStep,
-  } = useImportWalletContext()
-  const [error, setError] = useState(privateKeyError ?? '')
-  const [isLoading, setIsLoading] = useState(false)
-  const isPrivateKey = walletName === 'private-key'
+  } = useImportWalletContext();
+  const [error, setError] = useState(privateKeyError ?? '');
+  const [isLoading, setIsLoading] = useState(false);
+  const isPrivateKey = walletName === 'private-key';
 
   useEffect(() => {
     if (privateKeyError?.length) {
-      setError(privateKeyError)
+      setError(privateKeyError);
     }
-  }, [privateKeyError])
+  }, [privateKeyError]);
 
   const onChangeHandler = (value: string) => {
-    setError('')
-    setPrivateKeyError && setPrivateKeyError('')
-    setSecret(value)
-  }
+    setError('');
+    setPrivateKeyError && setPrivateKeyError('');
+    setSecret(value);
+  };
 
   const handleImportWalletClick = async () => {
     if (validateSeedPhrase({ phrase: secret, isPrivateKey, setError, setSecret })) {
-      setIsLoading(true)
-      await new Promise((resolve) => setTimeout(resolve, 100))
-      await importWalletFromSeedPhrase()
-      setIsLoading(false)
+      setIsLoading(true);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      await importWalletFromSeedPhrase();
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <OnboardingWrapper
@@ -52,10 +52,7 @@ export const SeedPhrase = () => {
         <SeedPhraseInput onChangeHandler={onChangeHandler} isError={!!error} />
 
         {error && (
-          <span
-            className='text-xs font-medium text-destructive-100 block text-center'
-            data-testing-id='error-text-ele'
-          >
+          <span className='text-xs font-medium text-destructive-100 block text-center' data-testing-id='error-text-ele'>
             {error}
           </span>
         )}
@@ -70,5 +67,5 @@ export const SeedPhrase = () => {
         Continue
       </Button>
     </OnboardingWrapper>
-  )
-}
+  );
+};

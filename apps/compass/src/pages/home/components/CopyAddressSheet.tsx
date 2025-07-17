@@ -1,4 +1,4 @@
-import HCaptcha from '@hcaptcha/react-hcaptcha'
+import HCaptcha from '@hcaptcha/react-hcaptcha';
 import {
   getSeiEvmInfo,
   SeiEvmInfoEnum,
@@ -6,27 +6,27 @@ import {
   useFeatureFlags,
   useSeiLinkedAddressState,
   useSelectedNetwork,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { ArrowSquareOut } from '@phosphor-icons/react'
-import { AlertStripV2 } from 'components/alert-strip/alert-strip-v2'
-import BottomModal from 'components/bottom-modal'
-import { CopyAddressCard } from 'components/card'
-import { ErrorCard } from 'components/ErrorCard'
-import { Button } from 'components/ui/button'
-import { ButtonName, EventName } from 'config/analytics'
-import { SHOW_LINK_ADDRESS_NUDGE } from 'config/storage-keys'
-import { useGetWalletAddresses } from 'hooks/useGetWalletAddresses'
-import { Wallet } from 'hooks/wallet/useWallet'
-import { Images } from 'images'
-import mixpanel from 'mixpanel-browser'
-import { observer } from 'mobx-react-lite'
-import React, { useMemo, useRef, useState } from 'react'
-import { globalSheetsStore } from 'stores/ui/global-sheets-store'
-import { sidePanel } from 'utils/isSidePanel'
-import Browser from 'webextension-polyfill'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { ArrowSquareOut } from '@phosphor-icons/react';
+import { AlertStripV2 } from 'components/alert-strip/alert-strip-v2';
+import BottomModal from 'components/bottom-modal';
+import { CopyAddressCard } from 'components/card';
+import { ErrorCard } from 'components/ErrorCard';
+import { Button } from 'components/ui/button';
+import { ButtonName, EventName } from 'config/analytics';
+import { SHOW_LINK_ADDRESS_NUDGE } from 'config/storage-keys';
+import { useGetWalletAddresses } from 'hooks/useGetWalletAddresses';
+import { Wallet } from 'hooks/wallet/useWallet';
+import { Images } from 'images';
+import mixpanel from 'mixpanel-browser';
+import { observer } from 'mobx-react-lite';
+import React, { useMemo, useRef, useState } from 'react';
+import { globalSheetsStore } from 'stores/ui/global-sheets-store';
+import { sidePanel } from 'utils/isSidePanel';
+import Browser from 'webextension-polyfill';
 
 const AddressList = observer(() => {
-  const walletAddresses = useGetWalletAddresses()
+  const walletAddresses = useGetWalletAddresses();
 
   return (
     <BottomModal
@@ -39,39 +39,39 @@ const AddressList = observer(() => {
         <CopyAddressCard address={address} key={`${address}-${index}`} />
       ))}
     </BottomModal>
-  )
-})
+  );
+});
 
 export const LinkAddressSheet = observer(() => {
-  const walletAddresses = useGetWalletAddresses()
-  const [error, setError] = useState<string>()
-  const activeChain = useActiveChain()
+  const walletAddresses = useGetWalletAddresses();
+  const [error, setError] = useState<string>();
+  const activeChain = useActiveChain();
 
-  const hCaptchaRef = useRef<HCaptcha>(null)
-  const [hCaptchaError, setHCaptchaError] = useState<string>('')
-  const [showLoadingMessage, setShowLoadingMessage] = useState('')
+  const hCaptchaRef = useRef<HCaptcha>(null);
+  const [hCaptchaError, setHCaptchaError] = useState<string>('');
+  const [showLoadingMessage, setShowLoadingMessage] = useState('');
 
-  const activeNetwork = useSelectedNetwork()
-  const { data: featureFlags } = useFeatureFlags()
+  const activeNetwork = useSelectedNetwork();
+  const { data: featureFlags } = useFeatureFlags();
 
-  const getWallet = Wallet.useGetWallet()
-  const { addressLinkState, updateAddressLinkState } = useSeiLinkedAddressState()
+  const getWallet = Wallet.useGetWallet();
+  const { addressLinkState, updateAddressLinkState } = useSeiLinkedAddressState();
 
-  const [showRefreshText, setShowRefreshText] = useState(false)
+  const [showRefreshText, setShowRefreshText] = useState(false);
 
   const handleLinkAddressClick = async () => {
-    setShowLoadingMessage('')
+    setShowLoadingMessage('');
 
     if (addressLinkState === 'success') {
-      return
+      return;
     }
 
     if (showRefreshText) {
-      const homePageUrl = sidePanel ? `/sidepanel.html#/home` : `/index.html#/home`
-      window.location.href = Browser.runtime.getURL(homePageUrl)
-      window.location.reload()
+      const homePageUrl = sidePanel ? `/sidepanel.html#/home` : `/index.html#/home`;
+      window.location.href = Browser.runtime.getURL(homePageUrl);
+      window.location.reload();
 
-      return
+      return;
     }
 
     if (featureFlags?.link_evm_address?.extension === 'redirect') {
@@ -79,64 +79,64 @@ export const LinkAddressSheet = observer(() => {
         activeNetwork,
         activeChain: activeChain as 'seiDevnet' | 'seiTestnet2',
         infoType: SeiEvmInfoEnum.NO_FUNDS_DAPP_LINK,
-      })) as string
+      })) as string;
 
-      window.open(dAppLink, '_blank')
-      setShowRefreshText(true)
-      globalSheetsStore.setCopyAddressSheetOpen(false)
+      window.open(dAppLink, '_blank');
+      setShowRefreshText(true);
+      globalSheetsStore.setCopyAddressSheetOpen(false);
 
-      return
+      return;
     }
 
     if (featureFlags?.link_evm_address?.extension === 'no-funds') {
       try {
-        const result = await hCaptchaRef.current?.execute({ async: true })
+        const result = await hCaptchaRef.current?.execute({ async: true });
 
         if (!result) {
-          setHCaptchaError('Could not get hCaptcha response. Please try again.')
-          return
+          setHCaptchaError('Could not get hCaptcha response. Please try again.');
+          return;
         }
 
         await updateAddressLinkState({
           wallet: getWallet,
           setError,
           onClose: () => {
-            globalSheetsStore.setCopyAddressSheetOpen(false)
-            localStorage.setItem(SHOW_LINK_ADDRESS_NUDGE, 'false')
+            globalSheetsStore.setCopyAddressSheetOpen(false);
+            localStorage.setItem(SHOW_LINK_ADDRESS_NUDGE, 'false');
           },
           ethAddress: walletAddresses[0],
           token: result.response,
           setShowLoadingMessage,
-        })
+        });
       } catch (_) {
-        setHCaptchaError('Failed to verify captcha. Please try again.')
+        setHCaptchaError('Failed to verify captcha. Please try again.');
       }
 
-      return
+      return;
     }
 
     await updateAddressLinkState({
       wallet: getWallet,
       setError,
       onClose: () => {
-        globalSheetsStore.setCopyAddressSheetOpen(false)
-        localStorage.setItem(SHOW_LINK_ADDRESS_NUDGE, 'false')
+        globalSheetsStore.setCopyAddressSheetOpen(false);
+        localStorage.setItem(SHOW_LINK_ADDRESS_NUDGE, 'false');
       },
       ethAddress: walletAddresses[0],
-    })
-  }
+    });
+  };
 
   const btnText = useMemo(() => {
     if (addressLinkState === 'loading') {
-      return 'Loading'
+      return 'Loading';
     }
 
     if (addressLinkState === 'success') {
-      return 'Addresses linked successfully'
+      return 'Addresses linked successfully';
     }
 
     if (showRefreshText) {
-      return 'Refresh & verify'
+      return 'Refresh & verify';
     }
 
     if (featureFlags?.link_evm_address?.extension === 'redirect') {
@@ -145,21 +145,20 @@ export const LinkAddressSheet = observer(() => {
           Link Addresses
           <ArrowSquareOut size={20} className='!leading-[20px]' />
         </span>
-      )
+      );
     }
 
-    return 'Link Addresses'
-  }, [addressLinkState, featureFlags?.link_evm_address?.extension, showRefreshText])
+    return 'Link Addresses';
+  }, [addressLinkState, featureFlags?.link_evm_address?.extension, showRefreshText]);
 
-  const isBtnDisabled =
-    addressLinkState === 'loading' || featureFlags?.link_evm_address?.extension === 'disabled'
+  const isBtnDisabled = addressLinkState === 'loading' || featureFlags?.link_evm_address?.extension === 'disabled';
 
   return (
     <BottomModal
       isOpen={globalSheetsStore.isCopyAddressSheetOpen}
       onClose={() => {
-        localStorage.setItem(SHOW_LINK_ADDRESS_NUDGE, 'false')
-        globalSheetsStore.setCopyAddressSheetOpen(false)
+        localStorage.setItem(SHOW_LINK_ADDRESS_NUDGE, 'false');
+        globalSheetsStore.setCopyAddressSheetOpen(false);
       }}
       title={'Link your addresses'}
       className='flex flex-col items-center justify-center gap-2 w-full overflow-y-auto relative'
@@ -172,12 +171,7 @@ export const LinkAddressSheet = observer(() => {
 
       <AlertStripV2 className='absolute top-0 left-0 right-0'>
         For Sei V2, link your EVM and SEI address.
-        <a
-          href='https://seistartguide.addpotion.com/'
-          target='_blank'
-          className='ml-2 underline'
-          rel='noreferrer'
-        >
+        <a href='https://seistartguide.addpotion.com/' target='_blank' className='ml-2 underline' rel='noreferrer'>
           Learn more
         </a>
       </AlertStripV2>
@@ -205,23 +199,19 @@ export const LinkAddressSheet = observer(() => {
         {btnText}
       </Button>
 
-      {hCaptchaError ? (
-        <p className='font-medium text-destructive-200 text-center mt-4'>{hCaptchaError}</p>
-      ) : null}
+      {hCaptchaError ? <p className='font-medium text-destructive-200 text-center mt-4'>{hCaptchaError}</p> : null}
 
-      {showLoadingMessage ? (
-        <p className='text-accent-warning text-center mt-4'>{showLoadingMessage}</p>
-      ) : null}
+      {showLoadingMessage ? <p className='text-accent-warning text-center mt-4'>{showLoadingMessage}</p> : null}
     </BottomModal>
-  )
-})
+  );
+});
 
 export const CopyAddressSheet = () => {
-  const { addressLinkState } = useSeiLinkedAddressState()
+  const { addressLinkState } = useSeiLinkedAddressState();
 
   if (addressLinkState === 'pending') {
-    return <LinkAddressSheet />
+    return <LinkAddressSheet />;
   }
 
-  return <AddressList />
-}
+  return <AddressList />;
+};

@@ -1,56 +1,41 @@
-import { CanvasBox } from 'components/canvas-box/CanvasTextBox'
-import { Button } from 'components/ui/button'
-import { AnimatePresence, motion } from 'framer-motion'
-import { KeySlimIcon } from 'icons/key-slim-icon'
-import React, {
-  ChangeEvent,
-  ChangeEventHandler,
-  ComponentPropsWithoutRef,
-  useMemo,
-  useState,
-} from 'react'
-import { cn } from 'utils/cn'
-import { getWordFromMnemonic } from 'utils/getWordFromMnemonic'
-import { errorVariants } from 'utils/motion-variants'
+import { CanvasBox } from 'components/canvas-box/CanvasTextBox';
+import { Button } from 'components/ui/button';
+import { AnimatePresence, motion } from 'framer-motion';
+import { KeySlimIcon } from 'icons/key-slim-icon';
+import React, { ChangeEvent, ChangeEventHandler, ComponentPropsWithoutRef, useMemo, useState } from 'react';
+import { cn } from 'utils/cn';
+import { getWordFromMnemonic } from 'utils/getWordFromMnemonic';
+import { errorVariants } from 'utils/motion-variants';
 
-import { OnboardingWrapper } from '../wrapper'
-import { useCreateWalletContext } from './create-wallet-context'
-import { SeedPhraseViewProps } from './SeedPhraseView'
+import { OnboardingWrapper } from '../wrapper';
+import { useCreateWalletContext } from './create-wallet-context';
+import { SeedPhraseViewProps } from './SeedPhraseView';
 
-type StatusType = 'error' | 'success' | ''
+type StatusType = 'error' | 'success' | '';
 
 type Status = {
-  four: StatusType
-  eight: StatusType
-  tweleve: StatusType
-}
+  four: StatusType;
+  eight: StatusType;
+  tweleve: StatusType;
+};
 
 type WordInputProps = ComponentPropsWithoutRef<'input'> & {
-  readonly value?: string
-  readonly onChange?: ChangeEventHandler
-  readonly onBlur?: () => void
-  readonly name?: string
-  readonly className?: string
-  readonly prefixNumber?: number
-  readonly status?: StatusType
-}
+  readonly value?: string;
+  readonly onChange?: ChangeEventHandler;
+  readonly onBlur?: () => void;
+  readonly name?: string;
+  readonly className?: string;
+  readonly prefixNumber?: number;
+  readonly status?: StatusType;
+};
 
 const outlineClassMap = {
   error: 'outline-destructive-100',
   success: 'outline-accent-success',
   default: 'focus-within:outline-foreground',
-}
+};
 
-const WordInput = ({
-  value,
-  onChange,
-  onBlur,
-  name,
-  prefixNumber,
-  className,
-  status,
-  ...rest
-}: WordInputProps) => {
+const WordInput = ({ value, onChange, onBlur, name, prefixNumber, className, status, ...rest }: WordInputProps) => {
   return (
     <div
       className={cn(
@@ -73,92 +58,88 @@ const WordInput = ({
         {...rest}
       />
     </div>
-  )
-}
+  );
+};
 
 type MissingWords = {
-  four: string
-  eight: string
-  tweleve: string
-}
+  four: string;
+  eight: string;
+  tweleve: string;
+};
 
 function ConfirmSecretPhraseView({ onProceed, mnemonic }: SeedPhraseViewProps) {
   const [status, setStatus] = useState<Status>({
     four: '',
     eight: '',
     tweleve: '',
-  })
+  });
   const [missingWords, setMissingWords] = useState<MissingWords>({
     four: '',
     eight: '',
     tweleve: '',
-  })
+  });
 
-  const hasError = status.four === 'error' || status.eight === 'error' || status.tweleve === 'error'
+  const hasError = status.four === 'error' || status.eight === 'error' || status.tweleve === 'error';
 
   const words = useMemo(() => {
-    const _words = mnemonic.trim().split(' ')
-    _words[3] = ''
-    _words[7] = ''
-    _words[11] = ''
+    const _words = mnemonic.trim().split(' ');
+    _words[3] = '';
+    _words[7] = '';
+    _words[11] = '';
 
-    return _words.join(' ')
-  }, [mnemonic])
+    return _words.join(' ');
+  }, [mnemonic]);
 
   function handleInputChange(event: ChangeEvent<HTMLInputElement>) {
     setStatus({
       ...status,
       [event.target.name]: '',
-    })
-    setMissingWords((prevValue) => ({ ...prevValue, [event.target.name]: event.target.value }))
+    });
+    setMissingWords((prevValue) => ({ ...prevValue, [event.target.name]: event.target.value }));
   }
 
   const validateInput = (index: number, numberWord: keyof typeof missingWords) => {
-    const word = getWordFromMnemonic(mnemonic, index)
-    const missingWord = missingWords[numberWord].trim()
+    const word = getWordFromMnemonic(mnemonic, index);
+    const missingWord = missingWords[numberWord].trim();
 
     setStatus({
       ...status,
       [numberWord]: missingWord && word !== missingWord ? 'error' : missingWord ? 'success' : '',
-    })
-  }
+    });
+  };
 
   function handleConfirmClick() {
     if (getWordFromMnemonic(mnemonic, 4) !== missingWords.four.trim()) {
       setStatus({
         ...status,
         four: 'error',
-      })
-      return
+      });
+      return;
     }
 
     if (getWordFromMnemonic(mnemonic, 8) !== missingWords.eight.trim()) {
       setStatus({
         ...status,
         eight: 'error',
-      })
-      return
+      });
+      return;
     }
 
     if (getWordFromMnemonic(mnemonic, 12) !== missingWords.tweleve.trim()) {
       setStatus({
         ...status,
         tweleve: 'error',
-      })
-      return
+      });
+      return;
     }
 
-    onProceed()
+    onProceed();
   }
 
   return (
     <>
       <div className='space-y-6'>
-        <div
-          className={
-            'relative rounded-2xl bg-secondary-200 text-xs font-medium box-border h-[184px] w-[376px] p-5'
-          }
-        >
+        <div className={'relative rounded-2xl bg-secondary-200 text-xs font-medium box-border h-[184px] w-[376px] p-5'}>
           <CanvasBox height={144} width={376 - 30} text={words} noSpace={false} />
 
           <WordInput
@@ -220,11 +201,11 @@ function ConfirmSecretPhraseView({ onProceed, mnemonic }: SeedPhraseViewProps) {
         Confirm and continue
       </Button>
     </>
-  )
+  );
 }
 
 export const ConfirmSecretPhrase = (props: SeedPhraseViewProps) => {
-  const { prevStep, currentStep } = useCreateWalletContext()
+  const { prevStep, currentStep } = useCreateWalletContext();
 
   return (
     <form onSubmit={(event) => event.preventDefault()} className='flex flex-col h-full'>
@@ -242,5 +223,5 @@ export const ConfirmSecretPhrase = (props: SeedPhraseViewProps) => {
         <ConfirmSecretPhraseView {...props} />
       </OnboardingWrapper>
     </form>
-  )
-}
+  );
+};

@@ -1,28 +1,28 @@
-import BottomModal from 'components/bottom-modal'
-import { Button } from 'components/ui/button'
-import { EyeIcon } from 'icons/eye-icon'
-import { observer } from 'mobx-react-lite'
-import CreateImportActions from 'pages/home/SelectWallet/CreateImportActions'
-import React, { useState } from 'react'
-import { globalSheetsStore } from 'stores/ui/global-sheets-store'
+import BottomModal from 'components/bottom-modal';
+import { Button } from 'components/ui/button';
+import { EyeIcon } from 'icons/eye-icon';
+import { observer } from 'mobx-react-lite';
+import CreateImportActions from 'pages/home/SelectWallet/CreateImportActions';
+import React, { useState } from 'react';
+import { globalSheetsStore } from 'stores/ui/global-sheets-store';
 
 const ImportWatchWalletSeedPopup = observer(() => {
-  const [showImportWalletSheet, setShowImportWalletSheet] = useState(false)
+  const [showImportWalletSheet, setShowImportWalletSheet] = useState(false);
 
   return (
     <>
       <BottomModal
         isOpen={globalSheetsStore.importWatchWalletSeedPopupOpen}
         onClose={() => {
-          globalSheetsStore.setImportWatchWalletSeedPopupOpen(false)
+          globalSheetsStore.setImportWatchWalletSeedPopupOpen(false);
         }}
         title={'Import wallet'}
         className='p-6'
         footerComponent={
           <Button
             onClick={() => {
-              setShowImportWalletSheet(true)
-              globalSheetsStore.setImportWatchWalletSeedPopupOpen(false)
+              setShowImportWalletSheet(true);
+              globalSheetsStore.setImportWatchWalletSeedPopupOpen(false);
             }}
             className='w-full'
             size={'md'}
@@ -46,11 +46,11 @@ const ImportWatchWalletSeedPopup = observer(() => {
         title='Add / Connect Wallet'
         isVisible={showImportWalletSheet}
         onClose={() => {
-          setShowImportWalletSheet(false)
+          setShowImportWalletSheet(false);
         }}
       />
     </>
-  )
-})
+  );
+});
 
-export default ImportWatchWalletSeedPopup
+export default ImportWatchWalletSeedPopup;

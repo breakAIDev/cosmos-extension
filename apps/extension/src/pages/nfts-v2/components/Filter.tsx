@@ -1,15 +1,15 @@
-import { X } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import Sort from 'icons/sort'
-import { Images } from 'images'
-import React from 'react'
-import { isSidePanel } from 'utils/isSidePanel'
+import { X } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import Sort from 'icons/sort';
+import { Images } from 'images';
+import React from 'react';
+import { isSidePanel } from 'utils/isSidePanel';
 
 type FilterProps = {
-  readonly searchedText: string
-  readonly setSearchedText: React.Dispatch<React.SetStateAction<string>>
-  readonly onClickSortBy: VoidFunction
-}
+  readonly searchedText: string;
+  readonly setSearchedText: React.Dispatch<React.SetStateAction<string>>;
+  readonly onClickSortBy: VoidFunction;
+};
 
 export function Filter({ searchedText, setSearchedText, onClickSortBy }: FilterProps) {
   return (
@@ -44,5 +44,5 @@ export function Filter({ searchedText, setSearchedText, onClickSortBy }: FilterP
         <Sort size={24} className='text-center text-gray-400' />
       </button>
     </div>
-  )
+  );
 }

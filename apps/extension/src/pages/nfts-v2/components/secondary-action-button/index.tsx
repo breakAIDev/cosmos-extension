@@ -1,14 +1,14 @@
-import classNames from 'classnames'
-import React from 'react'
+import classNames from 'classnames';
+import React from 'react';
 
 type SecondaryActionButtonProps = {
   // eslint-disable-next-line no-unused-vars
-  onClick: (e: React.MouseEvent) => void
-  leftIcon?: string
-  className?: string
-  actionLabel: string
+  onClick: (e: React.MouseEvent) => void;
+  leftIcon?: string;
+  className?: string;
+  actionLabel: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-} & React.PropsWithChildren<any>
+} & React.PropsWithChildren<any>;
 
 export const SecondaryActionButton: React.FC<SecondaryActionButtonProps> = ({
   actionLabel,
@@ -28,5 +28,5 @@ export const SecondaryActionButton: React.FC<SecondaryActionButtonProps> = ({
       {leftIcon && <img src={leftIcon} alt={actionLabel} className='mr-2' />}
       <span>{children}</span>
     </button>
-  )
-}
+  );
+};

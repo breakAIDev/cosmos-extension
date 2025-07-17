@@ -1,14 +1,14 @@
-import { WalletButtonV2 } from 'components/button'
-import { PageHeader } from 'components/header/PageHeaderV2'
-import { SideNavMenuOpen } from 'components/header/sidenav-menu'
-import { SidePanelTrigger } from 'components/header/sidepanel-trigger'
-import { useWalletInfo } from 'hooks/useWalletInfo'
-import SelectWallet from 'pages/home/SelectWallet/v2'
-import React, { useState } from 'react'
+import { WalletButtonV2 } from 'components/button';
+import { PageHeader } from 'components/header/PageHeaderV2';
+import { SideNavMenuOpen } from 'components/header/sidenav-menu';
+import { SidePanelTrigger } from 'components/header/sidepanel-trigger';
+import { useWalletInfo } from 'hooks/useWalletInfo';
+import SelectWallet from 'pages/home/SelectWallet/v2';
+import React, { useState } from 'react';
 
 export const ActivityHeader = (props: { disableWalletButton?: boolean }) => {
-  const walletInfo = useWalletInfo()
-  const [showSelectWallet, setShowSelectWallet] = useState(false)
+  const walletInfo = useWalletInfo();
+  const [showSelectWallet, setShowSelectWallet] = useState(false);
 
   return (
     <>
@@ -29,11 +29,7 @@ export const ActivityHeader = (props: { disableWalletButton?: boolean }) => {
         />
       </PageHeader>
 
-      <SelectWallet
-        isVisible={showSelectWallet}
-        onClose={() => setShowSelectWallet(false)}
-        title='Your Wallets'
-      />
+      <SelectWallet isVisible={showSelectWallet} onClose={() => setShowSelectWallet(false)} title='Your Wallets' />
     </>
-  )
-}
+  );
+};

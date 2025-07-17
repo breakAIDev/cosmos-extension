@@ -1,15 +1,8 @@
-import { IconProps } from '@phosphor-icons/react'
-import React from 'react'
+import { IconProps } from '@phosphor-icons/react';
+import React from 'react';
 
 const LeapNavLogo = (props: IconProps) => (
-  <svg
-    width='29'
-    height='19'
-    viewBox='0 0 29 19'
-    fill='none'
-    xmlns='http://www.w3.org/2000/svg'
-    {...props}
-  >
+  <svg width='29' height='19' viewBox='0 0 29 19' fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
     <path
       d='M26.1264 13.0038C26.1264 17.1533 21.0622 18.8394 14.7744 18.8394C8.48652 18.8394 3.34863 17.1533 3.34863 13.0038C3.34863 8.85429 8.44966 5.49658 14.7375 5.49658C21.0253 5.49658 26.1264 8.86162 26.1264 13.0038Z'
       fill='#24A95A'
@@ -47,22 +40,12 @@ const LeapNavLogo = (props: IconProps) => (
       fill='#092511'
     />
   </svg>
-)
+);
 
 export const LeapLogoText = (props: IconProps) => {
   return (
-    <svg
-      width='108'
-      height='45'
-      viewBox='0 0 108 45'
-      fill='none'
-      xmlns='http://www.w3.org/2000/svg'
-      {...props}
-    >
-      <path
-        d='M6.77231 27.588H17.3707V32.7029H0.321106V0.539062H6.77231V27.588Z'
-        fill='currentColor'
-      />
+    <svg width='108' height='45' viewBox='0 0 108 45' fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
+      <path d='M6.77231 27.588H17.3707V32.7029H0.321106V0.539062H6.77231V27.588Z' fill='currentColor' />
       <path
         d='M45.2024 19.3901C45.2024 20.3117 45.141 21.1411 45.0181 21.8784H26.3557C26.5093 23.7216 27.1544 25.1654 28.291 26.2099C29.4277 27.2544 30.8254 27.7766 32.4843 27.7766C34.8805 27.7766 36.5854 26.7475 37.5992 24.6893H44.5573C43.82 27.1469 42.4069 29.1744 40.3179 30.7718C38.229 32.3386 35.6638 33.1219 32.6226 33.1219C30.165 33.1219 27.9531 32.5843 25.987 31.5091C24.0517 30.4032 22.531 28.8518 21.4251 26.855C20.3499 24.8582 19.8123 22.5542 19.8123 19.943C19.8123 17.3011 20.3499 14.9818 21.4251 12.985C22.5003 10.9882 24.0056 9.45216 25.941 8.37696C27.8763 7.30176 30.1035 6.76416 32.6226 6.76416C35.0494 6.76416 37.2152 7.2864 39.1198 8.33088C41.0552 9.37536 42.5451 10.8653 43.5896 12.8006C44.6648 14.7053 45.2024 16.9018 45.2024 19.3901ZM38.5208 17.5469C38.4901 15.888 37.891 14.567 36.7237 13.584C35.5563 12.5702 34.1278 12.0634 32.4382 12.0634C30.8408 12.0634 29.4891 12.5549 28.3832 13.5379C27.308 14.4902 26.6475 15.8266 26.4018 17.5469H38.5208Z'
         fill='currentColor'
@@ -76,8 +59,8 @@ export const LeapLogoText = (props: IconProps) => {
         fill='currentColor'
       />
     </svg>
-  )
-}
+  );
+};
 
 export const LeapLogoFullSm = () => {
   return (
@@ -85,5 +68,5 @@ export const LeapLogoFullSm = () => {
       <LeapNavLogo className='h-[19px] w-[29px]' />
       <LeapLogoText className='h-6 w-12' />
     </div>
-  )
-}
+  );
+};

@@ -5,26 +5,26 @@ import {
   sortTokens,
   Token,
   useUserPreferredCurrency,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { BigNumber } from '@leapwallet/cosmos-wallet-sdk/dist/browser/proto/injective/utils/classes'
-import Badge from 'components/badge/Badge'
-import BottomModal from 'components/new-bottom-modal'
-import NoSearchResults from 'components/no-search-results'
-import Text from 'components/text'
-import { SearchInput } from 'components/ui/input/search-input'
-import { useFormatCurrency } from 'hooks/settings/useCurrency'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { hideAssetsStore } from 'stores/hide-assets-store'
-import { cn } from 'utils/cn'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { BigNumber } from '@leapwallet/cosmos-wallet-sdk/dist/browser/proto/injective/utils/classes';
+import Badge from 'components/badge/Badge';
+import BottomModal from 'components/new-bottom-modal';
+import NoSearchResults from 'components/no-search-results';
+import Text from 'components/text';
+import { SearchInput } from 'components/ui/input/search-input';
+import { useFormatCurrency } from 'hooks/settings/useCurrency';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { hideAssetsStore } from 'stores/hide-assets-store';
+import { cn } from 'utils/cn';
 
 type SelectTokenSheetProps = {
-  assets: Token[]
-  isOpen: boolean
-  onClose: () => void
-  selectedToken?: Token
+  assets: Token[];
+  isOpen: boolean;
+  onClose: () => void;
+  selectedToken?: Token;
   // eslint-disable-next-line no-unused-vars
-  onTokenSelect: (baseDenom: string, ibcDenom?: string) => void
-}
+  onTokenSelect: (baseDenom: string, ibcDenom?: string) => void;
+};
 
 const TokenCard = ({
   asset,
@@ -36,33 +36,29 @@ const TokenCard = ({
   symbol,
   isSelected,
 }: {
-  asset: Token
-  onSelect: (token: Token) => void
-  hasToShowIbcTag?: boolean
-  hasToShowEvmTag?: boolean
-  usdValue?: string
-  amount: string
-  symbol: string
-  isSelected: boolean
+  asset: Token;
+  onSelect: (token: Token) => void;
+  hasToShowIbcTag?: boolean;
+  hasToShowEvmTag?: boolean;
+  usdValue?: string;
+  amount: string;
+  symbol: string;
+  isSelected: boolean;
 }) => {
-  const [formatCurrency] = useFormatCurrency()
+  const [formatCurrency] = useFormatCurrency();
 
-  const [preferredCurrency] = useUserPreferredCurrency()
-  const formattedFiatValue = usdValue ? formatCurrency(new BigNumber(usdValue)) : '-'
+  const [preferredCurrency] = useUserPreferredCurrency();
+  const formattedFiatValue = usdValue ? formatCurrency(new BigNumber(usdValue)) : '-';
   const ibcInfo = useMemo(() => {
-    if (!asset.ibcChainInfo) return ''
+    if (!asset.ibcChainInfo) return '';
 
-    return `${asset.ibcChainInfo.pretty_name} / ${sliceWord(
-      asset.ibcChainInfo?.channelId ?? '',
-      7,
-      5,
-    )}`
-  }, [asset.ibcChainInfo])
+    return `${asset.ibcChainInfo.pretty_name} / ${sliceWord(asset.ibcChainInfo?.channelId ?? '', 7, 5)}`;
+  }, [asset.ibcChainInfo]);
 
   const handleTokenSelect = useCallback(() => {
-    if (isSelected) return
-    onSelect(asset)
-  }, [isSelected, onSelect, asset])
+    if (isSelected) return;
+    onSelect(asset);
+  }, [isSelected, onSelect, asset]);
 
   return (
     <div
@@ -88,24 +84,19 @@ const TokenCard = ({
         )}
         <Text size='xs' className='font-medium' color='text-secondary-800'>
           {hideAssetsStore.formatHideBalance(
-            formatTokenAmount(
-              amount,
-              sliceWord(symbol, 4, 4),
-              3,
-              currencyDetail[preferredCurrency].locale,
-            ),
+            formatTokenAmount(amount, sliceWord(symbol, 4, 4), 3, currencyDetail[preferredCurrency].locale),
           )}
         </Text>
       </div>
     </div>
-  )
-}
+  );
+};
 
 export const SelectTokenModal: React.FC<SelectTokenSheetProps> = React.memo(
   ({ assets, selectedToken, isOpen, onClose, onTokenSelect }: SelectTokenSheetProps) => {
-    const [searchQuery, setSearchQuery] = useState('')
-    const input = useMemo(() => searchQuery.trim(), [searchQuery])
-    const searchInputRef = useRef<HTMLInputElement>(null)
+    const [searchQuery, setSearchQuery] = useState('');
+    const input = useMemo(() => searchQuery.trim(), [searchQuery]);
+    const searchInputRef = useRef<HTMLInputElement>(null);
     const choiceOfTokens = useMemo(() => {
       return (
         assets
@@ -113,27 +104,27 @@ export const SelectTokenModal: React.FC<SelectTokenSheetProps> = React.memo(
           .filter((asset) => asset.symbol.toLowerCase().includes(input.toLowerCase()))
           // sort the tokens
           .sort(sortTokens)
-      )
-    }, [assets, input])
+      );
+    }, [assets, input]);
 
     const handleSelectToken = useCallback(
       (token: Token) => {
         if (token) {
-          onTokenSelect(token.coinMinimalDenom, token.ibcDenom)
-          onClose()
+          onTokenSelect(token.coinMinimalDenom, token.ibcDenom);
+          onClose();
         }
       },
       [onClose, onTokenSelect],
-    )
+    );
 
     useEffect(() => {
       if (isOpen) {
-        setSearchQuery('')
+        setSearchQuery('');
         setTimeout(() => {
-          searchInputRef.current?.focus()
-        }, 200)
+          searchInputRef.current?.focus();
+        }, 200);
       }
-    }, [isOpen])
+    }, [isOpen]);
 
     return (
       <BottomModal isOpen={isOpen} onClose={onClose} title='Select fees token' fullScreen>
@@ -152,14 +143,14 @@ export const SelectTokenModal: React.FC<SelectTokenSheetProps> = React.memo(
             <div className='w-full'>
               {choiceOfTokens.length > 0 ? (
                 choiceOfTokens.map((asset, index) => {
-                  const isFirst = index === 0
-                  const isLast = index === choiceOfTokens.length - 1
+                  const isFirst = index === 0;
+                  const isLast = index === choiceOfTokens.length - 1;
 
-                  let isSelected = false
+                  let isSelected = false;
                   if (selectedToken) {
                     isSelected = selectedToken?.ibcDenom
                       ? selectedToken?.ibcDenom === asset.ibcDenom
-                      : selectedToken?.coinMinimalDenom === asset.coinMinimalDenom
+                      : selectedToken?.coinMinimalDenom === asset.coinMinimalDenom;
                   }
 
                   return (
@@ -175,7 +166,7 @@ export const SelectTokenModal: React.FC<SelectTokenSheetProps> = React.memo(
                         isSelected={isSelected}
                       />
                     </React.Fragment>
-                  )
+                  );
                 })
               ) : (
                 <NoSearchResults searchQuery={searchQuery} />
@@ -184,8 +175,8 @@ export const SelectTokenModal: React.FC<SelectTokenSheetProps> = React.memo(
           </div>
         </div>
       </BottomModal>
-    )
+    );
   },
-)
+);
 
-SelectTokenModal.displayName = 'SelectTokenModal'
+SelectTokenModal.displayName = 'SelectTokenModal';

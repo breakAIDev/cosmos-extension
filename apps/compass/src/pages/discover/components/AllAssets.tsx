@@ -1,19 +1,15 @@
-import {
-  CompassDiscoverAssets,
-  DiscoverCollection,
-  DiscoverDapp,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { ArrowLeft, CaretDown, CaretUp, Check } from '@phosphor-icons/react'
-import Text from 'components/text'
-import { observer } from 'mobx-react-lite'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { compassTokenTagsStore } from 'stores/denoms-store-instance'
-import { cn } from 'utils/cn'
+import { CompassDiscoverAssets, DiscoverCollection, DiscoverDapp } from '@leapwallet/cosmos-wallet-hooks';
+import { ArrowLeft, CaretDown, CaretUp, Check } from '@phosphor-icons/react';
+import Text from 'components/text';
+import { observer } from 'mobx-react-lite';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { compassTokenTagsStore } from 'stores/denoms-store-instance';
+import { cn } from 'utils/cn';
 
-import { AssetType } from '..'
-import TrendingCollections from './TrendingCollections'
-import TrendingDapps from './TrendingDapps'
-import TrendingTokens from './TrendingTokens'
+import { AssetType } from '..';
+import TrendingCollections from './TrendingCollections';
+import TrendingDapps from './TrendingDapps';
+import TrendingTokens from './TrendingTokens';
 
 enum TypeFilter {
   ALL = 'All',
@@ -30,38 +26,36 @@ export enum TimeFilter {
 }
 
 type Props<T> = {
-  data: T[]
-  value: T
-  setValue: (val: T) => void
-}
+  data: T[];
+  value: T;
+  setValue: (val: T) => void;
+};
 
-const Filter = observer(
-  <T extends TypeFilter | TimeFilter>({ data, value, setValue }: Props<T>) => {
-    return (
-      <div className='absolute top-10 py-1 bg-background rounded-lg shadow-lg border border-background'>
-        {data.map((item) => {
-          const typedItem = item as T
-          return (
-            <div
-              key={item}
-              className={cn(
-                'flex justify-between bg-background hover:bg-secondary-100 w-[200px] items-center py-2 px-4 cursor-pointer hover:text-monochrome',
-                {
-                  'text-monochrome': value === item,
-                  'text-muted-foreground': value !== item,
-                },
-              )}
-              onClick={() => setValue(typedItem)}
-            >
-              <p className='font-medium text-sm'>{item}</p>
-              {value === item && <Check size={16} className='text-muted-foreground' />}
-            </div>
-          )
-        })}
-      </div>
-    )
-  },
-)
+const Filter = observer(<T extends TypeFilter | TimeFilter>({ data, value, setValue }: Props<T>) => {
+  return (
+    <div className='absolute top-10 py-1 bg-background rounded-lg shadow-lg border border-background'>
+      {data.map((item) => {
+        const typedItem = item as T;
+        return (
+          <div
+            key={item}
+            className={cn(
+              'flex justify-between bg-background hover:bg-secondary-100 w-[200px] items-center py-2 px-4 cursor-pointer hover:text-monochrome',
+              {
+                'text-monochrome': value === item,
+                'text-muted-foreground': value !== item,
+              },
+            )}
+            onClick={() => setValue(typedItem)}
+          >
+            <p className='font-medium text-sm'>{item}</p>
+            {value === item && <Check size={16} className='text-muted-foreground' />}
+          </div>
+        );
+      })}
+    </div>
+  );
+});
 
 const AllAssets = observer(
   ({
@@ -69,71 +63,65 @@ const AllAssets = observer(
     onBackClick,
     discoverAssets,
   }: {
-    showFor: AssetType
-    onBackClick: () => void
-    discoverAssets: CompassDiscoverAssets
+    showFor: AssetType;
+    onBackClick: () => void;
+    discoverAssets: CompassDiscoverAssets;
   }) => {
-    const [typeFilter, setTypeFilter] = useState<TypeFilter>(TypeFilter.ALL)
-    const [timeFilter, setTimeFilter] = useState<TimeFilter>(TimeFilter['1D'])
-    const [showTypeFilter, setShowTypeFilter] = useState(false)
-    const [showTimeFilter, setShowTimeFilter] = useState(false)
-    const dropdownRef1 = useRef<HTMLDivElement | null>(null)
-    const dropdownRef2 = useRef<HTMLDivElement | null>(null)
+    const [typeFilter, setTypeFilter] = useState<TypeFilter>(TypeFilter.ALL);
+    const [timeFilter, setTimeFilter] = useState<TimeFilter>(TimeFilter['1D']);
+    const [showTypeFilter, setShowTypeFilter] = useState(false);
+    const [showTimeFilter, setShowTimeFilter] = useState(false);
+    const dropdownRef1 = useRef<HTMLDivElement | null>(null);
+    const dropdownRef2 = useRef<HTMLDivElement | null>(null);
 
     const { filteredTokens, filteredDapps, filteredNFTs } = useMemo(() => {
-      let filteredTokens: string[] = Object.keys(compassTokenTagsStore.compassTokenTags)
+      let filteredTokens: string[] = Object.keys(compassTokenTagsStore.compassTokenTags);
 
-      const filteredDapps = discoverAssets.dapps
-      const filteredNFTs = discoverAssets.collections
+      const filteredDapps = discoverAssets.dapps;
+      const filteredNFTs = discoverAssets.collections;
 
       if (showFor === AssetType.TOKENS) {
         if (typeFilter === TypeFilter.TRENDING) {
-          filteredTokens = filteredTokens.filter((token) =>
-            discoverAssets.trendingTokens?.includes(token),
-          )
+          filteredTokens = filteredTokens.filter((token) => discoverAssets.trendingTokens?.includes(token));
         } else if (typeFilter === TypeFilter.TOP) {
-          filteredTokens = filteredTokens.filter((token) =>
-            discoverAssets.topTokens?.includes(token),
-          )
+          filteredTokens = filteredTokens.filter((token) => discoverAssets.topTokens?.includes(token));
         } else {
           filteredTokens = filteredTokens.filter((token) =>
             compassTokenTagsStore.compassTokenTags[token].includes(typeFilter),
-          )
+          );
         }
       }
 
-      return { filteredTokens, filteredDapps, filteredNFTs }
-    }, [discoverAssets, showFor, typeFilter])
+      return { filteredTokens, filteredDapps, filteredNFTs };
+    }, [discoverAssets, showFor, typeFilter]);
 
     const getAssetList = () => {
       switch (showFor) {
         case AssetType.NFTS:
-          return <TrendingCollections collections={filteredNFTs} showHeading={false} />
+          return <TrendingCollections collections={filteredNFTs} showHeading={false} />;
         case AssetType.DAPPS:
-          return <TrendingDapps dapps={filteredDapps} showHeading={false} />
+          return <TrendingDapps dapps={filteredDapps} showHeading={false} />;
         case AssetType.TOKENS:
-          return (
-            <TrendingTokens tokens={filteredTokens} showHeading={false} timeFilter={timeFilter} />
-          )
+          return <TrendingTokens tokens={filteredTokens} showHeading={false} timeFilter={timeFilter} />;
       }
-    }
+    };
 
     useEffect(() => {
       const handleClickOutside = (event: any) => {
         if (dropdownRef1.current && !dropdownRef1.current.contains(event.target)) {
-          setShowTypeFilter(false)
+          setShowTypeFilter(false);
         }
         if (dropdownRef2.current && !dropdownRef2.current.contains(event.target)) {
-          setShowTimeFilter(false)
+          setShowTimeFilter(false);
         }
-      }
+      };
 
-      document.addEventListener('click', handleClickOutside)
+      document.addEventListener('click', handleClickOutside);
 
       return () => {
-        document.removeEventListener('click', handleClickOutside)
-      }
-    }, [])
+        document.removeEventListener('click', handleClickOutside);
+      };
+    }, []);
 
     return (
       <div className='flex flex-col'>
@@ -212,8 +200,8 @@ const AllAssets = observer(
           </div>
         </div>
       </div>
-    )
+    );
   },
-)
+);
 
-export default AllAssets
+export default AllAssets;

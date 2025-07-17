@@ -1,86 +1,75 @@
-import {
-  Key,
-  SelectedAddress,
-  useChainInfo,
-  useGetChains,
-  WALLETTYPE,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { Question } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import Loader from 'components/loader/Loader'
-import Text from 'components/text'
-import useActiveWallet from 'hooks/settings/useActiveWallet'
-import { useChainInfos } from 'hooks/useChainInfos'
-import useQuery from 'hooks/useQuery'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import { Images } from 'images'
-import { useSendContext } from 'pages/send-v2/context'
-import React, { useEffect, useMemo, useState } from 'react'
-import { getLedgerEnabledEvmChainsKey } from 'utils/getLedgerEnabledEvmChains'
-import { isLedgerEnabled } from 'utils/isLedgerEnabled'
-import { capitalize, sliceAddress } from 'utils/strings'
+import { Key, SelectedAddress, useChainInfo, useGetChains, WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { Question } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import Loader from 'components/loader/Loader';
+import Text from 'components/text';
+import useActiveWallet from 'hooks/settings/useActiveWallet';
+import { useChainInfos } from 'hooks/useChainInfos';
+import useQuery from 'hooks/useQuery';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { Images } from 'images';
+import { useSendContext } from 'pages/send-v2/context';
+import React, { useEffect, useMemo, useState } from 'react';
+import { getLedgerEnabledEvmChainsKey } from 'utils/getLedgerEnabledEvmChains';
+import { isLedgerEnabled } from 'utils/isLedgerEnabled';
+import { capitalize, sliceAddress } from 'utils/strings';
 
-import SearchChainWithWalletFilter from './SearchChainWithWalletFilter'
+import SearchChainWithWalletFilter from './SearchChainWithWalletFilter';
 
 interface MyWalletsProps {
-  setSelectedAddress: (address: SelectedAddress) => void
-  skipSupportedDestinationChainsIDs: string[]
+  setSelectedAddress: (address: SelectedAddress) => void;
+  skipSupportedDestinationChainsIDs: string[];
 }
 
 function MyWallets({ skipSupportedDestinationChainsIDs, setSelectedAddress }: MyWalletsProps) {
-  const {
-    displayAccounts: _displayMyAccounts,
-    isIbcSupportDataLoading,
-    sendActiveChain,
-  } = useSendContext()
-  const chainInfos = useChainInfos()
-  const activeWallet = useActiveWallet()
-  const defaultTokenLogo = useDefaultTokenLogo()
-  const chains = useGetChains()
-  const activeChainInfo = useChainInfo(sendActiveChain)
+  const { displayAccounts: _displayMyAccounts, isIbcSupportDataLoading, sendActiveChain } = useSendContext();
+  const chainInfos = useChainInfos();
+  const activeWallet = useActiveWallet();
+  const defaultTokenLogo = useDefaultTokenLogo();
+  const chains = useGetChains();
+  const activeChainInfo = useChainInfo(sendActiveChain);
 
   const ledgerEnabledEvmChainsKeys = useMemo(() => {
-    return getLedgerEnabledEvmChainsKey(Object.values(chains))
-  }, [chains])
+    return getLedgerEnabledEvmChainsKey(Object.values(chains));
+  }, [chains]);
 
   const ledgerApp = useMemo(() => {
-    return ledgerEnabledEvmChainsKeys.includes(activeChainInfo?.key) ? 'EVM' : 'Cosmos'
-  }, [activeChainInfo?.key, ledgerEnabledEvmChainsKeys])
+    return ledgerEnabledEvmChainsKeys.includes(activeChainInfo?.key) ? 'EVM' : 'Cosmos';
+  }, [activeChainInfo?.key, ledgerEnabledEvmChainsKeys]);
 
-  const [selectedWallet, setSelectedWallet] = useState<Key | null>(activeWallet?.activeWallet)
-  const [searchQuery, setSearchQuery] = useState('')
-  const trimmedQuery = searchQuery.trim()
+  const [selectedWallet, setSelectedWallet] = useState<Key | null>(activeWallet?.activeWallet);
+  const [searchQuery, setSearchQuery] = useState('');
+  const trimmedQuery = searchQuery.trim();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const _displaySkipAccounts: any[][] = []
+  const _displaySkipAccounts: any[][] = [];
   Object.keys(chainInfos).map((chain) => {
     if (skipSupportedDestinationChainsIDs?.includes(chainInfos[chain as SupportedChain]?.chainId)) {
-      _displaySkipAccounts.push([chain, selectedWallet?.addresses?.[chain as SupportedChain]])
+      _displaySkipAccounts.push([chain, selectedWallet?.addresses?.[chain as SupportedChain]]);
     }
-  })
+  });
 
-  const _displayAccounts =
-    _displaySkipAccounts.length > 0 ? _displaySkipAccounts : _displayMyAccounts
+  const _displayAccounts = _displaySkipAccounts.length > 0 ? _displaySkipAccounts : _displayMyAccounts;
 
-  const { name, colorIndex, watchWallet } = selectedWallet as Key
+  const { name, colorIndex, watchWallet } = selectedWallet as Key;
 
   const displayAccounts = useMemo(
     () =>
       _displayAccounts.filter(([chain]) => {
-        const chainName = chainInfos[chain as SupportedChain]?.chainName ?? chain
-        return chainName.toLowerCase().includes(trimmedQuery.toLowerCase())
+        const chainName = chainInfos[chain as SupportedChain]?.chainName ?? chain;
+        return chainName.toLowerCase().includes(trimmedQuery.toLowerCase());
       }),
     [_displayAccounts, chainInfos, trimmedQuery],
-  )
+  );
 
-  const toChainId = useQuery().get('toChainId') ?? undefined
+  const toChainId = useQuery().get('toChainId') ?? undefined;
 
   useEffect(() => {
     if (toChainId && displayAccounts?.length > 0) {
-      const chainKey = Object.values(chainInfos).find((chain) => chain.chainId === toChainId)?.key
-      const toChain = displayAccounts.filter(([_chain]) => _chain === chainKey)?.[0]
-      const img = chainInfos[chainKey as SupportedChain]?.chainSymbolImageUrl ?? defaultTokenLogo
+      const chainKey = Object.values(chainInfos).find((chain) => chain.chainId === toChainId)?.key;
+      const toChain = displayAccounts.filter(([_chain]) => _chain === chainKey)?.[0];
+      const img = chainInfos[chainKey as SupportedChain]?.chainSymbolImageUrl ?? defaultTokenLogo;
 
       setSelectedAddress({
         address: toChain?.[1],
@@ -92,11 +81,11 @@ function MyWallets({ skipSupportedDestinationChainsIDs, setSelectedAddress }: My
           toChain?.[0] === 'seiTestnet2' ? 'sei' : toChain?.[0],
         )}`,
         selectionType: 'currentWallet',
-      })
+      });
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [toChainId, displayAccounts?.length > 0, sendActiveChain])
+  }, [toChainId, displayAccounts?.length > 0, sendActiveChain]);
 
   if (isIbcSupportDataLoading) {
     return (
@@ -106,7 +95,7 @@ function MyWallets({ skipSupportedDestinationChainsIDs, setSelectedAddress }: My
         </Text>
         <Loader />
       </div>
-    )
+    );
   }
 
   return (
@@ -121,18 +110,18 @@ function MyWallets({ skipSupportedDestinationChainsIDs, setSelectedAddress }: My
       <div className='relative mt-4 h-[calc(100%-300px)] overflow-auto'>
         {displayAccounts.length > 0 ? (
           displayAccounts.map(([_chain, address], index) => {
-            const chain = _chain as unknown as SupportedChain
-            const chainInfo = chainInfos[chain]
-            const img = chainInfo?.chainSymbolImageUrl ?? defaultTokenLogo
-            const chainName = chainInfo?.chainName ?? chain
-            const isLast = index === displayAccounts.length - 1
+            const chain = _chain as unknown as SupportedChain;
+            const chainInfo = chainInfos[chain];
+            const img = chainInfo?.chainSymbolImageUrl ?? defaultTokenLogo;
+            const chainName = chainInfo?.chainName ?? chain;
+            const isLast = index === displayAccounts.length - 1;
 
-            let addressText = ''
+            let addressText = '';
             if (
               selectedWallet?.walletType === WALLETTYPE.LEDGER &&
               !isLedgerEnabled(chainInfo.key, chainInfo.bip44.coinType, Object.values(chainInfos))
             ) {
-              addressText = `Ledger not supported on ${chainInfo.chainName}`
+              addressText = `Ledger not supported on ${chainInfo.chainName}`;
             }
 
             if (
@@ -140,7 +129,7 @@ function MyWallets({ skipSupportedDestinationChainsIDs, setSelectedAddress }: My
               isLedgerEnabled(chainInfo.key, chainInfo.bip44.coinType, Object.values(chainInfos)) &&
               !address
             ) {
-              addressText = `Please import ${ledgerApp} wallet`
+              addressText = `Please import ${ledgerApp} wallet`;
             }
 
             return (
@@ -160,20 +149,14 @@ function MyWallets({ skipSupportedDestinationChainsIDs, setSelectedAddress }: My
                         chain === 'seiTestnet2' ? 'sei' : chain,
                       )}`,
                       selectionType: 'currentWallet',
-                    })
+                    });
                   }}
                   disabled={!!addressText}
                 >
-                  <img
-                    src={img}
-                    alt={`${chainName} logo`}
-                    className='rounded-full border border-white-30 h-10 w-10'
-                  />
+                  <img src={img} alt={`${chainName} logo`} className='rounded-full border border-white-30 h-10 w-10' />
 
                   <div>
-                    <p className='font-bold text-left dark:text-white-100 text-gray-700 capitalize'>
-                      {chainName}
-                    </p>
+                    <p className='font-bold text-left dark:text-white-100 text-gray-700 capitalize'>{chainName}</p>
 
                     <p className='text-sm font-medium dark:text-gray-400 text-gray-600 text-left'>
                       {addressText || sliceAddress(address)}
@@ -181,11 +164,9 @@ function MyWallets({ skipSupportedDestinationChainsIDs, setSelectedAddress }: My
                   </div>
                 </button>
 
-                {!isLast && (
-                  <div className='border-b w-full border-gray-100 dark:border-gray-850' />
-                )}
+                {!isLast && <div className='border-b w-full border-gray-100 dark:border-gray-850' />}
               </React.Fragment>
-            )
+            );
           })
         ) : (
           <div className='py-[88px] w-full flex-col flex  justify-center items-center gap-4'>
@@ -206,7 +187,7 @@ function MyWallets({ skipSupportedDestinationChainsIDs, setSelectedAddress }: My
         )}
       </div>
     </>
-  )
+  );
 }
 
-export default MyWallets
+export default MyWallets;

@@ -1,27 +1,27 @@
-import { useDebounce } from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk/dist/browser/constants'
-import { ActionInputWithPreview } from 'components/action-input-with-preview'
-import Tooltip from 'components/better-tooltip'
-import { Images } from 'images'
-import React, { useEffect, useState } from 'react'
-import { Colors } from 'theme/colors'
+import { useDebounce } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk/dist/browser/constants';
+import { ActionInputWithPreview } from 'components/action-input-with-preview';
+import Tooltip from 'components/better-tooltip';
+import { Images } from 'images';
+import React, { useEffect, useState } from 'react';
+import { Colors } from 'theme/colors';
 
 export const MemoInput: React.FC<{
-  memo: string
+  memo: string;
   // eslint-disable-next-line no-unused-vars
-  setMemo: (memo: string) => void
-  disabled: boolean
-  activeChain: SupportedChain
+  setMemo: (memo: string) => void;
+  disabled: boolean;
+  activeChain: SupportedChain;
 }> = ({ memo, setMemo, disabled, activeChain }) => {
-  const [input, setInput] = useState<string>(memo)
+  const [input, setInput] = useState<string>(memo);
 
-  const debouncedInputValue = useDebounce(input, 200)
+  const debouncedInputValue = useDebounce(input, 200);
 
   useEffect(() => {
     if (debouncedInputValue !== memo) {
-      setMemo(debouncedInputValue)
+      setMemo(debouncedInputValue);
     }
-  }, [debouncedInputValue, memo, setMemo])
+  }, [debouncedInputValue, memo, setMemo]);
 
   return (
     <div className='rounded-2xl p-4 mt-3 dark:bg-gray-900 bg-white-100 space-y-2'>
@@ -30,8 +30,7 @@ export const MemoInput: React.FC<{
         <Tooltip
           content={
             <p className='text-gray-500 dark:text-gray-100 text-sm'>
-              An optional short message that can be attached to a transaction, can be viewed by
-              anyone.
+              An optional short message that can be attached to a transaction, can be viewed by anyone.
             </p>
           }
         >
@@ -44,9 +43,9 @@ export const MemoInput: React.FC<{
         disabled={disabled}
         buttonText={(() => {
           if (input.trim().length > 0) {
-            return 'Clear'
+            return 'Clear';
           }
-          return ''
+          return '';
         })()}
         rightElement={input.trim().length > 0 ? undefined : ' '}
         buttonTextColor={Colors.getChainColor(activeChain)}
@@ -54,20 +53,20 @@ export const MemoInput: React.FC<{
         onChange={(e) => setInput(e.target.value)}
         onAction={(_, action) => {
           if (action === 'clear') {
-            setInput('')
-            setMemo('')
+            setInput('');
+            setMemo('');
           }
         }}
         action={(() => {
           if (input.trim().length > 0) {
-            return 'clear'
+            return 'clear';
           }
-          return 'save'
+          return 'save';
         })()}
       />
       <p className='text-gray-700 dark:text-gray-100 text-xs text-left mt-1'>
         {disabled ? 'The dApp has set the memo, you cannot change it' : 'Edit the memo here'}
       </p>
     </div>
-  )
-}
+  );
+};

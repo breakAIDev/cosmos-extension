@@ -1,57 +1,52 @@
-import { motion } from 'framer-motion'
-import React, { forwardRef, useEffect, useRef, useState } from 'react'
+import { motion } from 'framer-motion';
+import React, { forwardRef, useEffect, useRef, useState } from 'react';
 
-const TabButton = forwardRef<
-  HTMLButtonElement,
-  { children: React.ReactNode; onClick: () => void; active?: boolean }
->((props, ref) => {
-  return (
-    <button
-      ref={ref}
-      className={'text-xs font-bold text-foreground py-2 px-4 rounded-full'}
-      onClick={props.onClick}
-    >
-      {props.children}
-    </button>
-  )
-})
+const TabButton = forwardRef<HTMLButtonElement, { children: React.ReactNode; onClick: () => void; active?: boolean }>(
+  (props, ref) => {
+    return (
+      <button ref={ref} className={'text-xs font-bold text-foreground py-2 px-4 rounded-full'} onClick={props.onClick}>
+        {props.children}
+      </button>
+    );
+  },
+);
 
-TabButton.displayName = 'TabButton'
+TabButton.displayName = 'TabButton';
 
-const transition = { duration: 0.2, ease: 'easeInOut' }
+const transition = { duration: 0.2, ease: 'easeInOut' };
 
 export const TabSelectors = ({
   selectedIndex,
   buttons,
 }: {
-  selectedIndex: number
+  selectedIndex: number;
   buttons: {
-    label: string
-    onClick: () => void
-  }[]
+    label: string;
+    onClick: () => void;
+  }[];
 }) => {
-  const [slider, setSlider] = useState({ left: 0, right: 0, width: 0, height: 0, hasValue: false })
-  const containerRef = useRef<HTMLDivElement>(null)
-  const childRefs = useRef(new Map())
+  const [slider, setSlider] = useState({ left: 0, right: 0, width: 0, height: 0, hasValue: false });
+  const containerRef = useRef<HTMLDivElement>(null);
+  const childRefs = useRef(new Map());
 
   useEffect(() => {
-    const target = childRefs.current.get(selectedIndex)
-    const container = containerRef.current
+    const target = childRefs.current.get(selectedIndex);
+    const container = containerRef.current;
     if (!target || !container) {
-      return
+      return;
     }
 
-    const cRect = container.getBoundingClientRect()
+    const cRect = container.getBoundingClientRect();
 
     // when container is `display: none`, width === 0.
     // ignore this case
     if (cRect.width === 0) {
-      return
+      return;
     }
 
-    const tRect = target.getBoundingClientRect()
-    const left = tRect.left - cRect.left
-    const right = cRect.right - tRect.right
+    const tRect = target.getBoundingClientRect();
+    const left = tRect.left - cRect.left;
+    const right = cRect.right - tRect.right;
 
     setSlider({
       hasValue: true,
@@ -59,14 +54,11 @@ export const TabSelectors = ({
       right: right,
       width: tRect.width - 1,
       height: tRect.height - 1,
-    })
-  }, [childRefs, selectedIndex])
+    });
+  }, [childRefs, selectedIndex]);
 
   return (
-    <div
-      ref={containerRef}
-      className='relative flex items-center bg-secondary-300 rounded-full p-px isolate'
-    >
+    <div ref={containerRef} className='relative flex items-center bg-secondary-300 rounded-full p-px isolate'>
       {buttons.map((button, index) => (
         <TabButton
           ref={(ref) => childRefs.current.set(index, ref)}
@@ -87,7 +79,7 @@ export const TabSelectors = ({
         transition={transition}
       />
     </div>
-  )
-}
+  );
+};
 
-TabSelectors.displayName = 'TabSelectors'
+TabSelectors.displayName = 'TabSelectors';

@@ -1,12 +1,12 @@
-import { DiscoverDapp } from '@leapwallet/cosmos-wallet-hooks'
-import { ArrowSquareOut } from '@phosphor-icons/react'
-import Text from 'components/text'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import React from 'react'
-import { cn } from 'utils/cn'
+import { DiscoverDapp } from '@leapwallet/cosmos-wallet-hooks';
+import { ArrowSquareOut } from '@phosphor-icons/react';
+import Text from 'components/text';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import React from 'react';
+import { cn } from 'utils/cn';
 
-import { AssetType } from '..'
+import { AssetType } from '..';
 
 const Dapp = observer(({ dapp }: { dapp: DiscoverDapp }) => {
   return (
@@ -29,8 +29,8 @@ const Dapp = observer(({ dapp }: { dapp: DiscoverDapp }) => {
       </div>
       <ArrowSquareOut size={32} className='p-2 text-muted-foreground' />
     </div>
-  )
-})
+  );
+});
 
 const TrendingDapps = observer(
   ({
@@ -40,11 +40,11 @@ const TrendingDapps = observer(
     isSearched = false,
     isExpanded = false,
   }: {
-    dapps: DiscoverDapp[]
-    showHeading?: boolean
-    onExpand?: (val: AssetType) => void
-    isSearched?: boolean
-    isExpanded?: boolean
+    dapps: DiscoverDapp[];
+    showHeading?: boolean;
+    onExpand?: (val: AssetType) => void;
+    isSearched?: boolean;
+    isExpanded?: boolean;
   }) => {
     return (
       <div className={cn('flex flex-col gap-3 w-full', { 'pb-4': showHeading })}>
@@ -55,11 +55,7 @@ const TrendingDapps = observer(
             </Text>
             {dapps.length > 3 || !isSearched ? (
               <div className='cursor-pointer' onClick={() => onExpand?.(AssetType.DAPPS)}>
-                <Text
-                  size='sm'
-                  className='font-bold !leading-5 cursor-pointer'
-                  color='text-secondary-600'
-                >
+                <Text size='sm' className='font-bold !leading-5 cursor-pointer' color='text-secondary-600'>
                   {isSearched ? (isExpanded ? 'See less' : 'Load more') : 'See more'}
                 </Text>
               </div>
@@ -76,8 +72,8 @@ const TrendingDapps = observer(
           ))}
         </div>
       </div>
-    )
+    );
   },
-)
+);
 
-export default TrendingDapps
+export default TrendingDapps;

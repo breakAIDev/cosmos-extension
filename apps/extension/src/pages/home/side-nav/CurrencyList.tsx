@@ -1,26 +1,21 @@
-import { CardDivider, GenericCard } from '@leapwallet/leap-ui'
-import { CheckCircle } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import NoSearchResults from 'components/no-search-results'
-import { SearchInput } from 'components/ui/input/search-input'
-import { useChainPageInfo } from 'hooks'
-import {
-  currencyDetail,
-  CurrencyMap,
-  useCurrencyUpdater,
-  useUserPreferredCurrency,
-} from 'hooks/settings/useCurrency'
-import { Images } from 'images'
-import React from 'react'
-import ReactCountryFlag from 'react-country-flag'
-import { rootStore } from 'stores/root-store'
-import { isSidePanel } from 'utils/isSidePanel'
+import { CardDivider, GenericCard } from '@leapwallet/leap-ui';
+import { CheckCircle } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import NoSearchResults from 'components/no-search-results';
+import { SearchInput } from 'components/ui/input/search-input';
+import { useChainPageInfo } from 'hooks';
+import { currencyDetail, CurrencyMap, useCurrencyUpdater, useUserPreferredCurrency } from 'hooks/settings/useCurrency';
+import { Images } from 'images';
+import React from 'react';
+import ReactCountryFlag from 'react-country-flag';
+import { rootStore } from 'stores/root-store';
+import { isSidePanel } from 'utils/isSidePanel';
 
 export const CurrencyList = () => {
-  const [searchQuery, setSearchQuery] = React.useState('')
-  const [selectedCurrency] = useUserPreferredCurrency()
-  const { topChainColor } = useChainPageInfo()
-  const [currencyUpdater] = useCurrencyUpdater()
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [selectedCurrency] = useUserPreferredCurrency();
+  const { topChainColor } = useChainPageInfo();
+  const [currencyUpdater] = useCurrencyUpdater();
 
   const currencyData =
     searchQuery === ''
@@ -29,10 +24,8 @@ export const CurrencyList = () => {
           (currency) =>
             currency.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             currency.country.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            currencyDetail[currency.country].ISOname.toLowerCase().includes(
-              searchQuery.toLowerCase(),
-            ),
-        )
+            currencyDetail[currency.country].ISOname.toLowerCase().includes(searchQuery.toLowerCase()),
+        );
 
   return (
     <div className='flex flex-col gap-7 items-center h-full'>
@@ -52,8 +45,8 @@ export const CurrencyList = () => {
                 key={currency.country}
                 className='flex items-center gap-3 py-3 px-4 w-full rounded-xl bg-secondary-100 hover:bg-secondary-200 transition-colors'
                 onClick={() => {
-                  currencyUpdater(currency.country)
-                  rootStore.setPreferredCurrency(currency.country)
+                  currencyUpdater(currency.country);
+                  rootStore.setPreferredCurrency(currency.country);
                 }}
               >
                 <ReactCountryFlag
@@ -69,12 +62,12 @@ export const CurrencyList = () => {
                   <CheckCircle className='text-accent-foreground' weight='fill' size={24} />
                 ) : null}
               </button>
-            )
+            );
           })
         ) : (
           <NoSearchResults searchQuery={searchQuery} />
         )}
       </div>
     </div>
-  )
-}
+  );
+};

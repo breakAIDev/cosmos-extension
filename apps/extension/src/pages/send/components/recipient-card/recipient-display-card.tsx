@@ -1,16 +1,16 @@
-import { capitalize, SelectedAddress, sliceAddress } from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { EditIcon } from 'icons/edit-icon'
-import { Images } from 'images'
-import React from 'react'
-import { AddressBook } from 'utils/addressbook'
+import { capitalize, SelectedAddress, sliceAddress } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { EditIcon } from 'icons/edit-icon';
+import { Images } from 'images';
+import React from 'react';
+import { AddressBook } from 'utils/addressbook';
 
 interface RecipientDisplayCardProps {
-  selectedAddress: SelectedAddress
-  setSelectedContact: (contact: AddressBook.SavedAddress) => void
-  setIsAddContactSheetVisible: (visible: boolean) => void
-  activeChain: SupportedChain
-  onEdit: () => void
+  selectedAddress: SelectedAddress;
+  setSelectedContact: (contact: AddressBook.SavedAddress) => void;
+  setIsAddContactSheetVisible: (visible: boolean) => void;
+  activeChain: SupportedChain;
+  onEdit: () => void;
 }
 
 const RecipientDisplayCard = ({
@@ -33,19 +33,11 @@ const RecipientDisplayCard = ({
             <p className='font-bold text-left text-monochrome text-sm'>
               {selectedAddress?.name
                 ? capitalize(selectedAddress?.name)
-                : sliceAddress(
-                    selectedAddress?.ethAddress
-                      ? selectedAddress?.ethAddress
-                      : selectedAddress?.address,
-                  )}
+                : sliceAddress(selectedAddress?.ethAddress ? selectedAddress?.ethAddress : selectedAddress?.address)}
             </p>
             {selectedAddress?.name ? (
               <p className='text-sm text-muted-foreground'>
-                {sliceAddress(
-                  selectedAddress?.ethAddress
-                    ? selectedAddress?.ethAddress
-                    : selectedAddress?.address,
-                )}
+                {sliceAddress(selectedAddress?.ethAddress ? selectedAddress?.ethAddress : selectedAddress?.address)}
               </p>
             ) : (
               <div
@@ -57,8 +49,8 @@ const RecipientDisplayCard = ({
                     emoji: 0,
                     blockchain: activeChain,
                     ethAddress: selectedAddress?.ethAddress || '',
-                  })
-                  setIsAddContactSheetVisible(true)
+                  });
+                  setIsAddContactSheetVisible(true);
                 }}
               >
                 + Add to contacts
@@ -73,13 +65,13 @@ const RecipientDisplayCard = ({
           weight='fill'
           className='bg-secondary-300 rounded-full p-2 text-monochrome cursor-pointer'
           onClick={(e) => {
-            e.stopPropagation()
-            onEdit()
+            e.stopPropagation();
+            onEdit();
           }}
         />
       </div>
     </>
-  )
-}
+  );
+};
 
-export default RecipientDisplayCard
+export default RecipientDisplayCard;

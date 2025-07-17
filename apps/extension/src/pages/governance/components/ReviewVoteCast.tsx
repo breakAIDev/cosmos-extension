@@ -1,42 +1,37 @@
-import {
-  GasOptions,
-  getErrorMsg,
-  useActiveChain,
-  VoteOptions,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { Memo } from '@leapwallet/leap-ui'
-import { ThumbsUp } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import { ErrorCard } from 'components/ErrorCard'
-import LedgerConfirmationPopup from 'components/ledger-confirmation/LedgerConfirmationPopup'
-import { LoaderAnimation } from 'components/loader/Loader'
-import BottomModal from 'components/new-bottom-modal'
-import Text from 'components/text'
-import { Button } from 'components/ui/button'
-import { useCaptureTxError } from 'hooks/utility/useCaptureTxError'
-import React, { useMemo } from 'react'
-import { Colors } from 'theme/colors'
+import { GasOptions, getErrorMsg, useActiveChain, VoteOptions } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { Memo } from '@leapwallet/leap-ui';
+import { ThumbsUp } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import { ErrorCard } from 'components/ErrorCard';
+import LedgerConfirmationPopup from 'components/ledger-confirmation/LedgerConfirmationPopup';
+import { LoaderAnimation } from 'components/loader/Loader';
+import BottomModal from 'components/new-bottom-modal';
+import Text from 'components/text';
+import { Button } from 'components/ui/button';
+import { useCaptureTxError } from 'hooks/utility/useCaptureTxError';
+import React, { useMemo } from 'react';
+import { Colors } from 'theme/colors';
 
 export type ReviewVoteCastProps = {
-  isOpen: boolean
-  onCloseHandler: () => void
+  isOpen: boolean;
+  onCloseHandler: () => void;
   // eslint-disable-next-line no-unused-vars
-  onSubmitVote: (option: VoteOptions) => Promise<boolean>
-  loading: boolean
-  error?: string
-  selectedVote: VoteOptions | undefined
-  memo: string
+  onSubmitVote: (option: VoteOptions) => Promise<boolean>;
+  loading: boolean;
+  error?: string;
+  selectedVote: VoteOptions | undefined;
+  memo: string;
   // eslint-disable-next-line no-unused-vars
-  setMemo: (memo: string) => void
-  feeText: string
-  proposalId: string
-  refetchCurrVote: () => void
-  showLedgerPopup?: boolean
-  ledgerError?: string
-  gasOption: GasOptions
-  forceChain?: SupportedChain
-}
+  setMemo: (memo: string) => void;
+  feeText: string;
+  proposalId: string;
+  refetchCurrVote: () => void;
+  showLedgerPopup?: boolean;
+  ledgerError?: string;
+  gasOption: GasOptions;
+  forceChain?: SupportedChain;
+};
 
 export function ReviewVoteCast({
   isOpen,
@@ -55,21 +50,16 @@ export function ReviewVoteCast({
   gasOption,
   forceChain,
 }: ReviewVoteCastProps): React.ReactElement {
-  const _activeChain = useActiveChain()
-  const activeChain = useMemo(() => forceChain || _activeChain, [_activeChain, forceChain])
+  const _activeChain = useActiveChain();
+  const activeChain = useMemo(() => forceChain || _activeChain, [_activeChain, forceChain]);
 
-  useCaptureTxError(error)
+  useCaptureTxError(error);
   if (showLedgerPopup) {
-    return <LedgerConfirmationPopup showLedgerPopup={showLedgerPopup} />
+    return <LedgerConfirmationPopup showLedgerPopup={showLedgerPopup} />;
   }
 
   return (
-    <BottomModal
-      isOpen={isOpen}
-      onClose={onCloseHandler}
-      title='Review Transaction'
-      className='p-6 !pt-8'
-    >
+    <BottomModal isOpen={isOpen} onClose={onCloseHandler} title='Review Transaction' className='p-6 !pt-8'>
       <div className='flex flex-col items-center gap-5'>
         <div className={classNames('flex p-4 w-full bg-gray-50 dark:bg-gray-900 rounded-2xl')}>
           <div className='h-10 w-10 bg-green-600 rounded-full flex items-center justify-center'>
@@ -86,7 +76,7 @@ export function ReviewVoteCast({
         <Memo
           value={memo}
           onChange={(e) => {
-            setMemo(e.target.value)
+            setMemo(e.target.value);
           }}
         />
 
@@ -96,18 +86,16 @@ export function ReviewVoteCast({
           </Text>
         )}
 
-        {(error ?? ledgerError) && (
-          <ErrorCard text={getErrorMsg(error ?? ledgerError ?? '', gasOption, 'vote')} />
-        )}
+        {(error ?? ledgerError) && <ErrorCard text={getErrorMsg(error ?? ledgerError ?? '', gasOption, 'vote')} />}
 
         <Button
           className='w-full mt-1'
           disabled={showLedgerPopup || loading}
           onClick={async () => {
             if (selectedVote !== undefined) {
-              const txSuccess = await onSubmitVote(selectedVote)
+              const txSuccess = await onSubmitVote(selectedVote);
               if (txSuccess) {
-                onCloseHandler()
+                onCloseHandler();
               }
             }
           }}
@@ -116,5 +104,5 @@ export function ReviewVoteCast({
         </Button>
       </div>
     </BottomModal>
-  )
+  );
 }

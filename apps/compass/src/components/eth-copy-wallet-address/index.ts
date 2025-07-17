@@ -1,1 +1,1 @@
-export * from './EthCopyWalletAddress'
+export * from './EthCopyWalletAddress';

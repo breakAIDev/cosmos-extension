@@ -1,9 +1,9 @@
-'use client'
+'use client';
 
-import { Check } from '@phosphor-icons/react'
-import * as CheckboxPrimitive from '@radix-ui/react-checkbox'
-import * as React from 'react'
-import { cn } from 'utils/cn'
+import { Check } from '@phosphor-icons/react';
+import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
+import * as React from 'react';
+import { cn } from 'utils/cn';
 
 const Checkbox = React.forwardRef<
   React.ElementRef<typeof CheckboxPrimitive.Root>,
@@ -21,7 +21,7 @@ const Checkbox = React.forwardRef<
       <Check className='h-4 w-4 text-secondary-300' />
     </CheckboxPrimitive.Indicator>
   </CheckboxPrimitive.Root>
-))
-Checkbox.displayName = CheckboxPrimitive.Root.displayName
+));
+Checkbox.displayName = CheckboxPrimitive.Root.displayName;
 
-export { Checkbox }
+export { Checkbox };

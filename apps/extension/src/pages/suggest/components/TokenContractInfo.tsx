@@ -1,11 +1,11 @@
-import { Divider, Key, Value } from 'components/dapp'
-import React from 'react'
+import { Divider, Key, Value } from 'components/dapp';
+import React from 'react';
 
 type TokenContractInfoProps = {
-  name: string
-  symbol: string
-  decimals: number
-}
+  name: string;
+  symbol: string;
+  decimals: number;
+};
 
 export function TokenContractInfo({ name, symbol, decimals }: TokenContractInfoProps) {
   return (
@@ -21,5 +21,5 @@ export function TokenContractInfo({ name, symbol, decimals }: TokenContractInfoP
       <Key>Coin Decimals</Key>
       <Value>{decimals}</Value>
     </div>
-  )
+  );
 }

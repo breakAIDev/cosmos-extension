@@ -1,19 +1,19 @@
-import { Key } from '@leapwallet/cosmos-wallet-hooks'
-import { CaretDown } from '@phosphor-icons/react'
-import Text from 'components/text'
-import { Images } from 'images'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { formatWalletName } from 'utils/formatWalletName'
-import { trim } from 'utils/strings'
+import { Key } from '@leapwallet/cosmos-wallet-hooks';
+import { CaretDown } from '@phosphor-icons/react';
+import Text from 'components/text';
+import { Images } from 'images';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { formatWalletName } from 'utils/formatWalletName';
+import { trim } from 'utils/strings';
 
-import { SelectWalletSheet } from './SelectWalletSheet'
+import { SelectWalletSheet } from './SelectWalletSheet';
 
 type SearchChainWithWalletFilterProps = {
-  value: string
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  setSelectedWallet: (val: Key) => void
-  selectedWallet: Key
-}
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  setSelectedWallet: (val: Key) => void;
+  selectedWallet: Key;
+};
 
 export default function SearchChainWithWalletFilter({
   value,
@@ -21,25 +21,25 @@ export default function SearchChainWithWalletFilter({
   setSelectedWallet,
   selectedWallet,
 }: SearchChainWithWalletFilterProps) {
-  const inputRef = useRef<HTMLInputElement | null>(null)
-  const [isWalletSheetVisible, setisWalletSheetVisible] = useState<boolean>(false)
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [isWalletSheetVisible, setisWalletSheetVisible] = useState<boolean>(false);
 
   useEffect(() => {
     if (inputRef.current) {
       setTimeout(() => {
-        inputRef.current?.focus()
-      }, 100)
+        inputRef.current?.focus();
+      }, 100);
     }
-  }, [])
+  }, []);
 
-  const walletName = formatWalletName(selectedWallet?.name || '')
+  const walletName = formatWalletName(selectedWallet?.name || '');
   const walletAvatar = useMemo(() => {
     if (selectedWallet?.avatar) {
-      return selectedWallet.avatar
+      return selectedWallet.avatar;
     } else {
-      return Images.Misc.getWalletIconAtIndex(selectedWallet.colorIndex, selectedWallet.watchWallet)
+      return Images.Misc.getWalletIconAtIndex(selectedWallet.colorIndex, selectedWallet.watchWallet);
     }
-  }, [selectedWallet.avatar, selectedWallet.colorIndex, selectedWallet.watchWallet])
+  }, [selectedWallet.avatar, selectedWallet.colorIndex, selectedWallet.watchWallet]);
 
   return (
     <div
@@ -79,5 +79,5 @@ export default function SearchChainWithWalletFilter({
         selectedWallet={selectedWallet}
       />
     </div>
-  )
+  );
 }

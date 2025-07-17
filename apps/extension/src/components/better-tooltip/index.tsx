@@ -1,30 +1,30 @@
-import classNames from 'classnames'
-import React, { useRef, useState } from 'react'
+import classNames from 'classnames';
+import React, { useRef, useState } from 'react';
 
 type TooltipProps = {
-  children: React.ReactElement
-  content: React.ReactNode
-  className?: string
-}
+  children: React.ReactElement;
+  content: React.ReactNode;
+  className?: string;
+};
 
 const Tooltip: React.FC<TooltipProps> = ({ children, content, className }) => {
-  const [showContent, setShowContent] = useState(false)
+  const [showContent, setShowContent] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const timer = useRef<any>(null)
-  const tooltipRef = useRef<HTMLDivElement | null>(null)
+  const timer = useRef<any>(null);
+  const tooltipRef = useRef<HTMLDivElement | null>(null);
 
   const handleMouseIn = () => {
     if (timer.current) {
-      clearTimeout(timer.current)
+      clearTimeout(timer.current);
     }
-    setShowContent(true)
-  }
+    setShowContent(true);
+  };
 
   const handleMouseOut = () => {
     timer.current = setTimeout(() => {
-      setShowContent(false)
-    }, 250)
-  }
+      setShowContent(false);
+    }, 250);
+  };
 
   return (
     <>
@@ -55,7 +55,7 @@ const Tooltip: React.FC<TooltipProps> = ({ children, content, className }) => {
         </>,
       )}
     </>
-  )
-}
+  );
+};
 
-export default Tooltip
+export default Tooltip;

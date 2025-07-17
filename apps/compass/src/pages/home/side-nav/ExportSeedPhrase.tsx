@@ -1,36 +1,27 @@
-import { useIsSeiEvmChain } from '@leapwallet/cosmos-wallet-hooks'
-import { Buttons, Header, HeaderActionType } from '@leapwallet/leap-ui'
-import classNames from 'classnames'
-import CanvasTextBox from 'components/canvas-box/CanvasTextBox'
-import InfoSheet from 'components/Infosheet'
-import Text from 'components/text'
-import { useChainPageInfo } from 'hooks'
-import { SeedPhrase } from 'hooks/wallet/seed-phrase/useSeedPhrase'
-import { Images } from 'images'
-import React, { ReactElement, useState } from 'react'
-import { UserClipboard } from 'utils/clipboard'
+import { useIsSeiEvmChain } from '@leapwallet/cosmos-wallet-hooks';
+import { Buttons, Header, HeaderActionType } from '@leapwallet/leap-ui';
+import classNames from 'classnames';
+import CanvasTextBox from 'components/canvas-box/CanvasTextBox';
+import InfoSheet from 'components/Infosheet';
+import Text from 'components/text';
+import { useChainPageInfo } from 'hooks';
+import { SeedPhrase } from 'hooks/wallet/seed-phrase/useSeedPhrase';
+import { Images } from 'images';
+import React, { ReactElement, useState } from 'react';
+import { UserClipboard } from 'utils/clipboard';
 
-import { EnterPasswordView } from './EnterPasswordView'
+import { EnterPasswordView } from './EnterPasswordView';
 
-function SeedPhraseView({
-  goBack,
-  password,
-}: {
-  password: Uint8Array
-  goBack: () => void
-}): ReactElement {
-  const mnemonic = SeedPhrase.useMnemonic(password)
-  const { topChainColor } = useChainPageInfo()
-  const [viewInfoSheet, setViewInfoSheet] = useState(false)
-  const isSeiEvmChain = useIsSeiEvmChain()
+function SeedPhraseView({ goBack, password }: { password: Uint8Array; goBack: () => void }): ReactElement {
+  const mnemonic = SeedPhrase.useMnemonic(password);
+  const { topChainColor } = useChainPageInfo();
+  const [viewInfoSheet, setViewInfoSheet] = useState(false);
+  const isSeiEvmChain = useIsSeiEvmChain();
 
   return (
     <div>
       {isSeiEvmChain ? (
-        <button
-          className='absolute top-5 right-5 w-[32px] cursor-pointer z-10'
-          onClick={() => setViewInfoSheet(true)}
-        >
+        <button className='absolute top-5 right-5 w-[32px] cursor-pointer z-10' onClick={() => setViewInfoSheet(true)}>
           <img className='w-full' src={Images.Misc.HelpOutline} alt='help' />
         </button>
       ) : null}
@@ -51,8 +42,7 @@ function SeedPhraseView({
           These words are the keys to your wallet
         </div>
         <div className='dark:text-gray-400 text-gray-600 text-xs mb-5 w-4/5 text-center'>
-          Exporting a recovery phrase to MetaMask might give a different address, use private key
-          instead.
+          Exporting a recovery phrase to MetaMask might give a different address, use private key instead.
         </div>
 
         <CanvasTextBox text={mnemonic} noSpace={false} size={'md'} />
@@ -60,7 +50,7 @@ function SeedPhraseView({
           color={topChainColor}
           data-testing-id='copy-seed-phrase'
           onCopy={() => {
-            UserClipboard.copyText(mnemonic)
+            UserClipboard.copyText(mnemonic);
           }}
         />
         <div className='w-full h-auto rounded-xl dark:bg-gray-900 bg-white-100 flex items-center p-[10px] my-[20px]'>
@@ -86,12 +76,12 @@ function SeedPhraseView({
         />
       ) : null}
     </div>
-  )
+  );
 }
 
 export default function ExportSeedPhrase({ goBack }: { goBack: () => void }): ReactElement {
-  const [password, setPassword] = useState<Uint8Array>()
-  const [isRevealed, setRevealed] = useState(false)
+  const [password, setPassword] = useState<Uint8Array>();
+  const [isRevealed, setRevealed] = useState(false);
   return isRevealed && !!password ? (
     <SeedPhraseView password={password} goBack={goBack} />
   ) : (
@@ -101,5 +91,5 @@ export default function ExportSeedPhrase({ goBack }: { goBack: () => void }): Re
       setPassword={setPassword}
       goBack={goBack}
     />
-  )
+  );
 }

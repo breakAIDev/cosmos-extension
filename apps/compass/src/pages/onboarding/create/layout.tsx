@@ -1,14 +1,14 @@
-import { ArrowLeft } from '@phosphor-icons/react'
-import { Button } from 'components/ui/button'
-import StepProgress from 'components/ui/step-progress'
-import React from 'react'
-import { cn } from 'utils/cn'
+import { ArrowLeft } from '@phosphor-icons/react';
+import { Button } from 'components/ui/button';
+import StepProgress from 'components/ui/step-progress';
+import React from 'react';
+import { cn } from 'utils/cn';
 
-import { OnboardingLayout } from '../layout'
-import { useCreateWalletContext } from './create-wallet-context'
+import { OnboardingLayout } from '../layout';
+import { useCreateWalletContext } from './create-wallet-context';
 
 const NavHeader = () => {
-  const { backToPreviousStep, currentStep, totalSteps, createType } = useCreateWalletContext()
+  const { backToPreviousStep, currentStep, totalSteps, createType } = useCreateWalletContext();
 
   return (
     <div className='flex flex-row items-center justify-between align-center w-full relative -m-1'>
@@ -19,11 +19,7 @@ const NavHeader = () => {
       {createType !== 'social' && (
         <>
           {currentStep > 0 && (
-            <StepProgress
-              currentStep={currentStep}
-              totalSteps={totalSteps}
-              className='mx-auto h-9'
-            />
+            <StepProgress currentStep={currentStep} totalSteps={totalSteps} className='mx-auto h-9' />
           )}
 
           {/* to center the progress bar horizontally */}
@@ -31,20 +27,17 @@ const NavHeader = () => {
         </>
       )}
     </div>
-  )
-}
+  );
+};
 
 export const CreateWalletLayout = (props: React.PropsWithChildren<{ className?: string }>) => {
   return (
     <OnboardingLayout
-      className={cn(
-        'flex flex-col items-stretch gap-7 p-7 overflow-auto border-secondary-300',
-        props.className,
-      )}
+      className={cn('flex flex-col items-stretch gap-7 p-7 overflow-auto border-secondary-300', props.className)}
     >
       <NavHeader key='nav-header' />
 
       {props.children}
     </OnboardingLayout>
-  )
-}
+  );
+};

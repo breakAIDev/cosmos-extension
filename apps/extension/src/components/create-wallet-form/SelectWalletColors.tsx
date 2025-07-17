@@ -1,14 +1,14 @@
-import { Check } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import React from 'react'
+import { Check } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import React from 'react';
 
-import { Colors } from '../../theme/colors'
+import { Colors } from '../../theme/colors';
 
 type Props = {
   // eslint-disable-next-line no-unused-vars
-  selectColorIndex: (index: number) => void
-  colorIndex: number
-}
+  selectColorIndex: (index: number) => void;
+  colorIndex: number;
+};
 
 export default function SelectWalletColors({ selectColorIndex, colorIndex }: Props) {
   return (
@@ -18,7 +18,7 @@ export default function SelectWalletColors({ selectColorIndex, colorIndex }: Pro
           <div
             key={index}
             onClick={() => {
-              selectColorIndex(index)
+              selectColorIndex(index);
             }}
             className={classNames('p-[4px] rounded-full cursor-pointer', {
               'border-2': colorIndex === index,
@@ -26,16 +26,14 @@ export default function SelectWalletColors({ selectColorIndex, colorIndex }: Pro
             style={{ borderColor: color }}
           >
             <div
-              className={classNames(
-                'flex items-center justify-center rounded-full w-[16px] h-[16px]',
-              )}
+              className={classNames('flex items-center justify-center rounded-full w-[16px] h-[16px]')}
               style={{ backgroundColor: color }}
             >
               {index === colorIndex && <Check size={12} className='text-white-100' />}
             </div>
           </div>
-        )
+        );
       })}
     </div>
-  )
+  );
 }

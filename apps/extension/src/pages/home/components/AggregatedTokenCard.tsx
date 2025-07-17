@@ -6,41 +6,41 @@ import {
   sliceWord,
   useGetChains,
   useUserPreferredCurrency,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { ChainInfos, SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import BigNumber from 'bignumber.js'
-import { TokenImageWithFallback } from 'components/token-image-with-fallback'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from 'components/ui/tooltip'
-import { AGGREGATED_CHAIN_KEY } from 'config/constants'
-import { AnimatePresence, motion } from 'framer-motion'
-import { useActiveChain } from 'hooks/settings/useActiveChain'
-import { useFormatCurrency } from 'hooks/settings/useCurrency'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import { observer } from 'mobx-react-lite'
-import React, { useMemo } from 'react'
-import { miscellaneousDataStore } from 'stores/chain-infos-store'
-import { hideAssetsStore } from 'stores/hide-assets-store'
-import { hidePercentChangeStore } from 'stores/hide-percent-change'
-import { AggregatedSupportedChain } from 'types/utility'
-import { cn } from 'utils/cn'
-import { imgOnError } from 'utils/imgOnError'
-import { opacityFadeInOut, transition150 } from 'utils/motion-variants'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { ChainInfos, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import BigNumber from 'bignumber.js';
+import { TokenImageWithFallback } from 'components/token-image-with-fallback';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from 'components/ui/tooltip';
+import { AGGREGATED_CHAIN_KEY } from 'config/constants';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useActiveChain } from 'hooks/settings/useActiveChain';
+import { useFormatCurrency } from 'hooks/settings/useCurrency';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { observer } from 'mobx-react-lite';
+import React, { useMemo } from 'react';
+import { miscellaneousDataStore } from 'stores/chain-infos-store';
+import { hideAssetsStore } from 'stores/hide-assets-store';
+import { hidePercentChangeStore } from 'stores/hide-percent-change';
+import { AggregatedSupportedChain } from 'types/utility';
+import { cn } from 'utils/cn';
+import { imgOnError } from 'utils/imgOnError';
+import { opacityFadeInOut, transition150 } from 'utils/motion-variants';
 
 type AggregatedTokenCardProps = {
-  readonly title: string
-  readonly usdValue: string | undefined
-  readonly amount: string
-  readonly symbol: string
-  readonly assetImg: string | undefined
-  readonly onClick: () => void
-  readonly ibcChainInfo: IbcChainInfo | undefined
-  readonly hasToShowEvmTag: boolean | undefined
-  readonly isEvm: boolean | undefined
-  readonly tokenBalanceOnChain: SupportedChain
-  readonly isPlaceholder?: boolean
-  percentChange24?: number
-  className?: string
-}
+  readonly title: string;
+  readonly usdValue: string | undefined;
+  readonly amount: string;
+  readonly symbol: string;
+  readonly assetImg: string | undefined;
+  readonly onClick: () => void;
+  readonly ibcChainInfo: IbcChainInfo | undefined;
+  readonly hasToShowEvmTag: boolean | undefined;
+  readonly isEvm: boolean | undefined;
+  readonly tokenBalanceOnChain: SupportedChain;
+  readonly isPlaceholder?: boolean;
+  percentChange24?: number;
+  className?: string;
+};
 
 export const AggregatedTokenCardView = observer(
   ({
@@ -58,33 +58,31 @@ export const AggregatedTokenCardView = observer(
     percentChange24,
     className,
   }: AggregatedTokenCardProps & { className?: string }) => {
-    const chains = useGetChains()
-    const activeChain = useActiveChain() as AggregatedSupportedChain
-    const [formatCurrency] = useFormatCurrency()
+    const chains = useGetChains();
+    const activeChain = useActiveChain() as AggregatedSupportedChain;
+    const [formatCurrency] = useFormatCurrency();
 
-    const defaultTokenLogo = useDefaultTokenLogo()
-    const [preferredCurrency] = useUserPreferredCurrency()
-    const formattedFiatValue = usdValue ? formatCurrency(new BigNumber(usdValue || 0), true) : '-'
+    const defaultTokenLogo = useDefaultTokenLogo();
+    const [preferredCurrency] = useUserPreferredCurrency();
+    const formattedFiatValue = usdValue ? formatCurrency(new BigNumber(usdValue || 0), true) : '-';
 
     const ibcInfo = ibcChainInfo
       ? `${ibcChainInfo.pretty_name} / ${sliceWord(ibcChainInfo?.channelId ?? '', 7, 5)}`
-      : ''
+      : '';
 
-    const chainName = chains[tokenBalanceOnChain]?.chainName ?? ''
+    const chainName = chains[tokenBalanceOnChain]?.chainName ?? '';
 
     const percentChangeText = useMemo(() => {
       if (!percentChange24) {
-        return '-'
+        return '-';
       }
 
       if (percentChange24 >= 0) {
-        return `+${formatPercentAmount(percentChange24.toString(), 2)}%`
+        return `+${formatPercentAmount(percentChange24.toString(), 2)}%`;
       } else {
-        return percentChange24 >= -100
-          ? `${formatPercentAmount(percentChange24.toString(), 2)}%`
-          : '-99.99%'
+        return percentChange24 >= -100 ? `${formatPercentAmount(percentChange24.toString(), 2)}%` : '-99.99%';
       }
-    }, [percentChange24])
+    }, [percentChange24]);
 
     return (
       <button
@@ -143,12 +141,7 @@ export const AggregatedTokenCardView = observer(
                     exit='hidden'
                   >
                     {hideAssetsStore.formatHideBalance(
-                      formatTokenAmount(
-                        amount,
-                        sliceWord(symbol, 4, 4),
-                        3,
-                        currencyDetail[preferredCurrency].locale,
-                      ),
+                      formatTokenAmount(amount, sliceWord(symbol, 4, 4), 3, currencyDetail[preferredCurrency].locale),
                     )}
                     {isEvm && hasToShowEvmTag ? ' · EVM' : ''}
                   </motion.span>
@@ -208,9 +201,9 @@ export const AggregatedTokenCardView = observer(
           </AnimatePresence>
         </div>
       </button>
-    )
+    );
   },
-)
+);
 
 const NobleRewards = () => {
   return (
@@ -219,23 +212,21 @@ const NobleRewards = () => {
       <span className='font-bold'>
         &nbsp;
         {parseFloat(miscellaneousDataStore.data?.noble?.usdnEarnApy) > 0
-          ? new BigNumber(miscellaneousDataStore.data.noble.usdnEarnApy)
-              .multipliedBy(100)
-              .toFixed(2) + '%'
+          ? new BigNumber(miscellaneousDataStore.data.noble.usdnEarnApy).multipliedBy(100).toFixed(2) + '%'
           : '-'}
         &nbsp;APY!
       </span>
     </div>
-  )
-}
+  );
+};
 
 export const AggregatedTokenCard = (props: AggregatedTokenCardProps) => {
-  const showNobleRewards = props.tokenBalanceOnChain === 'noble' && props.symbol === 'USDC'
+  const showNobleRewards = props.tokenBalanceOnChain === 'noble' && props.symbol === 'USDC';
 
   return (
     <div className='flex flex-col w-full rounded-2xl overflow-hidden'>
       <AggregatedTokenCardView {...props} />
       {showNobleRewards && <NobleRewards />}
     </div>
-  )
-}
+  );
+};

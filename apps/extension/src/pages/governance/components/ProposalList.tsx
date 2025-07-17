@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Proposal, useStaking } from '@leapwallet/cosmos-wallet-hooks'
+import { Proposal, useStaking } from '@leapwallet/cosmos-wallet-hooks';
 import {
   ChainTagsStore,
   ClaimRewardsStore,
@@ -7,51 +7,51 @@ import {
   GovStore,
   UndelegationsStore,
   ValidatorsStore,
-} from '@leapwallet/cosmos-wallet-store'
-import { CardDivider, Header, HeaderActionType } from '@leapwallet/leap-ui'
-import { CheckCircle } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import { TestnetAlertStrip } from 'components/alert-strip'
-import BottomModal from 'components/bottom-modal'
-import { EmptyCard } from 'components/empty-card'
-import PopupLayout from 'components/layout/popup-layout'
-import { LoaderAnimation } from 'components/loader/Loader'
-import GovCardSkeleton from 'components/Skeletons/GovCardSkeleton'
-import { SearchInput } from 'components/ui/input/search-input'
-import { useChainPageInfo } from 'hooks'
-import { useActiveChain } from 'hooks/settings/useActiveChain'
-import { useChainInfos } from 'hooks/useChainInfos'
-import Sort from 'icons/sort'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import SelectChain from 'pages/home/SelectChain'
-import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { rootDenomsStore } from 'stores/denoms-store-instance'
-import { isSidePanel } from 'utils/isSidePanel'
-import { sliceSearchWord } from 'utils/strings'
+} from '@leapwallet/cosmos-wallet-store';
+import { CardDivider, Header, HeaderActionType } from '@leapwallet/leap-ui';
+import { CheckCircle } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import { TestnetAlertStrip } from 'components/alert-strip';
+import BottomModal from 'components/bottom-modal';
+import { EmptyCard } from 'components/empty-card';
+import PopupLayout from 'components/layout/popup-layout';
+import { LoaderAnimation } from 'components/loader/Loader';
+import GovCardSkeleton from 'components/Skeletons/GovCardSkeleton';
+import { SearchInput } from 'components/ui/input/search-input';
+import { useChainPageInfo } from 'hooks';
+import { useActiveChain } from 'hooks/settings/useActiveChain';
+import { useChainInfos } from 'hooks/useChainInfos';
+import Sort from 'icons/sort';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import SelectChain from 'pages/home/SelectChain';
+import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { rootDenomsStore } from 'stores/denoms-store-instance';
+import { isSidePanel } from 'utils/isSidePanel';
+import { sliceSearchWord } from 'utils/strings';
 
-import { ProposalStatus, RequireMinStaking } from './index'
-import { ProposalStatusEnum } from './ProposalStatus'
+import { ProposalStatus, RequireMinStaking } from './index';
+import { ProposalStatusEnum } from './ProposalStatus';
 
 export type ProposalListProps = {
   // eslint-disable-next-line no-unused-vars
-  onClick: (proposal: string) => void
-  shouldPreferFallback?: boolean
-  governanceStore: GovStore
-  chainTagsStore: ChainTagsStore
-  delegationsStore: DelegationsStore
-  validatorsStore: ValidatorsStore
-  unDelegationsStore: UndelegationsStore
-  claimRewardsStore: ClaimRewardsStore
-}
+  onClick: (proposal: string) => void;
+  shouldPreferFallback?: boolean;
+  governanceStore: GovStore;
+  chainTagsStore: ChainTagsStore;
+  delegationsStore: DelegationsStore;
+  validatorsStore: ValidatorsStore;
+  unDelegationsStore: UndelegationsStore;
+  claimRewardsStore: ClaimRewardsStore;
+};
 
 const filters = [
   { key: 'all', label: 'All Proposals' },
   { key: ProposalStatusEnum.PROPOSAL_STATUS_VOTING_PERIOD, label: 'Voting in Progress' },
   { key: ProposalStatusEnum.PROPOSAL_STATUS_PASSED, label: 'Passed' },
   { key: ProposalStatusEnum.PROPOSAL_STATUS_REJECTED, label: 'Rejected' },
-]
+];
 
 export const ProposalList = observer(
   ({
@@ -63,31 +63,27 @@ export const ProposalList = observer(
     claimRewardsStore,
     chainTagsStore,
   }: ProposalListProps) => {
-    const {
-      status: proposalListStatus,
-      data: _proposalList,
-      fetchMore,
-    } = governanceStore.chainProposals
+    const { status: proposalListStatus, data: _proposalList, fetchMore } = governanceStore.chainProposals;
 
-    const chainInfos = useChainInfos()
-    const [propFilter, setPropFilter] = useState<string>('')
+    const chainInfos = useChainInfos();
+    const [propFilter, setPropFilter] = useState<string>('');
     const handleFilterChange = (event: React.FormEvent<HTMLInputElement>) => {
-      setPropFilter(event.currentTarget.value.toLowerCase())
-    }
-    const navigate = useNavigate()
+      setPropFilter(event.currentTarget.value.toLowerCase());
+    };
+    const navigate = useNavigate();
 
-    const [showFilter, setShowFilter] = useState(false)
-    const [filter, setFilter] = useState('all')
-    const [showChainSelector, setShowChainSelector] = useState(false)
-    const activeChain = useActiveChain()
-    const activeChainInfo = chainInfos[activeChain]
-    const loading = proposalListStatus === 'loading'
-    const denoms = rootDenomsStore.allDenoms
+    const [showFilter, setShowFilter] = useState(false);
+    const [filter, setFilter] = useState('all');
+    const [showChainSelector, setShowChainSelector] = useState(false);
+    const activeChain = useActiveChain();
+    const activeChainInfo = chainInfos[activeChain];
+    const loading = proposalListStatus === 'loading';
+    const denoms = rootDenomsStore.allDenoms;
 
-    const chainDelegations = delegationsStore.delegationsForChain(activeChain)
-    const chainValidators = validatorsStore.validatorsForChain(activeChain)
-    const chainUnDelegations = unDelegationsStore.unDelegationsForChain(activeChain)
-    const chainClaimRewards = claimRewardsStore.claimRewardsForChain(activeChain)
+    const chainDelegations = delegationsStore.delegationsForChain(activeChain);
+    const chainValidators = validatorsStore.validatorsForChain(activeChain);
+    const chainUnDelegations = unDelegationsStore.unDelegationsForChain(activeChain);
+    const chainClaimRewards = claimRewardsStore.claimRewardsForChain(activeChain);
 
     const { totalDelegation } = useStaking(
       denoms,
@@ -96,15 +92,15 @@ export const ProposalList = observer(
       chainUnDelegations,
       chainClaimRewards,
       activeChain,
-    )
+    );
 
     const hasMinAmountStaked = useMemo(() => {
       if (activeChain === 'cosmos' || activeChainInfo.chainId === 'atomone-1') {
-        return totalDelegation?.gte(1)
+        return totalDelegation?.gte(1);
       }
 
-      return true
-    }, [activeChain, activeChainInfo.chainId, totalDelegation])
+      return true;
+    }, [activeChain, activeChainInfo.chainId, totalDelegation]);
 
     const filteredProposalList: Proposal[] = useMemo(
       () =>
@@ -112,56 +108,56 @@ export const ProposalList = observer(
           ?.filter((proposal) => proposal.status !== 'PROPOSAL_STATUS_DEPOSIT_PERIOD')
           .reduce((acc, cur) => {
             if (filter === 'all') {
-              if (!propFilter) acc.push(cur)
+              if (!propFilter) acc.push(cur);
               else if (
                 cur.content?.title?.toLowerCase().includes(propFilter) ||
                 cur.title?.toLowerCase().includes(propFilter) ||
                 cur.proposal_id?.toLowerCase().includes(propFilter)
               ) {
-                acc.push(cur)
+                acc.push(cur);
               }
             } else {
               if (!propFilter && cur.status === filter) {
-                acc.push(cur)
+                acc.push(cur);
               } else if (
                 cur.status === filter &&
                 (cur.content?.title?.toLowerCase().includes(propFilter) ||
                   cur.title?.toLowerCase().includes(propFilter) ||
                   cur.proposal_id?.toLowerCase().includes(propFilter))
               ) {
-                acc.push(cur)
+                acc.push(cur);
               }
             }
-            return acc
+            return acc;
           }, []),
       [filter, propFilter, _proposalList],
-    )
+    );
 
     const onFilterClick = useCallback((key: string) => {
-      setFilter(key)
-      setShowFilter(false)
-    }, [])
+      setFilter(key);
+      setShowFilter(false);
+    }, []);
 
     useEffect(() => {
-      const bottom = document.querySelector('#bottom')
-      if (!bottom || filteredProposalList?.length === 0 || proposalListStatus !== 'success') return
+      const bottom = document.querySelector('#bottom');
+      if (!bottom || filteredProposalList?.length === 0 || proposalListStatus !== 'success') return;
       const handleIntersection = (entries: IntersectionObserverEntry[]) => {
         if (entries[0].isIntersecting) {
-          fetchMore()
+          fetchMore();
         }
-      }
+      };
       const observer = new IntersectionObserver(handleIntersection, {
         root: null,
         rootMargin: '0px',
         threshold: 1.0,
-      })
-      observer.observe(bottom)
+      });
+      observer.observe(bottom);
       return () => {
-        observer.disconnect()
-      }
-    }, [fetchMore, filteredProposalList?.length, proposalListStatus])
+        observer.disconnect();
+      };
+    }, [fetchMore, filteredProposalList?.length, proposalListStatus]);
 
-    const { headerChainImgSrc } = useChainPageInfo()
+    const { headerChainImgSrc } = useChainPageInfo();
 
     return (
       <div className='relative w-full panel-height enclosing-panel overflow-clip'>
@@ -182,9 +178,7 @@ export const ProposalList = observer(
             <TestnetAlertStrip />
 
             <div className='w-full flex flex-col pt-6 pb-2 px-7 '>
-              <div className='text-[28px] text-black-100 dark:text-white-100 font-bold'>
-                Proposals
-              </div>
+              <div className='text-[28px] text-black-100 dark:text-white-100 font-bold'>Proposals</div>
               <div className='text-sm text-gray-600 font-bold'>
                 List of proposals in {activeChainInfo?.chainName ?? ''}
               </div>
@@ -212,28 +206,19 @@ export const ProposalList = observer(
             <div id='governance-list' className='pb-8 px-7'>
               <div className='rounded-2xl flex flex-col items-center w-full m-auto justify-center dark:bg-gray-900 bg-white-100'>
                 {loading ? (
-                  Array.from({ length: 5 }).map((_, index) => (
-                    <GovCardSkeleton key={index} isLast={index === 4} />
-                  ))
+                  Array.from({ length: 5 }).map((_, index) => <GovCardSkeleton key={index} isLast={index === 4} />)
                 ) : (filteredProposalList?.length ?? 0) === 0 ? (
                   <EmptyCard
                     isRounded
                     subHeading={propFilter ? 'Please try again with something else' : ''}
-                    heading={
-                      propFilter
-                        ? 'No results for “' + sliceSearchWord(propFilter) + '”'
-                        : 'No Proposals'
-                    }
+                    heading={propFilter ? 'No results for “' + sliceSearchWord(propFilter) + '”' : 'No Proposals'}
                     src={Images.Misc.Explore}
                   />
                 ) : (
                   filteredProposalList?.map((prop: any, index) => {
                     return (
                       <div key={prop.proposal_id} className='w-full'>
-                        <div
-                          className='p-4 cursor-pointer'
-                          onClick={() => onClick(prop.proposal_id)}
-                        >
+                        <div className='p-4 cursor-pointer' onClick={() => onClick(prop.proposal_id)}>
                           <div className='flex items-center justify-between'>
                             <div
                               className={classNames('w-[272px]', {
@@ -245,8 +230,7 @@ export const ProposalList = observer(
                                   {prop?.title ?? prop?.content?.title}
                                 </div>
                                 <div className='text-gray-600 dark:text-gray-200 text-xs'>
-                                  #{prop.proposal_id} ·{' '}
-                                  <ProposalStatus status={prop.status as ProposalStatusEnum} />
+                                  #{prop.proposal_id} · <ProposalStatus status={prop.status as ProposalStatusEnum} />
                                 </div>
                               </div>
                             </div>
@@ -255,7 +239,7 @@ export const ProposalList = observer(
                         </div>
                         {index < filteredProposalList.length - 1 ? <CardDivider /> : null}
                       </div>
-                    )
+                    );
                   })
                 )}
               </div>
@@ -287,9 +271,7 @@ export const ProposalList = observer(
                   key={_filter.label}
                 >
                   <span>{_filter.label}</span>
-                  {filter === _filter.key ? (
-                    <CheckCircle weight='fill' size={24} className='text-[#E18881]' />
-                  ) : null}
+                  {filter === _filter.key ? <CheckCircle weight='fill' size={24} className='text-[#E18881]' /> : null}
                 </button>
                 {index === filters.length - 1 ? null : <CardDivider />}
               </Fragment>
@@ -297,6 +279,6 @@ export const ProposalList = observer(
           </div>
         </BottomModal>
       </div>
-    )
+    );
   },
-)
+);

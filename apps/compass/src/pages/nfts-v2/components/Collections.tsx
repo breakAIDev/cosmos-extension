@@ -1,44 +1,41 @@
-import {
-  useDisabledNFTsCollections,
-  useFractionalizedNftContracts,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { NftStore } from '@leapwallet/cosmos-wallet-store'
-import classNames from 'classnames'
-import { useChainPageInfo } from 'hooks'
-import { useChainInfos } from 'hooks/useChainInfos'
-import { RightArrow } from 'images/misc'
-import { observer } from 'mobx-react-lite'
-import React, { useMemo } from 'react'
-import { getChainName } from 'utils/getChainName'
-import { isSidePanel } from 'utils/isSidePanel'
+import { useDisabledNFTsCollections, useFractionalizedNftContracts } from '@leapwallet/cosmos-wallet-hooks';
+import { NftStore } from '@leapwallet/cosmos-wallet-store';
+import classNames from 'classnames';
+import { useChainPageInfo } from 'hooks';
+import { useChainInfos } from 'hooks/useChainInfos';
+import { RightArrow } from 'images/misc';
+import { observer } from 'mobx-react-lite';
+import React, { useMemo } from 'react';
+import { getChainName } from 'utils/getChainName';
+import { isSidePanel } from 'utils/isSidePanel';
 
-import { useNftContext } from '../context'
-import { Chip, CollectionAvatar, Text } from './index'
+import { useNftContext } from '../context';
+import { Chip, CollectionAvatar, Text } from './index';
 
 type CollectionsProps = {
-  setShowManageCollections: React.Dispatch<React.SetStateAction<boolean>>
-  nftStore: NftStore
-}
+  setShowManageCollections: React.Dispatch<React.SetStateAction<boolean>>;
+  nftStore: NftStore;
+};
 
 export const Collections = observer(({ setShowManageCollections, nftStore }: CollectionsProps) => {
-  const { topChainColor } = useChainPageInfo()
-  const chainInfos = useChainInfos()
+  const { topChainColor } = useChainPageInfo();
+  const chainInfos = useChainInfos();
 
-  const fractionalizedNftContracts = useFractionalizedNftContracts()
-  const { setActivePage, setShowCollectionDetailsFor } = useNftContext()
-  const collectionData = nftStore.nftDetails.collectionData
-  const disabledNftsCollections = useDisabledNFTsCollections()
+  const fractionalizedNftContracts = useFractionalizedNftContracts();
+  const { setActivePage, setShowCollectionDetailsFor } = useNftContext();
+  const collectionData = nftStore.nftDetails.collectionData;
+  const disabledNftsCollections = useDisabledNFTsCollections();
 
   const sortedCollections = useMemo(() => {
     return collectionData?.collections.slice().sort((collectionA, collectionB) => {
-      const nameA = collectionA.name.toLowerCase().trim()
-      const nameB = collectionB.name.toLowerCase().trim()
+      const nameA = collectionA.name.toLowerCase().trim();
+      const nameB = collectionB.name.toLowerCase().trim();
 
-      if (nameA > nameB) return 1
-      if (nameA < nameB) return -1
-      return 0
-    })
-  }, [collectionData?.collections])
+      if (nameA > nameB) return 1;
+      if (nameA < nameB) return -1;
+      return 0;
+    });
+  }, [collectionData?.collections]);
 
   return (
     <div className='rounded-2xl border dark:border-gray-900 mb-4'>
@@ -54,19 +51,17 @@ export const Collections = observer(({ setShowManageCollections, nftStore }: Col
       </div>
       <div>
         {sortedCollections?.map((collection, index, array) => {
-          const { chain, name, image, totalNfts, address } = collection
-          let nftCount = totalNfts
+          const { chain, name, image, totalNfts, address } = collection;
+          let nftCount = totalNfts;
 
           if (fractionalizedNftContracts.includes(address)) {
-            const fractionalizedNft = collectionData?.nfts?.[chain].filter(
-              (nft) => nft.collection.address === address,
-            )
+            const fractionalizedNft = collectionData?.nfts?.[chain].filter((nft) => nft.collection.address === address);
 
-            nftCount = fractionalizedNft?.length ?? nftCount
+            nftCount = fractionalizedNft?.length ?? nftCount;
           }
 
-          if (disabledNftsCollections.includes(address)) return null
-          const chainInfo = chainInfos[chain]
+          if (disabledNftsCollections.includes(address)) return null;
+          const chainInfo = chainInfos[chain];
 
           return (
             <div
@@ -75,8 +70,8 @@ export const Collections = observer(({ setShowManageCollections, nftStore }: Col
                 'border-b dark:border-gray-900': index + 1 !== array.length,
               })}
               onClick={() => {
-                setActivePage('CollectionDetails')
-                setShowCollectionDetailsFor(address)
+                setActivePage('CollectionDetails');
+                setShowCollectionDetailsFor(address);
               }}
             >
               <CollectionAvatar
@@ -120,9 +115,9 @@ export const Collections = observer(({ setShowManageCollections, nftStore }: Col
                 <img src={RightArrow} alt='right arrow' className='ml-2' />
               </div>
             </div>
-          )
+          );
         })}
       </div>
     </div>
-  )
-})
+  );
+});

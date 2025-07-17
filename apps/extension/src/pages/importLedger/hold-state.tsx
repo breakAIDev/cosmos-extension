@@ -1,9 +1,9 @@
-import { isLedgerUnlocked } from '@leapwallet/cosmos-wallet-sdk'
-import { type IconProps } from '@phosphor-icons/react'
-import { motion } from 'framer-motion'
-import { LEDGER_NETWORK } from 'pages/onboarding/import/import-wallet-context'
-import { onboardingWrapperVariants } from 'pages/onboarding/wrapper'
-import React, { useEffect } from 'react'
+import { isLedgerUnlocked } from '@leapwallet/cosmos-wallet-sdk';
+import { type IconProps } from '@phosphor-icons/react';
+import { motion } from 'framer-motion';
+import { LEDGER_NETWORK } from 'pages/onboarding/import/import-wallet-context';
+import { onboardingWrapperVariants } from 'pages/onboarding/wrapper';
+import React, { useEffect } from 'react';
 
 export const HoldState = ({
   Icon,
@@ -12,55 +12,53 @@ export const HoldState = ({
   appType,
   getLedgerAccountDetails,
 }: {
-  Icon: (props: IconProps) => React.JSX.Element
-  title: React.ReactNode
+  Icon: (props: IconProps) => React.JSX.Element;
+  title: React.ReactNode;
   moveToNextApp: (
     pathWiseAddresses: Record<
       string,
       Record<
         string,
         {
-          address: string
-          pubKey: Uint8Array
+          address: string;
+          pubKey: Uint8Array;
         }
       >
     >,
-  ) => void
-  appType: LEDGER_NETWORK
+  ) => void;
+  appType: LEDGER_NETWORK;
   getLedgerAccountDetails: (app: LEDGER_NETWORK) => Promise<
     Record<
       string,
       Record<
         string,
         {
-          address: string
-          pubKey: Uint8Array
+          address: string;
+          pubKey: Uint8Array;
         }
       >
     >
-  >
+  >;
 }) => {
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
-        const unlocked = await isLedgerUnlocked(
-          appType === LEDGER_NETWORK.ETH ? 'Ethereum' : 'Cosmos',
-        )
+        const unlocked = await isLedgerUnlocked(appType === LEDGER_NETWORK.ETH ? 'Ethereum' : 'Cosmos');
         if (unlocked) {
-          const pathWiseAddresses = await getLedgerAccountDetails(appType)
-          moveToNextApp(pathWiseAddresses)
-          clearInterval(interval)
+          const pathWiseAddresses = await getLedgerAccountDetails(appType);
+          moveToNextApp(pathWiseAddresses);
+          clearInterval(interval);
         }
       } catch (error) {
         // eslint-disable-next-line no-console
-        console.error(error)
+        console.error(error);
       }
-    }, 1000)
+    }, 1000);
 
     return () => {
-      clearInterval(interval)
-    }
-  }, [appType])
+      clearInterval(interval);
+    };
+  }, [appType]);
 
   return (
     <motion.div
@@ -82,5 +80,5 @@ export const HoldState = ({
         <span className='text-xl font-bold text-center'>{title}</span>
       </header>
     </motion.div>
-  )
-}
+  );
+};

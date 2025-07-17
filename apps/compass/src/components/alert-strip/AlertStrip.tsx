@@ -1,20 +1,20 @@
-import classNames from 'classnames'
-import React, { useEffect, useRef, useState } from 'react'
+import classNames from 'classnames';
+import React, { useEffect, useRef, useState } from 'react';
 
-import Text from '../text'
+import Text from '../text';
 
 type AlertStripProps = {
-  message: React.ReactNode
-  bgColor?: string
-  alwaysShow?: boolean
-  onHide?: VoidFunction
-  className?: string
-  timeOut?: number
-  'data-testing-id'?: string
-  textClassName?: string
-  onClick?: VoidFunction
-  childComponent?: React.ReactNode
-}
+  message: React.ReactNode;
+  bgColor?: string;
+  alwaysShow?: boolean;
+  onHide?: VoidFunction;
+  className?: string;
+  timeOut?: number;
+  'data-testing-id'?: string;
+  textClassName?: string;
+  onClick?: VoidFunction;
+  childComponent?: React.ReactNode;
+};
 
 const AlertStrip = React.memo(
   ({
@@ -28,29 +28,29 @@ const AlertStrip = React.memo(
     textClassName,
     ...rest
   }: AlertStripProps) => {
-    const [show, setShow] = useState<boolean>(true)
-    const mountedRef = useRef(true)
+    const [show, setShow] = useState<boolean>(true);
+    const mountedRef = useRef(true);
 
     const fn = () => {
       new Promise((res) => setTimeout(res, timeOut)).then(() => {
         if (mountedRef.current) {
-          setShow(false)
-          onHide && onHide()
+          setShow(false);
+          onHide && onHide();
         }
-      })
+      });
       return () => {
-        mountedRef.current = false
-      }
-    }
+        mountedRef.current = false;
+      };
+    };
 
     useEffect(() => {
-      if (show && !alwaysShow) fn()
+      if (show && !alwaysShow) fn();
       return () => {
-        mountedRef.current = false
-      }
+        mountedRef.current = false;
+      };
 
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [show])
+    }, [show]);
 
     return show ? (
       <div
@@ -68,10 +68,10 @@ const AlertStrip = React.memo(
           {message}
         </Text>
       </div>
-    ) : null
+    ) : null;
   },
-)
+);
 
-AlertStrip.displayName = 'AlertStrip'
+AlertStrip.displayName = 'AlertStrip';
 
-export { AlertStrip }
+export { AlertStrip };

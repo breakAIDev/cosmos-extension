@@ -1,11 +1,11 @@
-import { ArrowLeft } from '@phosphor-icons/react'
-import { PageHeader } from 'components/header'
-import { Button } from 'components/ui/button'
-import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import { ArrowLeft } from '@phosphor-icons/react';
+import { PageHeader } from 'components/header';
+import { Button } from 'components/ui/button';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export const ManageTokensHeader = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   return (
     <PageHeader>
@@ -23,5 +23,5 @@ export const ManageTokensHeader = () => {
         Manage Tokens
       </span>
     </PageHeader>
-  )
-}
+  );
+};

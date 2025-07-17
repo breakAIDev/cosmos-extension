@@ -1,4 +1,4 @@
-import { ChainInfo, SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
+import { ChainInfo, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 
 export const isCosmosLedgerChain = (chain: ChainInfo) => {
   return (
@@ -9,57 +9,57 @@ export const isCosmosLedgerChain = (chain: ChainInfo) => {
     chain.bip44.coinType !== '1' &&
     chain.bip44.coinType !== '637' &&
     chain.bip44.coinType !== '501'
-  )
-}
+  );
+};
 
 export const isEvmLedgerChain = (chain: ChainInfo) => {
-  return chain?.evmOnlyChain || chain?.bip44?.coinType === '60'
-}
+  return chain?.evmOnlyChain || chain?.bip44?.coinType === '60';
+};
 
 export function getLedgerEnabledCosmosChainsKey(chains: ChainInfo[]): SupportedChain[] {
   const cosmosOnlyChainsKey = chains.reduce((_cosmosOnlyChainsKey, chain) => {
     if (isCosmosLedgerChain(chain)) {
-      _cosmosOnlyChainsKey.push(chain?.key)
+      _cosmosOnlyChainsKey.push(chain?.key);
     }
 
-    return _cosmosOnlyChainsKey
-  }, [] as SupportedChain[])
+    return _cosmosOnlyChainsKey;
+  }, [] as SupportedChain[]);
 
-  return cosmosOnlyChainsKey
+  return cosmosOnlyChainsKey;
 }
 
 export function getLedgerEnabledCosmosChainsIds(chains: ChainInfo[]) {
   const cosmosOnlyChainsIds = chains.reduce((_cosmosOnlyChainsIds, chain) => {
     if (isCosmosLedgerChain(chain)) {
-      _cosmosOnlyChainsIds.push(chain?.chainId)
+      _cosmosOnlyChainsIds.push(chain?.chainId);
     }
 
-    return _cosmosOnlyChainsIds
-  }, [] as string[])
+    return _cosmosOnlyChainsIds;
+  }, [] as string[]);
 
-  return cosmosOnlyChainsIds
+  return cosmosOnlyChainsIds;
 }
 
 export function getLedgerEnabledEvmChainsKey(chains: ChainInfo[]): SupportedChain[] {
   const evmOnlyChainsKey = chains.reduce((_evmOnlyChainsKey, chain) => {
     if (isEvmLedgerChain(chain)) {
-      _evmOnlyChainsKey.push(chain.key)
+      _evmOnlyChainsKey.push(chain.key);
     }
 
-    return _evmOnlyChainsKey
-  }, [] as SupportedChain[])
+    return _evmOnlyChainsKey;
+  }, [] as SupportedChain[]);
 
-  return evmOnlyChainsKey
+  return evmOnlyChainsKey;
 }
 
 export function getLedgerEnabledEvmChainsIds(chains: ChainInfo[]) {
   const evmOnlyChainsIds = chains.reduce((_evmOnlyChainsIds, chain) => {
     if (isEvmLedgerChain(chain)) {
-      _evmOnlyChainsIds.push(chain.chainId)
+      _evmOnlyChainsIds.push(chain.chainId);
     }
 
-    return _evmOnlyChainsIds
-  }, [] as string[])
+    return _evmOnlyChainsIds;
+  }, [] as string[]);
 
-  return evmOnlyChainsIds
+  return evmOnlyChainsIds;
 }

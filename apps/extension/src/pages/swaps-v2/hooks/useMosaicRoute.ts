@@ -1,44 +1,44 @@
-import { isAptosChain } from '@leapwallet/cosmos-wallet-sdk'
+import { isAptosChain } from '@leapwallet/cosmos-wallet-sdk';
 import {
   AffiliateFeesByChainId,
   getDecimalPower10,
   MosaicAPI,
   MosaicPath,
   MosaicQuoteResponse,
-} from '@leapwallet/elements-core'
-import { RouteAggregator, RouteError, SkipSupportedChainData } from '@leapwallet/elements-hooks'
-import { useQuery } from '@tanstack/react-query'
-import BigNumber from 'bignumber.js'
-import { Wallet } from 'hooks/wallet/useWallet'
+} from '@leapwallet/elements-core';
+import { RouteAggregator, RouteError, SkipSupportedChainData } from '@leapwallet/elements-hooks';
+import { useQuery } from '@tanstack/react-query';
+import BigNumber from 'bignumber.js';
+import { Wallet } from 'hooks/wallet/useWallet';
 
-import { MergedAsset } from './useAssets'
+import { MergedAsset } from './useAssets';
 
-export const MOSAIC_AGGREGATOR = RouteAggregator.MOSAIC
-export type MosaicAggregator = typeof MOSAIC_AGGREGATOR
+export const MOSAIC_AGGREGATOR = RouteAggregator.MOSAIC;
+export type MosaicAggregator = typeof MOSAIC_AGGREGATOR;
 
 export type MosaicRouteQueryResponse = {
-  aggregator: MosaicAggregator
-  feeAmount: number
-  isFeeIn: boolean
-  sourceAssetChain: SkipSupportedChainData
-  sourceAsset: MergedAsset
-  paths: MosaicQuoteResponse['data']['paths']
-  destinationAssetChain: SkipSupportedChainData
-  destinationAsset: MergedAsset
-  amountIn: string
-  amountOut: string
-  transactionCount: number
-  response: MosaicQuoteResponse['data']
-  operations: MosaicPath[]
-}
+  aggregator: MosaicAggregator;
+  feeAmount: number;
+  isFeeIn: boolean;
+  sourceAssetChain: SkipSupportedChainData;
+  sourceAsset: MergedAsset;
+  paths: MosaicQuoteResponse['data']['paths'];
+  destinationAssetChain: SkipSupportedChainData;
+  destinationAsset: MergedAsset;
+  amountIn: string;
+  amountOut: string;
+  transactionCount: number;
+  response: MosaicQuoteResponse['data'];
+  operations: MosaicPath[];
+};
 
 export type MosaicRouteResponse = {
-  routeResponse: MosaicRouteQueryResponse | null
-  routeError?: RouteError
-  isLoadingRoute: boolean
-  refresh: () => Promise<void>
-  isAptos: boolean
-}
+  routeResponse: MosaicRouteQueryResponse | null;
+  routeError?: RouteError;
+  isLoadingRoute: boolean;
+  refresh: () => Promise<void>;
+  isAptos: boolean;
+};
 
 export const useMosaicRoute = ({
   enabled = true,
@@ -56,27 +56,24 @@ export const useMosaicRoute = ({
   slippage,
   affiliateFeesByChainId,
 }: {
-  enabled?: boolean
-  smartRelay: boolean
-  amountIn: string
-  sourceAsset?: MergedAsset
-  sourceAssetChain?: SkipSupportedChainData
-  destinationAsset?: MergedAsset
-  destinationAssetChain?: SkipSupportedChainData
-  isDirectTransfer?: boolean
-  sourceChainAddress?: string
-  integrator?: string
-  leapFeeBps?: string
-  maxPriceImpact?: number
-  slippage?: number
-  affiliateFeesByChainId?: AffiliateFeesByChainId
+  enabled?: boolean;
+  smartRelay: boolean;
+  amountIn: string;
+  sourceAsset?: MergedAsset;
+  sourceAssetChain?: SkipSupportedChainData;
+  destinationAsset?: MergedAsset;
+  destinationAssetChain?: SkipSupportedChainData;
+  isDirectTransfer?: boolean;
+  sourceChainAddress?: string;
+  integrator?: string;
+  leapFeeBps?: string;
+  maxPriceImpact?: number;
+  slippage?: number;
+  affiliateFeesByChainId?: AffiliateFeesByChainId;
 }): MosaicRouteResponse => {
-  const getAptosSigner = Wallet.useAptosSigner()
+  const getAptosSigner = Wallet.useAptosSigner();
   const isAptos =
-    sourceAsset &&
-    destinationAsset &&
-    isAptosChain(sourceAsset?.chainId) &&
-    isAptosChain(destinationAsset?.chainId)
+    sourceAsset && destinationAsset && isAptosChain(sourceAsset?.chainId) && isAptosChain(destinationAsset?.chainId);
 
   const {
     data: routeResponse,
@@ -101,32 +98,25 @@ export const useMosaicRoute = ({
       slippage,
     ],
     queryFn: async (): Promise<MosaicRouteQueryResponse | null> => {
-      if (
-        !amountIn ||
-        !sourceAsset ||
-        !sourceAssetChain ||
-        !destinationAsset ||
-        !destinationAssetChain ||
-        !isAptos
-      ) {
-        return null
+      if (!amountIn || !sourceAsset || !sourceAssetChain || !destinationAsset || !destinationAssetChain || !isAptos) {
+        return null;
       }
 
       if (!isDirectTransfer && sourceAsset.originDenom === destinationAsset.originDenom) {
-        throw new RouteError('Source and destination token cannot be same')
+        throw new RouteError('Source and destination token cannot be same');
       }
 
-      const amountInBN = new BigNumber(amountIn)
+      const amountInBN = new BigNumber(amountIn);
 
       if (amountInBN.isNaN() || amountInBN.isZero() || amountInBN.isNegative()) {
-        throw new RouteError('Please enter a valid amount')
+        throw new RouteError('Please enter a valid amount');
       }
 
       if (!sourceAsset?.decimals || !destinationAsset?.decimals) {
-        throw new RouteError('Asset metadata unavailable')
+        throw new RouteError('Asset metadata unavailable');
       }
 
-      const aptosSigner = await getAptosSigner('movement')
+      const aptosSigner = await getAptosSigner('movement');
 
       const mosaicResponse = await MosaicAPI.getRoute({
         amountIn,
@@ -138,10 +128,10 @@ export const useMosaicRoute = ({
         sender: aptosSigner.address.toString(),
         leapFeeBps,
         affiliateFeesByChainId,
-      })
+      });
 
       if (!mosaicResponse.success) {
-        throw new Error('No data')
+        throw new Error('No data');
       }
 
       return {
@@ -162,12 +152,12 @@ export const useMosaicRoute = ({
             getDecimalPower10(destinationAsset?.evmDecimals ?? destinationAsset?.decimals ?? 6),
           ),
         ),
-      }
+      };
     },
     retry: (_failureCount, error) => {
-      return !(error instanceof RouteError)
+      return !(error instanceof RouteError);
     },
-  })
+  });
 
   return {
     isAptos: isAptos ?? false,
@@ -175,7 +165,7 @@ export const useMosaicRoute = ({
     routeError: routeError as RouteError,
     isLoadingRoute: isLoadingRoute,
     refresh: async () => {
-      await refreshRoute()
+      await refreshRoute();
     },
-  }
-}
+  };
+};

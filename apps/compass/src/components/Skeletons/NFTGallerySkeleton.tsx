@@ -1,5 +1,5 @@
-import React from 'react'
-import Skeleton from 'react-loading-skeleton'
+import React from 'react';
+import Skeleton from 'react-loading-skeleton';
 
 export const NFTItemSkeleton = () => {
   return (
@@ -7,8 +7,8 @@ export const NFTItemSkeleton = () => {
       <Skeleton count={1} className='min-w-[40px] max-w-[40px] h-[40px] mr-2' />
       <Skeleton count={1} className='min-w-[240px] max-w-[240px] h-[12px]' />
     </div>
-  )
-}
+  );
+};
 
 export default function NFTGallerySkeleton() {
   return (
@@ -18,5 +18,5 @@ export default function NFTGallerySkeleton() {
       <NFTItemSkeleton />
       <NFTItemSkeleton />
     </>
-  )
+  );
 }

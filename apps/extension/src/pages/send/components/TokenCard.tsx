@@ -1,4 +1,4 @@
-import { toBase64, toUtf8 } from '@cosmjs/encoding'
+import { toBase64, toUtf8 } from '@cosmjs/encoding';
 import {
   currencyDetail,
   formatPercentAmount,
@@ -6,32 +6,32 @@ import {
   useActiveChain,
   useGetChains,
   useGetExplorerAccountUrl,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { MarketDataStore } from '@leapwallet/cosmos-wallet-store'
-import { useChains } from '@leapwallet/elements-hooks'
-import { ThemeName, useTheme } from '@leapwallet/leap-ui'
-import { ArrowSquareOut, CopySimple } from '@phosphor-icons/react'
-import BigNumber from 'bignumber.js'
-import classNames from 'classnames'
-import Badge from 'components/badge/Badge'
-import IBCTokenBadge from 'components/badge/IbcTokenBadge'
-import Text from 'components/text'
-import { AGGREGATED_CHAIN_KEY } from 'config/constants'
-import { useNonNativeCustomChains } from 'hooks'
-import { useFormatCurrency, useUserPreferredCurrency } from 'hooks/settings/useCurrency'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import React, { useCallback, useMemo, useState } from 'react'
-import Skeleton from 'react-loading-skeleton'
-import { hideAssetsStore } from 'stores/hide-assets-store'
-import { SourceChain, SourceToken } from 'types/swap'
-import { AggregatedSupportedChain } from 'types/utility'
-import { UserClipboard } from 'utils/clipboard'
-import { cn } from 'utils/cn'
-import { imgOnError } from 'utils/imgOnError'
-import { isSidePanel } from 'utils/isSidePanel'
-import { sliceWord } from 'utils/strings'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { MarketDataStore } from '@leapwallet/cosmos-wallet-store';
+import { useChains } from '@leapwallet/elements-hooks';
+import { ThemeName, useTheme } from '@leapwallet/leap-ui';
+import { ArrowSquareOut, CopySimple } from '@phosphor-icons/react';
+import BigNumber from 'bignumber.js';
+import classNames from 'classnames';
+import Badge from 'components/badge/Badge';
+import IBCTokenBadge from 'components/badge/IbcTokenBadge';
+import Text from 'components/text';
+import { AGGREGATED_CHAIN_KEY } from 'config/constants';
+import { useNonNativeCustomChains } from 'hooks';
+import { useFormatCurrency, useUserPreferredCurrency } from 'hooks/settings/useCurrency';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import React, { useCallback, useMemo, useState } from 'react';
+import Skeleton from 'react-loading-skeleton';
+import { hideAssetsStore } from 'stores/hide-assets-store';
+import { SourceChain, SourceToken } from 'types/swap';
+import { AggregatedSupportedChain } from 'types/utility';
+import { UserClipboard } from 'utils/clipboard';
+import { cn } from 'utils/cn';
+import { imgOnError } from 'utils/imgOnError';
+import { isSidePanel } from 'utils/isSidePanel';
+import { sliceWord } from 'utils/strings';
 
 export const TokenCardSkeleton = () => {
   return (
@@ -54,8 +54,8 @@ export const TokenCardSkeleton = () => {
         <Skeleton width={70} className='z-0' />
       </div>
     </div>
-  )
-}
+  );
+};
 
 function TokenCardView({
   onTokenSelect,
@@ -70,142 +70,129 @@ function TokenCardView({
   isFirst = false,
   isLast = false,
 }: {
-  onTokenSelect: (token: SourceToken) => void
-  token: SourceToken
-  isSelected: boolean
-  verified?: boolean
-  hideAmount?: boolean
-  selectedChain: SourceChain | undefined
-  showRedirection?: boolean
-  isChainAbstractionView?: boolean
-  marketDataStore?: MarketDataStore
-  isFirst?: boolean
-  isLast?: boolean
+  onTokenSelect: (token: SourceToken) => void;
+  token: SourceToken;
+  isSelected: boolean;
+  verified?: boolean;
+  hideAmount?: boolean;
+  selectedChain: SourceChain | undefined;
+  showRedirection?: boolean;
+  isChainAbstractionView?: boolean;
+  marketDataStore?: MarketDataStore;
+  isFirst?: boolean;
+  isLast?: boolean;
 }) {
-  const activeChain = useActiveChain() as AggregatedSupportedChain
-  const [formatCurrency] = useFormatCurrency()
-  const [preferredCurrency] = useUserPreferredCurrency()
-  const defaultTokenLogo = useDefaultTokenLogo()
-  const { theme } = useTheme()
+  const activeChain = useActiveChain() as AggregatedSupportedChain;
+  const [formatCurrency] = useFormatCurrency();
+  const [preferredCurrency] = useUserPreferredCurrency();
+  const defaultTokenLogo = useDefaultTokenLogo();
+  const { theme } = useTheme();
   const formattedTokenAmount = hideAssetsStore.formatHideBalance(
-    formatTokenAmount(
-      token?.amount,
-      sliceWord(token?.symbol, 4, 4),
-      3,
-      currencyDetail[preferredCurrency].locale,
-    ),
-  )
+    formatTokenAmount(token?.amount, sliceWord(token?.symbol, 4, 4), 3, currencyDetail[preferredCurrency].locale),
+  );
 
-  const nonNativeChains = useNonNativeCustomChains()
-  const chains = useGetChains()
+  const nonNativeChains = useNonNativeCustomChains();
+  const chains = useGetChains();
 
-  const { data: skipChains } = useChains()
-  const marketData = marketDataStore?.data
+  const { data: skipChains } = useChains();
+  const marketData = marketDataStore?.data;
   const ibcChainInfo = useMemo(() => {
-    if (!token.ibcChainInfo) return
+    if (!token.ibcChainInfo) return;
 
     return (
       Object.values(chains).find(
-        (chain) =>
-          chain.chainId === token.ibcChainInfo?.name ||
-          chain.testnetChainId === token.ibcChainInfo?.name,
+        (chain) => chain.chainId === token.ibcChainInfo?.name || chain.testnetChainId === token.ibcChainInfo?.name,
       ) ??
       Object.values(nonNativeChains).find(
-        (chain) =>
-          chain.chainId === token.ibcChainInfo?.name ||
-          chain.testnetChainId === token.ibcChainInfo?.name,
+        (chain) => chain.chainId === token.ibcChainInfo?.name || chain.testnetChainId === token.ibcChainInfo?.name,
       ) ??
       skipChains?.find((chain) => chain.chainId === token.ibcChainInfo?.name)
-    )
-  }, [chains, nonNativeChains, skipChains, token.ibcChainInfo])
+    );
+  }, [chains, nonNativeChains, skipChains, token.ibcChainInfo]);
 
   const formattedFiatValue = hideAssetsStore.formatHideBalance(
     token.usdValue ? formatCurrency(new BigNumber(token.usdValue)) : '-',
-  )
+  );
 
   const { getExplorerAccountUrl, explorerAccountUrl } = useGetExplorerAccountUrl({
     forceChain: selectedChain?.key,
-  })
+  });
 
-  const [isAddressCopied, setIsAddressCopied] = useState(false)
+  const [isAddressCopied, setIsAddressCopied] = useState(false);
   const [_showRedirection, showAddressCopy] = useMemo(() => {
-    const _showRedirection = showRedirection && selectedChain
+    const _showRedirection = showRedirection && selectedChain;
 
     if (
       _showRedirection &&
       token.coinMinimalDenom.toLowerCase().startsWith('factory/') &&
       !explorerAccountUrl?.toLowerCase().includes('mintscan')
     ) {
-      return [false, true]
+      return [false, true];
     }
 
-    return [_showRedirection, false]
-  }, [explorerAccountUrl, selectedChain, showRedirection, token.coinMinimalDenom])
+    return [_showRedirection, false];
+  }, [explorerAccountUrl, selectedChain, showRedirection, token.coinMinimalDenom]);
 
   const ibcInfo = useMemo(() => {
-    if (!token.ibcChainInfo) return ''
+    if (!token.ibcChainInfo) return '';
 
-    return `${token.ibcChainInfo.pretty_name} / ${sliceWord(
-      token.ibcChainInfo?.channelId ?? '',
-      7,
-      5,
-    )}`
-  }, [ibcChainInfo])
+    return `${token.ibcChainInfo.pretty_name} / ${sliceWord(token.ibcChainInfo?.channelId ?? '', 7, 5)}`;
+  }, [ibcChainInfo]);
 
   const marketDataForToken = useMemo(() => {
-    let key = token.coinGeckoId ?? token.skipAsset?.coingeckoId ?? token.coinMinimalDenom
+    let key = token.coinGeckoId ?? token.skipAsset?.coingeckoId ?? token.coinMinimalDenom;
     if (marketData?.[key]) {
-      return marketData[key]
+      return marketData[key];
     }
-    key = token.coinMinimalDenom
+    key = token.coinMinimalDenom;
     if (marketData?.[key]) {
-      return marketData[key]
+      return marketData[key];
     }
-    key = `${token.skipAsset?.chainId}-${token.coinMinimalDenom}`
+    key = `${token.skipAsset?.chainId}-${token.coinMinimalDenom}`;
     if (marketData?.[key]) {
-      return marketData[key]
+      return marketData[key];
     }
     if (!token?.skipAsset?.evmTokenContract) {
-      return undefined
+      return undefined;
     }
-    key = `${token.skipAsset?.chainId}-${token.skipAsset?.evmTokenContract}`
-    return marketData?.[key] ?? marketData?.[key?.toLowerCase()]
-  }, [marketData, token])
+    key = `${token.skipAsset?.chainId}-${token.skipAsset?.evmTokenContract}`;
+    return marketData?.[key] ?? marketData?.[key?.toLowerCase()];
+  }, [marketData, token]);
 
   const handleRedirectionClick = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
-      e.stopPropagation()
+      e.stopPropagation();
 
       if (token.coinMinimalDenom.toLowerCase().startsWith('factory/')) {
-        const asset = toBase64(toUtf8(token.coinMinimalDenom))
-        const explorerURL = getExplorerAccountUrl(asset, true)
+        const asset = toBase64(toUtf8(token.coinMinimalDenom));
+        const explorerURL = getExplorerAccountUrl(asset, true);
 
-        window.open(explorerURL, '_blank')
+        window.open(explorerURL, '_blank');
       } else {
-        const explorerURL = getExplorerAccountUrl(token.coinMinimalDenom)
-        window.open(explorerURL, '_blank')
+        const explorerURL = getExplorerAccountUrl(token.coinMinimalDenom);
+        window.open(explorerURL, '_blank');
       }
     },
     [getExplorerAccountUrl, token.coinMinimalDenom],
-  )
+  );
 
   const handleContentCopyClick = useCallback(
     async (e: React.MouseEvent<HTMLButtonElement>) => {
-      e.stopPropagation()
+      e.stopPropagation();
 
-      setIsAddressCopied(true)
-      await UserClipboard.copyText(token.coinMinimalDenom)
-      setTimeout(() => setIsAddressCopied(false), 2000)
+      setIsAddressCopied(true);
+      await UserClipboard.copyText(token.coinMinimalDenom);
+      setTimeout(() => setIsAddressCopied(false), 2000);
     },
     [token.coinMinimalDenom],
-  )
+  );
 
   const handleTokenSelect = useCallback(() => {
-    if (isSelected) return
-    onTokenSelect(token)
-  }, [isSelected, onTokenSelect, token])
+    if (isSelected) return;
+    onTokenSelect(token);
+  }, [isSelected, onTokenSelect, token]);
 
-  const tokenName = token.symbol ?? token?.name
+  const tokenName = token.symbol ?? token?.name;
 
   return (
     <>
@@ -232,11 +219,7 @@ function TokenCardView({
               {verified && (
                 <div className='absolute group -bottom-[3px] -right-[6px]'>
                   <img
-                    src={
-                      theme === ThemeName.DARK
-                        ? Images.Misc.VerifiedWithBgStarDark
-                        : Images.Misc.VerifiedWithBgStar
-                    }
+                    src={theme === ThemeName.DARK ? Images.Misc.VerifiedWithBgStarDark : Images.Misc.VerifiedWithBgStar}
                     alt='verified-token'
                     className='h-5 w-5'
                   />
@@ -263,8 +246,7 @@ function TokenCardView({
                       size='md'
                       className={classNames('font-bold !leading-[21.6px]', {
                         'items-center justify-center gap-1':
-                          (activeChain === AGGREGATED_CHAIN_KEY || isChainAbstractionView) &&
-                          token?.ibcChainInfo,
+                          (activeChain === AGGREGATED_CHAIN_KEY || isChainAbstractionView) && token?.ibcChainInfo,
                       })}
                       data-testing-id={`switch-token-${tokenName.toLowerCase()}-ele`}
                     >
@@ -314,11 +296,7 @@ function TokenCardView({
                 </Text>
               )}
               {parseFloat(token.amount) > 0 && (
-                <Text
-                  size='xs'
-                  className='font-medium !leading-[19.2px]'
-                  color='text-gray-600 dark:text-gray-400'
-                >
+                <Text size='xs' className='font-medium !leading-[19.2px]' color='text-gray-600 dark:text-gray-400'>
                   {formatTokenAmount(
                     token.amount,
                     sliceWord(token.symbol, 4, 4),
@@ -333,7 +311,7 @@ function TokenCardView({
       </div>
       {isLast && <div className='h-1 bg-transparent' />}
     </>
-  )
+  );
 }
 
-export const TokenCard = observer(TokenCardView)
+export const TokenCard = observer(TokenCardView);

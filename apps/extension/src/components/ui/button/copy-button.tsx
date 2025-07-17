@@ -1,28 +1,28 @@
-import { AnimatePresence, motion } from 'framer-motion'
-import { CopyIcon } from 'icons/copy-icon'
-import { Images } from 'images'
-import React, { useEffect, useState } from 'react'
-import { cn } from 'utils/cn'
+import { AnimatePresence, motion } from 'framer-motion';
+import { CopyIcon } from 'icons/copy-icon';
+import { Images } from 'images';
+import React, { useEffect, useState } from 'react';
+import { cn } from 'utils/cn';
 
-import { Button, ButtonProps } from '.'
+import { Button, ButtonProps } from '.';
 
-const transition = { duration: 0.15, type: 'easeIn' }
+const transition = { duration: 0.15, type: 'easeIn' };
 
 const copyVariants = {
   hide: { opacity: 0, scale: 0.8 },
   animate: { opacity: 1, scale: 1 },
-}
+};
 
 export const CopyButton = ({ children, ...props }: ButtonProps) => {
-  const [isCopied, setIsCopied] = useState(false)
+  const [isCopied, setIsCopied] = useState(false);
 
   useEffect(() => {
     if (isCopied) {
       setTimeout(() => {
-        setIsCopied(false)
-      }, 2_000)
+        setIsCopied(false);
+      }, 2_000);
     }
-  }, [isCopied])
+  }, [isCopied]);
 
   return (
     <Button
@@ -31,13 +31,11 @@ export const CopyButton = ({ children, ...props }: ButtonProps) => {
       {...props}
       className={cn(
         props.className,
-        isCopied
-          ? 'text-accent-success hover:text-accent-success'
-          : 'text-accent-green hover:text-accent-green-200',
+        isCopied ? 'text-accent-success hover:text-accent-success' : 'text-accent-green hover:text-accent-green-200',
       )}
       onClick={(e) => {
-        setIsCopied(true)
-        props.onClick?.(e)
+        setIsCopied(true);
+        props.onClick?.(e);
       }}
     >
       <AnimatePresence mode='wait'>
@@ -69,7 +67,7 @@ export const CopyButton = ({ children, ...props }: ButtonProps) => {
       </AnimatePresence>
       {children || 'Copy'}
     </Button>
-  )
-}
+  );
+};
 
-CopyButton.displayName = 'CopyButton'
+CopyButton.displayName = 'CopyButton';

@@ -1,8 +1,8 @@
-import React from 'react'
+import React from 'react';
 
-import { BookmarkProvider, ChadBookmarkProvider } from './bookmark-context'
-import { ChadProvider } from './chad-exclusives-context'
-import { FilterProvider } from './filter-context'
+import { BookmarkProvider, ChadBookmarkProvider } from './bookmark-context';
+import { ChadProvider } from './chad-exclusives-context';
+import { FilterProvider } from './filter-context';
 
 export const AlphaContextProvider = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -13,5 +13,5 @@ export const AlphaContextProvider = ({ children }: { children: React.ReactNode }
         </BookmarkProvider>
       </ChadProvider>
     </FilterProvider>
-  )
-}
+  );
+};

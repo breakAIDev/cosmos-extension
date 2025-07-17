@@ -1,16 +1,16 @@
-import BottomModal from 'components/bottom-modal'
-import { Button } from 'components/ui/button'
-import React from 'react'
+import BottomModal from 'components/bottom-modal';
+import { Button } from 'components/ui/button';
+import React from 'react';
 
-import { useGasPriceContext } from './context'
-import GasPriceOptions from './index'
+import { useGasPriceContext } from './context';
+import GasPriceOptions from './index';
 
 type FeesSettingsSheetProps = {
-  showFeesSettingSheet: boolean
-  onClose: () => void
-  gasError: string | null
-  hideAdditionalSettings?: boolean
-}
+  showFeesSettingSheet: boolean;
+  onClose: () => void;
+  gasError: string | null;
+  hideAdditionalSettings?: boolean;
+};
 
 export const FeesSettingsSheet: React.FC<FeesSettingsSheetProps> = ({
   onClose,
@@ -18,22 +18,21 @@ export const FeesSettingsSheet: React.FC<FeesSettingsSheetProps> = ({
   gasError,
   hideAdditionalSettings,
 }) => {
-  const { setViewAdditionalOptions } = useGasPriceContext()
+  const { setViewAdditionalOptions } = useGasPriceContext();
 
   return (
     <BottomModal
       isOpen={showFeesSettingSheet}
       title='Transaction fees'
       onClose={() => {
-        onClose()
-        setViewAdditionalOptions(false)
+        onClose();
+        setViewAdditionalOptions(false);
       }}
       className='!px-6 !py-7'
     >
       <div className='flex flex-col gap-y-8 mb-10'>
         <p className='text-sm font-medium text-secondary-800'>
-          Transaction fee is charged by the network. Higher the transaction fee, faster the
-          transaction will go through.
+          Transaction fee is charged by the network. Higher the transaction fee, faster the transaction will go through.
         </p>
 
         <GasPriceOptions.Selector />
@@ -56,5 +55,5 @@ export const FeesSettingsSheet: React.FC<FeesSettingsSheetProps> = ({
         Confirm and proceed
       </Button>
     </BottomModal>
-  )
-}
+  );
+};

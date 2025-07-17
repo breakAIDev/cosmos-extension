@@ -1,39 +1,35 @@
-import {
-  useAddressStore,
-  useFeatureFlags,
-  useLuminaTxClientStore,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { BalanceStore } from '@leapwallet/cosmos-wallet-store'
-import { CheckCircle } from '@phosphor-icons/react'
-import { captureException } from '@sentry/react'
-import classNames from 'classnames'
-import { Button } from 'components/ui/button'
-import { ButtonName, ButtonType, EventName } from 'config/analytics'
-import { motion } from 'framer-motion'
-import { Images } from 'images'
-import loadingAnimation from 'lottie-files/light-node-loading.json'
-import Lottie from 'lottie-react'
-import mixpanel from 'mixpanel-browser'
-import { observer } from 'mobx-react-lite'
-import React, { useEffect, useRef, useState } from 'react'
-import { clientIdStore } from 'stores/client-id-store'
-import { lightNodeStore } from 'stores/light-node-store'
-import browser from 'webextension-polyfill'
+import { useAddressStore, useFeatureFlags, useLuminaTxClientStore } from '@leapwallet/cosmos-wallet-hooks';
+import { BalanceStore } from '@leapwallet/cosmos-wallet-store';
+import { CheckCircle } from '@phosphor-icons/react';
+import { captureException } from '@sentry/react';
+import classNames from 'classnames';
+import { Button } from 'components/ui/button';
+import { ButtonName, ButtonType, EventName } from 'config/analytics';
+import { motion } from 'framer-motion';
+import { Images } from 'images';
+import loadingAnimation from 'lottie-files/light-node-loading.json';
+import Lottie from 'lottie-react';
+import mixpanel from 'mixpanel-browser';
+import { observer } from 'mobx-react-lite';
+import React, { useEffect, useRef, useState } from 'react';
+import { clientIdStore } from 'stores/client-id-store';
+import { lightNodeStore } from 'stores/light-node-store';
+import browser from 'webextension-polyfill';
 
-import BasicAccordion from './components/BaseAccordion'
-import LightNodeDetails from './components/LightNodeDetails'
-import LightNodeSyncProgress from './components/LightNodeSyncProgress'
-import LightNodeSettings from './components/Settings'
-import { LightNodeBanner } from './LumisNFT'
+import BasicAccordion from './components/BaseAccordion';
+import LightNodeDetails from './components/LightNodeDetails';
+import LightNodeSyncProgress from './components/LightNodeSyncProgress';
+import LightNodeSettings from './components/Settings';
+import { LightNodeBanner } from './LumisNFT';
 
 const ToggleCard = ({
   title,
   isEnabled,
   onClick,
 }: {
-  title: string
-  isEnabled: boolean
-  onClick: (val: boolean) => void
+  title: string;
+  isEnabled: boolean;
+  onClick: (val: boolean) => void;
 }) => {
   return (
     <div
@@ -50,19 +46,19 @@ const ToggleCard = ({
         className='flex-2 h-7 w-[50px] appearance-none rounded-full cursor-pointer bg-gray-600/30 transition duration-200 checked:bg-green-600 relative'
       />
     </div>
-  )
-}
+  );
+};
 
 const LoadingAnimation = () => {
-  const initialRef = useRef<Record<string, never | number>>({ opacity: 0, y: 50 })
+  const initialRef = useRef<Record<string, never | number>>({ opacity: 0, y: 50 });
   useEffect(() => {
-    const timeoutMilliSecond = 1000
+    const timeoutMilliSecond = 1000;
     const timeoutId = setTimeout(() => {
-      initialRef.current = {}
-    }, timeoutMilliSecond)
+      initialRef.current = {};
+    }, timeoutMilliSecond);
 
-    return () => clearTimeout(timeoutId)
-  }, [])
+    return () => clearTimeout(timeoutId);
+  }, []);
 
   return (
     <motion.div
@@ -81,8 +77,8 @@ const LoadingAnimation = () => {
       />
       <span className='font-bold'>Connecting to Celestia network...</span>
     </motion.div>
-  )
-}
+  );
+};
 
 const LightNode = ({
   goBack,
@@ -92,98 +88,95 @@ const LightNode = ({
   showBanner,
   balanceStore,
 }: {
-  goBack: (toHome?: boolean) => void
-  showLightNodeSettings: boolean
-  setShowLightNodeSettings: (show: boolean) => void
-  setActiveTab: React.Dispatch<React.SetStateAction<'Light Node' | 'Lumi NFT'>>
-  showBanner: boolean
-  balanceStore: BalanceStore
+  goBack: (toHome?: boolean) => void;
+  showLightNodeSettings: boolean;
+  setShowLightNodeSettings: (show: boolean) => void;
+  setActiveTab: React.Dispatch<React.SetStateAction<'Light Node' | 'Lumi NFT'>>;
+  showBanner: boolean;
+  balanceStore: BalanceStore;
 }) => {
-  const { primaryAddress } = useAddressStore()
-  const [showAnimation, setShowAnimation] = useState(false)
-  const [showMoreDetails, setShowMoreDetails] = useState<boolean>(false)
+  const { primaryAddress } = useAddressStore();
+  const [showAnimation, setShowAnimation] = useState(false);
+  const [showMoreDetails, setShowMoreDetails] = useState<boolean>(false);
   const handleAccordionClick = () => {
-    setShowMoreDetails(!showMoreDetails)
-  }
-  const { data: featureFlags } = useFeatureFlags()
+    setShowMoreDetails(!showMoreDetails);
+  };
+  const { data: featureFlags } = useFeatureFlags();
 
-  const { setForceLuminaTxClient } = useLuminaTxClientStore()
+  const { setForceLuminaTxClient } = useLuminaTxClientStore();
 
   const enableLuminaTxClient = (v: boolean) => {
-    setForceLuminaTxClient(v)
-    balanceStore.setUseCelestiaBalanceStore(v)
-  }
+    setForceLuminaTxClient(v);
+    balanceStore.setUseCelestiaBalanceStore(v);
+  };
 
   const toggleSampling = () => {
     if (lightNodeStore.isLightNodeRunning) {
-      lightNodeStore.stopNode(primaryAddress, clientIdStore.clientId)
-      enableLuminaTxClient(false)
+      lightNodeStore.stopNode(primaryAddress, clientIdStore.clientId);
+      enableLuminaTxClient(false);
     } else {
-      setShowAnimation(true)
+      setShowAnimation(true);
       lightNodeStore.startNode(primaryAddress, clientIdStore.clientId).then(() => {
         browser.runtime.sendMessage({
           type: 'capture-light-node-stats',
           payload: {},
-        })
-      })
+        });
+      });
     }
 
-    lightNodeStore.setLightNodeRunning(!lightNodeStore.isLightNodeRunning)
+    lightNodeStore.setLightNodeRunning(!lightNodeStore.isLightNodeRunning);
 
     try {
       mixpanel.track(EventName.ButtonClick, {
-        buttonName: lightNodeStore.isLightNodeRunning
-          ? ButtonName.SYNC_STOP
-          : ButtonName.SYNC_START,
+        buttonName: lightNodeStore.isLightNodeRunning ? ButtonName.SYNC_STOP : ButtonName.SYNC_START,
         buttonType: ButtonType.CELESTIA_LIGHT_NODE,
         uuid: clientIdStore.clientId,
-      })
+      });
     } catch (error) {
-      captureException(error)
+      captureException(error);
     }
-  }
+  };
 
   const navigateToHome = () => {
-    goBack(true)
-  }
+    goBack(true);
+  };
 
-  const initialRef = useRef<Record<string, never | number>>({ opacity: 0, y: 50 })
+  const initialRef = useRef<Record<string, never | number>>({ opacity: 0, y: 50 });
 
   useEffect(() => {
-    const timeoutMilliSecond = 1000
+    const timeoutMilliSecond = 1000;
     const timeoutId = setTimeout(() => {
-      initialRef.current = {}
-    }, timeoutMilliSecond)
+      initialRef.current = {};
+    }, timeoutMilliSecond);
 
-    return () => clearTimeout(timeoutId)
-  }, [])
+    return () => clearTimeout(timeoutId);
+  }, []);
 
   useEffect(() => {
     if (showAnimation) {
       setTimeout(() => {
-        setShowAnimation(false)
-      }, 3000)
+        setShowAnimation(false);
+      }, 3000);
     }
-  }, [showAnimation])
+  }, [showAnimation]);
 
   const handleShare = async () => {
     const tweetText =
       featureFlags?.light_node?.tweetText ??
-      `I just used @leap_wallet to run @CelestiaOrg light node ✨\n\nModularity & data availability now scaled by you & me.\n\nCome & take it\nleapwallet.io/download`
-    const shareUrl =
-      featureFlags?.light_node?.tweetImageUrl ?? `https://assets.leapwallet.io/light-node-share.png`
+      `I just used @leap_wallet to run @CelestiaOrg light node ✨\n\nModularity & data availability now scaled by you & me.\n\nCome & take it\nleapwallet.io/download`;
+    const shareUrl = featureFlags?.light_node?.tweetImageUrl ?? `https://assets.leapwallet.io/light-node-share.png`;
     const twitterShareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
       tweetText,
-    )}&url=${encodeURIComponent(shareUrl)}`
+    )}&url=${encodeURIComponent(shareUrl)}`;
 
     // Open Twitter compose window
-    window.open(twitterShareUrl.toString(), '_blank')
-  }
+    window.open(twitterShareUrl.toString(), '_blank');
+  };
 
   const handleClearStorage = async () => {
-    setShowLightNodeSettings(false)
-    lightNodeStore.clearLastSyncedInfo()
-  }
+    setShowLightNodeSettings(false);
+    lightNodeStore.clearLastSyncedInfo();
+  };
 
   return (
     <>
@@ -236,9 +229,7 @@ const LightNode = ({
                 {lightNodeStore.syncedPercentage === 100 && (
                   <div className='flex gap-1 items-center justify-center'>
                     <CheckCircle className='w-5 h-5 text-accent-success-200' weight='fill' />
-                    <span className='text-sm font-mediumn'>
-                      You&apos;re in sync with the most recent block
-                    </span>
+                    <span className='text-sm font-mediumn'>You&apos;re in sync with the most recent block</span>
                   </div>
                 )}
               </>
@@ -250,8 +241,8 @@ const LightNode = ({
                     <div className='flex flex-col gap-3'>
                       <span className='font-bold text-mdl'>Run your Celestia Light Node</span>
                       <span className='text-sm text-muted-foreground'>
-                        Help secure Celestia and stay connected to verified data by running a
-                        Celestia light node. Don&apos;t trust, verify.
+                        Help secure Celestia and stay connected to verified data by running a Celestia light node.
+                        Don&apos;t trust, verify.
                       </span>
                     </div>
                   </>
@@ -265,9 +256,8 @@ const LightNode = ({
                       blockTime={lightNodeStore.blockTime}
                     />
                     <span className='text-sm text-muted-foreground'>
-                      Your light node is currently paused. Resume verification to help secure
-                      Celestia and stay connected to verified data by running your Celestia light
-                      node.
+                      Your light node is currently paused. Resume verification to help secure Celestia and stay
+                      connected to verified data by running your Celestia light node.
                     </span>
                   </>
                 )}
@@ -285,9 +275,7 @@ const LightNode = ({
                 </div>
               ) : (
                 <Button className='w-full' onClick={toggleSampling}>
-                  {!lightNodeStore.lastSyncedInfo?.lastSyncedHeader
-                    ? 'Start Verifying'
-                    : 'Resume Verifying'}
+                  {!lightNodeStore.lastSyncedInfo?.lastSyncedHeader ? 'Start Verifying' : 'Resume Verifying'}
                 </Button>
               )}
             </footer>
@@ -301,7 +289,7 @@ const LightNode = ({
         onCloseHandler={() => setShowLightNodeSettings(false)}
       />
     </>
-  )
-}
+  );
+};
 
-export default observer(LightNode)
+export default observer(LightNode);

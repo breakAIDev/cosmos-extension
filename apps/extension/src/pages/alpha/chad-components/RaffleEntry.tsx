@@ -1,25 +1,25 @@
-import dayjs from 'dayjs'
-import { motion } from 'framer-motion'
-import React, { useEffect, useState } from 'react'
-import Skeleton from 'react-loading-skeleton'
-import { cn } from 'utils/cn'
+import dayjs from 'dayjs';
+import { motion } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
+import Skeleton from 'react-loading-skeleton';
+import { cn } from 'utils/cn';
 
 const cardVariants = {
   hidden: { opacity: 0, y: 10 },
   visible: { opacity: 1, y: 0 },
   exit: { opacity: 0, y: -10 },
-}
+};
 
-const transition = { duration: 0.2, ease: 'easeOut' }
+const transition = { duration: 0.2, ease: 'easeOut' };
 
 const CardWrapper = ({
   primary = false,
   children,
   className,
 }: {
-  primary?: boolean
-  children: React.ReactNode
-  className?: string
+  primary?: boolean;
+  children: React.ReactNode;
+  className?: string;
 }) => {
   return (
     <motion.div
@@ -36,8 +36,8 @@ const CardWrapper = ({
     >
       {children}
     </motion.div>
-  )
-}
+  );
+};
 
 const CountdownItem = ({ label, value }: { label: string; value: number }) => {
   return (
@@ -47,13 +47,13 @@ const CountdownItem = ({ label, value }: { label: string; value: number }) => {
       </div>
       <span className='text-xs'>{label}</span>
     </div>
-  )
-}
+  );
+};
 
 interface CountdownProps {
-  title: string
-  endDate: string
-  onExpire?: () => void
+  title: string;
+  endDate: string;
+  onExpire?: () => void;
 }
 
 export function SubscriptionCountdown({ title, endDate, onExpire }: CountdownProps) {
@@ -62,34 +62,34 @@ export function SubscriptionCountdown({ title, endDate, onExpire }: CountdownPro
     hours: 0,
     minutes: 0,
     seconds: 0,
-  })
+  });
 
   useEffect(() => {
     const calculateTimeRemaining = () => {
-      const now = dayjs()
-      const end = dayjs(endDate)
-      const diff = end.diff(now, 'second')
+      const now = dayjs();
+      const end = dayjs(endDate);
+      const diff = end.diff(now, 'second');
       if (diff <= 0) {
-        setTimeRemaining({ days: 0, hours: 0, minutes: 0, seconds: 0 })
-        onExpire?.()
-        return
+        setTimeRemaining({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+        onExpire?.();
+        return;
       }
 
-      const days = Math.floor(diff / (24 * 60 * 60))
-      const hours = Math.floor((diff % (24 * 60 * 60)) / (60 * 60))
-      const minutes = Math.floor((diff % (60 * 60)) / 60)
-      const seconds = Math.floor(diff % 60)
+      const days = Math.floor(diff / (24 * 60 * 60));
+      const hours = Math.floor((diff % (24 * 60 * 60)) / (60 * 60));
+      const minutes = Math.floor((diff % (60 * 60)) / 60);
+      const seconds = Math.floor(diff % 60);
 
-      setTimeRemaining({ days, hours, minutes, seconds })
-    }
+      setTimeRemaining({ days, hours, minutes, seconds });
+    };
 
-    calculateTimeRemaining()
-    const timerId = setInterval(calculateTimeRemaining, 1000)
+    calculateTimeRemaining();
+    const timerId = setInterval(calculateTimeRemaining, 1000);
 
-    return () => clearInterval(timerId)
-  }, [endDate, onExpire])
+    return () => clearInterval(timerId);
+  }, [endDate, onExpire]);
 
-  const { days, hours, minutes, seconds } = timeRemaining
+  const { days, hours, minutes, seconds } = timeRemaining;
 
   return (
     <CardWrapper primary>
@@ -102,18 +102,16 @@ export function SubscriptionCountdown({ title, endDate, onExpire }: CountdownPro
         <CountdownItem label='S' value={seconds} />
       </div>
     </CardWrapper>
-  )
+  );
 }
 
 export function IneligibleRaffle() {
   return (
     <CardWrapper>
       <span className='text-secondary-800 text-sm'>You&apos;re not a Leap Chad yet</span>
-      <span className='text-lg font-bold text-center'>
-        We&apos;ll notify you when you are eligible
-      </span>
+      <span className='text-lg font-bold text-center'>We&apos;ll notify you when you are eligible</span>
     </CardWrapper>
-  )
+  );
 }
 
 export function ResultSoon() {
@@ -122,7 +120,7 @@ export function ResultSoon() {
       <span className='text-secondary-800 text-sm'>Giveaway has ended</span>
       <span className='text-lg font-bold text-center'>Results will be declared soon</span>
     </CardWrapper>
-  )
+  );
 }
 
 export function RaffleWinner({ rewardUnit }: { rewardUnit?: string }) {
@@ -131,7 +129,7 @@ export function RaffleWinner({ rewardUnit }: { rewardUnit?: string }) {
       <span className='text-secondary-800 text-sm'>Congratulations!</span>
       <span className='text-lg font-bold text-center'>You&apos;ve won {rewardUnit}!</span>
     </CardWrapper>
-  )
+  );
 }
 
 export function NotRaffleWinner() {
@@ -140,7 +138,7 @@ export function NotRaffleWinner() {
       <span className='text-secondary-800 text-sm'>You did not win</span>
       <span className='text-lg font-bold text-center'>Better luck next time</span>
     </CardWrapper>
-  )
+  );
 }
 
 export function RaffleClosed() {
@@ -149,7 +147,7 @@ export function RaffleClosed() {
       <span className='text-secondary-800 text-sm'>You did not win</span>
       <span className='text-lg font-bold text-center'>Better luck next time</span>
     </CardWrapper>
-  )
+  );
 }
 
 export function RaffleEntrySkeleton() {
@@ -164,5 +162,5 @@ export function RaffleEntrySkeleton() {
     >
       <Skeleton className='w-full' height={100} borderRadius={20} />
     </motion.div>
-  )
+  );
 }

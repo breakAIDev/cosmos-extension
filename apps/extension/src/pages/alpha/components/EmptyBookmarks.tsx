@@ -1,24 +1,24 @@
-import { motion } from 'framer-motion'
-import { HappyFrog } from 'icons/frog'
-import React from 'react'
-import { cn } from 'utils/cn'
+import { motion } from 'framer-motion';
+import { HappyFrog } from 'icons/frog';
+import React from 'react';
+import { cn } from 'utils/cn';
 
 interface EmptyBookmarksProps {
-  title: string
-  subTitle: string | React.ReactNode
-  className?: string
-  showRetryButton?: boolean
+  title: string;
+  subTitle: string | React.ReactNode;
+  className?: string;
+  showRetryButton?: boolean;
 }
 
 const variants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0 },
-}
+};
 
 const transition = {
   duration: 0.3,
   ease: 'easeOut',
-}
+};
 
 export default function EmptyBookmarks({ title, subTitle, className }: EmptyBookmarksProps) {
   return (
@@ -35,9 +35,7 @@ export default function EmptyBookmarks({ title, subTitle, className }: EmptyBook
       <HappyFrog className='size-20 ' />
 
       <span className='font-bold text-mdl mb-1'>{title}</span>
-      <span className='text-sm font-medium text-center text-muted-foreground !leading-5 px-11'>
-        {subTitle}
-      </span>
+      <span className='text-sm font-medium text-center text-muted-foreground !leading-5 px-11'>{subTitle}</span>
     </motion.div>
-  )
+  );
 }

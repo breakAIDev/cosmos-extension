@@ -1,34 +1,34 @@
-import { useGetChains } from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { AnimatePresence, motion } from 'framer-motion'
-import { useActiveChain } from 'hooks/settings/useActiveChain'
-import { useFormatCurrency } from 'hooks/settings/useCurrency'
-import { observer } from 'mobx-react-lite'
-import React from 'react'
-import { hideAssetsStore } from 'stores/hide-assets-store'
-import { rootBalanceStore } from 'stores/root-store'
-import { AggregatedSupportedChain } from 'types/utility'
-import { opacityFadeInOut, transition150 } from 'utils/motion-variants'
+import { useGetChains } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useActiveChain } from 'hooks/settings/useActiveChain';
+import { useFormatCurrency } from 'hooks/settings/useCurrency';
+import { observer } from 'mobx-react-lite';
+import React from 'react';
+import { hideAssetsStore } from 'stores/hide-assets-store';
+import { rootBalanceStore } from 'stores/root-store';
+import { AggregatedSupportedChain } from 'types/utility';
+import { opacityFadeInOut, transition150 } from 'utils/motion-variants';
 
 export const TotalBalance = observer(() => {
-  const [formatCurrency] = useFormatCurrency()
-  const activeChain = useActiveChain() as AggregatedSupportedChain
+  const [formatCurrency] = useFormatCurrency();
+  const activeChain = useActiveChain() as AggregatedSupportedChain;
 
-  const chains = useGetChains()
+  const chains = useGetChains();
 
-  const isEvmOnlyChain = chains?.[activeChain as SupportedChain]?.evmOnlyChain
+  const isEvmOnlyChain = chains?.[activeChain as SupportedChain]?.evmOnlyChain;
 
   const totalFiatValue = (() => {
-    const addEvmDetails = isEvmOnlyChain ?? false
+    const addEvmDetails = isEvmOnlyChain ?? false;
 
     if (addEvmDetails) {
       return rootBalanceStore.totalFiatValue.plus(
         rootBalanceStore.erc20BalanceStore.evmBalanceStore.evmBalance.currencyInFiatValue,
-      )
+      );
     }
 
-    return rootBalanceStore.totalFiatValue
-  })()
+    return rootBalanceStore.totalFiatValue;
+  })();
 
   return (
     <AnimatePresence mode='wait'>
@@ -47,5 +47,5 @@ export const TotalBalance = observer(() => {
         </span>
       </motion.button>
     </AnimatePresence>
-  )
-})
+  );
+});

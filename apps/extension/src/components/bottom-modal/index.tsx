@@ -1,68 +1,68 @@
-import { Buttons } from '@leapwallet/leap-ui'
-import classNames from 'classnames'
-import React, { useCallback } from 'react'
-import { Sheet } from 'react-modal-sheet'
-import { isSidePanel } from 'utils/isSidePanel'
+import { Buttons } from '@leapwallet/leap-ui';
+import classNames from 'classnames';
+import React, { useCallback } from 'react';
+import { Sheet } from 'react-modal-sheet';
+import { isSidePanel } from 'utils/isSidePanel';
 
 type BottomModalProps = React.PropsWithChildren<{
   /*
    * is the modal open
    */
-  isOpen: boolean
+  isOpen: boolean;
   /*
    * title of the modal
    */
-  title: string
+  title: string;
   /*
    * custom title component
    */
-  titleComponent?: React.ReactNode
+  titleComponent?: React.ReactNode;
   /*
    * callback when the modal is closed
    */
-  onClose?: () => void
+  onClose?: () => void;
   /*
    * should the modal close when backdrop is clicked
    */
-  closeOnBackdropClick?: boolean
+  closeOnBackdropClick?: boolean;
   /*
    * should the modal be prevented from closing
    */
-  disableClose?: boolean
+  disableClose?: boolean;
   /*
    * custom class names for the modal
    */
-  className?: string
+  className?: string;
   /*
    * custom class names for the main wrapper
    */
-  wrapperClassName?: string
+  wrapperClassName?: string;
   /*
    * custom class names for the container
    */
-  containerClassName?: string
+  containerClassName?: string;
   /*
    * custom class names for the content
    */
-  contentClassName?: string
+  contentClassName?: string;
   /*
    * callback when the action button is clicked
    */
-  onActionButtonClick?: () => void
+  onActionButtonClick?: () => void;
   /*
    * should the action button be hidden
    */
-  hideActionButton?: boolean
+  hideActionButton?: boolean;
   /*
    * custom action button
    */
-  actionButton?: React.ReactNode
+  actionButton?: React.ReactNode;
   /*
    * custom secondary action button
    */
-  secondaryActionButton?: React.ReactNode
-  containerDiv?: HTMLElement
-}>
+  secondaryActionButton?: React.ReactNode;
+  containerDiv?: HTMLElement;
+}>;
 
 const BottomModal: React.FC<BottomModalProps> = ({
   isOpen,
@@ -82,17 +82,16 @@ const BottomModal: React.FC<BottomModalProps> = ({
   secondaryActionButton,
   containerDiv,
 }) => {
-  const container =
-    containerDiv ?? (document.getElementById('popup-layout')?.parentNode as HTMLElement)
+  const container = containerDiv ?? (document.getElementById('popup-layout')?.parentNode as HTMLElement);
 
   const handleCloseAction = useCallback(() => {
     if (!disableClose) {
-      onClose?.()
+      onClose?.();
     }
-  }, [disableClose, onClose])
+  }, [disableClose, onClose]);
 
   if (!container) {
-    return null
+    return null;
   }
 
   return (
@@ -102,10 +101,7 @@ const BottomModal: React.FC<BottomModalProps> = ({
       isOpen={isOpen}
       detent='content-height'
       onClose={handleCloseAction}
-      className={classNames(
-        'panel-width enclosing-panel mx-auto !absolute panel-height',
-        wrapperClassName,
-      )}
+      className={classNames('panel-width enclosing-panel mx-auto !absolute panel-height', wrapperClassName)}
     >
       <Sheet.Container
         className={classNames(
@@ -122,9 +118,7 @@ const BottomModal: React.FC<BottomModalProps> = ({
           <div className='relative flex items-center justify-center px-7 py-5 border-b border-b-gray-300 dark:border-b-gray-900'>
             {secondaryActionButton ? secondaryActionButton : null}
             {titleComponent ?? (
-              <h3 className='text-[18px] font-semibold dark:text-gray-50 text-gray-900 h-[28px]'>
-                {title}
-              </h3>
+              <h3 className='text-[18px] font-semibold dark:text-gray-50 text-gray-900 h-[28px]'>{title}</h3>
             )}
             {hideActionButton
               ? null
@@ -134,9 +128,7 @@ const BottomModal: React.FC<BottomModalProps> = ({
                   </div>
                 )}
           </div>
-          <div className={classNames('p-7 max-h-[calc(100%-112px)] overflow-auto', className)}>
-            {children}
-          </div>
+          <div className={classNames('p-7 max-h-[calc(100%-112px)] overflow-auto', className)}>{children}</div>
         </Sheet.Content>
       </Sheet.Container>
 
@@ -147,12 +139,12 @@ const BottomModal: React.FC<BottomModalProps> = ({
         })}
         onTap={() => {
           if (closeOnBackdropClick) {
-            handleCloseAction()
+            handleCloseAction();
           }
         }}
       />
     </Sheet>
-  )
-}
+  );
+};
 
-export default BottomModal
+export default BottomModal;

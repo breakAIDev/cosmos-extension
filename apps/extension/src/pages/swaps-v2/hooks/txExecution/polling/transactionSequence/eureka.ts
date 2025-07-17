@@ -1,11 +1,9 @@
-import { EurekaTransferInfoJSON } from '@skip-go/client'
-import { EurekaTransferPacketTxnSeq } from 'types/swap'
+import { EurekaTransferInfoJSON } from '@skip-go/client';
+import { EurekaTransferPacketTxnSeq } from 'types/swap';
 
-import { convertPacketFromJSON } from './convertPackageFromJson'
+import { convertPacketFromJSON } from './convertPackageFromJson';
 
-export function getEurekaTransactionSequence(
-  transferInfo: EurekaTransferInfoJSON,
-): EurekaTransferPacketTxnSeq {
+export function getEurekaTransactionSequence(transferInfo: EurekaTransferInfoJSON): EurekaTransferPacketTxnSeq {
   return {
     type: 'eurekaTransfer' as const,
     srcChainID: transferInfo.from_chain_id,
@@ -16,5 +14,5 @@ export function getEurekaTransactionSequence(
     },
     state: transferInfo.state,
     originalState: transferInfo.state,
-  }
+  };
 }

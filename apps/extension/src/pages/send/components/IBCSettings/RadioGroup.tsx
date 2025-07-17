@@ -1,21 +1,21 @@
-import { useAddCustomChannel, useChainsStore } from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import classNames from 'classnames'
-import { CtaInput } from 'components/cta-input'
-import { useSendContext } from 'pages/send/context'
-import React, { CSSProperties, useCallback, useEffect, useState } from 'react'
+import { useAddCustomChannel, useChainsStore } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import classNames from 'classnames';
+import { CtaInput } from 'components/cta-input';
+import { useSendContext } from 'pages/send/context';
+import React, { CSSProperties, useCallback, useEffect, useState } from 'react';
 
 type RadioGroupProps = {
-  options: { title: string; subTitle?: string; value: string }[]
-  selectedOption: string
+  options: { title: string; subTitle?: string; value: string }[];
+  selectedOption: string;
   // eslint-disable-next-line no-unused-vars
-  onChange: (value: string) => void
-  className?: string
-  themeColor?: CSSProperties['color']
-  isAddChannel?: boolean
-  targetChain: SupportedChain
-  hasChannelId: boolean
-}
+  onChange: (value: string) => void;
+  className?: string;
+  themeColor?: CSSProperties['color'];
+  isAddChannel?: boolean;
+  targetChain: SupportedChain;
+  hasChannelId: boolean;
+};
 
 const RadioGroupSend: React.FC<RadioGroupProps> = ({
   options,
@@ -27,55 +27,55 @@ const RadioGroupSend: React.FC<RadioGroupProps> = ({
   targetChain,
   themeColor,
 }) => {
-  const [value, setValue] = useState('')
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
-  const [message, setMessage] = useState<string>('')
-  const isCustomSelected = value !== '' && status === 'success'
+  const [value, setValue] = useState('');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [message, setMessage] = useState<string>('');
+  const isCustomSelected = value !== '' && status === 'success';
 
-  const { sendActiveChain } = useSendContext()
+  const { sendActiveChain } = useSendContext();
   const addCustomChannel = useAddCustomChannel({
     sourceChain: sendActiveChain,
     targetChain,
-  })
+  });
 
-  const { chains } = useChainsStore()
-  const activeChainInfo = chains[sendActiveChain]
+  const { chains } = useChainsStore();
+  const activeChainInfo = chains[sendActiveChain];
 
   const handleAddChannel = useCallback(
     async (channelId: string) => {
-      setStatus('loading')
+      setStatus('loading');
       try {
-        const result = await addCustomChannel(channelId)
+        const result = await addCustomChannel(channelId);
         if (result.success) {
-          onChange(result.channel)
-          setStatus('success')
-          setMessage(result.message)
+          onChange(result.channel);
+          setStatus('success');
+          setMessage(result.message);
         } else {
-          setStatus('error')
-          setMessage(result.message)
+          setStatus('error');
+          setMessage(result.message);
         }
       } catch (e) {
-        setStatus('error')
-        setMessage('Something went wrong')
+        setStatus('error');
+        setMessage('Something went wrong');
       }
     },
     [addCustomChannel, onChange],
-  )
+  );
 
   useEffect(() => {
     if (value) {
-      handleAddChannel(value)
+      handleAddChannel(value);
     } else {
-      setStatus('idle')
-      setMessage('')
+      setStatus('idle');
+      setMessage('');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value])
+  }, [value]);
 
   return (
     <fieldset className={classNames('flex flex-col', className)}>
       {options.map((option) => {
-        const isSelected = selectedOption === option.value
+        const isSelected = selectedOption === option.value;
 
         return (
           <label
@@ -84,13 +84,7 @@ const RadioGroupSend: React.FC<RadioGroupProps> = ({
               option.subTitle ? 'py-2 last-of-type:pb-0' : 'py-3 last-of-type:pb-0'
             }`}
           >
-            <input
-              type='radio'
-              value={option.value}
-              checked={isSelected}
-              readOnly
-              className='hidden'
-            />
+            <input type='radio' value={option.value} checked={isSelected} readOnly className='hidden' />
             <div
               aria-label='radio-button'
               className={classNames(
@@ -104,12 +98,12 @@ const RadioGroupSend: React.FC<RadioGroupProps> = ({
               }}
               tabIndex={0}
               onClick={() => {
-                onChange(option.value)
-                setValue('')
+                onChange(option.value);
+                setValue('');
               }}
               onKeyDown={(e) => {
                 if ((e.key === 'Enter' || e.key === ' ') && !isSelected) {
-                  onChange(option.value)
+                  onChange(option.value);
                 }
               }}
             >
@@ -123,24 +117,16 @@ const RadioGroupSend: React.FC<RadioGroupProps> = ({
             </div>
             <div className='flex flex-col ml-3'>
               <p className='text-foreground font-medium text-sm'>{option.title}</p>
-              {option.subTitle ? (
-                <p className='text-muted-foreground text-xs'>{option.subTitle}</p>
-              ) : null}
+              {option.subTitle ? <p className='text-muted-foreground text-xs'>{option.subTitle}</p> : null}
             </div>
           </label>
-        )
+        );
       })}
       {(isAddChannel || !hasChannelId) && (
         <label className={`inline-flex items-center py-1`}>
           <div className='flex flex-col w-full'>
             <div className='flex w-full items-center gap-3'>
-              <input
-                type='radio'
-                value={value}
-                checked={isCustomSelected}
-                readOnly
-                className='hidden'
-              />
+              <input type='radio' value={value} checked={isCustomSelected} readOnly className='hidden' />
               <div
                 aria-label='radio-button'
                 className={classNames(
@@ -155,7 +141,7 @@ const RadioGroupSend: React.FC<RadioGroupProps> = ({
                 tabIndex={0}
                 onKeyDown={(e) => {
                   if ((e.key === 'Enter' || e.key === ' ') && !value) {
-                    setValue(value)
+                    setValue(value);
                   }
                 }}
               >
@@ -170,10 +156,10 @@ const RadioGroupSend: React.FC<RadioGroupProps> = ({
               <CtaInput
                 value={value}
                 onChange={(e) => {
-                  setValue(e.target.value)
+                  setValue(e.target.value);
                   if (status === 'error') {
-                    setStatus('idle')
-                    setMessage('')
+                    setStatus('idle');
+                    setMessage('');
                   }
                 }}
                 type='number'
@@ -184,21 +170,17 @@ const RadioGroupSend: React.FC<RadioGroupProps> = ({
               />
             </div>
             <p className='text-xs mt-2 dark:text-gray-400 text-gray-600'>
-              You can enter <span className='font-medium dark:text-gray-200 text-gray-800'>24</span>{' '}
-              for <span className='font-medium dark:text-gray-200 text-gray-800'>channel-24</span>{' '}
-              on {activeChainInfo.chainName}
+              You can enter <span className='font-medium dark:text-gray-200 text-gray-800'>24</span> for{' '}
+              <span className='font-medium dark:text-gray-200 text-gray-800'>channel-24</span> on{' '}
+              {activeChainInfo.chainName}
             </p>
-            {status === 'error' ? (
-              <p className='text-xs mt-2 text-red-300 font-medium'>{message}</p>
-            ) : null}
-            {status === 'success' ? (
-              <p className='text-xs mt-2 text-green-300 font-medium'>{message}</p>
-            ) : null}
+            {status === 'error' ? <p className='text-xs mt-2 text-red-300 font-medium'>{message}</p> : null}
+            {status === 'success' ? <p className='text-xs mt-2 text-green-300 font-medium'>{message}</p> : null}
           </div>
         </label>
       )}
     </fieldset>
-  )
-}
+  );
+};
 
-export default RadioGroupSend
+export default RadioGroupSend;

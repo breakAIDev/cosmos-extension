@@ -1,22 +1,22 @@
-import { MagnifyingGlass } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import Text from 'components/text'
-import React, { useEffect, useRef } from 'react'
+import { MagnifyingGlass } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import Text from 'components/text';
+import React, { useEffect, useRef } from 'react';
 
 type SearchInputProps = {
-  value: string
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  action?: string
-  actionHandler?: () => void
-  onClear: () => void
-  autoFocus?: boolean
-  placeholder?: string
-  divClassName?: string
-  inputClassName?: string
-  inputDisabled?: boolean
-  type?: 'text' | 'number'
-  onKeyUp?: (e: React.KeyboardEvent<HTMLInputElement>) => void
-}
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  action?: string;
+  actionHandler?: () => void;
+  onClear: () => void;
+  autoFocus?: boolean;
+  placeholder?: string;
+  divClassName?: string;
+  inputClassName?: string;
+  inputDisabled?: boolean;
+  type?: 'text' | 'number';
+  onKeyUp?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+};
 
 export function CtaInput({
   value,
@@ -32,15 +32,15 @@ export function CtaInput({
   type = 'text',
   ...rest
 }: SearchInputProps) {
-  const inputRef = useRef<HTMLInputElement | null>(null)
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (inputRef.current && autoFocus) {
       setTimeout(() => {
-        inputRef.current?.focus()
-      }, 100)
+        inputRef.current?.focus();
+      }, 100);
     }
-  }, [autoFocus])
+  }, [autoFocus]);
 
   return (
     <div
@@ -90,5 +90,5 @@ export function CtaInput({
         </div>
       )}
     </div>
-  )
+  );
 }

@@ -1,74 +1,66 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ETHEREUM_METHOD_TYPE } from '@leapwallet/cosmos-wallet-provider/dist/provider/types'
+import { ETHEREUM_METHOD_TYPE } from '@leapwallet/cosmos-wallet-provider/dist/provider/types';
 import {
   formatEtherUnits,
   getChainApis,
   getErc20TokenDetails,
   getErc721TokenDetails,
   SupportedChain,
-} from '@leapwallet/cosmos-wallet-sdk'
-import { MessageTypes } from 'config/message-types'
-import { BG_RESPONSE } from 'config/storage-keys'
-import { getChainOriginStorageKey, getSupportedChains } from 'extension-scripts/utils'
-import React, { useCallback, useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { evmBalanceStore } from 'stores/balance-store'
-import { rootDenomsStore } from 'stores/denoms-store-instance'
-import { rootBalanceStore } from 'stores/root-store'
-import Browser from 'webextension-polyfill'
+} from '@leapwallet/cosmos-wallet-sdk';
+import { MessageTypes } from 'config/message-types';
+import { BG_RESPONSE } from 'config/storage-keys';
+import { getChainOriginStorageKey, getSupportedChains } from 'extension-scripts/utils';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { evmBalanceStore } from 'stores/balance-store';
+import { rootDenomsStore } from 'stores/denoms-store-instance';
+import { rootBalanceStore } from 'stores/root-store';
+import Browser from 'webextension-polyfill';
 
-import { ArrowHeader, Loading, MessageSignature, SignTransaction } from './components'
-import { handleRejectClick } from './utils'
+import { ArrowHeader, Loading, MessageSignature, SignTransaction } from './components';
+import { handleRejectClick } from './utils';
 
 type TxOriginData = {
-  activeChain: SupportedChain
-  activeNetwork: 'mainnet' | 'testnet'
-}
+  activeChain: SupportedChain;
+  activeNetwork: 'mainnet' | 'testnet';
+};
 
 type SeiEvmTransactionProps = {
-  txOriginData: TxOriginData
-  txnDataList: Record<string, any>[]
-  setTxnDataList: React.Dispatch<React.SetStateAction<Record<string, any>[] | null>>
-}
+  txOriginData: TxOriginData;
+  txnDataList: Record<string, any>[];
+  setTxnDataList: React.Dispatch<React.SetStateAction<Record<string, any>[] | null>>;
+};
 
 function SeiEvmTransaction({ txnDataList, setTxnDataList, txOriginData }: SeiEvmTransactionProps) {
-  const navigate = useNavigate()
-  const [activeTxn, setActiveTxn] = useState(0)
+  const navigate = useNavigate();
+  const [activeTxn, setActiveTxn] = useState(0);
 
   useEffect(() => {
-    window.addEventListener('beforeunload', () =>
-      handleRejectClick(navigate, txnDataList[0]?.payloadId),
-    )
-    Browser.storage.local.remove(BG_RESPONSE)
+    window.addEventListener('beforeunload', () => handleRejectClick(navigate, txnDataList[0]?.payloadId));
+    Browser.storage.local.remove(BG_RESPONSE);
 
     return () => {
-      window.removeEventListener('beforeunload', () =>
-        handleRejectClick(navigate, txnDataList[0]?.payloadId),
-      )
-    }
+      window.removeEventListener('beforeunload', () => handleRejectClick(navigate, txnDataList[0]?.payloadId));
+    };
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, []);
 
   const handleTxnListUpdate = (customId: string) => {
-    const filteredTxnDataList = txnDataList.filter((_txnData) => _txnData.customId !== customId)
-    setTxnDataList(filteredTxnDataList)
-    setActiveTxn(0)
-  }
+    const filteredTxnDataList = txnDataList.filter((_txnData) => _txnData.customId !== customId);
+    setTxnDataList(filteredTxnDataList);
+    setActiveTxn(0);
+  };
 
   return (
     <>
       {txnDataList.length > 1 ? (
-        <ArrowHeader
-          activeIndex={activeTxn}
-          setActiveIndex={setActiveTxn}
-          limit={txnDataList.length}
-        />
+        <ArrowHeader activeIndex={activeTxn} setActiveIndex={setActiveTxn} limit={txnDataList.length} />
       ) : null}
 
       {txnDataList.map((txnData, index) => {
         if (index !== activeTxn) {
-          return null
+          return null;
         }
 
         switch (txnData.signTxnData.methodType) {
@@ -82,7 +74,7 @@ function SeiEvmTransaction({ txnDataList, setTxnDataList, txOriginData }: SeiEvm
                 donotClose={txnDataList.length > 1}
                 handleTxnListUpdate={() => handleTxnListUpdate(txnData.customId)}
               />
-            )
+            );
         }
 
         return (
@@ -97,10 +89,10 @@ function SeiEvmTransaction({ txnDataList, setTxnDataList, txOriginData }: SeiEvm
             donotClose={txnDataList.length > 1}
             handleTxnListUpdate={() => handleTxnListUpdate(txnData.customId)}
           />
-        )
+        );
       })}
     </>
-  )
+  );
 }
 
 /**
@@ -108,103 +100,84 @@ function SeiEvmTransaction({ txnDataList, setTxnDataList, txOriginData }: SeiEvm
  */
 const withSeiEvmTxnSigningRequest = (Component: React.FC<any>) => {
   const Wrapped = () => {
-    const [txnDataList, setTxnDataList] = useState<Record<string, any>[] | null>(null)
-    const [txOriginData, setTxOriginData] = useState<TxOriginData | null>(null)
+    const [txnDataList, setTxnDataList] = useState<Record<string, any>[] | null>(null);
+    const [txOriginData, setTxOriginData] = useState<TxOriginData | null>(null);
 
     const signSeiEvmTxEventHandler = useCallback(async (message: any, sender: any) => {
-      if (sender.id !== Browser.runtime.id) return
+      if (sender.id !== Browser.runtime.id) return;
 
       if (message.type === MessageTypes.signTransaction) {
-        const txnData = message.payload
-        const storageKey = getChainOriginStorageKey(txnData.origin)
+        const txnData = message.payload;
+        const storageKey = getChainOriginStorageKey(txnData.origin);
 
-        const storage = await Browser.storage.local.get(storageKey)
-        const defaultChain = 'ethereum'
-        const { chainKey = defaultChain, network = 'mainnet' } = storage[storageKey] || {}
-        const supportedChains = await getSupportedChains()
-        const chainData = supportedChains[chainKey as SupportedChain]
-        const evmChainId = Number(
-          network === 'testnet' ? chainData?.evmChainIdTestnet : chainData?.evmChainId,
-        )
+        const storage = await Browser.storage.local.get(storageKey);
+        const defaultChain = 'ethereum';
+        const { chainKey = defaultChain, network = 'mainnet' } = storage[storageKey] || {};
+        const supportedChains = await getSupportedChains();
+        const chainData = supportedChains[chainKey as SupportedChain];
+        const evmChainId = Number(network === 'testnet' ? chainData?.evmChainIdTestnet : chainData?.evmChainId);
 
-        setTxOriginData({ activeChain: chainKey, activeNetwork: network })
+        setTxOriginData({ activeChain: chainKey, activeNetwork: network });
 
-        const { evmJsonRpc } = getChainApis(chainKey, network, supportedChains)
+        const { evmJsonRpc } = getChainApis(chainKey, network, supportedChains);
 
         if (txnData?.signTxnData?.spendPermissionCapValue) {
           try {
-            let tokenDetails
+            let tokenDetails;
             try {
-              tokenDetails = await getErc20TokenDetails(
-                txnData.signTxnData.to,
-                evmJsonRpc ?? '',
-                Number(evmChainId),
-              )
+              tokenDetails = await getErc20TokenDetails(txnData.signTxnData.to, evmJsonRpc ?? '', Number(evmChainId));
               txnData.signTxnData.details = {
                 Permission: `This allows the third party to spend ${formatEtherUnits(
                   txnData.signTxnData.spendPermissionCapValue,
                   tokenDetails?.decimals ?? 18,
                 )} ${tokenDetails.symbol} from your current balance.`,
                 ...txnData.signTxnData.details,
-              }
+              };
             } catch (error) {
               // eslint-disable-next-line no-console
-              console.error(
-                'Error fetching token details as ERC20 token, retrying as ERC721 token',
-                error,
-              )
-              tokenDetails = await getErc721TokenDetails(
-                txnData.signTxnData.to,
-                evmJsonRpc ?? '',
-                Number(evmChainId),
-              )
+              console.error('Error fetching token details as ERC20 token, retrying as ERC721 token', error);
+              tokenDetails = await getErc721TokenDetails(txnData.signTxnData.to, evmJsonRpc ?? '', Number(evmChainId));
               txnData.signTxnData.details = {
                 Permission: `This allows the third party to transfer your ${txnData.signTxnData.spendPermissionCapValue} ${tokenDetails.symbol} token.`,
                 ...txnData.signTxnData.details,
-              }
+              };
             }
           } catch (error) {
             // eslint-disable-next-line no-console
-            console.error('Error fetching token details', error)
+            console.error('Error fetching token details', error);
           }
         }
 
         setTxnDataList((prev) => {
-          prev = prev ?? []
+          prev = prev ?? [];
           if (prev.some((txn) => txn?.origin?.toLowerCase() !== txnData?.origin?.toLowerCase())) {
-            return prev
+            return prev;
           }
 
-          return [...prev, { ...txnData, customId: `${sender.id}-00${prev.length}` }]
-        })
+          return [...prev, { ...txnData, customId: `${sender.id}-00${prev.length}` }];
+        });
       }
-    }, [])
+    }, []);
 
     useEffect(() => {
-      Browser.runtime.sendMessage({ type: MessageTypes.signingPopupOpen })
-      Browser.runtime.onMessage.addListener(signSeiEvmTxEventHandler)
+      Browser.runtime.sendMessage({ type: MessageTypes.signingPopupOpen });
+      Browser.runtime.onMessage.addListener(signSeiEvmTxEventHandler);
 
       return () => {
-        Browser.runtime.onMessage.removeListener(signSeiEvmTxEventHandler)
-      }
-    }, [signSeiEvmTxEventHandler])
+        Browser.runtime.onMessage.removeListener(signSeiEvmTxEventHandler);
+      };
+    }, [signSeiEvmTxEventHandler]);
 
     if (txnDataList?.length) {
-      return (
-        <Component
-          txnDataList={txnDataList}
-          setTxnDataList={setTxnDataList}
-          txOriginData={txOriginData}
-        />
-      )
+      return <Component txnDataList={txnDataList} setTxnDataList={setTxnDataList} txOriginData={txOriginData} />;
     }
 
-    return <Loading />
-  }
+    return <Loading />;
+  };
 
-  Wrapped.displayName = `withSeiEvmTxnSigningRequest(${Component.displayName})`
-  return Wrapped
-}
+  Wrapped.displayName = `withSeiEvmTxnSigningRequest(${Component.displayName})`;
+  return Wrapped;
+};
 
-const signSeiEvmTx = withSeiEvmTxnSigningRequest(React.memo(SeiEvmTransaction))
-export default signSeiEvmTx
+const signSeiEvmTx = withSeiEvmTxnSigningRequest(React.memo(SeiEvmTransaction));
+export default signSeiEvmTx;

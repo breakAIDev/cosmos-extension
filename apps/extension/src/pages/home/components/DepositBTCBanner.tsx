@@ -1,80 +1,72 @@
-import { sliceAddress, useActiveChain } from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { Buttons } from '@leapwallet/leap-ui'
-import { LoaderAnimation } from 'components/loader/Loader'
-import BottomModal from 'components/new-bottom-modal'
-import { useGetBTCDepositInfo, useNomicBTCDepositConstants } from 'hooks/nomic-btc-deposit'
-import { useCaptureUIException } from 'hooks/perf-monitoring/useCaptureUIException'
-import { useChainInfos } from 'hooks/useChainInfos'
-import { useQueryParams } from 'hooks/useQuery'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import React, { useEffect, useState } from 'react'
-import { chainTagsStore } from 'stores/chain-infos-store'
-import { Colors } from 'theme/colors'
-import { UserClipboard } from 'utils/clipboard'
-import { formatAuthzDate } from 'utils/formatAuthzDate'
-import { imgOnError } from 'utils/imgOnError'
-import { queryParams } from 'utils/query-params'
+import { sliceAddress, useActiveChain } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { Buttons } from '@leapwallet/leap-ui';
+import { LoaderAnimation } from 'components/loader/Loader';
+import BottomModal from 'components/new-bottom-modal';
+import { useGetBTCDepositInfo, useNomicBTCDepositConstants } from 'hooks/nomic-btc-deposit';
+import { useCaptureUIException } from 'hooks/perf-monitoring/useCaptureUIException';
+import { useChainInfos } from 'hooks/useChainInfos';
+import { useQueryParams } from 'hooks/useQuery';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import React, { useEffect, useState } from 'react';
+import { chainTagsStore } from 'stores/chain-infos-store';
+import { Colors } from 'theme/colors';
+import { UserClipboard } from 'utils/clipboard';
+import { formatAuthzDate } from 'utils/formatAuthzDate';
+import { imgOnError } from 'utils/imgOnError';
+import { queryParams } from 'utils/query-params';
 
-import { SelectChainSheet } from '../side-nav/CustomEndpoints'
+import { SelectChainSheet } from '../side-nav/CustomEndpoints';
 
 export function DepositBTCBanner() {
-  const { data } = useNomicBTCDepositConstants()
-  const activeChain = useActiveChain()
-  const query = useQueryParams()
+  const { data } = useNomicBTCDepositConstants();
+  const activeChain = useActiveChain();
+  const query = useQueryParams();
 
   if (data && !data.banner.chains.includes(activeChain) && !data.banner.chains.includes('All')) {
-    return null
+    return null;
   }
 
   return data ? (
-    <button
-      className='rounded-[20px] w-[312px] h-[62px] my-6'
-      onClick={() => query.set('btcDeposit', 'true')}
-    >
+    <button className='rounded-[20px] w-[312px] h-[62px] my-6' onClick={() => query.set('btcDeposit', 'true')}>
       <img
         src={data?.banner.banner_url ?? ''}
         alt='Deposit BTC to get nBTC - Powered by Nomic'
         className='h-full w-full'
       />
     </button>
-  ) : null
+  ) : null;
 }
 
 type NomicBTCDepositProps = {
-  selectedChain: SupportedChain
-  handleChainBtnClick: () => void
-}
+  selectedChain: SupportedChain;
+  handleChainBtnClick: () => void;
+};
 
 function NomicBTCDeposit({ selectedChain, handleChainBtnClick }: NomicBTCDepositProps) {
-  const { data: btcDepositInfo, status } = useGetBTCDepositInfo(selectedChain)
-  const activeChain = useActiveChain()
-  const chainInfos = useChainInfos()
-  const defaultTokenLogo = useDefaultTokenLogo()
-  const { data } = useNomicBTCDepositConstants()
+  const { data: btcDepositInfo, status } = useGetBTCDepositInfo(selectedChain);
+  const activeChain = useActiveChain();
+  const chainInfos = useChainInfos();
+  const defaultTokenLogo = useDefaultTokenLogo();
+  const { data } = useNomicBTCDepositConstants();
 
-  useCaptureUIException(
-    btcDepositInfo?.code === 1 || btcDepositInfo?.code === 2 ? btcDepositInfo.reason : null,
-  )
+  useCaptureUIException(btcDepositInfo?.code === 1 || btcDepositInfo?.code === 2 ? btcDepositInfo.reason : null);
 
   if (status === 'loading') {
     return (
       <div className='flex flex-col items-center mb-[40px] h-[450px]'>
         <LoaderAnimation color='' />
       </div>
-    )
+    );
   }
 
   if (status === 'success' && btcDepositInfo) {
     const SelectChainDropdown = (
       <div className='flex justify-between items-center rounded-3xl dark:bg-gray-900 bg-white-100 px-3 py-1.5 w-full text-gray-800 dark:text-white-100'>
         <span>Receive nBTC on</span>
-        <button
-          className='flex item-center rounded-3xl p-2 dark:bg-gray-800'
-          onClick={handleChainBtnClick}
-        >
+        <button className='flex item-center rounded-3xl p-2 dark:bg-gray-800' onClick={handleChainBtnClick}>
           <img
             src={chainInfos[selectedChain].chainSymbolImageUrl ?? defaultTokenLogo}
             className='w-[24px] h-[24px] mr-2 border rounded-full dark:border-[#333333] border-[#cccccc]'
@@ -84,11 +76,11 @@ function NomicBTCDeposit({ selectedChain, handleChainBtnClick }: NomicBTCDeposit
           <img src={Images.Misc.ArrowDown} alt='' className='self-center ml-2 mr-1' />
         </button>
       </div>
-    )
+    );
 
     if (btcDepositInfo.code === 0) {
-      const { qrCodeData, bitcoinAddress, expirationTimeMs } = btcDepositInfo
-      const date = formatAuthzDate(expirationTimeMs)
+      const { qrCodeData, bitcoinAddress, expirationTimeMs } = btcDepositInfo;
+      const date = formatAuthzDate(expirationTimeMs);
 
       return (
         <div className='flex flex-col items-center gap-4 pb-4'>
@@ -103,13 +95,11 @@ function NomicBTCDeposit({ selectedChain, handleChainBtnClick }: NomicBTCDeposit
             walletAddress={sliceAddress(bitcoinAddress)}
             data-testing-id='copy-wallet-address'
             onCopy={() => {
-              UserClipboard.copyText(bitcoinAddress)
+              UserClipboard.copyText(bitcoinAddress);
             }}
           />
 
-          <p className='text-gray-800 dark:text-white-100 text-base'>
-            Deposit BTC to this address to receive nBTC
-          </p>
+          <p className='text-gray-800 dark:text-white-100 text-base'>Deposit BTC to this address to receive nBTC</p>
           <p className='text-red-300 text-sm text-center w-[250px]'>
             {date === 'Expired'
               ? 'This address is Expired.'
@@ -127,36 +117,28 @@ function NomicBTCDeposit({ selectedChain, handleChainBtnClick }: NomicBTCDeposit
                 <p className='text-[14px]'>Powered by Nomic</p>
                 <p className='text-[12px]'>Transaction details</p>
               </div>
-              <img
-                className='w-[84px] h-[32px]'
-                src={Images.Logos.NomicFullnameLogo}
-                alt='nomic logo'
-              />
+              <img className='w-[84px] h-[32px]' src={Images.Logos.NomicFullnameLogo} alt='nomic logo' />
             </div>
 
             <div style={{ border: '0.05px solid #48237A' }} />
 
             <div className='flex flex-col gap-1'>
               <p className='flex justify-between items-center text-gray-300 text-[12px]'>
-                <span>Bitcoin Miner Fee:</span>{' '}
-                <span>{data?.deposit_sheet.bitcoin_miner_fee ?? ''}</span>
+                <span>Bitcoin Miner Fee:</span> <span>{data?.deposit_sheet.bitcoin_miner_fee ?? ''}</span>
               </p>
               <p className='flex justify-between items-center text-gray-300 text-[12px]'>
-                <span>Estimated Arrival:</span>{' '}
-                <span>{data?.deposit_sheet.estimated_arrival ?? ''}</span>
+                <span>Estimated Arrival:</span> <span>{data?.deposit_sheet.estimated_arrival ?? ''}</span>
               </p>
               <p className='flex justify-between items-center text-gray-300 text-[12px]'>
                 <span>Nomic Bridge Fee:</span>{' '}
                 <span>
-                  {data?.deposit_sheet.nomic_bridge_fee[
-                    selectedChain === 'nomic' ? 'nomic' : 'non_nomic'
-                  ] ?? ''}
+                  {data?.deposit_sheet.nomic_bridge_fee[selectedChain === 'nomic' ? 'nomic' : 'non_nomic'] ?? ''}
                 </span>
               </p>
             </div>
           </div>
         </div>
-      )
+      );
     }
 
     if (btcDepositInfo.code === 2 || btcDepositInfo.code === 1) {
@@ -175,37 +157,35 @@ function NomicBTCDeposit({ selectedChain, handleChainBtnClick }: NomicBTCDeposit
           ) : (
             <>
               <p className='text-red-300 text-base'>Error</p>
-              <p className='text-center text-gray-800 dark:text-white-100 text-base'>
-                {btcDepositInfo.reason}
-              </p>
+              <p className='text-center text-gray-800 dark:text-white-100 text-base'>{btcDepositInfo.reason}</p>
             </>
           )}
         </div>
-      )
+      );
     }
   }
 
-  return null
+  return null;
 }
 
 export const BitcoinDeposit = observer(() => {
-  const query = useQueryParams()
-  const isVisible = query.get(queryParams.btcDeposit) === 'true'
+  const query = useQueryParams();
+  const isVisible = query.get(queryParams.btcDeposit) === 'true';
 
-  const activeChain = useActiveChain()
-  const [showSelectChain, setShowSelectChain] = useState(false)
-  const { data } = useNomicBTCDepositConstants()
-  const [selectedChain, setSelectedChain] = useState(activeChain)
+  const activeChain = useActiveChain();
+  const [showSelectChain, setShowSelectChain] = useState(false);
+  const { data } = useNomicBTCDepositConstants();
+  const [selectedChain, setSelectedChain] = useState(activeChain);
 
   useEffect(() => {
     if (data && data.ibcChains?.length) {
       if (data.ibcChains?.includes(activeChain)) {
-        setSelectedChain(activeChain)
+        setSelectedChain(activeChain);
       } else {
-        setSelectedChain(data.ibcChains?.[0] as SupportedChain)
+        setSelectedChain(data.ibcChains?.[0] as SupportedChain);
       }
     }
-  }, [activeChain, data])
+  }, [activeChain, data]);
 
   return (
     <BottomModal
@@ -214,22 +194,19 @@ export const BitcoinDeposit = observer(() => {
       title={'Bitcoin Deposit Address'}
     >
       <>
-        <NomicBTCDeposit
-          selectedChain={selectedChain}
-          handleChainBtnClick={() => setShowSelectChain(true)}
-        />
+        <NomicBTCDeposit selectedChain={selectedChain} handleChainBtnClick={() => setShowSelectChain(true)} />
         <SelectChainSheet
           chainsToShow={data?.ibcChains}
           isVisible={showSelectChain}
           onClose={() => setShowSelectChain(false)}
           selectedChain={selectedChain}
           onChainSelect={(chaiName: SupportedChain) => {
-            setSelectedChain(chaiName)
-            setShowSelectChain(false)
+            setSelectedChain(chaiName);
+            setShowSelectChain(false);
           }}
           chainTagsStore={chainTagsStore}
         />
       </>
     </BottomModal>
-  )
-})
+  );
+});

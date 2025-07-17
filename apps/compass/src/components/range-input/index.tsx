@@ -1,14 +1,14 @@
-import * as React from 'react'
-import { getTrackBackground, Range } from 'react-range'
+import * as React from 'react';
+import { getTrackBackground, Range } from 'react-range';
 
 type RangeInputProps = {
-  initialValue: number
-  onChangeHandler: (value: number) => void
-  activeColor?: string
-  min?: number
-  max?: number
-  step?: number
-}
+  initialValue: number;
+  onChangeHandler: (value: number) => void;
+  activeColor?: string;
+  min?: number;
+  max?: number;
+  step?: number;
+};
 
 const RangeInput = ({
   initialValue,
@@ -18,7 +18,7 @@ const RangeInput = ({
   max = 5,
   step = 1,
 }: RangeInputProps) => {
-  const [values, setValues] = React.useState([initialValue])
+  const [values, setValues] = React.useState([initialValue]);
 
   return (
     <div className='flex justify-center flex-wrap'>
@@ -28,15 +28,11 @@ const RangeInput = ({
         min={min}
         max={max}
         onChange={(values) => {
-          setValues(values)
-          onChangeHandler(values[0])
+          setValues(values);
+          onChangeHandler(values[0]);
         }}
         renderTrack={({ props, children }) => (
-          <div
-            onMouseDown={props.onMouseDown}
-            onTouchStart={props.onTouchStart}
-            className='h-9 w-full'
-          >
+          <div onMouseDown={props.onMouseDown} onTouchStart={props.onTouchStart} className='h-9 w-full'>
             <div
               ref={props.ref}
               style={{
@@ -69,7 +65,7 @@ const RangeInput = ({
         )}
       />
     </div>
-  )
-}
+  );
+};
 
-export default RangeInput
+export default RangeInput;

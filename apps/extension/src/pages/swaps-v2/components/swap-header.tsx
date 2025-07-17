@@ -1,16 +1,16 @@
-import { WalletButtonV2 } from 'components/button'
-import { PageHeader } from 'components/header/PageHeaderV2'
-import { SideNavMenuOpen } from 'components/header/sidenav-menu'
-import { SidePanelTrigger } from 'components/header/sidepanel-trigger'
-import { useWalletInfo } from 'hooks/useWalletInfo'
-import { FilterIcon } from 'icons/filter-icon'
-import { observer } from 'mobx-react-lite'
-import SelectWallet from 'pages/home/SelectWallet/v2'
-import React, { useState } from 'react'
+import { WalletButtonV2 } from 'components/button';
+import { PageHeader } from 'components/header/PageHeaderV2';
+import { SideNavMenuOpen } from 'components/header/sidenav-menu';
+import { SidePanelTrigger } from 'components/header/sidepanel-trigger';
+import { useWalletInfo } from 'hooks/useWalletInfo';
+import { FilterIcon } from 'icons/filter-icon';
+import { observer } from 'mobx-react-lite';
+import SelectWallet from 'pages/home/SelectWallet/v2';
+import React, { useState } from 'react';
 
 const SwapHeaderView = (props: { onSettings?: () => void; currentSlippage: number }) => {
-  const [showSelectWallet, setShowSelectWallet] = useState(false)
-  const walletInfo = useWalletInfo()
+  const [showSelectWallet, setShowSelectWallet] = useState(false);
+  const walletInfo = useWalletInfo();
 
   return (
     <>
@@ -38,9 +38,9 @@ const SwapHeaderView = (props: { onSettings?: () => void; currentSlippage: numbe
 
       <SelectWallet isVisible={showSelectWallet} onClose={() => setShowSelectWallet(false)} />
     </>
-  )
-}
+  );
+};
 
-SwapHeaderView.displayName = 'SwapHeader'
+SwapHeaderView.displayName = 'SwapHeader';
 
-export const SwapHeader = observer(SwapHeaderView)
+export const SwapHeader = observer(SwapHeaderView);

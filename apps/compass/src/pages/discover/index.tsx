@@ -1,22 +1,18 @@
-import {
-  DiscoverCollection,
-  DiscoverDapp,
-  useCompassDiscoverAssets,
-} from '@leapwallet/cosmos-wallet-hooks'
-import Text from 'components/text'
-import { SearchInput } from 'components/ui/input/search-input'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { compassTokenTagsStore, rootDenomsStore } from 'stores/denoms-store-instance'
-import { cn } from 'utils/cn'
+import { DiscoverCollection, DiscoverDapp, useCompassDiscoverAssets } from '@leapwallet/cosmos-wallet-hooks';
+import Text from 'components/text';
+import { SearchInput } from 'components/ui/input/search-input';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { compassTokenTagsStore, rootDenomsStore } from 'stores/denoms-store-instance';
+import { cn } from 'utils/cn';
 
-import AllAssets from './components/AllAssets'
-import { DiscoverHeader } from './components/discover-header'
-import { DiscoverBannerAD } from './components/DiscoverBannerAD'
-import TrendingCollections from './components/TrendingCollections'
-import TrendingDapps from './components/TrendingDapps'
-import TrendingTokens from './components/TrendingTokens'
+import AllAssets from './components/AllAssets';
+import { DiscoverHeader } from './components/discover-header';
+import { DiscoverBannerAD } from './components/DiscoverBannerAD';
+import TrendingCollections from './components/TrendingCollections';
+import TrendingDapps from './components/TrendingDapps';
+import TrendingTokens from './components/TrendingTokens';
 
 export enum AssetType {
   TOKENS = 'Tokens',
@@ -40,73 +36,67 @@ const tabs = [
     bgColor: 'bg-orange-800 hover:bg-orange-700',
     bgColor2: 'bg-orange-600',
   },
-]
+];
 
 const Discover = observer(() => {
-  const { data: discoverAssets, isLoading } = useCompassDiscoverAssets()
-  const [searchTerm, setSearchTerm] = useState('')
-  const [showAllAssets, setShowAllAssets] = useState<AssetType | undefined>()
-  const [isExpand, setIsExpand] = useState<AssetType | undefined>()
-  const listRef = useRef<HTMLDivElement | null>(null)
-  const denomInfos = rootDenomsStore.allDenoms
+  const { data: discoverAssets, isLoading } = useCompassDiscoverAssets();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showAllAssets, setShowAllAssets] = useState<AssetType | undefined>();
+  const [isExpand, setIsExpand] = useState<AssetType | undefined>();
+  const listRef = useRef<HTMLDivElement | null>(null);
+  const denomInfos = rootDenomsStore.allDenoms;
 
   const { filteredTokens, filteredDapps, filteredNFTs } = useMemo(() => {
     if (!discoverAssets) {
-      return { filteredTokens: [], filteredDapps: [], filteredNFTs: [] }
+      return { filteredTokens: [], filteredDapps: [], filteredNFTs: [] };
     }
     let filteredTokens: string[] = Object.keys(compassTokenTagsStore.compassTokenTags),
       filteredDapps: DiscoverDapp[] = discoverAssets.dapps,
-      filteredNFTs: DiscoverCollection[] = discoverAssets.collections
+      filteredNFTs: DiscoverCollection[] = discoverAssets.collections;
     if (!searchTerm) {
-      filteredTokens = filteredTokens.filter((token) =>
-        discoverAssets.trendingTokens.includes(token),
-      )
-      filteredDapps = filteredDapps.filter((dapp) => dapp.trending)
-      filteredNFTs = filteredNFTs.filter((collection) => collection.trending)
+      filteredTokens = filteredTokens.filter((token) => discoverAssets.trendingTokens.includes(token));
+      filteredDapps = filteredDapps.filter((dapp) => dapp.trending);
+      filteredNFTs = filteredNFTs.filter((collection) => collection.trending);
     } else {
-      const lowerSearchTerm = searchTerm.toLowerCase()
+      const lowerSearchTerm = searchTerm.toLowerCase();
       filteredTokens = filteredTokens.filter(
         (token) =>
           denomInfos[token].coinMinimalDenom.toLowerCase().includes(lowerSearchTerm) ||
           denomInfos[token].name?.toLowerCase().includes(lowerSearchTerm),
-      )
-      filteredDapps = filteredDapps.filter((dapp) =>
-        dapp.name.toLowerCase().includes(lowerSearchTerm),
-      )
-      filteredNFTs = filteredNFTs.filter((collection) =>
-        collection.name.toLowerCase().includes(lowerSearchTerm),
-      )
+      );
+      filteredDapps = filteredDapps.filter((dapp) => dapp.name.toLowerCase().includes(lowerSearchTerm));
+      filteredNFTs = filteredNFTs.filter((collection) => collection.name.toLowerCase().includes(lowerSearchTerm));
     }
-    return { filteredTokens, filteredDapps, filteredNFTs }
-  }, [denomInfos, discoverAssets, searchTerm])
+    return { filteredTokens, filteredDapps, filteredNFTs };
+  }, [denomInfos, discoverAssets, searchTerm]);
 
   const onExpand = useCallback(
     (val: AssetType) => {
       if (searchTerm.length > 0) {
         if (isExpand && isExpand === val) {
-          setIsExpand(undefined)
+          setIsExpand(undefined);
         } else {
-          setIsExpand(val)
+          setIsExpand(val);
         }
       } else {
-        setShowAllAssets(val)
+        setShowAllAssets(val);
         if (listRef.current) {
-          document.getElementById('popup-layout')?.scrollTo({ top: 0 })
+          document.getElementById('popup-layout')?.scrollTo({ top: 0 });
         }
       }
     },
     [isExpand, searchTerm.length],
-  )
+  );
 
   useEffect(() => {
     if (searchTerm.length === 0) {
-      setIsExpand(undefined)
+      setIsExpand(undefined);
     }
-  }, [searchTerm.length])
+  }, [searchTerm.length]);
 
   useEffect(() => {
-    setSearchTerm('')
-  }, [showAllAssets])
+    setSearchTerm('');
+  }, [showAllAssets]);
 
   return (
     <div ref={listRef} className='mb-20'>
@@ -133,15 +123,12 @@ const Discover = observer(() => {
                       )}
                       onClick={() => setShowAllAssets(tab.title)}
                     >
-                      <img
-                        src={Images.Misc.Toll}
-                        className={cn('rounded-full w-6 h-6 p-1', tab.bgColor2)}
-                      />
+                      <img src={Images.Misc.Toll} className={cn('rounded-full w-6 h-6 p-1', tab.bgColor2)} />
                       <Text size='sm' className='font-bold' color='text-monochrome'>
                         {tab.title}
                       </Text>
                     </div>
-                  )
+                  );
                 })}
               </div>
               <DiscoverBannerAD />
@@ -171,17 +158,11 @@ const Discover = observer(() => {
               isExpanded={isExpand === AssetType.NFTS}
             />
           )}
-          {filteredDapps.length === 0 &&
-            filteredNFTs.length === 0 &&
-            filteredTokens.length === 0 &&
-            !isLoading && (
-              <Text
-                className='px-6 py-[180px] w-full text-[18px] font-bold !leading-6'
-                color='text-secondary-600'
-              >
-                No dApps, tokens or collections found
-              </Text>
-            )}
+          {filteredDapps.length === 0 && filteredNFTs.length === 0 && filteredTokens.length === 0 && !isLoading && (
+            <Text className='px-6 py-[180px] w-full text-[18px] font-bold !leading-6' color='text-secondary-600'>
+              No dApps, tokens or collections found
+            </Text>
+          )}
         </div>
       )}
       {showAllAssets && discoverAssets && (
@@ -192,7 +173,7 @@ const Discover = observer(() => {
         />
       )}
     </div>
-  )
-})
+  );
+});
 
-export default Discover
+export default Discover;

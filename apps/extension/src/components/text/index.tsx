@@ -1,13 +1,13 @@
-import classNames from 'classnames'
-import React, { PropsWithChildren, ReactNode } from 'react'
+import classNames from 'classnames';
+import React, { PropsWithChildren, ReactNode } from 'react';
 
 export type TextProps = {
-  readonly size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'jumbo'
-  readonly children?: ReactNode
-  readonly className?: string
-  readonly color?: string
-  readonly style?: React.CSSProperties
-}
+  readonly size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'jumbo';
+  readonly children?: ReactNode;
+  readonly className?: string;
+  readonly color?: string;
+  readonly style?: React.CSSProperties;
+};
 
 /**
  * create a Text
@@ -16,7 +16,7 @@ export type TextProps = {
  * @returns {string} - new mnemonic or given length
  */
 export default function Text(props: PropsWithChildren<TextProps>) {
-  const { size, children, className, color, style, ...rest } = props
+  const { size, children, className, color, style, ...rest } = props;
   return (
     <span
       style={style}
@@ -42,5 +42,5 @@ export default function Text(props: PropsWithChildren<TextProps>) {
     >
       {children}
     </span>
-  )
+  );
 }

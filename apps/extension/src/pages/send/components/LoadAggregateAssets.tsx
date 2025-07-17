@@ -1,22 +1,19 @@
-import { useAggregatedSpendableTokens } from '@leapwallet/cosmos-wallet-hooks'
-import React, { useEffect } from 'react'
+import { useAggregatedSpendableTokens } from '@leapwallet/cosmos-wallet-hooks';
+import React, { useEffect } from 'react';
 
-import { LoadChainAssetsProps } from './LoadChainAssets'
+import { LoadChainAssetsProps } from './LoadChainAssets';
 
-export const LoadAggregateAssets = React.memo(function ({
-  setAllAssets,
-  setIsAllAssetsLoading,
-}: LoadChainAssetsProps) {
-  const { spendableAllAssets, spendableIsLoading } = useAggregatedSpendableTokens()
+export const LoadAggregateAssets = React.memo(function ({ setAllAssets, setIsAllAssetsLoading }: LoadChainAssetsProps) {
+  const { spendableAllAssets, spendableIsLoading } = useAggregatedSpendableTokens();
 
   useEffect(() => {
-    setAllAssets(spendableAllAssets)
-    setIsAllAssetsLoading(spendableIsLoading)
+    setAllAssets(spendableAllAssets);
+    setIsAllAssetsLoading(spendableIsLoading);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [spendableAllAssets, spendableIsLoading])
+  }, [spendableAllAssets, spendableIsLoading]);
 
-  return null
-})
+  return null;
+});
 
-LoadAggregateAssets.displayName = 'LoadAggregateAssets'
+LoadAggregateAssets.displayName = 'LoadAggregateAssets';

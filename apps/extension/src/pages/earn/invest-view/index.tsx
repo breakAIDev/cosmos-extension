@@ -1,16 +1,16 @@
-import { useInvestData } from '@leapwallet/cosmos-wallet-hooks'
-import { ErrorCard } from 'components/ErrorCard'
-import React from 'react'
+import { useInvestData } from '@leapwallet/cosmos-wallet-hooks';
+import { ErrorCard } from 'components/ErrorCard';
+import React from 'react';
 
-import { DisplaySettings } from '../types'
-import { InvestView } from './invest-view'
+import { DisplaySettings } from '../types';
+import { InvestView } from './invest-view';
 
 type InvestViewContainerProps = {
-  displaySettings: DisplaySettings
-}
+  displaySettings: DisplaySettings;
+};
 
 const InvestViewContainer: React.FC<InvestViewContainerProps> = ({ displaySettings }) => {
-  const investData = useInvestData()
+  const investData = useInvestData();
 
   if (investData.status === 'loading') {
     return (
@@ -34,14 +34,14 @@ const InvestViewContainer: React.FC<InvestViewContainerProps> = ({ displaySettin
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (investData.status === 'error') {
-    return <ErrorCard text={investData.error.message} />
+    return <ErrorCard text={investData.error.message} />;
   }
 
-  return <InvestView data={investData.data} displaySettings={displaySettings} />
-}
+  return <InvestView data={investData.data} displaySettings={displaySettings} />;
+};
 
-export default InvestViewContainer
+export default InvestViewContainer;

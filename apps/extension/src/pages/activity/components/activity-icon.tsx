@@ -1,62 +1,62 @@
-import { ActivityType } from '@leapwallet/cosmos-wallet-hooks'
-import classNames from 'classnames'
-import { Images } from 'images'
-import React from 'react'
+import { ActivityType } from '@leapwallet/cosmos-wallet-hooks';
+import classNames from 'classnames';
+import { Images } from 'images';
+import React from 'react';
 
-import { LoaderAnimation } from '../../../components/loader/Loader'
+import { LoaderAnimation } from '../../../components/loader/Loader';
 
 export type ActivityIconProps = {
-  img?: string
-  secondaryImg?: string
-  type: ActivityType
-  showLoader?: boolean
-  voteOption?: string
-  size?: 'sm' | 'md' | 'lg'
-  isSuccessful: boolean
-}
+  img?: string;
+  secondaryImg?: string;
+  type: ActivityType;
+  showLoader?: boolean;
+  voteOption?: string;
+  size?: 'sm' | 'md' | 'lg';
+  isSuccessful: boolean;
+};
 
 const getVoteIcon = (voteOption: string): string => {
   switch (voteOption) {
     case 'Yes':
-      return Images.Gov.VoteOptionYes
+      return Images.Gov.VoteOptionYes;
     case 'No':
-      return Images.Gov.VoteOptionNo
+      return Images.Gov.VoteOptionNo;
     case 'No with Veto':
-      return Images.Gov.VoteOptionNoWithVeto
+      return Images.Gov.VoteOptionNoWithVeto;
     case 'Abstain':
-      return Images.Gov.VoteOptionAbstain
+      return Images.Gov.VoteOptionAbstain;
   }
-  return Images.Activity.Voting
-}
+  return Images.Activity.Voting;
+};
 
 export const getActivityActionTypeIcon = (type: ActivityType, voteOption?: string) => {
   switch (type) {
     case 'send':
-      return Images.Activity.SendIcon
+      return Images.Activity.SendIcon;
     case 'receive':
-      return Images.Activity.ReceiveIcon
+      return Images.Activity.ReceiveIcon;
     case 'fallback':
-      return Images.Activity.Fallback
+      return Images.Activity.Fallback;
     case 'delegate':
-      return Images.Activity.Delegate
+      return Images.Activity.Delegate;
     case 'undelegate':
-      return Images.Activity.Undelegate
+      return Images.Activity.Undelegate;
     case 'pending':
-      return Images.Activity.Pending
+      return Images.Activity.Pending;
     case 'ibc/transfer':
-      return Images.Activity.SwapIcon
+      return Images.Activity.SwapIcon;
     case 'swap':
-      return Images.Activity.SwapIcon
+      return Images.Activity.SwapIcon;
     case 'vote':
-      return getVoteIcon(voteOption as string)
+      return getVoteIcon(voteOption as string);
     case 'secretTokenTransfer':
-      return Images.Activity.SendIcon
+      return Images.Activity.SendIcon;
     case 'liquidity/add':
-      return Images.Activity.Delegate
+      return Images.Activity.Delegate;
     case 'liquidity/remove':
-      return Images.Activity.Undelegate
+      return Images.Activity.Undelegate;
   }
-}
+};
 
 export function ActivityIcon({
   img,
@@ -67,7 +67,7 @@ export function ActivityIcon({
   size = 'md',
   isSuccessful,
 }: ActivityIconProps) {
-  const icon = getActivityActionTypeIcon(type, voteOption)
+  const icon = getActivityActionTypeIcon(type, voteOption);
   return (
     <div
       className={classNames('relative', {
@@ -112,5 +112,5 @@ export function ActivityIcon({
         />
       )}
     </div>
-  )
+  );
 }

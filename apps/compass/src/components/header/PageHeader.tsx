@@ -1,6 +1,6 @@
-import React from 'react'
-import { PageHeaderProps } from 'types/components'
-import { cn } from 'utils/cn'
+import React from 'react';
+import { PageHeaderProps } from 'types/components';
+import { cn } from 'utils/cn';
 
 const PageHeader = React.memo(({ children, className }: PageHeaderProps) => {
   return (
@@ -12,8 +12,8 @@ const PageHeader = React.memo(({ children, className }: PageHeaderProps) => {
     >
       {children}
     </header>
-  )
-})
+  );
+});
 
-PageHeader.displayName = 'PageHeader'
-export { PageHeader }
+PageHeader.displayName = 'PageHeader';
+export { PageHeader };

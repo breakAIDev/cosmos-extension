@@ -1,25 +1,25 @@
-import { Header, HeaderActionType } from '@leapwallet/leap-ui'
-import Text from 'components/text'
-import { useChainPageInfo } from 'hooks'
-import { useDontShowSelectChain } from 'hooks/useDontShowSelectChain'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import SelectChain from 'pages/home/SelectChain'
-import React, { useState } from 'react'
-import { manageChainsStore } from 'stores/manage-chains-store'
-import { globalSheetsStore } from 'stores/ui/global-sheets-store'
+import { Header, HeaderActionType } from '@leapwallet/leap-ui';
+import Text from 'components/text';
+import { useChainPageInfo } from 'hooks';
+import { useDontShowSelectChain } from 'hooks/useDontShowSelectChain';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import SelectChain from 'pages/home/SelectChain';
+import React, { useState } from 'react';
+import { manageChainsStore } from 'stores/manage-chains-store';
+import { globalSheetsStore } from 'stores/ui/global-sheets-store';
 
 export const NoStake = observer(() => {
-  const [showChainSelector, setShowChainSelector] = useState(false)
-  const { headerChainImgSrc } = useChainPageInfo()
-  const dontShowSelectChain = useDontShowSelectChain(manageChainsStore)
+  const [showChainSelector, setShowChainSelector] = useState(false);
+  const { headerChainImgSrc } = useChainPageInfo();
+  const dontShowSelectChain = useDontShowSelectChain(manageChainsStore);
 
   return (
     <div className='relative w-full overflow-clip panel-height'>
       <Header
         action={{
           onClick: function noRefCheck() {
-            globalSheetsStore.setSideNavOpen(true)
+            globalSheetsStore.setSideNavOpen(true);
           },
           type: HeaderActionType.NAVIGATION,
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -44,5 +44,5 @@ export const NoStake = observer(() => {
 
       <SelectChain isVisible={showChainSelector} onClose={() => setShowChainSelector(false)} />
     </div>
-  )
-})
+  );
+});

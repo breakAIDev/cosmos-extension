@@ -1,4 +1,4 @@
-import { Images } from 'images'
+import { Images } from 'images';
 
 export const CategoryIcon: Record<string, string> = {
   NFT: Images.Alpha.nftGiveaway,
@@ -17,4 +17,4 @@ export const CategoryIcon: Record<string, string> = {
   Mainnet: Images.Alpha.mainnet,
   Whitelist: Images.Alpha.whitelist,
   Rewards: Images.Alpha.reward,
-}
+};

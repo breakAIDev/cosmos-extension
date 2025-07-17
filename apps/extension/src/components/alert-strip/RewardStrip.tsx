@@ -1,73 +1,68 @@
-import HCaptcha from '@hcaptcha/react-hcaptcha'
-import { useAddress } from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { ArrowRight, CheckCircle } from '@phosphor-icons/react'
-import { captureException } from '@sentry/react'
-import axios from 'axios'
-import classNames from 'classnames'
-import Text from 'components/text'
-import useActiveWallet from 'hooks/settings/useActiveWallet'
-import { useQueryParams } from 'hooks/useQuery'
-import { Images } from 'images'
-import loadingImage from 'lottie-files/swaps-btn-loading.json'
-import Lottie from 'lottie-react'
-import { observer } from 'mobx-react-lite'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { activeChainStore } from 'stores/active-chain-store'
-import { chainInfoStore } from 'stores/chain-infos-store'
-import { rootBalanceStore } from 'stores/root-store'
-import { isSidePanel } from 'utils/isSidePanel'
+import HCaptcha from '@hcaptcha/react-hcaptcha';
+import { useAddress } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { ArrowRight, CheckCircle } from '@phosphor-icons/react';
+import { captureException } from '@sentry/react';
+import axios from 'axios';
+import classNames from 'classnames';
+import Text from 'components/text';
+import useActiveWallet from 'hooks/settings/useActiveWallet';
+import { useQueryParams } from 'hooks/useQuery';
+import { Images } from 'images';
+import loadingImage from 'lottie-files/swaps-btn-loading.json';
+import Lottie from 'lottie-react';
+import { observer } from 'mobx-react-lite';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { activeChainStore } from 'stores/active-chain-store';
+import { chainInfoStore } from 'stores/chain-infos-store';
+import { rootBalanceStore } from 'stores/root-store';
+import { isSidePanel } from 'utils/isSidePanel';
 
-const faucetsURL = `${process.env.LEAP_WALLET_BACKEND_API_URL}/faucets`
-const showFaucetsForChain: string[] = []
+const faucetsURL = `${process.env.LEAP_WALLET_BACKEND_API_URL}/faucets`;
+const showFaucetsForChain: string[] = [];
 
 type Faucet = {
-  faucet_id: number
-  faucet_name: string
-  chain_id: string
-  funds_wallet_address: string
-  secret_key_name: string
-  frequency: string
-  status: string
-  amount: number
-  gas_price: string
-  endpoint_url: string
-  denom: string
-}
+  faucet_id: number;
+  faucet_name: string;
+  chain_id: string;
+  funds_wallet_address: string;
+  secret_key_name: string;
+  frequency: string;
+  status: string;
+  amount: number;
+  gas_price: string;
+  endpoint_url: string;
+  denom: string;
+};
 
 type EligibilityData = {
-  eligible: boolean
-  code:
-    | 'ELIGIBLE'
-    | 'ALREADY_CLAIMED'
-    | 'CAPACITY_FULL'
-    | 'IP_LIMIT_REACHED'
-    | 'PENDING_CLAIM_EXISTS'
-}
-const MAX_TRIES = 20
+  eligible: boolean;
+  code: 'ELIGIBLE' | 'ALREADY_CLAIMED' | 'CAPACITY_FULL' | 'IP_LIMIT_REACHED' | 'PENDING_CLAIM_EXISTS';
+};
+const MAX_TRIES = 20;
 
 const RewardStrip = observer(() => {
-  const activeChain = activeChainStore.activeChain
-  const chainInfos = chainInfoStore.chainInfos
+  const activeChain = activeChainStore.activeChain;
+  const chainInfos = chainInfoStore.chainInfos;
 
-  const { activeWallet } = useActiveWallet()
-  const activeChainAddress = useAddress()
-  const query = useQueryParams()
+  const { activeWallet } = useActiveWallet();
+  const activeChainAddress = useAddress();
+  const query = useQueryParams();
 
-  const activeWalletId = activeWallet?.id
-  const chain = chainInfos[activeChain as SupportedChain]
-  const faucetSupported = showFaucetsForChain.includes(chain?.chainId ?? '')
+  const activeWalletId = activeWallet?.id;
+  const chain = chainInfos[activeChain as SupportedChain];
+  const faucetSupported = showFaucetsForChain.includes(chain?.chainId ?? '');
 
-  const hCaptchaRef = useRef<HCaptcha>(null)
+  const hCaptchaRef = useRef<HCaptcha>(null);
 
-  const [faucet, setFaucet] = useState<Faucet>()
+  const [faucet, setFaucet] = useState<Faucet>();
   const [eligibility, setEligibility] = useState<EligibilityData>({
     eligible: false,
     code: 'ALREADY_CLAIMED',
-  })
-  const [successClaim, setSuccessClaim] = useState(false)
+  });
+  const [successClaim, setSuccessClaim] = useState(false);
 
-  const faucetInactive = useMemo(() => faucet?.status === 'inactive', [faucet?.status])
+  const faucetInactive = useMemo(() => faucet?.status === 'inactive', [faucet?.status]);
 
   const checkEligibility = useCallback(async () => {
     if (!faucetInactive) {
@@ -76,38 +71,34 @@ const RewardStrip = observer(() => {
           wallet: activeWalletId,
           wallet_address: activeChainAddress,
           faucet_id: faucet?.faucet_id,
-        })
+        });
         setEligibility({
           eligible: data.eligible,
           code: data.code,
-        })
+        });
       } catch (error: any) {
-        captureException(error)
+        captureException(error);
       }
     }
-  }, [activeChainAddress, activeWalletId, faucet?.faucet_id, faucetInactive])
+  }, [activeChainAddress, activeWalletId, faucet?.faucet_id, faucetInactive]);
 
   const fetchData = useCallback(async () => {
     try {
-      const { data } = await axios.get(faucetsURL)
-      setFaucet(
-        data.data.find(
-          (item: any) => item.chain_id === chain?.chainId && item.status !== 'upcoming',
-        ),
-      )
+      const { data } = await axios.get(faucetsURL);
+      setFaucet(data.data.find((item: any) => item.chain_id === chain?.chainId && item.status !== 'upcoming'));
     } catch (error: any) {
-      captureException(error)
+      captureException(error);
     }
-  }, [chain?.chainId])
+  }, [chain?.chainId]);
 
   const checkClaimStatus = useCallback(async (claimId: string) => {
     try {
-      const response = await axios.get(`${faucetsURL}/claim/${claimId}/status`)
-      return response
+      const response = await axios.get(`${faucetsURL}/claim/${claimId}/status`);
+      return response;
     } catch (error) {
-      captureException(error)
+      captureException(error);
     }
-  }, [])
+  }, []);
 
   const claimRewards = useCallback(
     async (captcha_token: string) => {
@@ -117,81 +108,81 @@ const RewardStrip = observer(() => {
           wallet_address: activeChainAddress,
           faucet_id: faucet?.faucet_id,
           captcha_token,
-        })
+        });
         if (response.status === 200) {
           setEligibility({
             eligible: false,
             code: 'PENDING_CLAIM_EXISTS',
-          })
-          let retries = 0
+          });
+          let retries = 0;
           const poll = setInterval(async () => {
-            retries++
-            const res: any = await checkClaimStatus(response.data.claimId)
+            retries++;
+            const res: any = await checkClaimStatus(response.data.claimId);
             if (retries === MAX_TRIES || res.data?.status === 'success') {
-              clearInterval(poll)
+              clearInterval(poll);
             }
             if (res.data?.status === 'success') {
               setEligibility({
                 eligible: false,
                 code: 'ALREADY_CLAIMED',
-              })
-              setSuccessClaim(true)
+              });
+              setSuccessClaim(true);
               setTimeout(() => {
-                setSuccessClaim(false)
-              }, 3000)
+                setSuccessClaim(false);
+              }, 3000);
               setTimeout(() => {
-                rootBalanceStore.refetchBalances()
-              }, 3000)
+                rootBalanceStore.refetchBalances();
+              }, 3000);
             }
-          }, 2000)
+          }, 2000);
         }
       } catch (error) {
-        captureException(error)
+        captureException(error);
       }
     },
     [activeChainAddress, activeWalletId, checkClaimStatus, faucet?.faucet_id, rootBalanceStore],
-  )
+  );
 
   const handleSubmit = useCallback(async () => {
     if (eligibility.code === 'CAPACITY_FULL') {
-      query.set('faucet-error', 'Experiencing high traffic. Please try after few minutes.')
-      return
+      query.set('faucet-error', 'Experiencing high traffic. Please try after few minutes.');
+      return;
     }
     if (eligibility.code === 'IP_LIMIT_REACHED') {
-      query.set('faucet-error', 'You have reached the maximum limit to claim tokens.')
-      return
+      query.set('faucet-error', 'You have reached the maximum limit to claim tokens.');
+      return;
     }
     if (eligibility.eligible && !faucetInactive && !!hCaptchaRef.current) {
       try {
-        const result = await hCaptchaRef.current?.execute({ async: true })
-        const token = hCaptchaRef.current.getResponse()
+        const result = await hCaptchaRef.current?.execute({ async: true });
+        const token = hCaptchaRef.current.getResponse();
         if (!result) {
-          throw new Error('could not get hCaptcha response')
+          throw new Error('could not get hCaptcha response');
         }
 
-        claimRewards(token)
+        claimRewards(token);
       } catch (error) {
-        const errMsg = error instanceof Error ? error.message : error
+        const errMsg = error instanceof Error ? error.message : error;
         if (!(errMsg as string)?.includes?.('challenge-')) {
-          captureException(error)
+          captureException(error);
         }
       }
     }
-  }, [claimRewards, eligibility.code, eligibility.eligible, faucetInactive, query])
+  }, [claimRewards, eligibility.code, eligibility.eligible, faucetInactive, query]);
 
   useEffect(() => {
     if (faucetSupported) {
-      fetchData()
+      fetchData();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [faucetSupported])
+  }, [faucetSupported]);
 
   useEffect(() => {
     if (faucet?.chain_id) {
-      checkEligibility()
+      checkEligibility();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [faucet?.chain_id, activeChainAddress])
+  }, [faucet?.chain_id, activeChainAddress]);
 
   const titleText = useMemo(() => {
     if (faucetInactive) {
@@ -201,10 +192,10 @@ const RewardStrip = observer(() => {
           <br />
           Stay tuned...
         </>
-      )
+      );
     }
     if (eligibility.code !== 'ALREADY_CLAIMED' || successClaim) {
-      return 'Claim OMLY & start your Mantra missions.'
+      return 'Claim OMLY & start your Mantra missions.';
     } else {
       return (
         <>
@@ -212,12 +203,12 @@ const RewardStrip = observer(() => {
           {!isSidePanel() ? <br /> : ' '}
           Stay tuned for more!
         </>
-      )
+      );
     }
-  }, [eligibility.code, faucetInactive, successClaim])
+  }, [eligibility.code, faucetInactive, successClaim]);
 
   if (!faucetSupported || !faucet) {
-    return null
+    return null;
   }
 
   return (
@@ -250,9 +241,7 @@ const RewardStrip = observer(() => {
                 size='xs'
                 className='font-bold'
                 color={`${
-                  eligibility.code === 'PENDING_CLAIM_EXISTS' || successClaim
-                    ? 'text-white-100'
-                    : 'text-black-100'
+                  eligibility.code === 'PENDING_CLAIM_EXISTS' || successClaim ? 'text-white-100' : 'text-black-100'
                 }`}
               >
                 {eligibility.code === 'PENDING_CLAIM_EXISTS'
@@ -284,14 +273,9 @@ const RewardStrip = observer(() => {
           )}
         </div>
       </div>
-      <HCaptcha
-        ref={hCaptchaRef}
-        sitekey='e16e9de4-5efc-4d4a-9c04-9dbe115e6274'
-        size='invisible'
-        theme='dark'
-      />
+      <HCaptcha ref={hCaptchaRef} sitekey='e16e9de4-5efc-4d4a-9c04-9dbe115e6274' size='invisible' theme='dark' />
     </>
-  )
-})
+  );
+});
 
-export default RewardStrip
+export default RewardStrip;

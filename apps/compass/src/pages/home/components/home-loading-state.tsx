@@ -1,19 +1,19 @@
-import { AggregatedLoadingList } from 'components/aggregated/AggregatedLoading'
-import { BottomNavLabel } from 'components/bottom-nav/bottom-nav-items'
-import BottomNav from 'components/bottom-nav/BottomNav'
-import { useWalletInfo } from 'hooks'
-import React from 'react'
-import { cn } from 'utils/cn'
+import { AggregatedLoadingList } from 'components/aggregated/AggregatedLoading';
+import { BottomNavLabel } from 'components/bottom-nav/bottom-nav-items';
+import BottomNav from 'components/bottom-nav/BottomNav';
+import { useWalletInfo } from 'hooks';
+import React from 'react';
+import { cn } from 'utils/cn';
 
-import { BalanceHeaderLoading } from './balance-header'
-import { GeneralHomeHeader } from './general-home-header'
-import { HomeButtons } from './index'
+import { BalanceHeaderLoading } from './balance-header';
+import { GeneralHomeHeader } from './general-home-header';
+import { HomeButtons } from './index';
 
 export const HomeLoadingState = () => {
-  const { activeWallet } = useWalletInfo()
+  const { activeWallet } = useWalletInfo();
 
   if (!activeWallet) {
-    return null
+    return null;
   }
 
   return (
@@ -36,5 +36,5 @@ export const HomeLoadingState = () => {
 
       <BottomNav label={BottomNavLabel.Home} disableLottie />
     </>
-  )
-}
+  );
+};

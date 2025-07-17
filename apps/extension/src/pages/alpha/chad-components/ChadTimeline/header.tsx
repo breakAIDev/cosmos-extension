@@ -1,12 +1,12 @@
-import { useQueryParams } from 'hooks/useQuery'
-import { ChadBadgeInactive } from 'pages/alpha/components/chad-badge'
-import { ChadBadge } from 'pages/alpha/components/chad-badge'
-import React from 'react'
-import { cn } from 'utils/cn'
-import { queryParams } from 'utils/query-params'
+import { useQueryParams } from 'hooks/useQuery';
+import { ChadBadgeInactive } from 'pages/alpha/components/chad-badge';
+import { ChadBadge } from 'pages/alpha/components/chad-badge';
+import React from 'react';
+import { cn } from 'utils/cn';
+import { queryParams } from 'utils/query-params';
 
 export const ChadExclusivesHeader = (props: { isChad?: boolean; className?: string }) => {
-  const params = useQueryParams()
+  const params = useQueryParams();
 
   return (
     <header className={cn('flex flex-col gap-2', props.className)}>
@@ -18,5 +18,5 @@ export const ChadExclusivesHeader = (props: { isChad?: boolean; className?: stri
       </div>
       <p className='text-sm text-secondary-800'>Handpicked rewards for Leap Chad users only</p>
     </header>
-  )
-}
+  );
+};

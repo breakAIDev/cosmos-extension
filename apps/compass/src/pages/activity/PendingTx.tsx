@@ -1,4 +1,4 @@
-import { isDeliverTxSuccess } from '@cosmjs/stargate'
+import { isDeliverTxSuccess } from '@cosmjs/stargate';
 import {
   CosmosTxType,
   formatTokenAmount,
@@ -14,25 +14,25 @@ import {
   useInvalidateActivity,
   usePendingTxState,
   useSelectedNetwork,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { RootBalanceStore, RootStakeStore } from '@leapwallet/cosmos-wallet-store'
-import { Buttons, Header, ThemeName, useTheme } from '@leapwallet/leap-ui'
-import { ArrowSquareOut, CopySimple, UserCircle } from '@phosphor-icons/react'
-import BigNumber from 'bignumber.js'
-import classnames from 'classnames'
-import PopupLayout from 'components/layout/popup-layout'
-import { LoaderAnimation } from 'components/loader/Loader'
-import { Images } from 'images'
-import { Cross } from 'images/misc'
-import { observer } from 'mobx-react-lite'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { TxResponse } from 'secretjs'
-import { hideAssetsStore } from 'stores/hide-assets-store'
-import { Colors } from 'theme/colors'
-import { UserClipboard } from 'utils/clipboard'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { RootBalanceStore, RootStakeStore } from '@leapwallet/cosmos-wallet-store';
+import { Buttons, Header, ThemeName, useTheme } from '@leapwallet/leap-ui';
+import { ArrowSquareOut, CopySimple, UserCircle } from '@phosphor-icons/react';
+import BigNumber from 'bignumber.js';
+import classnames from 'classnames';
+import PopupLayout from 'components/layout/popup-layout';
+import { LoaderAnimation } from 'components/loader/Loader';
+import { Images } from 'images';
+import { Cross } from 'images/misc';
+import { observer } from 'mobx-react-lite';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { TxResponse } from 'secretjs';
+import { hideAssetsStore } from 'stores/hide-assets-store';
+import { Colors } from 'theme/colors';
+import { UserClipboard } from 'utils/clipboard';
 
-const PENDING_TX_MOBILE_QR_CODE_BANNER = 'pending-tx-mobile-qr-code-banner'
+const PENDING_TX_MOBILE_QR_CODE_BANNER = 'pending-tx-mobile-qr-code-banner';
 
 const txStatusStyles = {
   loading: {
@@ -47,19 +47,19 @@ const txStatusStyles = {
   failed: {
     title: 'Failed',
   },
-}
+};
 
 function MobileQrCode({
   setShowMobileQrCode,
   data,
 }: {
-  setShowMobileQrCode: React.Dispatch<React.SetStateAction<boolean>>
-  data: MobileAppBanner
+  setShowMobileQrCode: React.Dispatch<React.SetStateAction<boolean>>;
+  data: MobileAppBanner;
 }) {
   const handleClose = () => {
-    setShowMobileQrCode(false)
-    sessionStorage.setItem(PENDING_TX_MOBILE_QR_CODE_BANNER, 'true')
-  }
+    setShowMobileQrCode(false);
+    sessionStorage.setItem(PENDING_TX_MOBILE_QR_CODE_BANNER, 'true');
+  };
 
   return (
     <div className='mb-4 relative'>
@@ -68,24 +68,24 @@ function MobileQrCode({
         <img src={Cross} />
       </button>
     </div>
-  )
+  );
 }
 
 type PendingTxProps = {
-  rootBalanceStore: RootBalanceStore
-  rootStakeStore: RootStakeStore
-}
+  rootBalanceStore: RootBalanceStore;
+  rootStakeStore: RootStakeStore;
+};
 
 const PendingTx = observer(({ rootBalanceStore, rootStakeStore }: PendingTxProps) => {
-  const navigate = useNavigate()
-  const [txHash, setTxHash] = useState('')
+  const navigate = useNavigate();
+  const [txHash, setTxHash] = useState('');
   const [showMobileQrCode, setShowMobileQrCode] = useState(
     sessionStorage.getItem(PENDING_TX_MOBILE_QR_CODE_BANNER) ? false : true,
-  )
-  const { theme } = useTheme()
-  const copyTxHashRef = useRef<HTMLButtonElement>(null)
-  const { pendingTx, setPendingTx } = usePendingTxState()
-  const txPostToDB = LeapWalletApi.useOperateCosmosTx()
+  );
+  const { theme } = useTheme();
+  const copyTxHashRef = useRef<HTMLButtonElement>(null);
+  const { pendingTx, setPendingTx } = usePendingTxState();
+  const txPostToDB = LeapWalletApi.useOperateCosmosTx();
 
   const {
     txType,
@@ -102,73 +102,68 @@ const PendingTx = observer(({ rootBalanceStore, rootStakeStore }: PendingTxProps
     sourceNetwork,
     toAddress,
     toChain,
-  } = pendingTx ?? {}
+  } = pendingTx ?? {};
 
-  const _activeChain = useActiveChain()
-  const activeChain = useMemo(() => sourceChain || _activeChain, [_activeChain, sourceChain])
+  const _activeChain = useActiveChain();
+  const activeChain = useMemo(() => sourceChain || _activeChain, [_activeChain, sourceChain]);
 
-  const _selectedNetwork = useSelectedNetwork()
-  const selectedNetwork = useMemo(
-    () => sourceNetwork || _selectedNetwork,
-    [_selectedNetwork, sourceNetwork],
-  )
+  const _selectedNetwork = useSelectedNetwork();
+  const selectedNetwork = useMemo(() => sourceNetwork || _selectedNetwork, [_selectedNetwork, sourceNetwork]);
 
-  const activeChainId = useChainId(activeChain, selectedNetwork)
-  const address = useAddress(activeChain)
+  const activeChainId = useChainId(activeChain, selectedNetwork);
+  const address = useAddress(activeChain);
 
   const invalidateBalances = useCallback(() => {
-    rootBalanceStore.refetchBalances(activeChain, selectedNetwork)
+    rootBalanceStore.refetchBalances(activeChain, selectedNetwork);
     if (toAddress) {
-      rootBalanceStore.refetchBalances(toChain ?? activeChain, selectedNetwork, toAddress)
+      rootBalanceStore.refetchBalances(toChain ?? activeChain, selectedNetwork, toAddress);
     }
-  }, [activeChain, rootBalanceStore, selectedNetwork, toAddress, toChain])
+  }, [activeChain, rootBalanceStore, selectedNetwork, toAddress, toChain]);
 
   const invalidateDelegations = useCallback(() => {
-    rootStakeStore.updateStake(activeChain, selectedNetwork, true)
-  }, [activeChain, rootStakeStore, selectedNetwork])
+    rootStakeStore.updateStake(activeChain, selectedNetwork, true);
+  }, [activeChain, rootStakeStore, selectedNetwork]);
 
-  const invalidateActivity = useInvalidateActivity()
+  const invalidateActivity = useInvalidateActivity();
 
   useEffect(() => {
     const invalidateQueries = () => {
-      invalidateBalances()
-      invalidateDelegations()
-      invalidateActivity(activeChain)
-    }
+      invalidateBalances();
+      invalidateDelegations();
+      invalidateActivity(activeChain);
+    };
 
     if (pendingTx && pendingTx.promise) {
       pendingTx.promise
         .then(async (result) => {
           if ('code' in result) {
             if (result && 'txType' in result) {
-              setPendingTx({ ...pendingTx, txStatus: result.code === 0 ? 'success' : 'failed' })
+              setPendingTx({ ...pendingTx, txStatus: result.code === 0 ? 'success' : 'failed' });
             } else if (result && isDeliverTxSuccess(result)) {
-              setPendingTx({ ...pendingTx, txStatus: 'success' })
+              setPendingTx({ ...pendingTx, txStatus: 'success' });
             } else {
-              setPendingTx({ ...pendingTx, txStatus: 'failed' })
+              setPendingTx({ ...pendingTx, txStatus: 'failed' });
             }
           } else if (pendingTx.txType === 'cw20TokenTransfer') {
-            setPendingTx({ ...pendingTx, txStatus: 'success' })
+            setPendingTx({ ...pendingTx, txStatus: 'success' });
           } else if ('status' in result) {
-            setPendingTx({ ...pendingTx, txStatus: 'submitted' })
+            setPendingTx({ ...pendingTx, txStatus: 'submitted' });
           }
 
           if (pendingTx.txType === 'secretTokenTransfer') {
-            setTxHash(result.transactionHash)
+            setTxHash(result.transactionHash);
 
-            const _result = result as unknown as TxResponse
-            let feeQuantity
+            const _result = result as unknown as TxResponse;
+            let feeQuantity;
 
             if (_result?.tx?.auth_info?.fee?.amount) {
-              feeQuantity = _result?.tx?.auth_info?.fee?.amount[0].amount
+              feeQuantity = _result?.tx?.auth_info?.fee?.amount[0].amount;
             }
 
             txPostToDB({
               txHash: _result.transactionHash,
               txType: CosmosTxType.SecretTokenTransaction,
-              metadata: getMetaDataForSecretTokenTransfer(
-                pendingTx.sentTokenInfo?.coinMinimalDenom ?? '',
-              ),
+              metadata: getMetaDataForSecretTokenTransfer(pendingTx.sentTokenInfo?.coinMinimalDenom ?? ''),
               feeQuantity,
               feeDenomination: 'uscrt',
               amount: pendingTx.txnLogAmount,
@@ -176,11 +171,11 @@ const PendingTx = observer(({ rootBalanceStore, rootStakeStore }: PendingTxProps
               forceNetwork: selectedNetwork,
               forceWalletAddress: address,
               chainId: activeChainId,
-            })
+            });
           }
 
           if (pendingTx.txType === 'cw20TokenTransfer') {
-            setTxHash(result.transactionHash)
+            setTxHash(result.transactionHash);
 
             txPostToDB({
               txHash: result.transactionHash,
@@ -198,64 +193,57 @@ const PendingTx = observer(({ rootBalanceStore, rootStakeStore }: PendingTxProps
               forceNetwork: selectedNetwork,
               forceWalletAddress: address,
               chainId: activeChainId,
-            })
+            });
           }
 
-          invalidateQueries()
+          invalidateQueries();
         })
         .catch(() => {
           if (pendingTx.txType === 'cw20TokenTransfer') {
-            setPendingTx({ ...pendingTx, txStatus: 'failed' })
+            setPendingTx({ ...pendingTx, txStatus: 'failed' });
           }
 
-          invalidateQueries()
-        })
+          invalidateQueries();
+        });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeChain, address, selectedNetwork, activeChainId])
+  }, [activeChain, address, selectedNetwork, activeChainId]);
 
   useEffect(() => {
-    if (_txHash) setTxHash(_txHash)
-  }, [_txHash])
+    if (_txHash) setTxHash(_txHash);
+  }, [_txHash]);
 
-  const [isCopiedClick, setIsCopiedClick] = useState(false)
+  const [isCopiedClick, setIsCopiedClick] = useState(false);
 
   const sentAmountInfo =
-    sentAmount && sentTokenInfo ? formatTokenAmount(sentAmount, sentTokenInfo.coinDenom) : undefined
+    sentAmount && sentTokenInfo ? formatTokenAmount(sentAmount, sentTokenInfo.coinDenom) : undefined;
   const receivedAmountInfo =
-    receivedAmount && receivedTokenInfo
-      ? formatTokenAmount(receivedAmount, receivedTokenInfo.coinDenom)
-      : undefined
+    receivedAmount && receivedTokenInfo ? formatTokenAmount(receivedAmount, receivedTokenInfo.coinDenom) : undefined;
 
-  const balanceReduced = txType === 'delegate' || txType === 'send' || txType === 'liquidity/add'
-  const balanceIncreased =
-    txType === 'undelegate' || txType === 'receive' || txType === 'liquidity/remove'
+  const balanceReduced = txType === 'delegate' || txType === 'send' || txType === 'liquidity/add';
+  const balanceIncreased = txType === 'undelegate' || txType === 'receive' || txType === 'liquidity/remove';
 
   const { explorerTxnUrl: txnUrl } = useGetExplorerTxnUrl({
     forceTxHash: txHash,
     forceChain: activeChain,
     forceNetwork: selectedNetwork,
-  })
+  });
 
   const isSendTxn = txType
     ? ['ibc/transfer', 'send', 'secretTokenTransfer', 'cw20TokenTransfer'].includes(txType)
-    : false
+    : false;
   return (
     <PopupLayout>
       <Header title={`Transaction ${txStatusStyles[txStatus ?? 'loading'].title}`} />
       <div className='flex h-[calc(100%-72px)] p-6 flex-col items-center overflow-y-auto'>
         <div className='bg-white-100 dark:bg-gray-950 rounded-2xl w-full flex flex-col items-center p-4 mb-4'>
-          {txStatus === 'loading' && (
-            <LoaderAnimation color={Colors.green600} className='w-20 h-20' />
-          )}
+          {txStatus === 'loading' && <LoaderAnimation color={Colors.green600} className='w-20 h-20' />}
           {(txStatus === 'success' || txStatus === 'submitted') && (
             <img src={Images.Activity.SendDetails} className='w-20 h-20' />
           )}
           {txStatus === 'failed' && <img src={Images.Activity.Error} className='w-20 h-20' />}
 
-          <div className='text-xl font-bold text-black-100 dark:text-white-100 text-left mt-1 break-all'>
-            {title1}
-          </div>
+          <div className='text-xl font-bold text-black-100 dark:text-white-100 text-left mt-1 break-all'>{title1}</div>
           {isSendTxn && txStatus !== 'submitted' ? (
             <div className='text-sm font-medium text-black-100 dark:text-white-100 mt-1'>
               {txStatus === 'success'
@@ -271,9 +259,7 @@ const PendingTx = observer(({ rootBalanceStore, rootStakeStore }: PendingTxProps
               {subtitle1}
             </div>
           ) : (
-            <div className='text-base text-gray-600 dark:text-gray-400 text-center break-all mt-1'>
-              {subtitle1}
-            </div>
+            <div className='text-base text-gray-600 dark:text-gray-400 text-center break-all mt-1'>{subtitle1}</div>
           )}
 
           {!isSendTxn ? (
@@ -301,8 +287,7 @@ const PendingTx = observer(({ rootBalanceStore, rootStakeStore }: PendingTxProps
                         'text-green-600 dark:text-green-600': balanceIncreased,
                       })}
                     >
-                      ({balanceReduced && '-'} $
-                      {hideAssetsStore.formatHideBalance(Number(sentUsdValue).toFixed(2))})
+                      ({balanceReduced && '-'} ${hideAssetsStore.formatHideBalance(Number(sentUsdValue).toFixed(2))})
                     </p>
                   )}
 
@@ -321,19 +306,15 @@ const PendingTx = observer(({ rootBalanceStore, rootStakeStore }: PendingTxProps
           <div
             className='rounded-2xl w-full mb-4 px-6 py-4 bg-white-100 dark:bg-gray-950 cursor-pointer flex items-center'
             onClick={() => {
-              copyTxHashRef.current?.click()
-              UserClipboard.copyText(txHash)
-              setIsCopiedClick(true)
-              setTimeout(() => setIsCopiedClick(false), 2000)
+              copyTxHashRef.current?.click();
+              UserClipboard.copyText(txHash);
+              setIsCopiedClick(true);
+              setTimeout(() => setIsCopiedClick(false), 2000);
             }}
           >
             <div className='flex-1'>
-              <div className='text-sm font-bold text-black-100 dark:text-white-100 mb-1'>
-                Transaction ID
-              </div>
-              <div className='text-md font-medium text-gray-600 dark:text-gray-400'>
-                {sliceAddress(txHash)}
-              </div>
+              <div className='text-sm font-bold text-black-100 dark:text-white-100 mb-1'>Transaction ID</div>
+              <div className='text-md font-medium text-gray-600 dark:text-gray-400'>{sliceAddress(txHash)}</div>
             </div>
             <Buttons.CopyWalletAddress
               copyIcon={Images.Activity.Copy}
@@ -346,10 +327,10 @@ const PendingTx = observer(({ rootBalanceStore, rootStakeStore }: PendingTxProps
               <span
                 className='text-black-100 dark:text-white-100 bg-gray-50 dark:bg-gray-900 rounded-full p-2 ml-2'
                 onClick={() => {
-                  copyTxHashRef.current?.click()
-                  UserClipboard.copyText(txHash)
-                  setIsCopiedClick(true)
-                  setTimeout(() => setIsCopiedClick(false), 2000)
+                  copyTxHashRef.current?.click();
+                  UserClipboard.copyText(txHash);
+                  setIsCopiedClick(true);
+                  setTimeout(() => setIsCopiedClick(false), 2000);
                 }}
               >
                 <CopySimple size={20} />
@@ -360,8 +341,8 @@ const PendingTx = observer(({ rootBalanceStore, rootStakeStore }: PendingTxProps
               <span
                 className='text-black-100 dark:text-white-100 bg-gray-50 dark:bg-gray-900 rounded-full p-2 ml-2'
                 onClick={(event) => {
-                  event.stopPropagation()
-                  window.open(txnUrl, '_blank')
+                  event.stopPropagation();
+                  window.open(txnUrl, '_blank');
                 }}
               >
                 <ArrowSquareOut size={20} className='text-black-100 dark:text-white-100' />
@@ -385,12 +366,9 @@ const PendingTx = observer(({ rootBalanceStore, rootStakeStore }: PendingTxProps
               size='normal'
               className='w-full'
               onClick={() =>
-                navigate(
-                  `/send?assetCoinDenom=${
-                    sentTokenInfo?.ibcDenom || sentTokenInfo?.coinMinimalDenom
-                  }`,
-                  { replace: true },
-                )
+                navigate(`/send?assetCoinDenom=${sentTokenInfo?.ibcDenom || sentTokenInfo?.coinMinimalDenom}`, {
+                  replace: true,
+                })
               }
               disabled={txStatus !== 'success' && txStatus !== 'submitted'}
             >
@@ -400,7 +378,7 @@ const PendingTx = observer(({ rootBalanceStore, rootStakeStore }: PendingTxProps
         </div>
       </div>
     </PopupLayout>
-  )
-})
+  );
+});
 
-export default PendingTx
+export default PendingTx;

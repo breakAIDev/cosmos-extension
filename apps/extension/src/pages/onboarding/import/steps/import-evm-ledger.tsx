@@ -1,31 +1,22 @@
-import {
-  useActiveChain,
-  useActiveWallet,
-  useChainsStore,
-  WALLETTYPE,
-} from '@leapwallet/cosmos-wallet-hooks'
-import {
-  importLedgerAccount,
-  isLedgerUnlocked,
-  SupportedChain,
-} from '@leapwallet/cosmos-wallet-sdk'
-import { Keystore } from '@leapwallet/leap-keychain'
-import { CheckCircle } from '@phosphor-icons/react/dist/ssr'
-import { captureException } from '@sentry/react'
-import { Button } from 'components/ui/button'
-import { KEYSTORE } from 'config/storage-keys'
-import { AnimatePresence, motion, Variants } from 'framer-motion'
-import { LedgerDriveIcon } from 'icons/ledger-drive-icon'
-import { Images } from 'images'
-import React, { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { getLedgerEnabledEvmChainsKey } from 'utils/getLedgerEnabledEvmChains'
-import Browser from 'webextension-polyfill'
+import { useActiveChain, useActiveWallet, useChainsStore, WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks';
+import { importLedgerAccount, isLedgerUnlocked, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { Keystore } from '@leapwallet/leap-keychain';
+import { CheckCircle } from '@phosphor-icons/react/dist/ssr';
+import { captureException } from '@sentry/react';
+import { Button } from 'components/ui/button';
+import { KEYSTORE } from 'config/storage-keys';
+import { AnimatePresence, motion, Variants } from 'framer-motion';
+import { LedgerDriveIcon } from 'icons/ledger-drive-icon';
+import { Images } from 'images';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getLedgerEnabledEvmChainsKey } from 'utils/getLedgerEnabledEvmChains';
+import Browser from 'webextension-polyfill';
 
-import useActiveWalletExt from '../../../../hooks/settings/useActiveWallet'
-import { OnboardingWrapper } from '../../wrapper'
-import { LEDGER_CONNECTION_STEP } from '../types'
-import { ledgerImgTransition, walletCableVariants, walletUsbVariants } from './import-ledger'
+import useActiveWalletExt from '../../../../hooks/settings/useActiveWallet';
+import { OnboardingWrapper } from '../../wrapper';
+import { LEDGER_CONNECTION_STEP } from '../types';
+import { ledgerImgTransition, walletCableVariants, walletUsbVariants } from './import-ledger';
 
 const stepsData = [
   {
@@ -34,41 +25,38 @@ const stepsData = [
   {
     description: 'Select networks & choose wallets to import',
   },
-]
+];
 
-type ChainWiseAddresses = Record<string, { address: string; pubKey: Uint8Array }[]>
+type ChainWiseAddresses = Record<string, { address: string; pubKey: Uint8Array }[]>;
 
-const entry = 'right'
+const entry = 'right';
 
 export const ImportEvmLedger = () => {
-  const [error, setError] = useState('')
-  const [status, setLedgerConnectionStatus] = useState(LEDGER_CONNECTION_STEP.step0)
+  const [error, setError] = useState('');
+  const [status, setLedgerConnectionStatus] = useState(LEDGER_CONNECTION_STEP.step0);
 
-  const activeWallet = useActiveWallet()
-  const activeChain = useActiveChain()
-  const { chains } = useChainsStore()
-  const { setActiveWallet } = useActiveWalletExt()
-  const navigate = useNavigate()
+  const activeWallet = useActiveWallet();
+  const activeChain = useActiveChain();
+  const { chains } = useChainsStore();
+  const { setActiveWallet } = useActiveWalletExt();
+  const navigate = useNavigate();
 
   const ledgerEnabledEvmChains = useMemo(() => {
-    return getLedgerEnabledEvmChainsKey(Object.values(chains))
-  }, [chains])
+    return getLedgerEnabledEvmChainsKey(Object.values(chains));
+  }, [chains]);
 
   const getLedgerAccountDetails = async () => {
-    if (
-      chains[activeChain].bip44.coinType !== '60' ||
-      ledgerEnabledEvmChains.includes(activeChain) === false
-    ) {
-      throw new Error(`Import Error: Ledger is not supported on ${chains[activeChain].chainName}`)
+    if (chains[activeChain].bip44.coinType !== '60' || ledgerEnabledEvmChains.includes(activeChain) === false) {
+      throw new Error(`Import Error: Ledger is not supported on ${chains[activeChain].chainName}`);
     }
 
     if (!activeWallet) {
-      throw new Error('Import Error: No active wallet found')
+      throw new Error('Import Error: No active wallet found');
     }
 
-    const useEvmApp = true
-    const addressIndex = String(activeWallet.addressIndex)
-    const isCustomDerivationPathWallet = addressIndex?.includes("'")
+    const useEvmApp = true;
+    const addressIndex = String(activeWallet.addressIndex);
+    const isCustomDerivationPathWallet = addressIndex?.includes("'");
 
     const { chainWiseAddresses } = await importLedgerAccount(
       isCustomDerivationPathWallet ? [] : [0, 1, 2, 3, 4],
@@ -77,37 +65,31 @@ export const ImportEvmLedger = () => {
       ledgerEnabledEvmChains,
       chains,
       isCustomDerivationPathWallet ? [addressIndex] : [],
-    )
+    );
 
-    return { chainWiseAddresses }
-  }
+    return { chainWiseAddresses };
+  };
 
-  const confirmImport = async ({
-    chainWiseAddresses,
-  }: {
-    chainWiseAddresses: ChainWiseAddresses
-  }) => {
-    if (!activeWallet) throw new Error('Unable to import ledger wallet')
-    const store = await Browser.storage.local.get('keystore')
+  const confirmImport = async ({ chainWiseAddresses }: { chainWiseAddresses: ChainWiseAddresses }) => {
+    if (!activeWallet) throw new Error('Unable to import ledger wallet');
+    const store = await Browser.storage.local.get('keystore');
 
-    const keystore: Keystore<SupportedChain> = store[KEYSTORE]
-    if (!keystore) throw new Error('Unable to import ledger wallet')
+    const keystore: Keystore<SupportedChain> = store[KEYSTORE];
+    if (!keystore) throw new Error('Unable to import ledger wallet');
 
-    const ledgerWallets = Object.values(keystore).filter(
-      (key) => key.walletType === WALLETTYPE.LEDGER,
-    )
-    const newKeystore = keystore
+    const ledgerWallets = Object.values(keystore).filter((key) => key.walletType === WALLETTYPE.LEDGER);
+    const newKeystore = keystore;
 
     for (const ledgerWallet of ledgerWallets) {
-      const newAddresses: Record<string, string> = {}
-      const newPubKeys: Record<string, string> = {}
+      const newAddresses: Record<string, string> = {};
+      const newPubKeys: Record<string, string> = {};
 
       for (const chain of ledgerEnabledEvmChains) {
         if (chainWiseAddresses[chain] && !ledgerWallet.addresses[chain]) {
-          const account = chainWiseAddresses[chain][ledgerWallet.addressIndex]
+          const account = chainWiseAddresses[chain][ledgerWallet.addressIndex];
 
-          newAddresses[chain] = account.address
-          newPubKeys[chain] = Buffer.from(account.pubKey).toString('base64')
+          newAddresses[chain] = account.address;
+          newPubKeys[chain] = Buffer.from(account.pubKey).toString('base64');
         }
       }
 
@@ -121,55 +103,51 @@ export const ImportEvmLedger = () => {
           ...(ledgerWallet.pubKeys as Record<SupportedChain, string>),
           ...newPubKeys,
         },
-      }
+      };
 
-      newKeystore[ledgerWallet.id] = newWallet
+      newKeystore[ledgerWallet.id] = newWallet;
     }
 
-    const newActiveWallet = newKeystore[activeWallet.id]
+    const newActiveWallet = newKeystore[activeWallet.id];
 
-    await Browser.storage.local.set({ keystore: newKeystore, 'active-wallet': newActiveWallet })
-    setActiveWallet(newActiveWallet)
-    navigate('/home')
-  }
+    await Browser.storage.local.set({ keystore: newKeystore, 'active-wallet': newActiveWallet });
+    setActiveWallet(newActiveWallet);
+    navigate('/home');
+  };
 
   const importLedger = async () => {
     try {
-      setError('')
-      setLedgerConnectionStatus(LEDGER_CONNECTION_STEP.step2)
+      setError('');
+      setLedgerConnectionStatus(LEDGER_CONNECTION_STEP.step2);
 
-      const chainWiseAddresses = await getLedgerAccountDetails()
-      await confirmImport(chainWiseAddresses)
-      setLedgerConnectionStatus(LEDGER_CONNECTION_STEP.step3)
+      const chainWiseAddresses = await getLedgerAccountDetails();
+      await confirmImport(chainWiseAddresses);
+      setLedgerConnectionStatus(LEDGER_CONNECTION_STEP.step3);
     } catch (error) {
-      captureException(error)
-      setLedgerConnectionStatus(LEDGER_CONNECTION_STEP.step1)
+      captureException(error);
+      setLedgerConnectionStatus(LEDGER_CONNECTION_STEP.step1);
     }
-  }
+  };
 
   useEffect(() => {
-    let timeout: NodeJS.Timeout
+    let timeout: NodeJS.Timeout;
     const fn = async () => {
-      const unlocked = await isLedgerUnlocked('Ethereum')
+      const unlocked = await isLedgerUnlocked('Ethereum');
 
       if (unlocked) {
-        setLedgerConnectionStatus(LEDGER_CONNECTION_STEP.step1)
-        clearTimeout(timeout)
+        setLedgerConnectionStatus(LEDGER_CONNECTION_STEP.step1);
+        clearTimeout(timeout);
       } else {
         timeout = setTimeout(async () => {
-          await fn()
-        }, 1000)
+          await fn();
+        }, 1000);
       }
-    }
-    fn()
-  }, [])
+    };
+    fn();
+  }, []);
 
   return (
-    <OnboardingWrapper
-      headerIcon={<LedgerDriveIcon className='size-6' />}
-      heading='Connect your Ledger'
-      entry={entry}
-    >
+    <OnboardingWrapper headerIcon={<LedgerDriveIcon className='size-6' />} heading='Connect your Ledger' entry={entry}>
       {/* fixed height is hardcoded to avoid layout shift from transitions */}
       <div className='flex flex-col gap-4 w-full relative h-[301px]'>
         {stepsData.map((d, index) => (
@@ -209,13 +187,9 @@ export const ImportEvmLedger = () => {
         </div>
       </div>
 
-      <Button
-        className={'w-full mt-auto'}
-        disabled={status === LEDGER_CONNECTION_STEP.step2}
-        onClick={importLedger}
-      >
+      <Button className={'w-full mt-auto'} disabled={status === LEDGER_CONNECTION_STEP.step2} onClick={importLedger}>
         {status === LEDGER_CONNECTION_STEP.step2 ? 'Looking for device...' : 'Continue'}
       </Button>
     </OnboardingWrapper>
-  )
-}
+  );
+};

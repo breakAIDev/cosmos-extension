@@ -5,36 +5,36 @@ import {
   useActiveStakingDenom,
   useDualStaking,
   useSelectedNetwork,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { useTheme } from '@leapwallet/leap-ui'
-import BigNumber from 'bignumber.js'
-import BottomModal from 'components/new-bottom-modal'
-import { ValidatorItemSkeleton } from 'components/Skeletons/StakeSkeleton'
-import { useFormatCurrency } from 'hooks/settings/useCurrency'
-import { Images } from 'images'
-import React, { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { imgOnError } from 'utils/imgOnError'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { useTheme } from '@leapwallet/leap-ui';
+import BigNumber from 'bignumber.js';
+import BottomModal from 'components/new-bottom-modal';
+import { ValidatorItemSkeleton } from 'components/Skeletons/StakeSkeleton';
+import { useFormatCurrency } from 'hooks/settings/useCurrency';
+import { Images } from 'images';
+import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { imgOnError } from 'utils/imgOnError';
 
-import { Provider, ProviderDelegation, SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { RootDenomsStore } from '@leapwallet/cosmos-wallet-store'
-import { Button } from 'components/ui/button'
-import { observer } from 'mobx-react-lite'
-import { rootDenomsStore } from 'stores/denoms-store-instance'
-import { hideAssetsStore } from 'stores/hide-assets-store'
-import { isSidePanel } from 'utils/isSidePanel'
-import { ValidatorCardView } from '../components/ValidatorCardView'
-import { StakeInputPageState } from '../StakeInputPage'
+import { Provider, ProviderDelegation, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { RootDenomsStore } from '@leapwallet/cosmos-wallet-store';
+import { Button } from 'components/ui/button';
+import { observer } from 'mobx-react-lite';
+import { rootDenomsStore } from 'stores/denoms-store-instance';
+import { hideAssetsStore } from 'stores/hide-assets-store';
+import { isSidePanel } from 'utils/isSidePanel';
+import { ValidatorCardView } from '../components/ValidatorCardView';
+import { StakeInputPageState } from '../StakeInputPage';
 
 interface StakedProviderDetailsProps {
-  isOpen: boolean
-  onClose: () => void
-  onSwitchValidator: () => void
-  provider?: Provider
-  delegation: ProviderDelegation
-  rootDenomsStore: RootDenomsStore
-  forceChain?: SupportedChain
-  forceNetwork?: 'mainnet' | 'testnet'
+  isOpen: boolean;
+  onClose: () => void;
+  onSwitchValidator: () => void;
+  provider?: Provider;
+  delegation: ProviderDelegation;
+  rootDenomsStore: RootDenomsStore;
+  forceChain?: SupportedChain;
+  forceNetwork?: 'mainnet' | 'testnet';
 }
 
 const StakedProviderDetails = observer(
@@ -48,49 +48,36 @@ const StakedProviderDetails = observer(
     forceChain,
     forceNetwork,
   }: StakedProviderDetailsProps) => {
-    const denoms = rootDenomsStore.allDenoms
-    const _activeChain = useActiveChain()
-    const activeChain = useMemo(() => forceChain || _activeChain, [_activeChain, forceChain])
+    const denoms = rootDenomsStore.allDenoms;
+    const _activeChain = useActiveChain();
+    const activeChain = useMemo(() => forceChain || _activeChain, [_activeChain, forceChain]);
 
-    const _activeNetwork = useSelectedNetwork()
-    const activeNetwork = useMemo(
-      () => forceNetwork || _activeNetwork,
-      [_activeNetwork, forceNetwork],
-    )
+    const _activeNetwork = useSelectedNetwork();
+    const activeNetwork = useMemo(() => forceNetwork || _activeNetwork, [_activeNetwork, forceNetwork]);
 
-    const [activeStakingDenom] = useActiveStakingDenom(denoms, activeChain, activeNetwork)
-    const [formatCurrency] = useFormatCurrency()
-    const { theme } = useTheme()
+    const [activeStakingDenom] = useActiveStakingDenom(denoms, activeChain, activeNetwork);
+    const [formatCurrency] = useFormatCurrency();
+    const { theme } = useTheme();
 
     const amountTitleText = useMemo(() => {
       if (new BigNumber(delegation.amount.currencyAmount ?? '').gt(0)) {
-        return hideAssetsStore.formatHideBalance(
-          formatCurrency(new BigNumber(delegation.amount.currencyAmount ?? '')),
-        )
+        return hideAssetsStore.formatHideBalance(formatCurrency(new BigNumber(delegation.amount.currencyAmount ?? '')));
       } else {
-        return hideAssetsStore.formatHideBalance(
-          delegation.amount.formatted_amount ?? delegation.amount.amount,
-        )
+        return hideAssetsStore.formatHideBalance(delegation.amount.formatted_amount ?? delegation.amount.amount);
       }
     }, [
       delegation.amount.amount,
       delegation.amount.currencyAmount,
       delegation.amount.formatted_amount,
       formatCurrency,
-    ])
+    ]);
 
     const amountSubtitleText = useMemo(() => {
       if (new BigNumber(delegation.amount.currencyAmount ?? '').gt(0)) {
-        return hideAssetsStore.formatHideBalance(
-          delegation.amount.formatted_amount ?? delegation.amount.amount,
-        )
+        return hideAssetsStore.formatHideBalance(delegation.amount.formatted_amount ?? delegation.amount.amount);
       }
-      return ''
-    }, [
-      delegation.amount.amount,
-      delegation.amount.currencyAmount,
-      delegation.amount.formatted_amount,
-    ])
+      return '';
+    }, [delegation.amount.amount, delegation.amount.currencyAmount, delegation.amount.formatted_amount]);
 
     return (
       <BottomModal
@@ -114,9 +101,7 @@ const StakedProviderDetails = observer(
             <span className='font-bold text-lg'>
               {sliceWord(
                 provider?.moniker ?? '',
-                isSidePanel()
-                  ? 18 + Math.floor(((Math.min(window.innerWidth, 400) - 320) / 81) * 7)
-                  : 10,
+                isSidePanel() ? 18 + Math.floor(((Math.min(window.innerWidth, 400) - 320) / 81) * 7) : 10,
                 3,
               )}
             </span>
@@ -142,9 +127,7 @@ const StakedProviderDetails = observer(
           <span className='text-sm text-muted-foreground mt-4'>Your deposited amount</span>
           <div className='p-6 bg-secondary-100 rounded-xl'>
             <span className='font-bold text-lg'>{amountTitleText} </span>
-            {amountSubtitleText && (
-              <span className='text-muted-foreground'>({amountSubtitleText})</span>
-            )}
+            {amountSubtitleText && <span className='text-muted-foreground'>({amountSubtitleText})</span>}
           </div>
         </div>
 
@@ -152,48 +135,33 @@ const StakedProviderDetails = observer(
           <Button onClick={onSwitchValidator}>Switch provider</Button>
         </div>
       </BottomModal>
-    )
+    );
   },
-)
+);
 
 interface ProviderCardProps {
-  provider: Provider
-  delegation: ProviderDelegation
-  onClick?: () => void
+  provider: Provider;
+  delegation: ProviderDelegation;
+  onClick?: () => void;
 }
 
 const ProviderCard = observer(({ provider, delegation, onClick }: ProviderCardProps) => {
-  const [formatCurrency] = useFormatCurrency()
+  const [formatCurrency] = useFormatCurrency();
 
   const amountTitleText = useMemo(() => {
     if (new BigNumber(delegation.amount.currencyAmount ?? '').gt(0)) {
-      return hideAssetsStore.formatHideBalance(
-        formatCurrency(new BigNumber(delegation.amount.currencyAmount ?? '')),
-      )
+      return hideAssetsStore.formatHideBalance(formatCurrency(new BigNumber(delegation.amount.currencyAmount ?? '')));
     } else {
-      return hideAssetsStore.formatHideBalance(
-        delegation.amount.formatted_amount ?? delegation.amount.amount,
-      )
+      return hideAssetsStore.formatHideBalance(delegation.amount.formatted_amount ?? delegation.amount.amount);
     }
-  }, [
-    delegation.amount.amount,
-    delegation.amount.currencyAmount,
-    delegation.amount.formatted_amount,
-    formatCurrency,
-  ])
+  }, [delegation.amount.amount, delegation.amount.currencyAmount, delegation.amount.formatted_amount, formatCurrency]);
 
   const amountSubtitleText = useMemo(() => {
     if (new BigNumber(delegation.amount.currencyAmount ?? '').gt(0)) {
-      return hideAssetsStore.formatHideBalance(
-        delegation.amount.formatted_amount ?? delegation.amount.amount,
-      )
+      return hideAssetsStore.formatHideBalance(delegation.amount.formatted_amount ?? delegation.amount.amount);
     }
-    return ''
-  }, [
-    delegation.amount.amount,
-    delegation.amount.currencyAmount,
-    delegation.amount.formatted_amount,
-  ])
+    return '';
+  }, [delegation.amount.amount, delegation.amount.currencyAmount, delegation.amount.formatted_amount]);
 
   return (
     <ValidatorCardView
@@ -204,31 +172,31 @@ const ProviderCard = observer(({ provider, delegation, onClick }: ProviderCardPr
       subAmount={amountSubtitleText}
       jailed={false}
     />
-  )
-})
+  );
+});
 
 export default function ProviderList({
   forceChain,
   forceNetwork,
 }: {
-  forceChain?: SupportedChain
-  forceNetwork?: 'mainnet' | 'testnet'
+  forceChain?: SupportedChain;
+  forceNetwork?: 'mainnet' | 'testnet';
 }) {
-  const navigate = useNavigate()
-  const [showStakedProviderDetails, setShowStakedProviderDetails] = useState(false)
-  const [selectedDelegation, setSelectedDelegation] = useState<ProviderDelegation | undefined>()
-  const { delegations: providerDelegations, loadingDelegations, providers } = useDualStaking()
+  const navigate = useNavigate();
+  const [showStakedProviderDetails, setShowStakedProviderDetails] = useState(false);
+  const [selectedDelegation, setSelectedDelegation] = useState<ProviderDelegation | undefined>();
+  const { delegations: providerDelegations, loadingDelegations, providers } = useDualStaking();
 
   const emptyProviderDelegation = useMemo(() => {
-    return Object.values(providerDelegations ?? {}).find((d) => d.provider === 'empty_provider')
-  }, [providerDelegations])
+    return Object.values(providerDelegations ?? {}).find((d) => d.provider === 'empty_provider');
+  }, [providerDelegations]);
 
   const sortedDelegations = useMemo(() => {
     const _sortedDelegations = Object.values(providerDelegations ?? {}).sort(
       (a, b) => parseFloat(b.amount.amount) - parseFloat(a.amount.amount),
-    )
-    return _sortedDelegations
-  }, [providerDelegations])
+    );
+    return _sortedDelegations;
+  }, [providerDelegations]);
 
   const emptyProvider = useMemo(() => {
     return {
@@ -236,8 +204,8 @@ export default function ProviderList({
       moniker: 'Empty Provider',
       address: emptyProviderDelegation?.provider ?? '',
       specs: [],
-    }
-  }, [emptyProviderDelegation?.provider])
+    };
+  }, [emptyProviderDelegation?.provider]);
 
   return (
     <>
@@ -255,8 +223,8 @@ export default function ProviderList({
                   delegation={emptyProviderDelegation}
                   provider={emptyProvider}
                   onClick={() => {
-                    setSelectedDelegation(emptyProviderDelegation)
-                    setShowStakedProviderDetails(true)
+                    setSelectedDelegation(emptyProviderDelegation);
+                    setShowStakedProviderDetails(true);
                   }}
                 />
               </>
@@ -268,7 +236,7 @@ export default function ProviderList({
               </div>
             )}
             {sortedDelegations.map((d) => {
-              const provider = providers?.find((el) => el.address === d.provider)
+              const provider = providers?.find((el) => el.address === d.provider);
               return (
                 provider && (
                   <ProviderCard
@@ -276,12 +244,12 @@ export default function ProviderList({
                     delegation={d}
                     provider={provider}
                     onClick={() => {
-                      setSelectedDelegation(d)
-                      setShowStakedProviderDetails(true)
+                      setSelectedDelegation(d);
+                      setShowStakedProviderDetails(true);
                     }}
                   />
                 )
-              )
+              );
             })}
           </>
         )}
@@ -306,16 +274,16 @@ export default function ProviderList({
                   : providers.find((p) => p.address === selectedDelegation.provider),
               providerDelegation: selectedDelegation,
               forceChain: 'lava',
-            }
-            sessionStorage.setItem('navigate-stake-input-state', JSON.stringify(state))
+            };
+            sessionStorage.setItem('navigate-stake-input-state', JSON.stringify(state));
             navigate('/stake/input', {
               state,
-            })
+            });
           }}
           forceChain={forceChain}
           forceNetwork={forceNetwork}
         />
       )}
     </>
-  )
+  );
 }

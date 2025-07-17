@@ -1,39 +1,39 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useActiveChain } from '@leapwallet/cosmos-wallet-hooks'
-import { captureException } from '@sentry/react'
-import BottomModal from 'components/new-bottom-modal'
-import { Button } from 'components/ui/button'
-import { PrivateKeyInput } from 'components/ui/input/private-key-input'
-import useActiveWallet from 'hooks/settings/useActiveWallet'
-import { observer } from 'mobx-react-lite'
-import React, { useState } from 'react'
-import { passwordStore } from 'stores/password-store'
-import { validateSeedPhrase } from 'utils/validateSeedPhrase'
+import { useActiveChain } from '@leapwallet/cosmos-wallet-hooks';
+import { captureException } from '@sentry/react';
+import BottomModal from 'components/new-bottom-modal';
+import { Button } from 'components/ui/button';
+import { PrivateKeyInput } from 'components/ui/input/private-key-input';
+import useActiveWallet from 'hooks/settings/useActiveWallet';
+import { observer } from 'mobx-react-lite';
+import React, { useState } from 'react';
+import { passwordStore } from 'stores/password-store';
+import { validateSeedPhrase } from 'utils/validateSeedPhrase';
 
-import { Wallet } from '../../hooks/wallet/useWallet'
+import { Wallet } from '../../hooks/wallet/useWallet';
 
 type ImportPrivateKeyProps = {
-  isVisible: boolean
-  onClose: (closeParent: boolean) => void
-}
+  isVisible: boolean;
+  onClose: (closeParent: boolean) => void;
+};
 
 export const ImportPrivateKey = observer(({ isVisible, onClose }: ImportPrivateKeyProps) => {
-  const [privateKey, setPrivateKey] = useState('')
-  const [error, setError] = useState<string>('')
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-  const activeChain = useActiveChain()
-  const { activeWallet } = useActiveWallet()
-  const importWallet = Wallet.useImportWallet()
-  const updateWatchWalletSeed = Wallet.useUpdateWatchWalletSeed()
+  const [privateKey, setPrivateKey] = useState('');
+  const [error, setError] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const activeChain = useActiveChain();
+  const { activeWallet } = useActiveWallet();
+  const importWallet = Wallet.useImportWallet();
+  const updateWatchWalletSeed = Wallet.useUpdateWatchWalletSeed();
 
   const onChangeHandler = (value: string) => {
-    setError('')
-    setPrivateKey(value)
-  }
+    setError('');
+    setPrivateKey(value);
+  };
 
   const handleImportWallet = async () => {
-    setError('')
-    setIsLoading(true)
+    setError('');
+    setIsLoading(true);
 
     if (
       privateKey &&
@@ -47,34 +47,34 @@ export const ImportPrivateKey = observer(({ isVisible, onClose }: ImportPrivateK
     ) {
       try {
         if (activeWallet?.watchWallet) {
-          await updateWatchWalletSeed(privateKey)
+          await updateWatchWalletSeed(privateKey);
         } else {
           await importWallet({
             privateKey,
             type: 'import',
             addressIndex: '0',
             password: passwordStore.password,
-          })
+          });
         }
-        setPrivateKey('')
-        onClose(true)
+        setPrivateKey('');
+        onClose(true);
       } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : 'Something went wrong'
-        captureException(errorMessage)
-        setError(errorMessage)
+        const errorMessage = error instanceof Error ? error.message : 'Something went wrong';
+        captureException(errorMessage);
+        setError(errorMessage);
       }
     }
 
-    setIsLoading(false)
-  }
+    setIsLoading(false);
+  };
 
   return (
     <BottomModal
       fullScreen
       isOpen={isVisible}
       onClose={() => {
-        onClose(false)
-        setError('')
+        onClose(false);
+        setError('');
       }}
       title={'Import Wallet'}
       footerComponent={
@@ -98,5 +98,5 @@ export const ImportPrivateKey = observer(({ isVisible, onClose }: ImportPrivateK
         <PrivateKeyInput value={privateKey} onChange={onChangeHandler} error={error} />
       </div>
     </BottomModal>
-  )
-})
+  );
+});

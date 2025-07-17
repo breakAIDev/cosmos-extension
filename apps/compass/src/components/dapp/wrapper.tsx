@@ -1,13 +1,13 @@
-import { WalletButton } from 'components/button/WalletButton'
-import { PageHeader } from 'components/header'
-import { useWalletInfo } from 'hooks/useWalletInfo'
-import { Globe } from 'images/misc'
-import React, { PropsWithChildren } from 'react'
-import { cn } from 'utils/cn'
-import { imgOnError } from 'utils/imgOnError'
+import { WalletButton } from 'components/button/WalletButton';
+import { PageHeader } from 'components/header';
+import { useWalletInfo } from 'hooks/useWalletInfo';
+import { Globe } from 'images/misc';
+import React, { PropsWithChildren } from 'react';
+import { cn } from 'utils/cn';
+import { imgOnError } from 'utils/imgOnError';
 
 export const DappHeader = () => {
-  const { walletAvatar, walletName } = useWalletInfo()
+  const { walletAvatar, walletName } = useWalletInfo();
 
   return (
     <PageHeader className='py-3.5 -mx-5'>
@@ -19,14 +19,14 @@ export const DappHeader = () => {
         handleDropdownClick={() => void 0}
       />
     </PageHeader>
-  )
-}
+  );
+};
 
 type DappHeadingProps = {
-  logo: string
-  title: React.ReactNode
-  subTitle: React.ReactNode
-}
+  logo: string;
+  title: React.ReactNode;
+  subTitle: React.ReactNode;
+};
 
 export const DappHeading = (props: DappHeadingProps) => {
   return (
@@ -38,12 +38,12 @@ export const DappHeading = (props: DappHeadingProps) => {
         <span className='text-xs text-muted-foreground'>{props.subTitle}</span>
       </div>
     </div>
-  )
-}
+  );
+};
 
 type DappWrapperProps = PropsWithChildren<DappHeadingProps> & {
-  className?: string
-}
+  className?: string;
+};
 
 export const DappWrapper = (props: DappWrapperProps) => {
   return (
@@ -59,5 +59,5 @@ export const DappWrapper = (props: DappWrapperProps) => {
 
       {props.children}
     </div>
-  )
-}
+  );
+};

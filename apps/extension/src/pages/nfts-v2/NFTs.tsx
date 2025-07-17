@@ -1,24 +1,18 @@
-import { NftPage, useAddress } from '@leapwallet/cosmos-wallet-hooks'
-import { PageName } from 'config/analytics'
-import { usePageView } from 'hooks/analytics/usePageView'
-import React, { useState } from 'react'
-import { chainTagsStore } from 'stores/chain-infos-store'
-import { nftStore } from 'stores/nft-store'
+import { NftPage, useAddress } from '@leapwallet/cosmos-wallet-hooks';
+import { PageName } from 'config/analytics';
+import { usePageView } from 'hooks/analytics/usePageView';
+import React, { useState } from 'react';
+import { chainTagsStore } from 'stores/chain-infos-store';
+import { nftStore } from 'stores/nft-store';
 
-import {
-  ChainNftsDetails,
-  CollectionDetails,
-  NftContextProvider,
-  NftDetails,
-  ShowNfts,
-} from './index'
+import { ChainNftsDetails, CollectionDetails, NftContextProvider, NftDetails, ShowNfts } from './index';
 
 export default function NFTs() {
   // usePageView(PageName.NFT)
 
-  const address = useAddress()
-  const [activePage, setActivePage] = useState<NftPage>('ShowNfts')
-  const value = { activePage, setActivePage }
+  const address = useAddress();
+  const [activePage, setActivePage] = useState<NftPage>('ShowNfts');
+  const value = { activePage, setActivePage };
 
   return (
     <></>
@@ -30,5 +24,5 @@ export default function NFTs() {
     //   {activePage === 'NftDetails' && <NftDetails />}
     //   {activePage === 'ChainNftsDetails' && <ChainNftsDetails nftStore={nftStore} />}
     // </NftContextProvider>
-  )
+  );
 }

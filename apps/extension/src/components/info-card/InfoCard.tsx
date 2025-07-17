@@ -1,11 +1,11 @@
-import { Info } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import React, { ReactNode } from 'react'
+import { Info } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import React, { ReactNode } from 'react';
 
 type InfoCardProps = {
-  message: ReactNode
-  className?: string
-}
+  message: ReactNode;
+  className?: string;
+};
 
 export function InfoCard({ message, className }: InfoCardProps) {
   return (
@@ -13,5 +13,5 @@ export function InfoCard({ message, className }: InfoCardProps) {
       <Info size={20} className='text-foreground shrink-0 p-[1px]' />
       <p className='text-sm text-foreground !leading-[22px] font-medium'>{message}</p>
     </div>
-  )
+  );
 }

@@ -1,40 +1,39 @@
-import { useAddress } from '@leapwallet/cosmos-wallet-hooks'
-import { sha256 } from '@noble/hashes/sha256'
-import { utils } from '@noble/secp256k1'
-import { ArrowUp } from '@phosphor-icons/react'
-import { captureException } from '@sentry/react'
-import { Button } from 'components/ui/button'
-import { EventName } from 'config/analytics'
-import dayjs from 'dayjs'
-import { AnimatePresence, motion, Variants } from 'framer-motion'
-import { Images } from 'images'
-import mixpanel from 'mixpanel-browser'
-import React, { useEffect, useState } from 'react'
-import Confetti from 'react-confetti'
-import { createPortal } from 'react-dom'
+import { useAddress } from '@leapwallet/cosmos-wallet-hooks';
+import { sha256 } from '@noble/hashes/sha256';
+import { utils } from '@noble/secp256k1';
+import { ArrowUp } from '@phosphor-icons/react';
+import { captureException } from '@sentry/react';
+import { Button } from 'components/ui/button';
+import { EventName } from 'config/analytics';
+import dayjs from 'dayjs';
+import { AnimatePresence, motion, Variants } from 'framer-motion';
+import { Images } from 'images';
+import mixpanel from 'mixpanel-browser';
+import React, { useEffect, useState } from 'react';
+import Confetti from 'react-confetti';
+import { createPortal } from 'react-dom';
 
-import { OnboardingLayout } from '../layout'
+import { OnboardingLayout } from '../layout';
 
-const ctrlKey =
-  typeof navigator !== 'undefined' && navigator.userAgent.includes('Mac') ? 'Cmd' : 'Ctrl'
+const ctrlKey = typeof navigator !== 'undefined' && navigator.userAgent.includes('Mac') ? 'Cmd' : 'Ctrl';
 
 export default function OnboardingSuccess() {
-  const activeWalletCosmosAddress = useAddress('seiTestnet2')
+  const activeWalletCosmosAddress = useAddress('seiTestnet2');
 
   useEffect(() => {
-    const currentTime = new Date().getTime()
-    const timeStarted1 = Number(localStorage.getItem('timeStarted1'))
-    const timeStarted2 = Number(localStorage.getItem('timeStarted2'))
-    const methodChosen = localStorage.getItem('onboardingMethodChosen')
+    const currentTime = new Date().getTime();
+    const timeStarted1 = Number(localStorage.getItem('timeStarted1'));
+    const timeStarted2 = Number(localStorage.getItem('timeStarted2'));
+    const methodChosen = localStorage.getItem('onboardingMethodChosen');
 
     if (timeStarted1 && timeStarted2 && activeWalletCosmosAddress) {
-      const hashedAddress = utils.bytesToHex(sha256(activeWalletCosmosAddress))
+      const hashedAddress = utils.bytesToHex(sha256(activeWalletCosmosAddress));
 
-      localStorage.removeItem('timeStarted1')
-      localStorage.removeItem('timeStarted2')
-      localStorage.removeItem('onboardingMethodChosen')
+      localStorage.removeItem('timeStarted1');
+      localStorage.removeItem('timeStarted2');
+      localStorage.removeItem('onboardingMethodChosen');
     }
-  }, [activeWalletCosmosAddress])
+  }, [activeWalletCosmosAddress]);
 
   return (
     <>
@@ -51,10 +50,7 @@ export default function OnboardingSuccess() {
         document.body,
       )}
 
-      <OnboardingLayout
-        hideRightActions
-        className='flex flex-col items-center gap-7 p-7 overflow-auto'
-      >
+      <OnboardingLayout hideRightActions className='flex flex-col items-center gap-7 p-7 overflow-auto'>
         <div className='flex flex-col gap-y-16 my-auto'>
           <div className='w-60 h-36 rounded-[1.25rem] mx-auto relative border border-secondary-300'>
             <img src={Images.Misc.OnboardingSuccess} className='w-full h-full' />
@@ -78,20 +74,20 @@ export default function OnboardingSuccess() {
         <Button
           className='w-full mt-auto'
           onClick={() => {
-            chrome.action.openPopup()
+            chrome.action.openPopup();
           }}
         >
           Get started
         </Button>
       </OnboardingLayout>
     </>
-  )
+  );
 }
 
 const transition = {
   duration: 0.3,
   ease: 'easeInOut',
-}
+};
 
 const pinVariants: Variants = {
   show: {
@@ -102,19 +98,19 @@ const pinVariants: Variants = {
     opacity: 0,
     y: -10,
   },
-}
+};
 
 const PinButton = () => {
-  const [isPinned, setIsPinned] = useState(true)
+  const [isPinned, setIsPinned] = useState(true);
 
   useEffect(() => {
     const checkPinned = setInterval(async () => {
-      const userSettings = await chrome.action.getUserSettings()
-      setIsPinned(userSettings?.isOnToolbar)
-    }, 2000)
+      const userSettings = await chrome.action.getUserSettings();
+      setIsPinned(userSettings?.isOnToolbar);
+    }, 2000);
 
-    return () => clearInterval(checkPinned)
-  }, [])
+    return () => clearInterval(checkPinned);
+  }, []);
 
   return (
     <AnimatePresence>
@@ -135,5 +131,5 @@ const PinButton = () => {
         </motion.div>
       )}
     </AnimatePresence>
-  )
-}
+  );
+};

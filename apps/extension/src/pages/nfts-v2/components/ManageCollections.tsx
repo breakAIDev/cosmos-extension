@@ -2,86 +2,80 @@ import {
   sliceSearchWord,
   useDisabledNFTsCollections,
   useSetDisabledNFTsInStorage,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { MagnifyingGlassMinus } from '@phosphor-icons/react'
-import BottomModal from 'components/new-bottom-modal'
-import Text from 'components/text'
-import { SearchInput } from 'components/ui/input/search-input'
-import { Images } from 'images'
-import React, { useMemo, useState } from 'react'
-import { nftStore } from 'stores/nft-store'
-import { imgOnError } from 'utils/imgOnError'
-import { sliceWord } from 'utils/strings'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { MagnifyingGlassMinus } from '@phosphor-icons/react';
+import BottomModal from 'components/new-bottom-modal';
+import Text from 'components/text';
+import { SearchInput } from 'components/ui/input/search-input';
+import { Images } from 'images';
+import React, { useMemo, useState } from 'react';
+import { nftStore } from 'stores/nft-store';
+import { imgOnError } from 'utils/imgOnError';
+import { sliceWord } from 'utils/strings';
 
 export type ManageCollectionsProps = {
-  isVisible: boolean
-  onClose: VoidFunction
-}
+  isVisible: boolean;
+  onClose: VoidFunction;
+};
 
 export function ManageCollections({ isVisible, onClose }: ManageCollectionsProps) {
-  const collectionData = nftStore.nftDetails.collectionData
+  const collectionData = nftStore.nftDetails.collectionData;
   const collections = useMemo(() => {
-    return collectionData?.collections ?? []
-  }, [collectionData?.collections])
+    return collectionData?.collections ?? [];
+  }, [collectionData?.collections]);
 
-  const [searchedText, setSearchedText] = useState('')
-  const disabledNFTsCollections = useDisabledNFTsCollections()
-  const setDisabledNFTsCollections = useSetDisabledNFTsInStorage()
+  const [searchedText, setSearchedText] = useState('');
+  const disabledNFTsCollections = useDisabledNFTsCollections();
+  const setDisabledNFTsCollections = useSetDisabledNFTsInStorage();
 
   const filteredCollections = useMemo(() => {
     return (
       collections
         ?.filter((collection) => {
-          const lowercasedSearchedText = searchedText.trim().toLowerCase()
-          const { name, address, chain } = collection
+          const lowercasedSearchedText = searchedText.trim().toLowerCase();
+          const { name, address, chain } = collection;
 
           if (
             name.trim().toLowerCase().includes(lowercasedSearchedText) ||
             address.trim().toLowerCase().includes(lowercasedSearchedText) ||
             chain.trim().toLowerCase().includes(lowercasedSearchedText)
           ) {
-            return true
+            return true;
           }
 
-          return false
+          return false;
         })
         ?.sort((collectionA, collectionB) => {
-          const nameA = collectionA.name.toUpperCase()
-          const nameB = collectionB.name.toUpperCase()
+          const nameA = collectionA.name.toUpperCase();
+          const nameB = collectionB.name.toUpperCase();
 
-          if (nameA < nameB) return -1
-          if (nameA < nameB) return 1
-          return 0
+          if (nameA < nameB) return -1;
+          if (nameA < nameB) return 1;
+          return 0;
         }) ?? []
-    )
-  }, [collections, searchedText])
+    );
+  }, [collections, searchedText]);
 
   const handleBottomSheetClose = () => {
-    onClose()
-    setSearchedText('')
-  }
+    onClose();
+    setSearchedText('');
+  };
 
-  const handleToggleClick = async (
-    isEnabled: boolean,
-    collectionAddress: string,
-    chain: SupportedChain,
-  ) => {
-    let _disabledNFTsCollections: string[] = []
-    const _enabledNftsCollections: string[] = []
+  const handleToggleClick = async (isEnabled: boolean, collectionAddress: string, chain: SupportedChain) => {
+    let _disabledNFTsCollections: string[] = [];
+    const _enabledNftsCollections: string[] = [];
 
     if (isEnabled) {
-      _disabledNFTsCollections = disabledNFTsCollections.filter(
-        (collection) => collection !== collectionAddress,
-      )
+      _disabledNFTsCollections = disabledNFTsCollections.filter((collection) => collection !== collectionAddress);
     } else {
       if (!_disabledNFTsCollections.includes(collectionAddress)) {
-        _disabledNFTsCollections = [...disabledNFTsCollections, collectionAddress]
+        _disabledNFTsCollections = [...disabledNFTsCollections, collectionAddress];
       }
     }
 
-    await setDisabledNFTsCollections(_disabledNFTsCollections)
-  }
+    await setDisabledNFTsCollections(_disabledNFTsCollections);
+  };
 
   return (
     <BottomModal
@@ -123,15 +117,12 @@ export function ManageCollections({ isVisible, onClose }: ManageCollectionsProps
             className='w-full h-full'
           >
             {filteredCollections.map((filteredCollection, index, array) => {
-              const isLast = index === array.length - 1
-              const { name, address, image, chain } = filteredCollection
+              const isLast = index === array.length - 1;
+              const { name, address, image, chain } = filteredCollection;
 
               return (
                 <>
-                  <div
-                    key={`${address}-${index}`}
-                    className='py-5 flex justify-between items-center'
-                  >
+                  <div key={`${address}-${index}`} className='py-5 flex justify-between items-center'>
                     <div className='flex items-center gap-3'>
                       <img
                         src={image ?? Images.Logos.GenericNFT}
@@ -151,15 +142,13 @@ export function ManageCollections({ isVisible, onClose }: ManageCollectionsProps
                       className='h-5 w-9 appearance-none rounded-full cursor-pointer bg-gray-600/30 transition duration-200 checked:bg-accent-green-200 relative'
                     />
                   </div>
-                  {!isLast && (
-                    <div className='border-b w-full border-gray-100 dark:border-gray-850' />
-                  )}
+                  {!isLast && <div className='border-b w-full border-gray-100 dark:border-gray-850' />}
                 </>
-              )
+              );
             })}
           </div>
         )}
       </div>
     </BottomModal>
-  )
+  );
 }

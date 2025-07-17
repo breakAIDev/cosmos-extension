@@ -1,28 +1,24 @@
-import { Question } from '@phosphor-icons/react'
-import { routeToLabelMap } from 'components/bottom-nav/bottom-nav-items'
-import BottomNav from 'components/bottom-nav/BottomNav'
-import { Button } from 'components/ui/button'
-import ImportWatchWalletSeedPopup from 'components/watch-watch/ImportWatchWalletSeedPopup'
-import { useAuth } from 'context/auth-context'
-import { AnimatePresence, motion } from 'framer-motion'
-import { CompassFullLogo } from 'icons/compass-full-logo'
-import { observer } from 'mobx-react-lite'
-import { CopyAddressSheet } from 'pages/home/components'
-import SideNav from 'pages/home/side-nav'
-import React, { PropsWithChildren, ReactNode } from 'react'
-import { Location } from 'react-router-dom'
-import { cn } from 'utils/cn'
-import { sidePanel } from 'utils/isSidePanel'
-import {
-  opacityVariants,
-  slideVariants,
-  transition,
-} from 'utils/motion-variants/global-layout-motions'
+import { Question } from '@phosphor-icons/react';
+import { routeToLabelMap } from 'components/bottom-nav/bottom-nav-items';
+import BottomNav from 'components/bottom-nav/BottomNav';
+import { Button } from 'components/ui/button';
+import ImportWatchWalletSeedPopup from 'components/watch-watch/ImportWatchWalletSeedPopup';
+import { useAuth } from 'context/auth-context';
+import { AnimatePresence, motion } from 'framer-motion';
+import { CompassFullLogo } from 'icons/compass-full-logo';
+import { observer } from 'mobx-react-lite';
+import { CopyAddressSheet } from 'pages/home/components';
+import SideNav from 'pages/home/side-nav';
+import React, { PropsWithChildren, ReactNode } from 'react';
+import { Location } from 'react-router-dom';
+import { cn } from 'utils/cn';
+import { sidePanel } from 'utils/isSidePanel';
+import { opacityVariants, slideVariants, transition } from 'utils/motion-variants/global-layout-motions';
 
 type GlobalLayoutProps = {
-  children?: ReactNode
-  location?: Location
-}
+  children?: ReactNode;
+  location?: Location;
+};
 
 const dAppPages = new Set([
   '/approveConnection',
@@ -31,40 +27,39 @@ const dAppPages = new Set([
   '/add-secret-token',
   '/login',
   '/suggest-erc-20',
-])
+]);
 
 const showBottomNav = (path?: string) => {
   if (!path) {
-    return false
+    return false;
   }
 
   if (path.includes('onboarding') || path === '/' || path.includes('forgotPassword')) {
-    return false
+    return false;
   }
 
-  return true
-}
+  return true;
+};
 
 type CustomState = {
-  from: { pathname: string; search?: string } | string
-}
+  from: { pathname: string; search?: string } | string;
+};
 
 export const GlobalLayout = observer((props: PropsWithChildren<GlobalLayoutProps>) => {
-  const auth = useAuth()
+  const auth = useAuth();
 
-  const isFullScreen =
-    window.innerWidth >= 450 && !sidePanel && !dAppPages.has(props.location?.pathname ?? '')
+  const isFullScreen = window.innerWidth >= 450 && !sidePanel && !dAppPages.has(props.location?.pathname ?? '');
 
-  const isOnboarding = props.location?.pathname.includes('onboarding')
-  const isLogin = props.location?.pathname === '/'
-  const { from: fromLogin } = (props.location?.state || {}) as CustomState
+  const isOnboarding = props.location?.pathname.includes('onboarding');
+  const isLogin = props.location?.pathname === '/';
+  const { from: fromLogin } = (props.location?.state || {}) as CustomState;
 
-  const variants = isLogin || isOnboarding ? opacityVariants : slideVariants
+  const variants = isLogin || isOnboarding ? opacityVariants : slideVariants;
   const isBottomNavVisible =
     auth?.locked === 'unlocked' &&
     props.location?.pathname &&
     showBottomNav(props.location.pathname) &&
-    !!routeToLabelMap[props.location.pathname]
+    !!routeToLabelMap[props.location.pathname];
 
   return (
     <>
@@ -95,9 +90,7 @@ export const GlobalLayout = observer((props: PropsWithChildren<GlobalLayoutProps
           </motion.div>
         </AnimatePresence>
 
-        {isBottomNavVisible && (
-          <BottomNav label={routeToLabelMap[props?.location?.pathname ?? '']} />
-        )}
+        {isBottomNavVisible && <BottomNav label={routeToLabelMap[props?.location?.pathname ?? '']} />}
       </div>
 
       {isFullScreen && (
@@ -117,5 +110,5 @@ export const GlobalLayout = observer((props: PropsWithChildren<GlobalLayoutProps
         </div>
       )}
     </>
-  )
-})
+  );
+});

@@ -1,15 +1,12 @@
-import { sliceWord, useActiveChain } from '@leapwallet/cosmos-wallet-hooks'
-import { Buttons } from '@leapwallet/leap-ui'
-import { Info } from '@phosphor-icons/react'
-import Text from 'components/text'
-import React from 'react'
-import { Colors } from 'theme/colors'
+import { sliceWord, useActiveChain } from '@leapwallet/cosmos-wallet-hooks';
+import { Buttons } from '@leapwallet/leap-ui';
+import { Info } from '@phosphor-icons/react';
+import Text from 'components/text';
+import React from 'react';
+import { Colors } from 'theme/colors';
 
-export function CopyViewingKey(props: {
-  generatedViewingKey: string
-  onCopy: () => Promise<void>
-}) {
-  const activeChain = useActiveChain()
+export function CopyViewingKey(props: { generatedViewingKey: string; onCopy: () => Promise<void> }) {
+  const activeChain = useActiveChain();
 
   return (
     <div>
@@ -27,5 +24,5 @@ export function CopyViewingKey(props: {
 
       <Buttons.CopyToClipboard color={Colors.getChainColor(activeChain)} onCopy={props.onCopy} />
     </div>
-  )
+  );
 }

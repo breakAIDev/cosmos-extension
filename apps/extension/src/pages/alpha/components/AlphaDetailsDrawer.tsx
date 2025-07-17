@@ -1,46 +1,42 @@
-import classNames from 'classnames'
-import BottomModal from 'components/new-bottom-modal'
-import { Separator } from 'components/ui/separator'
-import { EventName, PageName } from 'config/analytics'
-import React, { useEffect, useRef } from 'react'
-import { mixpanelTrack } from 'utils/tracking'
+import classNames from 'classnames';
+import BottomModal from 'components/new-bottom-modal';
+import { Separator } from 'components/ui/separator';
+import { EventName, PageName } from 'config/analytics';
+import React, { useEffect, useRef } from 'react';
+import { mixpanelTrack } from 'utils/tracking';
 
-import { getHostname } from '../utils'
-import { AlphaOpportunityProps } from './alpha-timeline'
-import AlphaDescription from './AlphaDescription'
-import ListingFooter from './ListingFooter'
-import ListingImage from './ListingImage'
-import Tags from './Tags'
+import { getHostname } from '../utils';
+import { AlphaOpportunityProps } from './alpha-timeline';
+import AlphaDescription from './AlphaDescription';
+import ListingFooter from './ListingFooter';
+import ListingImage from './ListingImage';
+import Tags from './Tags';
 
 type AlphaDetailsDrawerProps = {
-  isShown: boolean
-  onClose: () => void
-  opportunity: AlphaOpportunityProps | null
-}
+  isShown: boolean;
+  onClose: () => void;
+  opportunity: AlphaOpportunityProps | null;
+};
 
-export default function AlphaDetailsDrawer({
-  isShown,
-  onClose,
-  opportunity,
-}: AlphaDetailsDrawerProps) {
-  const containerRef = useRef<HTMLDivElement>(null)
+export default function AlphaDetailsDrawer({ isShown, onClose, opportunity }: AlphaDetailsDrawerProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (containerRef.current) {
-      containerRef.current.style.height = '100%'
-      const parentElement = containerRef.current.parentElement
+      containerRef.current.style.height = '100%';
+      const parentElement = containerRef.current.parentElement;
       if (parentElement) {
         if (isShown) {
-          parentElement.style.overflow = 'hidden'
+          parentElement.style.overflow = 'hidden';
         } else {
-          parentElement.style.overflow = 'auto'
+          parentElement.style.overflow = 'auto';
         }
       }
     }
-  }, [isShown])
+  }, [isShown]);
 
   const handleExternalLinkClick = () => {
-    const alphaExternalURL = opportunity?.relevantLinks?.[0]
+    const alphaExternalURL = opportunity?.relevantLinks?.[0];
 
     // mixpanelTrack(EventName.PageView, {
     //   pageName: PageName.Post,
@@ -52,9 +48,9 @@ export default function AlphaDetailsDrawer({
     // })
 
     if (alphaExternalURL) {
-      window.open(alphaExternalURL ?? '', '_blank', 'noopener,noreferrer')
+      window.open(alphaExternalURL ?? '', '_blank', 'noopener,noreferrer');
     }
-  }
+  };
 
   return (
     <BottomModal
@@ -103,5 +99,5 @@ export default function AlphaDetailsDrawer({
         <AlphaDescription {...opportunity} pageName={PageName.Alpha} />
       ) : null}
     </BottomModal>
-  )
+  );
 }

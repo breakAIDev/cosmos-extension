@@ -1,21 +1,21 @@
-import Text from 'components/text'
-import useActiveWallet from 'hooks/settings/useActiveWallet'
-import { Images } from 'images'
-import React, { useMemo } from 'react'
-import { formatWalletName } from 'utils/formatWalletName'
-import { trim } from 'utils/strings'
+import Text from 'components/text';
+import useActiveWallet from 'hooks/settings/useActiveWallet';
+import { Images } from 'images';
+import React, { useMemo } from 'react';
+import { formatWalletName } from 'utils/formatWalletName';
+import { trim } from 'utils/strings';
 
 export default function WalletView() {
-  const { activeWallet } = useActiveWallet()
-  const walletName = formatWalletName(activeWallet?.name || '')
+  const { activeWallet } = useActiveWallet();
+  const walletName = formatWalletName(activeWallet?.name || '');
 
   const walletAvatar = useMemo(() => {
     if (activeWallet?.avatar) {
-      return activeWallet.avatar
+      return activeWallet.avatar;
     }
 
-    return
-  }, [activeWallet?.avatar])
+    return;
+  }, [activeWallet?.avatar]);
 
   return (
     <div className='flex items-center justify-between bg-secondary-100 pl-4 rounded-xl py-[10px]'>
@@ -33,5 +33,5 @@ export default function WalletView() {
         </Text>
       </div>
     </div>
-  )
+  );
 }

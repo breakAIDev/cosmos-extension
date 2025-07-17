@@ -1,30 +1,30 @@
-import { KeyChain } from '@leapwallet/leap-keychain'
-import { CaretRight } from '@phosphor-icons/react'
-import { WalletInfoCardSkeletons } from 'components/Skeletons'
-import Text from 'components/text'
-import { Button } from 'components/ui/button'
-import WalletInfoCard from 'components/wallet-info-card'
-import { WalletAccount } from 'hooks/onboarding/types'
-import React, { useEffect, useState } from 'react'
-import { cn } from 'utils/cn'
+import { KeyChain } from '@leapwallet/leap-keychain';
+import { CaretRight } from '@phosphor-icons/react';
+import { WalletInfoCardSkeletons } from 'components/Skeletons';
+import Text from 'components/text';
+import { Button } from 'components/ui/button';
+import WalletInfoCard from 'components/wallet-info-card';
+import { WalletAccount } from 'hooks/onboarding/types';
+import React, { useEffect, useState } from 'react';
+import { cn } from 'utils/cn';
 
-import { OnboardingWrapper } from '../wrapper'
-import { useImportWalletContext } from './import-wallet-context'
-import LedgerAdvancedMode from './LedgerAdvancedMode'
+import { OnboardingWrapper } from '../wrapper';
+import { useImportWalletContext } from './import-wallet-context';
+import LedgerAdvancedMode from './LedgerAdvancedMode';
 
 type SelectWalletViewProps = {
-  readonly onProceed: () => void
-  readonly accountsData: readonly WalletAccount[] | undefined
-  readonly customAccountsData: readonly WalletAccount[] | undefined
-  readonly setSelectedIds: (val: { [id: number]: boolean }) => void
-  readonly selectedIds: { [id: string]: boolean }
-  getLedgerAccountDetailsForIdxs: (idxs: number[]) => Promise<void>
+  readonly onProceed: () => void;
+  readonly accountsData: readonly WalletAccount[] | undefined;
+  readonly customAccountsData: readonly WalletAccount[] | undefined;
+  readonly setSelectedIds: (val: { [id: number]: boolean }) => void;
+  readonly selectedIds: { [id: string]: boolean };
+  getLedgerAccountDetailsForIdxs: (idxs: number[]) => Promise<void>;
   getCustomLedgerAccountDetails: (
     customDerivationPath: string,
     name: string,
     existingAddresses: string[] | undefined,
-  ) => Promise<void>
-}
+  ) => Promise<void>;
+};
 
 export default function SelectLedgerWalletView({
   onProceed,
@@ -35,68 +35,68 @@ export default function SelectLedgerWalletView({
   getLedgerAccountDetailsForIdxs,
   getCustomLedgerAccountDetails,
 }: SelectWalletViewProps) {
-  const { prevStep, currentStep, selectedApp } = useImportWalletContext()
-  const [isLoading, setIsLoading] = useState(false)
-  const [existingAddresses, setExistingAddresses] = useState<string[]>([])
-  const [isAdvanceModeEnabled, setIsAdvanceModeEnabled] = useState<boolean>(false)
-  const hasCustomAccounts = !!customAccountsData && customAccountsData.length > 0
+  const { prevStep, currentStep, selectedApp } = useImportWalletContext();
+  const [isLoading, setIsLoading] = useState(false);
+  const [existingAddresses, setExistingAddresses] = useState<string[]>([]);
+  const [isAdvanceModeEnabled, setIsAdvanceModeEnabled] = useState<boolean>(false);
+  const hasCustomAccounts = !!customAccountsData && customAccountsData.length > 0;
 
   useEffect(() => {
     const fn = async () => {
-      const allWallets = await KeyChain.getAllWallets()
-      const addresses = []
+      const allWallets = await KeyChain.getAllWallets();
+      const addresses = [];
 
       for (const wallet of Object.values(allWallets ?? {})) {
-        addresses.push(wallet.addresses.seiTestnet2)
+        addresses.push(wallet.addresses.seiTestnet2);
       }
 
-      setExistingAddresses(addresses)
-    }
-    fn()
-  }, [])
+      setExistingAddresses(addresses);
+    };
+    fn();
+  }, []);
 
   useEffect(() => {
-    const fetchMoreWallets = document.getElementById('fetch-more-wallets')
-    if (!fetchMoreWallets) return
+    const fetchMoreWallets = document.getElementById('fetch-more-wallets');
+    if (!fetchMoreWallets) return;
 
     const handleIntersection = (entries: IntersectionObserverEntry[]) => {
       if (entries[0].isIntersecting) {
         const idxs = [0, 1, 2, 3, 4].map((_, index) => {
-          return (accountsData ?? []).length + index
-        })
+          return (accountsData ?? []).length + index;
+        });
 
-        getLedgerAccountDetailsForIdxs(idxs)
+        getLedgerAccountDetailsForIdxs(idxs);
       }
-    }
+    };
 
     const observer = new IntersectionObserver(handleIntersection, {
       root: null,
       rootMargin: '0px',
       threshold: 1.0,
-    })
+    });
 
-    observer.observe(fetchMoreWallets)
-    return () => observer.disconnect()
+    observer.observe(fetchMoreWallets);
+    return () => observer.disconnect();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accountsData?.length])
+  }, [accountsData?.length]);
 
   const validate = () => {
     if (!Object.values(selectedIds).some((val) => val)) {
-      return false
+      return false;
     }
 
-    return true
-  }
+    return true;
+  };
 
   const handleProceedClick = () => {
-    setIsLoading(true)
-    if (validate()) onProceed()
-  }
+    setIsLoading(true);
+    if (validate()) onProceed();
+  };
 
   const handleAdvancedSettingsClick = () => {
-    setIsAdvanceModeEnabled(true)
-  }
+    setIsAdvanceModeEnabled(true);
+  };
 
   return (
     <OnboardingWrapper
@@ -114,8 +114,8 @@ export default function SelectLedgerWalletView({
         ) : null}
 
         {customAccountsData?.map(({ address, index: id, evmAddress, path, name }, index) => {
-          const isExistingAddress = existingAddresses.indexOf(address) > -1
-          const isChosen = selectedIds[path ?? id]
+          const isExistingAddress = existingAddresses.indexOf(address) > -1;
+          const isChosen = selectedIds[path ?? id];
 
           return (
             <WalletInfoCard
@@ -134,16 +134,16 @@ export default function SelectLedgerWalletView({
               name={name}
               onClick={() => {
                 if (!isExistingAddress) {
-                  const copy = selectedIds
+                  const copy = selectedIds;
                   if (!isChosen) {
-                    setSelectedIds({ ...copy, [path ?? id]: true })
+                    setSelectedIds({ ...copy, [path ?? id]: true });
                   } else {
-                    setSelectedIds({ ...copy, [path ?? id]: false })
+                    setSelectedIds({ ...copy, [path ?? id]: false });
                   }
                 }
               }}
             />
-          )
+          );
         })}
 
         {hasCustomAccounts ? (
@@ -155,8 +155,8 @@ export default function SelectLedgerWalletView({
         ) : null}
 
         {accountsData?.map(({ address, index: id, evmAddress, path, name }) => {
-          const isExistingAddress = existingAddresses.indexOf(address) > -1
-          const isChosen = selectedIds[path ?? id]
+          const isExistingAddress = existingAddresses.indexOf(address) > -1;
+          const isChosen = selectedIds[path ?? id];
           return (
             <WalletInfoCard
               key={`${path}-${id}`}
@@ -172,16 +172,16 @@ export default function SelectLedgerWalletView({
               name={name}
               onClick={() => {
                 if (!isExistingAddress) {
-                  const copy = selectedIds
+                  const copy = selectedIds;
                   if (!isChosen) {
-                    setSelectedIds({ ...copy, [path ?? id]: true })
+                    setSelectedIds({ ...copy, [path ?? id]: true });
                   } else {
-                    setSelectedIds({ ...copy, [path ?? id]: false })
+                    setSelectedIds({ ...copy, [path ?? id]: false });
                   }
                 }
               }}
             />
-          )
+          );
         })}
 
         <WalletInfoCardSkeletons
@@ -217,5 +217,5 @@ export default function SelectLedgerWalletView({
         selectedApp={selectedApp}
       />
     </OnboardingWrapper>
-  )
+  );
 }

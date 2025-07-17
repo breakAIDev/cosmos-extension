@@ -1,27 +1,20 @@
-import { Images } from 'images'
-import React from 'react'
-import { cn } from 'utils/cn'
+import { Images } from 'images';
+import React from 'react';
+import { cn } from 'utils/cn';
 
 type CustomCheckboxProps = {
-  checked: boolean
-  onClick: () => void
-  isWhite?: boolean
-}
+  checked: boolean;
+  onClick: () => void;
+  isWhite?: boolean;
+};
 
 export function CustomCheckbox({ checked, onClick, isWhite }: CustomCheckboxProps) {
   return (
-    <div
-      className={'w-[20px] h-[20px] rounded cursor-pointer flex justify-center items-center'}
-      onClick={onClick}
-    >
+    <div className={'w-[20px] h-[20px] rounded cursor-pointer flex justify-center items-center'} onClick={onClick}>
       {checked ? (
         <div className='w-[15px] h-[15px] relative'>
           <img
-            src={
-              isWhite
-                ? Images.Misc.FilledRoundedSquareWhite
-                : Images.Misc.FilledRoundedSquareCheckMark
-            }
+            src={isWhite ? Images.Misc.FilledRoundedSquareWhite : Images.Misc.FilledRoundedSquareCheckMark}
             className='absolute inset-0'
           />
         </div>
@@ -34,5 +27,5 @@ export function CustomCheckbox({ checked, onClick, isWhite }: CustomCheckboxProp
         ></div>
       )}
     </div>
-  )
+  );
 }

@@ -1,13 +1,7 @@
-import React from 'react'
-import { cn } from 'utils/cn'
+import React from 'react';
+import { cn } from 'utils/cn';
 
-export const PageHeader = ({
-  children,
-  className,
-}: {
-  children: React.ReactNode
-  className?: string
-}) => {
+export const PageHeader = ({ children, className }: { children: React.ReactNode; className?: string }) => {
   return (
     <header
       className={cn(
@@ -17,7 +11,7 @@ export const PageHeader = ({
     >
       {children}
     </header>
-  )
-}
+  );
+};
 
-PageHeader.displayName = 'PageHeader'
+PageHeader.displayName = 'PageHeader';

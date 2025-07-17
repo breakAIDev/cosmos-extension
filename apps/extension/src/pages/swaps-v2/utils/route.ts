@@ -1,31 +1,31 @@
-import { RouteAggregator } from '@leapwallet/elements-hooks'
+import { RouteAggregator } from '@leapwallet/elements-hooks';
 
-import { MosaicRouteQueryResponse } from '../hooks/useMosaicRoute'
-import { SkipRouteResponse } from '../hooks/useRoute'
+import { MosaicRouteQueryResponse } from '../hooks/useMosaicRoute';
+import { SkipRouteResponse } from '../hooks/useRoute';
 
 export function getChainIdsFromRoute(
   route: SkipRouteResponse | MosaicRouteQueryResponse | undefined,
 ): string[] | undefined {
-  if (!route) return undefined
+  if (!route) return undefined;
 
   if (route.aggregator === RouteAggregator.MOSAIC) {
     const chainIds = route.response?.operations[0].reduce((acc, path) => {
-      acc.add(path.srcAssetChainId)
-      acc.add(path.dstAssetChainId)
+      acc.add(path.srcAssetChainId);
+      acc.add(path.dstAssetChainId);
 
-      return acc
-    }, new Set<string>())
+      return acc;
+    }, new Set<string>());
 
-    return chainIds.size > 0 ? [...chainIds] : undefined
+    return chainIds.size > 0 ? [...chainIds] : undefined;
   }
 
-  return route.response?.chain_ids ?? undefined
+  return route.response?.chain_ids ?? undefined;
 }
 
 export function getNoOfStepsFromRoute(
   route: SkipRouteResponse | MosaicRouteQueryResponse | undefined,
 ): number | undefined {
-  if (!route) return undefined
+  if (!route) return undefined;
 
-  return route.response?.operations?.length
+  return route.response?.operations?.length;
 }

@@ -1,13 +1,13 @@
-import loadingImage from 'lottie-files/loading.json'
-import Lottie, { LottieOptions } from 'lottie-react'
-import React from 'react'
-import { ReactElement } from 'react'
+import loadingImage from 'lottie-files/loading.json';
+import Lottie, { LottieOptions } from 'lottie-react';
+import React from 'react';
+import { ReactElement } from 'react';
 
 export type LoaderProps = {
   /** Big text shown below GIF. */
-  readonly title?: string
-  readonly color?: string
-}
+  readonly title?: string;
+  readonly color?: string;
+};
 
 const defaultOptions: LottieOptions = {
   loop: true,
@@ -16,13 +16,11 @@ const defaultOptions: LottieOptions = {
   rendererSettings: {
     preserveAspectRatio: 'xMidYMid slice',
   },
-}
+};
 
 export const LoaderAnimation = ({ color, className }: { color: string; className?: string }) => {
-  return (
-    <Lottie {...defaultOptions} style={{ color: color }} className={className ?? 'h-12 w-12'} />
-  )
-}
+  return <Lottie {...defaultOptions} style={{ color: color }} className={className ?? 'h-12 w-12'} />;
+};
 
 export default function Loader({ title, color }: LoaderProps): ReactElement {
   return (
@@ -30,5 +28,5 @@ export default function Loader({ title, color }: LoaderProps): ReactElement {
       <LoaderAnimation color={color as string} />
       {title && <div className='text-base font-bold text-gray-600 dark:text-gray-200'>{title}</div>}
     </div>
-  )
+  );
 }

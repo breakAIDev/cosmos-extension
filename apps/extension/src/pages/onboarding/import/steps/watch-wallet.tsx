@@ -1,20 +1,20 @@
-import { isValidWalletAddress } from '@leapwallet/cosmos-wallet-sdk'
-import { Button } from 'components/ui/button'
-import { Input } from 'components/ui/input'
-import { TextareaWithPaste } from 'components/ui/input/textarea-with-paste'
-import { LEDGER_NAME_EDITED_SUFFIX_REGEX } from 'config/config'
-import { AnimatePresence, motion, Variants } from 'framer-motion'
-import { EyeIcon } from 'icons/eye-icon'
-import { OnboardingWrapper } from 'pages/onboarding/wrapper'
-import React, { useState } from 'react'
-import { transition150 } from 'utils/motion-variants'
+import { isValidWalletAddress } from '@leapwallet/cosmos-wallet-sdk';
+import { Button } from 'components/ui/button';
+import { Input } from 'components/ui/input';
+import { TextareaWithPaste } from 'components/ui/input/textarea-with-paste';
+import { LEDGER_NAME_EDITED_SUFFIX_REGEX } from 'config/config';
+import { AnimatePresence, motion, Variants } from 'framer-motion';
+import { EyeIcon } from 'icons/eye-icon';
+import { OnboardingWrapper } from 'pages/onboarding/wrapper';
+import React, { useState } from 'react';
+import { transition150 } from 'utils/motion-variants';
 
-import { useImportWalletContext } from '../import-wallet-context'
+import { useImportWalletContext } from '../import-wallet-context';
 
 const errorVariants: Variants = {
   hidden: { opacity: 0, y: -10, height: 0 },
   visible: { opacity: 1, y: 0, height: 'auto' },
-}
+};
 
 export const ImportWatchWallet = () => {
   const {
@@ -25,23 +25,23 @@ export const ImportWatchWallet = () => {
     watchWalletName,
     setWatchWalletName,
     moveToNextStep,
-  } = useImportWalletContext()
-  const [error, setError] = useState('')
+  } = useImportWalletContext();
+  const [error, setError] = useState('');
 
   const onImportWallet = () => {
     if (!watchWalletAddress) {
-      setError('')
-      return
+      setError('');
+      return;
     }
 
     if (!isValidWalletAddress(watchWalletAddress)) {
-      setError('Invalid public address, please enter a valid address')
-      return
+      setError('Invalid public address, please enter a valid address');
+      return;
     }
 
-    setError('')
-    moveToNextStep()
-  }
+    setError('');
+    moveToNextStep();
+  };
 
   return (
     <OnboardingWrapper
@@ -56,8 +56,8 @@ export const ImportWatchWallet = () => {
           <TextareaWithPaste
             autoFocus
             onChange={(value: string) => {
-              setError('')
-              setWatchWalletAddress(value)
+              setError('');
+              setWatchWalletAddress(value);
             }}
             value={watchWalletAddress}
             error={error}
@@ -104,5 +104,5 @@ export const ImportWatchWallet = () => {
         Start watching
       </Button>
     </OnboardingWrapper>
-  )
-}
+  );
+};

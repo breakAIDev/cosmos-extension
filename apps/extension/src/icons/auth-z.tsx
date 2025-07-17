@@ -1,16 +1,9 @@
-import { IconProps } from '@phosphor-icons/react'
-import React from 'react'
+import { IconProps } from '@phosphor-icons/react';
+import React from 'react';
 
 export const AuthZIcon = (props: IconProps) => {
   return (
-    <svg
-      width='24'
-      height='24'
-      viewBox='0 0 24 24'
-      fill='none'
-      xmlns='http://www.w3.org/2000/svg'
-      {...props}
-    >
+    <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
       <path
         d='M20.48 3.29414H7.31002L9.31002 5.29414H20.48V16.4641L22.24 18.2241C22.39 17.9441 22.48 17.6341 22.48 17.2941V5.29414C22.48 4.19414 21.58 3.29414 20.48 3.29414Z'
         fill='currentColor'
@@ -21,5 +14,5 @@ export const AuthZIcon = (props: IconProps) => {
         fill='currentColor'
       />
     </svg>
-  )
-}
+  );
+};

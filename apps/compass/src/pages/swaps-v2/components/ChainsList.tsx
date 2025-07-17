@@ -1,30 +1,30 @@
-import { Question } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import Text from 'components/text'
-import { SearchInput } from 'components/ui/input/search-input'
-import Fuse from 'fuse.js'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import { GenericLight } from 'images/logos'
-import { observer } from 'mobx-react-lite'
-import React, { useMemo } from 'react'
-import { Virtuoso } from 'react-virtuoso'
-import { SourceChain, SourceToken } from 'types/swap'
-import { imgOnError } from 'utils/imgOnError'
-import { isSidePanel } from 'utils/isSidePanel'
+import { Question } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import Text from 'components/text';
+import { SearchInput } from 'components/ui/input/search-input';
+import Fuse from 'fuse.js';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { GenericLight } from 'images/logos';
+import { observer } from 'mobx-react-lite';
+import React, { useMemo } from 'react';
+import { Virtuoso } from 'react-virtuoso';
+import { SourceChain, SourceToken } from 'types/swap';
+import { imgOnError } from 'utils/imgOnError';
+import { isSidePanel } from 'utils/isSidePanel';
 
 export type TokenAssociatedChain = {
-  chain: SourceChain
-  asset?: SourceToken
-}
+  chain: SourceChain;
+  asset?: SourceToken;
+};
 
 export type ListChainsProps = {
-  onChainSelect: (props: TokenAssociatedChain) => void
-  selectedChain?: SourceChain
-  selectedToken: SourceToken | null
-  chainsToShow?: TokenAssociatedChain[]
-  setSearchedChain: (chain: string) => void
-  searchedChain: string
-}
+  onChainSelect: (props: TokenAssociatedChain) => void;
+  selectedChain?: SourceChain;
+  selectedToken: SourceToken | null;
+  chainsToShow?: TokenAssociatedChain[];
+  setSearchedChain: (chain: string) => void;
+  searchedChain: string;
+};
 
 export function ChainCard({
   itemsLength,
@@ -35,24 +35,23 @@ export function ChainCard({
   selectedChain,
   selectedToken,
 }: {
-  tokenAssociatedChain: TokenAssociatedChain
-  index: number
-  itemsLength: number
-  setSearchedChain: (chain: string) => void
-  onChainSelect: (props: TokenAssociatedChain) => void
-  selectedChain?: SourceChain
-  selectedToken: SourceToken | null
+  tokenAssociatedChain: TokenAssociatedChain;
+  index: number;
+  itemsLength: number;
+  setSearchedChain: (chain: string) => void;
+  onChainSelect: (props: TokenAssociatedChain) => void;
+  selectedChain?: SourceChain;
+  selectedToken: SourceToken | null;
 }) {
-  const img = tokenAssociatedChain.chain.icon ?? GenericLight
-  const chainName = tokenAssociatedChain.chain.chainName
-  const isLast = index === itemsLength - 1
-  const defaultTokenLogo = useDefaultTokenLogo()
+  const img = tokenAssociatedChain.chain.icon ?? GenericLight;
+  const chainName = tokenAssociatedChain.chain.chainName;
+  const isLast = index === itemsLength - 1;
+  const defaultTokenLogo = useDefaultTokenLogo();
 
   const isSelected =
     !!selectedChain &&
     selectedChain.key === tokenAssociatedChain.chain.key &&
-    (!selectedToken ||
-      selectedToken.skipAsset?.denom === tokenAssociatedChain.asset?.skipAsset?.denom)
+    (!selectedToken || selectedToken.skipAsset?.denom === tokenAssociatedChain.asset?.skipAsset?.denom);
 
   return (
     <React.Fragment
@@ -60,31 +59,23 @@ export function ChainCard({
     >
       <div
         onClick={() => {
-          setSearchedChain('')
-          onChainSelect(tokenAssociatedChain)
+          setSearchedChain('');
+          onChainSelect(tokenAssociatedChain);
         }}
         className={classNames('flex flex-1 items-center py-3 cursor-pointer px-6', {
           'opacity-20': isSelected,
         })}
       >
         <div className='flex items-center flex-1'>
-          <img
-            src={img ?? defaultTokenLogo}
-            className='h-10 w-10 mr-3'
-            onError={imgOnError(defaultTokenLogo)}
-          />
-          <Text
-            size='md'
-            className='font-bold'
-            data-testing-id={`switch-chain-${chainName.toLowerCase()}-ele`}
-          >
+          <img src={img ?? defaultTokenLogo} className='h-10 w-10 mr-3' onError={imgOnError(defaultTokenLogo)} />
+          <Text size='md' className='font-bold' data-testing-id={`switch-chain-${chainName.toLowerCase()}-ele`}>
             {chainName}
           </Text>
         </div>
       </div>
       {!isLast && <div className='border-b border-gray-100 dark:border-gray-850 mx-6' />}
     </React.Fragment>
-  )
+  );
 }
 
 const ChainsListView = ({
@@ -100,15 +91,15 @@ const ChainsListView = ({
       threshold: 0.3,
       keys: ['chain.chainName'],
       shouldSort: false,
-    })
-  }, [chainsToShow])
+    });
+  }, [chainsToShow]);
 
   const filteredChains = useMemo(() => {
     if (!searchedChain) {
-      return chainsToShow ?? []
+      return chainsToShow ?? [];
     }
-    return chainsFuse?.search(searchedChain).map((chain) => chain.item) ?? []
-  }, [chainsFuse, searchedChain, chainsToShow])
+    return chainsFuse?.search(searchedChain).map((chain) => chain.item) ?? [];
+  }, [chainsFuse, searchedChain, chainsToShow]);
 
   return (
     <>
@@ -161,7 +152,7 @@ const ChainsListView = ({
         )}
       </div>
     </>
-  )
-}
+  );
+};
 
-export const ChainsList = observer(ChainsListView)
+export const ChainsList = observer(ChainsListView);

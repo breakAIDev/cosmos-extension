@@ -1,11 +1,5 @@
-import {
-  QueryFunction,
-  QueryKey,
-  useQuery,
-  UseQueryOptions,
-  UseQueryResult,
-} from '@tanstack/react-query'
-import browser from 'webextension-polyfill'
+import { QueryFunction, QueryKey, useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
+import browser from 'webextension-polyfill';
 
 export function useQueryCached<
   TQueryFnData = unknown,
@@ -20,17 +14,17 @@ export function useQueryCached<
   const queryData = useQuery(
     queryKey,
     async (qk) => {
-      const storageKey = qk.queryKey.toString()
-      const storage = await browser.storage.local.get(storageKey)
+      const storageKey = qk.queryKey.toString();
+      const storage = await browser.storage.local.get(storageKey);
       if (storage[storageKey]) {
-        return storage[storageKey]
+        return storage[storageKey];
       }
-      const data = await queryFunction(qk)
-      await browser.storage.local.set({ [storageKey]: data })
-      return data
+      const data = await queryFunction(qk);
+      await browser.storage.local.set({ [storageKey]: data });
+      return data;
     },
     options,
-  )
+  );
 
-  return queryData
+  return queryData;
 }

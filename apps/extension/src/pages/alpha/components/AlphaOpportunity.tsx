@@ -1,36 +1,36 @@
-import { BookmarkSimple, CheckCircle, EyeSlash } from '@phosphor-icons/react'
-import { EventName, PageName } from 'config/analytics'
-import { AnimatePresence, motion } from 'framer-motion'
-import { AlphaOpportunity as AlphaOpportunityType } from 'hooks/useAlphaOpportunities'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { cn } from 'utils/cn'
-import { opacityFadeInOut } from 'utils/motion-variants'
-import { mixpanelTrack } from 'utils/tracking'
+import { BookmarkSimple, CheckCircle, EyeSlash } from '@phosphor-icons/react';
+import { EventName, PageName } from 'config/analytics';
+import { AnimatePresence, motion } from 'framer-motion';
+import { AlphaOpportunity as AlphaOpportunityType } from 'hooks/useAlphaOpportunities';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { cn } from 'utils/cn';
+import { opacityFadeInOut } from 'utils/motion-variants';
+import { mixpanelTrack } from 'utils/tracking';
 
 import {
   alphaCardTransition,
   alphaCardVariants,
   animateBookMark,
   getBookMarkCloneId,
-} from '../chad-components/RaffleListing'
-import { useBookmarks } from '../context/bookmark-context'
-import { useFilters } from '../context/filter-context'
-import { getHostname } from '../utils'
-import { ALPHA_BOOKMARK_ID } from '../utils/constants'
-import { RaffleVisibilityStatus } from './alpha-timeline/use-raffle-status-map'
-import ListingFooter from './ListingFooter'
-import ListingImage from './ListingImage'
-import Tags from './Tags'
+} from '../chad-components/RaffleListing';
+import { useBookmarks } from '../context/bookmark-context';
+import { useFilters } from '../context/filter-context';
+import { getHostname } from '../utils';
+import { ALPHA_BOOKMARK_ID } from '../utils/constants';
+import { RaffleVisibilityStatus } from './alpha-timeline/use-raffle-status-map';
+import ListingFooter from './ListingFooter';
+import ListingImage from './ListingImage';
+import Tags from './Tags';
 
 export type AlphaOpportunityProps = AlphaOpportunityType & {
-  isBookmarked: boolean
-  pageName: PageName
-  isSearched?: boolean
-  onMarkRaffle?: (id: string, status: RaffleVisibilityStatus) => void
-  visibilityStatus?: RaffleVisibilityStatus
-}
+  isBookmarked: boolean;
+  pageName: PageName;
+  isSearched?: boolean;
+  onMarkRaffle?: (id: string, status: RaffleVisibilityStatus) => void;
+  visibilityStatus?: RaffleVisibilityStatus;
+};
 
-const exitDurationInSec = 0.4
+const exitDurationInSec = 0.4;
 const exitVariants = {
   exitLeft: {
     x: '-100%',
@@ -46,7 +46,7 @@ const exitVariants = {
       ease: 'easeInOut',
     },
   },
-}
+};
 
 export default function AlphaOpportunity(props: AlphaOpportunityProps) {
   const {
@@ -63,51 +63,41 @@ export default function AlphaOpportunity(props: AlphaOpportunityProps) {
     pageName,
     onMarkRaffle,
     visibilityStatus,
-  } = props
-  const { toggleBookmark, isBookmarked } = useBookmarks()
-  const {
-    setOpportunities,
-    setEcosystems,
-    selectedOpportunities,
-    selectedEcosystems,
-    openDetails,
-  } = useFilters()
+  } = props;
+  const { toggleBookmark, isBookmarked } = useBookmarks();
+  const { setOpportunities, setEcosystems, selectedOpportunities, selectedEcosystems, openDetails } = useFilters();
 
-  const isDragging = useRef(false)
-  const dragStartX = useRef<number | null>(null)
-  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null)
-  const bookMarkIconRef = useRef<SVGSVGElement>(null)
-  const bookMarkAnimationRef = useRef<Animation | null>(null)
-  const [isExiting, setIsExiting] = useState(false)
+  const isDragging = useRef(false);
+  const dragStartX = useRef<number | null>(null);
+  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
+  const bookMarkIconRef = useRef<SVGSVGElement>(null);
+  const bookMarkAnimationRef = useRef<Animation | null>(null);
+  const [isExiting, setIsExiting] = useState(false);
 
   const handleBookmarkClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
+    e.stopPropagation();
 
-    const prevBookMarked = isBookmarked(id)
-    const headerBookMarkIcon = document.getElementById(ALPHA_BOOKMARK_ID)
+    const prevBookMarked = isBookmarked(id);
+    const headerBookMarkIcon = document.getElementById(ALPHA_BOOKMARK_ID);
 
     if (!prevBookMarked && headerBookMarkIcon && bookMarkIconRef.current) {
-      bookMarkAnimationRef.current = animateBookMark(
-        id,
-        headerBookMarkIcon,
-        bookMarkIconRef.current,
-      )
+      bookMarkAnimationRef.current = animateBookMark(id, headerBookMarkIcon, bookMarkIconRef.current);
     }
 
-    toggleBookmark(id)
+    toggleBookmark(id);
     mixpanelTrack(EventName.Bookmark, {
       [!prevBookMarked ? 'bookmarkAdded' : 'bookmarkRemoved']: id,
       name: homepageDescription,
       page: PageName.Alpha,
-    })
-  }
+    });
+  };
 
   const handleClick = () => {
-    if (isDragging.current) return
+    if (isDragging.current) return;
 
     // if the opportunity is a post, open the details page:
     if (descriptionActions && descriptionActions !== 'NA') {
-      openDetails(props)
+      openDetails(props);
 
       // mixpanelTrack(EventName.PageView, {
       //   pageName: PageName.Post,
@@ -118,7 +108,7 @@ export default function AlphaOpportunity(props: AlphaOpportunityProps) {
       //   categories: [...(categoryFilter || [])],
       // })
 
-      return
+      return;
     }
     // if the opportunity only has an external link, open the link:
     if (relevantLinks?.[0]) {
@@ -130,10 +120,10 @@ export default function AlphaOpportunity(props: AlphaOpportunityProps) {
         alphaExternalURL: getHostname(relevantLinks[0]),
         ecosystem: [...(ecosystemFilter || [])],
         categories: [...(categoryFilter || [])],
-      })
-      window.open(relevantLinks[0], '_blank', 'noopener,noreferrer')
+      });
+      window.open(relevantLinks[0], '_blank', 'noopener,noreferrer');
 
-      return
+      return;
     }
 
     // else just register the click for the opportunity:
@@ -144,69 +134,69 @@ export default function AlphaOpportunity(props: AlphaOpportunityProps) {
       id: id,
       ecosystem: [...(ecosystemFilter || [])],
       categories: [...(categoryFilter || [])],
-    })
-  }
+    });
+  };
 
   const handleEcosystemClick = useCallback(
     (ecosystem: string) => {
-      setEcosystems([...(selectedEcosystems || []), ecosystem])
+      setEcosystems([...(selectedEcosystems || []), ecosystem]);
     },
     [selectedEcosystems, setEcosystems],
-  )
+  );
 
   const handleCategoryClick = useCallback(
     (category: string) => {
-      setOpportunities([...(selectedOpportunities || []), category])
+      setOpportunities([...(selectedOpportunities || []), category]);
     },
     [selectedOpportunities, setOpportunities],
-  )
+  );
 
   // Swipe gesture logic
   const handleDragStart = (_: any, info: { point: { x: number } }) => {
-    isDragging.current = true
-    dragStartX.current = info.point.x
-    setSwipeDirection(null)
-  }
+    isDragging.current = true;
+    dragStartX.current = info.point.x;
+    setSwipeDirection(null);
+  };
 
   const handleDrag = (_: any, info: { point: { x: number } }) => {
     if (dragStartX.current !== null) {
-      const deltaX = info.point.x - dragStartX.current
+      const deltaX = info.point.x - dragStartX.current;
       if (Math.abs(deltaX) > 10) {
-        setSwipeDirection(deltaX > 0 ? 'right' : 'left')
+        setSwipeDirection(deltaX > 0 ? 'right' : 'left');
       }
     }
-  }
+  };
 
   const handleDragEnd = (_: any, info: { offset: { x: number } }) => {
-    isDragging.current = false
-    dragStartX.current = null
+    isDragging.current = false;
+    dragStartX.current = null;
 
-    let status: RaffleVisibilityStatus | null = null
+    let status: RaffleVisibilityStatus | null = null;
     if (info.offset.x < -100) {
       // Swiped right: completed
-      status = 'completed'
+      status = 'completed';
     } else if (info.offset.x > 100) {
       // Swiped left: hide
-      status = 'hidden'
+      status = 'hidden';
     }
 
-    setIsExiting(!!status)
+    setIsExiting(!!status);
     setTimeout(() => {
-      status && onMarkRaffle?.(id, status)
-      setSwipeDirection(null)
-    }, (exitDurationInSec - 0.05) * 1000) // exit bit faster than the animation
-  }
+      status && onMarkRaffle?.(id, status);
+      setSwipeDirection(null);
+    }, (exitDurationInSec - 0.05) * 1000); // exit bit faster than the animation
+  };
 
   useEffect(() => {
     return () => {
       if (bookMarkAnimationRef.current) {
-        bookMarkAnimationRef.current.cancel()
-        document.getElementById(getBookMarkCloneId(id))?.remove()
+        bookMarkAnimationRef.current.cancel();
+        document.getElementById(getBookMarkCloneId(id))?.remove();
       }
-    }
-  }, [id])
+    };
+  }, [id]);
 
-  const enableDrag = !!onMarkRaffle && !visibilityStatus
+  const enableDrag = !!onMarkRaffle && !visibilityStatus;
 
   return (
     <motion.div
@@ -252,19 +242,11 @@ export default function AlphaOpportunity(props: AlphaOpportunityProps) {
           <div className='flex flex-col gap-1'>
             <span className='font-bold text-sm leading-snug'>{homepageDescription}</span>
 
-            <ListingFooter
-              endDate={endDate}
-              additionDate={additionDate}
-              relevantLinks={relevantLinks}
-            />
+            <ListingFooter endDate={endDate} additionDate={additionDate} relevantLinks={relevantLinks} />
           </div>
 
           <div className='size-12 rounded-lg bg-secondary overflow-hidden shrink-0'>
-            <ListingImage
-              ecosystemFilter={ecosystemFilter?.[0]}
-              categoryFilter={categoryFilter?.[0]}
-              image={image}
-            />
+            <ListingImage ecosystemFilter={ecosystemFilter?.[0]} categoryFilter={categoryFilter?.[0]} image={image} />
           </div>
         </div>
       </motion.div>
@@ -295,5 +277,5 @@ export default function AlphaOpportunity(props: AlphaOpportunityProps) {
         ) : null}
       </AnimatePresence>
     </motion.div>
-  )
+  );
 }

@@ -1,12 +1,12 @@
-import { Button } from 'components/ui/button'
-import { Checkbox } from 'components/ui/check-box'
-import { useDefaultTokenLogo } from 'hooks'
-import { Images } from 'images'
-import { OnboardingWrapper } from 'pages/onboarding/wrapper'
-import React, { useEffect } from 'react'
-import { imgOnError } from 'utils/imgOnError'
+import { Button } from 'components/ui/button';
+import { Checkbox } from 'components/ui/check-box';
+import { useDefaultTokenLogo } from 'hooks';
+import { Images } from 'images';
+import { OnboardingWrapper } from 'pages/onboarding/wrapper';
+import React, { useEffect } from 'react';
+import { imgOnError } from 'utils/imgOnError';
 
-import { LEDGER_NETWORK, useImportWalletContext } from '../import-wallet-context'
+import { LEDGER_NETWORK, useImportWalletContext } from '../import-wallet-context';
 
 export const ledgerNetworkOptions = [
   {
@@ -21,7 +21,7 @@ export const ledgerNetworkOptions = [
     title: 'EVM',
     subText: 'ETH, AVAX, BASE & 5 more',
   },
-]
+];
 
 export const SelectLedgerNetwork = () => {
   const {
@@ -33,14 +33,14 @@ export const SelectLedgerNetwork = () => {
     prevStep,
     currentStep,
     setAddresses,
-  } = useImportWalletContext()
+  } = useImportWalletContext();
 
   useEffect(() => {
-    setWalletAccounts(undefined)
+    setWalletAccounts(undefined);
     if (addresses && Object.keys(addresses).length > 0) {
-      setAddresses({})
+      setAddresses({});
     }
-  }, [])
+  }, []);
 
   return (
     <OnboardingWrapper
@@ -56,39 +56,35 @@ export const SelectLedgerNetwork = () => {
             checked={ledgerNetworks.has(network.id)}
             onCheckedChange={(checked) => {
               setLedgerNetworks((prev) => {
-                const newSet = new Set(prev)
+                const newSet = new Set(prev);
                 if (checked) {
-                  newSet.add(network.id)
+                  newSet.add(network.id);
                 } else {
-                  newSet.delete(network.id)
+                  newSet.delete(network.id);
                 }
 
-                return newSet
-              })
+                return newSet;
+              });
             }}
           />
         ))}
       </div>
 
-      <Button
-        disabled={ledgerNetworks.size === 0}
-        className='w-full mt-auto'
-        onClick={moveToNextStep}
-      >
+      <Button disabled={ledgerNetworks.size === 0} className='w-full mt-auto' onClick={moveToNextStep}>
         Proceed
       </Button>
     </OnboardingWrapper>
-  )
-}
+  );
+};
 
 const LedgerNetworkCard = (props: {
-  img?: string
-  title: string
-  subText: string
-  checked: boolean
-  onCheckedChange: (checked: boolean) => void
+  img?: string;
+  title: string;
+  subText: string;
+  checked: boolean;
+  onCheckedChange: (checked: boolean) => void;
 }) => {
-  const defaultTokenLogo = useDefaultTokenLogo()
+  const defaultTokenLogo = useDefaultTokenLogo();
 
   return (
     <label
@@ -108,11 +104,7 @@ const LedgerNetworkCard = (props: {
         <p className='text-sm font-medium text-muted-foreground'>{props.subText}</p>
       </div>
 
-      <Checkbox
-        className='ml-auto'
-        checked={props.checked}
-        onCheckedChange={props.onCheckedChange}
-      />
+      <Checkbox className='ml-auto' checked={props.checked} onCheckedChange={props.onCheckedChange} />
     </label>
-  )
-}
+  );
+};

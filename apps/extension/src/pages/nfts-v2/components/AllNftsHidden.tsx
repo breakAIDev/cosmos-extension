@@ -1,5 +1,5 @@
-import { EyeSlash } from '@phosphor-icons/react'
-import React from 'react'
+import { EyeSlash } from '@phosphor-icons/react';
+import React from 'react';
 
 export function AllNftsHidden() {
   return (
@@ -12,5 +12,5 @@ export function AllNftsHidden() {
         <p className='text-gray-300'>Looks like your all NFTs are hidden</p>
       </div>
     </div>
-  )
+  );
 }

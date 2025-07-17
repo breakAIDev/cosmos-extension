@@ -17,15 +17,15 @@ import {
   MarketDataStore,
   NmsStore,
   PriceStore,
-} from '@leapwallet/cosmos-wallet-store'
-import { AptosCoinDataStore } from '@leapwallet/cosmos-wallet-store/dist/bank/aptos-balance-store'
-import { SolanaCoinDataStore } from '@leapwallet/cosmos-wallet-store/dist/bank/solana-balance-store'
-import browser from 'webextension-polyfill'
+} from '@leapwallet/cosmos-wallet-store';
+import { AptosCoinDataStore } from '@leapwallet/cosmos-wallet-store/dist/bank/aptos-balance-store';
+import { SolanaCoinDataStore } from '@leapwallet/cosmos-wallet-store/dist/bank/solana-balance-store';
+import browser from 'webextension-polyfill';
 
-import { getStorageAdapter } from '../utils/storageAdapter'
-import { activeChainStore } from './active-chain-store'
-import { addressStore } from './address-store-instance'
-import { chainInfoStore } from './chain-infos-store'
+import { getStorageAdapter } from '../utils/storageAdapter';
+import { activeChainStore } from './active-chain-store';
+import { addressStore } from './address-store-instance';
+import { chainInfoStore } from './chain-infos-store';
 import {
   autoFetchedCW20DenomsStore,
   betaCW20DenomsStore,
@@ -38,36 +38,26 @@ import {
   erc20DenomsStore,
   erc404DenomsStore,
   rootDenomsStore,
-} from './denoms-store-instance'
-import { stakeEpochStore } from './epoch-store'
-import { selectedNetworkStore } from './selected-network-store'
+} from './denoms-store-instance';
+import { stakeEpochStore } from './epoch-store';
+import { selectedNetworkStore } from './selected-network-store';
 
-const app = 'extension'
-const version = browser.runtime.getManifest().version
-const storageAdapter = getStorageAdapter()
+const app = 'extension';
+const version = browser.runtime.getManifest().version;
+const storageAdapter = getStorageAdapter();
 
-export const chainFeatureFlagsStore = new ChainFeatureFlagsStore(app, version, storageAdapter)
-export const currencyStore = new CurrencyStore(storageAdapter)
-export const priceStore = new PriceStore(currencyStore)
-export const marketDataStore = new MarketDataStore(currencyStore)
-export const nmsStore = new NmsStore()
+export const chainFeatureFlagsStore = new ChainFeatureFlagsStore(app, version, storageAdapter);
+export const currencyStore = new CurrencyStore(storageAdapter);
+export const priceStore = new PriceStore(currencyStore);
+export const marketDataStore = new MarketDataStore(currencyStore);
+export const nmsStore = new NmsStore();
 
-export const ibcTraceFetcher = new IbcTraceFetcher(rootDenomsStore)
-export const aggregatedChainsStore = new AggregatedChainsStore(
-  app,
-  version,
-  storageAdapter,
-  chainFeatureFlagsStore,
-)
+export const ibcTraceFetcher = new IbcTraceFetcher(rootDenomsStore);
+export const aggregatedChainsStore = new AggregatedChainsStore(app, version, storageAdapter, chainFeatureFlagsStore);
 
-export const coingeckoIdsStore = new CoingeckoIdsStore(storageAdapter)
+export const coingeckoIdsStore = new CoingeckoIdsStore(storageAdapter);
 
-export const balanceAPIStore = new BalanceAPIStore(
-  chainInfoStore,
-  priceStore,
-  denomsStore,
-  coingeckoIdsStore,
-)
+export const balanceAPIStore = new BalanceAPIStore(chainInfoStore, priceStore, denomsStore, coingeckoIdsStore);
 
 export const balanceStore = new BalanceStore(
   addressStore,
@@ -84,7 +74,7 @@ export const balanceStore = new BalanceStore(
   currencyStore,
   coingeckoIdsStore,
   storageAdapter,
-)
+);
 
 export const cw20TokenBalanceStore = new CW20DenomBalanceStore(
   chainInfoStore,
@@ -103,10 +93,10 @@ export const cw20TokenBalanceStore = new CW20DenomBalanceStore(
   compassTokenTagsStore,
   currencyStore,
   coingeckoIdsStore,
-)
+);
 
-export const compassSeiEvmConfigStore = new CompassSeiEvmConfigStore()
-export const ankrChainMapStore = new AnkrChainMapStore()
+export const compassSeiEvmConfigStore = new CompassSeiEvmConfigStore();
+export const ankrChainMapStore = new AnkrChainMapStore();
 
 export const evmBalanceApiStore = new EVMBalanceAPIStore(
   chainInfoStore,
@@ -114,7 +104,7 @@ export const evmBalanceApiStore = new EVMBalanceAPIStore(
   denomsStore,
   betaERC20DenomsStore,
   coingeckoIdsStore,
-)
+);
 
 export const evmBalanceStore = new EvmBalanceStore(
   activeChainStore,
@@ -130,7 +120,7 @@ export const evmBalanceStore = new EvmBalanceStore(
   evmBalanceApiStore,
   currencyStore,
   coingeckoIdsStore,
-)
+);
 
 export const erc20TokenBalanceStore = new ERC20DenomBalanceStore(
   chainInfoStore,
@@ -153,14 +143,14 @@ export const erc20TokenBalanceStore = new ERC20DenomBalanceStore(
   compassTokenTagsStore,
   evmBalanceApiStore,
   coingeckoIdsStore,
-)
+);
 
 export const aptosBalanceApiStore = new AptosBalanceApiStore(
   chainInfoStore,
   priceStore,
   denomsStore,
   coingeckoIdsStore,
-)
+);
 
 export const aptosCoinDataStore = new AptosCoinDataStore(
   activeChainStore,
@@ -172,7 +162,7 @@ export const aptosCoinDataStore = new AptosCoinDataStore(
   aptosBalanceApiStore,
   currencyStore,
   coingeckoIdsStore,
-)
+);
 
 export const bitcoinBalanceStore = new BitcoinDataStore(
   activeChainStore,
@@ -183,7 +173,7 @@ export const bitcoinBalanceStore = new BitcoinDataStore(
   chainInfoStore,
   aggregatedChainsStore,
   currencyStore,
-)
+);
 
 export const solanaCoinDataStore = new SolanaCoinDataStore(
   activeChainStore,
@@ -194,4 +184,4 @@ export const solanaCoinDataStore = new SolanaCoinDataStore(
   chainInfoStore,
   currencyStore,
   coingeckoIdsStore,
-)
+);

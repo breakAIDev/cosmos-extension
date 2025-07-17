@@ -1,35 +1,32 @@
-import { BigNumber } from 'bignumber.js'
-import { observer } from 'mobx-react-lite'
-import React, { useMemo } from 'react'
-import { hideAssetsStore } from 'stores/hide-assets-store'
+import { BigNumber } from 'bignumber.js';
+import { observer } from 'mobx-react-lite';
+import React, { useMemo } from 'react';
+import { hideAssetsStore } from 'stores/hide-assets-store';
 
-import { useFormatCurrency } from '../../hooks/settings/useCurrency'
-import { Colors } from '../../theme/colors'
-import TokenCardSkeleton from '../Skeletons/TokenCardSkeleton'
-import Text from '../text'
+import { useFormatCurrency } from '../../hooks/settings/useCurrency';
+import { Colors } from '../../theme/colors';
+import TokenCardSkeleton from '../Skeletons/TokenCardSkeleton';
+import Text from '../text';
 
 function _PortfolioDistribution({
   stakeBalance,
   walletBalance,
   loading,
 }: {
-  stakeBalance: BigNumber | null
-  walletBalance: BigNumber | null
-  loading: boolean
+  stakeBalance: BigNumber | null;
+  walletBalance: BigNumber | null;
+  loading: boolean;
 }) {
-  const totalBalance = useMemo(
-    () => walletBalance?.plus(stakeBalance as BigNumber),
-    [stakeBalance, walletBalance],
-  )
+  const totalBalance = useMemo(() => walletBalance?.plus(stakeBalance as BigNumber), [stakeBalance, walletBalance]);
 
-  const threshold = useMemo(() => 3, [])
-  const [formatCurrency] = useFormatCurrency()
+  const threshold = useMemo(() => 3, []);
+  const [formatCurrency] = useFormatCurrency();
 
-  const walletBalancePct = walletBalance?.times(100).div(totalBalance as BigNumber)
-  const showLoader = walletBalance === null || loading === true
+  const walletBalancePct = walletBalance?.times(100).div(totalBalance as BigNumber);
+  const showLoader = walletBalance === null || loading === true;
 
   if (stakeBalance?.lte(0) && walletBalance?.lte(0) && !showLoader) {
-    return null
+    return null;
   }
 
   return (
@@ -52,10 +49,7 @@ function _PortfolioDistribution({
                 <div
                   className='h-[8px] rounded-l-2xl'
                   style={{
-                    width: `${(walletBalancePct.plus(threshold).gte(100)
-                      ? 100
-                      : walletBalancePct
-                    ).toString()}%`,
+                    width: `${(walletBalancePct.plus(threshold).gte(100) ? 100 : walletBalancePct).toString()}%`,
                     background: `${Colors.juno}`,
                   }}
                 ></div>
@@ -64,10 +58,7 @@ function _PortfolioDistribution({
           </div>
           <div className='flex justify-between'>
             <div>
-              <div
-                className='w-[8px] h-[8px] rounded-full inline-block'
-                style={{ background: Colors.juno }}
-              ></div>
+              <div className='w-[8px] h-[8px] rounded-full inline-block' style={{ background: Colors.juno }}></div>
               <div className='inline-block align-text-top ml-2'>
                 <Text size='sm' color='text-gray-400'>
                   Wallet Balance
@@ -97,7 +88,7 @@ function _PortfolioDistribution({
         </div>
       )}
     </div>
-  )
+  );
 }
 
-export const PortfolioDistribution = observer(_PortfolioDistribution)
+export const PortfolioDistribution = observer(_PortfolioDistribution);

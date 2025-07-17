@@ -1,8 +1,8 @@
-import { CaretUp } from '@phosphor-icons/react'
-import Text from 'components/text'
-import { AnimatePresence, motion } from 'framer-motion'
-import React from 'react'
-import { cn } from 'utils/cn'
+import { CaretUp } from '@phosphor-icons/react';
+import Text from 'components/text';
+import { AnimatePresence, motion } from 'framer-motion';
+import React from 'react';
+import { cn } from 'utils/cn';
 
 const BasicAccordion = ({
   title,
@@ -10,10 +10,10 @@ const BasicAccordion = ({
   isExpanded,
   toggleAccordion,
 }: {
-  title: string | React.ReactNode
-  children: React.ReactNode
-  isExpanded: boolean
-  toggleAccordion: () => void
+  title: string | React.ReactNode;
+  children: React.ReactNode;
+  isExpanded: boolean;
+  toggleAccordion: () => void;
 }) => {
   return (
     <div className='w-full flex-col bg-secondary-100 flex items-center justify-between p-4 gap-3 rounded-2xl overflow-hidden'>
@@ -25,10 +25,7 @@ const BasicAccordion = ({
       >
         <span className='text-sm font-medium'>{title}</span>
 
-        <CaretUp
-          size={16}
-          className={cn('transition-transform duration-300', !isExpanded && 'rotate-180')}
-        />
+        <CaretUp size={16} className={cn('transition-transform duration-300', !isExpanded && 'rotate-180')} />
       </div>
       <AnimatePresence initial={false}>
         {isExpanded && (
@@ -45,7 +42,7 @@ const BasicAccordion = ({
         )}
       </AnimatePresence>
     </div>
-  )
-}
+  );
+};
 
-export default BasicAccordion
+export default BasicAccordion;

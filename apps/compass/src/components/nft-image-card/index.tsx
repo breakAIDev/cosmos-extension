@@ -1,24 +1,24 @@
-import { ChainInfos } from '@leapwallet/cosmos-wallet-sdk'
-import Text from 'components/text'
-import { useActiveChain } from 'hooks/settings/useActiveChain'
-import { Images } from 'images'
-import React, { useState } from 'react'
-import { imgOnError } from 'utils/imgOnError'
+import { ChainInfos } from '@leapwallet/cosmos-wallet-sdk';
+import Text from 'components/text';
+import { useActiveChain } from 'hooks/settings/useActiveChain';
+import { Images } from 'images';
+import React, { useState } from 'react';
+import { imgOnError } from 'utils/imgOnError';
 
 export type NFTProps = {
   // eslint-disable-next-line no-unused-vars
-  onClick?: (NFFTMetadata: object) => void
-  imgSrc: string
+  onClick?: (NFFTMetadata: object) => void;
+  imgSrc: string;
   textNft?: {
-    name: string
-    description: string
-  }
-}
+    name: string;
+    description: string;
+  };
+};
 
 export default function NFTImageCard({ imgSrc, textNft, onClick }: NFTProps) {
-  const [imageIsLoading, setImageIsLoading] = useState(imgSrc ? true : false)
-  const [errorInLoadingMP4NFT, setErrorInLoadingMP4NFT] = useState(false)
-  const activeChain = useActiveChain()
+  const [imageIsLoading, setImageIsLoading] = useState(imgSrc ? true : false);
+  const [errorInLoadingMP4NFT, setErrorInLoadingMP4NFT] = useState(false);
+  const activeChain = useActiveChain();
 
   return (
     <div className='rounded-2xl' onClick={onClick}>
@@ -53,16 +53,12 @@ export default function NFTImageCard({ imgSrc, textNft, onClick }: NFTProps) {
             className='rounded-2xl p-4 flex-wrap  flex aspect-square  items-center bg-gray-400  justify-center'
             style={{ backgroundColor: ChainInfos[activeChain].theme.primaryColor }}
           >
-            <Text
-              size='md'
-              className='font-bold overflow-x-auto'
-              style={{ textOverflow: 'ellipsis' }}
-            >
+            <Text size='md' className='font-bold overflow-x-auto' style={{ textOverflow: 'ellipsis' }}>
               {textNft?.name}
             </Text>
           </div>
         )}
       </div>
     </div>
-  )
+  );
 }

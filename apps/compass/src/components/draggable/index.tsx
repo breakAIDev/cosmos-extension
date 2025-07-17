@@ -1,10 +1,10 @@
-import React from 'react'
-import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd'
+import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd';
+import React from 'react';
 
 interface PropTypes {
-  children?: React.ReactNode
+  children?: React.ReactNode;
   // eslint-disable-next-line no-unused-vars
-  onDragEnd: (result: DropResult) => void
+  onDragEnd: (result: DropResult) => void;
 }
 
 const DraggableContainer = (props: PropTypes) => {
@@ -19,7 +19,7 @@ const DraggableContainer = (props: PropTypes) => {
         )}
       </Droppable>
     </DragDropContext>
-  )
-}
+  );
+};
 
-export default DraggableContainer
+export default DraggableContainer;

@@ -1,15 +1,15 @@
-import { makeAutoObservable } from 'mobx'
+import { makeAutoObservable } from 'mobx';
 
 export class HomePageViewStore {
-  hasSeen = false
+  hasSeen = false;
 
   constructor() {
-    makeAutoObservable(this)
+    makeAutoObservable(this);
   }
 
   updateSeen(val: boolean) {
-    this.hasSeen = val
+    this.hasSeen = val;
   }
 }
 
-export const homePageViewStore = new HomePageViewStore()
+export const homePageViewStore = new HomePageViewStore();

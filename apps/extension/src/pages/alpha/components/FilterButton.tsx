@@ -1,13 +1,13 @@
-import { FunnelSimple } from '@phosphor-icons/react'
-import { AnimatePresence, motion } from 'framer-motion'
-import React from 'react'
+import { FunnelSimple } from '@phosphor-icons/react';
+import { AnimatePresence, motion } from 'framer-motion';
+import React from 'react';
 
 export default function FilterButton({
   setIsFilterDrawerOpen,
   filterCount,
 }: {
-  setIsFilterDrawerOpen: (isOpen: boolean) => void
-  filterCount: number
+  setIsFilterDrawerOpen: (isOpen: boolean) => void;
+  filterCount: number;
 }) {
   return (
     <motion.button
@@ -39,13 +39,11 @@ export default function FilterButton({
               }}
               className='overflow-hidden h-full flex items-center'
             >
-              <span className='text-gray-600 dark:text-gray-400 text-xs whitespace-nowrap'>
-                {filterCount}
-              </span>
+              <span className='text-gray-600 dark:text-gray-400 text-xs whitespace-nowrap'>{filterCount}</span>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
     </motion.button>
-  )
+  );
 }

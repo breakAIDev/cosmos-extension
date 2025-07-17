@@ -1,15 +1,8 @@
-import { IconProps } from '@phosphor-icons/react'
-import React from 'react'
+import { IconProps } from '@phosphor-icons/react';
+import React from 'react';
 
 export const GoogleColorIcon = (props: IconProps) => (
-  <svg
-    width='40'
-    height='40'
-    viewBox='0 0 40 40'
-    fill='none'
-    xmlns='http://www.w3.org/2000/svg'
-    {...props}
-  >
+  <svg width='40' height='40' viewBox='0 0 40 40' fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
     <path
       d='M36.6667 20.4008C36.6667 19.2526 36.5555 18.0673 36.3703 16.9561H20.3318V23.5122H29.5178C29.1474 25.6235 27.9251 27.4756 26.1101 28.6609L31.5921 32.9205C34.8146 29.9202 36.6667 25.5495 36.6667 20.4008Z'
       fill='#4280EF'
@@ -27,4 +20,4 @@ export const GoogleColorIcon = (props: IconProps) => (
       fill='#E54335'
     />
   </svg>
-)
+);

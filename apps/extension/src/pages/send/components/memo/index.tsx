@@ -1,14 +1,14 @@
-import { useGetChains } from '@leapwallet/cosmos-wallet-hooks'
-import { BTC_CHAINS, isAptosChain, isSolanaChain, isSuiChain } from '@leapwallet/cosmos-wallet-sdk'
-import { Plus } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import Text from 'components/text'
-import { useSendContext } from 'pages/send/context'
-import React from 'react'
+import { useGetChains } from '@leapwallet/cosmos-wallet-hooks';
+import { BTC_CHAINS, isAptosChain, isSolanaChain, isSuiChain } from '@leapwallet/cosmos-wallet-sdk';
+import { Plus } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import Text from 'components/text';
+import { useSendContext } from 'pages/send/context';
+import React from 'react';
 
 export const Memo = ({ containerClassname }: { containerClassname?: string }) => {
-  const { memo, setMemo, addressWarning, sendActiveChain } = useSendContext()
-  const chains = useGetChains()
+  const { memo, setMemo, addressWarning, sendActiveChain } = useSendContext();
+  const chains = useGetChains();
 
   if (
     isAptosChain(sendActiveChain) ||
@@ -17,7 +17,7 @@ export const Memo = ({ containerClassname }: { containerClassname?: string }) =>
     isSolanaChain(sendActiveChain) ||
     isSuiChain(sendActiveChain)
   ) {
-    return null
+    return null;
   }
 
   return (
@@ -44,5 +44,5 @@ export const Memo = ({ containerClassname }: { containerClassname?: string }) =>
         </div>
       )}
     </div>
-  )
-}
+  );
+};

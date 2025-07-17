@@ -1,15 +1,9 @@
-import classNames from 'classnames'
-import { motion } from 'framer-motion'
-import React from 'react'
-import { Colors } from 'theme/colors'
+import classNames from 'classnames';
+import { motion } from 'framer-motion';
+import React from 'react';
+import { Colors } from 'theme/colors';
 
-export function SwapSuccessfulIcon({
-  className,
-  size = '128',
-}: {
-  className?: string
-  size?: string
-}) {
+export function SwapSuccessfulIcon({ className, size = '128' }: { className?: string; size?: string }) {
   return (
     <motion.svg
       width={size}
@@ -40,5 +34,5 @@ export function SwapSuccessfulIcon({
         fill={Colors.white100}
       />
     </motion.svg>
-  )
+  );
 }

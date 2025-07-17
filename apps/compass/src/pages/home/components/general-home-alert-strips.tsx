@@ -1,24 +1,18 @@
-import { useActiveChain, useSeiLinkedAddressState } from '@leapwallet/cosmos-wallet-hooks'
-import { TestnetAlertStrip } from 'components/alert-strip'
-import { AlertStripV2 } from 'components/alert-strip/alert-strip-v2'
-import { ApiStatusWarningStrip } from 'components/alert-strip/ApiStatusWarningStrip'
-import { AGGREGATED_CHAIN_KEY } from 'config/constants'
-import { SHOW_LINK_ADDRESS_NUDGE } from 'config/storage-keys'
-import React, { useEffect } from 'react'
-import { globalSheetsStore } from 'stores/ui/global-sheets-store'
-import { AggregatedSupportedChain } from 'types/utility'
+import { useActiveChain, useSeiLinkedAddressState } from '@leapwallet/cosmos-wallet-hooks';
+import { TestnetAlertStrip } from 'components/alert-strip';
+import { AlertStripV2 } from 'components/alert-strip/alert-strip-v2';
+import { ApiStatusWarningStrip } from 'components/alert-strip/ApiStatusWarningStrip';
+import { AGGREGATED_CHAIN_KEY } from 'config/constants';
+import { SHOW_LINK_ADDRESS_NUDGE } from 'config/storage-keys';
+import React, { useEffect } from 'react';
+import { globalSheetsStore } from 'stores/ui/global-sheets-store';
+import { AggregatedSupportedChain } from 'types/utility';
 
-export const GeneralHomeAlertStirps = ({
-  evmStatus,
-  balanceError,
-}: {
-  evmStatus: string
-  balanceError: boolean
-}) => {
-  const activeChain = useActiveChain() as AggregatedSupportedChain
+export const GeneralHomeAlertStirps = ({ evmStatus, balanceError }: { evmStatus: string; balanceError: boolean }) => {
+  const activeChain = useActiveChain() as AggregatedSupportedChain;
   const { addressLinkState } = useSeiLinkedAddressState(
     activeChain === AGGREGATED_CHAIN_KEY ? 'seiTestnet2' : undefined,
-  )
+  );
 
   useEffect(() => {
     if (
@@ -26,9 +20,9 @@ export const GeneralHomeAlertStirps = ({
       evmStatus === 'success' &&
       localStorage.getItem(SHOW_LINK_ADDRESS_NUDGE) !== 'false'
     ) {
-      globalSheetsStore.setCopyAddressSheetOpen(true)
+      globalSheetsStore.setCopyAddressSheetOpen(true);
     }
-  }, [addressLinkState, evmStatus])
+  }, [addressLinkState, evmStatus]);
 
   return (
     <>
@@ -48,5 +42,5 @@ export const GeneralHomeAlertStirps = ({
 
       {balanceError && <ApiStatusWarningStrip />}
     </>
-  )
-}
+  );
+};

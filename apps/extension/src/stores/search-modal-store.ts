@@ -1,34 +1,34 @@
-import { makeAutoObservable } from 'mobx'
+import { makeAutoObservable } from 'mobx';
 
 type ActiveOption = {
-  active: number
-  lowLimit: number
-  highLimit: number
-}
+  active: number;
+  lowLimit: number;
+  highLimit: number;
+};
 
 export class SearchModalStore {
-  showModal = false
-  activeOption: ActiveOption = { active: 0, lowLimit: 0, highLimit: 0 }
-  enteredOption: number | null = null
+  showModal = false;
+  activeOption: ActiveOption = { active: 0, lowLimit: 0, highLimit: 0 };
+  enteredOption: number | null = null;
 
   constructor() {
-    makeAutoObservable(this)
+    makeAutoObservable(this);
   }
 
   setShowModal(showModal: boolean) {
-    this.showModal = showModal
+    this.showModal = showModal;
   }
 
   updateActiveOption(activeOption: Partial<ActiveOption>) {
     this.activeOption = {
       ...this.activeOption,
       ...activeOption,
-    }
+    };
   }
 
   setEnteredOption(enteredOption: number | null) {
-    this.enteredOption = enteredOption
+    this.enteredOption = enteredOption;
   }
 }
 
-export const searchModalStore = new SearchModalStore()
+export const searchModalStore = new SearchModalStore();

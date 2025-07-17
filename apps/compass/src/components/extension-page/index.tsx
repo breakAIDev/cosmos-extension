@@ -1,11 +1,11 @@
-import React, { PropsWithChildren, ReactNode } from 'react'
-import { cn } from 'utils/cn'
-import { sidePanel } from 'utils/isSidePanel'
+import React, { PropsWithChildren, ReactNode } from 'react';
+import { cn } from 'utils/cn';
+import { sidePanel } from 'utils/isSidePanel';
 
 type ExtensionPageProps = {
-  children?: ReactNode
-  className?: string
-}
+  children?: ReactNode;
+  className?: string;
+};
 
 export default function ExtensionPage(props: PropsWithChildren<ExtensionPageProps>) {
   return (
@@ -18,5 +18,5 @@ export default function ExtensionPage(props: PropsWithChildren<ExtensionPageProp
     >
       {props.children}
     </div>
-  )
+  );
 }

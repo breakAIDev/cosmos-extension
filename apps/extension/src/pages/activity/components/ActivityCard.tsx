@@ -1,27 +1,27 @@
-import { ActivityCardContent } from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { CaretRight } from '@phosphor-icons/react'
-import { default as classNames } from 'classnames'
-import { useActivityImage } from 'hooks/activity/useActivityImage'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import React from 'react'
-import { hideAssetsStore } from 'stores/hide-assets-store'
-import { cn } from 'utils/cn'
-import { formatTokenAmount } from 'utils/strings'
+import { ActivityCardContent } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { CaretRight } from '@phosphor-icons/react';
+import { default as classNames } from 'classnames';
+import { useActivityImage } from 'hooks/activity/useActivityImage';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import React from 'react';
+import { hideAssetsStore } from 'stores/hide-assets-store';
+import { cn } from 'utils/cn';
+import { formatTokenAmount } from 'utils/strings';
 
-import { ActivityIcon } from './index'
+import { ActivityIcon } from './index';
 
 export type ActivityCardProps = {
-  content: ActivityCardContent
-  showLoader?: boolean
-  onClick?: () => void
-  isSuccessful: boolean
-  containerClassNames?: string
-  forceChain?: SupportedChain
-  titleClassName?: string
-  imgSize?: 'sm' | 'md' | 'lg'
-}
+  content: ActivityCardContent;
+  showLoader?: boolean;
+  onClick?: () => void;
+  isSuccessful: boolean;
+  containerClassNames?: string;
+  forceChain?: SupportedChain;
+  titleClassName?: string;
+  imgSize?: 'sm' | 'md' | 'lg';
+};
 
 function ActivityCardView({
   content,
@@ -44,21 +44,18 @@ function ActivityCardView({
     img: customImage,
     secondaryImg,
     receivedTokenInfo,
-  } = content
+  } = content;
 
-  const defaultImg = useActivityImage(txType, forceChain)
-  const img = customImage || defaultImg
+  const defaultImg = useActivityImage(txType, forceChain);
+  const img = customImage || defaultImg;
 
   const sentAmountInfo =
-    sentAmount && sentTokenInfo ? formatTokenAmount(sentAmount, sentTokenInfo.coinDenom) : undefined
+    sentAmount && sentTokenInfo ? formatTokenAmount(sentAmount, sentTokenInfo.coinDenom) : undefined;
   const receivedAmountInfo =
-    receivedAmount && receivedTokenInfo
-      ? formatTokenAmount(receivedAmount, receivedTokenInfo.coinDenom)
-      : undefined
+    receivedAmount && receivedTokenInfo ? formatTokenAmount(receivedAmount, receivedTokenInfo.coinDenom) : undefined;
 
-  const balanceReduced = txType === 'delegate' || txType === 'send' || txType === 'liquidity/add'
-  const balanceIncreased =
-    txType === 'undelegate' || txType === 'receive' || txType === 'liquidity/remove'
+  const balanceReduced = txType === 'delegate' || txType === 'send' || txType === 'liquidity/add';
+  const balanceIncreased = txType === 'undelegate' || txType === 'receive' || txType === 'liquidity/remove';
 
   return (
     <button
@@ -108,8 +105,7 @@ function ActivityCardView({
                     'text-accent-success': balanceIncreased,
                   })}
                 >
-                  {balanceReduced && '-'} $
-                  {hideAssetsStore.formatHideBalance(Number(sentUsdValue).toFixed(2))}
+                  {balanceReduced && '-'} ${hideAssetsStore.formatHideBalance(Number(sentUsdValue).toFixed(2))}
                 </p>
               )}
 
@@ -124,7 +120,7 @@ function ActivityCardView({
         {onClick ? <CaretRight size={12} className='text-muted-foreground' /> : null}
       </div>
     </button>
-  )
+  );
 }
 
-export const ActivityCard = observer(ActivityCardView)
+export const ActivityCard = observer(ActivityCardView);

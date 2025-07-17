@@ -1,15 +1,15 @@
-import { NativeDenom } from '@leapwallet/cosmos-wallet-sdk'
-import { motion } from 'framer-motion'
-import React from 'react'
+import { NativeDenom } from '@leapwallet/cosmos-wallet-sdk';
+import { motion } from 'framer-motion';
+import React from 'react';
 
-import { ManuallyAddedTokensTab } from './ManuallyAddedTokensTab'
-import { SupportedToken } from './SupportedTokens'
-import { SupportedTokensTab } from './SupportedTokensTab'
+import { ManuallyAddedTokensTab } from './ManuallyAddedTokensTab';
+import { SupportedToken } from './SupportedTokens';
+import { SupportedTokensTab } from './SupportedTokensTab';
 
 const tabs = [
   { label: 'Supported', value: 'supported' },
   { label: 'Manually added', value: 'manually-added' },
-]
+];
 
 export const ManageTokensTabs = ({
   activeTab,
@@ -23,16 +23,16 @@ export const ManageTokensTabs = ({
   searchedText,
   fetchingContract,
 }: {
-  activeTab: string
-  setActiveTab: (tab: string) => void
-  filteredSupportedTokens: SupportedToken[]
-  filteredManuallyAddedTokens: NativeDenom[]
-  fetchedTokens: string[]
-  handleToggleChange: (isEnabled: boolean, coinMinimalDenom: string) => Promise<void>
-  onDeleteClick: (token: NativeDenom) => void
-  handleAddNewTokenClick: () => void
-  searchedText: string
-  fetchingContract: boolean
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+  filteredSupportedTokens: SupportedToken[];
+  filteredManuallyAddedTokens: NativeDenom[];
+  fetchedTokens: string[];
+  handleToggleChange: (isEnabled: boolean, coinMinimalDenom: string) => Promise<void>;
+  onDeleteClick: (token: NativeDenom) => void;
+  handleAddNewTokenClick: () => void;
+  searchedText: string;
+  fetchingContract: boolean;
 }) => {
   return (
     <>
@@ -44,7 +44,7 @@ export const ManageTokensTabs = ({
               tab.value === activeTab ? 'text-accent-green' : 'text-muted-foreground'
             }`}
             onClick={() => {
-              setActiveTab(tab.value)
+              setActiveTab(tab.value);
             }}
           >
             <div className='relative w-fit px-2 pb-3'>
@@ -81,5 +81,5 @@ export const ManageTokensTabs = ({
         />
       )}
     </>
-  )
-}
+  );
+};

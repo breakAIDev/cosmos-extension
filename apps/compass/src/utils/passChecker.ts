@@ -1,7 +1,7 @@
-import { zxcvbn, zxcvbnOptions } from '@zxcvbn-ts/core'
-import zxcvbnCommonPackage from '@zxcvbn-ts/language-common'
-import zxcvbnDePackage from '@zxcvbn-ts/language-de'
-import zxcvbnEnPackage from '@zxcvbn-ts/language-en'
+import { zxcvbn, zxcvbnOptions } from '@zxcvbn-ts/core';
+import zxcvbnCommonPackage from '@zxcvbn-ts/language-common';
+import zxcvbnDePackage from '@zxcvbn-ts/language-de';
+import zxcvbnEnPackage from '@zxcvbn-ts/language-en';
 
 /**
  * check out https://zxcvbn-ts.github.io/zxcvbn/guide/getting-started/
@@ -17,8 +17,8 @@ const options = {
   graphs: zxcvbnCommonPackage.adjacencyGraphs,
   useLevenshteinDistance: true,
   translations: zxcvbnEnPackage.translations,
-}
-zxcvbnOptions.setOptions(options)
+};
+zxcvbnOptions.setOptions(options);
 
 /**
  *
@@ -26,6 +26,6 @@ zxcvbnOptions.setOptions(options)
  * @returns number - The score of the password strength which ranges between [0-4]
  */
 export const getPassScore = (password: string) => {
-  const result = zxcvbn(password)
-  return result.score
-}
+  const result = zxcvbn(password);
+  return result.score;
+};

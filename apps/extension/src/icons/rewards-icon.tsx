@@ -1,5 +1,5 @@
-import { IconProps } from '@phosphor-icons/react'
-import React from 'react'
+import { IconProps } from '@phosphor-icons/react';
+import React from 'react';
 
 export const RewardsIcon = (props: IconProps) => {
   return (
@@ -34,5 +34,5 @@ export const RewardsIcon = (props: IconProps) => {
         </g>
       </g>
     </svg>
-  )
-}
+  );
+};

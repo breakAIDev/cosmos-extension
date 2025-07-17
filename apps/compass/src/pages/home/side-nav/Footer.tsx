@@ -1,9 +1,9 @@
-import Text from 'components/text'
-import { observer } from 'mobx-react-lite'
-import React from 'react'
-import { isCompassWallet } from 'utils/isCompassWallet'
+import Text from 'components/text';
+import { observer } from 'mobx-react-lite';
+import React from 'react';
+import { isCompassWallet } from 'utils/isCompassWallet';
 
-import VersionIndicator from './VersionIndicator'
+import VersionIndicator from './VersionIndicator';
 
 export const Footer = observer(() => {
   return (
@@ -13,5 +13,5 @@ export const Footer = observer(() => {
       </Text>
       <VersionIndicator />
     </div>
-  )
-})
+  );
+});

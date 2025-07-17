@@ -1,14 +1,14 @@
-import { X } from '@phosphor-icons/react'
-import { Button } from 'components/ui/button'
-import { SearchInput } from 'components/ui/input/search-input'
-import { AnimatePresence, motion } from 'framer-motion'
-import { useQueryParams } from 'hooks/useQuery'
-import { SearchIcon } from 'icons/search-icon'
-import { TuneIcon } from 'icons/tune-icon'
-import React, { useState } from 'react'
-import { cn } from 'utils/cn'
-import { transition250 } from 'utils/motion-variants'
-import { queryParams } from 'utils/query-params'
+import { X } from '@phosphor-icons/react';
+import { Button } from 'components/ui/button';
+import { SearchInput } from 'components/ui/input/search-input';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useQueryParams } from 'hooks/useQuery';
+import { SearchIcon } from 'icons/search-icon';
+import { TuneIcon } from 'icons/tune-icon';
+import React, { useState } from 'react';
+import { cn } from 'utils/cn';
+import { transition250 } from 'utils/motion-variants';
+import { queryParams } from 'utils/query-params';
 
 export enum StatusFilter {
   Live = 'live',
@@ -29,7 +29,7 @@ const quickFilters = [
     label: 'Ended',
     value: StatusFilter.Ended,
   },
-]
+];
 
 export const FilterButton = (props: React.ComponentProps<typeof Button>) => {
   return (
@@ -44,13 +44,13 @@ export const FilterButton = (props: React.ComponentProps<typeof Button>) => {
     >
       {props.children}
     </Button>
-  )
-}
+  );
+};
 
 const searchInputVariants = {
   hidden: { opacity: 0, height: 0 },
   visible: { opacity: 1, height: 'auto' },
-}
+};
 
 export const Searchbar = (props: { showSearch: boolean; setSearch: (search: string) => void }) => {
   return (
@@ -73,13 +73,13 @@ export const Searchbar = (props: { showSearch: boolean; setSearch: (search: stri
         </motion.div>
       ) : null}
     </AnimatePresence>
-  )
-}
+  );
+};
 
 const searchButtonVariants = {
   hidden: { opacity: 0, scale: 0.95, rotate: 90 },
   visible: { opacity: 1, scale: 1, rotate: 0 },
-}
+};
 
 export const SearchToggleIcon = (props: { showSearch: boolean; className?: string }) => {
   return (
@@ -109,18 +109,18 @@ export const SearchToggleIcon = (props: { showSearch: boolean; className?: strin
       )}
       <span className='sr-only'>Search</span>
     </AnimatePresence>
-  )
-}
+  );
+};
 
 export const ChadExclusivesFilters = (props: {
-  className?: string
-  setIsFilterDrawerOpen: (open: boolean) => void
-  setSearch: (search: string) => void
+  className?: string;
+  setIsFilterDrawerOpen: (open: boolean) => void;
+  setSearch: (search: string) => void;
 }) => {
-  const [showSearch, setShowSearch] = useState(false)
-  const params = useQueryParams()
+  const [showSearch, setShowSearch] = useState(false);
+  const params = useQueryParams();
 
-  const status = params.get(queryParams.alphaDateStatus) as StatusFilter | null
+  const status = params.get(queryParams.alphaDateStatus) as StatusFilter | null;
 
   return (
     <div className={cn('flex flex-col', props.className)}>
@@ -131,14 +131,13 @@ export const ChadExclusivesFilters = (props: {
               key={filter.value}
               className={cn(
                 'px-4',
-                status === filter.value &&
-                  'bg-secondary-500 ring-muted-foreground/75 ring-1 text-foreground',
+                status === filter.value && 'bg-secondary-500 ring-muted-foreground/75 ring-1 text-foreground',
               )}
               onClick={() => {
                 if (status === filter.value) {
-                  params.remove(queryParams.alphaDateStatus)
+                  params.remove(queryParams.alphaDateStatus);
                 } else {
-                  params.set(queryParams.alphaDateStatus, filter.value)
+                  params.set(queryParams.alphaDateStatus, filter.value);
                 }
               }}
             >
@@ -150,8 +149,8 @@ export const ChadExclusivesFilters = (props: {
         <FilterButton
           className='rounded-full ml-auto'
           onClick={() => {
-            setShowSearch(!showSearch)
-            props.setSearch('')
+            setShowSearch(!showSearch);
+            props.setSearch('');
           }}
         >
           <SearchToggleIcon showSearch={showSearch} />
@@ -168,5 +167,5 @@ export const ChadExclusivesFilters = (props: {
 
       <Searchbar showSearch={showSearch} setSearch={props.setSearch} />
     </div>
-  )
-}
+  );
+};

@@ -1,12 +1,12 @@
-import { ErrorCard } from 'components/ErrorCard'
-import { LoaderAnimation } from 'components/loader/Loader'
-import React, { ReactNode } from 'react'
+import { ErrorCard } from 'components/ErrorCard';
+import { LoaderAnimation } from 'components/loader/Loader';
+import React, { ReactNode } from 'react';
 
 type FooterProps = {
-  children: ReactNode
-  error?: string
-  isFetching?: boolean
-}
+  children: ReactNode;
+  error?: string;
+  isFetching?: boolean;
+};
 
 export function Footer({ children, error, isFetching }: FooterProps) {
   return (
@@ -19,5 +19,5 @@ export function Footer({ children, error, isFetching }: FooterProps) {
 
       {!isFetching ? <>{children}</> : <LoaderAnimation color='#E18881' />}
     </div>
-  )
+  );
 }

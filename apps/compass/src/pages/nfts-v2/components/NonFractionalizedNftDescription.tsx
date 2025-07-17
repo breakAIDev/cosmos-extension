@@ -1,19 +1,16 @@
-import { NftAttribute } from '@leapwallet/cosmos-wallet-hooks'
-import { CardDivider } from '@leapwallet/leap-ui'
-import { ProposalDescription } from 'components/proposal-description'
-import React from 'react'
+import { NftAttribute } from '@leapwallet/cosmos-wallet-hooks';
+import { CardDivider } from '@leapwallet/leap-ui';
+import { ProposalDescription } from 'components/proposal-description';
+import React from 'react';
 
-import { NftDetailsType } from '../context'
+import { NftDetailsType } from '../context';
 
 export type NonFractionalizedNftDescriptionProps = {
-  nftDetails: NftDetailsType
-  color: string
-}
+  nftDetails: NftDetailsType;
+  color: string;
+};
 
-export function NonFractionalizedNftDescription({
-  nftDetails,
-  color,
-}: NonFractionalizedNftDescriptionProps) {
+export function NonFractionalizedNftDescription({ nftDetails, color }: NonFractionalizedNftDescriptionProps) {
   return (
     <>
       <ProposalDescription
@@ -34,26 +31,19 @@ export function NonFractionalizedNftDescription({
           <div className='flex flex-wrap gap-[10px]'>
             {nftDetails.attributes.map((m: NftAttribute, index: number) => {
               if (!m.trait_type || !m.value) {
-                return null
+                return null;
               }
 
               return (
-                <div
-                  key={index}
-                  className='rounded-xl px-3 py-2 dark:bg-gray-900 bg-gray-100 mr-2 min-w-[80px]'
-                >
-                  <div className='text-gray-400 text-sm capitalize'>
-                    {(m.trait_type ?? '').toLowerCase()}
-                  </div>
-                  <div className='text-gray-900 text-sm dark:text-white-100 font-bold'>
-                    {m.value ?? ''}
-                  </div>
+                <div key={index} className='rounded-xl px-3 py-2 dark:bg-gray-900 bg-gray-100 mr-2 min-w-[80px]'>
+                  <div className='text-gray-400 text-sm capitalize'>{(m.trait_type ?? '').toLowerCase()}</div>
+                  <div className='text-gray-900 text-sm dark:text-white-100 font-bold'>{m.value ?? ''}</div>
                 </div>
-              )
+              );
             })}
           </div>
         </>
       )}
     </>
-  )
+  );
 }

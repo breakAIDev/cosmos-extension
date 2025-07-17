@@ -1,15 +1,15 @@
-import { makeAutoObservable } from 'mobx'
+import { makeAutoObservable } from 'mobx';
 
 class ImportWatchWalletSeedPopupStore {
-  showPopup: boolean = false
+  showPopup: boolean = false;
 
   constructor() {
-    makeAutoObservable(this)
+    makeAutoObservable(this);
   }
 
   setShowPopup(showPopup: boolean) {
-    this.showPopup = showPopup
+    this.showPopup = showPopup;
   }
 }
 
-export const importWatchWalletSeedPopupStore = new ImportWatchWalletSeedPopupStore()
+export const importWatchWalletSeedPopupStore = new ImportWatchWalletSeedPopupStore();

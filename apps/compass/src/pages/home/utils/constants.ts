@@ -1,6 +1,6 @@
-import { InitialFaucetResp } from './types'
+import { InitialFaucetResp } from './types';
 
 export const initialFaucetResp: InitialFaucetResp = {
   msg: '',
   status: null,
-}
+};

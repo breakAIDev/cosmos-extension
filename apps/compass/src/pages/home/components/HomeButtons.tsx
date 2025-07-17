@@ -1,21 +1,21 @@
-import ClickableIcon from 'components/clickable-icons'
-import { useHardCodedActions } from 'components/search-modal'
-import { PageName } from 'config/analytics'
-import CardIcon from 'icons/card-icon'
-import { DollarIcon } from 'icons/dollar-icon'
-import { SendIcon } from 'icons/send-icon'
-import { SwapIcon } from 'icons/swap-icon'
-import React, { useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import ClickableIcon from 'components/clickable-icons';
+import { useHardCodedActions } from 'components/search-modal';
+import { PageName } from 'config/analytics';
+import CardIcon from 'icons/card-icon';
+import { DollarIcon } from 'icons/dollar-icon';
+import { SendIcon } from 'icons/send-icon';
+import { SwapIcon } from 'icons/swap-icon';
+import React, { useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export function HomeButtons() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-  const { onSendClick, handleBuyClick, handleSwapClick } = useHardCodedActions()
+  const { onSendClick, handleBuyClick, handleSwapClick } = useHardCodedActions();
 
   const handleStakeClick = useCallback(() => {
-    navigate('/stake')
-  }, [navigate])
+    navigate('/stake');
+  }, [navigate]);
 
   return (
     <div className={'flex flex-row justify-evenly mb-5 px-7 w-full'}>
@@ -28,5 +28,5 @@ export function HomeButtons() {
       />
       <ClickableIcon label='Stake' icon={DollarIcon} onClick={handleStakeClick} />
     </div>
-  )
+  );
 }

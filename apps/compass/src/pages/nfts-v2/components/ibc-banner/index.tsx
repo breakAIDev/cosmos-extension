@@ -4,60 +4,60 @@ import {
   useChainsStore,
   useCustomChannels,
   useDefaultChannelId,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import classNames from 'classnames'
-import { ActionInputWithPreview } from 'components/action-input-with-preview'
-import Tooltip from 'components/better-tooltip'
-import BottomModal from 'components/bottom-modal'
-import DisclosureContainer from 'components/disclosure-container'
-import { LoaderAnimation } from 'components/loader/Loader'
-import RadioGroup from 'components/radio-group'
-import Text from 'components/text'
-import { Images } from 'images'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { Colors } from 'theme/colors'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import classNames from 'classnames';
+import { ActionInputWithPreview } from 'components/action-input-with-preview';
+import Tooltip from 'components/better-tooltip';
+import BottomModal from 'components/bottom-modal';
+import DisclosureContainer from 'components/disclosure-container';
+import { LoaderAnimation } from 'components/loader/Loader';
+import RadioGroup from 'components/radio-group';
+import Text from 'components/text';
+import { Images } from 'images';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Colors } from 'theme/colors';
 
 type AddIBCChannelProps = {
-  targetChain: string
+  targetChain: string;
   // eslint-disable-next-line no-unused-vars
-  onAddComplete: (value: string) => void
-}
+  onAddComplete: (value: string) => void;
+};
 
 const AddIBCChannel: React.FC<AddIBCChannelProps> = ({ targetChain, onAddComplete }) => {
-  const [value, setValue] = useState('')
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
-  const [message, setMessage] = useState<string>('')
+  const [value, setValue] = useState('');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [message, setMessage] = useState<string>('');
 
   const addCustomChannel = useAddCustomChannel({
     targetChain,
-  })
-  const activeChain = useActiveChain()
+  });
+  const activeChain = useActiveChain();
 
-  const { chains } = useChainsStore()
-  const activeChainInfo = chains[activeChain]
+  const { chains } = useChainsStore();
+  const activeChainInfo = chains[activeChain];
 
   const handleAddChannel = useCallback(
     async (channelId: string) => {
-      setStatus('loading')
+      setStatus('loading');
       try {
-        const result = await addCustomChannel(channelId)
+        const result = await addCustomChannel(channelId);
         if (result.success) {
-          onAddComplete(result.channel)
-          setValue('')
-          setStatus('success')
-          setMessage(result.message)
+          onAddComplete(result.channel);
+          setValue('');
+          setStatus('success');
+          setMessage(result.message);
         } else {
-          setStatus('error')
-          setMessage(result.message)
+          setStatus('error');
+          setMessage(result.message);
         }
       } catch (e) {
-        setStatus('error')
-        setMessage('Something went wrong')
+        setStatus('error');
+        setMessage('Something went wrong');
       }
     },
     [addCustomChannel, onAddComplete],
-  )
+  );
 
   return (
     <>
@@ -71,23 +71,23 @@ const AddIBCChannel: React.FC<AddIBCChannelProps> = ({ targetChain, onAddComplet
         placeholder='Enter source channel ID'
         onAction={(_, action, value) => {
           if (action === 'Clear') {
-            setValue('')
-            setStatus('idle')
-            setMessage('')
+            setValue('');
+            setStatus('idle');
+            setMessage('');
           } else {
-            handleAddChannel(value)
+            handleAddChannel(value);
           }
         }}
         onChange={(e) => {
-          setValue(e.target.value)
+          setValue(e.target.value);
           if (status === 'error') {
-            setStatus('idle')
-            setMessage('')
+            setStatus('idle');
+            setMessage('');
           }
         }}
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
-            handleAddChannel(value)
+            handleAddChannel(value);
           }
         }}
       />
@@ -98,72 +98,64 @@ const AddIBCChannel: React.FC<AddIBCChannelProps> = ({ targetChain, onAddComplet
         </strong>{' '}
         for channel-24 on {activeChainInfo.chainName}
       </p>
-      {status === 'error' ? (
-        <p className='text-xs mt-2 text-red-300 font-medium'>{message}</p>
-      ) : null}
-      {status === 'success' ? (
-        <p className='text-xs mt-2 text-green-300 font-medium'>{message}</p>
-      ) : null}
+      {status === 'error' ? <p className='text-xs mt-2 text-red-300 font-medium'>{message}</p> : null}
+      {status === 'success' ? <p className='text-xs mt-2 text-green-300 font-medium'>{message}</p> : null}
     </>
-  )
-}
+  );
+};
 
 type IBCSettingsProps = {
-  className?: string
-  targetChain: SupportedChain
+  className?: string;
+  targetChain: SupportedChain;
   // eslint-disable-next-line no-unused-vars
-  onSelectChannel: (channelId: string | undefined) => void
-}
+  onSelectChannel: (channelId: string | undefined) => void;
+};
 
-export const IBCSettings: React.FC<IBCSettingsProps> = ({
-  className,
-  targetChain,
-  onSelectChannel,
-}) => {
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+export const IBCSettings: React.FC<IBCSettingsProps> = ({ className, targetChain, onSelectChannel }) => {
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   // this will be null when data is loading
-  const [defaultChannelId, setDefaultChannelId] = useState<string | undefined | null>(null)
-  const [customChannelId, setCustomChannelId] = useState('')
+  const [defaultChannelId, setDefaultChannelId] = useState<string | undefined | null>(null);
+  const [customChannelId, setCustomChannelId] = useState('');
 
-  const { chains } = useChainsStore()
-  const sourceChain = useActiveChain()
+  const { chains } = useChainsStore();
+  const sourceChain = useActiveChain();
 
-  const sourceChainInfo = chains[sourceChain]
-  const targetChainInfo = chains[targetChain]
+  const sourceChainInfo = chains[sourceChain];
+  const targetChainInfo = chains[targetChain];
 
-  const customChannels = useCustomChannels()
+  const customChannels = useCustomChannels();
 
-  const { data, status } = useDefaultChannelId(sourceChain, targetChain)
+  const { data, status } = useDefaultChannelId(sourceChain, targetChain);
 
   useEffect(() => {
     if (status === 'success') {
-      setDefaultChannelId(data)
+      setDefaultChannelId(data);
     } else if (status === 'error') {
-      setDefaultChannelId(undefined)
+      setDefaultChannelId(undefined);
     }
-  }, [data, status])
+  }, [data, status]);
 
   const handleClick = useCallback(() => {
-    setIsSettingsOpen((prev) => !prev)
-  }, [setIsSettingsOpen])
+    setIsSettingsOpen((prev) => !prev);
+  }, [setIsSettingsOpen]);
 
   const handleSelectChannel = useCallback(
     (value: string) => {
-      setCustomChannelId(value)
+      setCustomChannelId(value);
       if (value === defaultChannelId && defaultChannelId !== undefined) {
-        onSelectChannel(undefined)
+        onSelectChannel(undefined);
       } else {
-        onSelectChannel(value)
+        onSelectChannel(value);
       }
     },
     [defaultChannelId, onSelectChannel],
-  )
+  );
 
   useEffect(() => {
     if (defaultChannelId) {
-      handleSelectChannel(defaultChannelId)
+      handleSelectChannel(defaultChannelId);
     }
-  }, [defaultChannelId, handleSelectChannel])
+  }, [defaultChannelId, handleSelectChannel]);
 
   const customChannelsForTargetChain = useMemo(
     () =>
@@ -176,11 +168,11 @@ export const IBCSettings: React.FC<IBCSettingsProps> = ({
         }))
         .sort((a, b) => a.title.localeCompare(b.title)),
     [customChannels, targetChain],
-  )
+  );
 
   const allOptions = useMemo(() => {
     if (!defaultChannelId) {
-      return customChannelsForTargetChain
+      return customChannelsForTargetChain;
     }
     return [
       {
@@ -189,35 +181,24 @@ export const IBCSettings: React.FC<IBCSettingsProps> = ({
         value: defaultChannelId,
       },
       ...customChannelsForTargetChain,
-    ]
-  }, [customChannelsForTargetChain, defaultChannelId])
+    ];
+  }, [customChannelsForTargetChain, defaultChannelId]);
 
   return (
     <>
-      <div
-        className={classNames(
-          'bg-purple-800 flex justify-center items-center w-full px-4 py-2',
-          className,
-        )}
-      >
+      <div className={classNames('bg-purple-800 flex justify-center items-center w-full px-4 py-2', className)}>
         <img src={Images.Misc.IBC} />
         <div className='flex justify-between items-center'>
           <Text size='sm' color='text-gray-100 ml-2'>
             This is an IBC transfer{' '}
-            {!!customChannelId && customChannelId !== defaultChannelId ? (
-              <>&middot; {customChannelId} </>
-            ) : null}
+            {!!customChannelId && customChannelId !== defaultChannelId ? <>&middot; {customChannelId} </> : null}
           </Text>
         </div>
         <button className='ml-auto' onClick={handleClick}>
           <img src={Images.Misc.Settings} />
         </button>
       </div>
-      <BottomModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        title='Advanced IBC Settings'
-      >
+      <BottomModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} title='Advanced IBC Settings'>
         <div className='px-4 py-3 rounded-2xl bg-white-100 dark:bg-gray-900 justify-center items-center'>
           <Text size='sm' className='text-gray-900 dark:text-gray-50 capitalize'>
             {sourceChainInfo.chainName} to {targetChainInfo.chainName} channels
@@ -269,24 +250,19 @@ export const IBCSettings: React.FC<IBCSettingsProps> = ({
         </DisclosureContainer>
       </BottomModal>
     </>
-  )
-}
+  );
+};
 
 export const IBCBanner: React.FC<{
-  className?: string
-  channelId?: string
+  className?: string;
+  channelId?: string;
 }> = ({ className, channelId }) => {
   return (
-    <div
-      className={classNames(
-        'bg-purple-800 flex justify-center items-center w-full px-4 py-2',
-        className,
-      )}
-    >
+    <div className={classNames('bg-purple-800 flex justify-center items-center w-full px-4 py-2', className)}>
       <img src={Images.Misc.IBC} />
       <Text size='sm' color='text-gray-100 ml-2'>
         This is an IBC transfer {channelId === undefined ? null : <>&middot; {channelId}</>}
       </Text>
     </div>
-  )
-}
+  );
+};

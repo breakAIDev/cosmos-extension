@@ -1,14 +1,14 @@
-import { Warning } from '@phosphor-icons/react'
-import { CustomCheckbox } from 'components/custom-checkbox'
-import React, { Dispatch, SetStateAction } from 'react'
+import { Warning } from '@phosphor-icons/react';
+import { CustomCheckbox } from 'components/custom-checkbox';
+import React, { Dispatch, SetStateAction } from 'react';
 
 type Props = {
-  isChecked: boolean
-  setIsChecked: Dispatch<SetStateAction<boolean>>
-  title: string
-  message: string
-  title2?: string
-}
+  isChecked: boolean;
+  setIsChecked: Dispatch<SetStateAction<boolean>>;
+  title: string;
+  message: string;
+  title2?: string;
+};
 
 export function WarningWithCheck({ isChecked, setIsChecked, title, message, title2 }: Props) {
   return (
@@ -34,5 +34,5 @@ export function WarningWithCheck({ isChecked, setIsChecked, title, message, titl
         </span>
       </div>
     </div>
-  )
+  );
 }

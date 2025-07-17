@@ -1,41 +1,41 @@
-import { removeTrailingSlash, useChainApis } from '@leapwallet/cosmos-wallet-hooks'
-import { initiateNodeUrls, NODE_URLS, SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { ChainTagsStore } from '@leapwallet/cosmos-wallet-store'
-import { CaretRight } from '@phosphor-icons/react'
-import { captureException } from '@sentry/react'
-import axios from 'axios'
-import classNames from 'classnames'
-import { AlertStrip } from 'components/alert-strip'
-import BottomModal from 'components/new-bottom-modal'
-import Text from 'components/text'
-import { Button } from 'components/ui/button'
-import { Input } from 'components/ui/input'
-import { AGGREGATED_CHAIN_KEY } from 'config/constants'
-import { CUSTOM_ENDPOINTS } from 'config/storage-keys'
-import { useActiveChain } from 'hooks/settings/useActiveChain'
-import { useSelectedNetwork } from 'hooks/settings/useNetwork'
-import { useChainInfos } from 'hooks/useChainInfos'
-import { useDebounceCallback } from 'hooks/useDebounceCallback'
-import { useDontShowSelectChain } from 'hooks/useDontShowSelectChain'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import React, { useEffect, useMemo, useState } from 'react'
-import { chainTagsStore } from 'stores/chain-infos-store'
-import { manageChainsStore } from 'stores/manage-chains-store'
-import { Colors } from 'theme/colors'
-import { AggregatedSupportedChain } from 'types/utility'
-import { imgOnError } from 'utils/imgOnError'
-import { uiErrorTags } from 'utils/sentry'
-import Browser from 'webextension-polyfill'
+import { removeTrailingSlash, useChainApis } from '@leapwallet/cosmos-wallet-hooks';
+import { initiateNodeUrls, NODE_URLS, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { ChainTagsStore } from '@leapwallet/cosmos-wallet-store';
+import { CaretRight } from '@phosphor-icons/react';
+import { captureException } from '@sentry/react';
+import axios from 'axios';
+import classNames from 'classnames';
+import { AlertStrip } from 'components/alert-strip';
+import BottomModal from 'components/new-bottom-modal';
+import Text from 'components/text';
+import { Button } from 'components/ui/button';
+import { Input } from 'components/ui/input';
+import { AGGREGATED_CHAIN_KEY } from 'config/constants';
+import { CUSTOM_ENDPOINTS } from 'config/storage-keys';
+import { useActiveChain } from 'hooks/settings/useActiveChain';
+import { useSelectedNetwork } from 'hooks/settings/useNetwork';
+import { useChainInfos } from 'hooks/useChainInfos';
+import { useDebounceCallback } from 'hooks/useDebounceCallback';
+import { useDontShowSelectChain } from 'hooks/useDontShowSelectChain';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import React, { useEffect, useMemo, useState } from 'react';
+import { chainTagsStore } from 'stores/chain-infos-store';
+import { manageChainsStore } from 'stores/manage-chains-store';
+import { Colors } from 'theme/colors';
+import { AggregatedSupportedChain } from 'types/utility';
+import { imgOnError } from 'utils/imgOnError';
+import { uiErrorTags } from 'utils/sentry';
+import Browser from 'webextension-polyfill';
 
-import SelectChain, { ListChains, ListChainsProps } from '../SelectChain'
+import SelectChain, { ListChains, ListChainsProps } from '../SelectChain';
 
 type SelectChainSheetProps = ListChainsProps & {
-  readonly isVisible: boolean
-  readonly onClose: VoidFunction
-  readonly chainTagsStore: ChainTagsStore
-}
+  readonly isVisible: boolean;
+  readonly onClose: VoidFunction;
+  readonly chainTagsStore: ChainTagsStore;
+};
 
 export const SelectChainSheet = observer(
   ({
@@ -57,19 +57,19 @@ export const SelectChainSheet = observer(
           chainTagsStore={chainTagsStore}
         />
       </BottomModal>
-    )
+    );
   },
-)
+);
 
 type CustomEndpointInputProps = {
-  label: string
-  inputValue: string
+  label: string;
+  inputValue: string;
   // eslint-disable-next-line no-unused-vars
-  inputOnChange: (value: string) => void
-  crossOnClick: VoidFunction
-  name: string
-  error: string
-}
+  inputOnChange: (value: string) => void;
+  crossOnClick: VoidFunction;
+  name: string;
+  error: string;
+};
 
 function CustomEndpointInput({
   label,
@@ -80,10 +80,7 @@ function CustomEndpointInput({
   error,
 }: CustomEndpointInputProps) {
   return (
-    <label
-      htmlFor={name}
-      className='rounded-2xl bg-white-100 dark:bg-gray-900 p-4 block mt-3 w-full'
-    >
+    <label htmlFor={name} className='rounded-2xl bg-white-100 dark:bg-gray-900 p-4 block mt-3 w-full'>
       <span className='text-gray-300 text-sm'>{label}</span>
 
       <div className='flex mt-2 border border-[0.5px] p-[2px] border-gray-300 dark:border-gray-50 rounded-lg overflow-hidden'>
@@ -112,155 +109,147 @@ function CustomEndpointInput({
         </Text>
       )}
     </label>
-  )
+  );
 }
 
 const CustomEndpointsView = ({ goBack, isVisible }: { goBack: () => void; isVisible: boolean }) => {
-  const _activeChain = useActiveChain() as AggregatedSupportedChain
+  const _activeChain = useActiveChain() as AggregatedSupportedChain;
   const activeChain = useMemo(() => {
     if (_activeChain === AGGREGATED_CHAIN_KEY) {
-      return 'cosmos'
+      return 'cosmos';
     }
 
-    return _activeChain
-  }, [_activeChain])
+    return _activeChain;
+  }, [_activeChain]);
 
-  const chainInfos = useChainInfos()
-  const defaultTokenLogo = useDefaultTokenLogo()
+  const chainInfos = useChainInfos();
+  const defaultTokenLogo = useDefaultTokenLogo();
 
-  const [showSelectChain, setShowSelectChain] = useState(false)
-  const [selectedChain, setSelectedChain] = useState(activeChain)
-  const [errors, setErrors] = useState<{ [key: string]: string }>({})
+  const [showSelectChain, setShowSelectChain] = useState(false);
+  const [selectedChain, setSelectedChain] = useState(activeChain);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
-  const selectedNetwork = useSelectedNetwork()
-  const { rpcUrl, lcdUrl } = useChainApis(selectedChain, selectedNetwork)
+  const selectedNetwork = useSelectedNetwork();
+  const { rpcUrl, lcdUrl } = useChainApis(selectedChain, selectedNetwork);
 
-  const { debounce } = useDebounceCallback()
-  const dontShowSelectChain = useDontShowSelectChain(manageChainsStore)
-  const [validating, setValidating] = useState(false)
-  const [showAlertMsg, setShowAlertMsg] = useState(false)
+  const { debounce } = useDebounceCallback();
+  const dontShowSelectChain = useDontShowSelectChain(manageChainsStore);
+  const [validating, setValidating] = useState(false);
+  const [showAlertMsg, setShowAlertMsg] = useState(false);
   const [customEndpoints, setCustomEndpoints] = useState({
     rpc: rpcUrl ?? '',
     lcd: lcdUrl ?? '',
-  })
+  });
 
   useEffect(() => {
     setCustomEndpoints({
       rpc: rpcUrl ?? '',
       lcd: lcdUrl ?? '',
-    })
-  }, [rpcUrl, lcdUrl])
+    });
+  }, [rpcUrl, lcdUrl]);
 
   const validateEndpoints = async (name: string, value: string) => {
-    let error = ''
-    const selectedChainInfo = chainInfos[selectedChain]
+    let error = '';
+    const selectedChainInfo = chainInfos[selectedChain];
 
     if (name === 'rpc') {
       try {
-        const { data } = await axios.get(`${value}/status`)
-        const { node_info: nodeInfo } = data.result ?? data
+        const { data } = await axios.get(`${value}/status`);
+        const { node_info: nodeInfo } = data.result ?? data;
 
         if (
           nodeInfo.network.trim() !==
-          (selectedNetwork === 'mainnet'
-            ? selectedChainInfo.chainId
-            : selectedChainInfo.testnetChainId)
+          (selectedNetwork === 'mainnet' ? selectedChainInfo.chainId : selectedChainInfo.testnetChainId)
         ) {
           error = `RPC endpoint has different chain id (expected: ${
-            selectedNetwork === 'mainnet'
-              ? selectedChainInfo.chainId
-              : selectedChainInfo.testnetChainId
-          }, actual: ${nodeInfo.network})`
+            selectedNetwork === 'mainnet' ? selectedChainInfo.chainId : selectedChainInfo.testnetChainId
+          }, actual: ${nodeInfo.network})`;
         }
       } catch (_) {
-        error = 'Invalid RPC url. Failed to get /status response.'
+        error = 'Invalid RPC url. Failed to get /status response.';
       } finally {
-        setValidating(false)
+        setValidating(false);
       }
     }
 
     if (name === 'lcd') {
       try {
-        const { data } = await axios.get(`${value}/cosmos/base/tendermint/v1beta1/node_info`)
-        const { default_node_info: nodeInfo } = data
+        const { data } = await axios.get(`${value}/cosmos/base/tendermint/v1beta1/node_info`);
+        const { default_node_info: nodeInfo } = data;
 
         if (
           nodeInfo.network.trim() !==
-          (selectedNetwork === 'mainnet'
-            ? selectedChainInfo.chainId
-            : selectedChainInfo.testnetChainId)
+          (selectedNetwork === 'mainnet' ? selectedChainInfo.chainId : selectedChainInfo.testnetChainId)
         ) {
           error = `LCD endpoint has different chain id (expected: ${
-            selectedNetwork === 'mainnet'
-              ? selectedChainInfo.chainId
-              : selectedChainInfo.testnetChainId
-          }, actual: ${nodeInfo.network})`
+            selectedNetwork === 'mainnet' ? selectedChainInfo.chainId : selectedChainInfo.testnetChainId
+          }, actual: ${nodeInfo.network})`;
         }
       } catch (_) {
-        error = 'Invalid LCD url. Failed to get /cosmos/base/tendermint/v1beta1/node_info response.'
+        error = 'Invalid LCD url. Failed to get /cosmos/base/tendermint/v1beta1/node_info response.';
       } finally {
-        setValidating(false)
+        setValidating(false);
       }
     }
 
     if (error) {
-      setErrors((prevValue) => ({ ...prevValue, [name]: error }))
+      setErrors((prevValue) => ({ ...prevValue, [name]: error }));
       captureException(error, {
         tags: uiErrorTags,
-      })
+      });
     } else {
-      delete errors[name]
-      setErrors(errors)
+      delete errors[name];
+      setErrors(errors);
     }
-  }
+  };
 
   const debouncedValidateEndpoints = debounce((name: string, value: string) => {
-    validateEndpoints(name, value)
-  }, 750)
+    validateEndpoints(name, value);
+  }, 750);
 
   const handleInputChange = (name: string, value: string) => {
-    value = value.trim()
-    setCustomEndpoints((prevValue) => ({ ...prevValue, [name]: value }))
+    value = value.trim();
+    setCustomEndpoints((prevValue) => ({ ...prevValue, [name]: value }));
 
     if (value) {
-      setValidating(true)
-      debouncedValidateEndpoints(name, removeTrailingSlash(value))
+      setValidating(true);
+      debouncedValidateEndpoints(name, removeTrailingSlash(value));
     } else {
-      delete errors[name]
-      setErrors(errors)
+      delete errors[name];
+      setErrors(errors);
     }
-  }
+  };
 
   const handleResetClick = async () => {
-    const storage = await Browser.storage.local.get([CUSTOM_ENDPOINTS])
+    const storage = await Browser.storage.local.get([CUSTOM_ENDPOINTS]);
     if (storage[CUSTOM_ENDPOINTS]) {
-      await initiateNodeUrls()
+      await initiateNodeUrls();
 
-      const _customEndpoints = JSON.parse(storage[CUSTOM_ENDPOINTS])
-      delete _customEndpoints[selectedChain]
+      const _customEndpoints = JSON.parse(storage[CUSTOM_ENDPOINTS]);
+      delete _customEndpoints[selectedChain];
       await Browser.storage.local.set({
         [CUSTOM_ENDPOINTS]: JSON.stringify(_customEndpoints),
-      })
+      });
 
-      const selectedChainInfo = chainInfos[selectedChain]
+      const selectedChainInfo = chainInfos[selectedChain];
       setCustomEndpoints({
         rpc: NODE_URLS.rpc?.[selectedChainInfo.chainId]?.[0].nodeUrl ?? rpcUrl ?? '',
         lcd: NODE_URLS.rest?.[selectedChainInfo.chainId]?.[0].nodeUrl ?? lcdUrl ?? '',
-      })
+      });
     } else {
-      setCustomEndpoints({ rpc: rpcUrl ?? '', lcd: lcdUrl ?? '' })
+      setCustomEndpoints({ rpc: rpcUrl ?? '', lcd: lcdUrl ?? '' });
     }
 
-    setErrors({})
-  }
+    setErrors({});
+  };
 
   const handleSaveClick = async () => {
-    const storage = await Browser.storage.local.get([CUSTOM_ENDPOINTS])
-    const customNewRpcURL = removeTrailingSlash(customEndpoints.rpc)
-    const customNewLcdURL = removeTrailingSlash(customEndpoints.lcd)
+    const storage = await Browser.storage.local.get([CUSTOM_ENDPOINTS]);
+    const customNewRpcURL = removeTrailingSlash(customEndpoints.rpc);
+    const customNewLcdURL = removeTrailingSlash(customEndpoints.lcd);
 
-    const newRpcURL = customNewRpcURL !== rpcUrl ? customNewRpcURL : undefined
-    const newLcdURL = customNewLcdURL !== lcdUrl ? customNewLcdURL : undefined
+    const newRpcURL = customNewRpcURL !== rpcUrl ? customNewRpcURL : undefined;
+    const newLcdURL = customNewLcdURL !== lcdUrl ? customNewLcdURL : undefined;
 
     if (storage[CUSTOM_ENDPOINTS]) {
       await Browser.storage.local.set({
@@ -272,7 +261,7 @@ const CustomEndpointsView = ({ goBack, isVisible }: { goBack: () => void; isVisi
             [selectedNetwork === 'mainnet' ? 'lcd' : 'lcdTest']: newLcdURL,
           },
         }),
-      })
+      });
     } else {
       await Browser.storage.local.set({
         [CUSTOM_ENDPOINTS]: JSON.stringify({
@@ -281,11 +270,11 @@ const CustomEndpointsView = ({ goBack, isVisible }: { goBack: () => void; isVisi
             [selectedNetwork === 'mainnet' ? 'lcd' : 'lcdTest']: newLcdURL,
           },
         }),
-      })
+      });
     }
 
-    setShowAlertMsg(true)
-  }
+    setShowAlertMsg(true);
+  };
 
   const isSaveDisabled =
     validating ||
@@ -293,18 +282,17 @@ const CustomEndpointsView = ({ goBack, isVisible }: { goBack: () => void; isVisi
     !!errors.lcd ||
     customEndpoints.rpc === '' ||
     customEndpoints.lcd === '' ||
-    (rpcUrl === removeTrailingSlash(customEndpoints.rpc) &&
-      lcdUrl === removeTrailingSlash(customEndpoints.lcd))
+    (rpcUrl === removeTrailingSlash(customEndpoints.rpc) && lcdUrl === removeTrailingSlash(customEndpoints.lcd));
 
   return (
     <BottomModal
       fullScreen
       isOpen={isVisible}
       onClose={() => {
-        goBack()
-        setShowAlertMsg(false)
-        setValidating(false)
-        setErrors({})
+        goBack();
+        setShowAlertMsg(false);
+        setValidating(false);
+        setErrors({});
       }}
       title='Custom Endpoints'
       className='relative flex flex-col gap-4 flex-1'
@@ -351,9 +339,7 @@ const CustomEndpointsView = ({ goBack, isVisible }: { goBack: () => void; isVisi
         )}
 
         {validating && (
-          <p className='font-medium text-muted-foreground text-sm text-center animate-pulse'>
-            Validating endpoints
-          </p>
+          <p className='font-medium text-muted-foreground text-sm text-center animate-pulse'>Validating endpoints</p>
         )}
 
         <div className='flex justify-between mt-auto [&>button]:flex-1 gap-4'>
@@ -372,13 +358,13 @@ const CustomEndpointsView = ({ goBack, isVisible }: { goBack: () => void; isVisi
         onClose={() => setShowSelectChain(false)}
         selectedChain={selectedChain}
         onChainSelect={(chaiName: SupportedChain) => {
-          setSelectedChain(chaiName)
-          setShowSelectChain(false)
+          setSelectedChain(chaiName);
+          setShowSelectChain(false);
         }}
         chainTagsStore={chainTagsStore}
       />
     </BottomModal>
-  )
-}
+  );
+};
 
-export const CustomEndpoints = observer(CustomEndpointsView)
+export const CustomEndpoints = observer(CustomEndpointsView);

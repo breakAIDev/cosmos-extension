@@ -1,7 +1,7 @@
-import { Header, HeaderActionType } from '@leapwallet/leap-ui'
-import React from 'react'
+import { Header, HeaderActionType } from '@leapwallet/leap-ui';
+import React from 'react';
 
-import { CurrencyList } from './CurrencyList'
+import { CurrencyList } from './CurrencyList';
 
 const ChangeCurrency = ({ goBack }: { goBack: () => void }) => {
   return (
@@ -9,7 +9,7 @@ const ChangeCurrency = ({ goBack }: { goBack: () => void }) => {
       <Header title='Currency' action={{ type: HeaderActionType.BACK, onClick: goBack }} />
       <CurrencyList />
     </div>
-  )
-}
+  );
+};
 
-export default ChangeCurrency
+export default ChangeCurrency;

@@ -1,12 +1,12 @@
-import { ThemeName, useTheme } from '@leapwallet/leap-ui'
-import React from 'react'
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
+import { ThemeName, useTheme } from '@leapwallet/leap-ui';
+import React from 'react';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 
 export function DiscoverBannerLoading() {
-  const { theme } = useTheme()
-  const isDark = theme === ThemeName.DARK
-  const baseColor1 = isDark ? '#393939' : '#D6D6D6'
-  const highlightColor1 = isDark ? '#2C2C2C' : '#E8E8E8'
+  const { theme } = useTheme();
+  const isDark = theme === ThemeName.DARK;
+  const baseColor1 = isDark ? '#393939' : '#D6D6D6';
+  const highlightColor1 = isDark ? '#2C2C2C' : '#E8E8E8';
 
   return (
     <SkeletonTheme duration={2} baseColor={baseColor1} highlightColor={highlightColor1}>
@@ -20,5 +20,5 @@ export function DiscoverBannerLoading() {
         </div>
       </div>
     </SkeletonTheme>
-  )
+  );
 }

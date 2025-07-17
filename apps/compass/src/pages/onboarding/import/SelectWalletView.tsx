@@ -1,50 +1,45 @@
-import { KeyChain } from '@leapwallet/leap-keychain'
-import { Button } from 'components/ui/button'
-import WalletInfoCard from 'components/wallet-info-card'
-import { WalletAccount } from 'hooks/onboarding/types'
-import React, { useEffect, useState } from 'react'
+import { KeyChain } from '@leapwallet/leap-keychain';
+import { Button } from 'components/ui/button';
+import WalletInfoCard from 'components/wallet-info-card';
+import { WalletAccount } from 'hooks/onboarding/types';
+import React, { useEffect, useState } from 'react';
 
-import { OnboardingWrapper } from '../wrapper'
-import { useImportWalletContext } from './import-wallet-context'
+import { OnboardingWrapper } from '../wrapper';
+import { useImportWalletContext } from './import-wallet-context';
 
 type SelectWalletViewProps = {
-  readonly onProceed: () => void
-  readonly accountsData: readonly WalletAccount[]
-  readonly setSelectedIds: (val: { [id: number]: boolean }) => void
-  readonly selectedIds: { [id: string]: boolean }
-}
+  readonly onProceed: () => void;
+  readonly accountsData: readonly WalletAccount[];
+  readonly setSelectedIds: (val: { [id: number]: boolean }) => void;
+  readonly selectedIds: { [id: string]: boolean };
+};
 
-export function SelectWalletView({
-  onProceed,
-  accountsData,
-  selectedIds,
-  setSelectedIds,
-}: SelectWalletViewProps) {
-  const [existingAddresses, setExistingAddresses] = useState<string[]>([])
-  const { currentStep, prevStep } = useImportWalletContext()
+export function SelectWalletView({ onProceed, accountsData, selectedIds, setSelectedIds }: SelectWalletViewProps) {
+  const [existingAddresses, setExistingAddresses] = useState<string[]>([]);
+  const { currentStep, prevStep } = useImportWalletContext();
 
   const handleProceedClick = () => {
     if (!Object.values(selectedIds).some((val) => val)) {
-      return false
+      return false;
     }
 
-    onProceed()
-  }
+    onProceed();
+  };
 
   useEffect(() => {
     const fn = async () => {
-      const allWallets = await KeyChain.getAllWallets()
-      const addresses = []
+      const allWallets = await KeyChain.getAllWallets();
+      const addresses = [];
 
       for (const wallet of Object.values(allWallets ?? {})) {
-        if ((wallet as any)?.watchWallet) continue
-        addresses.push(wallet.addresses.seiTestnet2)
+        if ((wallet as any)?.watchWallet) continue;
+        addresses.push(wallet.addresses.seiTestnet2);
       }
 
-      setExistingAddresses(addresses)
-    }
-    fn()
-  }, [])
+      setExistingAddresses(addresses);
+    };
+    fn();
+  }, []);
 
   return (
     <OnboardingWrapper
@@ -54,8 +49,8 @@ export function SelectWalletView({
     >
       <div className='flex flex-col bg-secondary-200 w-full max-h-[340px] py-1 overflow-y-auto rounded-xl'>
         {accountsData.map(({ address, index: id, evmAddress, name, path }) => {
-          const isExistingAddress = existingAddresses.indexOf(address) > -1
-          const isChosen = selectedIds[id]
+          const isExistingAddress = existingAddresses.indexOf(address) > -1;
+          const isChosen = selectedIds[id];
 
           return (
             <WalletInfoCard
@@ -72,17 +67,17 @@ export function SelectWalletView({
               path={path}
               onClick={() => {
                 if (!isExistingAddress) {
-                  const copy = selectedIds
+                  const copy = selectedIds;
 
                   if (!isChosen) {
-                    setSelectedIds({ ...copy, [id]: true })
+                    setSelectedIds({ ...copy, [id]: true });
                   } else {
-                    setSelectedIds({ ...copy, [id]: false })
+                    setSelectedIds({ ...copy, [id]: false });
                   }
                 }
               }}
             />
-          )
+          );
         })}
       </div>
 
@@ -95,5 +90,5 @@ export function SelectWalletView({
         Proceed
       </Button>
     </OnboardingWrapper>
-  )
+  );
 }

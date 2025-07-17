@@ -1,71 +1,71 @@
-import { Buttons } from '@leapwallet/leap-ui'
-import { ArrowSquareOut } from '@phosphor-icons/react'
-import { SidebarSimple } from '@phosphor-icons/react/dist/ssr'
-import { captureException } from '@sentry/react'
-import classNames from 'classnames'
-import { ButtonName, ButtonType, EventName } from 'config/analytics'
-import mixpanel from 'mixpanel-browser'
-import React, { useCallback } from 'react'
-import { HeaderAction, HeaderActionType } from 'types/components'
-import { isSidePanel, isSidePanelSupported } from 'utils/isSidePanel'
-import browser from 'webextension-polyfill'
+import { Buttons } from '@leapwallet/leap-ui';
+import { ArrowSquareOut } from '@phosphor-icons/react';
+import { SidebarSimple } from '@phosphor-icons/react/dist/ssr';
+import { captureException } from '@sentry/react';
+import classNames from 'classnames';
+import { ButtonName, ButtonType, EventName } from 'config/analytics';
+import mixpanel from 'mixpanel-browser';
+import React, { useCallback } from 'react';
+import { HeaderAction, HeaderActionType } from 'types/components';
+import { isSidePanel, isSidePanelSupported } from 'utils/isSidePanel';
+import browser from 'webextension-polyfill';
 
 const ActionButton = React.memo(({ type, onClick, className }: HeaderAction) => {
-  const isInExpandView = browser.extension.getViews({ type: 'tab' }).length > 0
+  const isInExpandView = browser.extension.getViews({ type: 'tab' }).length > 0;
 
   const handleSidePanelClick = useCallback(async () => {
     if (!isSidePanelSupported() || isSidePanel()) {
       if (isSidePanel()) {
         await chrome.sidePanel.setPanelBehavior({
           openPanelOnActionClick: false,
-        })
+        });
         try {
           mixpanel.track(EventName.ButtonClick, {
             buttonType: ButtonType.SIDE_PANEL,
             buttonName: ButtonName.SIDE_PANEL_CLOSED,
             time: Date.now() / 1000,
-          })
+          });
         } catch (e) {
-          captureException(e)
+          captureException(e);
         }
       }
-      window.close()
-      return
+      window.close();
+      return;
     }
     if (!chrome.windows) {
-      return
+      return;
     }
-    const currentWindow = await chrome.windows.getCurrent()
-    const windowId = currentWindow?.id
+    const currentWindow = await chrome.windows.getCurrent();
+    const windowId = currentWindow?.id;
     if (!windowId || !chrome.sidePanel) {
-      return
+      return;
     }
     await chrome.sidePanel.setOptions({
       path: 'sidepanel.html#/home',
       enabled: true,
-    })
-    await chrome.sidePanel.open({ windowId })
+    });
+    await chrome.sidePanel.open({ windowId });
     await chrome.sidePanel.setPanelBehavior({
       openPanelOnActionClick: true,
-    })
+    });
     try {
       mixpanel.track(EventName.ButtonClick, {
         buttonType: ButtonType.SIDE_PANEL,
         buttonName: ButtonName.SIDE_PANEL_OPENED,
         time: Date.now() / 1000,
-      })
+      });
     } catch (e) {
-      captureException(e)
+      captureException(e);
     }
-    window.close()
-  }, [])
+    window.close();
+  }, []);
 
   switch (type) {
     case HeaderActionType.CANCEL:
-      return <Buttons.Cancel onClick={onClick} className={className} />
+      return <Buttons.Cancel onClick={onClick} className={className} />;
 
     case HeaderActionType.BACK:
-      return <Buttons.Back onClick={onClick} className={className} />
+      return <Buttons.Back onClick={onClick} className={className} />;
 
     case HeaderActionType.NAVIGATION:
       return (
@@ -96,19 +96,15 @@ const ActionButton = React.memo(({ type, onClick, className }: HeaderAction) => 
                     className='text-black-100 dark:text-white-100'
                   />
                 ) : (
-                  <ArrowSquareOut
-                    size={18}
-                    mirrored={true}
-                    className='text-black-100 dark:text-white-100'
-                  />
+                  <ArrowSquareOut size={18} mirrored={true} className='text-black-100 dark:text-white-100' />
                 )}
               </button>
             </>
           )}
         </div>
-      )
+      );
   }
-})
+});
 
-ActionButton.displayName = 'ActionButton'
-export { ActionButton }
+ActionButton.displayName = 'ActionButton';
+export { ActionButton };

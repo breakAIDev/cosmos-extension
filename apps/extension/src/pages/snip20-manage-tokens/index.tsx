@@ -1,83 +1,81 @@
-import { SecretToken, useSecretTokenStore } from '@leapwallet/cosmos-wallet-hooks'
-import { CardDivider, GenericCard, Header, HeaderActionType } from '@leapwallet/leap-ui'
-import { Plus } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import { EmptyCard } from 'components/empty-card'
-import PopupLayout from 'components/layout/popup-layout'
-import useQuery from 'hooks/useQuery'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import { Images } from 'images'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { sliceSearchWord } from 'utils/strings'
+import { SecretToken, useSecretTokenStore } from '@leapwallet/cosmos-wallet-hooks';
+import { CardDivider, GenericCard, Header, HeaderActionType } from '@leapwallet/leap-ui';
+import { Plus } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import { EmptyCard } from 'components/empty-card';
+import PopupLayout from 'components/layout/popup-layout';
+import useQuery from 'hooks/useQuery';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { Images } from 'images';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { sliceSearchWord } from 'utils/strings';
 
-import { AddTokenSheet, CreateKeySheet, ImportKeySheet } from './components'
-import { Snip20ManageTokensProvider } from './context'
+import { AddTokenSheet, CreateKeySheet, ImportKeySheet } from './components';
+import { Snip20ManageTokensProvider } from './context';
 
 export default function SecretManageTokens() {
-  const defaultLogo = useDefaultTokenLogo()
-  const navigate = useNavigate()
+  const defaultLogo = useDefaultTokenLogo();
+  const navigate = useNavigate();
 
-  const [searchText, setSearchText] = useState('')
-  const [showAddToken, setShowAddToken] = useState(false)
-  const [selectedToken, setSelectedToken] = useState<
-    (SecretToken & { contractAddr: string }) | null
-  >(null)
-  const [reviewTx, setReviewTx] = useState(false)
-  const [showUpdateViewingKey, setShowUpdateViewingKey] = useState(false)
-  const [importKey, setImportKey] = useState(false)
+  const [searchText, setSearchText] = useState('');
+  const [showAddToken, setShowAddToken] = useState(false);
+  const [selectedToken, setSelectedToken] = useState<(SecretToken & { contractAddr: string }) | null>(null);
+  const [reviewTx, setReviewTx] = useState(false);
+  const [showUpdateViewingKey, setShowUpdateViewingKey] = useState(false);
+  const [importKey, setImportKey] = useState(false);
 
-  const contractAddress = useQuery().get('contractAddress') ?? undefined
-  const { secretTokens } = useSecretTokenStore()
+  const contractAddress = useQuery().get('contractAddress') ?? undefined;
+  const { secretTokens } = useSecretTokenStore();
 
   const selectToken = (token: SecretToken & { contractAddr: string }) => {
-    setSelectedToken(token)
-    setShowAddToken(true)
-  }
+    setSelectedToken(token);
+    setShowAddToken(true);
+  };
 
   useEffect(() => {
     if (contractAddress && secretTokens[contractAddress]) {
-      selectToken({ ...secretTokens[contractAddress], contractAddr: contractAddress })
-      setShowAddToken(true)
+      selectToken({ ...secretTokens[contractAddress], contractAddr: contractAddress });
+      setShowAddToken(true);
     }
-  }, [contractAddress, secretTokens])
+  }, [contractAddress, secretTokens]);
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchText(e.target.value)
-  }
+    setSearchText(e.target.value);
+  };
 
   const tokensList = useMemo(() => {
     return Object.entries(secretTokens)
       .filter(([contractAddr, tokenData]) => {
-        const filterText = searchText.toUpperCase()
+        const filterText = searchText.toUpperCase();
         return (
           contractAddr.toUpperCase().includes(filterText) ||
           tokenData.name.toUpperCase().includes(filterText) ||
           tokenData.symbol.toUpperCase().includes(filterText)
-        )
+        );
       })
       .map(([contractAddr, tokenData]) => {
-        return { ...tokenData, contractAddr }
-      })
+        return { ...tokenData, contractAddr };
+      });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchText])
+  }, [searchText]);
 
   const clearState = useCallback(() => {
-    setReviewTx(false)
-    setShowUpdateViewingKey(false)
-    setImportKey(false)
-    setShowAddToken(false)
-    setSelectedToken(null)
-  }, [])
+    setReviewTx(false);
+    setShowUpdateViewingKey(false);
+    setImportKey(false);
+    setShowAddToken(false);
+    setSelectedToken(null);
+  }, []);
 
   const handleImportClose = useCallback(() => {
-    setImportKey(false)
-    setShowUpdateViewingKey(false)
-  }, [])
+    setImportKey(false);
+    setShowUpdateViewingKey(false);
+  }, []);
 
-  const handleImportSuccess = useCallback(() => clearState(), [clearState])
-  const handleCreateKeyClose = useCallback(() => setReviewTx(false), [])
+  const handleImportSuccess = useCallback(() => clearState(), [clearState]);
+  const handleCreateKeyClose = useCallback(() => setReviewTx(false), []);
 
   return (
     <Snip20ManageTokensProvider>
@@ -108,19 +106,15 @@ export default function SecretManageTokens() {
                 <EmptyCard
                   isRounded
                   subHeading={searchText ? 'Please try again with something else' : ''}
-                  heading={
-                    searchText
-                      ? 'No results for “' + sliceSearchWord(searchText) + '”'
-                      : 'No Tokens'
-                  }
+                  heading={searchText ? 'No results for “' + sliceSearchWord(searchText) + '”' : 'No Tokens'}
                   src={Images.Misc.Explore}
                 />
               ) : null}
 
               <div className='rounded-2xl flex flex-col items-center mx-7 m-auto justify-center dark:bg-gray-900 bg-white-100'>
                 {tokensList.map((tokenData, index, array) => {
-                  const isLast = index === array.length - 1
-                  const isFirst = index === 0
+                  const isLast = index === array.length - 1;
+                  const isFirst = index === 0;
 
                   return (
                     <React.Fragment key={tokenData.contractAddr}>
@@ -142,7 +136,7 @@ export default function SecretManageTokens() {
                       />
                       {!isLast ? <CardDivider /> : null}
                     </React.Fragment>
-                  )
+                  );
                 })}
               </div>
             </div>
@@ -174,5 +168,5 @@ export default function SecretManageTokens() {
         />
       </div>
     </Snip20ManageTokensProvider>
-  )
+  );
 }

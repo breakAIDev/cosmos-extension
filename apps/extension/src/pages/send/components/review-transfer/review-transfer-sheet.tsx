@@ -5,7 +5,7 @@ import {
   TxCallback,
   useformatCurrency,
   useGetChains,
-} from '@leapwallet/cosmos-wallet-hooks'
+} from '@leapwallet/cosmos-wallet-hooks';
 import {
   getBech32Address,
   isAptosChain,
@@ -15,47 +15,47 @@ import {
   LedgerError,
   pubKeyToEvmAddressToShow,
   SupportedChain,
-} from '@leapwallet/cosmos-wallet-sdk'
-import { RootERC20DenomsStore } from '@leapwallet/cosmos-wallet-store'
-import { EthWallet } from '@leapwallet/leap-keychain'
-import { ArrowDown, Check } from '@phosphor-icons/react'
-import { captureException } from '@sentry/react'
-import BigNumber from 'bignumber.js'
-import classNames from 'classnames'
-import { ErrorCard } from 'components/ErrorCard'
-import LedgerConfirmationPopup from 'components/ledger-confirmation/LedgerConfirmationPopup'
-import BottomModal from 'components/new-bottom-modal'
-import { Button } from 'components/ui/button'
-import { AnimatePresence, motion } from 'framer-motion'
-import { useCaptureTxError } from 'hooks/utility/useCaptureTxError'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import { Wallet } from 'hooks/wallet/useWallet'
-import { CopyIcon } from 'icons/copy-icon'
-import { Images } from 'images'
-import loadingImage from 'lottie-files/swaps-btn-loading.json'
-import Lottie from 'lottie-react'
-import { observer } from 'mobx-react-lite'
-import { useExecuteSkipTx } from 'pages/send/components/review-transfer/executeSkipTx'
-import { useSendContext } from 'pages/send/context'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { UserClipboard } from 'utils/clipboard'
-import { opacityFadeInOut, transition150 } from 'utils/motion-variants'
+} from '@leapwallet/cosmos-wallet-sdk';
+import { RootERC20DenomsStore } from '@leapwallet/cosmos-wallet-store';
+import { EthWallet } from '@leapwallet/leap-keychain';
+import { ArrowDown, Check } from '@phosphor-icons/react';
+import { captureException } from '@sentry/react';
+import BigNumber from 'bignumber.js';
+import classNames from 'classnames';
+import { ErrorCard } from 'components/ErrorCard';
+import LedgerConfirmationPopup from 'components/ledger-confirmation/LedgerConfirmationPopup';
+import BottomModal from 'components/new-bottom-modal';
+import { Button } from 'components/ui/button';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useCaptureTxError } from 'hooks/utility/useCaptureTxError';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { Wallet } from 'hooks/wallet/useWallet';
+import { CopyIcon } from 'icons/copy-icon';
+import { Images } from 'images';
+import loadingImage from 'lottie-files/swaps-btn-loading.json';
+import Lottie from 'lottie-react';
+import { observer } from 'mobx-react-lite';
+import { useExecuteSkipTx } from 'pages/send/components/review-transfer/executeSkipTx';
+import { useSendContext } from 'pages/send/context';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { UserClipboard } from 'utils/clipboard';
+import { opacityFadeInOut, transition150 } from 'utils/motion-variants';
 
 type ReviewTransactionSheetProps = {
-  isOpen: boolean
-  onClose: () => void
-  setShowTxPage: (val: boolean) => void
-  rootERC20DenomsStore: RootERC20DenomsStore
-}
+  isOpen: boolean;
+  onClose: () => void;
+  setShowTxPage: (val: boolean) => void;
+  rootERC20DenomsStore: RootERC20DenomsStore;
+};
 
 export const ReviewTransferSheet = observer(
   ({ isOpen, onClose, setShowTxPage, rootERC20DenomsStore }: ReviewTransactionSheetProps) => {
-    const [isCopied, setIsCopied] = useState(false)
-    const [formatCurrency] = useformatCurrency()
-    const defaultTokenLogo = useDefaultTokenLogo()
-    const chains = useGetChains()
-    const getWallet = Wallet.useGetWallet()
-    const allERC20Denoms = rootERC20DenomsStore.allERC20Denoms
+    const [isCopied, setIsCopied] = useState(false);
+    const [formatCurrency] = useformatCurrency();
+    const defaultTokenLogo = useDefaultTokenLogo();
+    const chains = useGetChains();
+    const getWallet = Wallet.useGetWallet();
+    const allERC20Denoms = rootERC20DenomsStore.allERC20Denoms;
 
     const {
       memo,
@@ -82,52 +82,43 @@ export const ReviewTransferSheet = observer(
       fetchAccountDetailsData,
       sendActiveChain,
       setIsSending,
-    } = useSendContext()
+    } = useSendContext();
 
-    const {
-      confirmSkipTx,
-      txnProcessing,
-      error,
-      showLedgerPopupSkipTx,
-      setShowLedgerPopupSkipTx,
-      setError,
-    } = useExecuteSkipTx()
+    const { confirmSkipTx, txnProcessing, error, showLedgerPopupSkipTx, setShowLedgerPopupSkipTx, setError } =
+      useExecuteSkipTx();
     const fiatValue = useMemo(
       () => formatCurrency(new BigNumber(inputAmount).multipliedBy(tokenFiatValue ?? 0)),
       [formatCurrency, inputAmount, tokenFiatValue],
-    )
+    );
 
     const receiverChainName = useMemo(() => {
-      return chains?.[selectedAddress?.chainName as SupportedChain]?.chainName
-    }, [chains, selectedAddress?.chainName])
+      return chains?.[selectedAddress?.chainName as SupportedChain]?.chainName;
+    }, [chains, selectedAddress?.chainName]);
 
     const handleClose = useCallback(() => {
-      setError('')
-      onClose()
+      setError('');
+      onClose();
 
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, []);
 
     const modifiedCallback: TxCallback = useCallback(
       (status) => {
-        setShowTxPage(true)
-        onClose()
+        setShowTxPage(true);
+        onClose();
       },
       [onClose, setShowTxPage],
-    )
+    );
 
     const handleSend = useCallback(async () => {
-      clearTxError()
+      clearTxError();
       if (!fee || !selectedAddress?.address || !selectedToken) {
-        return
+        return;
       }
 
       try {
-        let toAddress = selectedAddress.address
-        const _isERC20Token = isERC20Token(
-          Object.keys(allERC20Denoms),
-          selectedToken?.coinMinimalDenom,
-        )
+        let toAddress = selectedAddress.address;
+        const _isERC20Token = isERC20Token(Object.keys(allERC20Denoms), selectedToken?.coinMinimalDenom);
 
         if (
           chains[sendActiveChain]?.evmOnlyChain &&
@@ -135,12 +126,12 @@ export const ReviewTransferSheet = observer(
           toAddress.toLowerCase().startsWith(chains[sendActiveChain].addressPrefix) &&
           fetchAccountDetailsData?.pubKey.key
         ) {
-          toAddress = pubKeyToEvmAddressToShow(fetchAccountDetailsData.pubKey.key)
+          toAddress = pubKeyToEvmAddressToShow(fetchAccountDetailsData.pubKey.key);
         }
 
         if (chains[sendActiveChain]?.evmOnlyChain) {
-          const wallet = await getWallet(sendActiveChain, true)
-          const nativeTokenKey = Object.keys(chains[sendActiveChain]?.nativeDenoms ?? {})?.[0]
+          const wallet = await getWallet(sendActiveChain, true);
+          const nativeTokenKey = Object.keys(chains[sendActiveChain]?.nativeDenoms ?? {})?.[0];
 
           await confirmSendEth(
             toAddress,
@@ -155,7 +146,7 @@ export const ReviewTransferSheet = observer(
               decimals: selectedToken.coinDecimals,
               nativeTokenKey,
             },
-          )
+          );
         } else if (
           transferData?.isSkipTransfer &&
           !isIbcUnwindingDisabled &&
@@ -165,7 +156,7 @@ export const ReviewTransferSheet = observer(
           // we use Skip API for transfer or
           // else we use default Cosmos API
 
-          const wallet = await getWallet(sendActiveChain, true)
+          const wallet = await getWallet(sendActiveChain, true);
           if (sendActiveChain === 'evmos' && wallet instanceof LeapLedgerSignerEth) {
             await confirmSend(
               {
@@ -176,19 +167,19 @@ export const ReviewTransferSheet = observer(
                 fees: fee,
               },
               modifiedCallback,
-            )
+            );
           } else {
-            confirmSkipTx(modifiedCallback)
+            confirmSkipTx(modifiedCallback);
           }
         } else {
-          const sendChainInfo = chains[sendActiveChain]
-          let toAddress = selectedAddress?.address
+          const sendChainInfo = chains[sendActiveChain];
+          let toAddress = selectedAddress?.address;
           if (
             Number(sendChainInfo.bip44.coinType) === 60 &&
             toAddress.toLowerCase().startsWith('0x') &&
             sendChainInfo.key !== 'injective'
           ) {
-            toAddress = getBech32Address(sendChainInfo.addressPrefix, toAddress)
+            toAddress = getBech32Address(sendChainInfo.addressPrefix, toAddress);
           }
           await confirmSend(
             {
@@ -199,16 +190,16 @@ export const ReviewTransferSheet = observer(
               fees: fee,
             },
             modifiedCallback,
-          )
+          );
         }
       } catch (err: unknown) {
         if (err instanceof LedgerError) {
-          setTxError(err.message)
-          setShowLedgerPopup(false)
-          setShowLedgerPopupSkipTx(false)
+          setTxError(err.message);
+          setShowLedgerPopup(false);
+          setShowLedgerPopupSkipTx(false);
         }
-        setIsSending(false)
-        captureException(err)
+        setIsSending(false);
+        captureException(err);
       }
     }, [
       clearTxError,
@@ -236,29 +227,29 @@ export const ReviewTransferSheet = observer(
       setTxError,
       setShowLedgerPopup,
       setShowLedgerPopupSkipTx,
-    ])
+    ]);
 
-    useCaptureTxError(txError)
+    useCaptureTxError(txError);
 
     const onCloseLedgerPopup = useCallback(() => {
-      setShowLedgerPopup(false)
-      setShowLedgerPopupSkipTx(false)
-    }, [setShowLedgerPopup, setShowLedgerPopupSkipTx])
+      setShowLedgerPopup(false);
+      setShowLedgerPopupSkipTx(false);
+    }, [setShowLedgerPopup, setShowLedgerPopupSkipTx]);
 
     useEffect(() => {
       if (isCopied) {
         setTimeout(() => {
-          setIsCopied(false)
-        }, 2_000)
+          setIsCopied(false);
+        }, 2_000);
       }
-    }, [isCopied])
+    }, [isCopied]);
 
     const senderChainIcon = useMemo(() => {
       if (selectedToken?.tokenBalanceOnChain) {
-        return chains?.[selectedToken?.tokenBalanceOnChain as SupportedChain]?.chainSymbolImageUrl
+        return chains?.[selectedToken?.tokenBalanceOnChain as SupportedChain]?.chainSymbolImageUrl;
       }
-      return null
-    }, [chains, selectedToken?.tokenBalanceOnChain])
+      return null;
+    }, [chains, selectedToken?.tokenBalanceOnChain]);
 
     const receiverChainIcon = useMemo(() => {
       if (
@@ -267,19 +258,14 @@ export const ReviewTransferSheet = observer(
         isSuiChain(sendActiveChain) ||
         isSolanaChain(sendActiveChain)
       ) {
-        return chains?.[sendActiveChain]?.chainSymbolImageUrl
+        return chains?.[sendActiveChain]?.chainSymbolImageUrl;
       }
-      return chains?.[selectedAddress?.chainName as SupportedChain]?.chainSymbolImageUrl
-    }, [chains, sendActiveChain, selectedAddress?.chainName])
+      return chains?.[selectedAddress?.chainName as SupportedChain]?.chainSymbolImageUrl;
+    }, [chains, sendActiveChain, selectedAddress?.chainName]);
 
     return (
       <>
-        <BottomModal
-          isOpen={isOpen}
-          onClose={handleClose}
-          title='Review transfer'
-          className='p-6 !pt-8'
-        >
+        <BottomModal isOpen={isOpen} onClose={handleClose} title='Review transfer' className='p-6 !pt-8'>
           <div className='flex flex-col items-center w-full gap-4 relative'>
             <div className='bg-secondary-100 p-6 rounded-xl flex w-full justify-between items-center'>
               <div className='flex flex-col gap-1'>
@@ -316,11 +302,9 @@ export const ReviewTransferSheet = observer(
               <div
                 className='flex items-center gap-1.5 cursor-pointer'
                 onClick={(e) => {
-                  e.stopPropagation()
-                  UserClipboard.copyText(
-                    selectedAddress?.ethAddress || selectedAddress?.address || '',
-                  )
-                  setIsCopied(true)
+                  e.stopPropagation();
+                  UserClipboard.copyText(selectedAddress?.ethAddress || selectedAddress?.address || '');
+                  setIsCopied(true);
                 }}
               >
                 <p
@@ -363,11 +347,7 @@ export const ReviewTransferSheet = observer(
                 </AnimatePresence>
               </div>
               <img
-                src={
-                  receiverChainIcon ||
-                  selectedAddress?.avatarIcon ||
-                  Images.Misc.getWalletIconAtIndex(0)
-                }
+                src={receiverChainIcon || selectedAddress?.avatarIcon || Images.Misc.getWalletIconAtIndex(0)}
                 width={48}
                 height={48}
                 className='rounded-full'
@@ -411,6 +391,6 @@ export const ReviewTransferSheet = observer(
           onCloseLedgerPopup={onCloseLedgerPopup}
         />
       </>
-    )
+    );
   },
-)
+);

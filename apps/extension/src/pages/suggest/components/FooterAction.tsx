@@ -1,16 +1,16 @@
-import { Buttons } from '@leapwallet/leap-ui'
-import classNames from 'classnames'
-import React, { ReactNode } from 'react'
-import { Colors } from 'theme/colors'
+import { Buttons } from '@leapwallet/leap-ui';
+import classNames from 'classnames';
+import React, { ReactNode } from 'react';
+import { Colors } from 'theme/colors';
 
 type FooterActionProps = {
-  error?: string
-  rejectBtnText: ReactNode
-  rejectBtnClick: () => void
-  confirmBtnText: ReactNode
-  confirmBtnClick?: () => void
-  isConfirmBtnDisabled?: boolean
-}
+  error?: string;
+  rejectBtnText: ReactNode;
+  rejectBtnClick: () => void;
+  confirmBtnText: ReactNode;
+  confirmBtnClick?: () => void;
+  isConfirmBtnDisabled?: boolean;
+};
 
 export function FooterAction({
   error,
@@ -47,5 +47,5 @@ export function FooterAction({
         {confirmBtnText}
       </Buttons.Generic>
     </div>
-  )
+  );
 }

@@ -1,22 +1,22 @@
-import { useSeiLinkedAddressState } from '@leapwallet/cosmos-wallet-hooks'
-import { ThemeName, useTheme } from '@leapwallet/leap-ui'
-import classNames from 'classnames'
-import { Images } from 'images'
-import React, { MouseEventHandler, useMemo, useState } from 'react'
-import { closeSidePanel } from 'utils/closeSidePanel'
-import { isCompassWallet } from 'utils/isCompassWallet'
-import browser from 'webextension-polyfill'
+import { useSeiLinkedAddressState } from '@leapwallet/cosmos-wallet-hooks';
+import { ThemeName, useTheme } from '@leapwallet/leap-ui';
+import classNames from 'classnames';
+import { Images } from 'images';
+import React, { MouseEventHandler, useMemo, useState } from 'react';
+import { closeSidePanel } from 'utils/closeSidePanel';
+import { isCompassWallet } from 'utils/isCompassWallet';
+import browser from 'webextension-polyfill';
 
 type EthCopyWalletAddressProps = {
-  readonly type?: 'button' | 'submit' | 'reset'
-  readonly walletAddresses?: string[]
-  readonly onCopy?: () => void
-  readonly color: string
-  readonly textOnCopied?: string
-  readonly className?: string
-  readonly copyIcon?: string
-  readonly onTextClick?: () => void
-}
+  readonly type?: 'button' | 'submit' | 'reset';
+  readonly walletAddresses?: string[];
+  readonly onCopy?: () => void;
+  readonly color: string;
+  readonly textOnCopied?: string;
+  readonly className?: string;
+  readonly copyIcon?: string;
+  readonly onTextClick?: () => void;
+};
 
 export function EthCopyWalletAddress({
   type,
@@ -29,47 +29,46 @@ export function EthCopyWalletAddress({
   onTextClick,
   ...rest
 }: EthCopyWalletAddressProps) {
-  const [copied, setCopied] = useState(false)
-  const { addressLinkState } = useSeiLinkedAddressState()
+  const [copied, setCopied] = useState(false);
+  const { addressLinkState } = useSeiLinkedAddressState();
 
-  const text = copied ? textOnCopied : walletAddresses?.[0] ?? ''
-  const copyIconSrc: string =
-    useTheme().theme === ThemeName.DARK ? Images.Misc.CopyGray200 : Images.Misc.CopyGray600
+  const text = copied ? textOnCopied : walletAddresses?.[0] ?? '';
+  const copyIconSrc: string = useTheme().theme === ThemeName.DARK ? Images.Misc.CopyGray200 : Images.Misc.CopyGray600;
 
   const isToAddLinkAddressNudgeText = useMemo(() => {
     if (isCompassWallet() && !['done', 'unknown', 'loading'].includes(addressLinkState)) {
-      return true
+      return true;
     }
 
-    return false
-  }, [addressLinkState])
+    return false;
+  }, [addressLinkState]);
 
   const redirectOnboarding = () => {
-    window.open(browser.runtime.getURL('index.html#/onboardEvmLedger'))
-    closeSidePanel()
-  }
+    window.open(browser.runtime.getURL('index.html#/onboardEvmLedger'));
+    closeSidePanel();
+  };
 
   const handleClick: MouseEventHandler<HTMLDivElement | HTMLButtonElement> = async (event) => {
     if (!text) {
-      event.stopPropagation()
-      redirectOnboarding()
-      return
+      event.stopPropagation();
+      redirectOnboarding();
+      return;
     }
 
-    onTextClick && event.stopPropagation()
+    onTextClick && event.stopPropagation();
 
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
 
-    onCopy && (await onCopy())
-  }
+    onCopy && (await onCopy());
+  };
 
   const handleTextClick: MouseEventHandler<HTMLDivElement> = (event) => {
     if (onTextClick) {
-      event.stopPropagation()
-      onTextClick()
+      event.stopPropagation();
+      onTextClick();
     }
-  }
+  };
 
   return (
     <button
@@ -78,8 +77,7 @@ export function EthCopyWalletAddress({
         'relative font-Satoshi14px text-[14px] leading-[20px] py-[8px] cursor-pointer',
         {
           'text-white-100 font-bold rounded-[56px] pl-[21px] pr-[25px]': copied,
-          'text-gray-600 dark:text-gray-200 bg-white-100 dark:bg-gray-900 rounded-[30px] pl-4 pr-3':
-            !copied,
+          'text-gray-600 dark:text-gray-200 bg-white-100 dark:bg-gray-900 rounded-[30px] pl-4 pr-3': !copied,
           'border-[1px] border-yellow-600': !copied && isToAddLinkAddressNudgeText,
         },
         className,
@@ -119,5 +117,5 @@ export function EthCopyWalletAddress({
         )}
       </div>
     </button>
-  )
+  );
 }

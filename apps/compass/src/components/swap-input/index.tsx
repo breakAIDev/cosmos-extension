@@ -1,40 +1,40 @@
-import { useformatCurrency } from '@leapwallet/cosmos-wallet-hooks'
-import { CardDivider } from '@leapwallet/leap-ui'
-import { Buttons } from '@leapwallet/leap-ui'
-import { CaretDoubleDown, CaretRight } from '@phosphor-icons/react'
-import BigNumber from 'bignumber.js'
-import classNames from 'classnames'
-import ClickableIcon from 'components/clickable-icons'
-import { DEFAULT_SWAP_FEE } from 'config/config'
-import { Images } from 'images'
-import React, { forwardRef, useEffect, useState } from 'react'
+import { useformatCurrency } from '@leapwallet/cosmos-wallet-hooks';
+import { CardDivider } from '@leapwallet/leap-ui';
+import { Buttons } from '@leapwallet/leap-ui';
+import { CaretDoubleDown, CaretRight } from '@phosphor-icons/react';
+import BigNumber from 'bignumber.js';
+import classNames from 'classnames';
+import ClickableIcon from 'components/clickable-icons';
+import { DEFAULT_SWAP_FEE } from 'config/config';
+import { Images } from 'images';
+import React, { forwardRef, useEffect, useState } from 'react';
 
 type Swap = {
-  name: string
-  icon?: string
-  balance: string
-}
+  name: string;
+  icon?: string;
+  balance: string;
+};
 
 export type SwapInputProps = Swap & {
-  targetName: string
-  targetTokenIcon: string
-  amount: string
-  targetAmount: string
-  feeInCurrency: string
+  targetName: string;
+  targetTokenIcon: string;
+  amount: string;
+  targetAmount: string;
+  feeInCurrency: string;
   // eslint-disable-next-line no-unused-vars
-  setAmount: (amount: string) => void
-  onSwapClick: () => void
-  placeholder?: string
-  onTokenClick?: () => void
-  onMaxClick?: () => void
-  onTargetTokenClick?: () => void
-  onSlippageClick: () => void
-  onReviewClick: () => void
-  targetUnitPrice: string
-  slippage: string
-  isFeeAvailable?: boolean
-  junoDollarValue: number | undefined
-}
+  setAmount: (amount: string) => void;
+  onSwapClick: () => void;
+  placeholder?: string;
+  onTokenClick?: () => void;
+  onMaxClick?: () => void;
+  onTargetTokenClick?: () => void;
+  onSlippageClick: () => void;
+  onReviewClick: () => void;
+  targetUnitPrice: string;
+  slippage: string;
+  isFeeAvailable?: boolean;
+  junoDollarValue: number | undefined;
+};
 
 const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
   ({
@@ -58,23 +58,21 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
     isFeeAvailable,
     junoDollarValue,
   }) => {
-    const [isError, setIsError] = useState(false)
-    const [formatBalance] = useformatCurrency()
+    const [isError, setIsError] = useState(false);
+    const [formatBalance] = useformatCurrency();
 
     useEffect(() => {
       if (name === 'JUNO' && Number(amount) > Number(balance) - 0.004) {
-        setIsError(true)
+        setIsError(true);
       } else if (name !== 'JUNO' && Number(amount) > Number(balance)) {
-        setIsError(true)
+        setIsError(true);
       } else {
-        setIsError(false)
+        setIsError(false);
       }
-    }, [amount, balance, name])
+    }, [amount, balance, name]);
 
     const dollarValueDisplay =
-      junoDollarValue === undefined
-        ? '-'
-        : formatBalance(new BigNumber(junoDollarValue).multipliedBy(amount))
+      junoDollarValue === undefined ? '-' : formatBalance(new BigNumber(junoDollarValue).multipliedBy(amount));
 
     return (
       <div>
@@ -86,9 +84,7 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
               onClick={onTokenClick}
             >
               {icon && <img src={icon} className='h-6 w-6 mr-1' />}
-              <div className='text-black-100 dark:text-white-100 font-bold text-base pl-[4px] pr-[7px]'>
-                {name}
-              </div>
+              <div className='text-black-100 dark:text-white-100 font-bold text-base pl-[4px] pr-[7px]'>{name}</div>
               <img src={Images.Misc.ArrowDown} />
             </div>
             <input
@@ -106,9 +102,7 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
                 'text-gray-400': !isError,
               })}
             >
-              {`${isError ? 'Insufficient Funds' : 'Balance'}: ${balance} ${
-                name === 'Select token' ? '' : name
-              }`}
+              {`${isError ? 'Insufficient Funds' : 'Balance'}: ${balance} ${name === 'Select token' ? '' : name}`}
             </div>
             <div className='flex flex-col self-end'>
               <p className='font-medium text-sm text-gray-600 dark:text-gray-300 text-right w-full'>
@@ -162,9 +156,7 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
               type='number'
             />
           </div>
-          <p className='font-medium text-sm text-gray-600 dark:text-gray-300 text-right w-full'>
-            {dollarValueDisplay}
-          </p>
+          <p className='font-medium text-sm text-gray-600 dark:text-gray-300 text-right w-full'>{dollarValueDisplay}</p>
         </div>
 
         {/* Slippage and per unit cost estimates */}
@@ -214,7 +206,7 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
               size='normal'
               color={'#E18881'}
               onClick={() => {
-                onReviewClick()
+                onReviewClick();
               }}
               disabled={
                 isError ||
@@ -232,10 +224,7 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
         </div>
 
         {/* Transaction fee information */}
-        {amount &&
-        name !== 'Select token' &&
-        targetAmount != '0' &&
-        targetName !== 'Select token' ? (
+        {amount && name !== 'Select token' && targetAmount != '0' && targetName !== 'Select token' ? (
           <div className='mt-[20px] text-center w-[344px]'>
             <p className='font-bold text-black-100 dark:text-[#D6D6D6] text-sm'>
               Transaction Fee: {DEFAULT_SWAP_FEE} JUNO (${feeInCurrency})
@@ -243,10 +232,10 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
           </div>
         ) : null}
       </div>
-    )
+    );
   },
-)
+);
 
-SwapInput.displayName = 'SwapInput'
+SwapInput.displayName = 'SwapInput';
 
-export default SwapInput
+export default SwapInput;

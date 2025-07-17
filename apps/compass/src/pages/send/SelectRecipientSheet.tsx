@@ -5,42 +5,34 @@ import {
   useActiveChain,
   useChainInfo,
   WALLETTYPE,
-} from '@leapwallet/cosmos-wallet-hooks'
-import {
-  isEthAddress,
-  isValidAddressWithPrefix,
-  pubKeyToEvmAddressToShow,
-} from '@leapwallet/cosmos-wallet-sdk'
-import { CaretRight, MagnifyingGlassMinus, PencilSimpleLine } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import BottomModal from 'components/bottom-modal'
-import { LedgerAppGuide } from 'components/ledger-app-info/ledger-app-guide'
-import { SearchInput } from 'components/search-input'
-import Text from 'components/text'
-import { useDefaultTokenLogo } from 'hooks'
-import useActiveWallet from 'hooks/settings/useActiveWallet'
-import { useChainInfos } from 'hooks/useChainInfos'
-import { useContacts, useContactsSearch } from 'hooks/useContacts'
-import { Wallet } from 'hooks/wallet/useWallet'
-import { LedgerDriveIcon } from 'icons/ledger-icon'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import { useSendContext } from 'pages/send/context'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { AddressBook } from 'utils/addressbook'
-import { UserClipboard } from 'utils/clipboard'
-import { cn } from 'utils/cn'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { isEthAddress, isValidAddressWithPrefix, pubKeyToEvmAddressToShow } from '@leapwallet/cosmos-wallet-sdk';
+import { CaretRight, MagnifyingGlassMinus, PencilSimpleLine } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import BottomModal from 'components/bottom-modal';
+import { LedgerAppGuide } from 'components/ledger-app-info/ledger-app-guide';
+import { SearchInput } from 'components/search-input';
+import Text from 'components/text';
+import { useDefaultTokenLogo } from 'hooks';
+import useActiveWallet from 'hooks/settings/useActiveWallet';
+import { useChainInfos } from 'hooks/useChainInfos';
+import { useContacts, useContactsSearch } from 'hooks/useContacts';
+import { Wallet } from 'hooks/wallet/useWallet';
+import { LedgerDriveIcon } from 'icons/ledger-icon';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import { useSendContext } from 'pages/send/context';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { AddressBook } from 'utils/addressbook';
+import { UserClipboard } from 'utils/clipboard';
+import { cn } from 'utils/cn';
 
-const ledgerAddressError = "0x addresses aren't supported with this wallet."
+const ledgerAddressError = "0x addresses aren't supported with this wallet.";
 
-function MyWallets({
-  setSelectedAddress,
-}: {
-  setSelectedAddress: (address: SelectedAddress) => void
-}) {
-  const activeChain = useActiveChain()
-  const { activeWallet } = useActiveWallet()
-  const wallets = Wallet.useWallets()
+function MyWallets({ setSelectedAddress }: { setSelectedAddress: (address: SelectedAddress) => void }) {
+  const activeChain = useActiveChain();
+  const { activeWallet } = useActiveWallet();
+  const wallets = Wallet.useWallets();
 
   const walletsList = useMemo(() => {
     return wallets
@@ -48,39 +40,37 @@ function MyWallets({
           .map((wallet) => wallet)
           .filter((wallet) => wallet.id !== activeWallet?.id)
           .sort((a, b) => a.name.localeCompare(b.name))
-      : []
-  }, [activeWallet?.id, wallets])
+      : [];
+  }, [activeWallet?.id, wallets]);
   const displayLedgerApp = useMemo(() => {
     return wallets
       ? Object.values(wallets).some((wallet) => {
           if (wallet.walletType === WALLETTYPE.LEDGER) {
-            return !wallet.app || wallet.app !== 'sei'
+            return !wallet.app || wallet.app !== 'sei';
           } else {
-            return false
+            return false;
           }
         })
-      : false
-  }, [wallets])
+      : false;
+  }, [wallets]);
 
   return (
     <div className='relative mt-2 w-full h-[calc(100%-235px)]] overflow-auto'>
       {walletsList.length > 0 ? (
         walletsList.map((wallet, index) => {
-          const isLast = index === walletsList.length - 1
-          const isFirst = index === 0
-          let walletLabel = ''
+          const isLast = index === walletsList.length - 1;
+          const isFirst = index === 0;
+          let walletLabel = '';
           let addressText =
-            pubKeyToEvmAddressToShow(wallet?.pubKeys?.[activeChain], true) ||
-            wallet?.addresses?.[activeChain]
+            pubKeyToEvmAddressToShow(wallet?.pubKeys?.[activeChain], true) || wallet?.addresses?.[activeChain];
 
           if (wallet.walletType === WALLETTYPE.LEDGER && wallet.app !== 'sei') {
             addressText =
-              wallet.addresses[activeChain] ||
-              pubKeyToEvmAddressToShow(wallet?.pubKeys?.[activeChain], true)
+              wallet.addresses[activeChain] || pubKeyToEvmAddressToShow(wallet?.pubKeys?.[activeChain], true);
           }
 
           if (wallet.walletType === WALLETTYPE.LEDGER) {
-            walletLabel = `Imported · ${wallet.path?.replace(/m\/44'\/(118'|60')\//, '')}`
+            walletLabel = `Imported · ${wallet.path?.replace(/m\/44'\/(118'|60')\//, '')}`;
           }
 
           return (
@@ -99,11 +89,9 @@ function MyWallets({
                     chainIcon: '',
                     chainName: activeChain,
                     emoji: undefined,
-                    name: `${
-                      wallet.name.length > 12 ? `${wallet.name.slice(0, 12)}...` : wallet.name
-                    }`,
+                    name: `${wallet.name.length > 12 ? `${wallet.name.slice(0, 12)}...` : wallet.name}`,
                     selectionType: 'currentWallet',
-                  })
+                  });
                 }}
                 disabled={!addressText}
               >
@@ -138,7 +126,7 @@ function MyWallets({
 
               {!isLast && <div className='border-b w-full border-gray-100 dark:border-gray-850' />}
             </React.Fragment>
-          )
+          );
         })
       ) : (
         <div className='py-[80px] px-4 w-full flex-col flex  justify-center items-center gap-4'>
@@ -147,9 +135,7 @@ function MyWallets({
             className='dark:text-gray-50 text-gray-900 p-5 rounded-full bg-secondary-200'
           />
           <div className='flex flex-col justify-start items-center w-full gap-3'>
-            <div className='text-lg text-center font-bold !leading-[21.5px] dark:text-white-100'>
-              No wallets found
-            </div>
+            <div className='text-lg text-center font-bold !leading-[21.5px] dark:text-white-100'>No wallets found</div>
             <div className='text-sm font-normal !leading-[22.4px] text-gray-400 dark:text-gray-400 text-center'>
               Use Compass’ in-wallet options to get started.
             </div>
@@ -157,23 +143,23 @@ function MyWallets({
         </div>
       )}
     </div>
-  )
+  );
 }
 
 function MyContacts({
   handleContactSelect,
   editContact,
 }: {
-  handleContactSelect: (contact: SelectedAddress) => void
-  editContact: (s?: AddressBook.SavedAddress) => void
+  handleContactSelect: (contact: SelectedAddress) => void;
+  editContact: (s?: AddressBook.SavedAddress) => void;
 }) {
-  const [searchQuery, setSearchQuery] = useState('')
-  const trimmedSearchQuery = searchQuery.trim()
-  const contacts = useContactsSearch(trimmedSearchQuery)
-  const chainInfos = useChainInfos()
-  const { chainName } = useChainInfo()
-  const { setMemo } = useSendContext()
-  const defaultTokenLogo = useDefaultTokenLogo()
+  const [searchQuery, setSearchQuery] = useState('');
+  const trimmedSearchQuery = searchQuery.trim();
+  const contacts = useContactsSearch(trimmedSearchQuery);
+  const chainInfos = useChainInfos();
+  const { chainName } = useChainInfo();
+  const { setMemo } = useSendContext();
+  const defaultTokenLogo = useDefaultTokenLogo();
 
   const handleAvatarClick = (contact: AddressBook.SavedAddress, chainImage: string | undefined) => {
     handleContactSelect({
@@ -184,17 +170,17 @@ function MyContacts({
       address: contact.address,
       emoji: contact.emoji,
       selectionType: 'saved',
-    })
-    setMemo(contact.memo ?? '')
-  }
+    });
+    setMemo(contact.memo ?? '');
+  };
 
   return (
     <div className='mt-2 w-full h-[calc(100%-235px)]] overflow-auto'>
       {contacts.length > 0 ? (
         contacts.map((contact, index) => {
-          const chainImage = chainInfos[contact.blockchain]?.chainSymbolImageUrl ?? defaultTokenLogo
-          const isLast = index === contacts.length - 1
-          const isFirst = index === 0
+          const chainImage = chainInfos[contact.blockchain]?.chainSymbolImageUrl ?? defaultTokenLogo;
+          const isLast = index === contacts.length - 1;
+          const isFirst = index === 0;
 
           return (
             <React.Fragment key={contact.address}>
@@ -211,9 +197,7 @@ function MyContacts({
                     <img className='h-11 w-11' src={Images.Misc.getWalletIconAtIndex(1)} />
 
                     <div className='flex flex-col'>
-                      <p className='font-bold text-left text-monochrome text-sm capitalize'>
-                        {contact.name}
-                      </p>
+                      <p className='font-bold text-left text-monochrome text-sm capitalize'>{contact.name}</p>
                       <p className='text-sm text-muted-foreground'>
                         {sliceAddress(contact.ethAddress ? contact.ethAddress : contact.address)}
                       </p>
@@ -224,8 +208,8 @@ function MyContacts({
                     weight='fill'
                     className='bg-secondary-100 hover:bg-secondary-200 border rounded-full p-2.5 border-secondary-200 text-muted-foreground cursor-pointer'
                     onClick={(e) => {
-                      e.stopPropagation()
-                      editContact(contact)
+                      e.stopPropagation();
+                      editContact(contact);
                     }}
                   />
                 </div>
@@ -233,7 +217,7 @@ function MyContacts({
 
               {!isLast && <div className='border-b w-full border-secondary-300' />}
             </React.Fragment>
-          )
+          );
         })
       ) : (
         <div className='py-[80px] px-4 w-full flex-col flex  justify-center items-center gap-4'>
@@ -242,14 +226,12 @@ function MyContacts({
             className='dark:text-gray-50 text-gray-900 p-5 rounded-full bg-secondary-200'
           />
           <div className='flex flex-col justify-start items-center w-full gap-3'>
-            <div className='text-lg text-center font-bold !leading-[21.5px] dark:text-white-100'>
-              No contacts found
-            </div>
+            <div className='text-lg text-center font-bold !leading-[21.5px] dark:text-white-100'>No contacts found</div>
             <div
               className='mt-2 text-sm font-medium !leading-[22.4px] text-accent-foreground text-center cursor-pointer'
               onClick={(e) => {
-                e.stopPropagation()
-                editContact()
+                e.stopPropagation();
+                editContact();
               }}
             >
               + Add new contact
@@ -258,7 +240,7 @@ function MyContacts({
         </div>
       )}
     </div>
-  )
+  );
 }
 
 export const SelectRecipientSheet = observer(
@@ -267,23 +249,22 @@ export const SelectRecipientSheet = observer(
     onClose,
     editContact,
   }: {
-    isOpen: boolean
-    onClose: () => void
-    editContact: (s?: AddressBook.SavedAddress) => void
+    isOpen: boolean;
+    onClose: () => void;
+    editContact: (s?: AddressBook.SavedAddress) => void;
   }) => {
-    const { contacts, loading: loadingContacts } = useContacts()
-    const [recipientInputValue, setRecipientInputValue] = useState<string>('')
-    const existingContactMatch = AddressBook.useGetContact(recipientInputValue)
-    const [selectedTab, setSelectedTab] = useState<'contacts' | 'wallets'>('contacts')
-    const [showLedgerAdvisory, setShowLedgerAdvisory] = useState(false)
+    const { contacts, loading: loadingContacts } = useContacts();
+    const [recipientInputValue, setRecipientInputValue] = useState<string>('');
+    const existingContactMatch = AddressBook.useGetContact(recipientInputValue);
+    const [selectedTab, setSelectedTab] = useState<'contacts' | 'wallets'>('contacts');
+    const [showLedgerAdvisory, setShowLedgerAdvisory] = useState(false);
 
-    const { setSelectedAddress, addressError, setAddressError, setMemo, setEthAddress } =
-      useSendContext()
-    const activeChain = useActiveChain()
+    const { setSelectedAddress, addressError, setAddressError, setMemo, setEthAddress } = useSendContext();
+    const activeChain = useActiveChain();
 
-    const { activeWallet } = useActiveWallet()
+    const { activeWallet } = useActiveWallet();
 
-    const wallets = Wallet.useWallets()
+    const wallets = Wallet.useWallets();
     const walletsList = useMemo(() => {
       return wallets
         ? Object.values(wallets)
@@ -294,87 +275,86 @@ export const SelectRecipientSheet = observer(
                 ? new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
                 : a.name.localeCompare(b.name),
             )
-        : []
-    }, [activeWallet?.id, wallets])
+        : [];
+    }, [activeWallet?.id, wallets]);
 
     const existingWalletMatch = useMemo(() => {
       const res = walletsList.find((wallet) => {
         return (
-          recipientInputValue.toLowerCase() ===
-            pubKeyToEvmAddressToShow(wallet?.pubKeys?.[activeChain], true) ||
+          recipientInputValue.toLowerCase() === pubKeyToEvmAddressToShow(wallet?.pubKeys?.[activeChain], true) ||
           recipientInputValue.toLowerCase() === wallet?.addresses?.[activeChain]
-        )
-      })
-      if (res) return res
-    }, [activeChain, recipientInputValue, walletsList])
-    const existingResult = existingContactMatch ?? existingWalletMatch
+        );
+      });
+      if (res) return res;
+    }, [activeChain, recipientInputValue, walletsList]);
+    const existingResult = existingContactMatch ?? existingWalletMatch;
 
     const actionPaste = () => {
       UserClipboard.pasteText().then((text) => {
-        if (!text) return
-        setRecipientInputValue(text.trim())
-      })
-    }
+        if (!text) return;
+        setRecipientInputValue(text.trim());
+      });
+    };
 
     const cosmosLedgerCheck = (address: string) => {
       return (
         address.toLowerCase().startsWith('0x') &&
         activeWallet?.walletType === WALLETTYPE.LEDGER &&
         activeWallet.app !== 'sei'
-      )
-    }
+      );
+    };
 
     const handleContactSelect = useCallback(
       (s: SelectedAddress) => {
-        setRecipientInputValue(s.address ?? '')
+        setRecipientInputValue(s.address ?? '');
         if (s.address && cosmosLedgerCheck(s.address)) {
-          setAddressError(ledgerAddressError)
-          return
+          setAddressError(ledgerAddressError);
+          return;
         }
-        setSelectedAddress(s)
-        setEthAddress(s.ethAddress ?? '')
+        setSelectedAddress(s);
+        setEthAddress(s.ethAddress ?? '');
       },
       [setEthAddress, setSelectedAddress],
-    )
+    );
 
     const handleWalletSelect = useCallback(
       (s: SelectedAddress) => {
-        setRecipientInputValue(s.address ?? '')
+        setRecipientInputValue(s.address ?? '');
         if (s.address && cosmosLedgerCheck(s.address)) {
-          setAddressError(ledgerAddressError)
-          return
+          setAddressError(ledgerAddressError);
+          return;
         }
-        setAddressError(undefined)
+        setAddressError(undefined);
 
-        setSelectedAddress(s)
-        setEthAddress(s.ethAddress ?? '')
+        setSelectedAddress(s);
+        setEthAddress(s.ethAddress ?? '');
       },
       [setAddressError, setEthAddress, setSelectedAddress],
-    )
+    );
 
     useEffect(() => {
       if (cosmosLedgerCheck(recipientInputValue)) {
-        setAddressError(ledgerAddressError)
-        return
+        setAddressError(ledgerAddressError);
+        return;
       }
       if (
         recipientInputValue.length > 0 &&
         !isValidAddressWithPrefix(recipientInputValue, 'sei') &&
         !isEthAddress(recipientInputValue)
       ) {
-        setAddressError('Invalid SEI address')
+        setAddressError('Invalid SEI address');
       } else {
-        setAddressError('')
+        setAddressError('');
       }
-    }, [recipientInputValue, setAddressError])
+    }, [recipientInputValue, setAddressError]);
 
     useEffect(() => {
       if (!loadingContacts) {
         if (Object.keys(contacts).length === 0) {
-          setSelectedTab('wallets')
+          setSelectedTab('wallets');
         }
       }
-    }, [contacts, loadingContacts])
+    }, [contacts, loadingContacts]);
 
     return (
       <BottomModal
@@ -393,10 +373,10 @@ export const SelectRecipientSheet = observer(
               onChange={(e) => setRecipientInputValue(e.target.value)}
               placeholder='Enter recipient’s SEI address'
               onClear={() => {
-                setEthAddress('')
-                setRecipientInputValue('')
-                setSelectedAddress(null)
-                setMemo('')
+                setEthAddress('');
+                setRecipientInputValue('');
+                setSelectedAddress(null);
+                setMemo('');
               }}
               divClassName={cn(
                 'rounded-2xl w-full flex items-center gap-[10px] bg-gray-50 dark:bg-gray-900 py-3 pr-3 pl-4   border border-transparent hover:border-secondary-400 focus-within:border-monochrome dark:focus-within:border-monochrome',
@@ -421,8 +401,7 @@ export const SelectRecipientSheet = observer(
 
           {recipientInputValue.length > 0 ? null : (
             <>
-              {Object.values(contacts).length === 0 &&
-              walletsList.length === 0 ? null : walletsList.length === 0 ? (
+              {Object.values(contacts).length === 0 && walletsList.length === 0 ? null : walletsList.length === 0 ? (
                 <Text className='font-bold mt-2' color='text-muted-foreground' size='xs'>
                   Contacts
                 </Text>
@@ -432,10 +411,8 @@ export const SelectRecipientSheet = observer(
                     className={cn(
                       'font-medium text-xs border bg-secondary py-2 px-4 hover:border-secondary-400 cursor-pointer',
                       {
-                        'text-monochrome !border-monochrome rounded-full':
-                          selectedTab === 'contacts',
-                        'text-muted-foreground border-transparent rounded-full':
-                          selectedTab !== 'contacts',
+                        'text-monochrome !border-monochrome rounded-full': selectedTab === 'contacts',
+                        'text-muted-foreground border-transparent rounded-full': selectedTab !== 'contacts',
                       },
                     )}
                     onClick={() => setSelectedTab('contacts')}
@@ -446,10 +423,8 @@ export const SelectRecipientSheet = observer(
                     className={cn(
                       'font-medium text-xs border bg-secondary py-2 px-4 hover:border-secondary-400 cursor-pointer',
                       {
-                        'text-monochrome !border-monochrome rounded-full':
-                          selectedTab === 'wallets',
-                        'text-muted-foreground border-transparent rounded-full':
-                          selectedTab !== 'wallets',
+                        'text-monochrome !border-monochrome rounded-full': selectedTab === 'wallets',
+                        'text-muted-foreground border-transparent rounded-full': selectedTab !== 'wallets',
                       },
                     )}
                     onClick={() => setSelectedTab('wallets')}
@@ -479,7 +454,7 @@ export const SelectRecipientSheet = observer(
                   emoji: undefined,
                   name: existingResult?.name ?? '',
                   selectionType: 'notSaved',
-                })
+                });
               }}
             >
               <div className='flex justify-between items-center w-full'>
@@ -487,18 +462,12 @@ export const SelectRecipientSheet = observer(
                   <img className='h-11 w-11' src={Images.Misc.getWalletIconAtIndex(1)} />
                   <div className='flex flex-col'>
                     {existingResult && (
-                      <p className='font-bold text-left text-monochrome text-sm capitalize'>
-                        {existingResult.name}
-                      </p>
+                      <p className='font-bold text-left text-monochrome text-sm capitalize'>{existingResult.name}</p>
                     )}
                     {existingResult ? (
-                      <p className='text-sm text-muted-foreground text-left'>
-                        {sliceAddress(recipientInputValue)}
-                      </p>
+                      <p className='text-sm text-muted-foreground text-left'>{sliceAddress(recipientInputValue)}</p>
                     ) : (
-                      <p className='font-bold text-left text-monochrome text-sm'>
-                        {sliceAddress(recipientInputValue)}
-                      </p>
+                      <p className='font-bold text-left text-monochrome text-sm'>{sliceAddress(recipientInputValue)}</p>
                     )}
                   </div>
                 </div>
@@ -509,6 +478,6 @@ export const SelectRecipientSheet = observer(
         </div>
         {addressError === ledgerAddressError && <LedgerAppGuide />}
       </BottomModal>
-    )
+    );
   },
-)
+);

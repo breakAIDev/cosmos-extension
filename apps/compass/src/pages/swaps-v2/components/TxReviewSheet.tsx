@@ -1,22 +1,22 @@
-import { CaretDown, CaretUp, GasPump } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import BottomModal from 'components/bottom-modal'
-import { Button } from 'components/ui/button'
-import { AnimatePresence, motion } from 'framer-motion'
-import React, { Dispatch, SetStateAction, useCallback, useState } from 'react'
+import { CaretDown, CaretUp, GasPump } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import BottomModal from 'components/bottom-modal';
+import { Button } from 'components/ui/button';
+import { AnimatePresence, motion } from 'framer-motion';
+import React, { Dispatch, SetStateAction, useCallback, useState } from 'react';
 
-import { useSwapContext } from '../context'
-import { MoreDetails } from './MoreDetails'
-import { ConversionRateDisplay } from './SwapInfo/ConversionRateDisplay'
-import TxTokensSummary from './TxTokensSummary'
+import { useSwapContext } from '../context';
+import { MoreDetails } from './MoreDetails';
+import { ConversionRateDisplay } from './SwapInfo/ConversionRateDisplay';
+import TxTokensSummary from './TxTokensSummary';
 
 type TxReviewSheetProps = {
-  isOpen: boolean
-  onClose: () => void
-  onProceed: () => void
-  setShowFeesSettingSheet: Dispatch<SetStateAction<boolean>>
-  onSlippageInfoClick: () => void
-}
+  isOpen: boolean;
+  onClose: () => void;
+  onProceed: () => void;
+  setShowFeesSettingSheet: Dispatch<SetStateAction<boolean>>;
+  onSlippageInfoClick: () => void;
+};
 
 export function TxReviewSheet({
   isOpen,
@@ -25,31 +25,23 @@ export function TxReviewSheet({
   setShowFeesSettingSheet,
   onSlippageInfoClick,
 }: TxReviewSheetProps) {
-  const {
-    displayFee,
-    inAmount,
-    sourceToken,
-    amountOut,
-    destinationToken,
-    sourceChain,
-    destinationChain,
-    routingInfo,
-  } = useSwapContext()
+  const { displayFee, inAmount, sourceToken, amountOut, destinationToken, sourceChain, destinationChain, routingInfo } =
+    useSwapContext();
 
-  const [showMoreDetails, setShowMoreDetails] = useState<boolean>(false)
+  const [showMoreDetails, setShowMoreDetails] = useState<boolean>(false);
 
   const handleAccordionClick = useCallback(() => {
-    setShowMoreDetails((prevShowMoreDetails) => !prevShowMoreDetails)
-  }, [setShowMoreDetails])
+    setShowMoreDetails((prevShowMoreDetails) => !prevShowMoreDetails);
+  }, [setShowMoreDetails]);
 
   const handleAccordingKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
       if (e.key === 'Enter' || e.key === ' ') {
-        handleAccordionClick()
+        handleAccordionClick();
       }
     },
     [handleAccordionClick],
-  )
+  );
 
   return (
     <BottomModal
@@ -90,9 +82,7 @@ export function TxReviewSheet({
             />
             <div className='flex items-center justify-end gap-1'>
               <GasPump size={16} className='text-secondary-800' weight='fill' />
-              <span className='text-secondary-800 text-sm font-medium'>
-                {displayFee?.fiatValue}
-              </span>
+              <span className='text-secondary-800 text-sm font-medium'>{displayFee?.fiatValue}</span>
               {showMoreDetails ? (
                 <CaretUp size={14} className='text-secondary-800' />
               ) : (
@@ -128,5 +118,5 @@ export function TxReviewSheet({
         </Button>
       </div>
     </BottomModal>
-  )
+  );
 }

@@ -1,7 +1,7 @@
-import { Button } from 'components/ui/button'
-import { observer } from 'mobx-react-lite'
-import React from 'react'
-import { Link } from 'react-router-dom'
+import { Button } from 'components/ui/button';
+import { observer } from 'mobx-react-lite';
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 const InsufficientBalanceCard = observer(() => {
   return (
@@ -14,7 +14,7 @@ const InsufficientBalanceCard = observer(() => {
         <Link to={`/buy?pageSource=stake`}>Get SEI</Link>
       </Button>
     </div>
-  )
-})
+  );
+});
 
-export default InsufficientBalanceCard
+export default InsufficientBalanceCard;

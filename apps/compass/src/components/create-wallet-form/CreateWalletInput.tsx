@@ -1,11 +1,11 @@
-import { Input } from '@leapwallet/leap-ui'
-import classNames from 'classnames'
-import React from 'react'
+import { Input } from '@leapwallet/leap-ui';
+import classNames from 'classnames';
+import React from 'react';
 
 type Props = {
-  value: string
-  onChange: React.ChangeEventHandler<HTMLInputElement>
-}
+  value: string;
+  onChange: React.ChangeEventHandler<HTMLInputElement>;
+};
 
 export default function CreateWalletInput({ value, onChange }: Props) {
   return (
@@ -19,5 +19,5 @@ export default function CreateWalletInput({ value, onChange }: Props) {
       />
       <div className='absolute right-[16px] top-[14px] text-gray-400 text-sm font-medium'>{`${value.length}/24`}</div>
     </div>
-  )
+  );
 }

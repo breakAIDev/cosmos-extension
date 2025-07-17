@@ -13,14 +13,14 @@ import {
   PriceStore,
   RootBalanceStore,
   RootDenomsStore,
-} from '@leapwallet/cosmos-wallet-store'
-import { observer } from 'mobx-react-lite'
-import React, { createContext, useContext } from 'react'
-import { assert } from 'utils/assert'
+} from '@leapwallet/cosmos-wallet-store';
+import { observer } from 'mobx-react-lite';
+import React, { createContext, useContext } from 'react';
+import { assert } from 'utils/assert';
 
-import { SwapsTxType, useSwapsTx } from '../hooks'
+import { SwapsTxType, useSwapsTx } from '../hooks';
 
-export const SwapContext = createContext<SwapsTxType | null>(null)
+export const SwapContext = createContext<SwapsTxType | null>(null);
 
 export const SwapContextProvider = observer(
   ({
@@ -40,21 +40,21 @@ export const SwapContextProvider = observer(
     compassTokensAssociationsStore,
     priceStore,
   }: {
-    children: React.ReactNode
-    rootDenomsStore: RootDenomsStore
-    rootBalanceStore: RootBalanceStore
-    activeChainStore: ActiveChainStore
-    autoFetchedCW20DenomsStore: AutoFetchedCW20DenomsStore
-    betaCW20DenomsStore: BetaCW20DenomsStore
-    cw20DenomsStore: CW20DenomsStore
-    disabledCW20DenomsStore: DisabledCW20DenomsStore
-    enabledCW20DenomsStore: EnabledCW20DenomsStore
-    cw20DenomBalanceStore: CW20DenomBalanceStore
-    betaERC20DenomsStore: BetaERC20DenomsStore
-    erc20DenomsStore: ERC20DenomsStore
-    compassTokenTagsStore: CompassTokenTagsStore
-    compassTokensAssociationsStore: CompassSeiTokensAssociationStore
-    priceStore: PriceStore
+    children: React.ReactNode;
+    rootDenomsStore: RootDenomsStore;
+    rootBalanceStore: RootBalanceStore;
+    activeChainStore: ActiveChainStore;
+    autoFetchedCW20DenomsStore: AutoFetchedCW20DenomsStore;
+    betaCW20DenomsStore: BetaCW20DenomsStore;
+    cw20DenomsStore: CW20DenomsStore;
+    disabledCW20DenomsStore: DisabledCW20DenomsStore;
+    enabledCW20DenomsStore: EnabledCW20DenomsStore;
+    cw20DenomBalanceStore: CW20DenomBalanceStore;
+    betaERC20DenomsStore: BetaERC20DenomsStore;
+    erc20DenomsStore: ERC20DenomsStore;
+    compassTokenTagsStore: CompassTokenTagsStore;
+    compassTokensAssociationsStore: CompassSeiTokensAssociationStore;
+    priceStore: PriceStore;
   }) => {
     const value = useSwapsTx({
       rootDenomsStore,
@@ -71,14 +71,14 @@ export const SwapContextProvider = observer(
       compassTokenTagsStore,
       compassTokensAssociationsStore,
       priceStore,
-    })
+    });
 
-    return <SwapContext.Provider value={value}>{children}</SwapContext.Provider>
+    return <SwapContext.Provider value={value}>{children}</SwapContext.Provider>;
   },
-)
+);
 
 export function useSwapContext() {
-  const context = useContext(SwapContext)
-  assert(context !== null, 'useSwapContext must be used within SwapContextProvider')
-  return context
+  const context = useContext(SwapContext);
+  assert(context !== null, 'useSwapContext must be used within SwapContextProvider');
+  return context;
 }

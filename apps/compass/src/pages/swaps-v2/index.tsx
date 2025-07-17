@@ -1,29 +1,29 @@
-import { useActiveWallet, WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks'
-import { ChainInfos, toSmall } from '@leapwallet/cosmos-wallet-sdk'
-import { RootBalanceStore } from '@leapwallet/cosmos-wallet-store'
-import { Faders } from '@phosphor-icons/react'
-import BigNumber from 'bignumber.js'
-import classNames from 'classnames'
-import { AutoAdjustAmountSheet } from 'components/auto-adjust-amount-sheet'
-import { WalletButton } from 'components/button'
-import { PageHeader } from 'components/header'
-import { SideNavMenuOpen } from 'components/header/sidenav-menu'
-import Text from 'components/text'
-import { Button } from 'components/ui/button'
-import { PageName } from 'config/analytics'
-import { usePerformanceMonitor } from 'hooks/perf-monitoring/usePerformanceMonitor'
-import { useSelectedNetwork } from 'hooks/settings/useNetwork'
-import { useNonNativeCustomChains } from 'hooks/useNonNativeCustomChains'
-import useQuery from 'hooks/useQuery'
-import { useWalletInfo } from 'hooks/useWalletInfo'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import { observer } from 'mobx-react-lite'
-import SelectWallet from 'pages/home/SelectWallet'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { activeChainStore } from 'stores/active-chain-store'
-import { cw20TokenBalanceStore, priceStore } from 'stores/balance-store'
-import { compassTokensAssociationsStore } from 'stores/chain-infos-store'
+import { useActiveWallet, WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks';
+import { ChainInfos, toSmall } from '@leapwallet/cosmos-wallet-sdk';
+import { RootBalanceStore } from '@leapwallet/cosmos-wallet-store';
+import { Faders } from '@phosphor-icons/react';
+import BigNumber from 'bignumber.js';
+import classNames from 'classnames';
+import { AutoAdjustAmountSheet } from 'components/auto-adjust-amount-sheet';
+import { WalletButton } from 'components/button';
+import { PageHeader } from 'components/header';
+import { SideNavMenuOpen } from 'components/header/sidenav-menu';
+import Text from 'components/text';
+import { Button } from 'components/ui/button';
+import { PageName } from 'config/analytics';
+import { usePerformanceMonitor } from 'hooks/perf-monitoring/usePerformanceMonitor';
+import { useSelectedNetwork } from 'hooks/settings/useNetwork';
+import { useNonNativeCustomChains } from 'hooks/useNonNativeCustomChains';
+import useQuery from 'hooks/useQuery';
+import { useWalletInfo } from 'hooks/useWalletInfo';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { observer } from 'mobx-react-lite';
+import SelectWallet from 'pages/home/SelectWallet';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { activeChainStore } from 'stores/active-chain-store';
+import { cw20TokenBalanceStore, priceStore } from 'stores/balance-store';
+import { compassTokensAssociationsStore } from 'stores/chain-infos-store';
 import {
   autoFetchedCW20DenomsStore,
   betaCW20DenomsStore,
@@ -35,9 +35,9 @@ import {
   erc20DenomsStore,
   rootDenomsStore,
   whitelistedFactoryTokensStore,
-} from 'stores/denoms-store-instance'
-import { globalSheetsStore } from 'stores/ui/global-sheets-store'
-import { SourceToken } from 'types/swap'
+} from 'stores/denoms-store-instance';
+import { globalSheetsStore } from 'stores/ui/global-sheets-store';
+import { SourceToken } from 'types/swap';
 
 import {
   InterchangeButton,
@@ -49,18 +49,18 @@ import {
   SwapTxPage,
   TokenInputCard,
   TxReviewSheet,
-} from './components'
-import FeesSheet from './components/FeesSheet'
-import { WarningsSection } from './components/WarningsSection'
-import { SwapContextProvider, useSwapContext } from './context'
-import { isNoRoutesAvailableError } from './hooks'
-import { getConversionRateRemark, getPriceImpactVars } from './utils/priceImpact'
+} from './components';
+import FeesSheet from './components/FeesSheet';
+import { WarningsSection } from './components/WarningsSection';
+import { SwapContextProvider, useSwapContext } from './context';
+import { isNoRoutesAvailableError } from './hooks';
+import { getConversionRateRemark, getPriceImpactVars } from './utils/priceImpact';
 
 const SwapSkeleton = () => {
-  const [showSelectWallet, setShowSelectWallet] = useState(false)
-  const navigate = useNavigate()
-  const { walletAvatar, walletName } = useWalletInfo()
-  const handleOpenWalletSheet = useCallback(() => setShowSelectWallet(true), [])
+  const [showSelectWallet, setShowSelectWallet] = useState(false);
+  const navigate = useNavigate();
+  const { walletAvatar, walletName } = useWalletInfo();
+  const handleOpenWalletSheet = useCallback(() => setShowSelectWallet(true), []);
   return (
     <>
       <PageHeader>
@@ -109,58 +109,56 @@ const SwapSkeleton = () => {
       <SelectWallet
         isVisible={showSelectWallet}
         onClose={() => {
-          setShowSelectWallet(false)
-          navigate('/home')
+          setShowSelectWallet(false);
+          navigate('/home');
         }}
         title='Wallets'
       />
     </>
-  )
-}
+  );
+};
 
 const SwapPage = observer(() => {
-  const navigate = useNavigate()
-  const defaultTokenLogo = useDefaultTokenLogo()
-  const counter = useRef(0)
-  const intervalTimeout = useRef<NodeJS.Timeout>()
+  const navigate = useNavigate();
+  const defaultTokenLogo = useDefaultTokenLogo();
+  const counter = useRef(0);
+  const intervalTimeout = useRef<NodeJS.Timeout>();
 
-  const activeWallet = useActiveWallet()
-  const [showTokenSelectSheet, setShowTokenSelectSheet] = useState<boolean>(false)
-  const [showSelectSheetFor, setShowSelectSheetFor] = useState<'source' | 'destination' | ''>(
-    'source',
-  )
-  const [isRefreshing, setIsRefreshing] = useState<boolean>(false)
-  const [showSelectWallet, setShowSelectWallet] = useState(false)
+  const activeWallet = useActiveWallet();
+  const [showTokenSelectSheet, setShowTokenSelectSheet] = useState<boolean>(false);
+  const [showSelectSheetFor, setShowSelectSheetFor] = useState<'source' | 'destination' | ''>('source');
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+  const [showSelectWallet, setShowSelectWallet] = useState(false);
 
-  const [showTxReviewSheet, setShowTxReviewSheet] = useState<boolean>(false)
-  const [checkForAutoAdjust, setCheckForAutoAdjust] = useState(false)
-  const [isPriceImpactChecked, setIsPriceImpactChecked] = useState<boolean>(false)
-  const [showFeesSettingSheet, setShowFeesSettingSheet] = useState(false)
+  const [showTxReviewSheet, setShowTxReviewSheet] = useState<boolean>(false);
+  const [checkForAutoAdjust, setCheckForAutoAdjust] = useState(false);
+  const [isPriceImpactChecked, setIsPriceImpactChecked] = useState<boolean>(false);
+  const [showFeesSettingSheet, setShowFeesSettingSheet] = useState(false);
 
-  const [showMoreDetailsSheet, setShowMoreDetailsSheet] = useState<boolean>(false)
-  const [showTxPage, setShowTxPage] = useState<boolean>(false)
-  const [showSlippageSheet, setShowSlippageSheet] = useState(false)
-  const [showSlippageInfo, setShowSlippageInfo] = useState(false)
-  const [ledgerError, setLedgerError] = useState<string>()
-  const [isInputInUSDC, setIsInputInUSDC] = useState<boolean>(false)
-  const [showMainnetAlert, setShowMainnetAlert] = useState<boolean>(false)
-  const [isQuoteReady, setIsQuoteReady] = useState<boolean>(false)
-  const [isQuoteReadyEventLogged, setIsQuoteReadyEventLogged] = useState<boolean>(false)
+  const [showMoreDetailsSheet, setShowMoreDetailsSheet] = useState<boolean>(false);
+  const [showTxPage, setShowTxPage] = useState<boolean>(false);
+  const [showSlippageSheet, setShowSlippageSheet] = useState(false);
+  const [showSlippageInfo, setShowSlippageInfo] = useState(false);
+  const [ledgerError, setLedgerError] = useState<string>();
+  const [isInputInUSDC, setIsInputInUSDC] = useState<boolean>(false);
+  const [showMainnetAlert, setShowMainnetAlert] = useState<boolean>(false);
+  const [isQuoteReady, setIsQuoteReady] = useState<boolean>(false);
+  const [isQuoteReadyEventLogged, setIsQuoteReadyEventLogged] = useState<boolean>(false);
 
-  const customChains = useNonNativeCustomChains()
-  const selectedNetwork = useSelectedNetwork()
+  const customChains = useNonNativeCustomChains();
+  const selectedNetwork = useSelectedNetwork();
 
-  const { walletAvatar, walletName } = useWalletInfo()
+  const { walletAvatar, walletName } = useWalletInfo();
 
   useEffect(() => {
     if (selectedNetwork === 'testnet') {
-      setShowMainnetAlert(true)
+      setShowMainnetAlert(true);
       const timeout = setTimeout(() => {
-        setShowMainnetAlert(false)
-      }, 10000)
-      return () => clearTimeout(timeout)
+        setShowMainnetAlert(false);
+      }, 10000);
+      return () => clearTimeout(timeout);
     }
-  }, [selectedNetwork])
+  }, [selectedNetwork]);
 
   const {
     inAmount,
@@ -196,17 +194,15 @@ const SwapPage = observer(() => {
     isChainAbstractionView,
     loadingRoutes,
     slippagePercent,
-  } = useSwapContext()
-  const [textInputValue, setTextInputValue] = useState<string>(inAmount?.toString())
-  const [textOutputValue, setTextOutputValue] = useState<string>(
-    amountOut ? Number(amountOut).toFixed(6) : amountOut,
-  )
+  } = useSwapContext();
+  const [textInputValue, setTextInputValue] = useState<string>(inAmount?.toString());
+  const [textOutputValue, setTextOutputValue] = useState<string>(amountOut ? Number(amountOut).toFixed(6) : amountOut);
   const { priceImpactPercent, usdValueDecreasePercent } = getPriceImpactVars(
     routingInfo?.route,
     sourceToken,
     destinationToken,
     Object.assign({}, rootDenomsStore.allDenoms, compassTokenTagsStore.compassTokenDenomInfo),
-  )
+  );
 
   const checkNeeded = useMemo(() => {
     return (
@@ -216,68 +212,57 @@ const SwapPage = observer(() => {
         destinationToken,
         Object.assign({}, rootDenomsStore.allDenoms, compassTokenTagsStore.compassTokenDenomInfo),
       ) === 'request-confirmation'
-    )
-  }, [routingInfo.route, sourceToken, destinationToken])
+    );
+  }, [routingInfo.route, sourceToken, destinationToken]);
 
   useEffect(() => {
     if (checkNeeded) {
-      setIsPriceImpactChecked(false)
+      setIsPriceImpactChecked(false);
     } else {
-      setIsPriceImpactChecked(true)
+      setIsPriceImpactChecked(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [checkNeeded])
+  }, [checkNeeded]);
 
   const uncheckWarnings = useCallback(() => {
-    setIsPriceImpactChecked(false)
-  }, [])
+    setIsPriceImpactChecked(false);
+  }, []);
 
   useEffect(() => {
-    if (
-      Number(amountOut) &&
-      ![showSlippageSheet, showTokenSelectSheet, showTxPage, showTxReviewSheet].includes(true)
-    ) {
+    if (Number(amountOut) && ![showSlippageSheet, showTokenSelectSheet, showTxPage, showTxReviewSheet].includes(true)) {
       intervalTimeout.current = setInterval(async () => {
         if (counter.current === 10) {
-          counter.current = 0
-          setIsRefreshing(true)
-          uncheckWarnings()
+          counter.current = 0;
+          setIsRefreshing(true);
+          uncheckWarnings();
 
           try {
-            await refresh()
+            await refresh();
           } catch (_) {
             //
           }
-          setIsRefreshing(false)
-          return
+          setIsRefreshing(false);
+          return;
         }
 
-        counter.current += 1
-      }, 1000)
+        counter.current += 1;
+      }, 1000);
     } else {
-      counter.current = 0
+      counter.current = 0;
     }
 
-    return () => clearInterval(intervalTimeout.current)
-  }, [
-    amountOut,
-    refresh,
-    showSlippageSheet,
-    showTokenSelectSheet,
-    showTxPage,
-    showTxReviewSheet,
-    uncheckWarnings,
-  ])
+    return () => clearInterval(intervalTimeout.current);
+  }, [amountOut, refresh, showSlippageSheet, showTokenSelectSheet, showTxPage, showTxReviewSheet, uncheckWarnings]);
 
   const additionalProperties = useMemo(() => {
-    let inAmountDollarValue, outAmountDollarValue
+    let inAmountDollarValue, outAmountDollarValue;
     if (
       sourceToken?.usdPrice &&
       !isNaN(parseFloat(sourceToken?.usdPrice)) &&
       inAmount &&
       !isNaN(parseFloat(inAmount))
     ) {
-      inAmountDollarValue = parseFloat(sourceToken?.usdPrice) * parseFloat(inAmount)
+      inAmountDollarValue = parseFloat(sourceToken?.usdPrice) * parseFloat(inAmount);
     }
     if (
       destinationToken?.usdPrice &&
@@ -285,7 +270,7 @@ const SwapPage = observer(() => {
       amountOut &&
       !isNaN(parseFloat(amountOut))
     ) {
-      outAmountDollarValue = parseFloat(destinationToken.usdPrice) * parseFloat(amountOut)
+      outAmountDollarValue = parseFloat(destinationToken.usdPrice) * parseFloat(amountOut);
     }
     return {
       pageName: PageName.SwapsQuoteReady,
@@ -304,7 +289,7 @@ const SwapPage = observer(() => {
       toChain: destinationChain?.chainName,
       toTokenAmount: outAmountDollarValue,
       transactionCount: routingInfo?.route?.transactionCount,
-    }
+    };
   }, [
     amountExceedsBalance,
     amountOut,
@@ -319,21 +304,21 @@ const SwapPage = observer(() => {
     sourceToken?.symbol,
     sourceToken?.usdPrice,
     usdValueDecreasePercent,
-  ])
+  ]);
 
   useEffect(() => {
     if (isQuoteReady && !isQuoteReadyEventLogged) {
       try {
-        setIsQuoteReadyEventLogged(true)
+        setIsQuoteReadyEventLogged(true);
       } catch (error) {
         // ignore
       }
     }
-  }, [additionalProperties, isQuoteReady, isQuoteReadyEventLogged])
+  }, [additionalProperties, isQuoteReady, isQuoteReadyEventLogged]);
 
   useEffect(() => {
-    setIsQuoteReadyEventLogged(false)
-  }, [inAmount, sourceToken, destinationToken])
+    setIsQuoteReadyEventLogged(false);
+  }, [inAmount, sourceToken, destinationToken]);
 
   useEffect(() => {
     if (
@@ -341,9 +326,9 @@ const SwapPage = observer(() => {
       !loadingRoutes &&
       (isNoRoutesAvailableError(errorMsg) || (!!routingInfo?.route && parseFloat(amountOut) > 0))
     ) {
-      setIsQuoteReady(true)
+      setIsQuoteReady(true);
     } else {
-      setIsQuoteReady(false)
+      setIsQuoteReady(false);
     }
   }, [
     inAmount,
@@ -354,144 +339,128 @@ const SwapPage = observer(() => {
     amountExceedsBalance,
     amountOut,
     errorMsg,
-  ])
+  ]);
 
   const _chainsToShow = useMemo(() => {
     if (activeWallet && activeWallet.walletType === WALLETTYPE.LEDGER) {
       return chainsToShow.filter((chain) => {
-        const chainInfo = Object.values(ChainInfos).find(
-          (chainInfo) => chainInfo.chainId === chain.chainId,
-        )
-        if (!chainInfo) return false
-        const hasAddress = activeWallet.addresses[chainInfo.key]
-        return hasAddress
-      })
+        const chainInfo = Object.values(ChainInfos).find((chainInfo) => chainInfo.chainId === chain.chainId);
+        if (!chainInfo) return false;
+        const hasAddress = activeWallet.addresses[chainInfo.key];
+        return hasAddress;
+      });
     }
-    return chainsToShow
-  }, [activeWallet, chainsToShow])
+    return chainsToShow;
+  }, [activeWallet, chainsToShow]);
 
   const reviewBtnText = useMemo(() => {
     if (inAmount === '') {
-      return 'Enter amount'
+      return 'Enter amount';
     }
     if (invalidAmount) {
-      return 'Amount must be greater than 0'
+      return 'Amount must be greater than 0';
     }
     if (amountExceedsBalance) {
-      return 'Insufficient balance'
+      return 'Insufficient balance';
     }
     if (isNoRoutesAvailableError(errorMsg)) {
-      return 'No transaction routes available'
+      return 'No transaction routes available';
     }
-    if (
-      activeChainStore.activeChain === 'evmos' &&
-      activeWallet?.walletType === WALLETTYPE.LEDGER
-    ) {
-      return 'Not supported using Ledger wallet'
+    if (activeChainStore.activeChain === 'evmos' && activeWallet?.walletType === WALLETTYPE.LEDGER) {
+      return 'Not supported using Ledger wallet';
     }
-    return 'Review Swap'
-  }, [activeWallet?.walletType, amountExceedsBalance, errorMsg, inAmount, invalidAmount])
+    return 'Review Swap';
+  }, [activeWallet?.walletType, amountExceedsBalance, errorMsg, inAmount, invalidAmount]);
 
   const reviewDisabled = useMemo(() => {
-    if (
-      activeChainStore.activeChain === 'evmos' &&
-      activeWallet?.walletType === WALLETTYPE.LEDGER
-    ) {
-      return true
+    if (activeChainStore.activeChain === 'evmos' && activeWallet?.walletType === WALLETTYPE.LEDGER) {
+      return true;
     }
-    return reviewBtnDisabled || isRefreshing || (checkNeeded && !isPriceImpactChecked)
-  }, [activeWallet?.walletType, checkNeeded, isPriceImpactChecked, isRefreshing, reviewBtnDisabled])
+    return reviewBtnDisabled || isRefreshing || (checkNeeded && !isPriceImpactChecked);
+  }, [activeWallet?.walletType, checkNeeded, isPriceImpactChecked, isRefreshing, reviewBtnDisabled]);
 
   const autoAdjustAmountFee = useMemo(() => {
-    if (!displayFee || !feeDenom) return null
+    if (!displayFee || !feeDenom) return null;
 
     return {
       amount: toSmall(String(displayFee.value), feeDenom.coinDecimals),
       denom: feeDenom.coinMinimalDenom,
-    }
-  }, [displayFee, feeDenom])
+    };
+  }, [displayFee, feeDenom]);
 
   const sourceTokenLoading = useMemo(() => {
     return (
       loadingChains ||
       loadingSourceAssets ||
-      (isChainAbstractionView && sourceToken?.amount === '0'
-        ? sourceTokenBalanceStatus === 'loading'
-        : false)
-    )
-  }, [
-    isChainAbstractionView,
-    loadingChains,
-    loadingSourceAssets,
-    sourceToken,
-    sourceTokenBalanceStatus,
-  ])
+      (isChainAbstractionView && sourceToken?.amount === '0' ? sourceTokenBalanceStatus === 'loading' : false)
+    );
+  }, [isChainAbstractionView, loadingChains, loadingSourceAssets, sourceToken, sourceTokenBalanceStatus]);
 
   const autoAdjustAmountToken = useMemo(() => {
-    if (!sourceToken) return null
+    if (!sourceToken) return null;
 
     return {
       amount: sourceToken.amount,
       coinMinimalDenom: sourceToken.coinMinimalDenom,
       chain: sourceToken?.skipAsset?.originChainId,
-    }
-  }, [sourceToken])
+    };
+  }, [sourceToken]);
 
   const handleOnSettingsClick = useCallback(() => {
-    setShowSlippageSheet(true)
-  }, [setShowSlippageSheet])
+    setShowSlippageSheet(true);
+  }, [setShowSlippageSheet]);
 
   const handleInputAmountChange = useCallback(
     (value: string) => {
-      handleInAmountChange(value)
-      uncheckWarnings()
+      handleInAmountChange(value);
+      uncheckWarnings();
     },
     [handleInAmountChange, uncheckWarnings],
-  )
+  );
 
   const handleInputTokenSelectSheetOpen = useCallback(() => {
-    setShowTokenSelectSheet(true)
-    setShowSelectSheetFor('source')
-    uncheckWarnings()
-  }, [setShowTokenSelectSheet, setShowSelectSheetFor, uncheckWarnings])
+    setShowTokenSelectSheet(true);
+    setShowSelectSheetFor('source');
+    uncheckWarnings();
+  }, [setShowTokenSelectSheet, setShowSelectSheetFor, uncheckWarnings]);
 
   const handleInputChainSelectSheetOpen = useCallback(() => {
-    setShowSelectSheetFor('source')
-    uncheckWarnings()
-  }, [uncheckWarnings, setShowSelectSheetFor])
+    setShowSelectSheetFor('source');
+    uncheckWarnings();
+  }, [uncheckWarnings, setShowSelectSheetFor]);
 
   const handleOutputTokenSelectSheetOpen = useCallback(() => {
-    setShowTokenSelectSheet(true)
-    setShowSelectSheetFor('destination')
-    uncheckWarnings()
-  }, [setShowTokenSelectSheet, setShowSelectSheetFor, uncheckWarnings])
+    setShowTokenSelectSheet(true);
+    setShowSelectSheetFor('destination');
+    uncheckWarnings();
+  }, [setShowTokenSelectSheet, setShowSelectSheetFor, uncheckWarnings]);
 
   const handleOutputChainSelectSheetOpen = useCallback(() => {
-    setShowSelectSheetFor('destination')
-    uncheckWarnings()
-  }, [uncheckWarnings, setShowSelectSheetFor])
+    setShowSelectSheetFor('destination');
+    uncheckWarnings();
+  }, [uncheckWarnings, setShowSelectSheetFor]);
 
   const handleOnTokenSelectSheetClose = useCallback(() => {
-    setShowTokenSelectSheet(false)
-    setShowSelectSheetFor('')
-  }, [setShowTokenSelectSheet, setShowSelectSheetFor])
+    setShowTokenSelectSheet(false);
+    setShowSelectSheetFor('');
+  }, [setShowTokenSelectSheet, setShowSelectSheetFor]);
 
   const handleSetToken = useCallback(
     (token: SourceToken) => {
-      const chain = _chainsToShow.find((chain) => chain.chainId === token.skipAsset.chainId)
+      const chain = _chainsToShow.find((chain) => chain.chainId === token.skipAsset.chainId);
       if (showSelectSheetFor === 'source') {
         if (isChainAbstractionView) {
-          setSourceChain(chain)
+          setSourceChain(chain);
         }
-        setSourceToken(token)
+        setSourceToken(token);
       } else if (showSelectSheetFor === 'destination') {
         if (isChainAbstractionView) {
-          setDestinationChain(chain)
+          setDestinationChain(chain);
         }
-        setDestinationToken(token)
+        setDestinationToken(token);
       }
-      setShowTokenSelectSheet(false)
-      setShowSelectSheetFor('')
+      setShowTokenSelectSheet(false);
+      setShowSelectSheetFor('');
     },
     [
       _chainsToShow,
@@ -502,74 +471,74 @@ const SwapPage = observer(() => {
       setDestinationToken,
       setDestinationChain,
     ],
-  )
+  );
 
   const handleOnTokenSelect = useCallback(
     (token: SourceToken) => {
       const customChain = Object.values(customChains).find(
         (_customChain) => _customChain.chainId === token.skipAsset.chainId,
-      )
+      );
       if (customChain) {
-        return
+        return;
       }
-      handleSetToken(token)
+      handleSetToken(token);
     },
     [customChains, handleSetToken],
-  )
+  );
 
   const handleOnSlippageInfoClick = useCallback(() => {
-    setShowSlippageInfo(true)
-  }, [setShowSlippageInfo])
+    setShowSlippageInfo(true);
+  }, [setShowSlippageInfo]);
 
   const handleOnSlippageInfoSheetClose = useCallback(() => {
-    setShowSlippageInfo(false)
-  }, [setShowSlippageInfo])
+    setShowSlippageInfo(false);
+  }, [setShowSlippageInfo]);
 
   const handleOnSlippageSheetClose = useCallback(() => {
-    setShowSlippageSheet(false)
-  }, [setShowSlippageSheet])
+    setShowSlippageSheet(false);
+  }, [setShowSlippageSheet]);
 
   const handleOnMoreDetailsSheetClose = useCallback(() => {
-    setShowMoreDetailsSheet(false)
-  }, [setShowMoreDetailsSheet])
+    setShowMoreDetailsSheet(false);
+  }, [setShowMoreDetailsSheet]);
 
   const handleOnAutoAdjustmentSheetClose = useCallback(() => {
-    setCheckForAutoAdjust(false)
-  }, [setCheckForAutoAdjust])
+    setCheckForAutoAdjust(false);
+  }, [setCheckForAutoAdjust]);
 
   const handleOnTxReviewSheetClose = useCallback(() => {
-    setShowTxReviewSheet(false)
-  }, [setShowTxReviewSheet])
+    setShowTxReviewSheet(false);
+  }, [setShowTxReviewSheet]);
 
   const handleOnTxReviewSheetProceed = useCallback(() => {
-    setShowTxReviewSheet(false)
-    setShowTxPage(true)
-    setTextOutputValue('')
-    ledgerError && setLedgerError(undefined)
-  }, [setShowTxReviewSheet, setShowTxPage, ledgerError])
+    setShowTxReviewSheet(false);
+    setShowTxPage(true);
+    setTextOutputValue('');
+    ledgerError && setLedgerError(undefined);
+  }, [setShowTxReviewSheet, setShowTxPage, ledgerError]);
 
-  const handleOpenWalletSheet = useCallback(() => setShowSelectWallet(true), [])
+  const handleOpenWalletSheet = useCallback(() => setShowSelectWallet(true), []);
 
   const handleOnTxPageClose = useCallback(() => {
-    setShowTxPage(false)
-    setTextInputValue('')
-    setTextOutputValue('')
-  }, [])
+    setShowTxPage(false);
+    setTextInputValue('');
+    setTextOutputValue('');
+  }, []);
 
   const swapTxPageSetLedgerError = useCallback(
     (ledgerError?: string) => {
-      setLedgerError(ledgerError)
-      ledgerError && setShowTxPage(false)
+      setLedgerError(ledgerError);
+      ledgerError && setShowTxPage(false);
     },
     [setLedgerError, setShowTxPage],
-  )
+  );
 
   usePerformanceMonitor({
     page: 'swaps',
     queryStatus: sourceTokenLoading || loadingDestinationAssets ? 'loading' : 'success',
     op: 'swapsPageLoad',
     description: 'loading state on swaps page',
-  })
+  });
 
   return (
     <>
@@ -589,10 +558,7 @@ const SwapPage = observer(() => {
           onClick={handleOnSettingsClick}
           className='text-black-100 dark:text-white-100 flex items-center gap-x-0.5 p-3'
         >
-          <Faders
-            size={24}
-            className='!leading-[24px] rotate-90 text-muted-foreground hover:text-foreground'
-          />
+          <Faders size={24} className='!leading-[24px] rotate-90 text-muted-foreground hover:text-foreground' />
           {slippagePercent !== 0.5 && (
             <Text size='sm' className='font-bold'>
               {slippagePercent}%
@@ -635,10 +601,7 @@ const SwapPage = observer(() => {
               setTextInputValue={setTextInputValue}
             />
 
-            <InterchangeButton
-              isSwitchOrderPossible={isSwitchOrderPossible}
-              handleSwitchOrder={handleSwitchOrder}
-            />
+            <InterchangeButton isSwitchOrderPossible={isSwitchOrderPossible} handleSwitchOrder={handleSwitchOrder} />
 
             <TokenInputCard
               readOnly
@@ -668,24 +631,20 @@ const SwapPage = observer(() => {
             ledgerError={ledgerError}
           />
 
-          <SwapInfo
-            setShowMoreDetailsSheet={setShowMoreDetailsSheet}
-            rootDenomsStore={rootDenomsStore}
-          />
+          <SwapInfo setShowMoreDetailsSheet={setShowMoreDetailsSheet} rootDenomsStore={rootDenomsStore} />
 
           <Button
             className={classNames('w-full', {
-              '!bg-red-300 text-white-100':
-                invalidAmount || amountExceedsBalance || isNoRoutesAvailableError(errorMsg),
+              '!bg-red-300 text-white-100': invalidAmount || amountExceedsBalance || isNoRoutesAvailableError(errorMsg),
               'mt-2': inAmount === '',
               'mt-1': inAmount !== '',
             })}
             disabled={reviewDisabled}
             onClick={() => {
               if (activeWallet?.watchWallet) {
-                globalSheetsStore.setImportWatchWalletSeedPopupOpen(true)
+                globalSheetsStore.setImportWatchWalletSeedPopupOpen(true);
               } else {
-                setCheckForAutoAdjust(true)
+                setCheckForAutoAdjust(true);
               }
             }}
           >
@@ -697,8 +656,8 @@ const SwapPage = observer(() => {
       <SelectWallet
         isVisible={showSelectWallet}
         onClose={() => {
-          setShowSelectWallet(false)
-          navigate('/home')
+          setShowSelectWallet(false);
+          navigate('/home');
         }}
         title='Wallets'
       />
@@ -715,9 +674,7 @@ const SwapPage = observer(() => {
         rootDenomsStore={rootDenomsStore}
         whitelistedFactorTokenStore={whitelistedFactoryTokensStore}
         isChainAbstractionView={isChainAbstractionView}
-        loadingTokens={
-          showSelectSheetFor === 'source' ? loadingSourceAssets : loadingDestinationAssets
-        }
+        loadingTokens={showSelectSheetFor === 'source' ? loadingSourceAssets : loadingDestinationAssets}
       />
       <MoreDetailsSheet
         isOpen={showMoreDetailsSheet}
@@ -731,21 +688,17 @@ const SwapPage = observer(() => {
         onSlippageInfoClick={handleOnSlippageInfoClick}
       />
       <SlippageInfoSheet isOpen={showSlippageInfo} onClose={handleOnSlippageInfoSheetClose} />
-      {checkForAutoAdjust &&
-        autoAdjustAmountFee &&
-        autoAdjustAmountToken &&
-        inAmount &&
-        sourceChain && (
-          <AutoAdjustAmountSheet
-            amount={inAmount}
-            setAmount={setInAmount}
-            selectedToken={autoAdjustAmountToken}
-            fee={autoAdjustAmountFee}
-            forceChain={sourceChain?.key}
-            setShowReviewSheet={setShowTxReviewSheet}
-            closeAdjustmentSheet={handleOnAutoAdjustmentSheetClose}
-          />
-        )}
+      {checkForAutoAdjust && autoAdjustAmountFee && autoAdjustAmountToken && inAmount && sourceChain && (
+        <AutoAdjustAmountSheet
+          amount={inAmount}
+          setAmount={setInAmount}
+          selectedToken={autoAdjustAmountToken}
+          fee={autoAdjustAmountFee}
+          forceChain={sourceChain?.key}
+          setShowReviewSheet={setShowTxReviewSheet}
+          closeAdjustmentSheet={handleOnAutoAdjustmentSheetClose}
+        />
+      )}
       <TxReviewSheet
         isOpen={showTxReviewSheet}
         onClose={handleOnTxReviewSheetClose}
@@ -754,106 +707,96 @@ const SwapPage = observer(() => {
         onSlippageInfoClick={handleOnSlippageInfoClick}
       />
       {routingInfo?.route?.response && (
-        <FeesSheet
-          showFeesSettingSheet={showFeesSettingSheet}
-          setShowFeesSettingSheet={setShowFeesSettingSheet}
-        />
+        <FeesSheet showFeesSettingSheet={showFeesSettingSheet} setShowFeesSettingSheet={setShowFeesSettingSheet} />
       )}
 
       {showTxPage ? (
-        <SwapTxPage
-          onClose={handleOnTxPageClose}
-          setLedgerError={swapTxPageSetLedgerError}
-          ledgerError={ledgerError}
-        />
+        <SwapTxPage onClose={handleOnTxPageClose} setLedgerError={swapTxPageSetLedgerError} ledgerError={ledgerError} />
       ) : null}
     </>
-  )
-})
+  );
+});
 
 const Swap = observer(({ rootBalanceStore }: { rootBalanceStore: RootBalanceStore }) => {
-  const [showLoader, setShowLoader] = useState(true)
-  const query = useQuery()
+  const [showLoader, setShowLoader] = useState(true);
+  const query = useQuery();
 
-  const location = useLocation()
+  const location = useLocation();
 
   const totalFiatValue = useMemo(() => {
     return rootBalanceStore
       .getAggregatedBalances('mainnet')
-      .reduce(
-        (acc, asset) => (asset.usdValue ? acc.plus(new BigNumber(asset.usdValue)) : acc),
-        new BigNumber(0),
-      )
-      ?.toNumber()
-  }, [rootBalanceStore])
+      .reduce((acc, asset) => (asset.usdValue ? acc.plus(new BigNumber(asset.usdValue)) : acc), new BigNumber(0))
+      ?.toNumber();
+  }, [rootBalanceStore]);
 
   const pageViewAdditionalProperties = useMemo(() => {
-    let pageSourceFormatted
-    const pageViewSource = query.get('pageSource') ?? undefined
+    let pageSourceFormatted;
+    const pageViewSource = query.get('pageSource') ?? undefined;
     switch (pageViewSource) {
       case 'bottomNav': {
-        pageSourceFormatted = 'Bottom Nav'
-        break
+        pageSourceFormatted = 'Bottom Nav';
+        break;
       }
       case 'assetDetails': {
-        pageSourceFormatted = 'Asset Details'
-        break
+        pageSourceFormatted = 'Asset Details';
+        break;
       }
       case 'banners': {
-        pageSourceFormatted = 'Banners'
-        break
+        pageSourceFormatted = 'Banners';
+        break;
       }
       case 'swapAgain': {
-        pageSourceFormatted = 'Swap Again CTA'
-        break
+        pageSourceFormatted = 'Swap Again CTA';
+        break;
       }
       case 'quickSearch': {
-        pageSourceFormatted = 'Quick Search'
-        break
+        pageSourceFormatted = 'Quick Search';
+        break;
       }
       case 'stake': {
-        pageSourceFormatted = PageName.Stake
-        break
+        pageSourceFormatted = PageName.Stake;
+        break;
       }
       case PageName.Home: {
-        pageSourceFormatted = PageName.Home
-        break
+        pageSourceFormatted = PageName.Home;
+        break;
       }
       case 'search': {
-        pageSourceFormatted = PageName.Search
-        break
+        pageSourceFormatted = PageName.Search;
+        break;
       }
       case PageName.ZeroState: {
-        pageSourceFormatted = PageName.ZeroState
-        break
+        pageSourceFormatted = PageName.ZeroState;
+        break;
       }
       default: {
-        break
+        break;
       }
     }
-    const _properties = { pageViewSource: pageSourceFormatted, userBalance: totalFiatValue }
+    const _properties = { pageViewSource: pageSourceFormatted, userBalance: totalFiatValue };
     if (pageViewSource === 'banners') {
       return {
         ..._properties,
         pageViewSourceDetail: query.get('bannerId') ?? undefined,
-      }
+      };
     }
-    return _properties
+    return _properties;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, location?.key])
+  }, [query, location?.key]);
 
   useEffect(() => {
     setTimeout(() => {
-      setShowLoader(false)
-    }, 150)
-  }, [])
+      setShowLoader(false);
+    }, 150);
+  }, []);
 
   if (showLoader) {
     return (
       <div className='h-full'>
         <SwapSkeleton />
       </div>
-    )
+    );
   }
 
   return (
@@ -875,7 +818,7 @@ const Swap = observer(({ rootBalanceStore }: { rootBalanceStore: RootBalanceStor
     >
       <SwapPage />
     </SwapContextProvider>
-  )
-})
+  );
+});
 
-export default Swap
+export default Swap;

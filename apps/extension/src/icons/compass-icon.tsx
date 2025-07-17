@@ -1,34 +1,20 @@
-import { IconProps } from '@phosphor-icons/react'
-import React from 'react'
+import { IconProps } from '@phosphor-icons/react';
+import React from 'react';
 
 export const CompassIcon = (props: IconProps) => {
   return (
-    <svg
-      width='40'
-      height='40'
-      viewBox='0 0 40 40'
-      fill='none'
-      xmlns='http://www.w3.org/2000/svg'
-      {...props}
-    >
+    <svg width='40' height='40' viewBox='0 0 40 40' fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
       <path
         d='M19.9999 3.33337C10.7999 3.33337 3.33325 10.8 3.33325 20C3.33325 29.2 10.7999 36.6667 19.9999 36.6667C29.1999 36.6667 36.6666 29.2 36.6666 20C36.6666 10.8 29.1999 3.33337 19.9999 3.33337ZM19.9999 33.3334C12.6499 33.3334 6.66659 27.35 6.66659 20C6.66659 12.65 12.6499 6.66671 19.9999 6.66671C27.3499 6.66671 33.3333 12.65 33.3333 20C33.3333 27.35 27.3499 33.3334 19.9999 33.3334ZM10.8333 29.1667L23.3499 23.35L29.1666 10.8334L16.6499 16.65L10.8333 29.1667ZM19.9999 18.1667C21.0166 18.1667 21.8333 18.9834 21.8333 20C21.8333 21.0167 21.0166 21.8334 19.9999 21.8334C18.9833 21.8334 18.1666 21.0167 18.1666 20C18.1666 18.9834 18.9833 18.1667 19.9999 18.1667Z'
         fill='currentColor'
       />
     </svg>
-  )
-}
+  );
+};
 
 export const CompassIcon2 = (props: IconProps) => {
   return (
-    <svg
-      width='18'
-      height='18'
-      viewBox='0 0 18 18'
-      fill='none'
-      xmlns='http://www.w3.org/2000/svg'
-      {...props}
-    >
+    <svg width='18' height='18' viewBox='0 0 18 18' fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
       <g clipPath='url(#a)'>
         <path
           fillRule='evenodd'
@@ -43,5 +29,5 @@ export const CompassIcon2 = (props: IconProps) => {
         </clipPath>
       </defs>
     </svg>
-  )
-}
+  );
+};

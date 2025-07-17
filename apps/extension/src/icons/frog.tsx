@@ -1,15 +1,8 @@
-import React from 'react'
+import React from 'react';
 
 export const HappyFrog = (props: React.ComponentProps<'svg'>) => {
   return (
-    <svg
-      width='80'
-      height='80'
-      viewBox='0 0 80 80'
-      fill='none'
-      xmlns='http://www.w3.org/2000/svg'
-      {...props}
-    >
+    <svg width='80' height='80' viewBox='0 0 80 80' fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
       <path
         d='M68.3951 49.7452C68.3951 59.8812 56.0248 64.0001 40.6655 64.0001C25.3062 64.0001 12.7559 59.8812 12.7559 49.7452C12.7559 39.6092 25.2162 31.4072 40.5755 31.4072C55.9348 31.4072 68.3951 39.6271 68.3951 49.7452Z'
         fill='#24A95A'
@@ -59,19 +52,12 @@ export const HappyFrog = (props: React.ComponentProps<'svg'>) => {
         fill='#092511'
       />
     </svg>
-  )
-}
+  );
+};
 
 export const CrownFrog = (props: React.ComponentProps<'svg'>) => {
   return (
-    <svg
-      width='120'
-      height='111'
-      viewBox='0 0 120 111'
-      fill='none'
-      xmlns='http://www.w3.org/2000/svg'
-      {...props}
-    >
+    <svg width='120' height='111' viewBox='0 0 120 111' fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
       <path
         d='M60.9434 55.4945C73.9001 55.4945 85.6206 58.9631 94.0928 64.5502C102.568 70.139 107.762 77.8232 107.762 86.2601C107.762 94.6894 102.633 100.64 94.21 104.5C85.7766 108.365 74.0839 110.109 61.0958 110.109C48.108 110.109 36.3392 108.366 27.8292 104.5C19.3281 100.639 14.1251 94.6873 14.1251 86.2601C14.1251 77.8079 19.3194 70.1234 27.794 64.5385C36.2662 58.9552 47.9866 55.4946 60.9434 55.4945Z'
         fill='#24A95A'
@@ -217,5 +203,5 @@ export const CrownFrog = (props: React.ComponentProps<'svg'>) => {
         fill='#1DAB4D'
       />
     </svg>
-  )
-}
+  );
+};

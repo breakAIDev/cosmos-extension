@@ -1,47 +1,47 @@
-import { isDeliverTxSuccess } from '@cosmjs/stargate'
+import { isDeliverTxSuccess } from '@cosmjs/stargate';
 import {
   SelectedNetwork,
   useGetExplorerTxnUrl,
   usePendingTxState,
   useSelectedNetwork,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { CaretRight } from '@phosphor-icons/react'
-import BottomModal from 'components/new-bottom-modal'
-import { Button } from 'components/ui/button'
-import { useActiveChain } from 'hooks/settings/useActiveChain'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import { txStatusMap } from 'pages/stake-v2/utils/stake-text'
-import React, { useEffect } from 'react'
-import { Link } from 'react-router-dom'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { CaretRight } from '@phosphor-icons/react';
+import BottomModal from 'components/new-bottom-modal';
+import { Button } from 'components/ui/button';
+import { useActiveChain } from 'hooks/settings/useActiveChain';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import { txStatusMap } from 'pages/stake-v2/utils/stake-text';
+import React, { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 type VoteTxnSheetProps = {
-  isOpen: boolean
-  onClose: () => void
-  forceChain?: SupportedChain
-  forceNetwork?: SelectedNetwork
-  refetchVote: () => Promise<any>
-}
+  isOpen: boolean;
+  onClose: () => void;
+  forceChain?: SupportedChain;
+  forceNetwork?: SelectedNetwork;
+  refetchVote: () => Promise<any>;
+};
 
 export const VoteTxnSheet = observer(
   ({ isOpen, onClose, forceChain, forceNetwork, refetchVote }: VoteTxnSheetProps) => {
-    const _activeChain = useActiveChain()
-    const _selectedNetwork = useSelectedNetwork()
-    const activeChain = forceChain ?? _activeChain
-    const selectedNetwork = forceNetwork ?? _selectedNetwork
+    const _activeChain = useActiveChain();
+    const _selectedNetwork = useSelectedNetwork();
+    const activeChain = forceChain ?? _activeChain;
+    const selectedNetwork = forceNetwork ?? _selectedNetwork;
 
-    const { pendingTx, setPendingTx } = usePendingTxState()
+    const { pendingTx, setPendingTx } = usePendingTxState();
 
     const { explorerTxnUrl: txnUrl } = useGetExplorerTxnUrl({
       forceChain: activeChain,
       forceNetwork: selectedNetwork,
       forceTxHash: pendingTx?.txHash,
-    })
+    });
 
     useEffect(() => {
       if (!pendingTx?.promise) {
-        return
+        return;
       }
 
       pendingTx.promise
@@ -50,20 +50,20 @@ export const VoteTxnSheet = observer(
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             if (result && isDeliverTxSuccess(result)) {
-              setPendingTx({ ...pendingTx, txStatus: 'success' })
+              setPendingTx({ ...pendingTx, txStatus: 'success' });
             } else {
-              setPendingTx({ ...pendingTx, txStatus: 'failed' })
+              setPendingTx({ ...pendingTx, txStatus: 'failed' });
             }
           },
           () => setPendingTx({ ...pendingTx, txStatus: 'failed' }),
         )
         .catch(() => {
-          setPendingTx({ ...pendingTx, txStatus: 'failed' })
+          setPendingTx({ ...pendingTx, txStatus: 'failed' });
         })
         .finally(() => {
-          refetchVote()
-        })
-    }, [pendingTx?.promise])
+          refetchVote();
+        });
+    }, [pendingTx?.promise]);
 
     return (
       <BottomModal
@@ -127,6 +127,6 @@ export const VoteTxnSheet = observer(
           </Button>
         </div>
       </BottomModal>
-    )
+    );
   },
-)
+);

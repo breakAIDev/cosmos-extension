@@ -1,32 +1,32 @@
-import { Key } from '@leapwallet/cosmos-wallet-hooks'
-import BottomModal from 'components/bottom-modal'
-import { useSiteLogo } from 'hooks/utility/useSiteLogo'
-import { Images } from 'images'
-import { addToConnections } from 'pages/ApproveConnection/utils'
-import React, { useEffect, useMemo, useState } from 'react'
-import { activeChainStore } from 'stores/active-chain-store'
-import { chainInfoStore } from 'stores/chain-infos-store'
+import { Key } from '@leapwallet/cosmos-wallet-hooks';
+import BottomModal from 'components/bottom-modal';
+import { useSiteLogo } from 'hooks/utility/useSiteLogo';
+import { Images } from 'images';
+import { addToConnections } from 'pages/ApproveConnection/utils';
+import React, { useEffect, useMemo, useState } from 'react';
+import { activeChainStore } from 'stores/active-chain-store';
+import { chainInfoStore } from 'stores/chain-infos-store';
 
-import Text from '../../components/text'
-import { Wallet } from '../../hooks/wallet/useWallet'
-import CreateImportActions from './CreateImportActions'
-import { NewWalletForm } from './CreateNewWallet'
-import { EditWalletForm } from './EditWallet'
-import { ImportPrivateKey } from './ImportPrivateKey'
-import { ImportSeedPhrase } from './ImportSeedPhrase'
-import ImportWatchWallet from './ImportWatchWallet'
-import WalletCardWrapper from './WalletCardWrapper'
+import Text from '../../components/text';
+import { Wallet } from '../../hooks/wallet/useWallet';
+import CreateImportActions from './CreateImportActions';
+import { NewWalletForm } from './CreateNewWallet';
+import { EditWalletForm } from './EditWallet';
+import { ImportPrivateKey } from './ImportPrivateKey';
+import { ImportSeedPhrase } from './ImportSeedPhrase';
+import ImportWatchWallet from './ImportWatchWallet';
+import WalletCardWrapper from './WalletCardWrapper';
 type SelectWalletProps = {
-  readonly isVisible: boolean
-  readonly onClose: VoidFunction
-  readonly title: string
-  readonly hideCreateNewWallet?: boolean
+  readonly isVisible: boolean;
+  readonly onClose: VoidFunction;
+  readonly title: string;
+  readonly hideCreateNewWallet?: boolean;
   readonly currentWalletInfo?: {
-    wallets: [Key]
-    chainIds: [string]
-    origin: string
-  } | null
-}
+    wallets: [Key];
+    chainIds: [string];
+    origin: string;
+  } | null;
+};
 
 export default function SelectWallet({
   isVisible,
@@ -35,48 +35,46 @@ export default function SelectWallet({
   currentWalletInfo,
   hideCreateNewWallet,
 }: SelectWalletProps) {
-  const [isNewWalletFormVisible, setIsNewWalletFormVisible] = useState(false)
-  const [isEditWalletVisible, setIsEditWalletVisible] = useState(false)
-  const wallets = Wallet.useWallets()
+  const [isNewWalletFormVisible, setIsNewWalletFormVisible] = useState(false);
+  const [isEditWalletVisible, setIsEditWalletVisible] = useState(false);
+  const wallets = Wallet.useWallets();
 
-  const [editWallet, setEditWallet] = useState<Key>()
+  const [editWallet, setEditWallet] = useState<Key>();
 
-  const [showImportPrivateKey, setShowImportPrivateKey] = useState(false)
-  const [showImportSeedPhrase, setShowImportSeedPhrase] = useState(false)
-  const [showImportWatchWallet, setShowImportWatchWallet] = useState(false)
+  const [showImportPrivateKey, setShowImportPrivateKey] = useState(false);
+  const [showImportSeedPhrase, setShowImportSeedPhrase] = useState(false);
+  const [showImportWatchWallet, setShowImportWatchWallet] = useState(false);
 
   useEffect(() => {
     if (!isVisible) {
-      setEditWallet(undefined)
+      setEditWallet(undefined);
     }
-  }, [isVisible])
+  }, [isVisible]);
 
   const walletsList = useMemo(() => {
     return wallets
       ? Object.values(wallets)
           .map((wallet) => wallet)
-          .sort((a, b) =>
-            a.watchWallet === b.watchWallet ? a.name.localeCompare(b.name) : a.watchWallet ? 1 : -1,
-          )
-      : []
-  }, [wallets])
+          .sort((a, b) => (a.watchWallet === b.watchWallet ? a.name.localeCompare(b.name) : a.watchWallet ? 1 : -1))
+      : [];
+  }, [wallets]);
 
   const handleConnectWalletClick = async () => {
-    const walletIds = currentWalletInfo?.wallets.map((wallet) => wallet.id)
+    const walletIds = currentWalletInfo?.wallets.map((wallet) => wallet.id);
     await addToConnections(
       currentWalletInfo?.chainIds as [string],
       walletIds ?? [],
       currentWalletInfo?.origin as string,
-    )
-    onClose()
-  }
+    );
+    onClose();
+  };
 
-  const walletName = currentWalletInfo?.wallets?.[0]?.name
-  const walletColorIndex = currentWalletInfo?.wallets?.[0]?.colorIndex
+  const walletName = currentWalletInfo?.wallets?.[0]?.name;
+  const walletColorIndex = currentWalletInfo?.wallets?.[0]?.colorIndex;
   const siteName =
     currentWalletInfo?.origin?.split('//')?.at(-1)?.split('.')?.at(-2) ||
-    currentWalletInfo?.origin?.split('//')?.at(-1)
-  const siteLogo = useSiteLogo(currentWalletInfo?.origin)
+    currentWalletInfo?.origin?.split('//')?.at(-1);
+  const siteLogo = useSiteLogo(currentWalletInfo?.origin);
 
   return (
     <>
@@ -110,12 +108,7 @@ export default function SelectWallet({
                 {walletName} not Connected
               </Text>
 
-              <Text
-                size='xs'
-                style={{ textAlign: 'center' }}
-                className='mb-2'
-                color='text-gray-400'
-              >
+              <Text size='xs' style={{ textAlign: 'center' }} className='mb-2' color='text-gray-400'>
                 You can connect this wallet, or can switch to an already connected wallet.
               </Text>
 
@@ -131,7 +124,7 @@ export default function SelectWallet({
 
           <div className='flex flex-col rounded-2xl bg-white-100 dark:bg-gray-900 max-h-[200px] overflow-y-auto mb-4 py-1'>
             {walletsList.map((wallet, index, array) => {
-              if (wallet.id === currentWalletInfo?.wallets?.[0]?.id) return null
+              if (wallet.id === currentWalletInfo?.wallets?.[0]?.id) return null;
               return (
                 <WalletCardWrapper
                   key={wallet.id}
@@ -141,7 +134,7 @@ export default function SelectWallet({
                   setEditWallet={setEditWallet}
                   setIsEditWalletVisible={setIsEditWalletVisible}
                 />
-              )
+              );
             })}
           </div>
 
@@ -160,7 +153,7 @@ export default function SelectWallet({
         wallet={editWallet as Key}
         isVisible={isEditWalletVisible}
         onClose={() => {
-          setIsEditWalletVisible(false)
+          setIsEditWalletVisible(false);
         }}
         activeChainStore={activeChainStore}
         chainInfosStore={chainInfoStore}
@@ -170,33 +163,33 @@ export default function SelectWallet({
         isVisible={isNewWalletFormVisible}
         onClose={(closeSelectWallet: boolean) => {
           if (closeSelectWallet) {
-            onClose()
+            onClose();
           }
-          setIsNewWalletFormVisible(false)
+          setIsNewWalletFormVisible(false);
         }}
       />
 
       <ImportSeedPhrase
         isVisible={showImportSeedPhrase}
         onClose={(closeSelectWallet: boolean) => {
-          if (closeSelectWallet) onClose()
-          setShowImportSeedPhrase(false)
+          if (closeSelectWallet) onClose();
+          setShowImportSeedPhrase(false);
         }}
       />
 
       <ImportPrivateKey
         isVisible={showImportPrivateKey}
         onClose={(closeSelectWallet: boolean) => {
-          if (closeSelectWallet) onClose()
-          setShowImportPrivateKey(false)
+          if (closeSelectWallet) onClose();
+          setShowImportPrivateKey(false);
         }}
       />
 
       <ImportWatchWallet
         isVisible={showImportWatchWallet}
         onClose={(closeSelectWallet: boolean) => {
-          if (closeSelectWallet) onClose()
-          setShowImportWatchWallet(false)
+          if (closeSelectWallet) onClose();
+          setShowImportWatchWallet(false);
         }}
       />
       <div id='select-wallet-container' />
@@ -204,5 +197,5 @@ export default function SelectWallet({
       <div id='edit-wallet-container' />
       <div id='remove-wallet-container' />
     </>
-  )
+  );
 }

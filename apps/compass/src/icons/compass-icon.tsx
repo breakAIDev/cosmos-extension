@@ -1,16 +1,9 @@
-import { IconProps } from '@phosphor-icons/react'
-import React from 'react'
+import { IconProps } from '@phosphor-icons/react';
+import React from 'react';
 
 export const CompassIcon = (props: IconProps) => {
   return (
-    <svg
-      width='18'
-      height='18'
-      viewBox='0 0 18 18'
-      fill='none'
-      xmlns='http://www.w3.org/2000/svg'
-      {...props}
-    >
+    <svg width='18' height='18' viewBox='0 0 18 18' fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
       <g clipPath='url(#a)'>
         <path
           fillRule='evenodd'
@@ -25,5 +18,5 @@ export const CompassIcon = (props: IconProps) => {
         </clipPath>
       </defs>
     </svg>
-  )
-}
+  );
+};

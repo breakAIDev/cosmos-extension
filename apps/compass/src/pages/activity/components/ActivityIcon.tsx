@@ -1,32 +1,32 @@
-import { ActivityType, useGetChains } from '@leapwallet/cosmos-wallet-hooks'
-import { Images } from 'images'
-import React from 'react'
-import { cn } from 'utils/cn'
+import { ActivityType, useGetChains } from '@leapwallet/cosmos-wallet-hooks';
+import { Images } from 'images';
+import React from 'react';
+import { cn } from 'utils/cn';
 
-import { LoaderAnimation } from '../../../components/loader/Loader'
+import { LoaderAnimation } from '../../../components/loader/Loader';
 
 export type ActivityIconProps = {
-  secondaryImg?: string
-  type: ActivityType
-  showLoader?: boolean
-  voteOption?: string
-  size?: 'sm' | 'md' | 'lg'
-  isSuccessful: boolean
-}
+  secondaryImg?: string;
+  type: ActivityType;
+  showLoader?: boolean;
+  voteOption?: string;
+  size?: 'sm' | 'md' | 'lg';
+  isSuccessful: boolean;
+};
 
 const getVoteIcon = (voteOption: string): string => {
   switch (voteOption) {
     case 'Yes':
-      return Images.Gov.VoteOptionYes
+      return Images.Gov.VoteOptionYes;
     case 'No':
-      return Images.Gov.VoteOptionNo
+      return Images.Gov.VoteOptionNo;
     case 'No with Veto':
-      return Images.Gov.VoteOptionNoWithVeto
+      return Images.Gov.VoteOptionNoWithVeto;
     case 'Abstain':
-      return Images.Gov.VoteOptionAbstain
+      return Images.Gov.VoteOptionAbstain;
   }
-  return Images.Activity.Voting
-}
+  return Images.Activity.Voting;
+};
 
 const activityActionTypeIconMap: Record<Exclude<ActivityType, 'vote'>, string> = {
   send: Images.Activity.SendIcon,
@@ -43,7 +43,7 @@ const activityActionTypeIconMap: Record<Exclude<ActivityType, 'vote'>, string> =
   cw20TokenTransfer: Images.Activity.SendIcon,
   grant: Images.Activity.SendIcon,
   revoke: Images.Activity.SendIcon,
-}
+};
 
 export function ActivityIcon({
   secondaryImg,
@@ -54,12 +54,11 @@ export function ActivityIcon({
   isSuccessful,
 }: ActivityIconProps) {
   const icon =
-    (type === 'vote' ? getVoteIcon(voteOption as string) : activityActionTypeIconMap[type]) ||
-    Images.Activity.SendIcon
+    (type === 'vote' ? getVoteIcon(voteOption as string) : activityActionTypeIconMap[type]) || Images.Activity.SendIcon;
 
-  const chains = useGetChains()
-  const chainInfo = chains.seiDevnet
-  const chainSymbolImageUrl = chainInfo?.chainSymbolImageUrl
+  const chains = useGetChains();
+  const chainInfo = chains.seiDevnet;
+  const chainSymbolImageUrl = chainInfo?.chainSymbolImageUrl;
 
   return (
     <div
@@ -106,5 +105,5 @@ export function ActivityIcon({
         />
       )}
     </div>
-  )
+  );
 }

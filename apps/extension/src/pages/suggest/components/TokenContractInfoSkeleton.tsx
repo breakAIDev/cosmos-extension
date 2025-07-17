@@ -1,6 +1,6 @@
-import { Divider, Key } from 'components/dapp'
-import React from 'react'
-import Skeleton from 'react-loading-skeleton'
+import { Divider, Key } from 'components/dapp';
+import React from 'react';
+import Skeleton from 'react-loading-skeleton';
 
 export function TokenContractInfoSkeleton() {
   return (
@@ -20,5 +20,5 @@ export function TokenContractInfoSkeleton() {
         <Skeleton className='' width={25} height={16} containerClassName='block !leading-none' />
       </div>
     </div>
-  )
+  );
 }

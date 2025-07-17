@@ -1,2 +1,2 @@
-export * from './useChainPageInfo'
-export * from './useDefaultTokenLogo'
+export * from './useChainPageInfo';
+export * from './useDefaultTokenLogo';

@@ -1,31 +1,27 @@
-import { MagnifyingGlassMinus } from '@phosphor-icons/react'
-import BottomModal from 'components/bottom-modal'
-import TokenListSkeleton from 'components/Skeletons/TokenListSkeleton'
-import { SearchInput } from 'components/ui/input/search-input'
-import { useGetKadoCurrencies } from 'hooks/useGetKadoDetails'
-import React, { useMemo, useState } from 'react'
+import { MagnifyingGlassMinus } from '@phosphor-icons/react';
+import BottomModal from 'components/bottom-modal';
+import TokenListSkeleton from 'components/Skeletons/TokenListSkeleton';
+import { SearchInput } from 'components/ui/input/search-input';
+import { useGetKadoCurrencies } from 'hooks/useGetKadoDetails';
+import React, { useMemo, useState } from 'react';
 
-import CurrencyCard from './CurrencyCard'
+import CurrencyCard from './CurrencyCard';
 
 type SelectCurrencySheetProps = {
-  isVisible: boolean
-  onClose: () => void
-  onCurrencySelect: (code: string) => void
-}
+  isVisible: boolean;
+  onClose: () => void;
+  onCurrencySelect: (code: string) => void;
+};
 
 type CurrencyProps = {
-  code: string
-  name: string
-  logo: string
-}
+  code: string;
+  name: string;
+  logo: string;
+};
 
-export default function SelectCurrencySheet({
-  isVisible,
-  onClose,
-  onCurrencySelect,
-}: SelectCurrencySheetProps) {
-  const [searchedCurrency, setSearchedCurrency] = useState('')
-  const { isLoading, data: supportedCurrencies = [] } = useGetKadoCurrencies()
+export default function SelectCurrencySheet({ isVisible, onClose, onCurrencySelect }: SelectCurrencySheetProps) {
+  const [searchedCurrency, setSearchedCurrency] = useState('');
+  const { isLoading, data: supportedCurrencies = [] } = useGetKadoCurrencies();
   const currencyList = useMemo<CurrencyProps[] | []>(
     () =>
       supportedCurrencies.filter(
@@ -34,16 +30,10 @@ export default function SelectCurrencySheet({
           currency.name.toLowerCase().includes(searchedCurrency),
       ),
     [supportedCurrencies, searchedCurrency],
-  )
+  );
 
   return (
-    <BottomModal
-      isOpen={isVisible}
-      onClose={onClose}
-      title='Select currency'
-      className='!p-6'
-      fullScreen={true}
-    >
+    <BottomModal isOpen={isVisible} onClose={onClose} title='Select currency' className='!p-6' fullScreen={true}>
       <div className='flex flex-col items-center w-full pb-2'>
         <SearchInput
           value={searchedCurrency}
@@ -92,5 +82,5 @@ export default function SelectCurrencySheet({
         </div>
       )}
     </BottomModal>
-  )
+  );
 }

@@ -1,24 +1,24 @@
-import classNames from 'classnames'
-import { AnimatePresence, motion } from 'framer-motion'
-import React, { useEffect, useRef, useState } from 'react'
-import { hex2rgba } from 'utils/hextorgba'
+import classNames from 'classnames';
+import { AnimatePresence, motion } from 'framer-motion';
+import React, { useEffect, useRef, useState } from 'react';
+import { hex2rgba } from 'utils/hextorgba';
 
 interface ActionInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  action: string
-  buttonText: string
-  buttonTextColor?: string
-  icon?: string
-  value: string
+  action: string;
+  buttonText: string;
+  buttonTextColor?: string;
+  icon?: string;
+  value: string;
   // eslint-disable-next-line no-unused-vars
-  onAction: (e: React.MouseEvent, action: string, value: string) => void
-  onChange: React.ChangeEventHandler<HTMLInputElement>
-  placeholder?: string
-  className?: string
-  preview?: React.ReactNode | undefined
-  invalid?: boolean
-  warning?: boolean
-  rightElement?: React.ReactNode
-  disabled?: boolean
+  onAction: (e: React.MouseEvent, action: string, value: string) => void;
+  onChange: React.ChangeEventHandler<HTMLInputElement>;
+  placeholder?: string;
+  className?: string;
+  preview?: React.ReactNode | undefined;
+  invalid?: boolean;
+  warning?: boolean;
+  rightElement?: React.ReactNode;
+  disabled?: boolean;
 }
 
 export const ActionInputWithPreview = React.forwardRef(
@@ -42,26 +42,26 @@ export const ActionInputWithPreview = React.forwardRef(
     }: ActionInputProps,
     ref: React.Ref<HTMLInputElement>,
   ) => {
-    const containerRef = useRef<HTMLDivElement | null>(null)
-    const [showPreview, setShowPreview] = useState(true)
+    const containerRef = useRef<HTMLDivElement | null>(null);
+    const [showPreview, setShowPreview] = useState(true);
 
     const handleButtonClick = (e: React.MouseEvent) => {
-      onAction(e, action, value)
-    }
+      onAction(e, action, value);
+    };
 
     useEffect(() => {
       const handleClickOutside = (e: MouseEvent) => {
         if (!containerRef.current?.contains(e.target as Node)) {
-          setShowPreview(true)
+          setShowPreview(true);
         }
-      }
+      };
 
-      const root = document.getElementById('root') as HTMLElement
-      root.addEventListener('mousedown', handleClickOutside)
+      const root = document.getElementById('root') as HTMLElement;
+      root.addEventListener('mousedown', handleClickOutside);
       return () => {
-        root.removeEventListener('mousedown', handleClickOutside)
-      }
-    }, [])
+        root.removeEventListener('mousedown', handleClickOutside);
+      };
+    }, []);
 
     return (
       <div className='relative w-full' ref={containerRef}>
@@ -77,8 +77,7 @@ export const ActionInputWithPreview = React.forwardRef(
                 {
                   'border-red-300 dark:border-red-300': invalid,
                   'border-yellow-600 dark:border-yellow-600': warning,
-                  'border-[transparent] focus:border-gray-400 dark:focus:border-gray-500':
-                    !invalid && !warning,
+                  'border-[transparent] focus:border-gray-400 dark:focus:border-gray-500': !invalid && !warning,
                 },
               )}
               onClick={() => setShowPreview(false)}
@@ -101,8 +100,7 @@ export const ActionInputWithPreview = React.forwardRef(
                 {
                   'border-red-300 dark:border-red-300': invalid,
                   'border-yellow-600 dark:border-yellow-600': warning,
-                  'focus-visible:border-gray-300 focus-visible:dark:border-gray-800':
-                    !invalid && !warning,
+                  'focus-visible:border-gray-300 focus-visible:dark:border-gray-800': !invalid && !warning,
                 },
               )}
               value={value}
@@ -111,17 +109,13 @@ export const ActionInputWithPreview = React.forwardRef(
               disabled={disabled}
               {...props}
               data-testing-id={
-                placeholder === 'Enter amount'
-                  ? 'input-send-enter-amount'
-                  : 'input-send-recipient-address'
+                placeholder === 'Enter amount' ? 'input-send-enter-amount' : 'input-send-recipient-address'
               }
             />
           )}
         </AnimatePresence>
         {rightElement ? (
-          <div className='absolute h-full right-0 top-0 flex items-center justify-center px-4'>
-            {rightElement}
-          </div>
+          <div className='absolute h-full right-0 top-0 flex items-center justify-center px-4'>{rightElement}</div>
         ) : !disabled ? (
           <div className='absolute h-full right-0 top-0 flex items-center justify-center px-4'>
             {icon ? (
@@ -148,8 +142,8 @@ export const ActionInputWithPreview = React.forwardRef(
           </div>
         ) : null}
       </div>
-    )
+    );
   },
-)
+);
 
-ActionInputWithPreview.displayName = 'ActionInput'
+ActionInputWithPreview.displayName = 'ActionInput';

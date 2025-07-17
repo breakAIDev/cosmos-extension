@@ -1,27 +1,27 @@
-import { Token } from '@leapwallet/cosmos-wallet-store'
-import { formatTokenAmount } from '@leapwallet/cosmos-wallet-store/dist/utils'
-import { ArrowRight } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import LedgerConfirmationPopup from 'components/ledger-confirmation/LedgerConfirmationPopup'
-import BottomModal from 'components/new-bottom-modal'
-import Text from 'components/text'
-import loadingImage from 'lottie-files/swaps-btn-loading.json'
-import Lottie from 'lottie-react'
-import { observer } from 'mobx-react-lite'
-import React from 'react'
+import { Token } from '@leapwallet/cosmos-wallet-store';
+import { formatTokenAmount } from '@leapwallet/cosmos-wallet-store/dist/utils';
+import { ArrowRight } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import LedgerConfirmationPopup from 'components/ledger-confirmation/LedgerConfirmationPopup';
+import BottomModal from 'components/new-bottom-modal';
+import Text from 'components/text';
+import loadingImage from 'lottie-files/swaps-btn-loading.json';
+import Lottie from 'lottie-react';
+import { observer } from 'mobx-react-lite';
+import React from 'react';
 
 type Props = {
-  isOpen: boolean
-  onClose: () => void
-  onConfirm: () => void
-  showLedgerPopup: boolean
-  source: Token
-  destination: Token
-  amountIn: string
-  amountOut: string
-  isProcessing: boolean
-  error?: string
-}
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  showLedgerPopup: boolean;
+  source: Token;
+  destination: Token;
+  amountIn: string;
+  amountOut: string;
+  isProcessing: boolean;
+  error?: string;
+};
 
 const ReviewTxSheet = observer(
   ({
@@ -38,12 +38,7 @@ const ReviewTxSheet = observer(
   }: Props) => {
     return (
       <>
-        <BottomModal
-          title='Confirm transaction'
-          isOpen={isOpen}
-          onClose={onClose}
-          className='p-6 z-10'
-        >
+        <BottomModal title='Confirm transaction' isOpen={isOpen} onClose={onClose} className='p-6 z-10'>
           <div className='flex flex-col gap-4 w-full'>
             <div className='w-full bg-gray-50 dark:bg-gray-900 flex items-center justify-between p-4 gap-2 rounded-2xl'>
               <div className='flex flex-col items-center w-full max-w-[140px] max-[399px]:!max-w-[calc(min(140px,45%))] gap-4 max-[399px]:overflow-visible'>
@@ -95,8 +90,8 @@ const ReviewTxSheet = observer(
         </BottomModal>
         {showLedgerPopup && <LedgerConfirmationPopup showLedgerPopup={showLedgerPopup} />}
       </>
-    )
+    );
   },
-)
+);
 
-export default ReviewTxSheet
+export default ReviewTxSheet;

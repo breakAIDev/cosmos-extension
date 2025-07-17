@@ -1,24 +1,24 @@
-import { Label, ThemeName, useTheme } from '@leapwallet/leap-ui'
-import classNames from 'classnames'
-import IconButton from 'components/icon-button'
-import { Images } from 'images'
-import { LeapLogo } from 'images/logos'
-import React, { PropsWithChildren, ReactNode } from 'react'
-import { isSidePanel } from 'utils/isSidePanel'
+import { Label, ThemeName, useTheme } from '@leapwallet/leap-ui';
+import classNames from 'classnames';
+import IconButton from 'components/icon-button';
+import { Images } from 'images';
+import { LeapLogo } from 'images/logos';
+import React, { PropsWithChildren, ReactNode } from 'react';
+import { isSidePanel } from 'utils/isSidePanel';
 
 // Page layout for full screen pages
 type ExtensionPageProps = {
-  readonly titleComponent?: ReactNode
-  readonly children?: ReactNode
-  readonly headerRightComponent?: ReactNode
-  readonly childrenMargin?: boolean
-}
+  readonly titleComponent?: ReactNode;
+  readonly children?: ReactNode;
+  readonly headerRightComponent?: ReactNode;
+  readonly childrenMargin?: boolean;
+};
 
 export default function ExtensionPage(props: PropsWithChildren<ExtensionPageProps>) {
-  const { titleComponent, children, headerRightComponent, childrenMargin } = props
-  const { theme, setTheme } = useTheme()
+  const { titleComponent, children, headerRightComponent, childrenMargin } = props;
+  const { theme, setTheme } = useTheme();
 
-  const isDark = theme === ThemeName.DARK
+  const isDark = theme === ThemeName.DARK;
 
   return (
     <div
@@ -48,7 +48,7 @@ export default function ExtensionPage(props: PropsWithChildren<ExtensionPageProp
                 <IconButton
                   isFilled={true}
                   onClick={() => {
-                    setTheme(isDark ? ThemeName.LIGHT : ThemeName.DARK)
+                    setTheme(isDark ? ThemeName.LIGHT : ThemeName.DARK);
                   }}
                   image={{
                     src: isDark ? Images.Misc.LightTheme : Images.Misc.DarkTheme,
@@ -81,5 +81,5 @@ export default function ExtensionPage(props: PropsWithChildren<ExtensionPageProp
         </>
       )}
     </div>
-  )
+  );
 }

@@ -1,17 +1,17 @@
-import { CardDivider } from '@leapwallet/leap-ui'
-import { Info } from '@phosphor-icons/react'
-import BottomModal from 'components/new-bottom-modal'
-import Text from 'components/text'
-import React, { Fragment, useState } from 'react'
-import Skeleton from 'react-loading-skeleton'
+import { CardDivider } from '@leapwallet/leap-ui';
+import { Info } from '@phosphor-icons/react';
+import BottomModal from 'components/new-bottom-modal';
+import Text from 'components/text';
+import React, { Fragment, useState } from 'react';
+import Skeleton from 'react-loading-skeleton';
 
 type ITally = {
-  label: string
-  value: number
-}
+  label: string;
+  value: number;
+};
 
 export function Turnout({ tallying }: { tallying: ITally[] }) {
-  const [detail, showDetail] = useState('')
+  const [detail, showDetail] = useState('');
 
   return (
     <>
@@ -48,5 +48,5 @@ export function Turnout({ tallying }: { tallying: ITally[] }) {
         </Text>
       </BottomModal>
     </>
-  )
+  );
 }

@@ -1,16 +1,16 @@
-import { FeeTokenData } from '@leapwallet/cosmos-wallet-hooks'
-import BigNumber from 'bignumber.js'
-import GasPriceOptions, { useDefaultGasPrice } from 'components/gas-price-options'
-import { GasPriceOptionValue } from 'components/gas-price-options/context'
-import { DisplayFee } from 'components/gas-price-options/display-fee'
-import { FeesSettingsSheet } from 'components/gas-price-options/fees-settings-sheet'
-import { observer } from 'mobx-react-lite'
-import { useSendContext } from 'pages/send/context'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { rootDenomsStore } from 'stores/denoms-store-instance'
+import { FeeTokenData } from '@leapwallet/cosmos-wallet-hooks';
+import BigNumber from 'bignumber.js';
+import GasPriceOptions, { useDefaultGasPrice } from 'components/gas-price-options';
+import { GasPriceOptionValue } from 'components/gas-price-options/context';
+import { DisplayFee } from 'components/gas-price-options/display-fee';
+import { FeesSettingsSheet } from 'components/gas-price-options/fees-settings-sheet';
+import { observer } from 'mobx-react-lite';
+import { useSendContext } from 'pages/send/context';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { rootDenomsStore } from 'stores/denoms-store-instance';
 
 export const FeesView = observer(() => {
-  const [showFeesSettingSheet, setShowFeesSettingSheet] = useState(false)
+  const [showFeesSettingSheet, setShowFeesSettingSheet] = useState(false);
   const {
     userPreferredGasPrice,
     userPreferredGasLimit,
@@ -27,61 +27,59 @@ export const FeesView = observer(() => {
     sendActiveChain,
     sendSelectedNetwork,
     isSeiEvmTransaction,
-  } = useSendContext()
+  } = useSendContext();
 
-  const denoms = rootDenomsStore.allDenoms
+  const denoms = rootDenomsStore.allDenoms;
 
   const defaultGasPrice = useDefaultGasPrice(denoms, {
     activeChain: sendActiveChain,
     selectedNetwork: sendSelectedNetwork,
     isSeiEvmTransaction,
-  })
+  });
 
   const [gasPriceOption, setGasPriceOption] = useState<GasPriceOptionValue>({
     option: gasOption,
     gasPrice: userPreferredGasPrice ?? defaultGasPrice.gasPrice,
-  })
-  const gasPriceSetFromGasPriceOptions = useRef<boolean>(false)
+  });
+  const gasPriceSetFromGasPriceOptions = useRef<boolean>(false);
 
   const onClose = useCallback(() => {
-    setShowFeesSettingSheet(false)
-  }, [])
+    setShowFeesSettingSheet(false);
+  }, []);
 
   const handleGasPriceOptionChange = useCallback(
     (value: GasPriceOptionValue, feeTokenData: FeeTokenData) => {
-      gasPriceSetFromGasPriceOptions.current = true
-      setGasPriceOption(value)
-      setFeeDenom({ ...feeTokenData.denom, ibcDenom: feeTokenData.ibcDenom })
+      gasPriceSetFromGasPriceOptions.current = true;
+      setGasPriceOption(value);
+      setFeeDenom({ ...feeTokenData.denom, ibcDenom: feeTokenData.ibcDenom });
     },
     [setFeeDenom],
-  )
+  );
 
   // initialize gasPriceOption with correct defaultGasPrice.gasPrice
   useEffect(() => {
     if (gasPriceSetFromGasPriceOptions.current) {
-      return
+      return;
     }
     setGasPriceOption({
       option: gasOption,
       gasPrice: defaultGasPrice.gasPrice,
-    })
+    });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultGasPrice.gasPrice.amount.toString(), defaultGasPrice.gasPrice.denom])
+  }, [defaultGasPrice.gasPrice.amount.toString(), defaultGasPrice.gasPrice.denom]);
 
   useEffect(() => {
-    setGasOption(gasPriceOption.option)
-    setUserPreferredGasPrice(gasPriceOption.gasPrice)
-  }, [gasPriceOption, setGasOption, setUserPreferredGasPrice])
+    setGasOption(gasPriceOption.option);
+    setUserPreferredGasPrice(gasPriceOption.gasPrice);
+  }, [gasPriceOption, setGasOption, setUserPreferredGasPrice]);
 
   return (
     <div>
       <GasPriceOptions
         recommendedGasLimit={gasEstimate.toString()}
         gasLimit={userPreferredGasLimit?.toString() ?? gasEstimate.toString()}
-        setGasLimit={(value: number | string | BigNumber) =>
-          setUserPreferredGasLimit(Number(value.toString()))
-        }
+        setGasLimit={(value: number | string | BigNumber) => setUserPreferredGasLimit(Number(value.toString()))}
         gasPriceOption={gasPriceOption}
         onGasPriceOptionChange={handleGasPriceOptionChange}
         error={gasError}
@@ -91,9 +89,7 @@ export const FeesView = observer(() => {
         network={sendSelectedNetwork}
         isSeiEvmTransaction={isSeiEvmTransaction}
       >
-        {addressWarning.type === 'link' ? null : (
-          <DisplayFee setShowFeesSettingSheet={setShowFeesSettingSheet} />
-        )}
+        {addressWarning.type === 'link' ? null : <DisplayFee setShowFeesSettingSheet={setShowFeesSettingSheet} />}
 
         {gasError && !showFeesSettingSheet ? (
           <p className='text-red-300 text-sm font-medium mt-2 text-center'>{gasError}</p>
@@ -103,11 +99,9 @@ export const FeesView = observer(() => {
           showFeesSettingSheet={showFeesSettingSheet}
           onClose={onClose}
           gasError={gasError}
-          hideAdditionalSettings={
-            sendActiveChain === 'bitcoin' || sendActiveChain === 'bitcoinSignet'
-          }
+          hideAdditionalSettings={sendActiveChain === 'bitcoin' || sendActiveChain === 'bitcoinSignet'}
         />
       </GasPriceOptions>
     </div>
-  )
-})
+  );
+});

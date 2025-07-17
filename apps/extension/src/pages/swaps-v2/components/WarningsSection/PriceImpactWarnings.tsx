@@ -1,26 +1,22 @@
-import { RootDenomsStore } from '@leapwallet/cosmos-wallet-store'
-import { observer } from 'mobx-react-lite'
-import { useSwapContext } from 'pages/swaps-v2/context'
-import { getPriceImpactVars } from 'pages/swaps-v2/utils/priceImpact'
-import React, { Dispatch, SetStateAction, useMemo } from 'react'
+import { RootDenomsStore } from '@leapwallet/cosmos-wallet-store';
+import { observer } from 'mobx-react-lite';
+import { useSwapContext } from 'pages/swaps-v2/context';
+import { getPriceImpactVars } from 'pages/swaps-v2/utils/priceImpact';
+import React, { Dispatch, SetStateAction, useMemo } from 'react';
 
-import { WarningBox } from './WarningBox'
-import { WarningWithCheck } from './WarningWithCheck'
+import { WarningBox } from './WarningBox';
+import { WarningWithCheck } from './WarningWithCheck';
 
 type PriceImpactWarningsProps = {
-  isPriceImpactChecked: boolean
-  setIsPriceImpactChecked: Dispatch<SetStateAction<boolean>>
-  rootDenomsStore: RootDenomsStore
-}
+  isPriceImpactChecked: boolean;
+  setIsPriceImpactChecked: Dispatch<SetStateAction<boolean>>;
+  rootDenomsStore: RootDenomsStore;
+};
 
 const PriceImpactWarnings = observer(
-  ({
-    isPriceImpactChecked,
-    setIsPriceImpactChecked,
-    rootDenomsStore,
-  }: PriceImpactWarningsProps) => {
-    const { routingInfo, sourceToken, destinationToken } = useSwapContext()
-    const formatter = Intl.NumberFormat('en-US', { maximumFractionDigits: 2 })
+  ({ isPriceImpactChecked, setIsPriceImpactChecked, rootDenomsStore }: PriceImpactWarningsProps) => {
+    const { routingInfo, sourceToken, destinationToken } = useSwapContext();
+    const formatter = Intl.NumberFormat('en-US', { maximumFractionDigits: 2 });
 
     const {
       shouldCheckPriceImpact,
@@ -29,18 +25,12 @@ const PriceImpactWarnings = observer(
       sourceAssetUSDValue,
       destinationAssetUSDValue,
     } = useMemo(
-      () =>
-        getPriceImpactVars(
-          routingInfo?.route,
-          sourceToken,
-          destinationToken,
-          rootDenomsStore.allDenoms,
-        ),
+      () => getPriceImpactVars(routingInfo?.route, sourceToken, destinationToken, rootDenomsStore.allDenoms),
       [destinationToken, rootDenomsStore.allDenoms, routingInfo?.route, sourceToken],
-    )
+    );
 
     if (!shouldCheckPriceImpact) {
-      return null
+      return null;
     }
 
     // if price impact is not available
@@ -54,11 +44,11 @@ const PriceImpactWarnings = observer(
             isChecked={isPriceImpactChecked}
             setIsChecked={setIsPriceImpactChecked}
           />
-        )
+        );
       }
       // usd value decrease is not more than 5%
       if (usdValueDecreasePercent.lt(5)) {
-        return null
+        return null;
       }
       // usd value decrease is more than 5%
       return (
@@ -67,29 +57,25 @@ const PriceImpactWarnings = observer(
           title2={`-${usdValueDecreasePercent.toFixed(2)}%`}
           message={`Estimated output value ($${formatter.format(
             destinationAssetUSDValue.toNumber(),
-          )}) is ${usdValueDecreasePercent.toFixed(
-            2,
-          )}% lower than estimated input value ($${formatter.format(
+          )}) is ${usdValueDecreasePercent.toFixed(2)}% lower than estimated input value ($${formatter.format(
             sourceAssetUSDValue.toNumber(),
           )}).
           I understand and wish to proceed.`}
           isChecked={isPriceImpactChecked}
           setIsChecked={setIsPriceImpactChecked}
         />
-      )
+      );
     }
 
     // price impact is less than 5%
     if (priceImpactPercent.lt(5)) {
       // usd value decrease is not available
       if (usdValueDecreasePercent.isNaN()) {
-        return (
-          <WarningBox type={'warning'} message='Price data unavailable for selected token(s).' />
-        )
+        return <WarningBox type={'warning'} message='Price data unavailable for selected token(s).' />;
       }
       if (usdValueDecreasePercent.lt(5)) {
         // no need to show any alerts/confirmations
-        return null
+        return null;
       }
       // usd value decrease is more than 5%
       return (
@@ -98,15 +84,13 @@ const PriceImpactWarnings = observer(
           title2={`-${usdValueDecreasePercent.toFixed(2)}%`}
           message={`Estimated output value ($${formatter.format(
             destinationAssetUSDValue.toNumber(),
-          )}) is ${usdValueDecreasePercent.toFixed(
-            2,
-          )}% lower than estimated input value ($${formatter.format(
+          )}) is ${usdValueDecreasePercent.toFixed(2)}% lower than estimated input value ($${formatter.format(
             sourceAssetUSDValue.toNumber(),
           )}). I understand and wish to proceed.`}
           isChecked={isPriceImpactChecked}
           setIsChecked={setIsPriceImpactChecked}
         />
-      )
+      );
     }
 
     // price impact is more than 5%
@@ -123,7 +107,7 @@ const PriceImpactWarnings = observer(
             isChecked={isPriceImpactChecked}
             setIsChecked={setIsPriceImpactChecked}
           />
-        )
+        );
       }
 
       // both price impact and usd value decrease are more than 5%
@@ -136,15 +120,13 @@ const PriceImpactWarnings = observer(
             title2={`-${usdValueDecreasePercent.toFixed(2)}%`}
             message={`Estimated output value ($${formatter.format(
               destinationAssetUSDValue.toNumber(),
-            )}) is ${usdValueDecreasePercent.toFixed(
-              2,
-            )}% lower than estimated input value ($${formatter.format(
+            )}) is ${usdValueDecreasePercent.toFixed(2)}% lower than estimated input value ($${formatter.format(
               sourceAssetUSDValue.toNumber(),
             )}). I understand and wish to proceed.`}
             isChecked={isPriceImpactChecked}
             setIsChecked={setIsPriceImpactChecked}
           />
-        )
+        );
       }
 
       // show price impact alert
@@ -158,9 +140,9 @@ const PriceImpactWarnings = observer(
           isChecked={isPriceImpactChecked}
           setIsChecked={setIsPriceImpactChecked}
         />
-      )
+      );
     }
   },
-)
+);
 
-export default PriceImpactWarnings
+export default PriceImpactWarnings;

@@ -1,30 +1,25 @@
-import { isAptosChain } from '@leapwallet/cosmos-wallet-sdk'
-import { BRIDGES, RouteResponse, SwapVenue } from '@leapwallet/elements-core'
-import {
-  RouteAggregator,
-  RouteError,
-  SkipSupportedChainData,
-  useRouteV2,
-} from '@leapwallet/elements-hooks'
-import { useMemo } from 'react'
-import { SWRConfiguration } from 'swr'
+import { isAptosChain } from '@leapwallet/cosmos-wallet-sdk';
+import { BRIDGES, RouteResponse, SwapVenue } from '@leapwallet/elements-core';
+import { RouteAggregator, RouteError, SkipSupportedChainData, useRouteV2 } from '@leapwallet/elements-hooks';
+import { useMemo } from 'react';
+import { SWRConfiguration } from 'swr';
 
-import { MergedAsset } from './useAssets'
-import { MosaicRouteQueryResponse, useMosaicRoute } from './useMosaicRoute'
-import { useProviderFeatureFlags } from './useProviderFeatureFlags'
+import { MergedAsset } from './useAssets';
+import { MosaicRouteQueryResponse, useMosaicRoute } from './useMosaicRoute';
+import { useProviderFeatureFlags } from './useProviderFeatureFlags';
 
 export type SkipRouteResponse = {
-  aggregator: RouteAggregator.SKIP
-  response: RouteResponse
-  sourceAssetChain: SkipSupportedChainData
-  sourceAsset: MergedAsset
-  destinationAssetChain: SkipSupportedChainData
-  destinationAsset: MergedAsset
-  transactionCount: number
-  operations: any[]
-  amountIn: string
-  amountOut: string
-}
+  aggregator: RouteAggregator.SKIP;
+  response: RouteResponse;
+  sourceAssetChain: SkipSupportedChainData;
+  sourceAsset: MergedAsset;
+  destinationAssetChain: SkipSupportedChainData;
+  destinationAsset: MergedAsset;
+  transactionCount: number;
+  operations: any[];
+  amountIn: string;
+  amountOut: string;
+};
 
 function useSkipRoute(
   {
@@ -45,22 +40,22 @@ function useSkipRoute(
     leapFeeAddresses,
     leapFeeBps,
   }: {
-    enabled: boolean
-    smartRelay: boolean
-    amountIn: string
-    sourceAsset?: MergedAsset
-    sourceAssetChain?: SkipSupportedChainData
-    destinationAsset?: MergedAsset
-    destinationAssetChain?: SkipSupportedChainData
-    allowedBridges?: BRIDGES[]
-    swapVenues?: SwapVenue[]
-    enableSmartSwap?: boolean
-    enableEvmSwap?: boolean
-    enableGoFast?: boolean
-    isDirectTransfer?: boolean
-    isSwapFeeEnabled?: boolean
-    leapFeeAddresses?: Record<string, string>
-    leapFeeBps: string
+    enabled: boolean;
+    smartRelay: boolean;
+    amountIn: string;
+    sourceAsset?: MergedAsset;
+    sourceAssetChain?: SkipSupportedChainData;
+    destinationAsset?: MergedAsset;
+    destinationAssetChain?: SkipSupportedChainData;
+    allowedBridges?: BRIDGES[];
+    swapVenues?: SwapVenue[];
+    enableSmartSwap?: boolean;
+    enableEvmSwap?: boolean;
+    enableGoFast?: boolean;
+    isDirectTransfer?: boolean;
+    isSwapFeeEnabled?: boolean;
+    leapFeeAddresses?: Record<string, string>;
+    leapFeeBps: string;
   },
   config?: SWRConfiguration,
 ) {
@@ -91,7 +86,7 @@ function useSkipRoute(
       enableGoFast,
     },
     config,
-  )
+  );
 
   const {
     amountOut: amountOutWithoutFees,
@@ -117,7 +112,7 @@ function useSkipRoute(
       basisPointsFees: undefined,
     },
     config,
-  )
+  );
 
   const {
     amountOut,
@@ -127,17 +122,15 @@ function useSkipRoute(
     refresh,
     appliedLeapFeeBps,
   }: {
-    amountOut: string
-    routeResponse: undefined | SkipRouteResponse
-    routeError: RouteError
-    isLoadingRoute: boolean
-    refresh: () => Promise<void>
-    appliedLeapFeeBps: string
+    amountOut: string;
+    routeResponse: undefined | SkipRouteResponse;
+    routeError: RouteError;
+    isLoadingRoute: boolean;
+    refresh: () => Promise<void>;
+    appliedLeapFeeBps: string;
   } = useMemo(() => {
     const finalResponse = {
-      isLoadingRoute: isSwapFeeEnabled
-        ? loadingRoutesWithoutFees || loadingRoutesWithFees
-        : loadingRoutesWithoutFees,
+      isLoadingRoute: isSwapFeeEnabled ? loadingRoutesWithoutFees || loadingRoutesWithFees : loadingRoutesWithoutFees,
       appliedLeapFeeBps: '0',
       amountOut: amountOutWithoutFees,
       routeResponse: routeResponseWithoutFees
@@ -145,23 +138,21 @@ function useSkipRoute(
         : undefined,
       routeError: routeErrorWithoutFees,
       refresh: refreshRouteWithoutFees,
-    }
+    };
     if (!isSwapFeeEnabled) {
       return {
         ...finalResponse,
         isLoadingRoute: loadingRoutesWithoutFees,
-      }
+      };
     }
     if (routeResponseWithFees) {
       if ('does_swap' in routeResponseWithFees.response) {
-        let lastSwapVenue = routeResponseWithFees.response.swap_venue
+        let lastSwapVenue = routeResponseWithFees.response.swap_venue;
         if (!lastSwapVenue) {
           lastSwapVenue =
-            routeResponseWithFees.response.swap_venues?.[
-              routeResponseWithFees.response.swap_venues.length - 1
-            ]
+            routeResponseWithFees.response.swap_venues?.[routeResponseWithFees.response.swap_venues.length - 1];
         }
-        const swapChainId = lastSwapVenue?.chain_id
+        const swapChainId = lastSwapVenue?.chain_id;
         if (leapFeeAddresses && swapChainId && leapFeeAddresses[swapChainId]) {
           return {
             ...finalResponse,
@@ -172,12 +163,12 @@ function useSkipRoute(
             routeError: routeErrorWithFees,
             appliedLeapFeeBps: leapFeeBps,
             refresh: refreshRouteWithFees,
-          }
+          };
         } else {
-          return finalResponse
+          return finalResponse;
         }
       } else {
-        return finalResponse
+        return finalResponse;
       }
     }
     if (!!routeErrorWithFees || !!routeErrorWithoutFees) {
@@ -187,9 +178,9 @@ function useSkipRoute(
         routeResponse: undefined,
         routeError: routeErrorWithFees || routeErrorWithoutFees,
         refresh: () => {
-          return Promise.resolve()
+          return Promise.resolve();
         },
-      }
+      };
     }
     return {
       ...finalResponse,
@@ -197,9 +188,9 @@ function useSkipRoute(
       routeResponse: undefined,
       routeError: undefined,
       refresh: () => {
-        return Promise.resolve()
+        return Promise.resolve();
       },
-    }
+    };
   }, [
     isSwapFeeEnabled,
     loadingRoutesWithoutFees,
@@ -214,7 +205,7 @@ function useSkipRoute(
     amountOutWithFees,
     leapFeeBps,
     refreshRouteWithFees,
-  ])
+  ]);
 
   return {
     routeResponse,
@@ -223,7 +214,7 @@ function useSkipRoute(
     isLoadingRoute,
     refresh,
     appliedLeapFeeBps,
-  }
+  };
 }
 
 /**
@@ -231,16 +222,16 @@ function useSkipRoute(
  */
 
 type BasicRouteResponse = {
-  routeError: RouteError | undefined
-  amountOut: string
-  isLoadingRoute: boolean
-  refresh: () => Promise<void>
-  appliedLeapFeeBps: string
-}
+  routeError: RouteError | undefined;
+  amountOut: string;
+  isLoadingRoute: boolean;
+  refresh: () => Promise<void>;
+  appliedLeapFeeBps: string;
+};
 
 export type AggregatedRouteResponse = BasicRouteResponse & {
-  routeResponse: undefined | SkipRouteResponse | MosaicRouteQueryResponse
-}
+  routeResponse: undefined | SkipRouteResponse | MosaicRouteQueryResponse;
+};
 
 export const useAggregatedRoute = (
   {
@@ -262,33 +253,30 @@ export const useAggregatedRoute = (
     isSwapFeeEnabled,
     slippage,
   }: {
-    enabled: boolean
-    smartRelay: boolean
-    amountIn: string
-    sourceAsset?: MergedAsset
-    sourceAssetChain?: SkipSupportedChainData
-    destinationAsset?: MergedAsset
-    destinationAssetChain?: SkipSupportedChainData
-    allowedBridges?: BRIDGES[]
-    swapVenues?: SwapVenue[]
-    enableSmartSwap?: boolean
-    enableEvmSwap?: boolean
-    enableGoFast?: boolean
-    isDirectTransfer?: boolean
-    isSwapFeeEnabled?: boolean
-    leapFeeAddresses?: Record<string, string>
-    leapFeeBps: string
-    maxPriceImpact?: number
-    slippage?: number
+    enabled: boolean;
+    smartRelay: boolean;
+    amountIn: string;
+    sourceAsset?: MergedAsset;
+    sourceAssetChain?: SkipSupportedChainData;
+    destinationAsset?: MergedAsset;
+    destinationAssetChain?: SkipSupportedChainData;
+    allowedBridges?: BRIDGES[];
+    swapVenues?: SwapVenue[];
+    enableSmartSwap?: boolean;
+    enableEvmSwap?: boolean;
+    enableGoFast?: boolean;
+    isDirectTransfer?: boolean;
+    isSwapFeeEnabled?: boolean;
+    leapFeeAddresses?: Record<string, string>;
+    leapFeeBps: string;
+    maxPriceImpact?: number;
+    slippage?: number;
   },
   config?: SWRConfiguration,
 ): AggregatedRouteResponse => {
-  const { isSkipEnabled } = useProviderFeatureFlags()
+  const { isSkipEnabled } = useProviderFeatureFlags();
   const isAptos =
-    sourceAsset &&
-    destinationAsset &&
-    isAptosChain(sourceAsset?.chainId) &&
-    isAptosChain(destinationAsset?.chainId)
+    sourceAsset && destinationAsset && isAptosChain(sourceAsset?.chainId) && isAptosChain(destinationAsset?.chainId);
 
   const {
     routeResponse: skipRouteResponse,
@@ -317,7 +305,7 @@ export const useAggregatedRoute = (
       isSwapFeeEnabled,
     },
     config,
-  )
+  );
 
   const {
     routeResponse: mosaicRouteResponse,
@@ -338,14 +326,12 @@ export const useAggregatedRoute = (
       sourceAsset && leapFeeAddresses
         ? {
             [sourceAsset.chainId]: {
-              affiliates: [
-                { basis_points_fee: leapFeeBps, address: leapFeeAddresses[sourceAsset.chainId] },
-              ],
+              affiliates: [{ basis_points_fee: leapFeeBps, address: leapFeeAddresses[sourceAsset.chainId] }],
               totalBasisPoints: Number(leapFeeBps),
             },
           }
         : undefined,
-  })
+  });
 
   return useMemo(() => {
     /**
@@ -363,7 +349,7 @@ export const useAggregatedRoute = (
       amountOut: skipAmountOut,
       isLoadingRoute: skipIsLoadingRoute,
       refresh: skipRefresh,
-    }
+    };
 
     if (isAptos && mosaicRouteResponse) {
       return {
@@ -373,11 +359,11 @@ export const useAggregatedRoute = (
         refresh: refreshMosaicRoute,
         appliedLeapFeeBps: leapFeeBps,
         routeResponse: mosaicRouteResponse,
-      }
+      };
     }
 
     // skip route is available and has higher amountOut
-    return defaultResponse
+    return defaultResponse;
   }, [
     skipAppliedLeapFeeBps,
     skipRouteResponse,
@@ -391,5 +377,5 @@ export const useAggregatedRoute = (
     isMosaicLoadingRoute,
     refreshMosaicRoute,
     leapFeeBps,
-  ])
-}
+  ]);
+};

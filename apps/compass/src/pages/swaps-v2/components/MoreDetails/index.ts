@@ -1,3 +1,3 @@
-export * from './MoreDetails'
-export * from './MoreDetailsSheet'
-export * from './SlippageInfoSheet'
+export * from './MoreDetails';
+export * from './MoreDetailsSheet';
+export * from './SlippageInfoSheet';

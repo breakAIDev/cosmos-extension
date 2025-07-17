@@ -1,43 +1,37 @@
-import { useGetChains } from '@leapwallet/cosmos-wallet-hooks'
-import { MosaicAPI } from '@leapwallet/elements-core'
-import {
-  SkipSupportedChainData,
-  useChains,
-  useSkipSupportedChains,
-} from '@leapwallet/elements-hooks'
-import { useNonNativeCustomChains } from 'hooks/useNonNativeCustomChains'
-import { useMemo } from 'react'
-import { SourceChain } from 'types/swap'
+import { useGetChains } from '@leapwallet/cosmos-wallet-hooks';
+import { MosaicAPI } from '@leapwallet/elements-core';
+import { SkipSupportedChainData, useChains, useSkipSupportedChains } from '@leapwallet/elements-hooks';
+import { useNonNativeCustomChains } from 'hooks/useNonNativeCustomChains';
+import { useMemo } from 'react';
+import { SourceChain } from 'types/swap';
 
 export function useGetChainsToShow() {
-  const chains = useGetChains()
-  const customChains = useNonNativeCustomChains()
-  const { isLoading } = useChains()
-  const { data: skipSupportedChains, isLoading: skipSupportedChainsLoading } =
-    useSkipSupportedChains({
-      chainTypes: ['cosmos', 'evm'],
-    })
+  const chains = useGetChains();
+  const customChains = useNonNativeCustomChains();
+  const { isLoading } = useChains();
+  const { data: skipSupportedChains, isLoading: skipSupportedChainsLoading } = useSkipSupportedChains({
+    chainTypes: ['cosmos', 'evm'],
+  });
 
   const skipAndMosaicChains = useMemo(() => {
     return skipSupportedChains
       ? [...skipSupportedChains, ...MosaicAPI.supportedChains]
       : skipSupportedChainsLoading
       ? []
-      : MosaicAPI.supportedChains
-  }, [skipSupportedChains, skipSupportedChainsLoading])
+      : MosaicAPI.supportedChains;
+  }, [skipSupportedChains, skipSupportedChainsLoading]);
 
   const chainsToShow = useMemo(() => {
     if (skipAndMosaicChains) {
-      const _chainsToShow: SourceChain[] = []
+      const _chainsToShow: SourceChain[] = [];
 
-      const allChains = { ...customChains, ...chains }
+      const allChains = { ...customChains, ...chains };
 
       Object.values(allChains).forEach((chain) => {
         const skipChain = skipAndMosaicChains.find(
           (_skipChain) =>
-            _skipChain.chainId === chain.chainId ||
-            (chain.evmOnlyChain && _skipChain.chainId === chain.evmChainId),
-        )
+            _skipChain.chainId === chain.chainId || (chain.evmOnlyChain && _skipChain.chainId === chain.evmChainId),
+        );
 
         if (skipChain?.chainType === 'cosmos') {
           _chainsToShow.push({
@@ -59,10 +53,10 @@ export function useGetChainsToShow() {
             bech32Prefix: skipChain.bech32Prefix ?? chain.addressPrefix,
             isTestnet: false,
             enabled: !!chains[chain.key], // disable custom chains
-          })
+          });
         } else if (skipChain?.chainType === 'evm') {
           // TODO: remove once when using elements stable release and not local version
-          const skipEvmChain = skipChain as Extract<SkipSupportedChainData, { chainType: 'evm' }>
+          const skipEvmChain = skipChain as Extract<SkipSupportedChainData, { chainType: 'evm' }>;
           _chainsToShow.push({
             key: chain.key,
             baseDenom: skipEvmChain.baseDenom ?? Object.keys(chain.nativeDenoms)[0],
@@ -77,7 +71,7 @@ export function useGetChainsToShow() {
             bech32Prefix: skipEvmChain.bech32Prefix ?? chain.addressPrefix,
             isTestnet: false,
             enabled: !!chains[chain.key],
-          })
+          });
         } else if (skipChain?.chainType === 'aptos') {
           _chainsToShow.push({
             key: chain.key,
@@ -94,15 +88,15 @@ export function useGetChainsToShow() {
             pfmEnabled: skipChain.pfmEnabled,
             logoUri: skipChain.logoUri || chain.chainSymbolImageUrl || '',
             txExplorer: skipChain.txExplorer,
-          })
+          });
         }
-      })
+      });
 
-      return _chainsToShow
+      return _chainsToShow;
     }
 
-    return []
-  }, [chains, customChains, skipAndMosaicChains])
+    return [];
+  }, [chains, customChains, skipAndMosaicChains]);
 
-  return { chainsToShow, chainsToShowLoading: isLoading || skipSupportedChainsLoading }
+  return { chainsToShow, chainsToShowLoading: isLoading || skipSupportedChainsLoading };
 }

@@ -1,64 +1,56 @@
-import { CaretRight, PlusCircle } from '@phosphor-icons/react'
-import BottomModal from 'components/bottom-modal'
-import { ButtonName, EventName } from 'config/analytics'
-import { EyeIcon } from 'icons/eye-icon'
-import { KeyIcon } from 'icons/key-icon'
-import { LedgerDriveIcon } from 'icons/ledger-drive-icon'
-import { LockRotateIcon } from 'icons/lock-rotate-icon'
-import mixpanel from 'mixpanel-browser'
-import { observer } from 'mobx-react-lite'
-import React, { useCallback, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { closeSidePanel } from 'utils/closeSidePanel'
-import { hasMnemonicWallet } from 'utils/hasMnemonicWallet'
-import { isSidePanel } from 'utils/isSidePanel'
-import extension from 'webextension-polyfill'
+import { CaretRight, PlusCircle } from '@phosphor-icons/react';
+import BottomModal from 'components/bottom-modal';
+import { ButtonName, EventName } from 'config/analytics';
+import { EyeIcon } from 'icons/eye-icon';
+import { KeyIcon } from 'icons/key-icon';
+import { LedgerDriveIcon } from 'icons/ledger-drive-icon';
+import { LockRotateIcon } from 'icons/lock-rotate-icon';
+import mixpanel from 'mixpanel-browser';
+import { observer } from 'mobx-react-lite';
+import React, { useCallback, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { closeSidePanel } from 'utils/closeSidePanel';
+import { hasMnemonicWallet } from 'utils/hasMnemonicWallet';
+import { isSidePanel } from 'utils/isSidePanel';
+import extension from 'webextension-polyfill';
 
-import { Wallet } from '../../../hooks/wallet/useWallet'
-import { NewWalletForm } from '../CreateNewWallet'
-import { ImportPrivateKey } from '../ImportPrivateKey'
-import { ImportSeedPhrase } from '../ImportSeedPhrase'
-import ImportWatchWallet from '../ImportWatchWallet'
+import { Wallet } from '../../../hooks/wallet/useWallet';
+import { NewWalletForm } from '../CreateNewWallet';
+import { ImportPrivateKey } from '../ImportPrivateKey';
+import { ImportSeedPhrase } from '../ImportSeedPhrase';
+import ImportWatchWallet from '../ImportWatchWallet';
 
-type SelectedAction = 'new-wallet' | 'import-private-key' | 'import-seed-phrase' | 'watch-wallet'
+type SelectedAction = 'new-wallet' | 'import-private-key' | 'import-seed-phrase' | 'watch-wallet';
 
 const CreateImportActions = observer(
-  ({
-    isVisible,
-    onClose,
-    title,
-  }: {
-    isVisible: boolean
-    onClose: (closeParent?: boolean) => void
-    title: string
-  }) => {
-    const navigate = useNavigate()
-    const wallets = Wallet.useWallets()
+  ({ isVisible, onClose, title }: { isVisible: boolean; onClose: (closeParent?: boolean) => void; title: string }) => {
+    const navigate = useNavigate();
+    const wallets = Wallet.useWallets();
 
-    const [selectedAction, setSelectedAction] = useState<SelectedAction | null>(null)
+    const [selectedAction, setSelectedAction] = useState<SelectedAction | null>(null);
 
     const handleCreateNewWalletClick = useCallback(() => {
       if (hasMnemonicWallet(wallets as Wallet.Keystore)) {
-        setSelectedAction('new-wallet')
+        setSelectedAction('new-wallet');
       } else {
-        window.open(extension.runtime.getURL(`index.html#/onboarding`))
-        closeSidePanel()
+        window.open(extension.runtime.getURL(`index.html#/onboarding`));
+        closeSidePanel();
       }
-    }, [wallets])
+    }, [wallets]);
 
     const handleWatchWalletClick = useCallback(() => {
-      setSelectedAction('watch-wallet')
-    }, [])
+      setSelectedAction('watch-wallet');
+    }, []);
 
     const handleConnectLedgerClick = useCallback(() => {
-      const views = extension.extension.getViews({ type: 'popup' })
+      const views = extension.extension.getViews({ type: 'popup' });
       if (views.length === 0 && !isSidePanel()) {
-        navigate('/onboardingImport?walletName=ledger')
+        navigate('/onboardingImport?walletName=ledger');
       } else {
-        window.open('index.html#/onboardingImport?walletName=ledger')
-        closeSidePanel()
+        window.open('index.html#/onboardingImport?walletName=ledger');
+        closeSidePanel();
       }
-    }, [navigate])
+    }, [navigate]);
 
     const actions = [
       {
@@ -91,17 +83,11 @@ const CreateImportActions = observer(
         icon: <EyeIcon size={20} weight='fill' className='size-6 text-accent-warning' />,
         onClick: handleWatchWalletClick,
       },
-    ]
+    ];
 
     return (
       <>
-        <BottomModal
-          isOpen={isVisible}
-          onClose={onClose}
-          title={title}
-          fullScreen
-          className='gap-2 flex flex-col'
-        >
+        <BottomModal isOpen={isVisible} onClose={onClose} title={title} fullScreen className='gap-2 flex flex-col'>
           {actions.map((action) => (
             <button
               key={action.testId}
@@ -123,38 +109,38 @@ const CreateImportActions = observer(
           isVisible={selectedAction === 'new-wallet'}
           onClose={(closeSelectWallet: boolean) => {
             if (closeSelectWallet) {
-              onClose(true)
+              onClose(true);
             }
-            setSelectedAction(null)
+            setSelectedAction(null);
           }}
         />
 
         <ImportSeedPhrase
           isVisible={selectedAction === 'import-seed-phrase'}
           onClose={(closeSelectWallet: boolean) => {
-            if (closeSelectWallet) onClose(true)
-            setSelectedAction(null)
+            if (closeSelectWallet) onClose(true);
+            setSelectedAction(null);
           }}
         />
 
         <ImportPrivateKey
           isVisible={selectedAction === 'import-private-key'}
           onClose={(closeSelectWallet: boolean) => {
-            if (closeSelectWallet) onClose(true)
-            setSelectedAction(null)
+            if (closeSelectWallet) onClose(true);
+            setSelectedAction(null);
           }}
         />
 
         <ImportWatchWallet
           isVisible={selectedAction === 'watch-wallet'}
           onClose={(closeSelectWallet?: boolean) => {
-            if (closeSelectWallet) onClose(true)
-            setSelectedAction(null)
+            if (closeSelectWallet) onClose(true);
+            setSelectedAction(null);
           }}
         />
       </>
-    )
+    );
   },
-)
+);
 
-export default CreateImportActions
+export default CreateImportActions;

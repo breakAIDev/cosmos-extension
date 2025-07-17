@@ -1,52 +1,50 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { sliceWord, useValidatorImage } from '@leapwallet/cosmos-wallet-hooks'
-import { Validator } from '@leapwallet/cosmos-wallet-sdk'
-import BigNumber from 'bignumber.js'
-import Text from 'components/text'
-import { useFormatCurrency } from 'hooks/settings/useCurrency'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import React, { useMemo } from 'react'
-import { epochIntervalStore } from 'stores/epoch-interval-store'
-import { hideAssetsStore } from 'stores/hide-assets-store'
-import { imgOnError } from 'utils/imgOnError'
-import { isSidePanel } from 'utils/isSidePanel'
+import { sliceWord, useValidatorImage } from '@leapwallet/cosmos-wallet-hooks';
+import { Validator } from '@leapwallet/cosmos-wallet-sdk';
+import BigNumber from 'bignumber.js';
+import Text from 'components/text';
+import { useFormatCurrency } from 'hooks/settings/useCurrency';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import React, { useMemo } from 'react';
+import { epochIntervalStore } from 'stores/epoch-interval-store';
+import { hideAssetsStore } from 'stores/hide-assets-store';
+import { imgOnError } from 'utils/imgOnError';
+import { isSidePanel } from 'utils/isSidePanel';
 
 type EpochPendingValidatorCardProps = {
-  validator: Validator
-  currencyBalance?: string
-  formattedBalance?: string
-}
+  validator: Validator;
+  currencyBalance?: string;
+  formattedBalance?: string;
+};
 
 const EpochPendingValidatorCardView = ({
   validator,
   currencyBalance,
   formattedBalance,
 }: EpochPendingValidatorCardProps) => {
-  const { data: validatorImage } = useValidatorImage(validator?.image ? undefined : validator)
-  const imageUrl = validator?.image || validatorImage || Images.Misc.Validator
-  const [formatCurrency] = useFormatCurrency()
+  const { data: validatorImage } = useValidatorImage(validator?.image ? undefined : validator);
+  const imageUrl = validator?.image || validatorImage || Images.Misc.Validator;
+  const [formatCurrency] = useFormatCurrency();
 
   const amountTitleText = useMemo(() => {
     if (new BigNumber(currencyBalance ?? '').gt(0)) {
-      return hideAssetsStore.formatHideBalance(formatCurrency(new BigNumber(currencyBalance ?? '')))
+      return hideAssetsStore.formatHideBalance(formatCurrency(new BigNumber(currencyBalance ?? '')));
     } else {
-      return hideAssetsStore.formatHideBalance(formattedBalance ?? '')
+      return hideAssetsStore.formatHideBalance(formattedBalance ?? '');
     }
-  }, [currencyBalance, formattedBalance, formatCurrency])
+  }, [currencyBalance, formattedBalance, formatCurrency]);
 
   const amountSubtitleText = useMemo(() => {
     if (new BigNumber(currencyBalance ?? '').gt(0)) {
-      return hideAssetsStore.formatHideBalance(formattedBalance ?? '')
+      return hideAssetsStore.formatHideBalance(formattedBalance ?? '');
     }
 
-    return ''
-  }, [currencyBalance, formattedBalance])
+    return '';
+  }, [currencyBalance, formattedBalance]);
 
   return (
-    <div
-      className={`flex justify-between items-center px-4 py-3 bg-white-100 dark:bg-gray-950 rounded-xl`}
-    >
+    <div className={`flex justify-between items-center px-4 py-3 bg-white-100 dark:bg-gray-950 rounded-xl`}>
       <div className='flex items-center w-full'>
         <img
           src={imageUrl}
@@ -58,16 +56,10 @@ const EpochPendingValidatorCardView = ({
 
         <div className='flex justify-between items-center w-full'>
           <div className='flex flex-col'>
-            <Text
-              size='sm'
-              color='text-black-100 dark:text-white-100'
-              className='font-bold  overflow-hidden'
-            >
+            <Text size='sm' color='text-black-100 dark:text-white-100' className='font-bold  overflow-hidden'>
               {sliceWord(
                 validator.moniker,
-                isSidePanel()
-                  ? 6 + Math.floor(((Math.min(window.innerWidth, 400) - 320) / 81) * 7)
-                  : 10,
+                isSidePanel() ? 6 + Math.floor(((Math.min(window.innerWidth, 400) - 320) / 81) * 7) : 10,
                 3,
               )}
             </Text>
@@ -89,7 +81,7 @@ const EpochPendingValidatorCardView = ({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export const EpochPendingValidatorCard = observer(EpochPendingValidatorCardView)
+export const EpochPendingValidatorCard = observer(EpochPendingValidatorCardView);

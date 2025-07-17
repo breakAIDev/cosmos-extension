@@ -1,10 +1,4 @@
-import {
-  SelectedAddress,
-  sliceWord,
-  Token,
-  useAddressPrefixes,
-  useChainsStore,
-} from '@leapwallet/cosmos-wallet-hooks'
+import { SelectedAddress, sliceWord, Token, useAddressPrefixes, useChainsStore } from '@leapwallet/cosmos-wallet-hooks';
 import {
   BTC_CHAINS,
   getBlockChainFromAddress,
@@ -12,23 +6,23 @@ import {
   isSolanaChain,
   isSuiChain,
   SupportedChain,
-} from '@leapwallet/cosmos-wallet-sdk'
-import { useEffect } from 'react'
-import { ManageChainsStore } from 'stores/manage-chains-store'
+} from '@leapwallet/cosmos-wallet-sdk';
+import { useEffect } from 'react';
+import { ManageChainsStore } from 'stores/manage-chains-store';
 
 export type UseCheckIbcTransferParams = {
-  sendActiveChain: SupportedChain
-  selectedAddress: SelectedAddress | null
+  sendActiveChain: SupportedChain;
+  selectedAddress: SelectedAddress | null;
 
-  associatedSeiAddress: string
-  sendSelectedNetwork: 'testnet' | 'mainnet'
-  isIbcUnwindingDisabled: boolean
-  skipSupportedDestinationChainsIDs: string[]
-  selectedToken: Token | null
+  associatedSeiAddress: string;
+  sendSelectedNetwork: 'testnet' | 'mainnet';
+  isIbcUnwindingDisabled: boolean;
+  skipSupportedDestinationChainsIDs: string[];
+  selectedToken: Token | null;
 
-  setAddressError: React.Dispatch<React.SetStateAction<string | undefined>>
-  manageChainsStore: ManageChainsStore
-}
+  setAddressError: React.Dispatch<React.SetStateAction<string | undefined>>;
+  manageChainsStore: ManageChainsStore;
+};
 
 export function useCheckIbcTransfer({
   sendActiveChain,
@@ -43,83 +37,77 @@ export function useCheckIbcTransfer({
   setAddressError,
   manageChainsStore,
 }: UseCheckIbcTransferParams) {
-  const { chains } = useChainsStore()
-  const addressPrefixes = useAddressPrefixes()
+  const { chains } = useChainsStore();
+  const addressPrefixes = useAddressPrefixes();
 
-  const isBtcTx = BTC_CHAINS.includes(sendActiveChain)
-  const isAptosTx = isAptosChain(sendActiveChain)
-  const isSolanaTx = isSolanaChain(sendActiveChain)
-  const isSuiTx = isSuiChain(sendActiveChain)
-  const activeChainInfo = chains[sendActiveChain]
+  const isBtcTx = BTC_CHAINS.includes(sendActiveChain);
+  const isAptosTx = isAptosChain(sendActiveChain);
+  const isSolanaTx = isSolanaChain(sendActiveChain);
+  const isSuiTx = isSuiChain(sendActiveChain);
+  const activeChainInfo = chains[sendActiveChain];
 
   useEffect(() => {
-    let destinationChain: string | undefined
-    let destChainAddrPrefix: string | undefined
+    let destinationChain: string | undefined;
+    let destChainAddrPrefix: string | undefined;
     if (isBtcTx || isAptosTx || isSolanaTx || isSuiTx) {
-      return
+      return;
     }
 
     if (
       chains[sendActiveChain]?.evmOnlyChain &&
       (selectedAddress?.address?.startsWith('0x') || associatedSeiAddress === 'loading')
     ) {
-      return
+      return;
     }
     if (selectedAddress?.address) {
-      destChainAddrPrefix = getBlockChainFromAddress(selectedAddress.address)
+      destChainAddrPrefix = getBlockChainFromAddress(selectedAddress.address);
 
       if (!destChainAddrPrefix) {
-        setAddressError('The entered address is invalid')
-        return
+        setAddressError('The entered address is invalid');
+        return;
       } else {
-        destinationChain = addressPrefixes[destChainAddrPrefix]
+        destinationChain = addressPrefixes[destChainAddrPrefix];
       }
     } else {
-      return
+      return;
     }
 
-    const isIBC =
-      destChainAddrPrefix && destChainAddrPrefix !== chains[sendActiveChain].addressPrefix
+    const isIBC = destChainAddrPrefix && destChainAddrPrefix !== chains[sendActiveChain].addressPrefix;
 
     if (!isIBC) {
-      return
+      return;
     }
 
     // ibc not supported on testnet
     if (isIBC && sendSelectedNetwork === 'testnet') {
-      setAddressError(`IBC transfers are not supported on testnet.`)
-      return
+      setAddressError(`IBC transfers are not supported on testnet.`);
+      return;
     }
 
     // check if destination chain is supported
-    if (
-      !isIbcUnwindingDisabled &&
-      chains[destinationChain as SupportedChain]?.apiStatus === false
-    ) {
+    if (!isIbcUnwindingDisabled && chains[destinationChain as SupportedChain]?.apiStatus === false) {
       setAddressError(
         `IBC transfers are not supported between ${
           chains[destinationChain as SupportedChain]?.chainName || 'this address'
         } and ${activeChainInfo.chainName}.`,
-      )
-      return
+      );
+      return;
     } else {
-      setAddressError(undefined)
+      setAddressError(undefined);
     }
 
     if (
       !isIbcUnwindingDisabled &&
       skipSupportedDestinationChainsIDs?.length > 0 &&
-      !skipSupportedDestinationChainsIDs.includes(
-        chains[destinationChain as SupportedChain]?.chainId,
-      )
+      !skipSupportedDestinationChainsIDs.includes(chains[destinationChain as SupportedChain]?.chainId)
     ) {
       setAddressError(
         `IBC transfers are not supported between ${
           chains[destinationChain as SupportedChain]?.chainName || 'this address'
         } and ${activeChainInfo.chainName} for ${sliceWord(selectedToken?.symbol)} token.`,
-      )
+      );
     } else {
-      setAddressError(undefined)
+      setAddressError(undefined);
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -136,5 +124,5 @@ export function useCheckIbcTransfer({
     sendSelectedNetwork,
     associatedSeiAddress,
     isBtcTx,
-  ])
+  ]);
 }

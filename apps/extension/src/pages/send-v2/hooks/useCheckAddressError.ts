@@ -8,7 +8,7 @@ import {
   useAddress,
   useChainsStore,
   useSeiLinkedAddressState,
-} from '@leapwallet/cosmos-wallet-hooks'
+} from '@leapwallet/cosmos-wallet-hooks';
 import {
   AccountDetails,
   BTC_CHAINS,
@@ -18,42 +18,42 @@ import {
   isValidAddress,
   isValidBtcAddress,
   SupportedChain,
-} from '@leapwallet/cosmos-wallet-sdk'
-import { Wallet } from 'hooks/wallet/useWallet'
-import * as sol from 'micro-sol-signer'
-import { ReactElement, useCallback, useEffect } from 'react'
+} from '@leapwallet/cosmos-wallet-sdk';
+import { Wallet } from 'hooks/wallet/useWallet';
+import * as sol from 'micro-sol-signer';
+import { ReactElement, useCallback, useEffect } from 'react';
 
 export type UseCheckAddressErrorParams = {
-  setAssociatedSeiAddress: React.Dispatch<React.SetStateAction<string>>
-  setAssociated0xAddress: React.Dispatch<React.SetStateAction<string>>
+  setAssociatedSeiAddress: React.Dispatch<React.SetStateAction<string>>;
+  setAssociated0xAddress: React.Dispatch<React.SetStateAction<string>>;
 
-  setAddressError: React.Dispatch<React.SetStateAction<string | undefined>>
-  setAddressWarning: React.Dispatch<React.SetStateAction<AddressWarning>>
-  setFetchAccountDetailsData: React.Dispatch<React.SetStateAction<AccountDetails | undefined>>
-  fetchAccountDetails: (address: string) => Promise<void>
+  setAddressError: React.Dispatch<React.SetStateAction<string | undefined>>;
+  setAddressWarning: React.Dispatch<React.SetStateAction<AddressWarning>>;
+  setFetchAccountDetailsData: React.Dispatch<React.SetStateAction<AccountDetails | undefined>>;
+  fetchAccountDetails: (address: string) => Promise<void>;
 
-  selectedToken: Token | null
-  recipientInputValue: string
-  allCW20Denoms: Record<string, any>
-  allERC20Denoms: Record<string, any>
-  addressWarningElementError: ReactElement
-  showNameServiceResults: boolean
+  selectedToken: Token | null;
+  recipientInputValue: string;
+  allCW20Denoms: Record<string, any>;
+  allERC20Denoms: Record<string, any>;
+  addressWarningElementError: ReactElement;
+  showNameServiceResults: boolean;
 
-  sendActiveChain: SupportedChain
-  sendSelectedNetwork: 'mainnet' | 'testnet'
-  setHasToUsePointerLogic: React.Dispatch<React.SetStateAction<boolean>>
-}
+  sendActiveChain: SupportedChain;
+  sendSelectedNetwork: 'mainnet' | 'testnet';
+  setHasToUsePointerLogic: React.Dispatch<React.SetStateAction<boolean>>;
+};
 
 function isHex(value: string): boolean {
-  return /^(0x|0X)?[a-fA-F0-9]+$/.test(value) && value.length % 2 === 0
+  return /^(0x|0X)?[a-fA-F0-9]+$/.test(value) && value.length % 2 === 0;
 }
 
 function getHexByteLength(value: string): number {
-  return /^(0x|0X)/.test(value) ? (value.length - 2) / 2 : value.length / 2
+  return /^(0x|0X)/.test(value) ? (value.length - 2) / 2 : value.length / 2;
 }
 
 export function isValidSuiAddress(value: string): value is string {
-  return isHex(value) && getHexByteLength(value) === 32
+  return isHex(value) && getHexByteLength(value) === 32;
 }
 
 export function useCheckAddressError({
@@ -70,101 +70,97 @@ export function useCheckAddressError({
   sendActiveChain,
   sendSelectedNetwork,
 }: UseCheckAddressErrorParams) {
-  const { chains } = useChainsStore()
+  const { chains } = useChainsStore();
 
-  const currentWalletAddress = useAddress()
-  const activeWallet = useActiveWallet()
-  const isBtcTx = BTC_CHAINS.includes(sendActiveChain)
-  const isAptosTx = isAptosChain(sendActiveChain)
-  const isSolanaTx = isSolanaChain(sendActiveChain)
-  const isSuiTx = isSuiChain(sendActiveChain)
+  const currentWalletAddress = useAddress();
+  const activeWallet = useActiveWallet();
+  const isBtcTx = BTC_CHAINS.includes(sendActiveChain);
+  const isAptosTx = isAptosChain(sendActiveChain);
+  const isSolanaTx = isSolanaChain(sendActiveChain);
+  const isSuiTx = isSuiChain(sendActiveChain);
 
-  const { addressLinkState } = useSeiLinkedAddressState()
+  const { addressLinkState } = useSeiLinkedAddressState();
 
   /**
    * Check Bitcoin Address Error
    */
   const checkBitcoinAddressError = useCallback(() => {
-    const network = sendActiveChain === 'bitcoin' ? 'mainnet' : 'testnet'
-    const isValidAddress = isValidBtcAddress(recipientInputValue, network)
+    const network = sendActiveChain === 'bitcoin' ? 'mainnet' : 'testnet';
+    const isValidAddress = isValidBtcAddress(recipientInputValue, network);
     if (!isValidAddress) {
-      setAddressError('The entered address is invalid')
+      setAddressError('The entered address is invalid');
     } else {
-      setAddressError(undefined)
+      setAddressError(undefined);
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recipientInputValue, sendActiveChain])
+  }, [recipientInputValue, sendActiveChain]);
 
   useEffect(() => {
-    ;(async function () {
-      setAssociatedSeiAddress('')
-      setAssociated0xAddress('')
+    (async function () {
+      setAssociatedSeiAddress('');
+      setAssociated0xAddress('');
 
       // Skip address check for Aptos
 
       if (isAptosTx) {
-        return
+        return;
       }
 
       // Sui Address Check
       if (isSuiTx) {
         if (!isValidSuiAddress(recipientInputValue)) {
-          setAddressError('The entered address is invalid')
+          setAddressError('The entered address is invalid');
         } else {
-          setAddressError(undefined)
+          setAddressError(undefined);
         }
-        return
+        return;
       }
 
       // Solana Address Check
       if (isSolanaTx) {
         if (!recipientInputValue) {
-          setAddressError(undefined)
-          return
+          setAddressError(undefined);
+          return;
         }
 
-        const regex = /^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+$/
+        const regex = /^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+$/;
         if (!regex.test(recipientInputValue)) {
-          setAddressError('The entered address is invalid')
-          return
+          setAddressError('The entered address is invalid');
+          return;
         }
 
         try {
           if (!sol.isOnCurve(recipientInputValue)) {
-            setAddressError('The entered address is invalid')
+            setAddressError('The entered address is invalid');
           } else {
-            setAddressError(undefined)
+            setAddressError(undefined);
           }
         } catch (e) {
-          setAddressError('The entered address is invalid')
+          setAddressError('The entered address is invalid');
         }
-        return
+        return;
       }
 
       // Bitcoin Address Check
       if (isBtcTx && recipientInputValue.length) {
-        checkBitcoinAddressError()
-        return
+        checkBitcoinAddressError();
+        return;
       }
 
       if (currentWalletAddress === recipientInputValue) {
-        return
+        return;
       } else if (chains[sendActiveChain]?.evmOnlyChain && recipientInputValue.length) {
         if (!recipientInputValue.toLowerCase().startsWith('0x')) {
-          setAddressError('The entered address is invalid')
+          setAddressError('The entered address is invalid');
         }
-      } else if (
-        recipientInputValue &&
-        !isValidAddress(recipientInputValue) &&
-        !showNameServiceResults
-      ) {
-        setAddressError('The entered address is invalid')
+      } else if (recipientInputValue && !isValidAddress(recipientInputValue) && !showNameServiceResults) {
+        setAddressError('The entered address is invalid');
       } else {
-        setAddressWarning(INITIAL_ADDRESS_WARNING)
-        setAddressError(undefined)
+        setAddressWarning(INITIAL_ADDRESS_WARNING);
+        setAddressError(undefined);
       }
-    })()
+    })();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -183,5 +179,5 @@ export function useCheckAddressError({
     isSolanaTx,
     isSuiTx,
     chains,
-  ])
+  ]);
 }

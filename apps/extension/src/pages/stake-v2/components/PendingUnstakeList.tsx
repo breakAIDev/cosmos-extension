@@ -6,14 +6,14 @@ import {
   useIsCancleUnstakeSupported,
   useSelectedNetwork,
   useStaking,
-} from '@leapwallet/cosmos-wallet-hooks'
+} from '@leapwallet/cosmos-wallet-hooks';
 import {
   isBabylon,
   SupportedChain,
   UnbondingDelegation,
   UnbondingDelegationEntry,
   Validator,
-} from '@leapwallet/cosmos-wallet-sdk'
+} from '@leapwallet/cosmos-wallet-sdk';
 import {
   ClaimRewardsStore,
   DelegationsStore,
@@ -21,26 +21,26 @@ import {
   RootDenomsStore,
   UndelegationsStore,
   ValidatorsStore,
-} from '@leapwallet/cosmos-wallet-store'
-import { ValidatorItemSkeleton } from 'components/Skeletons/StakeSkeleton'
-import { observer } from 'mobx-react-lite'
-import React, { useMemo, useState } from 'react'
-import { timeLeft } from 'utils/timeLeft'
+} from '@leapwallet/cosmos-wallet-store';
+import { ValidatorItemSkeleton } from 'components/Skeletons/StakeSkeleton';
+import { observer } from 'mobx-react-lite';
+import React, { useMemo, useState } from 'react';
+import { timeLeft } from 'utils/timeLeft';
 
-import UnstakedValidatorDetails from './UnstakedValidatorDetails'
-import { ValidatorCard } from './ValidatorCard'
+import UnstakedValidatorDetails from './UnstakedValidatorDetails';
+import { ValidatorCard } from './ValidatorCard';
 
 type PendingUnstakeListProps = {
-  rootDenomsStore: RootDenomsStore
-  delegationsStore: DelegationsStore
-  validatorsStore: ValidatorsStore
-  unDelegationsStore: UndelegationsStore
-  claimRewardsStore: ClaimRewardsStore
-  forceChain?: SupportedChain
-  forceNetwork?: SelectedNetwork
-  rootBalanceStore: RootBalanceStore
-  setClaimTxMode: (mode: STAKE_MODE | 'CLAIM_AND_DELEGATE' | null) => void
-}
+  rootDenomsStore: RootDenomsStore;
+  delegationsStore: DelegationsStore;
+  validatorsStore: ValidatorsStore;
+  unDelegationsStore: UndelegationsStore;
+  claimRewardsStore: ClaimRewardsStore;
+  forceChain?: SupportedChain;
+  forceNetwork?: SelectedNetwork;
+  rootBalanceStore: RootBalanceStore;
+  setClaimTxMode: (mode: STAKE_MODE | 'CLAIM_AND_DELEGATE' | null) => void;
+};
 
 const PendingUnstakeList = observer(
   ({
@@ -54,16 +54,16 @@ const PendingUnstakeList = observer(
     rootBalanceStore,
     setClaimTxMode,
   }: PendingUnstakeListProps) => {
-    const _activeChain = useActiveChain()
-    const _activeNetwork = useSelectedNetwork()
-    const activeChain = forceChain ?? _activeChain
-    const activeNetwork = forceNetwork ?? _activeNetwork
+    const _activeChain = useActiveChain();
+    const _activeNetwork = useSelectedNetwork();
+    const activeChain = forceChain ?? _activeChain;
+    const activeNetwork = forceNetwork ?? _activeNetwork;
 
-    const denoms = rootDenomsStore.allDenoms
-    const chainDelegations = delegationsStore.delegationsForChain(activeChain)
-    const chainValidators = validatorsStore.validatorsForChain(activeChain)
-    const chainUnDelegations = unDelegationsStore.unDelegationsForChain(activeChain)
-    const chainClaimRewards = claimRewardsStore.claimRewardsForChain(activeChain)
+    const denoms = rootDenomsStore.allDenoms;
+    const chainDelegations = delegationsStore.delegationsForChain(activeChain);
+    const chainValidators = validatorsStore.validatorsForChain(activeChain);
+    const chainUnDelegations = unDelegationsStore.unDelegationsForChain(activeChain);
+    const chainClaimRewards = claimRewardsStore.claimRewardsForChain(activeChain);
 
     const { unboundingDelegationsInfo, loadingUnboundingDelegations } = useStaking(
       denoms,
@@ -73,38 +73,27 @@ const PendingUnstakeList = observer(
       chainClaimRewards,
       activeChain,
       activeNetwork,
-    )
+    );
     const validators = useMemo(
       () =>
         chainValidators.validatorData.validators?.reduce((acc, validator) => {
-          acc[validator.address] = validator
-          return acc
+          acc[validator.address] = validator;
+          return acc;
         }, {} as Record<string, Validator>),
       [chainValidators.validatorData.validators],
-    )
+    );
     const memoisedUndelegation = useMemo(
       () => Object.values(unboundingDelegationsInfo ?? {})?.[0],
       [unboundingDelegationsInfo],
-    )
-    const { isCancleUnstakeSupported } = useIsCancleUnstakeSupported(
-      memoisedUndelegation,
-      activeChain,
-      activeNetwork,
-    )
-    const isLoading = loadingUnboundingDelegations
-    const [showUnstakeValidatorDetails, setShowUnstakeValidatorDetails] = useState(false)
-    const [selectedUnbondingDelegation, setSelectedUnbondingDelegation] = useState<
-      UnbondingDelegation | undefined
-    >()
-    const [selectedDelegationEntry, setSelectedDelegationEntry] = useState<
-      UnbondingDelegationEntry | undefined
-    >()
+    );
+    const { isCancleUnstakeSupported } = useIsCancleUnstakeSupported(memoisedUndelegation, activeChain, activeNetwork);
+    const isLoading = loadingUnboundingDelegations;
+    const [showUnstakeValidatorDetails, setShowUnstakeValidatorDetails] = useState(false);
+    const [selectedUnbondingDelegation, setSelectedUnbondingDelegation] = useState<UnbondingDelegation | undefined>();
+    const [selectedDelegationEntry, setSelectedDelegationEntry] = useState<UnbondingDelegationEntry | undefined>();
 
-    if (
-      !isLoading &&
-      (Object.values(unboundingDelegationsInfo ?? {}).length === 0 || !validators)
-    ) {
-      return <></>
+    if (!isLoading && (Object.values(unboundingDelegationsInfo ?? {}).length === 0 || !validators)) {
+      return <></>;
     }
 
     return (
@@ -128,9 +117,9 @@ const PendingUnstakeList = observer(
             </div>
 
             {Object.values(unboundingDelegationsInfo ?? {}).map((uds) => {
-              const validator = validators[uds?.validator_address]
+              const validator = validators[uds?.validator_address];
               if (!validator) {
-                return null
+                return null;
               }
               return uds.entries.map((ud, idx) => {
                 return (
@@ -142,14 +131,14 @@ const PendingUnstakeList = observer(
                     subText={isBabylon(activeChain) ? undefined : timeLeft(ud.completion_time)}
                     onClick={() => {
                       if (isCancleUnstakeSupported) {
-                        setShowUnstakeValidatorDetails(true)
-                        setSelectedUnbondingDelegation(uds)
-                        setSelectedDelegationEntry(ud)
+                        setShowUnstakeValidatorDetails(true);
+                        setSelectedUnbondingDelegation(uds);
+                        setSelectedDelegationEntry(ud);
                       }
                     }}
                   />
-                )
-              })
+                );
+              });
             })}
           </div>
         )}
@@ -173,8 +162,8 @@ const PendingUnstakeList = observer(
           />
         )}
       </>
-    )
+    );
   },
-)
+);
 
-export default PendingUnstakeList
+export default PendingUnstakeList;

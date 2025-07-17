@@ -12,4 +12,4 @@ export const queryParams = {
   alphaTags: 'alpha-tags',
   alphaTab: 'tab',
   alphaDateStatus: 'status',
-}
+};

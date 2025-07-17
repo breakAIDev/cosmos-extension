@@ -1,14 +1,14 @@
-import React from 'react'
-import { rootCW20DenomsStore, rootDenomsStore } from 'stores/denoms-store-instance'
+import React from 'react';
+import { rootCW20DenomsStore, rootDenomsStore } from 'stores/denoms-store-instance';
 
-import { useSwapContext } from '../context'
-import { TxPage } from './index'
+import { useSwapContext } from '../context';
+import { TxPage } from './index';
 
 type SwapTxPageProps = {
-  onClose: () => void
-  setLedgerError: (ledgerError?: string) => void
-  ledgerError?: string
-}
+  onClose: () => void;
+  setLedgerError: (ledgerError?: string) => void;
+  ledgerError?: string;
+};
 
 export function SwapTxPage({ onClose, setLedgerError, ledgerError }: SwapTxPageProps) {
   const {
@@ -28,7 +28,7 @@ export function SwapTxPage({ onClose, setLedgerError, ledgerError }: SwapTxPageP
     refetchSourceBalances,
     refetchDestinationBalances,
     swapFeeInfo,
-  } = useSwapContext()
+  } = useSwapContext();
 
   return routingInfo?.route ? (
     <TxPage
@@ -54,5 +54,5 @@ export function SwapTxPage({ onClose, setLedgerError, ledgerError }: SwapTxPageP
       rootCW20DenomsStore={rootCW20DenomsStore}
       swapFeeInfo={swapFeeInfo}
     />
-  ) : null
+  ) : null;
 }

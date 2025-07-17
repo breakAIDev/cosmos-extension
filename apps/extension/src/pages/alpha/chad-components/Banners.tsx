@@ -1,23 +1,22 @@
-import { useTheme } from '@leapwallet/leap-ui'
-import { useQueryParams } from 'hooks/useQuery'
-import { Images } from 'images'
-import React from 'react'
-import { queryParams } from 'utils/query-params'
+import { useTheme } from '@leapwallet/leap-ui';
+import { useQueryParams } from 'hooks/useQuery';
+import { Images } from 'images';
+import React from 'react';
+import { queryParams } from 'utils/query-params';
 
 const chadHighlightBannerGradient = {
   background: 'linear-gradient(180deg, #053F27 0%, #022718 100%)',
-}
+};
 
 const chadHighlightBannerGradientLight = {
   background: 'linear-gradient(rgb(115 151 136) 0%, rgb(24 97 68) 100%)',
-}
+};
 
 export function YouAreNotChadBanner() {
-  const params = useQueryParams()
-  const { theme } = useTheme()
+  const params = useQueryParams();
+  const { theme } = useTheme();
 
-  const bannerGradient =
-    theme === 'light' ? chadHighlightBannerGradientLight : chadHighlightBannerGradient
+  const bannerGradient = theme === 'light' ? chadHighlightBannerGradientLight : chadHighlightBannerGradient;
 
   return (
     <div
@@ -35,10 +34,7 @@ export function YouAreNotChadBanner() {
           Learn more
         </button>
       </span>
-      <img
-        src={Images.Alpha.chadHighlightBanner}
-        className='h-[5.375rem] w-[11rem] absolute top-0 right-0 -z-10'
-      />
+      <img src={Images.Alpha.chadHighlightBanner} className='h-[5.375rem] w-[11rem] absolute top-0 right-0 -z-10' />
     </div>
-  )
+  );
 }

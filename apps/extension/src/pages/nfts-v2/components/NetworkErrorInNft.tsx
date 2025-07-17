@@ -1,21 +1,21 @@
-import { NftStore } from '@leapwallet/cosmos-wallet-store'
-import { Buttons } from '@leapwallet/leap-ui'
-import { ArrowCounterClockwise } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import Text from 'components/text'
-import { Images } from 'images'
-import React from 'react'
+import { NftStore } from '@leapwallet/cosmos-wallet-store';
+import { Buttons } from '@leapwallet/leap-ui';
+import { ArrowCounterClockwise } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import Text from 'components/text';
+import { Images } from 'images';
+import React from 'react';
 
-import { CantSeeNfts } from './index'
+import { CantSeeNfts } from './index';
 
 type NetworkErrorInNftProps = {
-  title: string
-  subTitle: string | React.ReactNode
-  showRetryButton?: boolean
-  className?: string
-  nftStore: NftStore
-  setShowAddCollectionSheet: (value: React.SetStateAction<boolean>) => void
-}
+  title: string;
+  subTitle: string | React.ReactNode;
+  showRetryButton?: boolean;
+  className?: string;
+  nftStore: NftStore;
+  setShowAddCollectionSheet: (value: React.SetStateAction<boolean>) => void;
+};
 
 export default function NetworkErrorInNft({
   title,
@@ -26,8 +26,8 @@ export default function NetworkErrorInNft({
   setShowAddCollectionSheet,
 }: NetworkErrorInNftProps) {
   const onRetry = () => {
-    nftStore.loadNfts()
-  }
+    nftStore.loadNfts();
+  };
 
   return (
     <div className='px-6 pt-4 pb-8'>
@@ -42,11 +42,7 @@ export default function NetworkErrorInNft({
         <Text size='sm' className='font-bold mb-1'>
           {title}
         </Text>
-        <Text
-          size='xs'
-          color='text-gray-800 dark:text-gray-200'
-          className='font-medium text-center !leading-5'
-        >
+        <Text size='xs' color='text-gray-800 dark:text-gray-200' className='font-medium text-center !leading-5'>
           {subTitle}
         </Text>
 
@@ -75,5 +71,5 @@ export default function NetworkErrorInNft({
         nftStore={nftStore}
       />
     </div>
-  )
+  );
 }

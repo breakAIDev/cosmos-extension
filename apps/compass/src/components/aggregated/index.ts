@@ -1,2 +1,2 @@
-export * from './AggregatedLoading'
-export * from './AggregatedSearchComponent'
+export * from './AggregatedLoading';
+export * from './AggregatedSearchComponent';

@@ -25,26 +25,26 @@ import {
   useInitTxMetadata,
   useInitWhitelistedFactoryTokens,
   useTransactionConfigs,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { useInitAnalytics } from 'hooks/analytics/useInitAnalytics'
-import { useInitFavouriteNFTs, useInitHiddenNFTs, useInitIsCompassWallet } from 'hooks/settings'
-import { useInitiateCurrencyPreference } from 'hooks/settings/useCurrency'
-import { useInitChainInfos } from 'hooks/useChainInfos'
-import { observer } from 'mobx-react-lite'
-import React from 'react'
-import { useLocation } from 'react-router-dom'
-import { chainInfoStore } from 'stores/chain-infos-store'
-import { manageChainsStore } from 'stores/manage-chains-store'
-import { favNftStore, hiddenNftStore } from 'stores/manage-nft-store'
-import { passwordStore } from 'stores/password-store'
-import Browser from 'webextension-polyfill'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { useInitAnalytics } from 'hooks/analytics/useInitAnalytics';
+import { useInitFavouriteNFTs, useInitHiddenNFTs, useInitIsCompassWallet } from 'hooks/settings';
+import { useInitiateCurrencyPreference } from 'hooks/settings/useCurrency';
+import { useInitChainInfos } from 'hooks/useChainInfos';
+import { observer } from 'mobx-react-lite';
+import React from 'react';
+import { useLocation } from 'react-router-dom';
+import { chainInfoStore } from 'stores/chain-infos-store';
+import { manageChainsStore } from 'stores/manage-chains-store';
+import { favNftStore, hiddenNftStore } from 'stores/manage-nft-store';
+import { passwordStore } from 'stores/password-store';
+import Browser from 'webextension-polyfill';
 
-import { useInitActiveWallet } from './hooks/settings/useActiveWallet'
-import { useInitManageChains } from './hooks/settings/useManageChains'
-import { useInitPrimaryWalletAddress } from './hooks/wallet/useInitPrimaryWalletAddress'
+import { useInitActiveWallet } from './hooks/settings/useActiveWallet';
+import { useInitManageChains } from './hooks/settings/useManageChains';
+import { useInitPrimaryWalletAddress } from './hooks/wallet/useInitPrimaryWalletAddress';
 
-const app = 'extension'
-const version = Browser.runtime.getManifest().version
+const app = 'extension';
+const version = Browser.runtime.getManifest().version;
 const individualPages = [
   '/approveConnection',
   '/sign',
@@ -54,76 +54,76 @@ const individualPages = [
   '/onboarding',
   '/onboardingCreate',
   '/onboardingSuccess',
-]
+];
 
 const InitMainAppHooks = observer(() => {
-  useInitChainsApr()
-  useInitCoingeckoPrices()
+  useInitChainsApr();
+  useInitCoingeckoPrices();
 
-  useInitIteratedUriNftContracts()
-  useInitFractionalizedNftContracts()
+  useInitIteratedUriNftContracts();
+  useInitFractionalizedNftContracts();
 
   // initialize chains and default user preferences
-  useInitManageChains(manageChainsStore, chainInfoStore)
-  useInitNftChains()
+  useInitManageChains(manageChainsStore, chainInfoStore);
+  useInitNftChains();
 
-  useInitFavouriteNFTs(favNftStore)
-  useInitHiddenNFTs(hiddenNftStore)
+  useInitFavouriteNFTs(favNftStore);
+  useInitHiddenNFTs(hiddenNftStore);
 
-  useGetBannerApi()
+  useGetBannerApi();
   //useInitDenoms()
-  useInitWhitelistedFactoryTokens()
+  useInitWhitelistedFactoryTokens();
 
-  useInitCustomChannelsStore()
+  useInitCustomChannelsStore();
 
   // useInitDisabledCW20Tokens()
   // useInitEnabledCW20Tokens()
   // useInitInteractedTokens()
-  useInitDisabledNFTsCollections()
+  useInitDisabledNFTsCollections();
 
-  useInitBetaNFTsCollections()
-  useInitEnabledNftsCollections()
+  useInitBetaNFTsCollections();
+  useInitEnabledNftsCollections();
 
-  useInitStakingDenoms()
-  useInitKadoBuyChains()
+  useInitStakingDenoms();
+  useInitKadoBuyChains();
 
-  useInitBetaEvmNftTokenIds()
+  useInitBetaEvmNftTokenIds();
 
-  useGetBannerApi()
-  useBannerConfig()
+  useGetBannerApi();
+  useBannerConfig();
 
-  return <></>
-})
+  return <></>;
+});
 
 const metadata = {
   appVersion: version,
-}
+};
 
 export const InitHooks = observer(() => {
-  const location = useLocation()
-  useInitiateCurrencyPreference()
+  const location = useLocation();
+  useInitiateCurrencyPreference();
 
-  useInitGasPriceSteps()
-  useInitGasAdjustments()
-  useInitFeeDenoms()
-  useInitIsCompassWallet()
-  useInitActiveWallet(passwordStore)
+  useInitGasPriceSteps();
+  useInitGasAdjustments();
+  useInitFeeDenoms();
+  useInitIsCompassWallet();
+  useInitActiveWallet(passwordStore);
 
-  useInitTxMetadata(metadata)
+  useInitTxMetadata(metadata);
 
-  useInitPrimaryWalletAddress()
-  useInitAnalytics()
+  useInitPrimaryWalletAddress();
+  useInitAnalytics();
 
-  useFeatureFlags()
-  useTransactionConfigs()
+  useFeatureFlags();
+  useTransactionConfigs();
 
-  useInitTxLogCosmosBlockchainMap()
-  useInitChainInfos()
-  useInitCompassSeiEvmConfig()
+  useInitTxLogCosmosBlockchainMap();
+  useInitChainInfos();
+  useInitCompassSeiEvmConfig();
 
-  useInitIbcTraceStore()
-  useInitDefaultGasEstimates()
-  useInitChainCosmosSDK()
+  useInitIbcTraceStore();
+  useInitDefaultGasEstimates();
+  useInitChainCosmosSDK();
 
-  return <>{!individualPages.includes(location.pathname) && <InitMainAppHooks />}</>
-})
+  return <>{!individualPages.includes(location.pathname) && <InitMainAppHooks />}</>;
+});

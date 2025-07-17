@@ -1,4 +1,4 @@
-import * as React from 'react'
+import * as React from 'react';
 
 const IBCProtocol = ({ color }: { color: string }) => (
   <svg width='16' height='16' viewBox='0 0 30 30' fill='none' xmlns='http://www.w3.org/2000/svg'>
@@ -9,6 +9,6 @@ const IBCProtocol = ({ color }: { color: string }) => (
       fill={color}
     />
   </svg>
-)
+);
 
-export default IBCProtocol
+export default IBCProtocol;

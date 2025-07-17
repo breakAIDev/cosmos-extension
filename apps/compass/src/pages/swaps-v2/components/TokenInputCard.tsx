@@ -1,50 +1,42 @@
-import { sliceWord } from '@leapwallet/cosmos-wallet-hooks'
-import { ArrowsLeftRight, CaretDown } from '@phosphor-icons/react'
-import { QueryStatus } from '@tanstack/react-query'
-import BigNumber from 'bignumber.js'
-import classNames from 'classnames'
-import { useFormatCurrency } from 'hooks/settings/useCurrency'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import { observer } from 'mobx-react-lite'
-import React, {
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
-import Skeleton from 'react-loading-skeleton'
-import { hideAssetsStore } from 'stores/hide-assets-store'
-import { SourceChain, SourceToken } from 'types/swap'
-import { imgOnError } from 'utils/imgOnError'
-import { formatForSubstring } from 'utils/strings'
+import { sliceWord } from '@leapwallet/cosmos-wallet-hooks';
+import { ArrowsLeftRight, CaretDown } from '@phosphor-icons/react';
+import { QueryStatus } from '@tanstack/react-query';
+import BigNumber from 'bignumber.js';
+import classNames from 'classnames';
+import { useFormatCurrency } from 'hooks/settings/useCurrency';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { observer } from 'mobx-react-lite';
+import React, { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Skeleton from 'react-loading-skeleton';
+import { hideAssetsStore } from 'stores/hide-assets-store';
+import { SourceChain, SourceToken } from 'types/swap';
+import { imgOnError } from 'utils/imgOnError';
+import { formatForSubstring } from 'utils/strings';
 
 type TokenInputCardProps = {
-  readOnly?: boolean
-  isInputInUSDC: boolean
-  setIsInputInUSDC: Dispatch<SetStateAction<boolean>>
-  value: string
-  token?: SourceToken | null
-  balanceStatus?: QueryStatus
-  chainName?: string
-  chainLogo?: string
-  loadingAssets?: boolean
-  loadingChains?: boolean
+  readOnly?: boolean;
+  isInputInUSDC: boolean;
+  setIsInputInUSDC: Dispatch<SetStateAction<boolean>>;
+  value: string;
+  token?: SourceToken | null;
+  balanceStatus?: QueryStatus;
+  chainName?: string;
+  chainLogo?: string;
+  loadingAssets?: boolean;
+  loadingChains?: boolean;
   // eslint-disable-next-line no-unused-vars
-  onChange?: (value: string) => void
-  onTokenSelectSheet?: () => void
-  selectTokenDisabled?: boolean
-  selectChainDisabled?: boolean
-  onChainSelectSheet?: () => void
-  amountError?: boolean
-  showFor?: 'source' | 'destination'
-  selectedChain?: SourceChain
-  isChainAbstractionView?: boolean
-  textInputValue: string
-  setTextInputValue: (val: string) => void
-}
+  onChange?: (value: string) => void;
+  onTokenSelectSheet?: () => void;
+  selectTokenDisabled?: boolean;
+  selectChainDisabled?: boolean;
+  onChainSelectSheet?: () => void;
+  amountError?: boolean;
+  showFor?: 'source' | 'destination';
+  selectedChain?: SourceChain;
+  isChainAbstractionView?: boolean;
+  textInputValue: string;
+  setTextInputValue: (val: string) => void;
+};
 
 function TokenInputCardView({
   isInputInUSDC,
@@ -63,153 +55,144 @@ function TokenInputCardView({
   textInputValue,
   setTextInputValue,
 }: TokenInputCardProps) {
-  const [formatCurrency] = useFormatCurrency()
-  const [turnOffLoader, setTurnOffLoader] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
-  const [isFocused, setIsFocused] = useState(false)
-  const defaultTokenLogo = useDefaultTokenLogo()
+  const [formatCurrency] = useFormatCurrency();
+  const [turnOffLoader, setTurnOffLoader] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [isFocused, setIsFocused] = useState(false);
+  const defaultTokenLogo = useDefaultTokenLogo();
 
   const selectedAssetUSDPrice = useMemo(() => {
     if (token && token.usdPrice && token.usdPrice !== '0') {
-      return token.usdPrice
+      return token.usdPrice;
     }
 
-    return undefined
-  }, [token])
+    return undefined;
+  }, [token]);
 
   useEffect(() => {
     if (showFor === 'source' && !selectedAssetUSDPrice && isInputInUSDC) {
-      setIsInputInUSDC(false)
+      setIsInputInUSDC(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedAssetUSDPrice, isInputInUSDC])
+  }, [selectedAssetUSDPrice, isInputInUSDC]);
 
   const { dollarAmount, formattedDollarAmount } = useMemo(() => {
-    let _dollarAmount = '0'
+    let _dollarAmount = '0';
 
     if (value === '' || (value && isNaN(parseFloat(value)))) {
-      return { formattedDollarAmount: '', dollarAmount: '' }
+      return { formattedDollarAmount: '', dollarAmount: '' };
     }
 
     if (token && token.usdPrice && value) {
-      _dollarAmount = String(parseFloat(token.usdPrice) * parseFloat(value))
+      _dollarAmount = String(parseFloat(token.usdPrice) * parseFloat(value));
     }
 
     return {
       dollarAmount: _dollarAmount,
-      formattedDollarAmount: hideAssetsStore.formatHideBalance(
-        formatCurrency(new BigNumber(_dollarAmount)),
-      ),
-    }
+      formattedDollarAmount: hideAssetsStore.formatHideBalance(formatCurrency(new BigNumber(_dollarAmount))),
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formatCurrency, token, value])
+  }, [formatCurrency, token, value]);
 
   const formattedInputValue = useMemo(() => {
-    return hideAssetsStore.formatHideBalance(
-      `${formatForSubstring(value)} ${sliceWord(token?.symbol ?? '', 4, 4)}`,
-    )
+    return hideAssetsStore.formatHideBalance(`${formatForSubstring(value)} ${sliceWord(token?.symbol ?? '', 4, 4)}`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, token?.symbol])
+  }, [value, token?.symbol]);
 
   const balanceAmount = useMemo(() => {
-    return hideAssetsStore.formatHideBalance(formatForSubstring(token?.amount ?? '0'))
+    return hideAssetsStore.formatHideBalance(formatForSubstring(token?.amount ?? '0'));
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token?.amount, token?.symbol])
+  }, [token?.amount, token?.symbol]);
 
   const switchToUSDDisabled = useMemo(() => {
-    return !selectedAssetUSDPrice || new BigNumber(selectedAssetUSDPrice ?? 0).isLessThan(10 ** -6)
-  }, [selectedAssetUSDPrice])
+    return !selectedAssetUSDPrice || new BigNumber(selectedAssetUSDPrice ?? 0).isLessThan(10 ** -6);
+  }, [selectedAssetUSDPrice]);
 
   useEffect(() => {
     if (!readOnly && inputRef.current) {
-      inputRef.current.focus()
+      inputRef.current.focus();
     }
-  }, [readOnly])
+  }, [readOnly]);
 
   useEffect(() => {
-    if (!onChange) return
+    if (!onChange) return;
     if (isInputInUSDC && selectedAssetUSDPrice) {
-      const cleanedInputValue = textInputValue.trim()
+      const cleanedInputValue = textInputValue.trim();
       if (!cleanedInputValue) {
-        onChange('')
-        return
+        onChange('');
+        return;
       }
-      const cryptoAmount = new BigNumber(textInputValue).dividedBy(selectedAssetUSDPrice)
-      onChange(!isNaN(parseFloat(cryptoAmount.toString())) ? cryptoAmount?.toFixed(6) : '')
+      const cryptoAmount = new BigNumber(textInputValue).dividedBy(selectedAssetUSDPrice);
+      onChange(!isNaN(parseFloat(cryptoAmount.toString())) ? cryptoAmount?.toFixed(6) : '');
     } else {
-      onChange(!isNaN(parseFloat(textInputValue)) ? textInputValue : '')
+      onChange(!isNaN(parseFloat(textInputValue)) ? textInputValue : '');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [textInputValue, isInputInUSDC, selectedAssetUSDPrice])
+  }, [textInputValue, isInputInUSDC, selectedAssetUSDPrice]);
 
   const handleInputFocus = useCallback(() => {
     if (!readOnly) {
-      setIsFocused(true)
+      setIsFocused(true);
     }
-  }, [readOnly, setIsFocused])
+  }, [readOnly, setIsFocused]);
 
   const handleInputBlur = useCallback(() => {
     if (!readOnly) {
-      setIsFocused(false)
+      setIsFocused(false);
     }
-  }, [readOnly, setIsFocused])
+  }, [readOnly, setIsFocused]);
 
   const onMaxBtnClick = useCallback(() => {
     if (isInputInUSDC) {
-      if (!selectedAssetUSDPrice) throw 'USD price is not available'
+      if (!selectedAssetUSDPrice) throw 'USD price is not available';
 
-      const usdAmount = new BigNumber(token?.amount ?? '0').multipliedBy(selectedAssetUSDPrice)
-      setTextInputValue(usdAmount.toString())
+      const usdAmount = new BigNumber(token?.amount ?? '0').multipliedBy(selectedAssetUSDPrice);
+      setTextInputValue(usdAmount.toString());
     } else {
-      setTextInputValue(token?.amount ?? '0')
+      setTextInputValue(token?.amount ?? '0');
     }
-  }, [isInputInUSDC, selectedAssetUSDPrice, token?.amount, setTextInputValue])
+  }, [isInputInUSDC, selectedAssetUSDPrice, token?.amount, setTextInputValue]);
 
   const onHalfBtnClick = useCallback(() => {
     if (isInputInUSDC) {
-      if (!selectedAssetUSDPrice) throw 'USD price is not available'
+      if (!selectedAssetUSDPrice) throw 'USD price is not available';
 
-      const usdAmount = new BigNumber(token?.amount ?? '0')
-        .dividedBy(2)
-        .multipliedBy(selectedAssetUSDPrice)
-      setTextInputValue(usdAmount.toString())
+      const usdAmount = new BigNumber(token?.amount ?? '0').dividedBy(2).multipliedBy(selectedAssetUSDPrice);
+      setTextInputValue(usdAmount.toString());
     } else {
-      const amount = new BigNumber(token?.amount ?? '0').dividedBy(2).toFixed(6, 1)
-      setTextInputValue(amount)
+      const amount = new BigNumber(token?.amount ?? '0').dividedBy(2).toFixed(6, 1);
+      setTextInputValue(amount);
     }
-  }, [isInputInUSDC, selectedAssetUSDPrice, token?.amount, setTextInputValue])
+  }, [isInputInUSDC, selectedAssetUSDPrice, token?.amount, setTextInputValue]);
 
   const handleInputTypeSwitchClick = useCallback(() => {
     if (!selectedAssetUSDPrice) {
-      throw 'USD price is not available'
+      throw 'USD price is not available';
     }
 
     if (isInputInUSDC) {
-      setIsInputInUSDC(false)
-      const cryptoAmount = new BigNumber(textInputValue).dividedBy(selectedAssetUSDPrice)
-      setTextInputValue(cryptoAmount.toString())
+      setIsInputInUSDC(false);
+      const cryptoAmount = new BigNumber(textInputValue).dividedBy(selectedAssetUSDPrice);
+      setTextInputValue(cryptoAmount.toString());
     } else {
-      setIsInputInUSDC(true)
-      const usdAmount = new BigNumber(textInputValue).multipliedBy(selectedAssetUSDPrice)
-      setTextInputValue(usdAmount.toString())
+      setIsInputInUSDC(true);
+      const usdAmount = new BigNumber(textInputValue).multipliedBy(selectedAssetUSDPrice);
+      setTextInputValue(usdAmount.toString());
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isInputInUSDC, selectedAssetUSDPrice, setIsInputInUSDC, textInputValue])
+  }, [isInputInUSDC, selectedAssetUSDPrice, setIsInputInUSDC, textInputValue]);
 
   const inputFieldValue = useMemo(() => {
-    return showFor === 'source' ? textInputValue : isInputInUSDC ? dollarAmount : value
-  }, [dollarAmount, isInputInUSDC, showFor, textInputValue, value])
+    return showFor === 'source' ? textInputValue : isInputInUSDC ? dollarAmount : value;
+  }, [dollarAmount, isInputInUSDC, showFor, textInputValue, value]);
 
   useEffect(() => {
-    setTimeout(() => setTurnOffLoader(true), 5000)
-  }, [])
+    setTimeout(() => setTurnOffLoader(true), 5000);
+  }, []);
 
   return (
-    <div
-      className='w-full bg-secondary-100 rounded-2xl p-5 flex flex-col gap-3'
-      key={balanceAmount}
-    >
+    <div className='w-full bg-secondary-100 rounded-2xl p-5 flex flex-col gap-3' key={balanceAmount}>
       <div className='flex justify-between items-center'>
         <p className='text-muted-foreground text-sm font-medium !leading-[22.4px]'>
           You {showFor === 'source' ? 'pay' : 'get'}
@@ -274,11 +257,7 @@ function TokenInputCardView({
                 <CaretDown size={14} className='dark:text-white-100' />
               </button>
             ) : (
-              <Skeleton
-                width={100}
-                height={32}
-                containerClassName='block !leading-none overflow-hidden rounded-full'
-              />
+              <Skeleton width={100} height={32} containerClassName='block !leading-none overflow-hidden rounded-full' />
             )}
           </>
         )}
@@ -315,11 +294,7 @@ function TokenInputCardView({
         <div className='flex justify-end items-center gap-1 max-[350px]:flex-col max-[399px]:justify-start max-[399px]:!items-end'>
           {isChainAbstractionView && showFor === 'destination' ? null : (
             <span className='text-sm font-medium !leading-[18.9px] text-muted-foreground'>
-              {!balanceStatus || balanceStatus === 'success' ? (
-                balanceAmount
-              ) : (
-                <Skeleton width={50} />
-              )}
+              {!balanceStatus || balanceStatus === 'success' ? balanceAmount : <Skeleton width={50} />}
             </span>
           )}
 
@@ -342,7 +317,7 @@ function TokenInputCardView({
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export const TokenInputCard = observer(TokenInputCardView)
+export const TokenInputCard = observer(TokenInputCardView);

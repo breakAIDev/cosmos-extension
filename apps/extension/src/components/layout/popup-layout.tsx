@@ -1,14 +1,14 @@
-import classNames from 'classnames'
-import { WatchingWalletStrip } from 'components/alert-strip/WatchingWalletStrip'
-import React, { ReactNode } from 'react'
+import classNames from 'classnames';
+import { WatchingWalletStrip } from 'components/alert-strip/WatchingWalletStrip';
+import React, { ReactNode } from 'react';
 
 type PopupLayoutProps = {
-  children: ReactNode
-  header?: ReactNode
-  className?: string
-  headerZIndex?: number
-  skipWatchingWalletHeader?: boolean
-}
+  children: ReactNode;
+  header?: ReactNode;
+  className?: string;
+  headerZIndex?: number;
+  skipWatchingWalletHeader?: boolean;
+};
 
 export default function PopupLayout({
   children,
@@ -37,5 +37,5 @@ export default function PopupLayout({
       {header && !skipWatchingWalletHeader && <WatchingWalletStrip />}
       {children}
     </div>
-  )
+  );
 }

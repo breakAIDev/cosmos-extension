@@ -1,1 +1,1 @@
-export * from './SelectWallets'
+export * from './SelectWallets';

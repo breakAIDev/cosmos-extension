@@ -1,82 +1,73 @@
-import { Key as WalletKey, useChainsStore } from '@leapwallet/cosmos-wallet-hooks'
-import { ChainInfo, SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { RootStore } from '@leapwallet/cosmos-wallet-store'
-import { GenericCard } from '@leapwallet/leap-ui'
-import { Divider, Key, Value } from 'components/dapp'
-import { LoaderAnimation } from 'components/loader/Loader'
-import { BETA_CHAINS, BG_RESPONSE, NEW_CHAIN_REQUEST } from 'config/storage-keys'
-import { useDefaultTokenLogo } from 'hooks'
-import { useSetActiveChain } from 'hooks/settings/useActiveChain'
-import useActiveWallet, { useUpdateKeyStore } from 'hooks/settings/useActiveWallet'
-import { observer } from 'mobx-react-lite'
-import { addToConnections } from 'pages/ApproveConnection/utils'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { chainTagsStore } from 'stores/chain-infos-store'
-import { rootStore } from 'stores/root-store'
-import { Colors } from 'theme/colors'
-import { imgOnError } from 'utils/imgOnError'
-import { isSidePanel } from 'utils/isSidePanel'
-import Browser from 'webextension-polyfill'
+import { Key as WalletKey, useChainsStore } from '@leapwallet/cosmos-wallet-hooks';
+import { ChainInfo, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { RootStore } from '@leapwallet/cosmos-wallet-store';
+import { GenericCard } from '@leapwallet/leap-ui';
+import { Divider, Key, Value } from 'components/dapp';
+import { LoaderAnimation } from 'components/loader/Loader';
+import { BETA_CHAINS, BG_RESPONSE, NEW_CHAIN_REQUEST } from 'config/storage-keys';
+import { useDefaultTokenLogo } from 'hooks';
+import { useSetActiveChain } from 'hooks/settings/useActiveChain';
+import useActiveWallet, { useUpdateKeyStore } from 'hooks/settings/useActiveWallet';
+import { observer } from 'mobx-react-lite';
+import { addToConnections } from 'pages/ApproveConnection/utils';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { chainTagsStore } from 'stores/chain-infos-store';
+import { rootStore } from 'stores/root-store';
+import { Colors } from 'theme/colors';
+import { imgOnError } from 'utils/imgOnError';
+import { isSidePanel } from 'utils/isSidePanel';
+import Browser from 'webextension-polyfill';
 
-import {
-  ChildrenParams,
-  Footer,
-  FooterAction,
-  Heading,
-  SubHeading,
-  SuggestContainer,
-} from './components'
+import { ChildrenParams, Footer, FooterAction, Heading, SubHeading, SuggestContainer } from './components';
 
 type SuggestEthereumChainProps = ChildrenParams & {
-  rootStore: RootStore
-}
+  rootStore: RootStore;
+};
 
 const SuggestEthereumChain = observer(
   ({ handleRejectBtnClick, handleError, rootStore, chainTagsStore }: SuggestEthereumChainProps) => {
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
-    const [chainInfo, setChainInfo] = useState<ChainInfo | undefined>(undefined)
-    const [origin, setOrigin] = useState<string>('')
-    const [isLoading, setIsLoading] = useState(false)
+    const [chainInfo, setChainInfo] = useState<ChainInfo | undefined>(undefined);
+    const [origin, setOrigin] = useState<string>('');
+    const [isLoading, setIsLoading] = useState(false);
 
-    const defaultTokenLogo = useDefaultTokenLogo()
-    const updateKeyStore = useUpdateKeyStore()
-    const { activeWallet, setActiveWallet } = useActiveWallet()
-    const setActiveChain = useSetActiveChain()
+    const defaultTokenLogo = useDefaultTokenLogo();
+    const updateKeyStore = useUpdateKeyStore();
+    const { activeWallet, setActiveWallet } = useActiveWallet();
+    const setActiveChain = useSetActiveChain();
 
-    const { setChains, chains } = useChainsStore()
+    const { setChains, chains } = useChainsStore();
 
-    const siteName = useMemo(() => origin.replace('https://', ''), [origin])
-    const chainKey = useMemo(() => chainInfo?.key || chainInfo?.chainName || '', [chainInfo])
+    const siteName = useMemo(() => origin.replace('https://', ''), [origin]);
+    const chainKey = useMemo(() => chainInfo?.key || chainInfo?.chainName || '', [chainInfo]);
 
     useEffect(() => {
-      Browser.storage.local
-        .get([NEW_CHAIN_REQUEST])
-        .then(async function initializeChainInfo(response) {
-          const { chainInfo, origin } = response[NEW_CHAIN_REQUEST].msg
-          setChainInfo(chainInfo)
-          setOrigin(origin)
-        })
-    }, [])
+      Browser.storage.local.get([NEW_CHAIN_REQUEST]).then(async function initializeChainInfo(response) {
+        const { chainInfo, origin } = response[NEW_CHAIN_REQUEST].msg;
+        setChainInfo(chainInfo);
+        setOrigin(origin);
+      });
+    }, []);
 
     const addBetaChainTags = useCallback(async () => {
       if (chainInfo?.chainId) {
-        await chainTagsStore.setBetaChainTags(chainInfo.chainId, ['EVM'])
+        await chainTagsStore.setBetaChainTags(chainInfo.chainId, ['EVM']);
       }
       if (chainInfo?.testnetChainId) {
-        await chainTagsStore.setBetaChainTags(chainInfo.testnetChainId, ['EVM'])
+        await chainTagsStore.setBetaChainTags(chainInfo.testnetChainId, ['EVM']);
       }
       if (chainInfo?.evmChainId) {
-        await chainTagsStore.setBetaChainTags(chainInfo.evmChainId, ['EVM'])
+        await chainTagsStore.setBetaChainTags(chainInfo.evmChainId, ['EVM']);
       }
       if (chainInfo?.evmChainIdTestnet) {
-        await chainTagsStore.setBetaChainTags(chainInfo.evmChainIdTestnet, ['EVM'])
+        await chainTagsStore.setBetaChainTags(chainInfo.evmChainIdTestnet, ['EVM']);
       }
-    }, [chainInfo, chainTagsStore])
+    }, [chainInfo, chainTagsStore]);
 
     const handleConfirmClick = async () => {
-      setIsLoading(true)
+      setIsLoading(true);
 
       try {
         const updatedKeystore = await updateKeyStore(
@@ -84,43 +75,43 @@ const SuggestEthereumChain = observer(
           chainKey as SupportedChain,
           'UPDATE',
           chainInfo,
-        )
+        );
 
-        const storedBetaChains = await Browser.storage.local.get([BETA_CHAINS])
-        const betaChains = JSON.parse(storedBetaChains[BETA_CHAINS] ?? '{}')
-        const newBetaChains = { ...betaChains, [chainKey]: chainInfo }
+        const storedBetaChains = await Browser.storage.local.get([BETA_CHAINS]);
+        const betaChains = JSON.parse(storedBetaChains[BETA_CHAINS] ?? '{}');
+        const newBetaChains = { ...betaChains, [chainKey]: chainInfo };
 
-        await Browser.storage.local.set({ [BETA_CHAINS]: JSON.stringify(newBetaChains) })
-        await addBetaChainTags()
-        await setActiveChain(chainKey as SupportedChain, chainInfo)
+        await Browser.storage.local.set({ [BETA_CHAINS]: JSON.stringify(newBetaChains) });
+        await addBetaChainTags();
+        await setActiveChain(chainKey as SupportedChain, chainInfo);
 
         if (activeWallet) {
-          await addToConnections([chainInfo?.evmChainId || ''], [activeWallet.id], origin ?? '')
-          await setActiveWallet(updatedKeystore[activeWallet.id] as WalletKey)
+          await addToConnections([chainInfo?.evmChainId || ''], [activeWallet.id], origin ?? '');
+          await setActiveWallet(updatedKeystore[activeWallet.id] as WalletKey);
         }
 
-        setChains({ ...chains, [chainKey]: chainInfo })
-        rootStore.setChains({ ...chains, [chainKey]: chainInfo })
-        rootStore.reloadAddresses()
+        setChains({ ...chains, [chainKey]: chainInfo });
+        rootStore.setChains({ ...chains, [chainKey]: chainInfo });
+        rootStore.reloadAddresses();
 
-        window.removeEventListener('beforeunload', handleRejectBtnClick)
-        await Browser.storage.local.set({ [BG_RESPONSE]: { data: 'Approved' } })
+        window.removeEventListener('beforeunload', handleRejectBtnClick);
+        await Browser.storage.local.set({ [BG_RESPONSE]: { data: 'Approved' } });
 
-        await Browser.storage.local.remove([NEW_CHAIN_REQUEST])
-        await Browser.storage.local.remove(BG_RESPONSE)
+        await Browser.storage.local.remove([NEW_CHAIN_REQUEST]);
+        await Browser.storage.local.remove(BG_RESPONSE);
 
         if (isSidePanel()) {
-          navigate('/home')
+          navigate('/home');
         } else {
-          window.close()
+          window.close();
         }
 
-        setIsLoading(false)
+        setIsLoading(false);
       } catch (_) {
-        handleError('Failed to add network')
-        setIsLoading(false)
+        handleError('Failed to add network');
+        setIsLoading(false);
       }
-    }
+    };
 
     return (
       <>
@@ -170,9 +161,9 @@ const SuggestEthereumChain = observer(
           />
         </Footer>
       </>
-    )
+    );
   },
-)
+);
 
 export default function SuggestEthereumChainWrapper() {
   return (
@@ -186,5 +177,5 @@ export default function SuggestEthereumChainWrapper() {
         />
       )}
     </SuggestContainer>
-  )
+  );
 }

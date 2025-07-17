@@ -1,20 +1,15 @@
-import { Buttons } from '@leapwallet/leap-ui'
-import React, { ReactNode } from 'react'
-import { Colors } from 'theme/colors'
+import { Buttons } from '@leapwallet/leap-ui';
+import React, { ReactNode } from 'react';
+import { Colors } from 'theme/colors';
 
 type FooterActionProps = {
-  rejectBtnClick: () => void
-  rejectBtnText: ReactNode
-  confirmBtnText: ReactNode
-  confirmBtnClick?: () => void
-}
+  rejectBtnClick: () => void;
+  rejectBtnText: ReactNode;
+  confirmBtnText: ReactNode;
+  confirmBtnClick?: () => void;
+};
 
-export function FooterAction({
-  rejectBtnClick,
-  rejectBtnText,
-  confirmBtnClick,
-  confirmBtnText,
-}: FooterActionProps) {
+export function FooterAction({ rejectBtnClick, rejectBtnText, confirmBtnClick, confirmBtnText }: FooterActionProps) {
   return (
     <div className='flex flex-row justify-between w-full'>
       <Buttons.Generic
@@ -36,5 +31,5 @@ export function FooterAction({
         {confirmBtnText}
       </Buttons.Generic>
     </div>
-  )
+  );
 }

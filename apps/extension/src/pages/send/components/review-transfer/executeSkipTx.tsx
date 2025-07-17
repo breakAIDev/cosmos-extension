@@ -15,7 +15,7 @@ import {
   usePendingTxState,
   useTxMetadata,
   WALLETTYPE,
-} from '@leapwallet/cosmos-wallet-hooks'
+} from '@leapwallet/cosmos-wallet-hooks';
 import {
   ChainInfos,
   EthermintTxHandler,
@@ -26,8 +26,8 @@ import {
   sleep,
   SupportedChain,
   toSmall,
-} from '@leapwallet/cosmos-wallet-sdk'
-import { TxClient as InjectiveTxClient } from '@leapwallet/cosmos-wallet-sdk/dist/browser/proto/injective/core/modules'
+} from '@leapwallet/cosmos-wallet-sdk';
+import { TxClient as InjectiveTxClient } from '@leapwallet/cosmos-wallet-sdk/dist/browser/proto/injective/core/modules';
 import {
   Account,
   getMessageMetadataForSigning,
@@ -36,22 +36,22 @@ import {
   SkipAPI,
   SkipCosmosMsg,
   TxClient,
-} from '@leapwallet/elements-core'
-import { useChains } from '@leapwallet/elements-hooks'
-import BigNumber from 'bignumber.js'
-import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx'
-import useActiveWallet from 'hooks/settings/useActiveWallet'
-import { useWalletClient } from 'hooks/useWalletClient'
-import { Wallet } from 'hooks/wallet/useWallet'
-import { useSendContext } from 'pages/send/context'
-import { handleCosmosTx } from 'pages/swaps-v2/tx/cosmosTxHandler'
-import { useMemo, useState } from 'react'
-import { SourceChain } from 'types/swap'
-import { getLedgerEnabledEvmChainsKey } from 'utils/getLedgerEnabledEvmChains'
+} from '@leapwallet/elements-core';
+import { useChains } from '@leapwallet/elements-hooks';
+import BigNumber from 'bignumber.js';
+import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
+import useActiveWallet from 'hooks/settings/useActiveWallet';
+import { useWalletClient } from 'hooks/useWalletClient';
+import { Wallet } from 'hooks/wallet/useWallet';
+import { useSendContext } from 'pages/send/context';
+import { handleCosmosTx } from 'pages/swaps-v2/tx/cosmosTxHandler';
+import { useMemo, useState } from 'react';
+import { SourceChain } from 'types/swap';
+import { getLedgerEnabledEvmChainsKey } from 'utils/getLedgerEnabledEvmChains';
 
 export const useExecuteSkipTx = () => {
-  const [txnProcessing, setTxnProcessing] = useState<boolean>(false)
-  const [error, setError] = useState<string | undefined>()
+  const [txnProcessing, setTxnProcessing] = useState<boolean>(false);
+  const [error, setError] = useState<string | undefined>();
 
   const {
     selectedToken,
@@ -63,93 +63,87 @@ export const useExecuteSkipTx = () => {
     memo,
     sendActiveChain,
     sendSelectedNetwork,
-  } = useSendContext()
+  } = useSendContext();
 
-  const denoms = useDenoms()
-  const { chains } = useChainsStore()
-  const { data: elementsChains } = useChains()
-  const { setPendingTx } = usePendingTxState()
-  const { walletClient } = useWalletClient(sendActiveChain)
-  const txMetadata = useTxMetadata()
-  const txPostToDB = LeapWalletApi.useOperateCosmosTx()
-  const [showLedgerPopupSkipTx, setShowLedgerPopup] = useState(false)
-  const getWallet = Wallet.useGetWallet()
-  const activeChainId = useChainId(sendActiveChain, sendSelectedNetwork)
-  const { activeWallet } = useActiveWallet()
-  const activeWalletAddress = activeWallet?.addresses[sendActiveChain]
+  const denoms = useDenoms();
+  const { chains } = useChainsStore();
+  const { data: elementsChains } = useChains();
+  const { setPendingTx } = usePendingTxState();
+  const { walletClient } = useWalletClient(sendActiveChain);
+  const txMetadata = useTxMetadata();
+  const txPostToDB = LeapWalletApi.useOperateCosmosTx();
+  const [showLedgerPopupSkipTx, setShowLedgerPopup] = useState(false);
+  const getWallet = Wallet.useGetWallet();
+  const activeChainId = useChainId(sendActiveChain, sendSelectedNetwork);
+  const { activeWallet } = useActiveWallet();
+  const activeWalletAddress = activeWallet?.addresses[sendActiveChain];
 
   const ledgerEnabledEvmChains = useMemo(() => {
-    return getLedgerEnabledEvmChainsKey(Object.values(chains))
-  }, [chains])
+    return getLedgerEnabledEvmChainsKey(Object.values(chains));
+  }, [chains]);
 
-  const getIsMinitiaEvmChain = useGetIsMinitiaEvmChain()
+  const getIsMinitiaEvmChain = useGetIsMinitiaEvmChain();
 
   const confirmSkipTx = async (modifiedCallback: TxCallback) => {
-    if (
-      !fee ||
-      !transferData ||
-      !('messages' in transferData) ||
-      !transferData?.messages ||
-      !chains
-    ) {
-      if (!fee) setError(`Invalid transfer fee`)
+    if (!fee || !transferData || !('messages' in transferData) || !transferData?.messages || !chains) {
+      if (!fee) setError(`Invalid transfer fee`);
       else if (!transferData || !('messages' in transferData) || !transferData?.messages) {
-        setError(`Invalid transfer message`)
-      } else if (!chains) setError(`Invalid transfer chains`)
-      else setError(`Invalid transfer data`)
-      return
+        setError(`Invalid transfer message`);
+      } else if (!chains) setError(`Invalid transfer chains`);
+      else setError(`Invalid transfer data`);
+      return;
     }
 
-    setError(undefined)
+    setError(undefined);
 
-    setTxnProcessing(true)
-    const { messages } = transferData
+    setTxnProcessing(true);
+    const { messages } = transferData;
 
     for (let i = 0; i < messages.length; i++) {
-      const allMessages = messages[i] as SkipCosmosMsg
-      const multiHopMsg = allMessages?.multi_chain_msg
-      const msgJSON = JSON.parse(multiHopMsg.msg)
-      const currentTimestamp = new Date().getTime()
-      const timeoutMilliseconds = Number(msgJSON.timeout_timestamp / 10 ** 6)
+      const allMessages = messages[i] as SkipCosmosMsg;
+      const multiHopMsg = allMessages?.multi_chain_msg;
+      const msgJSON = JSON.parse(multiHopMsg.msg);
+      const currentTimestamp = new Date().getTime();
+      const timeoutMilliseconds = Number(msgJSON.timeout_timestamp / 10 ** 6);
       if (timeoutMilliseconds < currentTimestamp) {
-        setError('Transaction timed out')
-        setTxnProcessing(false)
-        return
+        setError('Transaction timed out');
+        setTxnProcessing(false);
+        return;
       }
 
       const { senderAddress, encodedMessage: transferMessage } = getMessageMetadataForSigning(
         multiHopMsg.msg_type_url,
         msgJSON,
-      )
-      const encodedMessage = transferMessage as { typeUrl: string; value: MsgTransfer }
+      );
+      const encodedMessage = transferMessage as { typeUrl: string; value: MsgTransfer };
 
-      const messageChain = elementsChains?.find((chain) => chain.chainId === multiHopMsg.chain_id)
+      const messageChain = elementsChains?.find((chain) => chain.chainId === multiHopMsg.chain_id);
 
       if (!messageChain) {
-        setError('Chain info is not found')
-        return
+        setError('Chain info is not found');
+        return;
       }
 
-      let account: Account | undefined
-      let signer: Signer | undefined
+      let account: Account | undefined;
+      let signer: Signer | undefined;
       try {
-        account = await walletClient.getAccount('')
-        signer = await walletClient.getSigner('')
+        account = await walletClient.getAccount('');
+        signer = await walletClient.getSigner('');
         if (account?.isNanoLedger) {
-          setShowLedgerPopup(true)
+          setShowLedgerPopup(true);
         }
       } catch (e: any) {
-        setError(e?.message)
-        setTxnProcessing(false)
-        return
+        setError(e?.message);
+        setTxnProcessing(false);
+        return;
       }
-      let txBytesString: string | undefined = undefined
+      let txBytesString: string | undefined = undefined;
 
       const isMinitiaEvmChain = getIsMinitiaEvmChain(
         sendSelectedNetwork,
         messageChain.key as SupportedChain,
         messageChain.chainId,
-      )
+      );
       const tx = new TxClient(
         String(messageChain.chainId),
         messageChain.restUrl,
@@ -157,8 +151,8 @@ export const useExecuteSkipTx = () => {
         signer,
         account,
         isMinitiaEvmChain ? '/initia.crypto.v1beta1.ethsecp256k1.PubKey' : undefined,
-      )
-      const wallet = await getWallet(messageChain.key as SupportedChain)
+      );
+      const wallet = await getWallet(messageChain.key as SupportedChain);
 
       try {
         if (activeWallet?.walletType === WALLETTYPE.LEDGER) {
@@ -170,22 +164,21 @@ export const useExecuteSkipTx = () => {
               wallet as LeapLedgerSigner,
               senderAddress,
               memo,
-            )
-            txBytesString = res.txBytesString
+            );
+            txBytesString = res.txBytesString;
           } else {
             if (messageChain.key === 'injective') {
-              const injectiveTx = new InjectiveTx(false, wallet as any, messageChain.restUrl)
+              const injectiveTx = new InjectiveTx(false, wallet as any, messageChain.restUrl);
               const channelIdData = await getClientState(
                 messageChain.restUrl,
                 encodedMessage.value.sourceChannel,
                 'transfer',
-              )
-              const latest_height =
-                channelIdData.data.identified_client_state.client_state.latest_height
+              );
+              const latest_height = channelIdData.data.identified_client_state.client_state.latest_height;
               const height = {
                 revisionHeight: new BigNumber(latest_height.revision_height).plus(150),
                 revisionNumber: latest_height.revision_number,
-              }
+              };
               const newEncodedMessage = {
                 ...encodedMessage,
                 value: {
@@ -198,9 +191,9 @@ export const useExecuteSkipTx = () => {
                   port: encodedMessage.value.sourcePort,
                   channelId: encodedMessage.value.sourceChannel,
                 },
-              }
-              const txRaw = await injectiveTx.signTx(senderAddress, [newEncodedMessage], fee, memo)
-              txBytesString = InjectiveTxClient.encode(txRaw)
+              };
+              const txRaw = await injectiveTx.signTx(senderAddress, [newEncodedMessage], fee, memo);
+              txBytesString = InjectiveTxClient.encode(txRaw);
             } else if (
               messageChain.key === 'dymension' ||
               messageChain.key === 'evmos' ||
@@ -212,10 +205,10 @@ export const useExecuteSkipTx = () => {
                 wallet as any,
                 ChainInfos[messageChain.key].chainId,
                 ChainInfos[messageChain.key].evmChainId,
-              )
-              const msgValue = encodedMessage.value as MsgTransfer
+              );
+              const msgValue = encodedMessage.value as MsgTransfer;
               if (!msgValue.token) {
-                throw new Error('Invalid token')
+                throw new Error('Invalid token');
               }
 
               txBytesString = await ethermintTx.signIbcTx({
@@ -229,80 +222,75 @@ export const useExecuteSkipTx = () => {
                 fee,
                 memo: memo || '',
                 txMemo: msgValue.memo,
-              })
+              });
             }
           }
         } else {
-          txBytesString = await tx.sign(senderAddress, [encodedMessage], fee, memo)
+          txBytesString = await tx.sign(senderAddress, [encodedMessage], fee, memo);
         }
       } catch (e: any) {
-        const err = e as Error
+        const err = e as Error;
         if (err?.message?.includes('rejected') || err?.message?.includes('declined')) {
-          setTxnProcessing(false)
-          setError(err?.message)
+          setTxnProcessing(false);
+          setError(err?.message);
         } else {
-          setError(err?.message)
-          setTxnProcessing(false)
+          setError(err?.message);
+          setTxnProcessing(false);
         }
-        setShowLedgerPopup(false)
-        return
+        setShowLedgerPopup(false);
+        return;
       } finally {
-        setShowLedgerPopup(false)
+        setShowLedgerPopup(false);
       }
 
       try {
-        let txHash: string = ''
-        let success: boolean = false
+        let txHash: string = '';
+        let success: boolean = false;
         try {
-          const submitResponse = await tx.submitTx(
-            String(messageChain.chainId),
-            txBytesString as string,
-          )
-          success = submitResponse.success
-          if (!success) throw new Error('SubmitTx Failed')
-          txHash = submitResponse.response.tx_hash
+          const submitResponse = await tx.submitTx(String(messageChain.chainId), txBytesString as string);
+          success = submitResponse.success;
+          if (!success) throw new Error('SubmitTx Failed');
+          txHash = submitResponse.response.tx_hash;
         } catch (e: any) {
           if (e.message === 'SubmitTx Failed') {
-            const { transactionHash, code, codespace } = await tx.broadcastTx(
-              txBytesString as string,
-            )
-            txHash = transactionHash
+            const { transactionHash, code, codespace } = await tx.broadcastTx(txBytesString as string);
+            txHash = transactionHash;
             if (code !== 0) {
-              throw new Error(`BroadcastTx Failed ${getErrorMessageFromCode(code, codespace)}`)
+              throw new Error(`BroadcastTx Failed ${getErrorMessageFromCode(code, codespace)}`);
             }
-            success = true
+            success = true;
           } else {
-            throw new Error(`BroadcastTx Failed ${getErrorMessageFromCode(e.code, e.codespace)}`)
+            throw new Error(`BroadcastTx Failed ${getErrorMessageFromCode(e.code, e.codespace)}`);
           }
         }
 
         const getTxStatus = async () => {
-          let index = 0
-          const max = 100
+          let index = 0;
+          const max = 100;
           while (index <= max) {
             const txnStatus = await SkipAPI.getTxnStatus({
               chain_id: multiHopMsg.chain_id,
               tx_hash: txHash,
-            })
+            });
             if (txnStatus.success) {
-              const { state, error } = txnStatus.response
+              const { state, error } = txnStatus.response;
 
               if (state === SKIP_TXN_STATUS.STATE_COMPLETED_SUCCESS) {
-                return { code: 0 }
+                return { code: 0 };
               } else if (state === SKIP_TXN_STATUS.STATE_ABANDONED) {
-                return { code: 0 }
+                return { code: 0 };
               }
 
               if (error?.code) {
-                return error
+                return error;
               }
             }
-            index += 1
-            await sleep(2000)
+            index += 1;
+            await sleep(2000);
           }
-        }
-        const toAddress = selectedAddress?.address || ''
-        const denom = selectedToken?.coinMinimalDenom || selectedToken?.ibcDenom || ''
+        };
+        const toAddress = selectedAddress?.address || '';
+        const denom = selectedToken?.coinMinimalDenom || selectedToken?.ibcDenom || '';
 
         const pendingTx = {
           img: messageChain.icon,
@@ -322,18 +310,17 @@ export const useExecuteSkipTx = () => {
           sourceNetwork: sendSelectedNetwork,
           toAddress,
           toChain: selectedAddress?.chainName,
-        }
+        };
 
-        const denomChainInfo =
-          chains[(denoms[selectedToken?.coinMinimalDenom ?? '']?.chain ?? '') as SupportedChain]
+        const denomChainInfo = chains[(denoms[selectedToken?.coinMinimalDenom ?? '']?.chain ?? '') as SupportedChain];
         const txnLogAmountValue = await getTxnLogAmountValue(inputAmount, {
           coinGeckoId: denoms[selectedToken?.coinMinimalDenom ?? '']?.coinGeckoId,
           coinMinimalDenom: selectedToken?.coinMinimalDenom ?? '',
           chainId: getChainId(denomChainInfo, sendSelectedNetwork),
           chain: (selectedToken?.chain ?? '') as SupportedChain,
-        })
+        });
 
-        const normalizedAmount = toSmall(inputAmount.toString(), selectedToken?.coinDecimals ?? 6)
+        const normalizedAmount = toSmall(inputAmount.toString(), selectedToken?.coinDecimals ?? 6);
         let metadata = isIBCTransfer
           ? await getMetaDataForIbcTx(msgJSON?.source_channel, toAddress, {
               denom,
@@ -342,9 +329,9 @@ export const useExecuteSkipTx = () => {
           : getMetaDataForSendTx(toAddress, {
               denom,
               amount: normalizedAmount,
-            })
+            });
 
-        metadata = { ...metadata, ...txMetadata }
+        metadata = { ...metadata, ...txMetadata };
 
         await txPostToDB({
           txHash,
@@ -357,29 +344,29 @@ export const useExecuteSkipTx = () => {
           forceNetwork: sendSelectedNetwork,
           forceWalletAddress: activeWalletAddress,
           chainId: activeChainId,
-        })
+        });
 
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        setPendingTx(pendingTx)
+        setPendingTx(pendingTx);
 
         if (success) {
-          modifiedCallback('success')
+          modifiedCallback('success');
         } else {
-          modifiedCallback('txDeclined')
+          modifiedCallback('txDeclined');
         }
       } catch (err: any) {
-        setTxnProcessing(false)
+        setTxnProcessing(false);
         if (err?.message?.includes('insufficient fees')) {
-          setError('Send failed due to low gas fees. Please try again with higher gas.')
+          setError('Send failed due to low gas fees. Please try again with higher gas.');
         } else {
-          setError(err?.message)
+          setError(err?.message);
         }
-        return
+        return;
       }
     }
-    setTxnProcessing(false)
-  }
+    setTxnProcessing(false);
+  };
 
   return {
     confirmSkipTx,
@@ -388,5 +375,5 @@ export const useExecuteSkipTx = () => {
     showLedgerPopupSkipTx,
     setShowLedgerPopupSkipTx: setShowLedgerPopup,
     setError,
-  }
-}
+  };
+};

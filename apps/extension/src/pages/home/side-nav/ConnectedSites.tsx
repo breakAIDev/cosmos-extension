@@ -1,40 +1,40 @@
-import { Avatar, Buttons, CardDivider, Header, HeaderActionType } from '@leapwallet/leap-ui'
-import { captureException } from '@sentry/react'
-import classNames from 'classnames'
-import Text from 'components/text'
-import { SearchInput } from 'components/ui/input/search-input'
-import { CONNECTIONS } from 'config/storage-keys'
-import Fuse from 'fuse.js'
-import { useActiveChain } from 'hooks/settings/useActiveChain'
-import useActiveWallet from 'hooks/settings/useActiveWallet'
-import { useChainInfos } from 'hooks/useChainInfos'
-import { useSiteLogo } from 'hooks/utility/useSiteLogo'
-import { Images } from 'images'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { sendMessageToAllTabs } from 'utils'
-import { imgOnError } from 'utils/imgOnError'
-import { isSidePanel } from 'utils/isSidePanel'
-import Browser, { Storage } from 'webextension-polyfill'
+import { Avatar, Buttons, CardDivider, Header, HeaderActionType } from '@leapwallet/leap-ui';
+import { captureException } from '@sentry/react';
+import classNames from 'classnames';
+import Text from 'components/text';
+import { SearchInput } from 'components/ui/input/search-input';
+import { CONNECTIONS } from 'config/storage-keys';
+import Fuse from 'fuse.js';
+import { useActiveChain } from 'hooks/settings/useActiveChain';
+import useActiveWallet from 'hooks/settings/useActiveWallet';
+import { useChainInfos } from 'hooks/useChainInfos';
+import { useSiteLogo } from 'hooks/utility/useSiteLogo';
+import { Images } from 'images';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { sendMessageToAllTabs } from 'utils';
+import { imgOnError } from 'utils/imgOnError';
+import { isSidePanel } from 'utils/isSidePanel';
+import Browser, { Storage } from 'webextension-polyfill';
 
-import { NavPages } from './types'
+import { NavPages } from './types';
 
 type Props = {
-  setPage: React.Dispatch<React.SetStateAction<NavPages | null>>
-}
+  setPage: React.Dispatch<React.SetStateAction<NavPages | null>>;
+};
 
 type ConnectedSiteCardProps = {
-  site: string
-  onClick: () => void
-  className?: string
-}
+  site: string;
+  onClick: () => void;
+  className?: string;
+};
 
 const ConnectedSiteCard = ({ site, onClick, className }: ConnectedSiteCardProps) => {
   // generate url object from site
-  const siteURL = new URL(site)
+  const siteURL = new URL(site);
   // get site logo
-  const siteLogo = useSiteLogo(siteURL.origin)
+  const siteLogo = useSiteLogo(siteURL.origin);
   // use top level domain as name (without tld)
-  const name = siteURL.host.split('.').slice(-2)[0]
+  const name = siteURL.host.split('.').slice(-2)[0];
 
   return (
     <div
@@ -64,10 +64,7 @@ const ConnectedSiteCard = ({ site, onClick, className }: ConnectedSiteCardProps)
           >
             {name}
           </h3>
-          <p
-            title={siteURL.host}
-            className='text-xs text-gray-400 text-left w-full text-ellipsis overflow-clip'
-          >
+          <p title={siteURL.host} className='text-xs text-gray-400 text-left w-full text-ellipsis overflow-clip'>
             {siteURL.host}
           </p>
         </div>
@@ -83,27 +80,27 @@ const ConnectedSiteCard = ({ site, onClick, className }: ConnectedSiteCardProps)
         <Buttons.Cancel onClick={onClick} className='h-5 w-5' />
       )}
     </div>
-  )
-}
+  );
+};
 
 const ConnectedSites = ({ setPage }: Props) => {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [sites, setSites] = useState<string[]>([])
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sites, setSites] = useState<string[]>([]);
 
-  const chainInfos = useChainInfos()
-  const activeChain = useActiveChain()
-  const { activeWallet } = useActiveWallet()
+  const chainInfos = useChainInfos();
+  const activeChain = useActiveChain();
+  const { activeWallet } = useActiveWallet();
 
   const sitesFuse = useMemo(() => {
     return new Fuse(sites, {
       threshold: 0.3,
-    })
-  }, [sites])
+    });
+  }, [sites]);
 
   const sitesToDisplay = useMemo(() => {
-    const clearSearchQuery = searchQuery.trim()
+    const clearSearchQuery = searchQuery.trim();
     if (!searchQuery) {
-      return sites
+      return sites;
     }
 
     return sitesFuse
@@ -112,69 +109,68 @@ const ConnectedSites = ({ setPage }: Props) => {
       .filter((site) => {
         // filtering Invalid URLs
         try {
-          new URL(site) // throws TypeError incase of an Invalid URL
-          return true
+          new URL(site); // throws TypeError incase of an Invalid URL
+          return true;
         } catch (_) {
-          return false
+          return false;
         }
-      })
-  }, [searchQuery, sites, sitesFuse])
+      });
+  }, [searchQuery, sites, sitesFuse]);
 
   const activeChainId = useMemo(() => {
-    return chainInfos[activeChain].chainId
-  }, [activeChain, chainInfos])
+    return chainInfos[activeChain].chainId;
+  }, [activeChain, chainInfos]);
 
   const updateSites = useCallback(async () => {
-    const { connections } = await Browser.storage.local.get(CONNECTIONS)
-    const walletConnections =
-      connections?.[activeWallet?.id as string] ?? ({} as Record<string, string[]>)
-    setSites(walletConnections[activeChainId] ?? [])
-  }, [activeChainId, activeWallet?.id])
+    const { connections } = await Browser.storage.local.get(CONNECTIONS);
+    const walletConnections = connections?.[activeWallet?.id as string] ?? ({} as Record<string, string[]>);
+    setSites(walletConnections[activeChainId] ?? []);
+  }, [activeChainId, activeWallet?.id]);
 
   useEffect(() => {
     const connectionChangeListener = (changes: Record<string, Storage.StorageChange>) => {
-      const { newValue } = changes[CONNECTIONS] || {}
+      const { newValue } = changes[CONNECTIONS] || {};
       if (newValue) {
-        updateSites().catch(captureException)
+        updateSites().catch(captureException);
       }
-    }
-    Browser.storage.onChanged.addListener(connectionChangeListener)
+    };
+    Browser.storage.onChanged.addListener(connectionChangeListener);
     return () => {
-      Browser.storage.onChanged.removeListener(connectionChangeListener)
-    }
-  }, [updateSites])
+      Browser.storage.onChanged.removeListener(connectionChangeListener);
+    };
+  }, [updateSites]);
 
   useEffect(() => {
-    updateSites().catch(captureException)
-  }, [updateSites])
+    updateSites().catch(captureException);
+  }, [updateSites]);
 
   const goBack = useCallback(() => {
-    setPage(null)
-  }, [setPage])
+    setPage(null);
+  }, [setPage]);
 
   const handleSearchSite = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value)
-  }
+    setSearchQuery(e.target.value);
+  };
 
   const handleDisconnect = useCallback(
     async (siteName: string) => {
-      const { connections } = await Browser.storage.local.get(CONNECTIONS)
-      const walletConnections = connections[activeWallet?.id as string]
+      const { connections } = await Browser.storage.local.get(CONNECTIONS);
+      const walletConnections = connections[activeWallet?.id as string];
       if (!walletConnections) {
-        return
+        return;
       }
-      const websites: string[] = walletConnections[activeChainId]
+      const websites: string[] = walletConnections[activeChainId];
       if (!websites) {
-        return
+        return;
       }
-      const index = websites.findIndex((site) => site === siteName)
-      websites.splice(index, 1)
-      await Browser.storage.local.set({ [CONNECTIONS]: { ...connections } })
-      await updateSites()
-      await sendMessageToAllTabs({ event: 'disconnectFromOrigin', data: siteName })
+      const index = websites.findIndex((site) => site === siteName);
+      websites.splice(index, 1);
+      await Browser.storage.local.set({ [CONNECTIONS]: { ...connections } });
+      await updateSites();
+      await sendMessageToAllTabs({ event: 'disconnectFromOrigin', data: siteName });
     },
     [activeChainId, activeWallet?.id, updateSites],
-  )
+  );
 
   return (
     <div className='panel-height enclosing-panel'>
@@ -189,15 +185,12 @@ const ConnectedSites = ({ setPage }: Props) => {
                   {sites.length === 0 ? 'No sites connected' : 'No results found'}
                 </Text>
                 <Text size='sm' className='text-center text-gray-400'>
-                  {sites.length === 0
-                    ? 'You are not connected to any sites'
-                    : 'Change your search query and try again'}
+                  {sites.length === 0 ? 'You are not connected to any sites' : 'Change your search query and try again'}
                 </Text>
               </div>
             ) : (
               <p className='mt-5 px-4 text-sm text-center dark:text-gray-300 text-gray-700'>
-                <strong>{activeWallet?.name ?? 'Your wallet'}</strong> is connected to the following
-                dapps
+                <strong>{activeWallet?.name ?? 'Your wallet'}</strong> is connected to the following dapps
               </p>
             )}
           </div>
@@ -214,18 +207,18 @@ const ConnectedSites = ({ setPage }: Props) => {
 
         <ul className='mx-7 mb-4 dark:bg-gray-900 bg-white-100 rounded-2xl list-none'>
           {sitesToDisplay.map((site, index, arr) => {
-            const isLast = index === arr.length - 1
+            const isLast = index === arr.length - 1;
             return (
               <li key={site} className='!m-0'>
                 <ConnectedSiteCard site={site} onClick={() => handleDisconnect(site)} />
                 {isLast ? null : <CardDivider />}
               </li>
-            )
+            );
           })}
         </ul>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ConnectedSites
+export default ConnectedSites;

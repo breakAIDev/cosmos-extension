@@ -1,65 +1,58 @@
-import { useActiveChain, useActiveWallet, useFeatureFlags } from '@leapwallet/cosmos-wallet-hooks'
-import { useTabIndicatorPosition } from 'hooks/utility/useTabIndicatorPosition'
-import Lottie from 'lottie-react'
-import { observer } from 'mobx-react-lite'
-import React, { useEffect, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
-import { cn } from 'utils/cn'
+import { useActiveChain, useActiveWallet, useFeatureFlags } from '@leapwallet/cosmos-wallet-hooks';
+import { useTabIndicatorPosition } from 'hooks/utility/useTabIndicatorPosition';
+import Lottie from 'lottie-react';
+import { observer } from 'mobx-react-lite';
+import React, { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { cn } from 'utils/cn';
 
-import {
-  allBottomNavItems,
-  bottomNavItemsForWatchWallet,
-  BottomNavLabel,
-  routeToLabelMap,
-} from './bottom-nav-items'
+import { allBottomNavItems, bottomNavItemsForWatchWallet, BottomNavLabel, routeToLabelMap } from './bottom-nav-items';
 
 type BottomNavProps = {
-  label: BottomNavLabel
-  disableLottie?: boolean
-}
+  label: BottomNavLabel;
+  disableLottie?: boolean;
+};
 
 const indicatorDefaultScale = {
   transform: 'translateX(12px) scaleX(0.14)',
-}
+};
 
 const useShowBottomNav = () => {
-  const location = useLocation()
+  const location = useLocation();
 
   const isBottomNavVisible =
     location.pathname &&
     !!routeToLabelMap[location.pathname] &&
     !location.pathname.includes('onboarding') &&
-    !location.pathname.includes('forgotPassword')
+    !location.pathname.includes('forgotPassword');
 
-  return isBottomNavVisible
-}
+  return isBottomNavVisible;
+};
 
 const BottomNavView = ({ label, disableLottie }: BottomNavProps) => {
-  const activeWallet = useActiveWallet()
-  const activeChain = useActiveChain()
-  const featureFlags = useFeatureFlags()
+  const activeWallet = useActiveWallet();
+  const activeChain = useActiveChain();
+  const featureFlags = useFeatureFlags();
 
-  const bottomNavItems = activeWallet?.watchWallet
-    ? bottomNavItemsForWatchWallet
-    : allBottomNavItems
+  const bottomNavItems = activeWallet?.watchWallet ? bottomNavItemsForWatchWallet : allBottomNavItems;
 
   const { containerRef, indicatorRef, childRefs } = useTabIndicatorPosition({
     navItems: bottomNavItems,
     activeLabel: label,
     widthScale: 0.7,
-  })
+  });
 
-  const isBottomNavVisible = useShowBottomNav()
-  const [showLottie, setShowLottie] = useState(false)
+  const isBottomNavVisible = useShowBottomNav();
+  const [showLottie, setShowLottie] = useState(false);
 
   useEffect(() => {
     setTimeout(() => {
       // to hide initial lottie animation on page load
-      setShowLottie(true)
-    }, 3000)
-  }, [])
+      setShowLottie(true);
+    }, 3000);
+  }, []);
 
-  if (!isBottomNavVisible) return null
+  if (!isBottomNavVisible) return null;
 
   return (
     <div
@@ -71,8 +64,7 @@ const BottomNavView = ({ label, disableLottie }: BottomNavProps) => {
       {bottomNavItems.map(({ label: l, path, params, lottie, Icon }, idx) => {
         const isDisabled =
           l === BottomNavLabel.Swap &&
-          (featureFlags?.data?.swaps?.extension === 'disabled' ||
-            ['nomic', 'seiDevnet'].includes(activeChain))
+          (featureFlags?.data?.swaps?.extension === 'disabled' || ['nomic', 'seiDevnet'].includes(activeChain));
 
         return (
           <Link
@@ -95,7 +87,7 @@ const BottomNavView = ({ label, disableLottie }: BottomNavProps) => {
 
             <span className='text-[10px] leading-3 font-bold'>{l}</span>
           </Link>
-        )
+        );
       })}
 
       <div
@@ -104,11 +96,11 @@ const BottomNavView = ({ label, disableLottie }: BottomNavProps) => {
         className='absolute top-0 origin-left scale-0 translate-x-3 transition-transform duration-200 w-full h-1 bg-primary rounded-[50vmin/10vmin]'
       />
     </div>
-  )
-}
+  );
+};
 
-BottomNavView.displayName = 'BottomNavView'
-export const BottomNav = observer(BottomNavView)
+BottomNavView.displayName = 'BottomNavView';
+export const BottomNav = observer(BottomNavView);
 
 const LottieWrapper = ({
   showLottie,
@@ -117,11 +109,11 @@ const LottieWrapper = ({
   active,
   lottie,
 }: {
-  showLottie: boolean
-  disableLottie?: boolean
-  lottie: { on: unknown; off: unknown }
-  active: boolean
-  Icon: (props: { className?: string }) => JSX.Element
+  showLottie: boolean;
+  disableLottie?: boolean;
+  lottie: { on: unknown; off: unknown };
+  active: boolean;
+  Icon: (props: { className?: string }) => JSX.Element;
 }) => {
   return (
     <>
@@ -135,5 +127,5 @@ const LottieWrapper = ({
         />
       )}
     </>
-  )
-}
+  );
+};

@@ -7,7 +7,7 @@ import {
   useChainApis,
   useChainInfo,
   WALLETTYPE,
-} from '@leapwallet/cosmos-wallet-hooks'
+} from '@leapwallet/cosmos-wallet-hooks';
 import {
   isEthAddress,
   isValidAddress,
@@ -15,39 +15,35 @@ import {
   pubKeyToEvmAddressToShow,
   SeiEvmTx,
   SupportedChain,
-} from '@leapwallet/cosmos-wallet-sdk'
-import { CaretRight, Compass, PencilSimpleLine } from '@phosphor-icons/react'
-import { bech32 } from 'bech32'
-import classNames from 'classnames'
-import BottomModal from 'components/bottom-modal'
-import { LoaderAnimation } from 'components/loader/Loader'
-import { SearchInput } from 'components/search-input'
-import Text from 'components/text'
-import { SEI_EVM_LEDGER_ERROR_MESSAGE } from 'config/constants'
-import { useDefaultTokenLogo } from 'hooks'
-import useActiveWallet from 'hooks/settings/useActiveWallet'
-import { useChainInfos } from 'hooks/useChainInfos'
-import { useContacts, useContactsSearch } from 'hooks/useContacts'
-import { Wallet } from 'hooks/wallet/useWallet'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { Colors } from 'theme/colors'
-import { AddressBook } from 'utils/addressbook'
-import { UserClipboard } from 'utils/clipboard'
-import { cn } from 'utils/cn'
+} from '@leapwallet/cosmos-wallet-sdk';
+import { CaretRight, Compass, PencilSimpleLine } from '@phosphor-icons/react';
+import { bech32 } from 'bech32';
+import classNames from 'classnames';
+import BottomModal from 'components/bottom-modal';
+import { LoaderAnimation } from 'components/loader/Loader';
+import { SearchInput } from 'components/search-input';
+import Text from 'components/text';
+import { SEI_EVM_LEDGER_ERROR_MESSAGE } from 'config/constants';
+import { useDefaultTokenLogo } from 'hooks';
+import useActiveWallet from 'hooks/settings/useActiveWallet';
+import { useChainInfos } from 'hooks/useChainInfos';
+import { useContacts, useContactsSearch } from 'hooks/useContacts';
+import { Wallet } from 'hooks/wallet/useWallet';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Colors } from 'theme/colors';
+import { AddressBook } from 'utils/addressbook';
+import { UserClipboard } from 'utils/clipboard';
+import { cn } from 'utils/cn';
 
-import { NftDetailsType } from './context'
-import { useNFTSendContext } from './send-nft/context'
+import { NftDetailsType } from './context';
+import { useNFTSendContext } from './send-nft/context';
 
-function MyWallets({
-  setSelectedAddress,
-}: {
-  setSelectedAddress: (address: SelectedAddress) => void
-}) {
-  const activeChain = useActiveChain()
-  const { activeWallet } = useActiveWallet()
-  const wallets = Wallet.useWallets()
+function MyWallets({ setSelectedAddress }: { setSelectedAddress: (address: SelectedAddress) => void }) {
+  const activeChain = useActiveChain();
+  const { activeWallet } = useActiveWallet();
+  const wallets = Wallet.useWallets();
 
   const walletsList = useMemo(() => {
     return wallets
@@ -55,19 +51,18 @@ function MyWallets({
           .map((wallet) => wallet)
           .filter((wallet) => wallet.id !== activeWallet?.id)
           .sort((a, b) => a.name.localeCompare(b.name))
-      : []
-  }, [activeWallet?.id, wallets])
+      : [];
+  }, [activeWallet?.id, wallets]);
 
   return (
     <div className='relative mt-2 w-full h-[calc(100%-235px)]] overflow-auto'>
       {walletsList.length > 0 ? (
         walletsList.map((wallet, index) => {
-          const isLast = index === walletsList.length - 1
-          const isFirst = index === 0
+          const isLast = index === walletsList.length - 1;
+          const isFirst = index === 0;
 
           const addressText =
-            pubKeyToEvmAddressToShow(wallet?.pubKeys?.[activeChain], true) ||
-            wallet?.addresses?.[activeChain]
+            pubKeyToEvmAddressToShow(wallet?.pubKeys?.[activeChain], true) || wallet?.addresses?.[activeChain];
           return (
             <React.Fragment key={wallet.id}>
               <button
@@ -84,11 +79,9 @@ function MyWallets({
                     chainIcon: '',
                     chainName: activeChain,
                     emoji: undefined,
-                    name: `${
-                      wallet.name.length > 12 ? `${wallet.name.slice(0, 12)}...` : wallet.name
-                    }`,
+                    name: `${wallet.name.length > 12 ? `${wallet.name.slice(0, 12)}...` : wallet.name}`,
                     selectionType: 'currentWallet',
-                  })
+                  });
                 }}
                 disabled={!addressText}
               >
@@ -96,9 +89,7 @@ function MyWallets({
                   <img className='h-11 w-11' src={Images.Misc.getWalletIconAtIndex(1)} />
 
                   <div className='flex flex-col'>
-                    <p className='font-bold text-left text-monochrome text-sm capitalize'>
-                      {wallet.name}
-                    </p>
+                    <p className='font-bold text-left text-monochrome text-sm capitalize'>{wallet.name}</p>
                     <p className='text-sm text-muted-foreground'>{sliceAddress(addressText)}</p>
                   </div>
                 </div>
@@ -106,7 +97,7 @@ function MyWallets({
 
               {!isLast && <div className='border-b w-full border-gray-100 dark:border-gray-850' />}
             </React.Fragment>
-          )
+          );
         })
       ) : (
         <div className='py-[80px] px-4 w-full flex-col flex  justify-center items-center gap-4'>
@@ -115,9 +106,7 @@ function MyWallets({
             className=' dark:text-gray-400 text-gray-600 p-2 rounded-full dark:bg-gray-850 bg-gray-100'
           />
           <div className='flex flex-col justify-start items-center w-full gap-3'>
-            <div className='text-lg text-center font-bold !leading-[21.5px] dark:text-white-100'>
-              No wallets found
-            </div>
+            <div className='text-lg text-center font-bold !leading-[21.5px] dark:text-white-100'>No wallets found</div>
             <div className='text-sm font-normal !leading-[22.4px] text-gray-400 dark:text-gray-400 text-center'>
               Use Compass’ in-wallet options to get started.
             </div>
@@ -125,22 +114,22 @@ function MyWallets({
         </div>
       )}
     </div>
-  )
+  );
 }
 
 function MyContacts({
   handleContactSelect,
   editContact,
 }: {
-  handleContactSelect: (contact: SelectedAddress) => void
-  editContact: (s?: AddressBook.SavedAddress) => void
+  handleContactSelect: (contact: SelectedAddress) => void;
+  editContact: (s?: AddressBook.SavedAddress) => void;
 }) {
-  const [searchQuery, setSearchQuery] = useState('')
-  const trimmedSearchQuery = searchQuery.trim()
-  const contacts = useContactsSearch(trimmedSearchQuery)
-  const chainInfos = useChainInfos()
-  const { chainName } = useChainInfo()
-  const defaultTokenLogo = useDefaultTokenLogo()
+  const [searchQuery, setSearchQuery] = useState('');
+  const trimmedSearchQuery = searchQuery.trim();
+  const contacts = useContactsSearch(trimmedSearchQuery);
+  const chainInfos = useChainInfos();
+  const { chainName } = useChainInfo();
+  const defaultTokenLogo = useDefaultTokenLogo();
 
   const handleAvatarClick = (contact: AddressBook.SavedAddress, chainImage: string | undefined) => {
     handleContactSelect({
@@ -151,16 +140,16 @@ function MyContacts({
       address: contact.address,
       emoji: contact.emoji,
       selectionType: 'saved',
-    })
-  }
+    });
+  };
 
   return (
     <div className='mt-2 w-full h-[calc(100%-235px)]] overflow-auto'>
       {contacts.length > 0 ? (
         contacts.map((contact, index) => {
-          const chainImage = chainInfos[contact.blockchain]?.chainSymbolImageUrl ?? defaultTokenLogo
-          const isLast = index === contacts.length - 1
-          const isFirst = index === 0
+          const chainImage = chainInfos[contact.blockchain]?.chainSymbolImageUrl ?? defaultTokenLogo;
+          const isLast = index === contacts.length - 1;
+          const isFirst = index === 0;
 
           return (
             <React.Fragment key={contact.address}>
@@ -177,9 +166,7 @@ function MyContacts({
                     <img className='h-11 w-11' src={Images.Misc.getWalletIconAtIndex(1)} />
 
                     <div className='flex flex-col'>
-                      <p className='font-bold text-left text-monochrome text-sm capitalize'>
-                        {contact.name}
-                      </p>
+                      <p className='font-bold text-left text-monochrome text-sm capitalize'>{contact.name}</p>
                       <p className='text-sm text-muted-foreground'>
                         {sliceAddress(contact.ethAddress ? contact.ethAddress : contact.address)}
                       </p>
@@ -190,8 +177,8 @@ function MyContacts({
                     weight='fill'
                     className='bg-secondary-50 border rounded-full p-2.5 border-secondary-200 text-muted-foreground cursor-pointer'
                     onClick={(e) => {
-                      e.stopPropagation()
-                      editContact(contact)
+                      e.stopPropagation();
+                      editContact(contact);
                     }}
                   />
                 </div>
@@ -199,7 +186,7 @@ function MyContacts({
 
               {!isLast && <div className='border-b w-full border-secondary-300' />}
             </React.Fragment>
-          )
+          );
         })
       ) : (
         <div className='py-[80px] px-4 w-full flex-col flex  justify-center items-center gap-4'>
@@ -208,14 +195,12 @@ function MyContacts({
             className=' dark:text-gray-400 text-gray-600 p-2 rounded-full dark:bg-gray-850 bg-gray-100'
           />
           <div className='flex flex-col justify-start items-center w-full gap-3'>
-            <div className='text-lg text-center font-bold !leading-[21.5px] dark:text-white-100'>
-              No contacts found
-            </div>
+            <div className='text-lg text-center font-bold !leading-[21.5px] dark:text-white-100'>No contacts found</div>
             <div
               className='mt-2 text-sm font-medium !leading-[22.4px] text-accent-foreground text-center cursor-pointer'
               onClick={(e) => {
-                e.stopPropagation()
-                editContact()
+                e.stopPropagation();
+                editContact();
               }}
             >
               + Add new contact
@@ -224,7 +209,7 @@ function MyContacts({
         </div>
       )}
     </div>
-  )
+  );
 }
 
 export const SelectNFTRecipient = observer(
@@ -235,16 +220,16 @@ export const SelectNFTRecipient = observer(
     nftDetails,
     editContact,
   }: {
-    isOpen: boolean
-    onClose: () => void
-    setShowReviewSheet: (val: boolean) => void
-    nftDetails: NftDetailsType
-    editContact: (s?: AddressBook.SavedAddress) => void
+    isOpen: boolean;
+    onClose: () => void;
+    setShowReviewSheet: (val: boolean) => void;
+    nftDetails: NftDetailsType;
+    editContact: (s?: AddressBook.SavedAddress) => void;
   }) => {
-    const [recipientInputValue, setRecipientInputValue] = useState<string>('')
-    const existingContactMatch = AddressBook.useGetContact(recipientInputValue)
-    const [addressError, setAddressError] = useState<string>()
-    const activeChain = useActiveChain()
+    const [recipientInputValue, setRecipientInputValue] = useState<string>('');
+    const existingContactMatch = AddressBook.useGetContact(recipientInputValue);
+    const [addressError, setAddressError] = useState<string>();
+    const activeChain = useActiveChain();
 
     const {
       setReceiverAddress,
@@ -254,22 +239,18 @@ export const SelectNFTRecipient = observer(
       collectionAddress,
       receiverAddress,
       associatedSeiAddress,
-    } = useNFTSendContext()
-    const currentWalletAddress = useAddress(activeChain)
-    const addressPrefixes = useAddressPrefixes()
-    const activeChainInfo = useChainInfo()
-    const {
-      fetchAccountDetailsStatus,
-      fetchAccountDetailsData,
-      setAddressWarning,
-      fetchAccountDetails,
-    } = sendNftReturn
+    } = useNFTSendContext();
+    const currentWalletAddress = useAddress(activeChain);
+    const addressPrefixes = useAddressPrefixes();
+    const activeChainInfo = useChainInfo();
+    const { fetchAccountDetailsStatus, fetchAccountDetailsData, setAddressWarning, fetchAccountDetails } =
+      sendNftReturn;
 
-    const { contacts, loading: loadingContacts } = useContacts()
-    const { activeWallet } = useActiveWallet()
-    const [selectedTab, setSelectedTab] = useState<'contacts' | 'wallets'>('contacts')
-    const { evmJsonRpc } = useChainApis(activeChain)
-    const wallets = Wallet.useWallets()
+    const { contacts, loading: loadingContacts } = useContacts();
+    const { activeWallet } = useActiveWallet();
+    const [selectedTab, setSelectedTab] = useState<'contacts' | 'wallets'>('contacts');
+    const { evmJsonRpc } = useChainApis(activeChain);
+    const wallets = Wallet.useWallets();
     const walletsList = useMemo(() => {
       return wallets
         ? Object.values(wallets)
@@ -280,65 +261,64 @@ export const SelectNFTRecipient = observer(
                 ? new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
                 : a.name.localeCompare(b.name),
             )
-        : []
-    }, [activeWallet?.id, wallets])
+        : [];
+    }, [activeWallet?.id, wallets]);
 
     const existingWalletMatch = useMemo(() => {
       const res = walletsList.find((wallet) => {
         return (
-          recipientInputValue.toLowerCase() ===
-            pubKeyToEvmAddressToShow(wallet?.pubKeys?.[activeChain], true) ||
+          recipientInputValue.toLowerCase() === pubKeyToEvmAddressToShow(wallet?.pubKeys?.[activeChain], true) ||
           recipientInputValue.toLowerCase() === wallet?.addresses?.[activeChain]
-        )
-      })
-      if (res) return res
-    }, [activeChain, recipientInputValue, walletsList])
-    const existingResult = existingContactMatch ?? existingWalletMatch
+        );
+      });
+      if (res) return res;
+    }, [activeChain, recipientInputValue, walletsList]);
+    const existingResult = existingContactMatch ?? existingWalletMatch;
 
     const actionPaste = () => {
       UserClipboard.pasteText().then((text) => {
-        if (!text) return
-        setRecipientInputValue(text.trim())
-      })
-    }
+        if (!text) return;
+        setRecipientInputValue(text.trim());
+      });
+    };
 
     const allowReview = useCallback(() => {
       if (!addressError) {
-        setShowReviewSheet(true)
-        onClose()
+        setShowReviewSheet(true);
+        onClose();
       }
-    }, [addressError, onClose, setShowReviewSheet])
+    }, [addressError, onClose, setShowReviewSheet]);
 
     const handleContactSelect = useCallback(
       (s: SelectedAddress) => {
-        setReceiverAddress(s)
-        setRecipientInputValue(s.address ?? '')
-        allowReview()
+        setReceiverAddress(s);
+        setRecipientInputValue(s.address ?? '');
+        allowReview();
       },
       [allowReview, setReceiverAddress],
-    )
+    );
 
     const handleWalletSelect = useCallback(
       (s: SelectedAddress) => {
-        setAddressError(undefined)
-        setRecipientInputValue(s.address ?? '')
-        setReceiverAddress(s)
-        allowReview()
+        setAddressError(undefined);
+        setRecipientInputValue(s.address ?? '');
+        setReceiverAddress(s);
+        allowReview();
       },
       [allowReview, setReceiverAddress],
-    )
+    );
 
     useEffect(() => {
       if (!loadingContacts) {
         if (Object.keys(contacts).length === 0) {
-          setSelectedTab('wallets')
+          setSelectedTab('wallets');
         }
       }
-    }, [contacts, loadingContacts])
+    }, [contacts, loadingContacts]);
 
     useEffect(() => {
-      setCollectionAddress(nftDetails?.collection.address ?? '')
-    }, [nftDetails?.collection.address, setCollectionAddress])
+      setCollectionAddress(nftDetails?.collection.address ?? '');
+    }, [nftDetails?.collection.address, setCollectionAddress]);
 
     useEffect(() => {
       switch (fetchAccountDetailsStatus) {
@@ -348,53 +328,51 @@ export const SelectNFTRecipient = observer(
               Recipient will receive this on address:{' '}
               <LoaderAnimation color={Colors.white100} className='w-[20px] h-[20px]' />
             </>,
-          )
+          );
 
-          break
+          break;
         }
 
         case 'success': {
           if (fetchAccountDetailsData?.pubKey.key) {
-            const recipient0xAddress = pubKeyToEvmAddressToShow(fetchAccountDetailsData.pubKey.key)
+            const recipient0xAddress = pubKeyToEvmAddressToShow(fetchAccountDetailsData.pubKey.key);
             if (recipient0xAddress.toLowerCase().startsWith('0x')) {
-              setAddressWarning(
-                `Recipient will receive the NFT on associated EVM address: ${recipient0xAddress}`,
-              )
+              setAddressWarning(`Recipient will receive the NFT on associated EVM address: ${recipient0xAddress}`);
             } else {
-              setAddressError('You can only send this NFT to an EVM address.')
+              setAddressError('You can only send this NFT to an EVM address.');
             }
           }
 
-          break
+          break;
         }
 
         case 'error': {
-          setAddressError('You can only send this NFT to an EVM address.')
-          break
+          setAddressError('You can only send this NFT to an EVM address.');
+          break;
         }
 
         default: {
-          setAddressWarning('')
-          setAddressError('')
+          setAddressWarning('');
+          setAddressError('');
         }
       }
 
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [fetchAccountDetailsData?.pubKey.key, fetchAccountDetailsStatus])
+    }, [fetchAccountDetailsData?.pubKey.key, fetchAccountDetailsStatus]);
 
     useEffect(() => {
-      ;(async function () {
-        setAssociatedSeiAddress('')
+      (async function () {
+        setAssociatedSeiAddress('');
 
         if (
           recipientInputValue.length > 0 &&
           !isValidAddressWithPrefix(recipientInputValue, 'sei') &&
           !isEthAddress(recipientInputValue)
         ) {
-          setAddressError('Invalid address')
-          return
+          setAddressError('Invalid address');
+          return;
         } else {
-          setAddressError('')
+          setAddressError('');
         }
 
         if (
@@ -402,23 +380,20 @@ export const SelectNFTRecipient = observer(
           activeWallet?.walletType === WALLETTYPE.LEDGER &&
           activeWallet.app !== 'sei'
         ) {
-          setAddressError(SEI_EVM_LEDGER_ERROR_MESSAGE)
-          return
+          setAddressError(SEI_EVM_LEDGER_ERROR_MESSAGE);
+          return;
         }
 
         if (currentWalletAddress === recipientInputValue) {
-          setAddressError('Cannot send to self')
+          setAddressError('Cannot send to self');
         } else if (collectionAddress.toLowerCase().startsWith('0x') && recipientInputValue) {
           if (activeWallet?.walletType === WALLETTYPE.LEDGER && activeWallet?.app === 'cosmos') {
-            setAddressError(SEI_EVM_LEDGER_ERROR_MESSAGE)
-            return
+            setAddressError(SEI_EVM_LEDGER_ERROR_MESSAGE);
+            return;
           }
 
-          if (
-            !recipientInputValue.toLowerCase().startsWith('0x') &&
-            recipientInputValue.length >= 42
-          ) {
-            await fetchAccountDetails(recipientInputValue)
+          if (!recipientInputValue.toLowerCase().startsWith('0x') && recipientInputValue.length >= 42) {
+            await fetchAccountDetails(recipientInputValue);
           }
         } else if (
           !collectionAddress.toLowerCase().startsWith('0x') &&
@@ -426,23 +401,18 @@ export const SelectNFTRecipient = observer(
           recipientInputValue.toLowerCase().startsWith('0x')
         ) {
           try {
-            const recipientSeiAddress = await SeiEvmTx.GetSeiAddressFromHex(
-              recipientInputValue,
-              evmJsonRpc,
-            )
+            const recipientSeiAddress = await SeiEvmTx.GetSeiAddressFromHex(recipientInputValue, evmJsonRpc);
 
-            setAssociatedSeiAddress(recipientSeiAddress)
-            setAddressWarning(
-              `Recipient will receive the NFT on associated Sei address: ${recipientSeiAddress}`,
-            )
+            setAssociatedSeiAddress(recipientSeiAddress);
+            setAddressWarning(`Recipient will receive the NFT on associated Sei address: ${recipientSeiAddress}`);
           } catch {
-            setAddressError('You can only send this NFT to a Sei address and not an EVM address.')
+            setAddressError('You can only send this NFT to a Sei address and not an EVM address.');
           }
         } else {
-          setAddressError('')
-          setAddressWarning('')
+          setAddressError('');
+          setAddressWarning('');
         }
-      })()
+      })();
 
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
@@ -452,16 +422,16 @@ export const SelectNFTRecipient = observer(
       setAddressError,
       activeWallet?.walletType,
       activeChain,
-    ])
+    ]);
 
     useEffect(() => {
       if (recipientInputValue === receiverAddress?.address) {
-        return
+        return;
       }
-      const cleanInputValue = recipientInputValue.trim()
+      const cleanInputValue = recipientInputValue.trim();
       if (receiverAddress && cleanInputValue !== receiverAddress.address) {
-        setReceiverAddress(null)
-        return
+        setReceiverAddress(null);
+        return;
       }
       try {
         if (
@@ -477,13 +447,13 @@ export const SelectNFTRecipient = observer(
             chainIcon: activeChainInfo.chainSymbolImageUrl ?? '',
             chainName: activeChainInfo.key,
             selectionType: 'notSaved',
-          })
-          return
+          });
+          return;
         }
 
-        const { prefix } = bech32.decode(cleanInputValue)
-        const _chain = addressPrefixes[prefix] as SupportedChain
-        const img = activeChainInfo.chainSymbolImageUrl ?? ''
+        const { prefix } = bech32.decode(cleanInputValue);
+        const _chain = addressPrefixes[prefix] as SupportedChain;
+        const img = activeChainInfo.chainSymbolImageUrl ?? '';
 
         setReceiverAddress({
           address: cleanInputValue,
@@ -493,7 +463,7 @@ export const SelectNFTRecipient = observer(
           chainIcon: img ?? '',
           chainName: _chain,
           selectionType: 'notSaved',
-        })
+        });
       } catch (err) {
         //
       }
@@ -506,7 +476,7 @@ export const SelectNFTRecipient = observer(
       receiverAddress,
       recipientInputValue,
       setReceiverAddress,
-    ])
+    ]);
 
     return (
       <BottomModal
@@ -525,8 +495,8 @@ export const SelectNFTRecipient = observer(
               onChange={(e) => setRecipientInputValue(e.target.value)}
               placeholder='Enter recipient’s SEI address'
               onClear={() => {
-                setRecipientInputValue('')
-                setReceiverAddress(null)
+                setRecipientInputValue('');
+                setReceiverAddress(null);
               }}
               divClassName={cn(
                 'rounded-2xl w-full flex items-center gap-[10px] bg-gray-50 dark:bg-gray-900 py-3 pr-3 pl-4   border border-transparent hover:border-secondary-400 focus-within:border-monochrome dark:focus-within:border-monochrome',
@@ -551,8 +521,7 @@ export const SelectNFTRecipient = observer(
 
           {recipientInputValue.length > 0 ? null : (
             <>
-              {Object.values(contacts).length === 0 &&
-              walletsList.length === 0 ? null : walletsList.length === 0 ? (
+              {Object.values(contacts).length === 0 && walletsList.length === 0 ? null : walletsList.length === 0 ? (
                 <Text className='font-bold mt-2' color='text-muted-foreground' size='xs'>
                   Contacts
                 </Text>
@@ -562,10 +531,8 @@ export const SelectNFTRecipient = observer(
                     className={cn(
                       'font-medium text-xs border bg-secondary py-2 px-4 hover:border-secondary-400 cursor-pointer',
                       {
-                        'text-monochrome !border-monochrome rounded-full':
-                          selectedTab === 'contacts',
-                        'text-muted-foreground border-transparent rounded-full':
-                          selectedTab !== 'contacts',
+                        'text-monochrome !border-monochrome rounded-full': selectedTab === 'contacts',
+                        'text-muted-foreground border-transparent rounded-full': selectedTab !== 'contacts',
                       },
                     )}
                     onClick={() => setSelectedTab('contacts')}
@@ -576,10 +543,8 @@ export const SelectNFTRecipient = observer(
                     className={cn(
                       'font-medium text-xs border bg-secondary py-2 px-4 hover:border-secondary-400 cursor-pointer',
                       {
-                        'text-monochrome !border-monochrome rounded-full':
-                          selectedTab === 'wallets',
-                        'text-muted-foreground border-transparent rounded-full':
-                          selectedTab !== 'wallets',
+                        'text-monochrome !border-monochrome rounded-full': selectedTab === 'wallets',
+                        'text-muted-foreground border-transparent rounded-full': selectedTab !== 'wallets',
                       },
                     )}
                     onClick={() => setSelectedTab('wallets')}
@@ -609,8 +574,8 @@ export const SelectNFTRecipient = observer(
                   emoji: undefined,
                   name: existingResult?.name ?? '',
                   selectionType: 'notSaved',
-                })
-                allowReview()
+                });
+                allowReview();
               }}
             >
               <div className='flex justify-between items-center w-full'>
@@ -619,18 +584,12 @@ export const SelectNFTRecipient = observer(
 
                   <div className='flex flex-col'>
                     {existingResult && (
-                      <p className='font-bold text-left text-monochrome text-sm capitalize'>
-                        {existingResult.name}
-                      </p>
+                      <p className='font-bold text-left text-monochrome text-sm capitalize'>{existingResult.name}</p>
                     )}
                     {existingResult ? (
-                      <p className='text-sm text-muted-foreground text-left'>
-                        {sliceAddress(recipientInputValue)}
-                      </p>
+                      <p className='text-sm text-muted-foreground text-left'>{sliceAddress(recipientInputValue)}</p>
                     ) : (
-                      <p className='font-bold text-left text-monochrome text-sm'>
-                        {sliceAddress(recipientInputValue)}
-                      </p>
+                      <p className='font-bold text-left text-monochrome text-sm'>{sliceAddress(recipientInputValue)}</p>
                     )}
                   </div>
                 </div>
@@ -640,6 +599,6 @@ export const SelectNFTRecipient = observer(
           ) : null}
         </div>
       </BottomModal>
-    )
+    );
   },
-)
+);

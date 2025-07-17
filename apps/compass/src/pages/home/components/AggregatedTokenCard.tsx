@@ -6,34 +6,34 @@ import {
   sliceWord,
   useGetChains,
   useUserPreferredCurrency,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import BigNumber from 'bignumber.js'
-import { AnimatePresence, motion } from 'framer-motion'
-import { useFormatCurrency } from 'hooks/settings/useCurrency'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import { observer } from 'mobx-react-lite'
-import React, { useMemo } from 'react'
-import { hideAssetsStore } from 'stores/hide-assets-store'
-import { hidePercentChangeStore } from 'stores/hide-percent-change'
-import { cn } from 'utils/cn'
-import { imgOnError } from 'utils/imgOnError'
-import { opacityFadeInOut, transition150 } from 'utils/motion-variants'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import BigNumber from 'bignumber.js';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useFormatCurrency } from 'hooks/settings/useCurrency';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { observer } from 'mobx-react-lite';
+import React, { useMemo } from 'react';
+import { hideAssetsStore } from 'stores/hide-assets-store';
+import { hidePercentChangeStore } from 'stores/hide-percent-change';
+import { cn } from 'utils/cn';
+import { imgOnError } from 'utils/imgOnError';
+import { opacityFadeInOut, transition150 } from 'utils/motion-variants';
 
 type AggregatedTokenCardProps = {
-  readonly title: string
-  readonly usdValue: string | undefined
-  readonly amount: string
-  readonly symbol: string
-  readonly assetImg: string | undefined
-  readonly onClick: () => void
-  readonly ibcChainInfo: IbcChainInfo | undefined
-  readonly isEvm: boolean | undefined
-  readonly tokenBalanceOnChain: SupportedChain
-  readonly isPlaceholder?: boolean
-  percentChange24?: number
-  className?: string
-}
+  readonly title: string;
+  readonly usdValue: string | undefined;
+  readonly amount: string;
+  readonly symbol: string;
+  readonly assetImg: string | undefined;
+  readonly onClick: () => void;
+  readonly ibcChainInfo: IbcChainInfo | undefined;
+  readonly isEvm: boolean | undefined;
+  readonly tokenBalanceOnChain: SupportedChain;
+  readonly isPlaceholder?: boolean;
+  percentChange24?: number;
+  className?: string;
+};
 
 const AggregatedTokenCardView = ({
   title,
@@ -49,32 +49,28 @@ const AggregatedTokenCardView = ({
   percentChange24,
   className,
 }: AggregatedTokenCardProps) => {
-  const chains = useGetChains()
-  const [formatCurrency] = useFormatCurrency()
+  const chains = useGetChains();
+  const [formatCurrency] = useFormatCurrency();
 
-  const defaultTokenLogo = useDefaultTokenLogo()
-  const [preferredCurrency] = useUserPreferredCurrency()
-  const formattedFiatValue = formatCurrency(new BigNumber(usdValue || 0), true)
+  const defaultTokenLogo = useDefaultTokenLogo();
+  const [preferredCurrency] = useUserPreferredCurrency();
+  const formattedFiatValue = formatCurrency(new BigNumber(usdValue || 0), true);
 
-  const ibcInfo = ibcChainInfo
-    ? `${ibcChainInfo.pretty_name} / ${sliceWord(ibcChainInfo?.channelId ?? '', 7, 5)}`
-    : ''
+  const ibcInfo = ibcChainInfo ? `${ibcChainInfo.pretty_name} / ${sliceWord(ibcChainInfo?.channelId ?? '', 7, 5)}` : '';
 
-  const chainName = chains[tokenBalanceOnChain]?.chainName ?? 'Unknown Chain'
+  const chainName = chains[tokenBalanceOnChain]?.chainName ?? 'Unknown Chain';
 
   const percentChangeText = useMemo(() => {
     if (!percentChange24) {
-      return '-'
+      return '-';
     }
 
     if (percentChange24 >= 0) {
-      return `+${formatPercentAmount(percentChange24.toString(), 2)}%`
+      return `+${formatPercentAmount(percentChange24.toString(), 2)}%`;
     } else {
-      return percentChange24 >= -100
-        ? `${formatPercentAmount(percentChange24.toString(), 2)}%`
-        : '-99.99%'
+      return percentChange24 >= -100 ? `${formatPercentAmount(percentChange24.toString(), 2)}%` : '-99.99%';
     }
-  }, [percentChange24])
+  }, [percentChange24]);
 
   return (
     <div
@@ -105,12 +101,7 @@ const AggregatedTokenCardView = ({
             exit='hidden'
           >
             {hideAssetsStore.formatHideBalance(
-              formatTokenAmount(
-                amount,
-                sliceWord(symbol, 4, 4),
-                3,
-                currencyDetail[preferredCurrency].locale,
-              ),
+              formatTokenAmount(amount, sliceWord(symbol, 4, 4), 3, currencyDetail[preferredCurrency].locale),
             )}
             {isEvm ? ' · EVM' : ''}
             {ibcInfo ? <span title={ibcInfo}> · IBC</span> : null}
@@ -125,10 +116,7 @@ const AggregatedTokenCardView = ({
           <AnimatePresence mode='wait'>
             <motion.span
               key={hideAssetsStore.isHidden ? 'hidden-fiat' : 'visible-fiat'}
-              className={
-                'font-bold text-sm text-end ' +
-                (hideAssetsStore.isHidden ? 'text-muted-foreground' : '')
-              }
+              className={'font-bold text-sm text-end ' + (hideAssetsStore.isHidden ? 'text-muted-foreground' : '')}
               transition={transition150}
               variants={opacityFadeInOut}
               initial='hidden'
@@ -165,7 +153,7 @@ const AggregatedTokenCardView = ({
         </AnimatePresence>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export const AggregatedTokenCard = observer(AggregatedTokenCardView)
+export const AggregatedTokenCard = observer(AggregatedTokenCardView);

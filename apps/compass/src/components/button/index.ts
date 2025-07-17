@@ -1,2 +1,2 @@
-export * from './HeaderActionButton'
-export * from './WalletButton'
+export * from './HeaderActionButton';
+export * from './WalletButton';

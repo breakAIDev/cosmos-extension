@@ -1,74 +1,72 @@
-import { useActiveWallet } from '@leapwallet/cosmos-wallet-hooks'
-import { pubKeyToEvmAddressToShow } from '@leapwallet/cosmos-wallet-sdk'
-import { NftStore } from '@leapwallet/cosmos-wallet-store'
-import { Buttons, GenericCard } from '@leapwallet/leap-ui'
-import classNames from 'classnames'
-import { Images } from 'images'
-import React, { useEffect, useMemo, useState } from 'react'
-import { isCompassWallet } from 'utils/isCompassWallet'
+import { useActiveWallet } from '@leapwallet/cosmos-wallet-hooks';
+import { pubKeyToEvmAddressToShow } from '@leapwallet/cosmos-wallet-sdk';
+import { NftStore } from '@leapwallet/cosmos-wallet-store';
+import { Buttons, GenericCard } from '@leapwallet/leap-ui';
+import classNames from 'classnames';
+import { Images } from 'images';
+import React, { useEffect, useMemo, useState } from 'react';
+import { isCompassWallet } from 'utils/isCompassWallet';
 
 type CantSeeNftsProps = {
-  openAddCollectionSheet: () => void
-  className?: string
-  nftStore: NftStore
-}
+  openAddCollectionSheet: () => void;
+  className?: string;
+  nftStore: NftStore;
+};
 
 export function CantSeeNfts({ openAddCollectionSheet, className, nftStore }: CantSeeNftsProps) {
-  const activeWallet = useActiveWallet()
-  const [showDetails, setShowDetails] = useState(false)
-  const detailsRef = React.useRef<HTMLDivElement>(null)
-  const showAddCollectionSheet = nftStore.compassSeiApiIsDown
+  const activeWallet = useActiveWallet();
+  const [showDetails, setShowDetails] = useState(false);
+  const detailsRef = React.useRef<HTMLDivElement>(null);
+  const showAddCollectionSheet = nftStore.compassSeiApiIsDown;
 
   const externalPlatforms = useMemo(() => {
     const palletSei = {
       title: 'Pallet (Sei)',
       account: `https://pallet.exchange/profile/${activeWallet?.addresses.seiTestnet2}`,
-    }
+    };
 
     if (isCompassWallet()) {
-      return [palletSei]
+      return [palletSei];
     }
 
     const stargaze = {
       title: 'Stargaze',
       account: `https://www.stargaze.zone/p/${activeWallet?.addresses.stargaze}/tokens`,
-    }
+    };
 
     const omniflix = {
       title: 'OmniFlix',
       account: `https://omniflix.market/account/${activeWallet?.addresses.omniflix}/nfts`,
-    }
+    };
 
     const forma = {
       title: 'Forma',
       account: `https://modularium.art/my-collection`,
-    }
+    };
 
     const manta = {
       title: 'Manta',
       account: 'https://nft.manta.network',
-    }
+    };
 
     const lightlink = {
       title: 'Lightlink',
-      account: `https://nft.lightlink.io/users/${pubKeyToEvmAddressToShow(
-        activeWallet?.pubKeys?.lightlink,
-      )}`,
-    }
+      account: `https://nft.lightlink.io/users/${pubKeyToEvmAddressToShow(activeWallet?.pubKeys?.lightlink)}`,
+    };
 
-    return [stargaze, omniflix, forma, manta, lightlink]
+    return [stargaze, omniflix, forma, manta, lightlink];
   }, [
     activeWallet?.addresses.omniflix,
     activeWallet?.addresses.seiTestnet2,
     activeWallet?.addresses.stargaze,
     activeWallet?.pubKeys?.lightlink,
-  ])
+  ]);
 
   useEffect(() => {
     if (showDetails) {
-      detailsRef.current?.scrollIntoView({ behavior: 'smooth' })
+      detailsRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [showDetails])
+  }, [showDetails]);
 
   return (
     <div
@@ -120,8 +118,8 @@ export function CantSeeNfts({ openAddCollectionSheet, className, nftStore }: Can
           )}
 
           <li className='ml-4'>
-            We&apos;re temporarily unable to fetch your NFTs from some platforms. You can still view
-            them on the marketplace.
+            We&apos;re temporarily unable to fetch your NFTs from some platforms. You can still view them on the
+            marketplace.
             <ul className='mt-2 flex items-center gap-4'>
               {externalPlatforms.map((platform) => (
                 <li key={platform.title} className='list-none ml-0'>
@@ -140,5 +138,5 @@ export function CantSeeNfts({ openAddCollectionSheet, className, nftStore }: Can
         </ol>
       </div>
     </div>
-  )
+  );
 }

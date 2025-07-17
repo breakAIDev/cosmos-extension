@@ -6,31 +6,31 @@ import {
   sliceWord,
   Token,
   useUserPreferredCurrency,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { getErc20TokenDetails } from '@leapwallet/cosmos-wallet-sdk'
-import { CompassTokenTagsStore, MarketDataStore } from '@leapwallet/cosmos-wallet-store'
-import { CheckCircle, Copy, Info, MagnifyingGlass, Question } from '@phosphor-icons/react'
-import { useQuery } from '@tanstack/react-query'
-import BigNumber from 'bignumber.js'
-import classNames from 'classnames'
-import BottomModal from 'components/bottom-modal'
-import Text from 'components/text'
-import { PageName } from 'config/analytics'
-import Fuse from 'fuse.js'
-import { useDefaultTokenLogo } from 'hooks'
-import { useFormatCurrency } from 'hooks/settings/useCurrency'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { compassSeiEvmConfigStore } from 'stores/balance-store'
-import { SourceToken } from 'types/swap'
-import { UserClipboard } from 'utils/clipboard'
-import { imgOnError } from 'utils/imgOnError'
-import { isSidePanel } from 'utils/isSidePanel'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { getErc20TokenDetails } from '@leapwallet/cosmos-wallet-sdk';
+import { CompassTokenTagsStore, MarketDataStore } from '@leapwallet/cosmos-wallet-store';
+import { CheckCircle, Copy, Info, MagnifyingGlass, Question } from '@phosphor-icons/react';
+import { useQuery } from '@tanstack/react-query';
+import BigNumber from 'bignumber.js';
+import classNames from 'classnames';
+import BottomModal from 'components/bottom-modal';
+import Text from 'components/text';
+import { PageName } from 'config/analytics';
+import Fuse from 'fuse.js';
+import { useDefaultTokenLogo } from 'hooks';
+import { useFormatCurrency } from 'hooks/settings/useCurrency';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { compassSeiEvmConfigStore } from 'stores/balance-store';
+import { SourceToken } from 'types/swap';
+import { UserClipboard } from 'utils/clipboard';
+import { imgOnError } from 'utils/imgOnError';
+import { isSidePanel } from 'utils/isSidePanel';
 
-import { MergedAsset } from '../hooks'
-import { TokenCardSkeleton } from './TokenCard'
+import { MergedAsset } from '../hooks';
+import { TokenCardSkeleton } from './TokenCard';
 
 export enum TabType {
   All = 'All',
@@ -40,15 +40,15 @@ export enum TabType {
 }
 
 type SelectTokenSheetProps = {
-  isOpen: boolean
-  destinationAssets: SourceToken[]
-  destinationToken: SourceToken | null
-  onClose: () => void
-  onTokenSelect: (token: SourceToken) => void
-  loadingTokens: boolean
-  compassTokenTagsStore: CompassTokenTagsStore
-  marketDataStore: MarketDataStore
-}
+  isOpen: boolean;
+  destinationAssets: SourceToken[];
+  destinationToken: SourceToken | null;
+  onClose: () => void;
+  onTokenSelect: (token: SourceToken) => void;
+  loadingTokens: boolean;
+  compassTokenTagsStore: CompassTokenTagsStore;
+  marketDataStore: MarketDataStore;
+};
 
 const TokenCard = observer(
   ({
@@ -57,97 +57,91 @@ const TokenCard = observer(
     selectedToken,
     marketDataStore,
   }: {
-    token: SourceToken
-    selectedToken: SourceToken | null
-    onTokenSelect: (token: SourceToken) => void
-    marketDataStore: MarketDataStore
+    token: SourceToken;
+    selectedToken: SourceToken | null;
+    onTokenSelect: (token: SourceToken) => void;
+    marketDataStore: MarketDataStore;
   }) => {
-    const [showTooltip, setShowTooltip] = useState(false)
-    const [formatCurrency] = useFormatCurrency()
-    const [preferredCurrency] = useUserPreferredCurrency()
-    const defaultTokenLogo = useDefaultTokenLogo()
-    const [copied, setCopied] = useState(false)
-    const navigate = useNavigate()
-    const marketData = marketDataStore.data
+    const [showTooltip, setShowTooltip] = useState(false);
+    const [formatCurrency] = useFormatCurrency();
+    const [preferredCurrency] = useUserPreferredCurrency();
+    const defaultTokenLogo = useDefaultTokenLogo();
+    const [copied, setCopied] = useState(false);
+    const navigate = useNavigate();
+    const marketData = marketDataStore.data;
 
     const marketDataForToken = useMemo(() => {
-      let key = token.coinGeckoId ?? token.skipAsset?.coingeckoId ?? token.coinMinimalDenom
+      let key = token.coinGeckoId ?? token.skipAsset?.coingeckoId ?? token.coinMinimalDenom;
       if (marketData?.[key]) {
-        return marketData[key]
+        return marketData[key];
       }
-      key = token.coinMinimalDenom
+      key = token.coinMinimalDenom;
       if (marketData?.[key]) {
-        return marketData[key]
+        return marketData[key];
       }
-      key = `${token.skipAsset?.chainId}-${token.coinMinimalDenom}`
+      key = `${token.skipAsset?.chainId}-${token.coinMinimalDenom}`;
       if (marketData?.[key]) {
-        return marketData[key]
+        return marketData[key];
       }
       if (!token?.skipAsset?.evmTokenContract) {
-        return undefined
+        return undefined;
       }
-      key = `${token.skipAsset?.chainId}-${token.skipAsset?.evmTokenContract}`
-      return marketData?.[key] ?? marketData?.[key?.toLowerCase()]
-    }, [marketData, token])
+      key = `${token.skipAsset?.chainId}-${token.skipAsset?.evmTokenContract}`;
+      return marketData?.[key] ?? marketData?.[key?.toLowerCase()];
+    }, [marketData, token]);
 
     const isSelected = useMemo(() => {
       let _isSelected =
         getKeyToUseForDenoms(token.skipAsset.denom, token.skipAsset.originChainId) ===
-        getKeyToUseForDenoms(
-          selectedToken?.skipAsset?.denom ?? '',
-          selectedToken?.skipAsset?.originChainId ?? '',
-        )
+        getKeyToUseForDenoms(selectedToken?.skipAsset?.denom ?? '', selectedToken?.skipAsset?.originChainId ?? '');
 
       if (token.ibcDenom !== undefined && selectedToken?.ibcDenom !== undefined) {
-        _isSelected = _isSelected && token.ibcDenom === selectedToken.ibcDenom
+        _isSelected = _isSelected && token.ibcDenom === selectedToken.ibcDenom;
       }
-      return _isSelected
-    }, [selectedToken, token])
+      return _isSelected;
+    }, [selectedToken, token]);
 
     const handleMouseEnter = useCallback(() => {
-      setShowTooltip(true)
-    }, [])
+      setShowTooltip(true);
+    }, []);
     const handleMouseLeave = useCallback(() => {
-      setShowTooltip(false)
-    }, [])
+      setShowTooltip(false);
+    }, []);
 
     const handleCopyClick = useCallback(() => {
-      UserClipboard.copyText(
-        token.skipAsset?.evmTokenContract ?? token.skipAsset.tokenContract ?? '',
-      )
-      setCopied(true)
+      UserClipboard.copyText(token.skipAsset?.evmTokenContract ?? token.skipAsset.tokenContract ?? '');
+      setCopied(true);
 
       setTimeout(() => {
-        setCopied(false)
-      }, 2000)
-    }, [token.skipAsset?.evmTokenContract, token.skipAsset?.tokenContract])
+        setCopied(false);
+      }, 2000);
+    }, [token.skipAsset?.evmTokenContract, token.skipAsset?.tokenContract]);
 
     const handleMoreDetailsClick = useCallback(() => {
-      const asset: Token = token
-      sessionStorage.setItem('navigate-assetDetails-state', JSON.stringify(asset))
-      let chain = token.chain ?? token.skipAsset?.originChainId
+      const asset: Token = token;
+      sessionStorage.setItem('navigate-assetDetails-state', JSON.stringify(asset));
+      let chain = token.chain ?? token.skipAsset?.originChainId;
       if (chain === String(compassSeiEvmConfigStore.compassSeiEvmConfig.PACIFIC_ETH_CHAIN_ID)) {
-        chain = 'seiTestnet2'
+        chain = 'seiTestnet2';
       }
       navigate(
-        `/assetDetails?assetName=${(
-          token.skipAsset?.originDenom ??
-          token.coinMinimalDenom ??
-          ''
-        )?.replace(/(cw20:|erc20\/)/g, '')}&tokenChain=${chain}&pageSource=${PageName.SwapsStart}`,
-      )
-    }, [token, navigate])
+        `/assetDetails?assetName=${(token.skipAsset?.originDenom ?? token.coinMinimalDenom ?? '')?.replace(
+          /(cw20:|erc20\/)/g,
+          '',
+        )}&tokenChain=${chain}&pageSource=${PageName.SwapsStart}`,
+      );
+    }, [token, navigate]);
 
     const usdPrice = useMemo(() => {
-      return marketDataForToken?.current_price ?? token?.usdPrice
-    }, [marketDataForToken, token?.usdPrice])
+      return marketDataForToken?.current_price ?? token?.usdPrice;
+    }, [marketDataForToken, token?.usdPrice]);
 
     const usdValue = useMemo(() => {
       if (token.usdValue) {
-        return token.usdValue
+        return token.usdValue;
       }
-      return usdPrice ? new BigNumber(usdPrice).multipliedBy(token.amount).toString() : ''
-    }, [usdPrice, token.amount, token.usdValue])
+      return usdPrice ? new BigNumber(usdPrice).multipliedBy(token.amount).toString() : '';
+    }, [usdPrice, token.amount, token.usdValue]);
 
     return (
       <div className='relative'>
@@ -206,19 +200,11 @@ const TokenCard = observer(
                 </Text>
                 <Text size='sm' className='font-medium' color='text-gray-800 dark:text-gray-200'>
                   {usdPrice ? (
-                    <Text
-                      size='sm'
-                      className='font-medium'
-                      color='text-gray-800 dark:text-gray-200'
-                    >
+                    <Text size='sm' className='font-medium' color='text-gray-800 dark:text-gray-200'>
                       {formatCurrency(new BigNumber(usdPrice), false, 6)}
                     </Text>
                   ) : (
-                    <Text
-                      size='sm'
-                      className='font-medium'
-                      color='text-gray-800 dark:text-gray-200'
-                    >
+                    <Text size='sm' className='font-medium' color='text-gray-800 dark:text-gray-200'>
                       -
                     </Text>
                   )}
@@ -231,18 +217,12 @@ const TokenCard = observer(
                 {marketDataForToken?.price_change_percentage_24h ? (
                   <div
                     className={classNames('text-sm font-medium !leading-[18px]', {
-                      'text-green-500 dark:text-green-500':
-                        marketDataForToken.price_change_percentage_24h >= 0,
-                      'text-red-600 dark:text-red-400':
-                        marketDataForToken.price_change_percentage_24h < 0,
+                      'text-green-500 dark:text-green-500': marketDataForToken.price_change_percentage_24h >= 0,
+                      'text-red-600 dark:text-red-400': marketDataForToken.price_change_percentage_24h < 0,
                     })}
                   >
                     {marketDataForToken.price_change_percentage_24h > 0 ? '+' : ''}
-                    {formatPercentAmount(
-                      new BigNumber(marketDataForToken.price_change_percentage_24h).toString(),
-                      2,
-                    )}
-                    %
+                    {formatPercentAmount(new BigNumber(marketDataForToken.price_change_percentage_24h).toString(), 2)}%
                   </div>
                 ) : (
                   <Text size='sm' className='font-medium' color='text-gray-800 dark:text-gray-200'>
@@ -283,9 +263,9 @@ const TokenCard = observer(
           </div>
         )}
       </div>
-    )
+    );
   },
-)
+);
 
 const TokenList = observer(
   ({
@@ -295,11 +275,11 @@ const TokenList = observer(
     selectedToken,
     marketDataStore,
   }: {
-    header: string
-    tokens: SourceToken[]
-    onTokenSelect: (token: SourceToken) => void
-    selectedToken: SourceToken | null
-    marketDataStore: MarketDataStore
+    header: string;
+    tokens: SourceToken[];
+    onTokenSelect: (token: SourceToken) => void;
+    selectedToken: SourceToken | null;
+    marketDataStore: MarketDataStore;
   }) => {
     return (
       <div className='flex flex-col'>
@@ -316,16 +296,14 @@ const TokenList = observer(
                 selectedToken={selectedToken}
                 marketDataStore={marketDataStore}
               />
-              {index !== tokens.length - 1 && (
-                <div className='border-b w-full border-gray-100 dark:border-gray-850' />
-              )}
+              {index !== tokens.length - 1 && <div className='border-b w-full border-gray-100 dark:border-gray-850' />}
             </>
-          )
+          );
         })}
       </div>
-    )
+    );
   },
-)
+);
 
 export const SelectDestinationSheet = observer(
   ({
@@ -338,70 +316,70 @@ export const SelectDestinationSheet = observer(
     compassTokenTagsStore,
     marketDataStore,
   }: SelectTokenSheetProps) => {
-    const [searchQuery, setSearchQuery] = useState('')
-    const [selectedTab, setSelectedTab] = useState<TabType>(TabType.All)
-    const inputRef = useRef<HTMLInputElement>(null)
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedTab, setSelectedTab] = useState<TabType>(TabType.All);
+    const inputRef = useRef<HTMLInputElement>(null);
 
     const trendingTokens = useMemo(() => {
-      if (searchQuery.length !== 0) return []
+      if (searchQuery.length !== 0) return [];
       return destinationAssets.filter((token) => {
-        let tag = compassTokenTagsStore.compassTokenTags[token.coinMinimalDenom]
+        let tag = compassTokenTagsStore.compassTokenTags[token.coinMinimalDenom];
         if (!tag && token.skipAsset.evmTokenContract) {
-          tag = compassTokenTagsStore.compassTokenTags[token.skipAsset.evmTokenContract]
+          tag = compassTokenTagsStore.compassTokenTags[token.skipAsset.evmTokenContract];
         }
         if (tag) {
-          return tag.includes('Trending')
+          return tag.includes('Trending');
         }
-        return false
-      })
-    }, [compassTokenTagsStore.compassTokenTags, destinationAssets, searchQuery.length])
+        return false;
+      });
+    }, [compassTokenTagsStore.compassTokenTags, destinationAssets, searchQuery.length]);
 
     const tabTokens = useMemo(() => {
-      if (selectedTab === TabType.All && searchQuery.length !== 0) return destinationAssets
+      if (selectedTab === TabType.All && searchQuery.length !== 0) return destinationAssets;
 
       return destinationAssets.filter((token) => {
-        let tag = compassTokenTagsStore.compassTokenTags[token.coinMinimalDenom]
+        let tag = compassTokenTagsStore.compassTokenTags[token.coinMinimalDenom];
         if (!tag && token.skipAsset.evmTokenContract) {
-          tag = compassTokenTagsStore.compassTokenTags[token.skipAsset.evmTokenContract]
+          tag = compassTokenTagsStore.compassTokenTags[token.skipAsset.evmTokenContract];
         }
         if (tag) {
-          return tag.includes(selectedTab)
+          return tag.includes(selectedTab);
         }
-        return false
-      })
-    }, [compassTokenTagsStore.compassTokenTags, destinationAssets, searchQuery.length, selectedTab])
+        return false;
+      });
+    }, [compassTokenTagsStore.compassTokenTags, destinationAssets, searchQuery.length, selectedTab]);
 
     const simpleFuse = useMemo(() => {
-      const keys = ['symbol', 'name']
+      const keys = ['symbol', 'name'];
       const fuseOptions = {
         keys,
         threshold: 0.3,
         ignoreLocation: true,
-      }
-      return new Fuse(destinationAssets, fuseOptions)
-    }, [destinationAssets])
+      };
+      return new Fuse(destinationAssets, fuseOptions);
+    }, [destinationAssets]);
 
     const extendedFuse = useMemo(() => {
-      const keys = ['symbol', 'name', 'coinMinimalDenom', 'ibcDenom', 'skipAsset.evmTokenContract']
+      const keys = ['symbol', 'name', 'coinMinimalDenom', 'ibcDenom', 'skipAsset.evmTokenContract'];
       const fuseOptions = {
         keys,
         threshold: 0.3,
         ignoreLocation: true,
-      }
-      return new Fuse(destinationAssets, fuseOptions)
-    }, [destinationAssets])
+      };
+      return new Fuse(destinationAssets, fuseOptions);
+    }, [destinationAssets]);
 
     const filteredTokens = useMemo(() => {
       if (searchQuery.length === 0) {
-        return tabTokens
+        return tabTokens;
       }
-      let fuse = simpleFuse
+      let fuse = simpleFuse;
       if (searchQuery.length >= 8) {
-        fuse = extendedFuse
+        fuse = extendedFuse;
       }
-      const searchResult = fuse.search(searchQuery)
-      return searchResult.map((result) => result.item)
-    }, [searchQuery, simpleFuse, tabTokens, extendedFuse])
+      const searchResult = fuse.search(searchQuery);
+      return searchResult.map((result) => result.item);
+    }, [searchQuery, simpleFuse, tabTokens, extendedFuse]);
 
     const { data: nonSupportedERC20Token } = useQuery(
       ['erc20-token-details', searchQuery],
@@ -411,7 +389,7 @@ export const SelectDestinationSheet = observer(
             searchQuery,
             compassSeiEvmConfigStore.compassSeiEvmConfig.PACIFIC_EVM_RPC_URL,
             compassSeiEvmConfigStore.compassSeiEvmConfig.PACIFIC_ETH_CHAIN_ID,
-          )
+          );
           const denomInfo = {
             name: token.name,
             coinDenom: token.symbol,
@@ -420,7 +398,7 @@ export const SelectDestinationSheet = observer(
             icon: '',
             chain: 'seiTestnet2',
             coinGeckoId: '',
-          }
+          };
           const mergedAsset: MergedAsset = {
             evmTokenContract: searchQuery,
             evmChainId: String(compassSeiEvmConfigStore.compassSeiEvmConfig.PACIFIC_ETH_CHAIN_ID),
@@ -436,7 +414,7 @@ export const SelectDestinationSheet = observer(
             isCw20: false,
             name: denomInfo.name ?? denomInfo.coinDenom,
             tokenContract: searchQuery,
-          }
+          };
           return {
             skipAsset: mergedAsset,
             symbol: denomInfo.coinDenom,
@@ -448,38 +426,37 @@ export const SelectDestinationSheet = observer(
             tokenBalanceOnChain: 'seiTestnet2',
             name: denomInfo.name ?? denomInfo.coinDenom,
             coinDecimals: denomInfo.coinDecimals,
-          }
+          };
         } catch (error) {
           // eslint-disable-next-line no-console
-          console.error('Error fetching non supported ERC20 token details', error)
-          return undefined
+          console.error('Error fetching non supported ERC20 token details', error);
+          return undefined;
         }
       },
       {
-        enabled:
-          searchQuery.length >= 8 && searchQuery.startsWith('0x') && filteredTokens.length === 0,
+        enabled: searchQuery.length >= 8 && searchQuery.startsWith('0x') && filteredTokens.length === 0,
       },
-    )
+    );
 
     const handleResetClick = useCallback(() => {
-      setSearchQuery('')
-      setSelectedTab(TabType.All)
-      inputRef.current?.focus()
-    }, [])
+      setSearchQuery('');
+      setSelectedTab(TabType.All);
+      inputRef.current?.focus();
+    }, []);
 
     useEffect(() => {
       if (inputRef.current) {
         setTimeout(() => {
-          inputRef.current?.focus()
-        }, 100)
+          inputRef.current?.focus();
+        }, 100);
       }
-    }, [])
+    }, []);
 
     useEffect(() => {
       if (isOpen) {
-        setSearchQuery('')
+        setSearchQuery('');
       }
-    }, [isOpen])
+    }, [isOpen]);
 
     return (
       <BottomModal
@@ -514,9 +491,7 @@ export const SelectDestinationSheet = observer(
               {[...Array(5)].map((_, index) => (
                 <>
                   <TokenCardSkeleton key={index} />
-                  {index !== 4 && (
-                    <div className='border-b w-full border-gray-100 dark:border-gray-850' />
-                  )}
+                  {index !== 4 && <div className='border-b w-full border-gray-100 dark:border-gray-850' />}
                 </>
               ))}
             </div>
@@ -533,7 +508,7 @@ export const SelectDestinationSheet = observer(
                 <>
                   <div className='flex gap-x-2 pb-4 sticky z-[2] top-0 bg-white-100 dark:bg-gray-950'>
                     {(Object.keys(TabType) as Array<keyof typeof TabType>).map((key) => {
-                      const tab = TabType[key]
+                      const tab = TabType[key];
                       return (
                         <button
                           key={tab}
@@ -546,7 +521,7 @@ export const SelectDestinationSheet = observer(
                         >
                           {tab}
                         </button>
-                      )
+                      );
                     })}
                   </div>
                   {/* Trending tokens */}
@@ -566,11 +541,7 @@ export const SelectDestinationSheet = observer(
                 <TokenList
                   header='Tokens'
                   tokens={
-                    filteredTokens.length > 0
-                      ? filteredTokens
-                      : nonSupportedERC20Token
-                      ? [nonSupportedERC20Token]
-                      : []
+                    filteredTokens.length > 0 ? filteredTokens : nonSupportedERC20Token ? [nonSupportedERC20Token] : []
                   }
                   onTokenSelect={onTokenSelect}
                   selectedToken={destinationToken}
@@ -607,6 +578,6 @@ export const SelectDestinationSheet = observer(
           )}
         </div>
       </BottomModal>
-    )
+    );
   },
-)
+);

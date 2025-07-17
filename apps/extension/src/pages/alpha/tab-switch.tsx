@@ -1,7 +1,7 @@
-import { motion } from 'framer-motion'
-import { useQueryParams } from 'hooks/useQuery'
-import React from 'react'
-import { queryParams } from 'utils/query-params'
+import { motion } from 'framer-motion';
+import { useQueryParams } from 'hooks/useQuery';
+import React from 'react';
+import { queryParams } from 'utils/query-params';
 
 const tabs = [
   {
@@ -12,11 +12,11 @@ const tabs = [
     label: 'Chad Exclusives',
     value: 'exclusive',
   },
-]
+];
 
 export const TabSwitch = () => {
-  const params = useQueryParams()
-  const activeTab = params.get(queryParams.alphaTab) || 'all'
+  const params = useQueryParams();
+  const activeTab = params.get(queryParams.alphaTab) || 'all';
 
   return (
     <div className='flex w-full border-b border-gray-200 dark:border-gray-800 relative'>
@@ -41,5 +41,5 @@ export const TabSwitch = () => {
         </button>
       ))}
     </div>
-  )
-}
+  );
+};

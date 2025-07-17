@@ -4,26 +4,26 @@ import {
   useSetBetaCW20Tokens,
   useSetBetaSnip20Tokens,
   useSnipDenoms,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { SUPPORTED_METHODS } from '@leapwallet/cosmos-wallet-provider/dist/provider/messaging/requester'
-import { Sscrt, SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { captureException } from '@sentry/react'
-import { AxiosError } from 'axios'
-import { LoaderAnimation } from 'components/loader/Loader'
-import Text from 'components/text'
-import { BG_RESPONSE, SUGGEST_TOKEN } from 'config/storage-keys'
-import { decodeChainIdToChain } from 'extension-scripts/utils'
-import { useCreateViewingKey, verifyViewingKey } from 'hooks/secret/useCreateViewingKey'
-import { observer } from 'mobx-react-lite'
-import React, { useCallback, useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { betaCW20DenomsStore, enabledCW20DenomsStore } from 'stores/denoms-store-instance'
-import { rootBalanceStore } from 'stores/root-store'
-import { Colors } from 'theme/colors'
-import { getContractInfo } from 'utils/getContractInfo'
-import { isSidePanel } from 'utils/isSidePanel'
-import { uiErrorTags } from 'utils/sentry'
-import Browser from 'webextension-polyfill'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { SUPPORTED_METHODS } from '@leapwallet/cosmos-wallet-provider/dist/provider/messaging/requester';
+import { Sscrt, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { captureException } from '@sentry/react';
+import { AxiosError } from 'axios';
+import { LoaderAnimation } from 'components/loader/Loader';
+import Text from 'components/text';
+import { BG_RESPONSE, SUGGEST_TOKEN } from 'config/storage-keys';
+import { decodeChainIdToChain } from 'extension-scripts/utils';
+import { useCreateViewingKey, verifyViewingKey } from 'hooks/secret/useCreateViewingKey';
+import { observer } from 'mobx-react-lite';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { betaCW20DenomsStore, enabledCW20DenomsStore } from 'stores/denoms-store-instance';
+import { rootBalanceStore } from 'stores/root-store';
+import { Colors } from 'theme/colors';
+import { getContractInfo } from 'utils/getContractInfo';
+import { isSidePanel } from 'utils/isSidePanel';
+import { uiErrorTags } from 'utils/sentry';
+import Browser from 'webextension-polyfill';
 
 import {
   ChildrenParams,
@@ -34,32 +34,32 @@ import {
   SuggestContainer,
   TokenContractAddress,
   TokenContractInfo,
-} from './components'
-import { TokenContractInfoSkeleton } from './components/TokenContractInfoSkeleton'
+} from './components';
+import { TokenContractInfoSkeleton } from './components/TokenContractInfoSkeleton';
 
 const SuggestSecret = observer(({ handleRejectBtnClick }: ChildrenParams) => {
-  const chains = useGetChains()
-  const createViewingKey = useCreateViewingKey()
-  const secretTokens = useSnipDenoms()
-  const navigate = useNavigate()
-  const getChainApis = useGetChainApis('secret', 'mainnet', chains)
-  const setBetaCW20Tokens = useSetBetaCW20Tokens()
-  const setSnip20Tokens = useSetBetaSnip20Tokens()
+  const chains = useGetChains();
+  const createViewingKey = useCreateViewingKey();
+  const secretTokens = useSnipDenoms();
+  const navigate = useNavigate();
+  const getChainApis = useGetChainApis('secret', 'mainnet', chains);
+  const setBetaCW20Tokens = useSetBetaCW20Tokens();
+  const setSnip20Tokens = useSetBetaSnip20Tokens();
 
-  const [customKey, setCustomKey] = useState('')
-  const [advancedFeature, setAdvancedFeature] = useState(false)
-  const [isVerifying, setIsVerifying] = useState(false)
-  const [isCustomKeyError, setIsCustomKeyError] = useState(false)
+  const [customKey, setCustomKey] = useState('');
+  const [advancedFeature, setAdvancedFeature] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isCustomKeyError, setIsCustomKeyError] = useState(false);
 
-  const [isFetching, setIsFetching] = useState(true)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [isFetching, setIsFetching] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const [contractInfo, setContractInfo] = useState({
     decimals: 0,
     name: '',
     symbol: '',
-  })
+  });
 
   const [payload, setPayload] = useState({
     contractAddress: '',
@@ -67,108 +67,102 @@ const SuggestSecret = observer(({ handleRejectBtnClick }: ChildrenParams) => {
     viewingKey: '',
     type: '',
     chainId: 'secret-4',
-  })
-  const isUpdateSecret20Type = payload.type !== SUPPORTED_METHODS.SUGGEST_CW20_TOKEN
+  });
+  const isUpdateSecret20Type = payload.type !== SUPPORTED_METHODS.SUGGEST_CW20_TOKEN;
 
   useEffect(() => {
     Browser.storage.local.get([SUGGEST_TOKEN]).then(async (res) => {
-      const _payload = res[SUGGEST_TOKEN]
-      const chainIdToChain = await decodeChainIdToChain()
-      const chain = chainIdToChain[_payload.chainId]
-      const { lcdUrl } = getChainApis(false, chain as SupportedChain, 'mainnet')
+      const _payload = res[SUGGEST_TOKEN];
+      const chainIdToChain = await decodeChainIdToChain();
+      const chain = chainIdToChain[_payload.chainId];
+      const { lcdUrl } = getChainApis(false, chain as SupportedChain, 'mainnet');
 
       if (_payload && lcdUrl) {
         try {
-          setIsFetching(true)
-          setPayload(_payload)
-          setError('')
+          setIsFetching(true);
+          setPayload(_payload);
+          setError('');
 
           if (_payload.type !== SUPPORTED_METHODS.SUGGEST_CW20_TOKEN) {
             if (secretTokens?.[_payload.contractAddress]) {
-              const denom = secretTokens[_payload.contractAddress]
+              const denom = secretTokens[_payload.contractAddress];
               setContractInfo({
                 name: denom.name,
                 symbol: denom.symbol,
                 decimals: denom.decimals,
-              })
+              });
             } else {
-              const sscrt = Sscrt.create(lcdUrl, _payload.chainId, _payload.address)
-              const resp = await sscrt.getTokenParams(_payload.contractAddress)
+              const sscrt = Sscrt.create(lcdUrl, _payload.chainId, _payload.address);
+              const resp = await sscrt.getTokenParams(_payload.contractAddress);
 
               if (resp.token_info) {
-                setContractInfo(resp.token_info)
+                setContractInfo(resp.token_info);
               }
             }
           } else {
-            const result = await getContractInfo(lcdUrl, _payload.contractAddress)
+            const result = await getContractInfo(lcdUrl, _payload.contractAddress);
 
             if (typeof result === 'string' && result.includes('Invalid')) {
-              setError('Invalid Contract Address')
-              return
+              setError('Invalid Contract Address');
+              return;
             }
             setContractInfo({
               name: result.name,
               symbol: result.symbol,
               decimals: result.decimals,
-            })
+            });
           }
         } catch (e) {
           if (e instanceof AxiosError) {
-            setError(e.response?.data?.message ?? e.message)
+            setError(e.response?.data?.message ?? e.message);
           } else {
-            setError((e as Error).message)
+            setError((e as Error).message);
           }
 
           captureException(e, {
             tags: uiErrorTags,
-          })
+          });
         } finally {
-          setIsFetching(false)
+          setIsFetching(false);
         }
       }
-      setIsFetching(false)
-    })
-  }, [getChainApis, secretTokens])
+      setIsFetching(false);
+    });
+  }, [getChainApis, secretTokens]);
 
   const verifyViewingKeyOnChange = useCallback(async () => {
-    setIsVerifying(true)
-    const chainIdToChain = await decodeChainIdToChain()
-    const chain = chainIdToChain[payload.chainId]
-    const { lcdUrl = '' } = getChainApis(false, chain as SupportedChain, 'mainnet')
+    setIsVerifying(true);
+    const chainIdToChain = await decodeChainIdToChain();
+    const chain = chainIdToChain[payload.chainId];
+    const { lcdUrl = '' } = getChainApis(false, chain as SupportedChain, 'mainnet');
 
-    const validKey = await verifyViewingKey(
-      lcdUrl,
-      customKey,
-      payload.contractAddress,
-      payload.address,
-    )
+    const validKey = await verifyViewingKey(lcdUrl, customKey, payload.contractAddress, payload.address);
 
-    setIsCustomKeyError(!validKey)
-    setIsVerifying(false)
-    return validKey
-  }, [customKey, getChainApis, payload.address, payload.chainId, payload.contractAddress])
+    setIsCustomKeyError(!validKey);
+    setIsVerifying(false);
+    return validKey;
+  }, [customKey, getChainApis, payload.address, payload.chainId, payload.contractAddress]);
 
   const approveNewToken = useCallback(async () => {
     if (isUpdateSecret20Type) {
       if (customKey) {
-        const validKey = await verifyViewingKeyOnChange()
-        if (!validKey) return
+        const validKey = await verifyViewingKeyOnChange();
+        if (!validKey) return;
       }
 
-      setIsLoading(true)
-      const chainIdToChain = await decodeChainIdToChain()
-      const chain = chainIdToChain[payload.chainId]
-      const { lcdUrl = '' } = getChainApis(false, chain as SupportedChain, 'mainnet')
+      setIsLoading(true);
+      const chainIdToChain = await decodeChainIdToChain();
+      const chain = chainIdToChain[payload.chainId];
+      const { lcdUrl = '' } = getChainApis(false, chain as SupportedChain, 'mainnet');
 
       await createViewingKey(
         lcdUrl,
         payload.chainId,
         payload.address,
         payload.contractAddress,
-        payload.type === SUPPORTED_METHODS.UPDATE_SECRET20_VIEWING_KEY ||
-          (advancedFeature && !!customKey),
+        payload.type === SUPPORTED_METHODS.UPDATE_SECRET20_VIEWING_KEY || (advancedFeature && !!customKey),
         { key: payload.viewingKey || customKey },
-      )
+      );
 
       if (!secretTokens[payload.contractAddress]) {
         const newSnipToken = {
@@ -177,14 +171,14 @@ const SuggestSecret = observer(({ handleRejectBtnClick }: ChildrenParams) => {
           decimals: contractInfo.decimals,
           coinGeckoId: '',
           icon: '',
-        }
+        };
 
-        await setSnip20Tokens(payload.contractAddress, newSnipToken, chain)
+        await setSnip20Tokens(payload.contractAddress, newSnipToken, chain);
       }
     } else {
-      setIsLoading(true)
-      const chainIdToChain = await decodeChainIdToChain()
-      const chain = chainIdToChain[payload.chainId] as SupportedChain
+      setIsLoading(true);
+      const chainIdToChain = await decodeChainIdToChain();
+      const chain = chainIdToChain[payload.chainId] as SupportedChain;
 
       const cw20Token = {
         coinDenom: contractInfo.symbol,
@@ -193,31 +187,31 @@ const SuggestSecret = observer(({ handleRejectBtnClick }: ChildrenParams) => {
         coinGeckoId: '',
         icon: '',
         chain,
-      }
+      };
 
-      window.removeEventListener('beforeunload', handleRejectBtnClick)
-      await betaCW20DenomsStore.setBetaCW20Denoms(payload.contractAddress, cw20Token, chain)
+      window.removeEventListener('beforeunload', handleRejectBtnClick);
+      await betaCW20DenomsStore.setBetaCW20Denoms(payload.contractAddress, cw20Token, chain);
 
-      const enabledCW20Tokens = enabledCW20DenomsStore.getEnabledCW20DenomsForChain(chain)
-      const _enabledCW20Tokens = [...enabledCW20Tokens, payload.contractAddress]
-      await enabledCW20DenomsStore.setEnabledCW20Denoms(_enabledCW20Tokens, chain)
-      rootBalanceStore.loadBalances()
+      const enabledCW20Tokens = enabledCW20DenomsStore.getEnabledCW20DenomsForChain(chain);
+      const _enabledCW20Tokens = [...enabledCW20Tokens, payload.contractAddress];
+      await enabledCW20DenomsStore.setEnabledCW20Denoms(_enabledCW20Tokens, chain);
+      rootBalanceStore.loadBalances();
     }
-    window.removeEventListener('beforeunload', handleRejectBtnClick)
+    window.removeEventListener('beforeunload', handleRejectBtnClick);
     await Browser.storage.local.set({
       [BG_RESPONSE]: { data: 'Approved' },
-    })
+    });
 
     setTimeout(async () => {
-      await Browser.storage.local.remove([SUGGEST_TOKEN])
-      await Browser.storage.local.remove(BG_RESPONSE)
-      setIsLoading(false)
+      await Browser.storage.local.remove([SUGGEST_TOKEN]);
+      await Browser.storage.local.remove(BG_RESPONSE);
+      setIsLoading(false);
       if (isSidePanel()) {
-        navigate('/home')
+        navigate('/home');
       } else {
-        window.close()
+        window.close();
       }
-    }, 50)
+    }, 50);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     advancedFeature,
@@ -237,7 +231,7 @@ const SuggestSecret = observer(({ handleRejectBtnClick }: ChildrenParams) => {
     setBetaCW20Tokens,
     setSnip20Tokens,
     verifyViewingKeyOnChange,
-  ])
+  ]);
 
   return (
     <>
@@ -312,22 +306,20 @@ const SuggestSecret = observer(({ handleRejectBtnClick }: ChildrenParams) => {
           rejectBtnClick={handleRejectBtnClick}
           rejectBtnText='Reject'
           confirmBtnClick={approveNewToken}
-          confirmBtnText={
-            isLoading || isVerifying ? <LoaderAnimation color={Colors.white100} /> : 'Approve'
-          }
+          confirmBtnText={isLoading || isVerifying ? <LoaderAnimation color={Colors.white100} /> : 'Approve'}
           isConfirmBtnDisabled={
             error?.length !== 0 || (isCustomKeyError && customKey?.length > 0) || !contractInfo.name
           }
         />
       </Footer>
     </>
-  )
-})
+  );
+});
 
 export default function SuggestSecretWrapper() {
   return (
     <SuggestContainer suggestKey={SUGGEST_TOKEN}>
       {({ handleRejectBtnClick }) => <SuggestSecret handleRejectBtnClick={handleRejectBtnClick} />}
     </SuggestContainer>
-  )
+  );
 }

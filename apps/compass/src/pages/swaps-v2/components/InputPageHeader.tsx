@@ -1,19 +1,19 @@
-import { Buttons, LineDivider } from '@leapwallet/leap-ui'
-import { Faders } from '@phosphor-icons/react'
-import Text from 'components/text'
-import React from 'react'
+import { Buttons, LineDivider } from '@leapwallet/leap-ui';
+import { Faders } from '@phosphor-icons/react';
+import Text from 'components/text';
+import React from 'react';
 
-import { useSwapContext } from '../context'
+import { useSwapContext } from '../context';
 
 type InputPageHeaderProps = {
-  onBack: () => void
-  onRefresh: () => void
-  onSettings: () => void
-  topColor: string
-}
+  onBack: () => void;
+  onRefresh: () => void;
+  onSettings: () => void;
+  topColor: string;
+};
 
 function InputPageHeader({ onBack, onRefresh, onSettings, topColor }: InputPageHeaderProps) {
-  const { slippagePercent } = useSwapContext()
+  const { slippagePercent } = useSwapContext();
 
   return (
     <div className='w-[400px] h-[72px]'>
@@ -22,18 +22,10 @@ function InputPageHeader({ onBack, onRefresh, onSettings, topColor }: InputPageH
         <div className='absolute top-6 left-6'>
           <Buttons.Back onClick={onBack} />
         </div>
-        <div className='font-bold text-black-100 dark:text-white-100 text-lg !leading-[28px]'>
-          Swap
-        </div>
+        <div className='font-bold text-black-100 dark:text-white-100 text-lg !leading-[28px]'>Swap</div>
         <div className='absolute top-6 right-6 flex justify-end items-center gap-4'>
-          <button
-            onClick={onSettings}
-            className='text-black-100 dark:text-white-100 flex items-center gap-x-0.5'
-          >
-            <Faders
-              size={24}
-              className='!leading-[24px] rotate-90 text-muted-foreground hover:text-foreground'
-            />
+          <button onClick={onSettings} className='text-black-100 dark:text-white-100 flex items-center gap-x-0.5'>
+            <Faders size={24} className='!leading-[24px] rotate-90 text-muted-foreground hover:text-foreground' />
             <Text size='sm' className='font-bold'>
               {slippagePercent}%
             </Text>
@@ -42,7 +34,7 @@ function InputPageHeader({ onBack, onRefresh, onSettings, topColor }: InputPageH
       </div>
       <LineDivider />
     </div>
-  )
+  );
 }
 
-export default InputPageHeader
+export default InputPageHeader;

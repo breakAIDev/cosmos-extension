@@ -1,28 +1,28 @@
-import { ButtonProps } from 'components/ui/button'
-import { Button } from 'components/ui/button'
-import { AnimatePresence, motion } from 'framer-motion'
-import { CopyIcon } from 'icons/copy-icon'
-import { Images } from 'images'
-import React, { useEffect, useState } from 'react'
-import { cn } from 'utils/cn'
+import { ButtonProps } from 'components/ui/button';
+import { Button } from 'components/ui/button';
+import { AnimatePresence, motion } from 'framer-motion';
+import { CopyIcon } from 'icons/copy-icon';
+import { Images } from 'images';
+import React, { useEffect, useState } from 'react';
+import { cn } from 'utils/cn';
 
-const transition = { duration: 0.15, type: 'easeIn' }
+const transition = { duration: 0.15, type: 'easeIn' };
 
 const copyVariants = {
   hide: { opacity: 0, scale: 0.8 },
   animate: { opacity: 1, scale: 1 },
-}
+};
 
 export const CopyButton = (props: ButtonProps) => {
-  const [isCopied, setIsCopied] = useState(false)
+  const [isCopied, setIsCopied] = useState(false);
 
   useEffect(() => {
     if (isCopied) {
       setTimeout(() => {
-        setIsCopied(false)
-      }, 2_000)
+        setIsCopied(false);
+      }, 2_000);
     }
-  }, [isCopied])
+  }, [isCopied]);
 
   return (
     <Button
@@ -32,8 +32,8 @@ export const CopyButton = (props: ButtonProps) => {
       title='Copy'
       className={cn(props.className, isCopied ? 'text-accent-success' : 'text-muted-foreground')}
       onClick={(e) => {
-        setIsCopied(true)
-        props.onClick?.(e)
+        setIsCopied(true);
+        props.onClick?.(e);
       }}
     >
       <AnimatePresence mode='wait'>
@@ -63,7 +63,7 @@ export const CopyButton = (props: ButtonProps) => {
         )}
       </AnimatePresence>
     </Button>
-  )
-}
+  );
+};
 
-CopyButton.displayName = 'CopyButton'
+CopyButton.displayName = 'CopyButton';

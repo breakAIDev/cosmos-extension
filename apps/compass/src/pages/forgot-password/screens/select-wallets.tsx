@@ -1,28 +1,23 @@
-import { Button } from 'components/ui/button'
-import WalletInfoCard from 'components/wallet-info-card'
-import { WalletAccount } from 'hooks/onboarding/types'
-import React from 'react'
+import { Button } from 'components/ui/button';
+import WalletInfoCard from 'components/wallet-info-card';
+import { WalletAccount } from 'hooks/onboarding/types';
+import React from 'react';
 
-import { ForgotPasswordWrapper } from './wrapper'
+import { ForgotPasswordWrapper } from './wrapper';
 
 type SelectWalletProps = {
-  readonly onProceed: () => void
-  readonly accountsData: readonly WalletAccount[]
+  readonly onProceed: () => void;
+  readonly accountsData: readonly WalletAccount[];
   readonly setSelectedIds: React.Dispatch<
     React.SetStateAction<{
-      [k: number]: boolean
+      [k: number]: boolean;
     }>
-  >
-  readonly selectedIds: { [id: string]: boolean }
-}
+  >;
+  readonly selectedIds: { [id: string]: boolean };
+};
 
-function SelectWallets({
-  onProceed,
-  accountsData,
-  selectedIds,
-  setSelectedIds,
-}: SelectWalletProps) {
-  const canProceed = Object.values(selectedIds).some((v) => v)
+function SelectWallets({ onProceed, accountsData, selectedIds, setSelectedIds }: SelectWalletProps) {
+  const canProceed = Object.values(selectedIds).some((v) => v);
 
   return (
     <ForgotPasswordWrapper>
@@ -36,7 +31,7 @@ function SelectWallets({
 
       <div className='flex flex-col w-full max-h-[375px] overflow-y-auto rounded-xl gap-1.5 flex-1'>
         {accountsData.map(({ address, index: id, evmAddress, name, path }) => {
-          const isChosen = selectedIds[id]
+          const isChosen = selectedIds[id];
 
           return (
             <WalletInfoCard
@@ -51,10 +46,10 @@ function SelectWallets({
               name={name}
               path={path}
               onClick={() => {
-                setSelectedIds((prev) => ({ ...prev, [id]: !isChosen }))
+                setSelectedIds((prev) => ({ ...prev, [id]: !isChosen }));
               }}
             />
-          )
+          );
         })}
       </div>
 
@@ -62,13 +57,13 @@ function SelectWallets({
         className='w-full mt-auto'
         disabled={!canProceed}
         onClick={() => {
-          if (canProceed) onProceed()
+          if (canProceed) onProceed();
         }}
       >
         Proceed
       </Button>
     </ForgotPasswordWrapper>
-  )
+  );
 }
 
-export default SelectWallets
+export default SelectWallets;

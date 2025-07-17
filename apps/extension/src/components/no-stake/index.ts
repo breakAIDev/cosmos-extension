@@ -1,1 +1,1 @@
-export * from './NoStake'
+export * from './NoStake';

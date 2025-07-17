@@ -1,3 +1,3 @@
-import NoStakeSVG from './no-stake.svg'
+import NoStakeSVG from './no-stake.svg';
 
-export { NoStakeSVG }
+export { NoStakeSVG };

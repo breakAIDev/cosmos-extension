@@ -1,20 +1,15 @@
-import Text from 'components/text'
-import React from 'react'
+import Text from 'components/text';
+import React from 'react';
 
 type Props = {
-  heading?: string
-  subtitle?: string
-  SubTitleComponent?: React.FC
-  HeadingComponent?: React.FC
-  headingSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'jumbo'
-}
+  heading?: string;
+  subtitle?: string;
+  SubTitleComponent?: React.FC;
+  HeadingComponent?: React.FC;
+  headingSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'jumbo';
+};
 
-export const Header: React.FC<Props> = ({
-  heading,
-  subtitle,
-  SubTitleComponent,
-  HeadingComponent,
-}) => {
+export const Header: React.FC<Props> = ({ heading, subtitle, SubTitleComponent, HeadingComponent }) => {
   return (
     <div className='flex flex-col justify-center items-center mb-3'>
       {HeadingComponent ? (
@@ -31,5 +26,5 @@ export const Header: React.FC<Props> = ({
       )}
       {SubTitleComponent && <SubTitleComponent />}
     </div>
-  )
-}
+  );
+};

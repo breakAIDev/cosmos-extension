@@ -1,15 +1,15 @@
-import CanvasTextBox from 'components/canvas-box/CanvasTextBox'
-import { Button } from 'components/ui/button'
-import { CopyButton } from 'components/ui/button/copy-button'
-import { KeySlimIcon } from 'icons/key-slim-icon'
-import React from 'react'
-import { UserClipboard } from 'utils/clipboard'
+import CanvasTextBox from 'components/canvas-box/CanvasTextBox';
+import { Button } from 'components/ui/button';
+import { CopyButton } from 'components/ui/button/copy-button';
+import { KeySlimIcon } from 'icons/key-slim-icon';
+import React from 'react';
+import { UserClipboard } from 'utils/clipboard';
 
-import { OnboardingWrapper } from '../../wrapper'
-import { useCreateWalletContext } from '../create-wallet-context'
+import { OnboardingWrapper } from '../../wrapper';
+import { useCreateWalletContext } from '../create-wallet-context';
 
 export const SeedPhrase = () => {
-  const { prevStep, currentStep, mnemonic, moveToNextStep } = useCreateWalletContext()
+  const { prevStep, currentStep, mnemonic, moveToNextStep } = useCreateWalletContext();
 
   return (
     <OnboardingWrapper
@@ -30,7 +30,7 @@ export const SeedPhrase = () => {
           className='mx-auto'
           data-testing-id='mnemonic-copy-to-clipboard'
           onClick={() => {
-            UserClipboard.copyText(mnemonic)
+            UserClipboard.copyText(mnemonic);
           }}
         >
           Copy to Clipboard
@@ -46,5 +46,5 @@ export const SeedPhrase = () => {
         I have saved my recovery phrase
       </Button>
     </OnboardingWrapper>
-  )
-}
+  );
+};

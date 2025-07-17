@@ -1,22 +1,22 @@
-import { formatTokenAmount, sliceWord } from '@leapwallet/cosmos-wallet-hooks'
-import BigNumber from 'bignumber.js'
-import classNames from 'classnames'
-import { useFormatCurrency } from 'hooks/settings/useCurrency'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import { observer } from 'mobx-react-lite'
-import React, { useMemo } from 'react'
-import { hideAssetsStore } from 'stores/hide-assets-store'
-import { SourceChain, SourceToken } from 'types/swap'
-import { imgOnError } from 'utils/imgOnError'
+import { formatTokenAmount, sliceWord } from '@leapwallet/cosmos-wallet-hooks';
+import BigNumber from 'bignumber.js';
+import classNames from 'classnames';
+import { useFormatCurrency } from 'hooks/settings/useCurrency';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { observer } from 'mobx-react-lite';
+import React, { useMemo } from 'react';
+import { hideAssetsStore } from 'stores/hide-assets-store';
+import { SourceChain, SourceToken } from 'types/swap';
+import { imgOnError } from 'utils/imgOnError';
 
 export type TxReviewTokenInfoProps = {
-  amount: string
-  token: SourceToken | null
-  chain: SourceChain | undefined
-  tokenImgClassName?: string
-  chainImgClassName?: string
-  assetUsdValue?: BigNumber
-}
+  amount: string;
+  token: SourceToken | null;
+  chain: SourceChain | undefined;
+  tokenImgClassName?: string;
+  chainImgClassName?: string;
+  assetUsdValue?: BigNumber;
+};
 
 function TxReviewTokenInfoView({
   amount,
@@ -26,36 +26,29 @@ function TxReviewTokenInfoView({
   chainImgClassName,
   assetUsdValue,
 }: TxReviewTokenInfoProps) {
-  const [formatCurrency] = useFormatCurrency()
-  const defaultTokenLogo = useDefaultTokenLogo()
+  const [formatCurrency] = useFormatCurrency();
+  const defaultTokenLogo = useDefaultTokenLogo();
   const dollarAmount = useMemo(() => {
-    let _dollarAmount = '0'
+    let _dollarAmount = '0';
 
     if (token && token.usdPrice && amount) {
-      _dollarAmount = String(parseFloat(token.usdPrice) * parseFloat(amount))
+      _dollarAmount = String(parseFloat(token.usdPrice) * parseFloat(amount));
     }
 
-    if (
-      (!_dollarAmount || _dollarAmount === '0') &&
-      assetUsdValue &&
-      !assetUsdValue.isNaN() &&
-      assetUsdValue.gt(0)
-    ) {
-      _dollarAmount = assetUsdValue.toString()
+    if ((!_dollarAmount || _dollarAmount === '0') && assetUsdValue && !assetUsdValue.isNaN() && assetUsdValue.gt(0)) {
+      _dollarAmount = assetUsdValue.toString();
     }
 
-    return hideAssetsStore.formatHideBalance(formatCurrency(new BigNumber(_dollarAmount)))
+    return hideAssetsStore.formatHideBalance(formatCurrency(new BigNumber(_dollarAmount)));
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formatCurrency, token, amount])
+  }, [formatCurrency, token, amount]);
 
   const balanceAmount = useMemo(() => {
-    return hideAssetsStore.formatHideBalance(
-      formatTokenAmount(amount ?? '0', sliceWord(token?.symbol ?? '', 4, 4), 3),
-    )
+    return hideAssetsStore.formatHideBalance(formatTokenAmount(amount ?? '0', sliceWord(token?.symbol ?? '', 4, 4), 3));
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [amount, token?.symbol])
+  }, [amount, token?.symbol]);
 
   return (
     <div className='flex flex-col items-center w-full max-w-[140px] max-[399px]:!max-w-[calc(min(140px,45%))] gap-4 max-[399px]:overflow-visible'>
@@ -79,7 +72,7 @@ function TxReviewTokenInfoView({
         </p>
       </div>
     </div>
-  )
+  );
 }
 
-export const TxReviewTokenInfo = observer(TxReviewTokenInfoView)
+export const TxReviewTokenInfo = observer(TxReviewTokenInfoView);

@@ -1,7 +1,7 @@
-import { buttonRingClass } from 'components/ui/button'
-import { useTabIndicatorPosition } from 'hooks/utility/useTabIndicatorPosition'
-import React, { forwardRef } from 'react'
-import { cn } from 'utils/cn'
+import { buttonRingClass } from 'components/ui/button';
+import { useTabIndicatorPosition } from 'hooks/utility/useTabIndicatorPosition';
+import React, { forwardRef } from 'react';
+import { cn } from 'utils/cn';
 
 const TabButton = forwardRef<
   HTMLButtonElement,
@@ -20,19 +20,19 @@ const TabButton = forwardRef<
     >
       {props.children}
     </button>
-  )
-})
+  );
+});
 
-TabButton.displayName = 'TabButton'
+TabButton.displayName = 'TabButton';
 
 type Tab = {
-  label: string
-  id?: string
-}
+  label: string;
+  id?: string;
+};
 
 const indicatorDefaultStyles = {
   transform: 'translateX(0px) scaleX(0.441654)',
-}
+};
 
 export const TabSelectors = <T extends Tab>({
   setSelectedTab,
@@ -42,17 +42,17 @@ export const TabSelectors = <T extends Tab>({
   className,
   indicatorDefaultScale,
 }: {
-  setSelectedTab: (tab: T) => void
-  selectedIndex: number
-  buttons: T[]
-  buttonClassName?: string
-  className?: string
-  indicatorDefaultScale?: React.CSSProperties
+  setSelectedTab: (tab: T) => void;
+  selectedIndex: number;
+  buttons: T[];
+  buttonClassName?: string;
+  className?: string;
+  indicatorDefaultScale?: React.CSSProperties;
 }) => {
   const { containerRef, indicatorRef, childRefs } = useTabIndicatorPosition({
     navItems: buttons,
     activeLabel: buttons[selectedIndex]?.label,
-  })
+  });
 
   return (
     <div ref={containerRef} className={cn('relative flex items-center isolate gap-7', className)}>
@@ -74,7 +74,7 @@ export const TabSelectors = <T extends Tab>({
         style={indicatorDefaultScale ?? indicatorDefaultStyles}
       />
     </div>
-  )
-}
+  );
+};
 
-TabSelectors.displayName = 'TabSelectors'
+TabSelectors.displayName = 'TabSelectors';

@@ -1,28 +1,23 @@
-import { ActivityType } from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { useActivityImage } from 'hooks/activity/useActivityImage'
-import React from 'react'
-import { cn } from 'utils/cn'
-import { imgOnError } from 'utils/imgOnError'
+import { ActivityType } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { useActivityImage } from 'hooks/activity/useActivityImage';
+import React from 'react';
+import { cn } from 'utils/cn';
+import { imgOnError } from 'utils/imgOnError';
 
 export const DetailsCard = (props: {
-  title: string
-  imgSrc: string | React.ReactNode
-  subtitle: string
-  trailing?: React.ReactNode
-  txType?: ActivityType
-  activeChain: SupportedChain
-  className?: string
+  title: string;
+  imgSrc: string | React.ReactNode;
+  subtitle: string;
+  trailing?: React.ReactNode;
+  txType?: ActivityType;
+  activeChain: SupportedChain;
+  className?: string;
 }) => {
-  const defaultImg = useActivityImage(props.txType ?? 'fallback', props.activeChain)
+  const defaultImg = useActivityImage(props.txType ?? 'fallback', props.activeChain);
 
   return (
-    <div
-      className={cn(
-        'flex items-center p-5 gap-3 bg-secondary-100 rounded-xl w-full',
-        props.className,
-      )}
-    >
+    <div className={cn('flex items-center p-5 gap-3 bg-secondary-100 rounded-xl w-full', props.className)}>
       {typeof props.imgSrc === 'string' ? (
         <img src={props.imgSrc} onError={imgOnError(defaultImg)} className='size-10' />
       ) : (
@@ -36,5 +31,5 @@ export const DetailsCard = (props: {
 
       <span className={'text-muted-foreground ml-auto'}>{props.trailing}</span>
     </div>
-  )
-}
+  );
+};

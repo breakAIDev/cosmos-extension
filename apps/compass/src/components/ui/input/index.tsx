@@ -1,12 +1,12 @@
-import * as React from 'react'
-import { cn } from 'utils/cn'
+import * as React from 'react';
+import { cn } from 'utils/cn';
 
-export type InputStatus = 'error' | 'success' | 'warning' | 'default'
+export type InputStatus = 'error' | 'success' | 'warning' | 'default';
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  trailingElement?: React.ReactNode
-  status?: InputStatus
-  inputClassName?: string
+  trailingElement?: React.ReactNode;
+  status?: InputStatus;
+  inputClassName?: string;
 }
 
 export const inputStatusOutlineClassMap = {
@@ -15,7 +15,7 @@ export const inputStatusOutlineClassMap = {
   warning: 'ring-accent-warning focus-within:ring-accent-warning ring-1',
   default:
     'focus-within:ring-accent-blue-200 focus-within:hover:ring-accent-blue-200 focus-within:ring-1 hover:ring-secondary-400 hover:ring-1 data-[disabled=true]:ring-0',
-} as const
+} as const;
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, trailingElement, status, inputClassName, ...props }, ref) => {
@@ -39,8 +39,8 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
         {trailingElement}
       </div>
-    )
+    );
   },
-)
+);
 
-Input.displayName = 'Input'
+Input.displayName = 'Input';

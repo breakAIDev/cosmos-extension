@@ -1,1 +1,1 @@
-export { default } from './SwitchEthereumChain'
+export { default } from './SwitchEthereumChain';

@@ -1,1 +1,1 @@
-export * from './useHandleInitialAnimation'
+export * from './useHandleInitialAnimation';

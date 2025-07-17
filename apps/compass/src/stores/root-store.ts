@@ -1,7 +1,7 @@
-import { RootBalanceStore, RootStakeStore, RootStore } from '@leapwallet/cosmos-wallet-store'
+import { RootBalanceStore, RootStakeStore, RootStore } from '@leapwallet/cosmos-wallet-store';
 
-import { activeChainStore } from './active-chain-store'
-import { addressStore } from './address-store-instance'
+import { activeChainStore } from './active-chain-store';
+import { addressStore } from './address-store-instance';
 import {
   aptosCoinDataStore,
   balanceStore,
@@ -14,16 +14,11 @@ import {
   nmsStore,
   priceStore,
   solanaCoinDataStore,
-} from './balance-store'
-import { chainInfoStore, compassTokensAssociationsStore } from './chain-infos-store'
-import { stakeEpochStore } from './epoch-store'
-import { selectedNetworkStore } from './selected-network-store'
-import {
-  claimRewardsStore,
-  delegationsStore,
-  unDelegationsStore,
-  validatorsStore,
-} from './stake-store'
+} from './balance-store';
+import { chainInfoStore, compassTokensAssociationsStore } from './chain-infos-store';
+import { stakeEpochStore } from './epoch-store';
+import { selectedNetworkStore } from './selected-network-store';
+import { claimRewardsStore, delegationsStore, unDelegationsStore, validatorsStore } from './stake-store';
 
 export const rootStakeStore = new RootStakeStore(
   delegationsStore,
@@ -31,7 +26,7 @@ export const rootStakeStore = new RootStakeStore(
   unDelegationsStore,
   validatorsStore,
   stakeEpochStore,
-)
+);
 
 export const rootBalanceStore = new RootBalanceStore(
   balanceStore,
@@ -47,7 +42,7 @@ export const rootBalanceStore = new RootBalanceStore(
   addressStore,
   selectedNetworkStore,
   currencyStore,
-)
+);
 
 export const rootStore = new RootStore(
   nmsStore,
@@ -61,4 +56,4 @@ export const rootStore = new RootStore(
   currencyStore,
   chainInfoStore,
   evmBalanceStore,
-)
+);

@@ -1,16 +1,9 @@
-import { IconProps } from '@phosphor-icons/react'
-import React from 'react'
+import { IconProps } from '@phosphor-icons/react';
+import React from 'react';
 
 export const KeyIcon = (props: IconProps) => {
   return (
-    <svg
-      width='24'
-      height='24'
-      viewBox='0 0 24 24'
-      fill='none'
-      xmlns='http://www.w3.org/2000/svg'
-      {...props}
-    >
+    <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
       <g clipPath='url(#clip0_403_263)'>
         <mask id='mask0_403_263' maskUnits='userSpaceOnUse' x='0' y='0' width='24' height='24'>
           <rect width='24' height='24' fill='#D9D9D9' />
@@ -28,5 +21,5 @@ export const KeyIcon = (props: IconProps) => {
         </clipPath>
       </defs>
     </svg>
-  )
-}
+  );
+};

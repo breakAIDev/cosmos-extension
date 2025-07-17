@@ -1,2 +1,2 @@
-export * from './LoadAggregateAssets'
-export * from './LoadChainAssets'
+export * from './LoadAggregateAssets';
+export * from './LoadChainAssets';

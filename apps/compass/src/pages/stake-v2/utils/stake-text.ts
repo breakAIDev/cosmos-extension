@@ -1,13 +1,13 @@
-import { STAKE_MODE } from '@leapwallet/cosmos-wallet-hooks'
+import { STAKE_MODE } from '@leapwallet/cosmos-wallet-hooks';
 
-type StakeTxnMode = STAKE_MODE | 'CLAIM_AND_DELEGATE'
+type StakeTxnMode = STAKE_MODE | 'CLAIM_AND_DELEGATE';
 
 export const txStatusMap = {
   loading: 'in progress',
   success: 'successful',
   submitted: 'submitted',
   failed: 'failed',
-}
+};
 
 export const txModeTitleMap: Record<StakeTxnMode, string> = {
   DELEGATE: 'Stake',
@@ -16,7 +16,7 @@ export const txModeTitleMap: Record<StakeTxnMode, string> = {
   CLAIM_REWARDS: 'Claim',
   CANCEL_UNDELEGATION: 'Cancel unstake',
   CLAIM_AND_DELEGATE: 'Claim',
-}
+};
 
 export const stakeModeMap: Record<StakeTxnMode, string> = {
   DELEGATE: 'Enter amount to be staked',
@@ -25,7 +25,7 @@ export const stakeModeMap: Record<StakeTxnMode, string> = {
   CLAIM_REWARDS: 'Enter amount to be claimed',
   CANCEL_UNDELEGATION: 'Enter amount to be cancelled',
   CLAIM_AND_DELEGATE: 'Enter amount to be claimed',
-}
+};
 
 export const stakeButtonTitleMap: Record<StakeTxnMode, string> = {
   DELEGATE: 'stake',
@@ -34,7 +34,7 @@ export const stakeButtonTitleMap: Record<StakeTxnMode, string> = {
   CLAIM_REWARDS: 'claiming',
   REDELEGATE: 'validator switching',
   CLAIM_AND_DELEGATE: 'claiming',
-}
+};
 
 export const transitionTitleMap: Record<StakeTxnMode, string> = {
   CLAIM_REWARDS: 'Review claim',
@@ -43,4 +43,4 @@ export const transitionTitleMap: Record<StakeTxnMode, string> = {
   UNDELEGATE: 'Review unstake',
   REDELEGATE: 'Review validator switching',
   CANCEL_UNDELEGATION: 'Review cancel unstake',
-}
+};

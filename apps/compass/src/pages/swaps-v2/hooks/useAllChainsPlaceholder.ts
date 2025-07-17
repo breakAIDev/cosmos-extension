@@ -1,9 +1,9 @@
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { ThemeName, useTheme } from '@leapwallet/leap-ui'
-import { Images } from 'images'
-import { useMemo } from 'react'
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { ThemeName, useTheme } from '@leapwallet/leap-ui';
+import { Images } from 'images';
+import { useMemo } from 'react';
 
-import { TokenAssociatedChain } from '../components/ChainsList'
+import { TokenAssociatedChain } from '../components/ChainsList';
 
 const ALL_CHAINS_PLACEHOLDER: TokenAssociatedChain = {
   chain: {
@@ -29,24 +29,18 @@ const ALL_CHAINS_PLACEHOLDER: TokenAssociatedChain = {
     },
     key: 'all' as SupportedChain,
   },
-}
+};
 
 export const useAllChainsPlaceholder = () => {
-  const { theme } = useTheme()
+  const { theme } = useTheme();
 
   return useMemo(() => {
     return {
       chain: {
         ...ALL_CHAINS_PLACEHOLDER.chain,
-        icon:
-          theme === ThemeName.DARK
-            ? Images.Misc.AggregatedViewDarkSvg
-            : Images.Misc.AggregatedViewSvg,
-        logoUri:
-          theme === ThemeName.DARK
-            ? Images.Misc.AggregatedViewDarkSvg
-            : Images.Misc.AggregatedViewSvg,
+        icon: theme === ThemeName.DARK ? Images.Misc.AggregatedViewDarkSvg : Images.Misc.AggregatedViewSvg,
+        logoUri: theme === ThemeName.DARK ? Images.Misc.AggregatedViewDarkSvg : Images.Misc.AggregatedViewSvg,
       },
-    }
-  }, [theme])
-}
+    };
+  }, [theme]);
+};

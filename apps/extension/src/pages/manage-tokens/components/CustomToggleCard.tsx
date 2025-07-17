@@ -1,19 +1,19 @@
-import { GenericCard, GenericCardProps, Toggle } from '@leapwallet/leap-ui'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import { Images } from 'images'
-import React from 'react'
-import { cn } from 'utils/cn'
-import { imgOnError } from 'utils/imgOnError'
+import { GenericCard, GenericCardProps, Toggle } from '@leapwallet/leap-ui';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { Images } from 'images';
+import React from 'react';
+import { cn } from 'utils/cn';
+import { imgOnError } from 'utils/imgOnError';
 
 type CustomToggleCardProps = GenericCardProps & {
-  imgSrc?: string
-  TokenType?: React.ReactNode
-  onToggleChange: (isEnabled: boolean) => void
-  isToggleChecked: boolean
-  className?: string
-  onDeleteClick: () => void
-  imageClassName?: string
-}
+  imgSrc?: string;
+  TokenType?: React.ReactNode;
+  onToggleChange: (isEnabled: boolean) => void;
+  isToggleChecked: boolean;
+  className?: string;
+  onDeleteClick: () => void;
+  imageClassName?: string;
+};
 
 export function CustomToggleCard({
   title,
@@ -27,7 +27,7 @@ export function CustomToggleCard({
   className,
   imageClassName,
 }: CustomToggleCardProps) {
-  const defaultTokenLogo = useDefaultTokenLogo()
+  const defaultTokenLogo = useDefaultTokenLogo();
 
   return (
     <GenericCard
@@ -59,5 +59,5 @@ export function CustomToggleCard({
       }
       className={className}
     />
-  )
+  );
 }

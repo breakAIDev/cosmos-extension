@@ -1,23 +1,23 @@
-import classNames from 'classnames'
-import { inputStatusOutlineClassMap } from 'components/ui/input'
-import { TabSelectors } from 'components/ui/tab-list-selectors'
-import { AnimatePresence, motion, Variants } from 'framer-motion'
-import React, { useState } from 'react'
-import { cn } from 'utils/cn'
+import classNames from 'classnames';
+import { inputStatusOutlineClassMap } from 'components/ui/input';
+import { TabSelectors } from 'components/ui/tab-list-selectors';
+import { AnimatePresence, motion, Variants } from 'framer-motion';
+import React, { useState } from 'react';
+import { cn } from 'utils/cn';
 
 type SeedPhraseWordInputProps = {
   // eslint-disable-next-line no-unused-vars
-  handlePaste: (wordIndex: number, value: string) => void
-  wordIndex: number
-  word: string
+  handlePaste: (wordIndex: number, value: string) => void;
+  wordIndex: number;
+  word: string;
   // eslint-disable-next-line no-unused-vars
-  handleWordChange: (wordIndex: number, value: string) => void
-  isError: boolean
-  isFocused: boolean
+  handleWordChange: (wordIndex: number, value: string) => void;
+  isError: boolean;
+  isFocused: boolean;
   // eslint-disable-next-line no-unused-vars
-  handleWordFocused: (wordIndex: number) => void
-  handleWordBlur: () => void
-}
+  handleWordFocused: (wordIndex: number) => void;
+  handleWordBlur: () => void;
+};
 
 const SeedPhraseWordInput = ({
   wordIndex,
@@ -39,8 +39,8 @@ const SeedPhraseWordInput = ({
       onBlur={() => handleWordBlur()}
       tabIndex={0}
       onPaste={(event) => {
-        event.preventDefault()
-        handlePaste(wordIndex, event.clipboardData.getData('text'))
+        event.preventDefault();
+        handlePaste(wordIndex, event.clipboardData.getData('text'));
       }}
     >
       <span className='text-muted-foreground shrink-0'>{wordIndex}</span>
@@ -53,85 +53,77 @@ const SeedPhraseWordInput = ({
         className='flex-1 outline-none bg-transparent w-0 text-foreground font-bold'
       />
     </div>
-  )
-}
+  );
+};
 
 type SeedPhraseInputProps = {
-  onChangeHandler: (value: string) => void
-  isError: boolean
-  onPage?: string
-  className?: string
-}
+  onChangeHandler: (value: string) => void;
+  isError: boolean;
+  onPage?: string;
+  className?: string;
+};
 
-const transition = { duration: 0.2, ease: 'easeInOut' }
+const transition = { duration: 0.2, ease: 'easeInOut' };
 
 const variants: Variants = {
   left: { opacity: 0, x: 10, transition },
   right: { opacity: 0, x: -10, transition },
   visible: { opacity: 1, x: 0, transition },
-}
+};
 
 export const SeedPhraseInput = ({ onChangeHandler, isError, className }: SeedPhraseInputProps) => {
-  const [focusedWordIndex, setFocusedWordIndex] = useState(1)
-  const [seedPhraseWordCount, setSeedPhraseWordCount] = useState(12)
-  const [seedPhraseWords, setSeedPhraseWords] = useState(new Array(12).fill('') as string[])
+  const [focusedWordIndex, setFocusedWordIndex] = useState(1);
+  const [seedPhraseWordCount, setSeedPhraseWordCount] = useState(12);
+  const [seedPhraseWords, setSeedPhraseWords] = useState(new Array(12).fill('') as string[]);
 
   const handleSeedPhraseWordIndexChange = (newCount: number) => {
-    setSeedPhraseWordCount(newCount)
-    setSeedPhraseWords(new Array(newCount).fill(''))
-  }
+    setSeedPhraseWordCount(newCount);
+    setSeedPhraseWords(new Array(newCount).fill(''));
+  };
 
   const handlePaste = (wordIndex: number, clipboardText: string) => {
     const words = clipboardText
       .trim()
       .split(' ')
       .map((word) => word.trim())
-      .filter((word) => word.length)
+      .filter((word) => word.length);
 
     if (words.length) {
       if (words.length === 12 || words.length === 24) {
-        if (words.length === 24) setSeedPhraseWordCount(24)
-        else if (words.length === 12) setSeedPhraseWordCount(12)
+        if (words.length === 24) setSeedPhraseWordCount(24);
+        else if (words.length === 12) setSeedPhraseWordCount(12);
 
-        setSeedPhraseWords(words)
-        onChangeHandler(words.join(' ').trim())
-        return
+        setSeedPhraseWords(words);
+        onChangeHandler(words.join(' ').trim());
+        return;
       }
 
-      for (
-        let index = wordIndex;
-        index < Math.min(seedPhraseWordCount, words.length + wordIndex);
-        index++
-      ) {
-        seedPhraseWords[index - 1] = words[index - wordIndex]
+      for (let index = wordIndex; index < Math.min(seedPhraseWordCount, words.length + wordIndex); index++) {
+        seedPhraseWords[index - 1] = words[index - wordIndex];
       }
 
-      setSeedPhraseWords(seedPhraseWords)
-      onChangeHandler(seedPhraseWords.join(' ').trim())
+      setSeedPhraseWords(seedPhraseWords);
+      onChangeHandler(seedPhraseWords.join(' ').trim());
     }
-  }
+  };
 
   const handleWordChange = (wordIndex: number, value: string) => {
-    seedPhraseWords[wordIndex - 1] = value
-    setSeedPhraseWords(seedPhraseWords)
-    onChangeHandler(seedPhraseWords.join(' ').trim())
-  }
+    seedPhraseWords[wordIndex - 1] = value;
+    setSeedPhraseWords(seedPhraseWords);
+    onChangeHandler(seedPhraseWords.join(' ').trim());
+  };
 
   const handleWordFocused = (wordIndex: number) => {
-    setFocusedWordIndex(wordIndex)
-  }
+    setFocusedWordIndex(wordIndex);
+  };
 
   const handleWordBlur = () => {
-    setFocusedWordIndex(-1)
-  }
+    setFocusedWordIndex(-1);
+  };
 
   return (
     <div
-      className={cn(
-        'flex flex-col items-center w-full gap-7',
-        isError ? 'h-[17.15rem]' : 'h-[19.375rem]',
-        className,
-      )}
+      className={cn('flex flex-col items-center w-full gap-7', isError ? 'h-[17.15rem]' : 'h-[19.375rem]', className)}
     >
       <TabSelectors
         selectedIndex={seedPhraseWordCount === 12 ? 0 : 1}
@@ -169,10 +161,10 @@ export const SeedPhraseInput = ({ onChangeHandler, isError, className }: SeedPhr
                 handleWordFocused={handleWordFocused}
                 handleWordBlur={handleWordBlur}
               />
-            )
+            );
           })}
         </motion.div>
       </AnimatePresence>
     </div>
-  )
-}
+  );
+};

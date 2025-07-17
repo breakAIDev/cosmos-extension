@@ -1,34 +1,28 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { SKIP_TXN_STATUS, TXN_STATUS } from '@leapwallet/elements-core'
-import { ArrowRight } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import { PENDING_SWAP_TXS } from 'config/storage-keys'
-import { Images } from 'images'
-import { ActivitySwapTxPage } from 'pages/activity/ActivitySwapTxPage'
-import { useGetChainsToShow } from 'pages/swaps-v2/hooks'
-import qs from 'qs'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { moveTxsFromCurrentToPending, TxStoreObject } from 'utils/pendingSwapsTxsStore'
-import Browser from 'webextension-polyfill'
+import { SKIP_TXN_STATUS, TXN_STATUS } from '@leapwallet/elements-core';
+import { ArrowRight } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import { PENDING_SWAP_TXS } from 'config/storage-keys';
+import { Images } from 'images';
+import { ActivitySwapTxPage } from 'pages/activity/ActivitySwapTxPage';
+import { useGetChainsToShow } from 'pages/swaps-v2/hooks';
+import qs from 'qs';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { moveTxsFromCurrentToPending, TxStoreObject } from 'utils/pendingSwapsTxsStore';
+import Browser from 'webextension-polyfill';
 
-import PendingSwapsSheet from './PendingSwapsSheet'
+import PendingSwapsSheet from './PendingSwapsSheet';
 
-function ViewButton({
-  handleViewClick,
-  swapsState,
-}: {
-  handleViewClick: () => void
-  swapsState: string
-}) {
-  const { chainsToShowLoading } = useGetChainsToShow()
+function ViewButton({ handleViewClick, swapsState }: { handleViewClick: () => void; swapsState: string }) {
+  const { chainsToShowLoading } = useGetChainsToShow();
 
   const handleOnClick = useCallback(() => {
     if (chainsToShowLoading) {
-      return
+      return;
     }
-    handleViewClick()
-  }, [chainsToShowLoading, handleViewClick])
+    handleViewClick();
+  }, [chainsToShowLoading, handleViewClick]);
 
   return (
     <button
@@ -46,121 +40,115 @@ function ViewButton({
       <span>View</span>
       <ArrowRight size={14} />
     </button>
-  )
+  );
 }
 
 const PendingSwapsAlertStrip = () => {
-  const [showSwapTxPageFor, setShowSwapTxPageFor] = useState<TxStoreObject>()
-  const [showPendingSwapsSheet, setShowPendingSwapsSheet] = useState<boolean>(false)
-  const [pendingSwapTxs, setPendingSwapTxs] = useState<TxStoreObject[]>([])
+  const [showSwapTxPageFor, setShowSwapTxPageFor] = useState<TxStoreObject>();
+  const [showPendingSwapsSheet, setShowPendingSwapsSheet] = useState<boolean>(false);
+  const [pendingSwapTxs, setPendingSwapTxs] = useState<TxStoreObject[]>([]);
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function updatePendingSwapTxs() {
-      const storage = await Browser.storage.local.get([PENDING_SWAP_TXS])
+      const storage = await Browser.storage.local.get([PENDING_SWAP_TXS]);
 
       if (storage[PENDING_SWAP_TXS]) {
-        const pendingTxs = Object.values(
-          JSON.parse(storage[PENDING_SWAP_TXS]) ?? {},
-        ) as TxStoreObject[]
+        const pendingTxs = Object.values(JSON.parse(storage[PENDING_SWAP_TXS]) ?? {}) as TxStoreObject[];
 
-        setPendingSwapTxs(pendingTxs)
+        setPendingSwapTxs(pendingTxs);
       } else {
-        setPendingSwapTxs([])
+        setPendingSwapTxs([]);
       }
     }
-    moveTxsFromCurrentToPending()
-    updatePendingSwapTxs()
+    moveTxsFromCurrentToPending();
+    updatePendingSwapTxs();
 
     Browser.storage.onChanged.addListener((storage) => {
       if (storage[PENDING_SWAP_TXS]) {
-        updatePendingSwapTxs()
+        updatePendingSwapTxs();
       }
-    })
+    });
 
     return Browser.storage.onChanged.removeListener((storage) => {
       if (storage[PENDING_SWAP_TXS]) {
-        updatePendingSwapTxs()
+        updatePendingSwapTxs();
       }
-    })
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, []);
 
   const totalSwaps = useMemo(() => {
-    return pendingSwapTxs?.length ?? 0
-  }, [pendingSwapTxs?.length])
+    return pendingSwapTxs?.length ?? 0;
+  }, [pendingSwapTxs?.length]);
 
   const noOfFailedSwaps = useMemo(() => {
     return (
       pendingSwapTxs?.filter((tx) =>
-        [
-          SKIP_TXN_STATUS.STATE_COMPLETED_ERROR,
-          SKIP_TXN_STATUS.STATE_ABANDONED,
-          TXN_STATUS.FAILED,
-        ].includes(tx.state ?? TXN_STATUS.PENDING),
+        [SKIP_TXN_STATUS.STATE_COMPLETED_ERROR, SKIP_TXN_STATUS.STATE_ABANDONED, TXN_STATUS.FAILED].includes(
+          tx.state ?? TXN_STATUS.PENDING,
+        ),
       ).length ?? 0
-    )
-  }, [pendingSwapTxs])
+    );
+  }, [pendingSwapTxs]);
 
   const noOfSuccessfulSwaps = useMemo(() => {
     return (
       pendingSwapTxs?.filter((tx) =>
-        [SKIP_TXN_STATUS.STATE_COMPLETED_SUCCESS, TXN_STATUS.SUCCESS].includes(
-          tx.state ?? TXN_STATUS.PENDING,
-        ),
+        [SKIP_TXN_STATUS.STATE_COMPLETED_SUCCESS, TXN_STATUS.SUCCESS].includes(tx.state ?? TXN_STATUS.PENDING),
       )?.length ?? 0
-    )
-  }, [pendingSwapTxs])
+    );
+  }, [pendingSwapTxs]);
 
   const handleViewClick = useCallback(() => {
     if (totalSwaps > 1) {
-      setShowPendingSwapsSheet(true)
+      setShowPendingSwapsSheet(true);
     } else {
-      setShowSwapTxPageFor(pendingSwapTxs[0])
+      setShowSwapTxPageFor(pendingSwapTxs[0]);
     }
-  }, [pendingSwapTxs, setShowPendingSwapsSheet, setShowSwapTxPageFor, totalSwaps])
+  }, [pendingSwapTxs, setShowPendingSwapsSheet, setShowSwapTxPageFor, totalSwaps]);
 
   const swapsState: 'idle' | 'loading' | 'error' | 'success' = useMemo(() => {
     if (noOfFailedSwaps > 0) {
-      return 'error'
+      return 'error';
     }
     if (noOfSuccessfulSwaps > 0) {
-      return 'success'
+      return 'success';
     }
     if (totalSwaps > 0) {
-      return 'loading'
+      return 'loading';
     }
-    return 'idle'
-  }, [noOfFailedSwaps, noOfSuccessfulSwaps, totalSwaps])
+    return 'idle';
+  }, [noOfFailedSwaps, noOfSuccessfulSwaps, totalSwaps]);
 
   const title = useMemo(() => {
     if (swapsState === 'success') {
-      return `Swap${noOfSuccessfulSwaps > 1 ? 's' : ''} successful`
+      return `Swap${noOfSuccessfulSwaps > 1 ? 's' : ''} successful`;
     }
     if (swapsState === 'error') {
-      return `Swap${noOfFailedSwaps > 1 ? 's' : ''} failed`
+      return `Swap${noOfFailedSwaps > 1 ? 's' : ''} failed`;
     }
     if (swapsState === 'loading') {
-      return totalSwaps > 1 ? 'Multiple swaps in progress' : 'Swap in progress'
+      return totalSwaps > 1 ? 'Multiple swaps in progress' : 'Swap in progress';
     }
-  }, [noOfFailedSwaps, noOfSuccessfulSwaps, swapsState, totalSwaps])
+  }, [noOfFailedSwaps, noOfSuccessfulSwaps, swapsState, totalSwaps]);
 
   const alertIcon = useMemo(() => {
     if (swapsState === 'loading') {
-      return Images.Loaders.SwapsAlertStripLoader
+      return Images.Loaders.SwapsAlertStripLoader;
     }
     if (swapsState === 'error') {
-      return Images.Swap.AlertTriangle
+      return Images.Swap.AlertTriangle;
     }
 
     if (swapsState === 'success') {
-      return Images.Swap.CheckCircle
+      return Images.Swap.CheckCircle;
     }
-  }, [swapsState])
+  }, [swapsState]);
 
   if (totalSwaps === 0) {
-    return null
+    return null;
   }
 
   return (
@@ -190,15 +178,15 @@ const PendingSwapsAlertStrip = () => {
         isOpen={showPendingSwapsSheet}
         setShowSwapTxPageFor={setShowSwapTxPageFor}
         onClose={() => {
-          setShowPendingSwapsSheet(false)
+          setShowPendingSwapsSheet(false);
         }}
       />
 
       {showSwapTxPageFor ? (
         <ActivitySwapTxPage
           onClose={(sourceChainId, sourceToken, destinationChainId, destinationToken) => {
-            setShowSwapTxPageFor(undefined)
-            let queryStr = ''
+            setShowSwapTxPageFor(undefined);
+            let queryStr = '';
             if (sourceChainId || sourceToken || destinationChainId || destinationToken) {
               queryStr = `?${qs.stringify({
                 sourceChainId,
@@ -206,15 +194,15 @@ const PendingSwapsAlertStrip = () => {
                 destinationChainId,
                 destinationToken,
                 pageSource: 'swapAgain',
-              })}`
+              })}`;
             }
-            navigate(`/swap${queryStr}`)
+            navigate(`/swap${queryStr}`);
           }}
           {...showSwapTxPageFor}
         />
       ) : null}
     </>
-  )
-}
+  );
+};
 
-export default PendingSwapsAlertStrip
+export default PendingSwapsAlertStrip;

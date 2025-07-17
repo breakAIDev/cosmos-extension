@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { parseUnits } from '@ethersproject/units'
+import { parseUnits } from '@ethersproject/units';
 import {
   CosmosTxType,
   GasOptions,
@@ -17,7 +17,7 @@ import {
   useSeiLinkedAddressState,
   useTxMetadata,
   WALLETTYPE,
-} from '@leapwallet/cosmos-wallet-hooks'
+} from '@leapwallet/cosmos-wallet-hooks';
 import {
   DefaultGasEstimates,
   GasPrice,
@@ -26,56 +26,56 @@ import {
   pubKeyToEvmAddressToShow,
   SeiEvmTx,
   SupportedChain,
-} from '@leapwallet/cosmos-wallet-sdk'
-import { EvmBalanceStore, RootBalanceStore, RootDenomsStore } from '@leapwallet/cosmos-wallet-store'
-import { EthWallet } from '@leapwallet/leap-keychain'
-import { Avatar, Buttons, Header, ThemeName, useTheme } from '@leapwallet/leap-ui'
-import { captureException } from '@sentry/react'
-import { useQuery } from '@tanstack/react-query'
-import BigNumber from 'bignumber.js'
-import classNames from 'classnames'
-import Tooltip from 'components/better-tooltip'
-import { ErrorCard } from 'components/ErrorCard'
-import GasPriceOptions, { useDefaultGasPrice } from 'components/gas-price-options'
-import PopupLayout from 'components/layout/popup-layout'
-import LedgerConfirmationModal from 'components/ledger-confirmation/confirmation-modal'
-import { LoaderAnimation } from 'components/loader/Loader'
-import { Tabs } from 'components/tabs'
-import { SEI_EVM_LEDGER_ERROR_MESSAGE } from 'config/constants'
-import { MessageTypes } from 'config/message-types'
-import { useSiteLogo } from 'hooks/utility/useSiteLogo'
-import { Wallet } from 'hooks/wallet/useWallet'
-import { Images } from 'images'
-import { GenericDark, GenericLight } from 'images/logos'
-import { observer } from 'mobx-react-lite'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { feeTokensStore } from 'stores/fee-store'
-import { Colors } from 'theme/colors'
-import { TransactionStatus } from 'types/utility'
-import { assert } from 'utils/assert'
-import { formatWalletName } from 'utils/formatWalletName'
-import { imgOnError } from 'utils/imgOnError'
-import { isSidePanel } from 'utils/isSidePanel'
-import { uiErrorTags } from 'utils/sentry'
-import { trim } from 'utils/strings'
-import Browser from 'webextension-polyfill'
+} from '@leapwallet/cosmos-wallet-sdk';
+import { EvmBalanceStore, RootBalanceStore, RootDenomsStore } from '@leapwallet/cosmos-wallet-store';
+import { EthWallet } from '@leapwallet/leap-keychain';
+import { Avatar, Buttons, Header, ThemeName, useTheme } from '@leapwallet/leap-ui';
+import { captureException } from '@sentry/react';
+import { useQuery } from '@tanstack/react-query';
+import BigNumber from 'bignumber.js';
+import classNames from 'classnames';
+import Tooltip from 'components/better-tooltip';
+import { ErrorCard } from 'components/ErrorCard';
+import GasPriceOptions, { useDefaultGasPrice } from 'components/gas-price-options';
+import PopupLayout from 'components/layout/popup-layout';
+import LedgerConfirmationModal from 'components/ledger-confirmation/confirmation-modal';
+import { LoaderAnimation } from 'components/loader/Loader';
+import { Tabs } from 'components/tabs';
+import { SEI_EVM_LEDGER_ERROR_MESSAGE } from 'config/constants';
+import { MessageTypes } from 'config/message-types';
+import { useSiteLogo } from 'hooks/utility/useSiteLogo';
+import { Wallet } from 'hooks/wallet/useWallet';
+import { Images } from 'images';
+import { GenericDark, GenericLight } from 'images/logos';
+import { observer } from 'mobx-react-lite';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { feeTokensStore } from 'stores/fee-store';
+import { Colors } from 'theme/colors';
+import { TransactionStatus } from 'types/utility';
+import { assert } from 'utils/assert';
+import { formatWalletName } from 'utils/formatWalletName';
+import { imgOnError } from 'utils/imgOnError';
+import { isSidePanel } from 'utils/isSidePanel';
+import { uiErrorTags } from 'utils/sentry';
+import { trim } from 'utils/strings';
+import Browser from 'webextension-polyfill';
 
-import { handleRejectClick } from '../utils'
-import { Loading } from './index'
+import { handleRejectClick } from '../utils';
+import { Loading } from './index';
 
-const useGetWallet = Wallet.useGetWallet
+const useGetWallet = Wallet.useGetWallet;
 
 export type SignTransactionProps = {
-  txnData: Record<string, any>
-  rootDenomsStore: RootDenomsStore
-  rootBalanceStore: RootBalanceStore
-  evmBalanceStore: EvmBalanceStore
-  donotClose: boolean
-  activeChain: SupportedChain
-  activeNetwork: NetworkType
-  handleTxnListUpdate: () => void
-}
+  txnData: Record<string, any>;
+  rootDenomsStore: RootDenomsStore;
+  rootBalanceStore: RootBalanceStore;
+  evmBalanceStore: EvmBalanceStore;
+  donotClose: boolean;
+  activeChain: SupportedChain;
+  activeNetwork: NetworkType;
+  handleTxnListUpdate: () => void;
+};
 
 export const SignTransaction = observer(
   ({
@@ -88,103 +88,91 @@ export const SignTransaction = observer(
     activeChain,
     activeNetwork,
   }: SignTransactionProps) => {
-    const getWallet = useGetWallet(activeChain)
-    const { theme } = useTheme()
-    const { addressLinkState } = useSeiLinkedAddressState(activeChain)
-    const evmBalance = evmBalanceStore.evmBalance
-    const chainInfo = useChainInfo(activeChain)
-    const activeWallet = useActiveWallet()
-    const allAssets = rootBalanceStore.getBalancesForChain(activeChain, activeNetwork)
-    feeTokensStore.getStore(activeChain, activeNetwork, true)
+    const getWallet = useGetWallet(activeChain);
+    const { theme } = useTheme();
+    const { addressLinkState } = useSeiLinkedAddressState(activeChain);
+    const evmBalance = evmBalanceStore.evmBalance;
+    const chainInfo = useChainInfo(activeChain);
+    const activeWallet = useActiveWallet();
+    const allAssets = rootBalanceStore.getBalancesForChain(activeChain, activeNetwork);
+    feeTokensStore.getStore(activeChain, activeNetwork, true);
 
-    const [showLedgerPopup, setShowLedgerPopup] = useState(false)
+    const [showLedgerPopup, setShowLedgerPopup] = useState(false);
 
     const assets = useMemo(() => {
-      let _assets = allAssets
-      const addEvmDetails = hasToAddEvmDetails(
-        false,
-        addressLinkState,
-        chainInfo?.evmOnlyChain ?? false,
-      )
+      let _assets = allAssets;
+      const addEvmDetails = hasToAddEvmDetails(false, addressLinkState, chainInfo?.evmOnlyChain ?? false);
 
       if (addEvmDetails) {
-        _assets = [..._assets, ...(evmBalance.evmBalance ?? [])].filter((token) =>
-          new BigNumber(token.amount).gt(0),
-        )
+        _assets = [..._assets, ...(evmBalance.evmBalance ?? [])].filter((token) => new BigNumber(token.amount).gt(0));
       }
 
-      return _assets
-    }, [addressLinkState, allAssets, chainInfo?.evmOnlyChain, evmBalance.evmBalance])
+      return _assets;
+    }, [addressLinkState, allAssets, chainInfo?.evmOnlyChain, evmBalance.evmBalance]);
 
     const isEvmTokenExist = useMemo(
       () =>
-        (assets ?? []).some(
-          (asset) =>
-            asset?.isEvm && (asset?.coinMinimalDenom === 'usei' || chainInfo?.evmOnlyChain),
-        ),
+        (assets ?? []).some((asset) => asset?.isEvm && (asset?.coinMinimalDenom === 'usei' || chainInfo?.evmOnlyChain)),
       [assets, chainInfo?.evmOnlyChain],
-    )
+    );
 
-    assert(activeWallet !== null, 'activeWallet is null')
-    const globalTxMeta = useTxMetadata()
-    const txPostToDb = LeapWalletApi.useLogCosmosDappTx()
+    assert(activeWallet !== null, 'activeWallet is null');
+    const globalTxMeta = useTxMetadata();
+    const txPostToDb = LeapWalletApi.useLogCosmosDappTx();
     const walletName = useMemo(() => {
-      return formatWalletName(activeWallet.name)
-    }, [activeWallet.name])
-    const navigate = useNavigate()
+      return formatWalletName(activeWallet.name);
+    }, [activeWallet.name]);
+    const navigate = useNavigate();
 
-    const address = useAddress(activeChain)
-    const evmChainId = useChainId(activeChain, activeNetwork, true)
-    const { evmJsonRpc } = useChainApis(activeChain, activeNetwork)
+    const address = useAddress(activeChain);
+    const evmChainId = useChainId(activeChain, activeNetwork, true);
+    const { evmJsonRpc } = useChainApis(activeChain, activeNetwork);
     const defaultGasPrice = useDefaultGasPrice(rootDenomsStore.allDenoms, {
       activeChain,
       isSeiEvmTransaction: true,
-    })
-    const { status: gasPriceStatus } = useGetEvmGasPrices(activeChain, activeNetwork)
+    });
+    const { status: gasPriceStatus } = useGetEvmGasPrices(activeChain, activeNetwork);
 
-    const [txStatus, setTxStatus] = useState<TransactionStatus>('idle')
-    const [userPreferredGasLimit, setUserPreferredGasLimit] = useState<string>('')
-    const [gasPriceError, setGasPriceError] = useState<string | null>(null)
-    const [signingError, setSigningError] = useState<string | null>(null)
+    const [txStatus, setTxStatus] = useState<TransactionStatus>('idle');
+    const [userPreferredGasLimit, setUserPreferredGasLimit] = useState<string>('');
+    const [gasPriceError, setGasPriceError] = useState<string | null>(null);
+    const [signingError, setSigningError] = useState<string | null>(null);
 
-    const defaultGasEstimates = useDefaultGasEstimates()
-    const gasAdjustment = useGasAdjustmentForChain(activeChain)
+    const defaultGasEstimates = useDefaultGasEstimates();
+    const gasAdjustment = useGasAdjustmentForChain(activeChain);
     const defaultGasLimit = useMemo(
       () =>
         parseInt(
           (
-            (defaultGasEstimates[activeChain]?.DEFAULT_GAS_IBC ??
-              DefaultGasEstimates.DEFAULT_GAS_IBC) * gasAdjustment
+            (defaultGasEstimates[activeChain]?.DEFAULT_GAS_IBC ?? DefaultGasEstimates.DEFAULT_GAS_IBC) * gasAdjustment
           ).toString(),
         ),
       [activeChain, defaultGasEstimates, gasAdjustment],
-    )
+    );
 
     const [gasPriceOption, setGasPriceOption] = useState<{
-      option: GasOptions
-      gasPrice: GasPrice
-    }>({ gasPrice: defaultGasPrice.gasPrice, option: GasOptions.LOW })
+      option: GasOptions;
+      gasPrice: GasPrice;
+    }>({ gasPrice: defaultGasPrice.gasPrice, option: GasOptions.LOW });
 
-    const siteOrigin = txnData?.origin as string | undefined
-    const siteName = siteOrigin?.split('//')?.at(-1)?.split('.')?.at(-2)
-    const siteLogo = useSiteLogo(siteOrigin)
+    const siteOrigin = txnData?.origin as string | undefined;
+    const siteName = siteOrigin?.split('//')?.at(-1)?.split('.')?.at(-2);
+    const siteLogo = useSiteLogo(siteOrigin);
 
-    const nativeFeeDenom = useNativeFeeDenom(rootDenomsStore.allDenoms, activeChain, activeNetwork)
+    const nativeFeeDenom = useNativeFeeDenom(rootDenomsStore.allDenoms, activeChain, activeNetwork);
 
     const nativeFeeToken = useMemo(() => {
       if (!nativeFeeDenom) {
-        return undefined
+        return undefined;
       }
 
-      return (assets ?? []).find(
-        (asset) => asset?.coinMinimalDenom === nativeFeeDenom.coinMinimalDenom,
-      )
-    }, [assets, nativeFeeDenom])
+      return (assets ?? []).find((asset) => asset?.coinMinimalDenom === nativeFeeDenom.coinMinimalDenom);
+    }, [assets, nativeFeeDenom]);
 
     useEffect(() => {
-      rootBalanceStore.loadBalances(activeChain, activeNetwork)
+      rootBalanceStore.loadBalances(activeChain, activeNetwork);
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [activeChain, activeNetwork])
+    }, [activeChain, activeNetwork]);
 
     const { data: recommendedGasLimit, isLoading: isLoadingGasLimit } = useQuery({
       queryKey: [
@@ -201,21 +189,18 @@ export const SignTransaction = observer(
       ],
       queryFn: async function fetchGasEstimate() {
         if (txnData?.signTxnData?.gas) {
-          return Math.ceil(Number(txnData.signTxnData.gas) * gasAdjustment)
+          return Math.ceil(Number(txnData.signTxnData.gas) * gasAdjustment);
         }
 
         try {
-          let gasUsed = defaultGasLimit
+          let gasUsed = defaultGasLimit;
 
           if (txnData.signTxnData.params) {
-            const _gasUsed = await SeiEvmTx.ExecuteEthEstimateGas(
-              txnData.signTxnData.params,
-              evmJsonRpc,
-            )
+            const _gasUsed = await SeiEvmTx.ExecuteEthEstimateGas(txnData.signTxnData.params, evmJsonRpc);
 
-            gasUsed = Math.ceil(Number(_gasUsed) * gasAdjustment)
+            gasUsed = Math.ceil(Number(_gasUsed) * gasAdjustment);
           } else {
-            const fromEthAddress = pubKeyToEvmAddressToShow(activeWallet?.pubKeys?.[activeChain])
+            const fromEthAddress = pubKeyToEvmAddressToShow(activeWallet?.pubKeys?.[activeChain]);
 
             gasUsed = await SeiEvmTx.SimulateTransaction(
               txnData.signTxnData.to,
@@ -224,37 +209,37 @@ export const SignTransaction = observer(
               txnData.signTxnData.data,
               undefined,
               fromEthAddress,
-            )
-            gasUsed = Math.ceil(Number(gasUsed) * gasAdjustment)
+            );
+            gasUsed = Math.ceil(Number(gasUsed) * gasAdjustment);
           }
 
-          return gasUsed
+          return gasUsed;
         } catch (_) {
-          return defaultGasLimit
+          return defaultGasLimit;
         }
       },
       initialData: defaultGasLimit,
-    })
+    });
 
     useEffect(() => {
       function resetGasPriceError() {
         if (gasPriceError?.includes('Insufficient funds to cover gas and transaction amount.')) {
-          setGasPriceError('')
+          setGasPriceError('');
         }
       }
 
       async function checkIfFundsAreSufficient() {
         if (gasPriceStatus === 'loading' || !gasPriceOption?.gasPrice?.amount) {
-          resetGasPriceError()
-          return
+          resetGasPriceError();
+          return;
         }
 
-        const amount = txnData.signTxnData.value
+        const amount = txnData.signTxnData.value;
         const gasAmount = new BigNumber(userPreferredGasLimit || recommendedGasLimit).multipliedBy(
           gasPriceOption.gasPrice.amount.toString(),
-        )
+        );
 
-        const decimals = Number(nativeFeeToken?.coinDecimals ?? 18)
+        const decimals = Number(nativeFeeToken?.coinDecimals ?? 18);
         if (
           nativeFeeToken &&
           !!amount &&
@@ -263,14 +248,14 @@ export const SignTransaction = observer(
             .plus(parseUnits(Number(amount).toFixed(decimals), decimals).toString())
             .gt(parseUnits(Number(nativeFeeToken.amount).toFixed(decimals), decimals).toString())
         ) {
-          setGasPriceError(`Insufficient funds to cover gas and transaction amount.`)
-          return
+          setGasPriceError(`Insufficient funds to cover gas and transaction amount.`);
+          return;
         }
 
-        resetGasPriceError()
+        resetGasPriceError();
       }
 
-      checkIfFundsAreSufficient()
+      checkIfFundsAreSufficient();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
       evmJsonRpc,
@@ -280,30 +265,30 @@ export const SignTransaction = observer(
       recommendedGasLimit,
       txnData.signTxnData.value,
       userPreferredGasLimit,
-    ])
+    ]);
 
     const refetchData = useCallback(() => {
       setTimeout(() => {
-        rootBalanceStore.refetchBalances(activeChain, activeNetwork)
-      }, 3000)
-    }, [activeChain, activeNetwork, rootBalanceStore])
+        rootBalanceStore.refetchBalances(activeChain, activeNetwork);
+      }, 3000);
+    }, [activeChain, activeNetwork, rootBalanceStore]);
 
     const handleApproveClick = async () => {
       try {
         if (activeWallet.walletType === WALLETTYPE.LEDGER) {
           if (chainInfo?.evmOnlyChain) {
-            setShowLedgerPopup(true)
+            setShowLedgerPopup(true);
           } else {
-            throw new Error(SEI_EVM_LEDGER_ERROR_MESSAGE)
+            throw new Error(SEI_EVM_LEDGER_ERROR_MESSAGE);
           }
         }
 
-        setSigningError(null)
-        setTxStatus('loading')
+        setSigningError(null);
+        setTxStatus('loading');
 
-        const wallet = (await getWallet(activeChain, true)) as unknown as EthWallet
+        const wallet = (await getWallet(activeChain, true)) as unknown as EthWallet;
 
-        const seiEvmTx = SeiEvmTx.GetSeiEvmClient(wallet, evmJsonRpc ?? '', Number(evmChainId))
+        const seiEvmTx = SeiEvmTx.GetSeiEvmClient(wallet, evmJsonRpc ?? '', Number(evmChainId));
         const result = await seiEvmTx.sendTransaction(
           '',
           txnData.signTxnData.to,
@@ -312,17 +297,15 @@ export const SignTransaction = observer(
           parseInt(gasPriceOption.gasPrice.amount.toString()),
           txnData.signTxnData.data,
           false,
-        )
+        );
 
         try {
-          const evmTxHash = result.hash
-          const feeQuantity = new BigNumber(
-            Number(userPreferredGasLimit || recommendedGasLimit).toString(),
-          )
+          const evmTxHash = result.hash;
+          const feeQuantity = new BigNumber(Number(userPreferredGasLimit || recommendedGasLimit).toString())
             .multipliedBy(gasPriceOption.gasPrice.amount.toString())
             .dividedBy(1)
-            .toFixed(0)
-          const feeDenomination = nativeFeeDenom.coinMinimalDenom
+            .toFixed(0);
+          const feeDenomination = nativeFeeDenom.coinMinimalDenom;
 
           if (chainInfo?.evmOnlyChain) {
             await txPostToDb({
@@ -335,9 +318,9 @@ export const SignTransaction = observer(
               isEvmOnly: true,
               feeQuantity,
               feeDenomination,
-            })
+            });
           } else {
-            const cosmosTxHash = await SeiEvmTx.GetCosmosTxHash(evmTxHash, evmJsonRpc ?? '')
+            const cosmosTxHash = await SeiEvmTx.GetCosmosTxHash(evmTxHash, evmJsonRpc ?? '');
             await txPostToDb({
               txType: CosmosTxType.Dapp,
               txHash: cosmosTxHash,
@@ -347,63 +330,59 @@ export const SignTransaction = observer(
               network: activeNetwork,
               feeQuantity,
               feeDenomination,
-            })
+            });
           }
         } catch {
           // Added here as the GetCosmosTxHash call is currently failing causing the send flow to break
         }
 
-        setTxStatus('success')
+        setTxStatus('success');
         try {
           Browser.runtime.sendMessage({
             type: MessageTypes.signSeiEvmResponse,
             payloadId: txnData?.payloadId,
             payload: { status: 'success', data: result.hash },
-          })
+          });
         } catch {
-          throw new Error('Could not send transaction to the dApp')
+          throw new Error('Could not send transaction to the dApp');
         }
 
         if (!donotClose) {
           if (isSidePanel()) {
-            refetchData()
-            navigate('/home')
+            refetchData();
+            navigate('/home');
           } else {
-            window.close()
+            window.close();
           }
         } else {
-          handleTxnListUpdate()
+          handleTxnListUpdate();
         }
       } catch (error) {
-        setTxStatus('error')
+        setTxStatus('error');
         if (error instanceof LedgerError) {
           setTimeout(() => {
-            setSigningError(null)
-          }, 5000)
+            setSigningError(null);
+          }, 5000);
         }
-        const errorMessage = error instanceof Error ? error.message : 'Something went wrong.'
+        const errorMessage = error instanceof Error ? error.message : 'Something went wrong.';
         if (errorMessage.includes('intrinsic gas too low')) {
-          setSigningError('Please try again with higher gas fee.')
-          return
+          setSigningError('Please try again with higher gas fee.');
+          return;
         }
 
-        setSigningError(errorMessage)
+        setSigningError(errorMessage);
         captureException(error, {
           tags: uiErrorTags,
-        })
+        });
       }
-    }
+    };
 
     if (chainInfo?.evmOnlyChain && evmBalanceStore.evmBalance.status === 'loading') {
-      return <Loading />
+      return <Loading />;
     }
 
     const isApproveBtnDisabled =
-      !!signingError ||
-      txStatus === 'loading' ||
-      !!gasPriceError ||
-      isLoadingGasLimit ||
-      gasPriceStatus === 'loading'
+      !!signingError || txStatus === 'loading' || !!gasPriceError || isLoadingGasLimit || gasPriceStatus === 'loading';
 
     return (
       <div
@@ -422,14 +401,9 @@ export const SignTransaction = observer(
             header={
               <div className='w-[396px]'>
                 <Header
-                  imgSrc={
-                    chainInfo.chainSymbolImageUrl ??
-                    (theme === ThemeName.DARK ? GenericDark : GenericLight)
-                  }
-                  imgOnError={imgOnError(theme === ThemeName.DARK ? GenericDark : GenericLight)}
-                  title={
-                    <Buttons.Wallet title={trim(walletName, 10)} className='pr-4 cursor-default' />
-                  }
+                  imgSrc={chainInfo.chainSymbolImageUrl ?? (theme === ThemeName.DARK ? GenericDark : GenericLight)}
+                  // imgOnError={imgOnError(theme === ThemeName.DARK ? GenericDark : GenericLight)}
+                  title={<Buttons.Wallet title={trim(walletName, 10)} className='pr-4 cursor-default' />}
                 />
               </div>
             }
@@ -446,20 +420,14 @@ export const SignTransaction = observer(
                   className='rounded-full overflow-hidden'
                 />
                 <div className='ml-3'>
-                  <p className='capitalize text-gray-900 dark:text-white-100 text-base font-bold'>
-                    {siteName}
-                  </p>
-                  <p className='lowercase text-gray-500 dark:text-gray-400 text-xs font-medium'>
-                    {siteOrigin}
-                  </p>
+                  <p className='capitalize text-gray-900 dark:text-white-100 text-base font-bold'>{siteName}</p>
+                  <p className='lowercase text-gray-500 dark:text-gray-400 text-xs font-medium'>{siteOrigin}</p>
                 </div>
               </div>
 
               <GasPriceOptions
                 gasLimit={userPreferredGasLimit || recommendedGasLimit?.toString()}
-                setGasLimit={(value: string | number | BigNumber) =>
-                  setUserPreferredGasLimit(value.toString())
-                }
+                setGasLimit={(value: string | number | BigNumber) => setUserPreferredGasLimit(value.toString())}
                 recommendedGasLimit={recommendedGasLimit?.toString()}
                 gasPriceOption={gasPriceOption}
                 onGasPriceOptionChange={(value: any) => setGasPriceOption(value)}
@@ -511,9 +479,7 @@ export const SignTransaction = observer(
                         />
 
                         {gasPriceError ? (
-                          <p className='text-red-300 text-sm font-medium mt-2 px-1'>
-                            {gasPriceError}
-                          </p>
+                          <p className='text-red-300 text-sm font-medium mt-2 px-1'>{gasPriceError}</p>
                         ) : null}
                       </div>
                     ),
@@ -530,15 +496,10 @@ export const SignTransaction = observer(
                 />
               </GasPriceOptions>
 
-              {signingError && txStatus === 'error' ? (
-                <ErrorCard text={signingError} className='mt-3' />
-              ) : null}
+              {signingError && txStatus === 'error' ? <ErrorCard text={signingError} className='mt-3' /> : null}
 
               {txStatus !== 'error' && showLedgerPopup ? (
-                <LedgerConfirmationModal
-                  showLedgerPopup={showLedgerPopup}
-                  onClose={() => setShowLedgerPopup(false)}
-                />
+                <LedgerConfirmationModal showLedgerPopup={showLedgerPopup} onClose={() => setShowLedgerPopup(false)} />
               ) : null}
             </div>
 
@@ -548,10 +509,10 @@ export const SignTransaction = observer(
                   title='Reject Button'
                   color={Colors.gray900}
                   onClick={() => {
-                    handleRejectClick(navigate, txnData?.payloadId, donotClose)
+                    handleRejectClick(navigate, txnData?.payloadId, donotClose);
 
                     if (donotClose) {
-                      handleTxnListUpdate()
+                      handleTxnListUpdate();
                     }
                   }}
                   disabled={txStatus === 'loading'}
@@ -573,6 +534,6 @@ export const SignTransaction = observer(
           </PopupLayout>
         </div>
       </div>
-    )
+    );
   },
-)
+);

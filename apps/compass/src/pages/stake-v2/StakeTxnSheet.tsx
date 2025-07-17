@@ -1,55 +1,55 @@
-import { isDeliverTxSuccess } from '@cosmjs/stargate'
+import { isDeliverTxSuccess } from '@cosmjs/stargate';
 import {
   SelectedNetwork,
   STAKE_MODE,
   useGetExplorerTxnUrl,
   usePendingTxState,
   useSelectedNetwork,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { Provider, SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { Validator } from '@leapwallet/cosmos-wallet-sdk/dist/browser/types/validators'
-import { CaretRight } from '@phosphor-icons/react'
-import BottomModal from 'components/bottom-modal'
-import { Button } from 'components/ui/button'
-import { useActiveChain } from 'hooks/settings/useActiveChain'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import React, { useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { rootBalanceStore, rootStakeStore } from 'stores/root-store'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { Provider, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { Validator } from '@leapwallet/cosmos-wallet-sdk/dist/browser/types/validators';
+import { CaretRight } from '@phosphor-icons/react';
+import BottomModal from 'components/bottom-modal';
+import { Button } from 'components/ui/button';
+import { useActiveChain } from 'hooks/settings/useActiveChain';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import React, { useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { rootBalanceStore, rootStakeStore } from 'stores/root-store';
 
-import { txModeTitleMap } from './utils/stake-text'
-import { txStatusMap } from './utils/stake-text'
+import { txModeTitleMap } from './utils/stake-text';
+import { txStatusMap } from './utils/stake-text';
 
 export type StakeTxnPageState = {
-  validator: Validator
-  provider: Provider
-  mode: STAKE_MODE | 'CLAIM_AND_DELEGATE'
-  forceChain?: SupportedChain
-  forceNetwork?: SelectedNetwork
-}
+  validator: Validator;
+  provider: Provider;
+  mode: STAKE_MODE | 'CLAIM_AND_DELEGATE';
+  forceChain?: SupportedChain;
+  forceNetwork?: SelectedNetwork;
+};
 
 type StakeTxnSheetProps = {
-  isOpen: boolean
-  onClose: () => void
-  mode?: StakeTxnPageState['mode'] | null
-}
+  isOpen: boolean;
+  onClose: () => void;
+  mode?: StakeTxnPageState['mode'] | null;
+};
 
 export const StakeTxnSheet = observer(({ isOpen, onClose, mode }: StakeTxnSheetProps) => {
-  const activeChain = useActiveChain()
-  const selectedNetwork = useSelectedNetwork()
+  const activeChain = useActiveChain();
+  const selectedNetwork = useSelectedNetwork();
 
-  const { pendingTx, setPendingTx } = usePendingTxState()
+  const { pendingTx, setPendingTx } = usePendingTxState();
 
   const { explorerTxnUrl: txnUrl } = useGetExplorerTxnUrl({
     forceChain: activeChain,
     forceNetwork: selectedNetwork,
     forceTxHash: pendingTx?.txHash,
-  })
+  });
 
   useEffect(() => {
     if (!pendingTx?.promise) {
-      return
+      return;
     }
 
     pendingTx.promise
@@ -58,21 +58,21 @@ export const StakeTxnSheet = observer(({ isOpen, onClose, mode }: StakeTxnSheetP
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
           if (result && isDeliverTxSuccess(result)) {
-            setPendingTx({ ...pendingTx, txStatus: 'success' })
+            setPendingTx({ ...pendingTx, txStatus: 'success' });
           } else {
-            setPendingTx({ ...pendingTx, txStatus: 'failed' })
+            setPendingTx({ ...pendingTx, txStatus: 'failed' });
           }
         },
         () => setPendingTx({ ...pendingTx, txStatus: 'failed' }),
       )
       .catch(() => {
-        setPendingTx({ ...pendingTx, txStatus: 'failed' })
+        setPendingTx({ ...pendingTx, txStatus: 'failed' });
       })
       .finally(() => {
-        rootBalanceStore.refetchBalances(activeChain, selectedNetwork)
-        rootStakeStore.updateStake(activeChain, selectedNetwork, true)
-      })
-  }, [pendingTx?.promise])
+        rootBalanceStore.refetchBalances(activeChain, selectedNetwork);
+        rootStakeStore.updateStake(activeChain, selectedNetwork, true);
+      });
+  }, [pendingTx?.promise]);
 
   return (
     <BottomModal
@@ -125,13 +125,9 @@ export const StakeTxnSheet = observer(({ isOpen, onClose, mode }: StakeTxnSheetP
           <Link to='/home'>Home</Link>
         </Button>
         <Button onClick={onClose} disabled={pendingTx?.txStatus === 'loading'}>
-          {pendingTx?.txStatus === 'failed'
-            ? 'Retry'
-            : mode === 'DELEGATE'
-            ? 'Stake Again'
-            : 'Done'}
+          {pendingTx?.txStatus === 'failed' ? 'Retry' : mode === 'DELEGATE' ? 'Stake Again' : 'Done'}
         </Button>
       </div>
     </BottomModal>
-  )
-})
+  );
+});

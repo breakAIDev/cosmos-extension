@@ -1,21 +1,21 @@
-import { sliceWord } from '@leapwallet/cosmos-wallet-hooks'
-import Text from 'components/text'
-import React, { useCallback } from 'react'
-import { cn } from 'utils/cn'
+import { sliceWord } from '@leapwallet/cosmos-wallet-hooks';
+import Text from 'components/text';
+import React, { useCallback } from 'react';
+import { cn } from 'utils/cn';
 
 export type CurrencyCardProps = {
-  code: string
-  name: string
-  logo: string
-  onClick: () => void
-  isSelected: boolean
-}
+  code: string;
+  name: string;
+  logo: string;
+  onClick: () => void;
+  isSelected: boolean;
+};
 
 export default function CurrencyCard({ code, name, logo, onClick, isSelected }: CurrencyCardProps) {
   const handleCurrencySelect = useCallback(() => {
-    if (isSelected) return
-    onClick()
-  }, [isSelected, onClick])
+    if (isSelected) return;
+    onClick();
+  }, [isSelected, onClick]);
 
   return (
     <div
@@ -37,5 +37,5 @@ export default function CurrencyCard({ code, name, logo, onClick, isSelected }: 
         </Text>
       </div>
     </div>
-  )
+  );
 }

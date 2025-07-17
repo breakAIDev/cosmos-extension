@@ -1,5 +1,5 @@
-import { Check } from '@phosphor-icons/react'
-import React from 'react'
+import { Check } from '@phosphor-icons/react';
+import React from 'react';
 
 export default function FilterItem({
   icon,
@@ -9,12 +9,12 @@ export default function FilterItem({
   isLast = false,
   onRemove,
 }: {
-  icon: string | React.ReactNode
-  label: string
-  isSelected?: boolean
-  isLast?: boolean
-  onSelect?: () => void
-  onRemove?: () => void
+  icon: string | React.ReactNode;
+  label: string;
+  isSelected?: boolean;
+  isLast?: boolean;
+  onSelect?: () => void;
+  onRemove?: () => void;
 }) {
   return (
     <button
@@ -30,7 +30,7 @@ export default function FilterItem({
             alt={label}
             className='size-8 rounded-full'
             onError={(e) => {
-              e.currentTarget.src = `https://placehold.co/20x20?text=${label}`
+              e.currentTarget.src = `https://placehold.co/20x20?text=${label}`;
             }}
           />
         ) : (
@@ -44,5 +44,5 @@ export default function FilterItem({
         </div>
       )}
     </button>
-  )
+  );
 }

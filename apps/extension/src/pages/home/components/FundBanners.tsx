@@ -1,76 +1,72 @@
-import { useActiveWallet, useChainInfo, useFeatureFlags } from '@leapwallet/cosmos-wallet-hooks'
-import { type Icon, Path, ShoppingBag, Wallet } from '@phosphor-icons/react'
-import { ArrowsLeftRight } from '@phosphor-icons/react/dist/ssr'
-import { captureException } from '@sentry/react'
-import { useHardCodedActions } from 'components/search-modal'
-import Text from 'components/text'
-import { ButtonName, ButtonType, EventName, PageName } from 'config/analytics'
-import { AGGREGATED_CHAIN_KEY, LEAPBOARD_URL } from 'config/constants'
-import { useActiveChain } from 'hooks/settings/useActiveChain'
-import { useAddress } from 'hooks/wallet/useAddress'
-import mixpanel from 'mixpanel-browser'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { AggregatedSupportedChain } from 'types/utility'
-import { UserClipboard } from 'utils/clipboard'
-import { trim } from 'utils/strings'
+import { useActiveWallet, useChainInfo, useFeatureFlags } from '@leapwallet/cosmos-wallet-hooks';
+import { type Icon, Path, ShoppingBag, Wallet } from '@phosphor-icons/react';
+import { ArrowsLeftRight } from '@phosphor-icons/react/dist/ssr';
+import { captureException } from '@sentry/react';
+import { useHardCodedActions } from 'components/search-modal';
+import Text from 'components/text';
+import { ButtonName, ButtonType, EventName, PageName } from 'config/analytics';
+import { AGGREGATED_CHAIN_KEY, LEAPBOARD_URL } from 'config/constants';
+import { useActiveChain } from 'hooks/settings/useActiveChain';
+import { useAddress } from 'hooks/wallet/useAddress';
+import mixpanel from 'mixpanel-browser';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { AggregatedSupportedChain } from 'types/utility';
+import { UserClipboard } from 'utils/clipboard';
+import { trim } from 'utils/strings';
 
-import FundsSheet from './FundSheet'
+import FundsSheet from './FundSheet';
 
 export type FundBannerData = {
-  icon: Icon
-  title: string
-  content: string
-  textColor: string
-  onClick: () => void
-  hide?: boolean
-}
+  icon: Icon;
+  title: string;
+  content: string;
+  textColor: string;
+  onClick: () => void;
+  hide?: boolean;
+};
 
 export interface FundBannersProps {
-  handleCopyClick: () => void
+  handleCopyClick: () => void;
 }
 
 const FundBanners = React.memo(() => {
-  const address = useAddress()
-  const activeWallet = useActiveWallet()
-  const activeChain = useActiveChain() as AggregatedSupportedChain
-  const { data: featureFlags } = useFeatureFlags()
-  const chain = useChainInfo()
-  const { handleSwapClick, handleBuyClick } = useHardCodedActions()
-  const [showCopyAddress, setShowCopyAddress] = useState<boolean>(false)
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const address = useAddress();
+  const activeWallet = useActiveWallet();
+  const activeChain = useActiveChain() as AggregatedSupportedChain;
+  const { data: featureFlags } = useFeatureFlags();
+  const chain = useChainInfo();
+  const { handleSwapClick, handleBuyClick } = useHardCodedActions();
+  const [showCopyAddress, setShowCopyAddress] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
-  const token = chain?.denom?.toUpperCase()
-  const isAggregatedView = useMemo(() => activeChain === AGGREGATED_CHAIN_KEY, [activeChain])
+  const token = chain?.denom?.toUpperCase();
+  const isAggregatedView = useMemo(() => activeChain === AGGREGATED_CHAIN_KEY, [activeChain]);
   const swapPath = `/swap?sourceChainId=${
     chain?.chainId === 'cosmoshub-4' ? 'osmosis-1' : 'cosmoshub-4'
-  }&destinationChainId=${chain?.chainId}&pageSource=${PageName.ZeroState}`
-  const chainId = isAggregatedView ? 'all' : chain?.chainId ?? ''
-  const chainName = isAggregatedView ? 'All Chains' : chain?.chainName ?? ''
+  }&destinationChainId=${chain?.chainId}&pageSource=${PageName.ZeroState}`;
+  const chainId = isAggregatedView ? 'all' : chain?.chainId ?? '';
+  const chainName = isAggregatedView ? 'All Chains' : chain?.chainName ?? '';
 
   useEffect(() => {
     if (showCopyAddress) {
       setTimeout(() => {
-        setShowCopyAddress(false)
-      }, 2000)
+        setShowCopyAddress(false);
+      }, 2000);
     }
-  }, [showCopyAddress])
+  }, [showCopyAddress]);
 
   const transactUrl = useCallback(
     (type: 'swap' | 'bridge') => {
       if (type === 'swap') {
-        return `${LEAPBOARD_URL}/transact/${type}${
-          isAggregatedView ? '' : `?destinationChainId=${chain?.chainId}`
-        }`
+        return `${LEAPBOARD_URL}/transact/${type}${isAggregatedView ? '' : `?destinationChainId=${chain?.chainId}`}`;
       }
 
       if (type === 'bridge') {
-        return `https://swapfast.app/bridge${
-          isAggregatedView ? '' : `?destinationChainId=${chain?.chainId}`
-        }`
+        return `https://swapfast.app/bridge${isAggregatedView ? '' : `?destinationChainId=${chain?.chainId}`}`;
       }
     },
     [chain?.chainId, isAggregatedView],
-  )
+  );
 
   const trackCTAEvent = useCallback(
     (buttonName: string, redirectURL?: string) => {
@@ -82,13 +78,13 @@ const FundBanners = React.memo(() => {
           time: Date.now() / 1000,
           chainId,
           chainName,
-        })
+        });
       } catch (e) {
-        captureException(e)
+        captureException(e);
       }
     },
     [chainId, chainName],
-  )
+  );
 
   const bannerData: FundBannerData[] = useMemo(
     () =>
@@ -102,14 +98,14 @@ const FundBanners = React.memo(() => {
           textColor: '#FFC770',
           onClick: () => {
             if (isAggregatedView) {
-              return
+              return;
             }
 
-            if (!activeWallet) return
-            UserClipboard.copyText(address)
+            if (!activeWallet) return;
+            UserClipboard.copyText(address);
 
-            setShowCopyAddress(true)
-            trackCTAEvent(ButtonName.RECEIVE_ASSETS)
+            setShowCopyAddress(true);
+            trackCTAEvent(ButtonName.RECEIVE_ASSETS);
           },
         },
         {
@@ -118,11 +114,11 @@ const FundBanners = React.memo(() => {
           content: `Swap into ${token} from 300+ other tokens`,
           textColor: '#70B7FF',
           onClick: () => {
-            handleSwapClick(transactUrl('swap'), swapPath)
+            handleSwapClick(transactUrl('swap'), swapPath);
             trackCTAEvent(
               ButtonName.IBC_SWAP,
               featureFlags?.all_chains?.swap === 'redirect' ? transactUrl('swap') : swapPath,
-            )
+            );
           },
           hide: isAggregatedView,
         },
@@ -132,8 +128,8 @@ const FundBanners = React.memo(() => {
           content: `Buy ${isAggregatedView ? 'Cosmos tokens' : token} using USD, EUR, GBP & others`,
           textColor: '#F47CCE',
           onClick: () => {
-            handleBuyClick()
-            trackCTAEvent(ButtonName.BUY, '/buy')
+            handleBuyClick();
+            trackCTAEvent(ButtonName.BUY, '/buy');
           },
         },
         {
@@ -142,27 +138,16 @@ const FundBanners = React.memo(() => {
           content: 'Swap & bridge tokens from other ecosystems',
           textColor: '#3ACF92',
           onClick: () => {
-            window.open(transactUrl('bridge'), '_blank')
-            trackCTAEvent(ButtonName.BRIDGE, transactUrl('bridge'))
+            window.open(transactUrl('bridge'), '_blank');
+            trackCTAEvent(ButtonName.BRIDGE, transactUrl('bridge'));
           },
         },
       ].filter((d) => !d?.hide),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      activeWallet,
-      address,
-      chain?.bip44?.coinType,
-      chain?.key,
-      trackCTAEvent,
-      transactUrl,
-      isAggregatedView,
-      token,
-    ],
-  )
+    [activeWallet, address, chain?.bip44?.coinType, chain?.key, trackCTAEvent, transactUrl, isAggregatedView, token],
+  );
 
-  const modalTitle = isAggregatedView
-    ? 'Get started'
-    : `Get started on ${trim(chain?.chainName, 14)}`
+  const modalTitle = isAggregatedView ? 'Get started' : `Get started on ${trim(chain?.chainName, 14)}`;
 
   return (
     <>
@@ -202,8 +187,8 @@ const FundBanners = React.memo(() => {
         modalTitle={modalTitle}
       />
     </>
-  )
-})
+  );
+});
 
-FundBanners.displayName = 'FundBanners'
-export { FundBanners }
+FundBanners.displayName = 'FundBanners';
+export { FundBanners };

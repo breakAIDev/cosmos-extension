@@ -1,16 +1,10 @@
-import { CheckCircle } from '@phosphor-icons/react'
-import BottomModal from 'components/new-bottom-modal'
-import { observer } from 'mobx-react-lite'
-import React from 'react'
-import { autoLockTimeStore, TimerLockPeriod, TimerLockPeriodKey } from 'stores/password-store'
+import { CheckCircle } from '@phosphor-icons/react';
+import BottomModal from 'components/new-bottom-modal';
+import { observer } from 'mobx-react-lite';
+import React from 'react';
+import { autoLockTimeStore, TimerLockPeriod, TimerLockPeriodKey } from 'stores/password-store';
 
-const SetLockTimerDropUp = ({
-  onClose,
-  isVisible,
-}: {
-  isVisible: boolean
-  onClose: () => void
-}) => {
+const SetLockTimerDropUp = ({ onClose, isVisible }: { isVisible: boolean; onClose: () => void }) => {
   return (
     <BottomModal
       fullScreen
@@ -25,8 +19,8 @@ const SetLockTimerDropUp = ({
             key={time[index]}
             className='flex p-4 hover:cursor-pointer justify-between rounded-xl bg-secondary-100 hover:bg-secondary-200 transition-colors'
             onClick={() => {
-              autoLockTimeStore.setLockTime(time[0] as TimerLockPeriodKey)
-              onClose()
+              autoLockTimeStore.setLockTime(time[0] as TimerLockPeriodKey);
+              onClose();
             }}
           >
             <span className='text-sm font-bold'>{time[0]}</span>
@@ -34,10 +28,10 @@ const SetLockTimerDropUp = ({
               <CheckCircle weight='fill' size={24} className='text-accent-foreground' />
             )}
           </button>
-        )
+        );
       })}
     </BottomModal>
-  )
-}
+  );
+};
 
-export default observer(SetLockTimerDropUp)
+export default observer(SetLockTimerDropUp);

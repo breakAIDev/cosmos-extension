@@ -1,7 +1,7 @@
-import { Info } from '@phosphor-icons/react'
-import React from 'react'
+import { Info } from '@phosphor-icons/react';
+import React from 'react';
 
-import Text from '../text'
+import Text from '../text';
 
 export default function WarningCard({ text, subText }: { text: string; subText?: string }) {
   return (
@@ -18,5 +18,5 @@ export default function WarningCard({ text, subText }: { text: string; subText?:
         ) : null}
       </div>
     </div>
-  )
+  );
 }

@@ -1,5 +1,5 @@
-import { Icon, IconBase, IconWeight } from '@phosphor-icons/react'
-import React, { forwardRef, ReactElement } from 'react'
+import { Icon, IconBase, IconWeight } from '@phosphor-icons/react';
+import React, { forwardRef, ReactElement } from 'react';
 
 const weights = new Map<IconWeight, ReactElement>([
   [
@@ -13,20 +13,8 @@ const weights = new Map<IconWeight, ReactElement>([
           strokeLinecap='round'
           strokeLinejoin='round'
         />
-        <path
-          d='M3 8.25H21'
-          stroke='currentColor'
-          strokeWidth='1.5'
-          strokeLinecap='round'
-          strokeLinejoin='round'
-        />
-        <path
-          d='M3 17.25H7.125'
-          stroke='currentColor'
-          strokeWidth='1.5'
-          strokeLinecap='round'
-          strokeLinejoin='round'
-        />
+        <path d='M3 8.25H21' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' />
+        <path d='M3 17.25H7.125' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' />
       </g>
       <defs>
         <clipPath id='clip0_241_1099'>
@@ -46,13 +34,7 @@ const weights = new Map<IconWeight, ReactElement>([
           strokeLinecap='round'
           strokeLinejoin='round'
         />
-        <path
-          d='M3 8.25H21'
-          stroke='currentColor'
-          strokeWidth='2.25'
-          strokeLinecap='round'
-          strokeLinejoin='round'
-        />
+        <path d='M3 8.25H21' stroke='currentColor' strokeWidth='2.25' strokeLinecap='round' strokeLinejoin='round' />
         <path
           d='M3 17.25H7.125'
           stroke='currentColor'
@@ -78,12 +60,10 @@ const weights = new Map<IconWeight, ReactElement>([
       fill='currentColor'
     />,
   ],
-])
+]);
 
-const Sort: Icon = forwardRef((props, ref) => (
-  <IconBase viewBox='0 0 24 24' ref={ref} {...props} weights={weights} />
-))
+const Sort: Icon = forwardRef((props, ref) => <IconBase viewBox='0 0 24 24' ref={ref} {...props} weights={weights} />);
 
-Sort.displayName = 'Sort'
+Sort.displayName = 'Sort';
 
-export default Sort
+export default Sort;

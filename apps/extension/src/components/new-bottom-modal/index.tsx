@@ -1,11 +1,11 @@
-import { X } from '@phosphor-icons/react/dist/ssr'
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { Button } from 'components/ui/button'
-import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from 'components/ui/drawer'
-import { observer } from 'mobx-react-lite'
-import React, { useCallback } from 'react'
-import { cn } from 'utils/cn'
-import { sidePanel } from 'utils/isSidePanel'
+import { X } from '@phosphor-icons/react/dist/ssr';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import { Button } from 'components/ui/button';
+import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from 'components/ui/drawer';
+import { observer } from 'mobx-react-lite';
+import React, { useCallback } from 'react';
+import { cn } from 'utils/cn';
+import { sidePanel } from 'utils/isSidePanel';
 
 export const BottomModalClose = () => {
   return (
@@ -14,71 +14,71 @@ export const BottomModalClose = () => {
         <X weight='bold' size={18} />
       </Button>
     </DrawerClose>
-  )
-}
+  );
+};
 
 type BottomModalProps = React.PropsWithChildren<{
   /*
    * is the modal open
    */
-  isOpen: boolean
+  isOpen: boolean;
   /*
    * title of the modal
    */
-  title?: string | React.ReactNode
+  title?: string | React.ReactNode;
   /*
    * callback when the modal is closed
    */
-  onClose?: () => void
+  onClose?: () => void;
   /*
    * should the modal be prevented from closing
    */
-  disableClose?: boolean
+  disableClose?: boolean;
   /*
    * custom class names for the modal
    */
-  className?: string
+  className?: string;
   /*
    * custom class names for the container
    */
-  containerClassName?: string
+  containerClassName?: string;
   /*
    * custom class names for the content
    */
-  contentClassName?: string
+  contentClassName?: string;
   /*
    * custom class names for the header
    */
-  headerClassName?: string
+  headerClassName?: string;
   /*
    * callback when the action button is clicked
    */
-  onActionButtonClick?: () => void
+  onActionButtonClick?: () => void;
   /*
    * should the action button be hidden
    */
-  hideActionButton?: boolean
+  hideActionButton?: boolean;
   /*
    * custom action button
    */
-  actionButton?: React.ReactNode
+  actionButton?: React.ReactNode;
   /*
    * custom secondary action button
    */
-  secondaryActionButton?: React.ReactNode
+  secondaryActionButton?: React.ReactNode;
   /*
    * custom footer component
    */
-  footerComponent?: React.ReactNode
+  footerComponent?: React.ReactNode;
   /*
    * should the modal be full screen
    */
-  fullScreen?: boolean
+  fullScreen?: boolean;
   /*
    * direction of the modal
    */
-  direction?: 'top' | 'bottom' | 'left' | 'right'
-}>
+  direction?: 'top' | 'bottom' | 'left' | 'right';
+}>;
 
 const BottomModal: React.FC<BottomModalProps> = ({
   isOpen,
@@ -98,16 +98,16 @@ const BottomModal: React.FC<BottomModalProps> = ({
   fullScreen,
   direction = 'bottom',
 }) => {
-  const container = document.getElementById('popup-layout')?.parentNode as HTMLElement
+  const container = document.getElementById('popup-layout')?.parentNode as HTMLElement;
 
   const handleCloseAction = useCallback(() => {
     if (!disableClose) {
-      onClose?.()
+      onClose?.();
     }
-  }, [disableClose, onClose])
+  }, [disableClose, onClose]);
 
   if (!container) {
-    return null
+    return null;
   }
 
   return (
@@ -118,8 +118,8 @@ const BottomModal: React.FC<BottomModalProps> = ({
       dismissible={!disableClose}
       onOpenChange={(open) => {
         if (!open) {
-          onActionButtonClick?.()
-          handleCloseAction()
+          onActionButtonClick?.();
+          handleCloseAction();
         }
       }}
     >
@@ -157,13 +157,7 @@ const BottomModal: React.FC<BottomModalProps> = ({
           {hideActionButton ? <div className='flex items-center size-12' /> : <BottomModalClose />}
         </DrawerHeader>
 
-        <div
-          className={cn(
-            'p-4 overflow-auto',
-            fullScreen ? 'max-h-full' : 'max-h-[calc(100%-112px)]',
-            className,
-          )}
-        >
+        <div className={cn('p-4 overflow-auto', fullScreen ? 'max-h-full' : 'max-h-[calc(100%-112px)]', className)}>
           {children}
         </div>
         {footerComponent ? (
@@ -173,7 +167,7 @@ const BottomModal: React.FC<BottomModalProps> = ({
         ) : null}
       </DrawerContent>
     </Drawer>
-  )
-}
+  );
+};
 
-export default observer(BottomModal)
+export default observer(BottomModal);

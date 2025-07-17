@@ -1,5 +1,5 @@
-import { getKeyToUseForDenoms, Token } from '@leapwallet/cosmos-wallet-hooks'
-import { DenomsRecord, SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
+import { getKeyToUseForDenoms, Token } from '@leapwallet/cosmos-wallet-hooks';
+import { DenomsRecord, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import {
   AutoFetchedCW20DenomsStore,
   BetaCW20DenomsStore,
@@ -8,13 +8,13 @@ import {
   DisabledCW20DenomsStore,
   EnabledCW20DenomsStore,
   RootBalanceStore,
-} from '@leapwallet/cosmos-wallet-store'
-import { useQuery } from '@tanstack/react-query'
-import { useMemo } from 'react'
-import { SourceChain, SourceToken } from 'types/swap'
-import { isCompassWallet } from 'utils/isCompassWallet'
+} from '@leapwallet/cosmos-wallet-store';
+import { useQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
+import { SourceChain, SourceToken } from 'types/swap';
+import { isCompassWallet } from 'utils/isCompassWallet';
 
-import { SWAP_NETWORK } from './useSwapsTx'
+import { SWAP_NETWORK } from './useSwapsTx';
 
 export function useTokenWithBalances(
   token: SourceToken | null,
@@ -32,17 +32,13 @@ export function useTokenWithBalances(
 ): { data: any; status: any } {
   const disabledCW20Tokens = disabledCW20DenomsStore.getDisabledCW20DenomsForChain(
     (chain?.key ?? '') as SupportedChain,
-  )
-  const enabledCW20Tokens = enabledCW20DenomsStore.getEnabledCW20DenomsForChain(
-    (chain?.key ?? '') as SupportedChain,
-  )
-  const cw20Tokens = cw20DenomsStore.getCW20DenomsForChain((chain?.key ?? '') as SupportedChain)
-  const betaCw20Tokens = betaCW20DenomsStore.getBetaCW20DenomsForChain(
-    (chain?.key ?? '') as SupportedChain,
-  )
+  );
+  const enabledCW20Tokens = enabledCW20DenomsStore.getEnabledCW20DenomsForChain((chain?.key ?? '') as SupportedChain);
+  const cw20Tokens = cw20DenomsStore.getCW20DenomsForChain((chain?.key ?? '') as SupportedChain);
+  const betaCw20Tokens = betaCW20DenomsStore.getBetaCW20DenomsForChain((chain?.key ?? '') as SupportedChain);
   const autoFetchedCW20Denoms = autoFetchedCW20DenomsStore.getAutoFetchedCW20DenomsForChain(
     (chain?.key ?? '') as SupportedChain,
-  )
+  );
 
   /**
    * Managed Tokens Coin Minimal Denoms
@@ -52,33 +48,27 @@ export function useTokenWithBalances(
       ...Object.values(cw20Tokens),
       ...Object.values(autoFetchedCW20Denoms),
       ...Object.values(betaCw20Tokens ?? {}),
-    ].map((token) => token.coinMinimalDenom)
-  }, [autoFetchedCW20Denoms, betaCw20Tokens, cw20Tokens])
+    ].map((token) => token.coinMinimalDenom);
+  }, [autoFetchedCW20Denoms, betaCw20Tokens, cw20Tokens]);
 
   const updatedToken = useMemo(() => {
-    if (!token || !allAssets) return token
+    if (!token || !allAssets) return token;
 
     const latestBalance = allAssets?.find(
       (asset) =>
         asset.coinMinimalDenom === token.coinMinimalDenom &&
         asset.ibcDenom === token.ibcDenom &&
-        getKeyToUseForDenoms(
-          asset.skipAsset?.originDenom ?? '',
-          asset.skipAsset?.originChainId ?? '',
-        ) ===
-          getKeyToUseForDenoms(
-            token.skipAsset?.originDenom ?? '',
-            token.skipAsset?.originChainId ?? '',
-          ) &&
+        getKeyToUseForDenoms(asset.skipAsset?.originDenom ?? '', asset.skipAsset?.originChainId ?? '') ===
+          getKeyToUseForDenoms(token.skipAsset?.originDenom ?? '', token.skipAsset?.originChainId ?? '') &&
         getKeyToUseForDenoms(asset.skipAsset?.denom ?? '', asset.skipAsset?.originChainId ?? '') ===
           getKeyToUseForDenoms(token.skipAsset?.denom ?? '', token.skipAsset?.originChainId ?? ''),
-    )?.amount
+    )?.amount;
 
     return {
       ...token,
       amount: latestBalance ?? token.amount,
-    }
-  }, [allAssets, token])
+    };
+  }, [allAssets, token]);
 
   const { data, status } = useQuery(
     [
@@ -89,35 +79,27 @@ export function useTokenWithBalances(
     ],
     async () => {
       if (!updatedToken || !chain) {
-        return updatedToken
+        return updatedToken;
       }
 
-      if (
-        !managedTokens.includes(updatedToken.coinMinimalDenom) ||
-        updatedToken?.skipAsset?.evmTokenContract
-      ) {
+      if (!managedTokens.includes(updatedToken.coinMinimalDenom) || updatedToken?.skipAsset?.evmTokenContract) {
         if (!updatedToken?.amount || updatedToken?.amount === '0') {
-          if (
-            updatedToken?.coinMinimalDenom?.startsWith('0x') ||
-            updatedToken?.skipAsset?.evmTokenContract
-          ) {
+          if (updatedToken?.coinMinimalDenom?.startsWith('0x') || updatedToken?.skipAsset?.evmTokenContract) {
             try {
               const denomInfo: DenomsRecord = {
                 [updatedToken?.skipAsset?.evmTokenContract ?? updatedToken.coinMinimalDenom]: {
                   name: updatedToken.name ?? updatedToken.skipAsset?.name ?? '',
                   coinDenom: updatedToken.symbol ?? updatedToken.skipAsset?.symbol,
-                  coinMinimalDenom:
-                    updatedToken?.skipAsset?.evmTokenContract ?? updatedToken.coinMinimalDenom,
+                  coinMinimalDenom: updatedToken?.skipAsset?.evmTokenContract ?? updatedToken.coinMinimalDenom,
                   coinDecimals:
                     updatedToken?.skipAsset?.evmDecimals ??
                     updatedToken.coinDecimals ??
                     updatedToken.skipAsset?.decimals,
                   icon: updatedToken.img ?? updatedToken.skipAsset?.logoUri ?? '',
                   chain: chain.key,
-                  coinGeckoId:
-                    updatedToken.coinGeckoId ?? updatedToken.skipAsset?.coingeckoId ?? '',
+                  coinGeckoId: updatedToken.coinGeckoId ?? updatedToken.skipAsset?.coingeckoId ?? '',
                 },
-              }
+              };
               const balances: Token[] =
                 (await rootBalanceStore.erc20BalanceStore.fetchERC20TokenBalances(
                   chain.key,
@@ -125,32 +107,32 @@ export function useTokenWithBalances(
                   [updatedToken?.skipAsset?.evmTokenContract ?? updatedToken.coinMinimalDenom],
                   true,
                   denomInfo,
-                )) ?? []
+                )) ?? [];
 
-              if (!balances?.length) return updatedToken
+              if (!balances?.length) return updatedToken;
 
-              const [tokenBalance] = balances
+              const [tokenBalance] = balances;
 
               return {
                 ...updatedToken,
                 amount: tokenBalance?.amount,
                 usdPrice: tokenBalance?.usdPrice,
                 usdValue: tokenBalance?.usdValue,
-              }
+              };
             } catch (error) {
               if (!updatedToken?.skipAsset?.isCw20) {
-                return updatedToken
+                return updatedToken;
               }
             }
           }
           if (!isCompassWallet()) {
-            await rootBalanceStore.loadBalances(chain.key, SWAP_NETWORK)
+            await rootBalanceStore.loadBalances(chain.key, SWAP_NETWORK);
             // sleep for 5 secs
-            await new Promise((resolve) => setTimeout(resolve, 5000))
+            await new Promise((resolve) => setTimeout(resolve, 5000));
           }
         }
         if (!updatedToken?.skipAsset?.isCw20) {
-          return updatedToken
+          return updatedToken;
         }
       }
 
@@ -161,11 +143,11 @@ export function useTokenWithBalances(
             !enabledCW20Tokens?.includes(updatedToken.coinMinimalDenom))
         )
       ) {
-        return updatedToken
+        return updatedToken;
       }
 
       try {
-        let balances: Token[]
+        let balances: Token[];
         if (updatedToken?.coinMinimalDenom) {
           balances =
             (await cw20DenomBalanceStore.fetchCW20TokenBalances(
@@ -173,32 +155,32 @@ export function useTokenWithBalances(
               SWAP_NETWORK,
               [updatedToken?.coinMinimalDenom ?? ''],
               true,
-            )) ?? []
+            )) ?? [];
         } else {
-          balances = []
+          balances = [];
         }
 
-        if (!balances?.length) return updatedToken
+        if (!balances?.length) return updatedToken;
 
-        const [tokenBalance] = balances
+        const [tokenBalance] = balances;
 
         return {
           ...updatedToken,
           amount: tokenBalance?.amount,
           usdPrice: tokenBalance?.usdPrice,
           usdValue: tokenBalance?.usdValue,
-        }
+        };
       } catch (error) {
-        return updatedToken
+        return updatedToken;
       }
     },
     {
       enabled: !loadingAssets,
     },
-  )
+  );
 
   return {
     data: (status === 'success' ? data ?? null : updatedToken) as SourceToken | null,
     status: loadingAssets ? 'loading' : status,
-  }
+  };
 }

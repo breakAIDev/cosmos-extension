@@ -1,101 +1,92 @@
-import { pubKeyToEvmAddressToShow } from '@leapwallet/cosmos-wallet-sdk'
-import { KeyChain } from '@leapwallet/leap-keychain'
-import { Button } from 'components/ui/button'
-import WalletInfoCard from 'components/wallet-info-card'
-import { OnboardingWrapper } from 'pages/onboarding/wrapper'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { cn } from 'utils/cn'
+import { pubKeyToEvmAddressToShow } from '@leapwallet/cosmos-wallet-sdk';
+import { KeyChain } from '@leapwallet/leap-keychain';
+import { Button } from 'components/ui/button';
+import WalletInfoCard from 'components/wallet-info-card';
+import { OnboardingWrapper } from 'pages/onboarding/wrapper';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { cn } from 'utils/cn';
 
-import { LEDGER_NETWORK, useImportWalletContext } from '../import-wallet-context'
+import { LEDGER_NETWORK, useImportWalletContext } from '../import-wallet-context';
 
 export const SelectLedgerWallet = () => {
-  const {
-    prevStep,
-    currentStep,
-    selectedIds,
-    setSelectedIds,
-    moveToNextStep,
-    addresses,
-    ledgerNetworks,
-  } = useImportWalletContext()
+  const { prevStep, currentStep, selectedIds, setSelectedIds, moveToNextStep, addresses, ledgerNetworks } =
+    useImportWalletContext();
 
-  const [existingAddresses, setExistingAddresses] = useState<string[]>([])
+  const [existingAddresses, setExistingAddresses] = useState<string[]>([]);
 
   useEffect(() => {
     const fn = async () => {
-      const allWallets = await KeyChain.getAllWallets()
-      const addresses = []
+      const allWallets = await KeyChain.getAllWallets();
+      const addresses = [];
 
       for (const wallet of Object.values(allWallets ?? {})) {
-        const address = wallet?.addresses?.cosmos
+        const address = wallet?.addresses?.cosmos;
         if (address) {
-          addresses.push(address)
+          addresses.push(address);
         }
-        const evmPubKey = wallet?.pubKeys?.ethereum
-        const evmAddress = evmPubKey
-          ? pubKeyToEvmAddressToShow(evmPubKey, true) || undefined
-          : undefined
+        const evmPubKey = wallet?.pubKeys?.ethereum;
+        const evmAddress = evmPubKey ? pubKeyToEvmAddressToShow(evmPubKey, true) || undefined : undefined;
         if (evmAddress) {
-          addresses.push(evmAddress)
+          addresses.push(evmAddress);
         }
       }
 
-      setExistingAddresses(addresses)
-    }
-    fn()
-  }, [])
+      setExistingAddresses(addresses);
+    };
+    fn();
+  }, []);
 
   const handleSelectChange = useCallback(
     (id: number, flag: boolean) => {
-      setSelectedIds((prevSelectedIds) => ({ ...(prevSelectedIds ?? {}), [id]: flag }))
+      setSelectedIds((prevSelectedIds) => ({ ...(prevSelectedIds ?? {}), [id]: flag }));
     },
     [setSelectedIds],
-  )
+  );
 
   const proceedButtonEnabled = useMemo(() => {
-    const isCosmosAppSelected = ledgerNetworks.has(LEDGER_NETWORK.COSMOS)
-    const isEvmAppSelected = ledgerNetworks.has(LEDGER_NETWORK.ETH)
+    const isCosmosAppSelected = ledgerNetworks.has(LEDGER_NETWORK.COSMOS);
+    const isEvmAppSelected = ledgerNetworks.has(LEDGER_NETWORK.ETH);
     // check if atleast one of the selected wallets is not already in the existing addresses
     return Object.entries(selectedIds ?? {}).some(([key, val]) => {
-      if (!val) return false
-      const cosmosAddress = addresses?.[key]?.cosmos?.address
-      const evmPubKey = addresses?.[key]?.ethereum?.pubKey
-      const evmAddress = evmPubKey ? pubKeyToEvmAddressToShow(evmPubKey, true) : undefined
-      const cosmosAddressExists = cosmosAddress ? existingAddresses.includes(cosmosAddress) : false
-      const evmAddressExists = evmAddress ? existingAddresses.includes(evmAddress) : false
+      if (!val) return false;
+      const cosmosAddress = addresses?.[key]?.cosmos?.address;
+      const evmPubKey = addresses?.[key]?.ethereum?.pubKey;
+      const evmAddress = evmPubKey ? pubKeyToEvmAddressToShow(evmPubKey, true) : undefined;
+      const cosmosAddressExists = cosmosAddress ? existingAddresses.includes(cosmosAddress) : false;
+      const evmAddressExists = evmAddress ? existingAddresses.includes(evmAddress) : false;
       if (isCosmosAppSelected && isEvmAppSelected) {
-        return !cosmosAddressExists && !evmAddressExists
+        return !cosmosAddressExists && !evmAddressExists;
       }
       if (isCosmosAppSelected && !cosmosAddressExists) {
-        return true
+        return true;
       }
       if (isEvmAppSelected && !evmAddressExists) {
-        return true
+        return true;
       }
-      return false
-    })
-  }, [ledgerNetworks, selectedIds, addresses, existingAddresses])
+      return false;
+    });
+  }, [ledgerNetworks, selectedIds, addresses, existingAddresses]);
 
   const multiEcosystemImportNote = useMemo(() => {
-    const bothNetworksSelected = ledgerNetworks.size === 2
-    if (!bothNetworksSelected) return false
+    const bothNetworksSelected = ledgerNetworks.size === 2;
+    if (!bothNetworksSelected) return false;
 
     return Object.entries(selectedIds ?? {}).some(([key, val]) => {
-      if (!val) return false
-      const cosmosAddress = addresses?.[key]?.cosmos?.address
-      const evmPubKey = addresses?.[key]?.ethereum?.pubKey
-      const evmAddress = evmPubKey ? pubKeyToEvmAddressToShow(evmPubKey, true) : undefined
-      const cosmosAddressExists = cosmosAddress ? existingAddresses.includes(cosmosAddress) : false
-      const evmAddressExists = evmAddress ? existingAddresses.includes(evmAddress) : false
+      if (!val) return false;
+      const cosmosAddress = addresses?.[key]?.cosmos?.address;
+      const evmPubKey = addresses?.[key]?.ethereum?.pubKey;
+      const evmAddress = evmPubKey ? pubKeyToEvmAddressToShow(evmPubKey, true) : undefined;
+      const cosmosAddressExists = cosmosAddress ? existingAddresses.includes(cosmosAddress) : false;
+      const evmAddressExists = evmAddress ? existingAddresses.includes(evmAddress) : false;
       if (!cosmosAddressExists && evmAddressExists) {
-        return true
+        return true;
       }
       if (cosmosAddressExists && !evmAddressExists) {
-        return true
+        return true;
       }
-      return false
-    })
-  }, [ledgerNetworks.size, selectedIds, addresses, existingAddresses])
+      return false;
+    });
+  }, [ledgerNetworks.size, selectedIds, addresses, existingAddresses]);
 
   return (
     <OnboardingWrapper
@@ -112,24 +103,24 @@ export const SelectLedgerWallet = () => {
         >
           <div className='flex flex-col gap-4 pb-28'>
             {Object.entries(addresses ?? {}).map(([path, value], index) => {
-              let address
-              let isExistingCosmosAddress = false
+              let address;
+              let isExistingCosmosAddress = false;
               if (ledgerNetworks.has(LEDGER_NETWORK.COSMOS)) {
-                address = value?.cosmos?.address
+                address = value?.cosmos?.address;
                 if (address) {
-                  isExistingCosmosAddress = existingAddresses.indexOf(address) > -1
+                  isExistingCosmosAddress = existingAddresses.indexOf(address) > -1;
                 }
               }
-              let evmAddress
-              let isExistingEvmAddress = false
+              let evmAddress;
+              let isExistingEvmAddress = false;
               if (ledgerNetworks.has(LEDGER_NETWORK.ETH)) {
-                const evmPubKey = value?.ethereum?.pubKey
-                evmAddress = pubKeyToEvmAddressToShow(evmPubKey, true) || undefined
+                const evmPubKey = value?.ethereum?.pubKey;
+                evmAddress = pubKeyToEvmAddressToShow(evmPubKey, true) || undefined;
                 if (evmAddress) {
-                  isExistingEvmAddress = existingAddresses.indexOf(evmAddress) > -1
+                  isExistingEvmAddress = existingAddresses.indexOf(evmAddress) > -1;
                 }
               }
-              const isChosen = selectedIds[path]
+              const isChosen = selectedIds[path];
               return (
                 <WalletInfoCard
                   key={path}
@@ -145,7 +136,7 @@ export const SelectLedgerWallet = () => {
                   isLedger
                   showDerivationPath
                 />
-              )
+              );
             })}
           </div>
         </div>
@@ -167,5 +158,5 @@ export const SelectLedgerWallet = () => {
         )}
       </div>
     </OnboardingWrapper>
-  )
-}
+  );
+};

@@ -1,16 +1,16 @@
-import { AggregatedLoadingList } from 'components/aggregated/AggregatedLoading'
-import { useActiveChain } from 'hooks/settings/useActiveChain'
-import { useChainInfos } from 'hooks/useChainInfos'
-import React from 'react'
-import { AggregatedSupportedChain } from 'types/utility'
+import { AggregatedLoadingList } from 'components/aggregated/AggregatedLoading';
+import { useActiveChain } from 'hooks/settings/useActiveChain';
+import { useChainInfos } from 'hooks/useChainInfos';
+import React from 'react';
+import { AggregatedSupportedChain } from 'types/utility';
 
-import { ActivityHeader } from './components/activity-header'
+import { ActivityHeader } from './components/activity-header';
 
 export const ActivityPageLoader = () => {
-  const activeChain = useActiveChain() as AggregatedSupportedChain
-  const chains = useChainInfos()
+  const activeChain = useActiveChain() as AggregatedSupportedChain;
+  const chains = useChainInfos();
 
-  const selectedChain = activeChain === 'aggregated' ? chains?.cosmos?.key : activeChain
+  const selectedChain = activeChain === 'aggregated' ? chains?.cosmos?.key : activeChain;
 
   return (
     <>
@@ -28,5 +28,5 @@ export const ActivityPageLoader = () => {
         <AggregatedLoadingList className='mt-4' />
       </div>
     </>
-  )
-}
+  );
+};

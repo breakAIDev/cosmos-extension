@@ -1,71 +1,58 @@
-import {
-  Key,
-  useActiveChain,
-  useChainInfo,
-  useGetChains,
-  WALLETTYPE,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { isAptosChain, pubKeyToEvmAddressToShow } from '@leapwallet/cosmos-wallet-sdk'
-import { Check, DotsThreeVertical } from '@phosphor-icons/react'
-import { AnimatePresence, motion } from 'framer-motion'
-import { useChainPageInfo } from 'hooks'
-import { CopyIcon } from 'icons/copy-icon'
-import { EyeIcon } from 'icons/eye-icon'
-import { LedgerDriveIcon } from 'icons/ledger-icon'
-import { getWalletIconAtIndex } from 'images/misc'
-import { observer } from 'mobx-react-lite'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Colors } from 'theme/colors'
-import { AggregatedSupportedChain } from 'types/utility'
-import { UserClipboard } from 'utils/clipboard'
-import { cn } from 'utils/cn'
-import { formatWalletName } from 'utils/formatWalletName'
-import { getLedgerEnabledEvmChainsKey } from 'utils/getLedgerEnabledEvmChains'
-import { isLedgerEnabled } from 'utils/isLedgerEnabled'
-import { opacityFadeInOut, transition150 } from 'utils/motion-variants'
+import { Key, useActiveChain, useChainInfo, useGetChains, WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks';
+import { isAptosChain, pubKeyToEvmAddressToShow } from '@leapwallet/cosmos-wallet-sdk';
+import { Check, DotsThreeVertical } from '@phosphor-icons/react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useChainPageInfo } from 'hooks';
+import { CopyIcon } from 'icons/copy-icon';
+import { EyeIcon } from 'icons/eye-icon';
+import { LedgerDriveIcon } from 'icons/ledger-icon';
+import { getWalletIconAtIndex } from 'images/misc';
+import { observer } from 'mobx-react-lite';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Colors } from 'theme/colors';
+import { AggregatedSupportedChain } from 'types/utility';
+import { UserClipboard } from 'utils/clipboard';
+import { cn } from 'utils/cn';
+import { formatWalletName } from 'utils/formatWalletName';
+import { getLedgerEnabledEvmChainsKey } from 'utils/getLedgerEnabledEvmChains';
+import { isLedgerEnabled } from 'utils/isLedgerEnabled';
+import { opacityFadeInOut, transition150 } from 'utils/motion-variants';
 
-import useActiveWallet from '../../hooks/settings/useActiveWallet'
-import { sliceAddress } from '../../utils/strings'
+import useActiveWallet from '../../hooks/settings/useActiveWallet';
+import { sliceAddress } from '../../utils/strings';
 
-export const WatchWalletAvatar = (props: {
-  colorIndex: number
-  className?: string
-  iconClassName?: string
-}) => {
+export const WatchWalletAvatar = (props: { colorIndex: number; className?: string; iconClassName?: string }) => {
   return (
     <div
-      className={cn(
-        'rounded-lg bg-secondary-400 flex items-center justify-center shrink-0',
-        props.className,
-      )}
+      className={cn('rounded-lg bg-secondary-400 flex items-center justify-center shrink-0', props.className)}
       style={{ backgroundColor: Colors.getWalletColorAtIndex(props.colorIndex) }}
     >
       <EyeIcon className={cn('size-5 p-0.5', props.iconClassName)} />
     </div>
-  )
-}
+  );
+};
 
 const AddressLabel = ({ address }: { address: string }) => {
-  const [isCopied, setIsCopied] = useState(false)
+  const [isCopied, setIsCopied] = useState(false);
 
   useEffect(() => {
     if (isCopied) {
       setTimeout(() => {
-        setIsCopied(false)
-      }, 2_000)
+        setIsCopied(false);
+      }, 2_000);
     }
-  }, [isCopied])
+  }, [isCopied]);
 
-  if (!address) return null
+  if (!address) return null;
 
   return (
     <button
       className='text-xs text-muted-foreground truncate max-w-56 hover:text-accent-green'
       onClick={(e) => {
-        e.stopPropagation()
-        UserClipboard.copyText(address)
-        setIsCopied(true)
+        e.stopPropagation();
+        UserClipboard.copyText(address);
+        setIsCopied(true);
       }}
     >
       <AnimatePresence mode='wait'>
@@ -98,8 +85,8 @@ const AddressLabel = ({ address }: { address: string }) => {
         )}
       </AnimatePresence>
     </button>
-  )
-}
+  );
+};
 
 const WalletCardWrapper = observer(
   ({
@@ -109,109 +96,100 @@ const WalletCardWrapper = observer(
     setEditWallet,
     setIsEditWalletVisible,
   }: {
-    isLast: boolean
-    wallet: Key
-    onClose: () => void
-    setEditWallet: (wallet: Key) => void
-    setIsEditWalletVisible: (visible: boolean) => void
+    isLast: boolean;
+    wallet: Key;
+    onClose: () => void;
+    setEditWallet: (wallet: Key) => void;
+    setIsEditWalletVisible: (visible: boolean) => void;
   }) => {
-    const navigate = useNavigate()
-    const activeChainInfo = useChainInfo()
-    const activeChain = useActiveChain() as AggregatedSupportedChain
-    const { activeWallet, setActiveWallet } = useActiveWallet()
-    const chains = useGetChains()
-    const { topChainColor } = useChainPageInfo()
+    const navigate = useNavigate();
+    const activeChainInfo = useChainInfo();
+    const activeChain = useActiveChain() as AggregatedSupportedChain;
+    const { activeWallet, setActiveWallet } = useActiveWallet();
+    const chains = useGetChains();
+    const { topChainColor } = useChainPageInfo();
 
     const ledgerEnabledEvmChainsKeys = useMemo(() => {
-      return getLedgerEnabledEvmChainsKey(Object.values(chains))
-    }, [chains])
+      return getLedgerEnabledEvmChainsKey(Object.values(chains));
+    }, [chains]);
 
     const ledgerApp = useMemo(() => {
-      return ledgerEnabledEvmChainsKeys.includes(activeChainInfo?.key) ? 'EVM' : 'Cosmos'
-    }, [activeChainInfo?.key, ledgerEnabledEvmChainsKeys])
+      return ledgerEnabledEvmChainsKeys.includes(activeChainInfo?.key) ? 'EVM' : 'Cosmos';
+    }, [activeChainInfo?.key, ledgerEnabledEvmChainsKeys]);
 
     const { walletLabel, shortenedWalletName } = useMemo(() => {
-      let walletLabel = ''
+      let walletLabel = '';
 
       if (
-        (wallet.walletType === WALLETTYPE.PRIVATE_KEY ||
-          wallet.walletType === WALLETTYPE.SEED_PHRASE_IMPORTED) &&
+        (wallet.walletType === WALLETTYPE.PRIVATE_KEY || wallet.walletType === WALLETTYPE.SEED_PHRASE_IMPORTED) &&
         !wallet.watchWallet
       ) {
-        walletLabel = 'Imported'
+        walletLabel = 'Imported';
       }
 
       if (!wallet.watchWallet && wallet.walletType === WALLETTYPE.LEDGER && wallet.path) {
-        walletLabel = `${wallet.path?.replace("m/44'/118'/", '')}`
+        walletLabel = `${wallet.path?.replace("m/44'/118'/", '')}`;
       }
 
-      const walletName = formatWalletName(wallet.name)
+      const walletName = formatWalletName(wallet.name);
 
-      const sliceLength = 19
-      const walletNameLength = walletName.length
+      const sliceLength = 19;
+      const walletNameLength = walletName.length;
       const shortenedWalletName =
-        walletNameLength > sliceLength ? walletName.slice(0, sliceLength) + '...' : walletName
+        walletNameLength > sliceLength ? walletName.slice(0, sliceLength) + '...' : walletName;
 
-      return { walletLabel, walletName, walletNameLength, shortenedWalletName }
-    }, [wallet])
+      return { walletLabel, walletName, walletNameLength, shortenedWalletName };
+    }, [wallet]);
 
     const { addressText, disableEdit } = useMemo(() => {
       const addressValue = activeChainInfo?.evmOnlyChain
         ? pubKeyToEvmAddressToShow(wallet?.pubKeys?.[activeChainInfo?.key], true) ??
           wallet?.addresses?.[activeChainInfo?.key]
-        : wallet?.addresses?.[activeChainInfo?.key] ?? ''
+        : wallet?.addresses?.[activeChainInfo?.key] ?? '';
 
-      let addressText = addressValue
+      let addressText = addressValue;
 
-      let disableEdit = false
+      let disableEdit = false;
 
       if (
         wallet.walletType === WALLETTYPE.LEDGER &&
-        !isLedgerEnabled(
-          activeChainInfo?.key,
-          activeChainInfo?.bip44?.coinType,
-          Object.values(chains),
-        )
+        !isLedgerEnabled(activeChainInfo?.key, activeChainInfo?.bip44?.coinType, Object.values(chains))
       ) {
-        addressText = `Ledger not supported on ${activeChainInfo?.chainName}`
-        disableEdit = true
+        addressText = `Ledger not supported on ${activeChainInfo?.chainName}`;
+        disableEdit = true;
       }
       if (
         wallet.walletType === WALLETTYPE.LEDGER &&
-        isLedgerEnabled(
-          activeChainInfo?.key,
-          activeChainInfo?.bip44?.coinType,
-          Object.values(chains),
-        ) &&
+        isLedgerEnabled(activeChainInfo?.key, activeChainInfo?.bip44?.coinType, Object.values(chains)) &&
         !wallet.addresses[activeChainInfo?.key]
       ) {
-        addressText = `Please import ${ledgerApp} wallet`
-        disableEdit = true
+        addressText = `Please import ${ledgerApp} wallet`;
+        disableEdit = true;
       }
 
       const isEvmNotImportedOnWW =
         wallet.walletType === WALLETTYPE.WATCH_WALLET &&
         !!activeChainInfo?.evmOnlyChain &&
-        !wallet.addresses[activeChainInfo?.key]
+        !wallet.addresses[activeChainInfo?.key];
 
       const isAptosNotImportedOnWW =
         wallet.walletType === WALLETTYPE.WATCH_WALLET &&
         isAptosChain(activeChainInfo?.key) &&
-        !wallet.addresses[activeChainInfo?.key]
+        !wallet.addresses[activeChainInfo?.key];
 
       if (isEvmNotImportedOnWW || isAptosNotImportedOnWW) {
-        addressText = `Please import ${isEvmNotImportedOnWW ? 'EVM' : 'Movement'} wallet`
-        disableEdit = true
+        addressText = `Please import ${isEvmNotImportedOnWW ? 'EVM' : 'Movement'} wallet`;
+        disableEdit = true;
       }
 
-      return { addressText, disableEdit }
-    }, [wallet, activeChainInfo, chains, ledgerApp])
+      return { addressText, disableEdit };
+    }, [wallet, activeChainInfo, chains, ledgerApp]);
 
     const onClick = useCallback(async () => {
-      await setActiveWallet(wallet)
-      onClose()
-      navigate('/home')
-    }, [setActiveWallet, wallet, onClose, navigate])
+      await setActiveWallet(wallet);
+      onClose();
+      navigate('/home');
+    }, [setActiveWallet, wallet, onClose, navigate]);
 
     return (
       <div
@@ -224,16 +202,9 @@ const WalletCardWrapper = observer(
         )}
       >
         {wallet.watchWallet ? (
-          <WatchWalletAvatar
-            colorIndex={wallet.colorIndex}
-            className='size-9 rounded-full'
-            iconClassName='size-7'
-          />
+          <WatchWalletAvatar colorIndex={wallet.colorIndex} className='size-9 rounded-full' iconClassName='size-7' />
         ) : (
-          <img
-            src={wallet?.avatar || getWalletIconAtIndex(wallet.colorIndex)}
-            className='size-9 rounded-full'
-          />
+          <img src={wallet?.avatar || getWalletIconAtIndex(wallet.colorIndex)} className='size-9 rounded-full' />
         )}
 
         <div className='flex flex-col flex-1'>
@@ -251,31 +222,25 @@ const WalletCardWrapper = observer(
             )}
           </div>
           <span className='text-xs text-muted-foreground max-w-56 whitespace-nowrap w-full flex items-center gap-1'>
-            {activeChain !== 'aggregated' ? (
-              disableEdit ? (
-                addressText
-              ) : (
-                <AddressLabel address={addressText} />
-              )
-            ) : null}
+            {activeChain !== 'aggregated' ? disableEdit ? addressText : <AddressLabel address={addressText} /> : null}
           </span>
         </div>
 
         <button
           className='size-7 cursor-pointer justify-center text-monochrome/60 hover:text-monochrome grid place-content-center'
           onClick={(e) => {
-            e.stopPropagation()
-            if (disableEdit) return
-            setEditWallet(wallet)
-            setIsEditWalletVisible(true)
+            e.stopPropagation();
+            if (disableEdit) return;
+            setEditWallet(wallet);
+            setIsEditWalletVisible(true);
           }}
           data-testing-id={isLast ? 'btn-more-horiz' : ''}
         >
           <DotsThreeVertical size={20} />
         </button>
       </div>
-    )
+    );
   },
-)
+);
 
-export default WalletCardWrapper
+export default WalletCardWrapper;

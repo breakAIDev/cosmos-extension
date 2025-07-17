@@ -1,20 +1,20 @@
-import { sliceWord } from '@leapwallet/cosmos-wallet-hooks'
-import { Collection } from '@leapwallet/cosmos-wallet-store'
-import { Heart } from '@phosphor-icons/react'
-import Text from 'components/text'
-import { Images } from 'images'
-import React from 'react'
-import { favNftStore } from 'stores/manage-nft-store'
-import { imgOnError } from 'utils/imgOnError'
+import { sliceWord } from '@leapwallet/cosmos-wallet-hooks';
+import { Collection } from '@leapwallet/cosmos-wallet-store';
+import { Heart } from '@phosphor-icons/react';
+import Text from 'components/text';
+import { Images } from 'images';
+import React from 'react';
+import { favNftStore } from 'stores/manage-nft-store';
+import { imgOnError } from 'utils/imgOnError';
 
-import { useNftContext } from './index'
+import { useNftContext } from './index';
 
 const CollectionList = ({ collections }: { collections: Collection[] }) => {
-  const { setShowCollectionDetailsFor } = useNftContext()
+  const { setShowCollectionDetailsFor } = useNftContext();
   return (
     <div className='grid grid-cols-2 gap-5'>
       {collections.map((c) => {
-        const isCollectionFav = favNftStore.favNfts.some((item) => item.includes(c.address))
+        const isCollectionFav = favNftStore.favNfts.some((item) => item.includes(c.address));
         return (
           <div
             key={c.name}
@@ -31,12 +31,7 @@ const CollectionList = ({ collections }: { collections: Collection[] }) => {
             {isCollectionFav && (
               <div>
                 <Heart size={26} className='absolute top-[9px] right-[9px]' />
-                <Heart
-                  size={24}
-                  weight='fill'
-                  color='#D0414F'
-                  className='absolute top-2.5 right-2.5'
-                />
+                <Heart size={24} weight='fill' color='#D0414F' className='absolute top-2.5 right-2.5' />
               </div>
             )}
             <div className='absolute bottom-3 left-3 inline-flex gap-x-0.5 rounded-lg px-2 py-1.5 bg-monochrome-foreground'>
@@ -48,10 +43,10 @@ const CollectionList = ({ collections }: { collections: Collection[] }) => {
               </Text>
             </div>
           </div>
-        )
+        );
       })}
     </div>
-  )
-}
+  );
+};
 
-export default CollectionList
+export default CollectionList;

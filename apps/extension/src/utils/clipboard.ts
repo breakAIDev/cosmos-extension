@@ -4,10 +4,10 @@ export class UserClipboard {
    */
   static async copyText(text: string): Promise<boolean> {
     try {
-      await window.navigator.clipboard.writeText(text)
-      return true
+      await window.navigator.clipboard.writeText(text);
+      return true;
     } catch {
-      return false
+      return false;
     }
   }
   /**
@@ -15,10 +15,10 @@ export class UserClipboard {
    */
   static async pasteText(): Promise<string | null> {
     try {
-      const text = await window.navigator.clipboard.readText()
-      return text
+      const text = await window.navigator.clipboard.readText();
+      return text;
     } catch {
-      return null
+      return null;
     }
   }
 }

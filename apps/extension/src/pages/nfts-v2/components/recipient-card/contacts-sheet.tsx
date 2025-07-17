@@ -1,33 +1,29 @@
-import { SelectedAddress, sliceAddress } from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { AvatarCard, InputWithButton } from '@leapwallet/leap-ui'
-import BottomModal from 'components/bottom-modal'
-import { EmptyCard } from 'components/empty-card'
-import { useChainInfos } from 'hooks/useChainInfos'
-import { useContactsSearch } from 'hooks/useContacts'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import { Images } from 'images'
-import React, { useState } from 'react'
-import { AddressBook } from 'utils/addressbook'
+import { SelectedAddress, sliceAddress } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { AvatarCard, InputWithButton } from '@leapwallet/leap-ui';
+import BottomModal from 'components/bottom-modal';
+import { EmptyCard } from 'components/empty-card';
+import { useChainInfos } from 'hooks/useChainInfos';
+import { useContactsSearch } from 'hooks/useContacts';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { Images } from 'images';
+import React, { useState } from 'react';
+import { AddressBook } from 'utils/addressbook';
 
 type ContactsSheetProps = {
-  isOpen: boolean
-  onClose: () => void
+  isOpen: boolean;
+  onClose: () => void;
   // eslint-disable-next-line no-unused-vars
-  onContactSelect: (s: SelectedAddress) => void
-}
+  onContactSelect: (s: SelectedAddress) => void;
+};
 
-export const ContactsSheet: React.FC<ContactsSheetProps> = ({
-  isOpen,
-  onClose,
-  onContactSelect,
-}) => {
-  const [searchQuery, setSearchQuery] = useState('')
-  const trimmedSearchQuery = searchQuery.trim()
-  const contacts = useContactsSearch(trimmedSearchQuery)
-  const chainInfos = useChainInfos()
+export const ContactsSheet: React.FC<ContactsSheetProps> = ({ isOpen, onClose, onContactSelect }) => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const trimmedSearchQuery = searchQuery.trim();
+  const contacts = useContactsSearch(trimmedSearchQuery);
+  const chainInfos = useChainInfos();
 
-  const defaultTokenLogo = useDefaultTokenLogo()
+  const defaultTokenLogo = useDefaultTokenLogo();
 
   const handleAvatarClick = (contact: AddressBook.SavedAddress, chainImage: string | undefined) => {
     onContactSelect({
@@ -38,8 +34,8 @@ export const ContactsSheet: React.FC<ContactsSheetProps> = ({
       address: contact.address,
       emoji: contact.emoji,
       selectionType: 'saved',
-    })
-  }
+    });
+  };
 
   return (
     <BottomModal isOpen={isOpen} closeOnBackdropClick={true} title='Contact Book' onClose={onClose}>
@@ -57,8 +53,7 @@ export const ContactsSheet: React.FC<ContactsSheetProps> = ({
         >
           {contacts.length > 0 ? (
             contacts.map((contact) => {
-              const chainImage =
-                chainInfos[contact.blockchain].chainSymbolImageUrl ?? defaultTokenLogo
+              const chainImage = chainInfos[contact.blockchain].chainSymbolImageUrl ?? defaultTokenLogo;
 
               return (
                 <AvatarCard
@@ -70,13 +65,11 @@ export const ContactsSheet: React.FC<ContactsSheetProps> = ({
                   title={contact.name}
                   onClick={() => handleAvatarClick(contact, chainImage)}
                 />
-              )
+              );
             })
           ) : (
             <EmptyCard
-              src={
-                trimmedSearchQuery.length > 0 ? Images.Misc.NoSearchResult : Images.Misc.AddContact
-              }
+              src={trimmedSearchQuery.length > 0 ? Images.Misc.NoSearchResult : Images.Misc.AddContact}
               heading='No Contact Found'
               subHeading={
                 trimmedSearchQuery.length > 0
@@ -89,5 +82,5 @@ export const ContactsSheet: React.FC<ContactsSheetProps> = ({
         </div>
       </div>
     </BottomModal>
-  )
-}
+  );
+};

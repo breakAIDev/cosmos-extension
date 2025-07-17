@@ -1,50 +1,45 @@
-import { Key } from '@leapwallet/cosmos-wallet-hooks'
-import { WALLETTYPE } from '@leapwallet/leap-keychain'
-import { Plus } from '@phosphor-icons/react'
-import BottomModal from 'components/bottom-modal'
-import { Button } from 'components/ui/button'
-import React, { useMemo, useState } from 'react'
-import { activeChainStore } from 'stores/active-chain-store'
+import { Key } from '@leapwallet/cosmos-wallet-hooks';
+import { WALLETTYPE } from '@leapwallet/leap-keychain';
+import { Plus } from '@phosphor-icons/react';
+import BottomModal from 'components/bottom-modal';
+import { Button } from 'components/ui/button';
+import React, { useMemo, useState } from 'react';
+import { activeChainStore } from 'stores/active-chain-store';
 
-import { Wallet } from '../../../hooks/wallet/useWallet'
-import { EditWalletForm } from '../EditWallet'
-import WalletCardWrapper from '../WalletCardWrapper'
-import CreateImportActions from './CreateImportActions'
-import { WalletNotConnectedMsg } from './not-connected-msg'
+import { Wallet } from '../../../hooks/wallet/useWallet';
+import { EditWalletForm } from '../EditWallet';
+import WalletCardWrapper from '../WalletCardWrapper';
+import CreateImportActions from './CreateImportActions';
+import { WalletNotConnectedMsg } from './not-connected-msg';
 
 type SelectWalletProps = {
-  readonly isVisible: boolean
-  readonly onClose: VoidFunction
-  readonly title?: string
+  readonly isVisible: boolean;
+  readonly onClose: VoidFunction;
+  readonly title?: string;
   readonly currentWalletInfo?: {
-    wallets: [Key]
-    chainIds: [string]
-    origin: string
-  } | null
-}
+    wallets: [Key];
+    chainIds: [string];
+    origin: string;
+  } | null;
+};
 
-const SelectWallet = ({
-  isVisible,
-  onClose,
-  title = 'Your Wallets',
-  currentWalletInfo,
-}: SelectWalletProps) => {
-  const [isEditWalletVisible, setIsEditWalletVisible] = useState(false)
-  const wallets = Wallet.useWallets()
+const SelectWallet = ({ isVisible, onClose, title = 'Your Wallets', currentWalletInfo }: SelectWalletProps) => {
+  const [isEditWalletVisible, setIsEditWalletVisible] = useState(false);
+  const wallets = Wallet.useWallets();
 
-  const [editWallet, setEditWallet] = useState<Key>()
-  const [showCreateImportActions, setShowCreateImportActions] = useState(false)
+  const [editWallet, setEditWallet] = useState<Key>();
+  const [showCreateImportActions, setShowCreateImportActions] = useState(false);
   const displayLedgerApp = useMemo(() => {
     return wallets
       ? Object.values(wallets).some((wallet) => {
           if (wallet.walletType === WALLETTYPE.LEDGER) {
-            return !wallet.app || wallet.app !== 'sei'
+            return !wallet.app || wallet.app !== 'sei';
           } else {
-            return false
+            return false;
           }
         })
-      : false
-  }, [wallets])
+      : false;
+  }, [wallets]);
 
   const walletsList = useMemo(() => {
     return wallets
@@ -55,8 +50,8 @@ const SelectWallet = ({
               ? new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
               : a.name.localeCompare(b.name),
           )
-      : []
-  }, [wallets])
+      : [];
+  }, [wallets]);
 
   return (
     <>
@@ -72,13 +67,11 @@ const SelectWallet = ({
         }
       >
         <div>
-          {currentWalletInfo && (
-            <WalletNotConnectedMsg currentWalletInfo={currentWalletInfo} onClose={onClose} />
-          )}
+          {currentWalletInfo && <WalletNotConnectedMsg currentWalletInfo={currentWalletInfo} onClose={onClose} />}
 
           <div className='flex flex-col rounded-2xl overflow-y-auto mb-4 py-1 gap-2'>
             {walletsList.map((wallet, index, array) => {
-              if (wallet.id === currentWalletInfo?.wallets?.[0]?.id) return null
+              if (wallet.id === currentWalletInfo?.wallets?.[0]?.id) return null;
               return (
                 <WalletCardWrapper
                   key={wallet.id}
@@ -89,7 +82,7 @@ const SelectWallet = ({
                   setIsEditWalletVisible={setIsEditWalletVisible}
                   displayLedgerApp={displayLedgerApp}
                 />
-              )
+              );
             })}
           </div>
         </div>
@@ -99,8 +92,8 @@ const SelectWallet = ({
         title='Add / Connect Wallet'
         isVisible={showCreateImportActions}
         onClose={(closeParent) => {
-          setShowCreateImportActions(false)
-          if (closeParent) onClose()
+          setShowCreateImportActions(false);
+          if (closeParent) onClose();
         }}
       />
 
@@ -108,12 +101,12 @@ const SelectWallet = ({
         wallet={editWallet as Key}
         isVisible={isEditWalletVisible}
         onClose={() => {
-          setIsEditWalletVisible(false)
+          setIsEditWalletVisible(false);
         }}
         activeChainStore={activeChainStore}
       />
     </>
-  )
-}
+  );
+};
 
-export default SelectWallet
+export default SelectWallet;

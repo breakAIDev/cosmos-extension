@@ -5,34 +5,34 @@ import {
   useAddress,
   useChainApis,
   useChainsStore,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { getNeutronProposalVote, SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { Buttons } from '@leapwallet/leap-ui'
-import { ArrowSquareOut, ThumbsUp, User } from '@phosphor-icons/react'
-import { useQuery } from '@tanstack/react-query'
-import axios from 'axios'
-import classNames from 'classnames'
-import { ProposalDescription } from 'components/proposal-description'
-import Text from 'components/text'
-import { Button } from 'components/ui/button'
-import dayjs from 'dayjs'
-import useActiveWallet from 'hooks/settings/useActiveWallet'
-import { useSelectedNetwork } from 'hooks/settings/useNetwork'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import Vote from 'icons/vote'
-import React, { useEffect, useMemo, useState } from 'react'
-import Skeleton from 'react-loading-skeleton'
-import { PieChart } from 'react-minimal-pie-chart'
-import { importWatchWalletSeedPopupStore } from 'stores/import-watch-wallet-seed-popup-store'
-import { Colors } from 'theme/colors'
-import { cn } from 'utils/cn'
-import { imgOnError } from 'utils/imgOnError'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { getNeutronProposalVote, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { Buttons } from '@leapwallet/leap-ui';
+import { ArrowSquareOut, ThumbsUp, User } from '@phosphor-icons/react';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
+import classNames from 'classnames';
+import { ProposalDescription } from 'components/proposal-description';
+import Text from 'components/text';
+import { Button } from 'components/ui/button';
+import dayjs from 'dayjs';
+import useActiveWallet from 'hooks/settings/useActiveWallet';
+import { useSelectedNetwork } from 'hooks/settings/useNetwork';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import Vote from 'icons/vote';
+import React, { useEffect, useMemo, useState } from 'react';
+import Skeleton from 'react-loading-skeleton';
+import { PieChart } from 'react-minimal-pie-chart';
+import { importWatchWalletSeedPopupStore } from 'stores/import-watch-wallet-seed-popup-store';
+import { Colors } from 'theme/colors';
+import { cn } from 'utils/cn';
+import { imgOnError } from 'utils/imgOnError';
 
-import { ProposalStatusEnum, ShowVotes, Turnout } from '../components'
-import GovHeader from '../components/GovHeader'
-import { convertTime, getPercentage, voteRatio } from '../utils'
-import { NtrnCastVote, NtrnStatus } from './index'
-import { NtrnProposalStatus } from './NtrnStatus'
+import { ProposalStatusEnum, ShowVotes, Turnout } from '../components';
+import GovHeader from '../components/GovHeader';
+import { convertTime, getPercentage, voteRatio } from '../utils';
+import { NtrnCastVote, NtrnStatus } from './index';
+import { NtrnProposalStatus } from './NtrnStatus';
 import {
   getDescription,
   getEndTime,
@@ -44,41 +44,34 @@ import {
   getTurnout,
   getVotes,
   VoteOptions,
-} from './utils'
+} from './utils';
 
 type VoteDetailsProps = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  proposal: any
-  onVote: () => void
-  currVote: string
-  isLoading: boolean
-  shouldUseFallback: boolean
-  forceChain?: SupportedChain
-}
+  proposal: any;
+  onVote: () => void;
+  currVote: string;
+  isLoading: boolean;
+  shouldUseFallback: boolean;
+  forceChain?: SupportedChain;
+};
 
-function VoteDetails({
-  proposal,
-  onVote,
-  currVote,
-  isLoading,
-  shouldUseFallback,
-  forceChain,
-}: VoteDetailsProps) {
-  const [timeLeft, setTimeLeft] = useState<string | undefined>()
-  const _activeChain = useActiveChain()
-  const activeChain = useMemo(() => forceChain || _activeChain, [_activeChain, forceChain])
+function VoteDetails({ proposal, onVote, currVote, isLoading, shouldUseFallback, forceChain }: VoteDetailsProps) {
+  const [timeLeft, setTimeLeft] = useState<string | undefined>();
+  const _activeChain = useActiveChain();
+  const activeChain = useMemo(() => forceChain || _activeChain, [_activeChain, forceChain]);
 
   useEffect(() => {
     const getTime = () => {
-      const now = dayjs()
-      const end = dayjs(getEndTime(proposal, shouldUseFallback))
-      const duration = end.diff(now, 'seconds')
-      setTimeLeft(convertTime(duration))
-    }
+      const now = dayjs();
+      const end = dayjs(getEndTime(proposal, shouldUseFallback));
+      const duration = end.diff(now, 'seconds');
+      setTimeLeft(convertTime(duration));
+    };
 
-    const intervalId = setInterval(getTime, 1000)
-    return () => clearInterval(intervalId)
-  }, [proposal, shouldUseFallback])
+    const intervalId = setInterval(getTime, 1000);
+    return () => clearInterval(intervalId);
+  }, [proposal, shouldUseFallback]);
 
   switch (getStatus(proposal, shouldUseFallback)) {
     case NtrnProposalStatus.OPEN:
@@ -88,9 +81,7 @@ function VoteDetails({
         <>
           <div className='rounded-2xl bg-white-100 dark:bg-gray-900 flex flex-col mt-4'>
             <div className='flex items-center justify-between gap-3 p-4'>
-              <div className='text-black-100 dark:text-white-100 text-base font-bold'>
-                Voting Ends
-              </div>
+              <div className='text-black-100 dark:text-white-100 text-base font-bold'>Voting Ends</div>
               <div className='text-black-100 dark:text-white-100 text-sm font-bold'>
                 {dayjs(getEndTime(proposal, shouldUseFallback)).format('MMM DD, YYYY')}
               </div>
@@ -121,9 +112,7 @@ function VoteDetails({
               </div>
               <div className='flex flex-col justify-center items-start px-3'>
                 <div className='text-base text-white-100 text-left'>Vote submitted</div>
-                <div className='text-sm text-gray-600 font-medium'>
-                  Voted {currVote.toUpperCase()}
-                </div>
+                <div className='text-sm text-gray-600 font-medium'>Voted {currVote.toUpperCase()}</div>
               </div>
             </div>
           )}
@@ -140,7 +129,7 @@ function VoteDetails({
             </div>
           </Buttons.Generic>
         </>
-      )
+      );
 
     case NtrnProposalStatus.EXECUTED:
     case NtrnProposalStatus.PASSED:
@@ -152,9 +141,7 @@ function VoteDetails({
       return (
         <div className='rounded-2xl bg-white-100 dark:bg-gray-900 flex flex-col mt-4'>
           <div className='flex items-center gap-3 p-4'>
-            <div className='text-gray-600 w-[200px] dark:text-gray-200 text-xs font-bold'>
-              Results
-            </div>
+            <div className='text-gray-600 w-[200px] dark:text-gray-200 text-xs font-bold'>Results</div>
             <div className='text-gray-600 dark:text-gray-200 text-xs font-bold'></div>
           </div>
           <div className='flex flex-col justify-center gap-3 p-4'>
@@ -176,36 +163,31 @@ function VoteDetails({
                       values.selectedBorderCSS,
                     )}
                   >
-                    <span className='absolute right-4 font-bold'>
-                      {values.percentage.toFixed(2)}
-                    </span>
+                    <span className='absolute right-4 font-bold'>{values.percentage.toFixed(2)}</span>
                   </div>
                   <div
                     style={{ width: (values.percentage * 3.12).toString() + 'px' }}
-                    className={classNames(
-                      'h-10 absolute l-0 m-[2px] rounded-2xl',
-                      values.selectedBackgroundCSS,
-                    )}
+                    className={classNames('h-10 absolute l-0 m-[2px] rounded-2xl', values.selectedBackgroundCSS)}
                   ></div>
                 </div>
               ))}
           </div>
         </div>
-      )
+      );
   }
 
-  return <></>
+  return <></>;
 }
 
 type NtrnProposalDetailsProps = {
-  selectedProp: string | undefined
-  onBack: () => void
+  selectedProp: string | undefined;
+  onBack: () => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  proposalList: any[]
-  shouldUseFallback: boolean
-  forceChain?: SupportedChain
-  forceNetwork?: 'mainnet' | 'testnet'
-}
+  proposalList: any[];
+  shouldUseFallback: boolean;
+  forceChain?: SupportedChain;
+  forceNetwork?: 'mainnet' | 'testnet';
+};
 
 export function NtrnProposalDetails({
   selectedProp,
@@ -215,39 +197,33 @@ export function NtrnProposalDetails({
   forceChain,
   forceNetwork,
 }: NtrnProposalDetailsProps) {
-  const { chains } = useChainsStore()
-  const { activeWallet } = useActiveWallet()
-  const _activeChain = useActiveChain()
-  const activeChain = useMemo(() => forceChain || _activeChain, [_activeChain, forceChain])
-  const _selectedNetwork = useSelectedNetwork()
-  const selectedNetwork = useMemo(
-    () => forceNetwork || _selectedNetwork,
-    [_selectedNetwork, forceNetwork],
-  )
+  const { chains } = useChainsStore();
+  const { activeWallet } = useActiveWallet();
+  const _activeChain = useActiveChain();
+  const activeChain = useMemo(() => forceChain || _activeChain, [_activeChain, forceChain]);
+  const _selectedNetwork = useSelectedNetwork();
+  const selectedNetwork = useMemo(() => forceNetwork || _selectedNetwork, [_selectedNetwork, forceNetwork]);
 
-  const address = useAddress(activeChain)
-  const chain = chains[activeChain]
-  const { rpcUrl, txUrl } = useChainApis(activeChain, selectedNetwork)
-  const defaultTokenLogo = useDefaultTokenLogo()
-  const [showCastVoteSheet, setShowCastVoteSheet] = useState(false)
+  const address = useAddress(activeChain);
+  const chain = chains[activeChain];
+  const { rpcUrl, txUrl } = useChainApis(activeChain, selectedNetwork);
+  const defaultTokenLogo = useDefaultTokenLogo();
+  const [showCastVoteSheet, setShowCastVoteSheet] = useState(false);
 
   const proposal = useMemo(
-    () =>
-      proposalList.find(
-        (_proposal) => (shouldUseFallback ? _proposal.id : _proposal.proposal_id) === selectedProp,
-      ),
+    () => proposalList.find((_proposal) => (shouldUseFallback ? _proposal.id : _proposal.proposal_id) === selectedProp),
     [proposalList, selectedProp, shouldUseFallback],
-  )
-  const { abstain, yes, no } = shouldUseFallback ? proposal.proposal.votes : proposal.tally
-  const totalVotes = [yes, no, abstain].reduce((sum, val) => sum + Number(val), 0)
+  );
+  const { abstain, yes, no } = shouldUseFallback ? proposal.proposal.votes : proposal.tally;
+  const totalVotes = [yes, no, abstain].reduce((sum, val) => sum + Number(val), 0);
 
   const isProposalInVotingPeriod = useMemo(() => {
     return [
       NtrnProposalStatus.OPEN,
       ProposalStatusEnum.PROPOSAL_STATUS_IN_PROGRESS,
       ProposalStatusEnum.PROPOSAL_STATUS_VOTING_PERIOD,
-    ].includes(getStatus(proposal, shouldUseFallback))
-  }, [proposal, shouldUseFallback])
+    ].includes(getStatus(proposal, shouldUseFallback));
+  }, [proposal, shouldUseFallback]);
 
   const dataMock = useMemo(() => {
     return !totalVotes
@@ -271,8 +247,8 @@ export function NtrnProposalDetails({
             color: '#D1A700',
             percent: getPercentage(+abstain, totalVotes),
           },
-        ]
-  }, [abstain, no, totalVotes, yes])
+        ];
+  }, [abstain, no, totalVotes, yes]);
 
   const tallying = useMemo(() => {
     return [
@@ -284,8 +260,8 @@ export function NtrnProposalDetails({
         label: 'Quorum',
         value: getQuorum(proposal, shouldUseFallback),
       },
-    ]
-  }, [proposal, shouldUseFallback, totalVotes])
+    ];
+  }, [proposal, shouldUseFallback, totalVotes]);
 
   const {
     data: currVote,
@@ -298,29 +274,26 @@ export function NtrnProposalDetails({
         const { data } = await axios.post(
           `${process.env.LEAP_WALLET_BACKEND_API_URL}/gov/vote/${chain.chainId}/${selectedProp}`,
           { userAddress: address },
-        )
-        return { vote: data }
+        );
+        return { vote: data };
       } catch (err) {
-        return await getNeutronProposalVote(rpcUrl ?? '', Number(selectedProp ?? ''), address)
+        return await getNeutronProposalVote(rpcUrl ?? '', Number(selectedProp ?? ''), address);
       }
     },
     {
       retry: (failureCount) => failureCount <= 2,
       enabled: isProposalInVotingPeriod && !!rpcUrl,
     },
-  )
+  );
 
   return (
     <>
       <GovHeader onBack={onBack} title='Proposal' />
       <div className='flex flex-col p-6 overflow-y-scroll'>
         <div className='text-muted-foreground text-sm mb-2 font-medium'>
-          #{getId(proposal, shouldUseFallback)} ·{' '}
-          <NtrnStatus status={getStatus(proposal, shouldUseFallback)} />
+          #{getId(proposal, shouldUseFallback)} · <NtrnStatus status={getStatus(proposal, shouldUseFallback)} />
         </div>
-        <div className='text-foreground font-bold text-lg break-words'>
-          {getTitle(proposal, shouldUseFallback)}
-        </div>
+        <div className='text-foreground font-bold text-lg break-words'>{getTitle(proposal, shouldUseFallback)}</div>
 
         <VoteDetails
           proposal={proposal}
@@ -338,9 +311,7 @@ export function NtrnProposalDetails({
             <div className='w-full h-full flex items-center justify-center mb-8'>
               <div className='w-[180px] h-[180px] flex items-center justify-center relative'>
                 <PieChart data={dataMock} lineWidth={20} />
-                <p className='text-md dark:text-white-100 text-dark-gray font-bold absolute'>
-                  Current Status
-                </p>
+                <p className='text-md dark:text-white-100 text-dark-gray font-bold absolute'>Current Status</p>
               </div>
             </div>
 
@@ -383,10 +354,7 @@ export function NtrnProposalDetails({
             <button
               className='flex items-center justify-center px-1'
               onClick={() =>
-                window.open(
-                  `${txUrl?.replace('txs', 'account')}/${getProposer(proposal, shouldUseFallback)}`,
-                  '_blank',
-                )
+                window.open(`${txUrl?.replace('txs', 'account')}/${getProposer(proposal, shouldUseFallback)}`, '_blank')
               }
             >
               <ArrowSquareOut size={18} className='text-gray-400' />
@@ -406,16 +374,15 @@ export function NtrnProposalDetails({
         )}
       </div>
 
-      {(proposal as Proposal | ProposalApi).status ===
-        ProposalStatusEnum.PROPOSAL_STATUS_VOTING_PERIOD && (
+      {(proposal as Proposal | ProposalApi).status === ProposalStatusEnum.PROPOSAL_STATUS_VOTING_PERIOD && (
         <div className='w-full p-4 mt-auto sticky bottom-0 bg-secondary-100 '>
           <Button
             className={cn('w-full')}
             onClick={() => {
               if (activeWallet?.watchWallet) {
-                importWatchWalletSeedPopupStore.setShowPopup(true)
+                importWatchWalletSeedPopupStore.setShowPopup(true);
               } else {
-                setShowCastVoteSheet(true)
+                setShowCastVoteSheet(true);
               }
             }}
           >
@@ -437,5 +404,5 @@ export function NtrnProposalDetails({
         forceNetwork={forceNetwork}
       />
     </>
-  )
+  );
 }

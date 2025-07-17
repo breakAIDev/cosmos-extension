@@ -1,26 +1,26 @@
-import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate'
+import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 
 type CosmWasmClients = {
-  [rpcEndpoint: string]: CosmWasmClient
-}
+  [rpcEndpoint: string]: CosmWasmClient;
+};
 
 class CosmWasmClientRouter {
-  clients: CosmWasmClients = {}
+  clients: CosmWasmClients = {};
 
   async connect(rpcEndpoint: string) {
     if (!this.getClientInstance(rpcEndpoint)) {
-      this.setClientInstance(rpcEndpoint, await CosmWasmClient.connect(rpcEndpoint))
+      this.setClientInstance(rpcEndpoint, await CosmWasmClient.connect(rpcEndpoint));
     }
 
-    return this.getClientInstance(rpcEndpoint)
+    return this.getClientInstance(rpcEndpoint);
   }
 
   getClientInstance(rpcEndpoint: string) {
-    return this.clients[rpcEndpoint]
+    return this.clients[rpcEndpoint];
   }
   setClientInstance(rpcEndpoint: string, client: CosmWasmClient) {
-    this.clients[rpcEndpoint] = client
+    this.clients[rpcEndpoint] = client;
   }
 }
 
-export const cosmWasmClientRouter = new CosmWasmClientRouter()
+export const cosmWasmClientRouter = new CosmWasmClientRouter();

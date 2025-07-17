@@ -4,48 +4,48 @@ import {
   sliceAddress,
   useformatCurrency,
   useGetChains,
-} from '@leapwallet/cosmos-wallet-hooks'
+} from '@leapwallet/cosmos-wallet-hooks';
 import {
   LeapLedgerSignerEth,
   LedgerError,
   pubKeyToEvmAddressToShow,
   SupportedChain,
-} from '@leapwallet/cosmos-wallet-sdk'
-import { RootERC20DenomsStore } from '@leapwallet/cosmos-wallet-store'
-import { EthWallet } from '@leapwallet/leap-keychain'
-import { Avatar, Buttons } from '@leapwallet/leap-ui'
-import { ArrowRight } from '@phosphor-icons/react'
-import { captureException } from '@sentry/react'
-import BigNumber from 'bignumber.js'
-import BottomModal from 'components/bottom-modal'
-import { ErrorCard } from 'components/ErrorCard'
-import LedgerConfirmationPopup from 'components/ledger-confirmation/LedgerConfirmationPopup'
-import { TokenImageWithFallback } from 'components/token-image-with-fallback'
-import { useCaptureTxError } from 'hooks/utility/useCaptureTxError'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import { Wallet } from 'hooks/wallet/useWallet'
-import { observer } from 'mobx-react-lite'
-import { useSendContext } from 'pages/send-v2/context'
-import React, { useCallback, useMemo, useState } from 'react'
-import { Colors } from 'theme/colors'
-import { imgOnError } from 'utils/imgOnError'
+} from '@leapwallet/cosmos-wallet-sdk';
+import { RootERC20DenomsStore } from '@leapwallet/cosmos-wallet-store';
+import { EthWallet } from '@leapwallet/leap-keychain';
+import { Avatar, Buttons } from '@leapwallet/leap-ui';
+import { ArrowRight } from '@phosphor-icons/react';
+import { captureException } from '@sentry/react';
+import BigNumber from 'bignumber.js';
+import BottomModal from 'components/bottom-modal';
+import { ErrorCard } from 'components/ErrorCard';
+import LedgerConfirmationPopup from 'components/ledger-confirmation/LedgerConfirmationPopup';
+import { TokenImageWithFallback } from 'components/token-image-with-fallback';
+import { useCaptureTxError } from 'hooks/utility/useCaptureTxError';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { Wallet } from 'hooks/wallet/useWallet';
+import { observer } from 'mobx-react-lite';
+import { useSendContext } from 'pages/send-v2/context';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Colors } from 'theme/colors';
+import { imgOnError } from 'utils/imgOnError';
 
-import { useExecuteSkipTx } from './executeSkipTx'
+import { useExecuteSkipTx } from './executeSkipTx';
 
 type ReviewTransactionSheetProps = {
-  isOpen: boolean
-  onClose: () => void
-  rootERC20DenomsStore: RootERC20DenomsStore
-}
+  isOpen: boolean;
+  onClose: () => void;
+  rootERC20DenomsStore: RootERC20DenomsStore;
+};
 
 export const ReviewTransferSheet = observer(
   ({ isOpen, onClose, rootERC20DenomsStore }: ReviewTransactionSheetProps) => {
-    const [formatCurrency] = useformatCurrency()
-    const defaultTokenLogo = useDefaultTokenLogo()
-    const [useChainImgFallback, setUseChainImgFallback] = useState(false)
-    const chains = useGetChains()
-    const getWallet = Wallet.useGetWallet()
-    const allERC20Denoms = rootERC20DenomsStore.allERC20Denoms
+    const [formatCurrency] = useformatCurrency();
+    const defaultTokenLogo = useDefaultTokenLogo();
+    const [useChainImgFallback, setUseChainImgFallback] = useState(false);
+    const chains = useGetChains();
+    const getWallet = Wallet.useGetWallet();
+    const allERC20Denoms = rootERC20DenomsStore.allERC20Denoms;
 
     const {
       memo,
@@ -74,44 +74,35 @@ export const ReviewTransferSheet = observer(
       sendActiveChain,
       associated0xAddress,
       setIsSending,
-    } = useSendContext()
+    } = useSendContext();
 
-    const {
-      confirmSkipTx,
-      txnProcessing,
-      error,
-      showLedgerPopupSkipTx,
-      setShowLedgerPopupSkipTx,
-      setError,
-    } = useExecuteSkipTx()
+    const { confirmSkipTx, txnProcessing, error, showLedgerPopupSkipTx, setShowLedgerPopupSkipTx, setError } =
+      useExecuteSkipTx();
     const fiatValue = useMemo(
       () => formatCurrency(new BigNumber(inputAmount).multipliedBy(tokenFiatValue ?? 0)),
       [formatCurrency, inputAmount, tokenFiatValue],
-    )
+    );
 
     const receiverChainName = useMemo(() => {
-      return chains?.[selectedAddress?.chainName as SupportedChain]?.chainName
-    }, [chains, selectedAddress?.chainName])
+      return chains?.[selectedAddress?.chainName as SupportedChain]?.chainName;
+    }, [chains, selectedAddress?.chainName]);
 
     const handleClose = useCallback(() => {
-      setError('')
-      onClose()
+      setError('');
+      onClose();
 
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, []);
 
     const handleSend = useCallback(async () => {
-      clearTxError()
+      clearTxError();
       if (!fee || !selectedAddress?.address || !selectedToken) {
-        return
+        return;
       }
 
       try {
-        let toAddress = selectedAddress.address
-        const _isERC20Token = isERC20Token(
-          Object.keys(allERC20Denoms),
-          selectedToken?.coinMinimalDenom,
-        )
+        let toAddress = selectedAddress.address;
+        const _isERC20Token = isERC20Token(Object.keys(allERC20Denoms), selectedToken?.coinMinimalDenom);
 
         if (
           chains[sendActiveChain]?.evmOnlyChain &&
@@ -119,20 +110,20 @@ export const ReviewTransferSheet = observer(
           toAddress.toLowerCase().startsWith(chains[sendActiveChain].addressPrefix) &&
           fetchAccountDetailsData?.pubKey.key
         ) {
-          toAddress = pubKeyToEvmAddressToShow(fetchAccountDetailsData.pubKey.key)
+          toAddress = pubKeyToEvmAddressToShow(fetchAccountDetailsData.pubKey.key);
         }
 
         if (selectedAddress.address.toLowerCase().startsWith('0x') && associatedSeiAddress) {
-          toAddress = associatedSeiAddress
+          toAddress = associatedSeiAddress;
         }
 
         if (associated0xAddress) {
-          toAddress = associated0xAddress
+          toAddress = associated0xAddress;
         }
 
         if (chains[sendActiveChain]?.evmOnlyChain) {
-          const wallet = await getWallet(sendActiveChain, true)
-          const nativeTokenKey = Object.keys(chains[sendActiveChain]?.nativeDenoms ?? {})?.[0]
+          const wallet = await getWallet(sendActiveChain, true);
+          const nativeTokenKey = Object.keys(chains[sendActiveChain]?.nativeDenoms ?? {})?.[0];
 
           await confirmSendEth(
             toAddress,
@@ -146,7 +137,7 @@ export const ReviewTransferSheet = observer(
               decimals: selectedToken.coinDecimals,
               nativeTokenKey,
             },
-          )
+          );
         } else if (
           transferData?.isSkipTransfer &&
           !isIbcUnwindingDisabled &&
@@ -156,7 +147,7 @@ export const ReviewTransferSheet = observer(
           // we use Skip API for transfer or
           // else we use default Cosmos API
 
-          const wallet = await getWallet(sendActiveChain, true)
+          const wallet = await getWallet(sendActiveChain, true);
           if (sendActiveChain === 'evmos' && wallet instanceof LeapLedgerSignerEth) {
             await confirmSend({
               selectedToken: selectedToken,
@@ -164,9 +155,9 @@ export const ReviewTransferSheet = observer(
               amount: new BigNumber(inputAmount),
               memo: memo,
               fees: fee,
-            })
+            });
           } else {
-            confirmSkipTx()
+            confirmSkipTx();
           }
         } else {
           await confirmSend({
@@ -175,16 +166,16 @@ export const ReviewTransferSheet = observer(
             amount: new BigNumber(inputAmount),
             memo: memo,
             fees: fee,
-          })
+          });
         }
       } catch (err: unknown) {
         if (err instanceof LedgerError) {
-          setTxError(err.message)
-          setShowLedgerPopup(false)
-          setShowLedgerPopupSkipTx(false)
+          setTxError(err.message);
+          setShowLedgerPopup(false);
+          setShowLedgerPopupSkipTx(false);
         }
-        setIsSending(false)
-        captureException(err)
+        setIsSending(false);
+        captureException(err);
       }
     }, [
       clearTxError,
@@ -213,14 +204,14 @@ export const ReviewTransferSheet = observer(
       memo,
       confirmSkipTx,
       setIsSending,
-    ])
+    ]);
 
-    useCaptureTxError(txError)
+    useCaptureTxError(txError);
 
     const onCloseLedgerPopup = useCallback(() => {
-      setShowLedgerPopup(false)
-      setShowLedgerPopupSkipTx(false)
-    }, [setShowLedgerPopup, setShowLedgerPopupSkipTx])
+      setShowLedgerPopup(false);
+      setShowLedgerPopupSkipTx(false);
+    }, [setShowLedgerPopup, setShowLedgerPopupSkipTx]);
 
     return (
       <>
@@ -249,7 +240,7 @@ export const ReviewTransferSheet = observer(
                       src={chains?.[sendActiveChain]?.chainSymbolImageUrl}
                       alt={chains?.[sendActiveChain]?.chainName ?? ''}
                       onError={() => {
-                        setUseChainImgFallback(true)
+                        setUseChainImgFallback(true);
                       }}
                       className='absolute bottom-0 right-0 h-4 w-4'
                     />
@@ -327,6 +318,6 @@ export const ReviewTransferSheet = observer(
           onCloseLedgerPopup={onCloseLedgerPopup}
         />
       </>
-    )
+    );
   },
-)
+);

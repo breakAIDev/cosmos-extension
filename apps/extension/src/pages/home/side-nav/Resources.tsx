@@ -1,12 +1,12 @@
-import { CardDivider } from '@leapwallet/leap-ui'
-import { ExternalLinkIcon } from 'icons/external-link'
-import { HeadphoneIcon } from 'icons/headphone'
-import { XIcon } from 'icons/x'
-import { observer } from 'mobx-react-lite'
-import React from 'react'
+import { CardDivider } from '@leapwallet/leap-ui';
+import { ExternalLinkIcon } from 'icons/external-link';
+import { HeadphoneIcon } from 'icons/headphone';
+import { XIcon } from 'icons/x';
+import { observer } from 'mobx-react-lite';
+import React from 'react';
 
-import { SideNavSection } from '.'
-import { NavItem } from './NavItem'
+import { SideNavSection } from '.';
+import { NavItem } from './NavItem';
 
 const resources = [
   {
@@ -14,9 +14,7 @@ const resources = [
     title: 'Support',
     titleIcon: HeadphoneIcon,
     onclick: () => {
-      window.open(
-        'https://leapwallet.notion.site/Leap-Wallet-Help-Center-Cosmos-ba1da3c05d3341eaa44a1850ed3260ee',
-      )
+      window.open('https://leapwallet.notion.site/Leap-Wallet-Help-Center-Cosmos-ba1da3c05d3341eaa44a1850ed3260ee');
     },
     enabled: true,
   },
@@ -25,11 +23,11 @@ const resources = [
     title: 'Twitter',
     titleIcon: XIcon,
     onclick: () => {
-      window.open('https://x.com/leap_wallet')
+      window.open('https://x.com/leap_wallet');
     },
     enabled: true,
   },
-]
+];
 
 export const Resources = observer(() => {
   return (
@@ -48,8 +46,8 @@ export const Resources = observer(() => {
                 trailingIcon={<ExternalLinkIcon className='!size-4 text-muted-foreground' />}
               />
             </React.Fragment>
-          )
+          );
         })}
     </SideNavSection>
-  )
-})
+  );
+});

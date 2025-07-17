@@ -1,71 +1,69 @@
-import { CaretDown } from '@phosphor-icons/react'
-import { WalletButtonV2 } from 'components/button'
-import { PageHeader } from 'components/header/PageHeaderV2'
-import { SideNavMenuOpen } from 'components/header/sidenav-menu'
-import { SidePanelTrigger } from 'components/header/sidepanel-trigger'
-import { useDefaultTokenLogo } from 'hooks'
-import { useActiveChain } from 'hooks/settings/useActiveChain'
-import useQuery from 'hooks/useQuery'
-import { useWalletInfo } from 'hooks/useWalletInfo'
-import { useChainPageInfo } from 'hooks/utility/useChainPageInfo'
-import { observer } from 'mobx-react-lite'
-import React, { useEffect, useState } from 'react'
-import Skeleton from 'react-loading-skeleton'
-import { useNavigate } from 'react-router'
-import { earnFeatureShowStore } from 'stores/earn-feature-show'
-import { globalSheetsStore } from 'stores/global-sheets-store'
-import { imgOnError } from 'utils/imgOnError'
+import { CaretDown } from '@phosphor-icons/react';
+import { WalletButtonV2 } from 'components/button';
+import { PageHeader } from 'components/header/PageHeaderV2';
+import { SideNavMenuOpen } from 'components/header/sidenav-menu';
+import { SidePanelTrigger } from 'components/header/sidepanel-trigger';
+import { useDefaultTokenLogo } from 'hooks';
+import { useActiveChain } from 'hooks/settings/useActiveChain';
+import useQuery from 'hooks/useQuery';
+import { useWalletInfo } from 'hooks/useWalletInfo';
+import { useChainPageInfo } from 'hooks/utility/useChainPageInfo';
+import { observer } from 'mobx-react-lite';
+import React, { useEffect, useState } from 'react';
+import Skeleton from 'react-loading-skeleton';
+import { useNavigate } from 'react-router';
+import { earnFeatureShowStore } from 'stores/earn-feature-show';
+import { globalSheetsStore } from 'stores/global-sheets-store';
+import { imgOnError } from 'utils/imgOnError';
 
-import SelectChain from '../SelectChain'
-import SelectWallet from '../SelectWallet/v2'
-import EarnUSDNSheet from './EarnUSDNSheet'
+import SelectChain from '../SelectChain';
+import SelectWallet from '../SelectWallet/v2';
+import EarnUSDNSheet from './EarnUSDNSheet';
 
 const GeneralHomeHeaderView = (props: { disableWalletButton?: boolean; isLoading?: boolean }) => {
-  const [showSelectWallet, setShowSelectWallet] = useState(false)
-  const [defaultFilter, setDefaultFilter] = useState<string | undefined>(undefined)
-  const [showEarnUSDN, setShowEarnUSDN] = useState(false)
-  const walletInfo = useWalletInfo()
-  const query = useQuery()
-  const navigate = useNavigate()
-  const activeChain = useActiveChain()
+  const [showSelectWallet, setShowSelectWallet] = useState(false);
+  const [defaultFilter, setDefaultFilter] = useState<string | undefined>(undefined);
+  const [showEarnUSDN, setShowEarnUSDN] = useState(false);
+  const walletInfo = useWalletInfo();
+  const query = useQuery();
+  const navigate = useNavigate();
+  const activeChain = useActiveChain();
 
-  const { headerChainImgSrc } = useChainPageInfo()
-  const defaultTokenLogo = useDefaultTokenLogo()
+  const { headerChainImgSrc } = useChainPageInfo();
+  const defaultTokenLogo = useDefaultTokenLogo();
 
   useEffect(() => {
-    if (!globalSheetsStore.isChainSelectorOpen) setDefaultFilter('Popular')
-  }, [globalSheetsStore.isChainSelectorOpen])
+    if (!globalSheetsStore.isChainSelectorOpen) setDefaultFilter('Popular');
+  }, [globalSheetsStore.isChainSelectorOpen]);
 
   // Handle deep links
   useEffect(() => {
     if (query.get('openChainSwitch')) {
-      const _defaultFilter = query.get('defaultFilter')
-      navigate('/home')
-      globalSheetsStore.toggleChainSelector()
+      const _defaultFilter = query.get('defaultFilter');
+      navigate('/home');
+      globalSheetsStore.toggleChainSelector();
       if (_defaultFilter) {
-        setDefaultFilter(_defaultFilter)
+        setDefaultFilter(_defaultFilter);
       }
 
-      return
+      return;
     }
 
     if (query.get('openLightNode')) {
-      navigate('/home')
+      navigate('/home');
       globalSheetsStore.toggleSideNav({
         openLightNodePage: true,
-      })
+      });
 
-      return
+      return;
     }
 
     if (query.get('openEarnUSDN')) {
-      earnFeatureShowStore.show !== 'false'
-        ? setShowEarnUSDN(true)
-        : navigate('/earn-usdn', { replace: true })
+      earnFeatureShowStore.show !== 'false' ? setShowEarnUSDN(true) : navigate('/earn-usdn', { replace: true });
 
-      return
+      return;
     }
-  }, [navigate, query])
+  }, [navigate, query]);
 
   return (
     <>
@@ -97,11 +95,7 @@ const GeneralHomeHeaderView = (props: { disableWalletButton?: boolean; isLoading
               onError={imgOnError(defaultTokenLogo)}
             />
           ) : (
-            <Skeleton
-              circle
-              className='size-5 shrink-0'
-              containerClassName='block shrink-0 size-5 !leading-none'
-            />
+            <Skeleton circle className='size-5 shrink-0' containerClassName='block shrink-0 size-5 !leading-none' />
           )}
           <CaretDown weight='fill' className='size-3 fill-muted-foreground' />
         </button>
@@ -118,15 +112,15 @@ const GeneralHomeHeaderView = (props: { disableWalletButton?: boolean; isLoading
       {showEarnUSDN && (
         <EarnUSDNSheet
           onClose={() => {
-            setShowEarnUSDN(false)
-            navigate('/home', { replace: true })
+            setShowEarnUSDN(false);
+            navigate('/home', { replace: true });
           }}
         />
       )}
     </>
-  )
-}
+  );
+};
 
-GeneralHomeHeaderView.displayName = 'GeneralHomeHeader'
+GeneralHomeHeaderView.displayName = 'GeneralHomeHeader';
 
-export const GeneralHomeHeader = observer(GeneralHomeHeaderView)
+export const GeneralHomeHeader = observer(GeneralHomeHeaderView);

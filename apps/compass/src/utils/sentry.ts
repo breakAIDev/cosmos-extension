@@ -1,8 +1,8 @@
-import { Scope } from '@sentry/react'
+import { Scope } from '@sentry/react';
 
 export const uiErrorTags = {
   uiError: true,
-}
+};
 
 export const beforeCapture = (scope: Scope, error: Error | null, componentStack: string | null) => {
   scope.addBreadcrumb({
@@ -13,6 +13,6 @@ export const beforeCapture = (scope: Scope, error: Error | null, componentStack:
       componentStack,
       errorStack: error?.stack,
     },
-  })
-  scope.setTag('extension-crash', 'true')
-}
+  });
+  scope.setTag('extension-crash', 'true');
+};

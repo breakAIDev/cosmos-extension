@@ -1,25 +1,25 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react';
 
 export const useCopy = () => {
-  const [isCopied, setIsCopied] = useState(false)
+  const [isCopied, setIsCopied] = useState(false);
 
   const copy = (text: string) => {
     if (typeof navigator === 'undefined' || !navigator.clipboard) {
-      return
+      return;
     }
 
-    navigator.clipboard.writeText(text)
-    setIsCopied(true)
-  }
+    navigator.clipboard.writeText(text);
+    setIsCopied(true);
+  };
 
   useEffect(() => {
     if (isCopied) {
-      setTimeout(() => setIsCopied(false), 1000)
+      setTimeout(() => setIsCopied(false), 1000);
     }
-  }, [isCopied])
+  }, [isCopied]);
 
   return {
     isCopied,
     copy,
-  }
-}
+  };
+};

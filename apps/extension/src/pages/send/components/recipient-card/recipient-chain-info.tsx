@@ -1,18 +1,13 @@
-import { useGetChains } from '@leapwallet/cosmos-wallet-hooks'
-import {
-  isAptosChain,
-  isSolanaChain,
-  isSuiChain,
-  SupportedChain,
-} from '@leapwallet/cosmos-wallet-sdk'
-import { Info } from '@phosphor-icons/react'
-import { SHOW_ETH_ADDRESS_CHAINS } from 'config/constants'
-import { useSendContext } from 'pages/send/context'
-import React, { useMemo } from 'react'
+import { useGetChains } from '@leapwallet/cosmos-wallet-hooks';
+import { isAptosChain, isSolanaChain, isSuiChain, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { Info } from '@phosphor-icons/react';
+import { SHOW_ETH_ADDRESS_CHAINS } from 'config/constants';
+import { useSendContext } from 'pages/send/context';
+import React, { useMemo } from 'react';
 
 export function RecipientChainInfo() {
-  const { sendActiveChain, addressError, selectedAddress } = useSendContext()
-  const chains = useGetChains()
+  const { sendActiveChain, addressError, selectedAddress } = useSendContext();
+  const chains = useGetChains();
 
   const sendChainEcosystem = useMemo(() => {
     if (
@@ -21,29 +16,22 @@ export function RecipientChainInfo() {
       chains?.[sendActiveChain]?.evmOnlyChain ||
       isSolanaChain(sendActiveChain)
     ) {
-      return chains?.[sendActiveChain]?.chainName ?? sendActiveChain
+      return chains?.[sendActiveChain]?.chainName ?? sendActiveChain;
     }
     if (
       SHOW_ETH_ADDRESS_CHAINS.includes(sendActiveChain) &&
-      (!!selectedAddress?.ethAddress?.startsWith('0x') ||
-        !!selectedAddress?.address?.startsWith('0x'))
+      (!!selectedAddress?.ethAddress?.startsWith('0x') || !!selectedAddress?.address?.startsWith('0x'))
     ) {
-      return chains?.[sendActiveChain]?.chainName ?? sendActiveChain
+      return chains?.[sendActiveChain]?.chainName ?? sendActiveChain;
     }
     if (!!selectedAddress?.address?.startsWith('init') && selectedAddress?.chainName) {
-      return chains?.[selectedAddress?.chainName as SupportedChain]?.chainName ?? sendActiveChain
+      return chains?.[selectedAddress?.chainName as SupportedChain]?.chainName ?? sendActiveChain;
     }
-    return undefined
-  }, [
-    sendActiveChain,
-    chains,
-    selectedAddress?.ethAddress,
-    selectedAddress?.address,
-    selectedAddress?.chainName,
-  ])
+    return undefined;
+  }, [sendActiveChain, chains, selectedAddress?.ethAddress, selectedAddress?.address, selectedAddress?.chainName]);
 
   if (!sendChainEcosystem || addressError) {
-    return null
+    return null;
   }
 
   return (
@@ -56,5 +44,5 @@ export function RecipientChainInfo() {
         </div>
       </div>
     </div>
-  )
+  );
 }

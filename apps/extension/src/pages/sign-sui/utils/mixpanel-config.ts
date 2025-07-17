@@ -1,18 +1,18 @@
-import { WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks'
+import { WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks';
 
 export const mapWalletTypeToMixpanelWalletType = (walletType: WALLETTYPE): string => {
   switch (walletType) {
     case WALLETTYPE.LEDGER:
-      return 'ledger'
+      return 'ledger';
     case WALLETTYPE.PRIVATE_KEY:
-      return 'privateKey'
+      return 'privateKey';
     case WALLETTYPE.SEED_PHRASE:
-      return 'seedPhrase'
+      return 'seedPhrase';
     default:
-      return 'unknown'
+      return 'unknown';
   }
-}
+};
 
 export const mixpanelTrackOptions = {
   transport: 'sendBeacon',
-}
+};

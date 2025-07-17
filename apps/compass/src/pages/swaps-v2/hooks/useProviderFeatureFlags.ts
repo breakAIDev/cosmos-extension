@@ -1,73 +1,70 @@
-import { useFeatureFlags } from '@leapwallet/cosmos-wallet-hooks'
-import { useMemo } from 'react'
-import semver from 'semver'
-import browser from 'webextension-polyfill'
+import { useFeatureFlags } from '@leapwallet/cosmos-wallet-hooks';
+import { useMemo } from 'react';
+import semver from 'semver';
+import browser from 'webextension-polyfill';
 
-function getMultiplier(
-  multiplier: Record<string, Record<string, number>> | undefined,
-  version: string,
-) {
+function getMultiplier(multiplier: Record<string, Record<string, number>> | undefined, version: string) {
   if (!multiplier) {
-    return undefined
+    return undefined;
   }
   const applicableRange = Object.keys(multiplier).find((versionRange) => {
     if (semver.satisfies(version, versionRange)) {
-      return true
+      return true;
     }
-    return false
-  })
+    return false;
+  });
   if (!applicableRange) {
-    return undefined
+    return undefined;
   }
-  return multiplier?.[applicableRange]
+  return multiplier?.[applicableRange];
 }
 
 export function useProviderFeatureFlags() {
-  const { data: featureFlags } = useFeatureFlags()
+  const { data: featureFlags } = useFeatureFlags();
 
   const isLifiEnabled = useMemo(() => {
     if (!featureFlags?.swaps?.providers?.lifi?.disabled_on_versions) {
-      return true
+      return true;
     }
-    const version = browser.runtime.getManifest().version
+    const version = browser.runtime.getManifest().version;
     return !featureFlags.swaps.providers.lifi.disabled_on_versions?.some((disabledVersions) => {
-      return semver.satisfies(version, disabledVersions)
-    })
-  }, [featureFlags])
+      return semver.satisfies(version, disabledVersions);
+    });
+  }, [featureFlags]);
 
   const lifiGasPriceMultiplier = useMemo(() => {
     return getMultiplier(
       featureFlags?.swaps?.providers?.lifi?.gas_price_multiplier?.extension,
       browser.runtime.getManifest().version,
-    )
-  }, [featureFlags])
+    );
+  }, [featureFlags]);
 
   const lifiGasLimitMultiplier = useMemo(() => {
     return getMultiplier(
       featureFlags?.swaps?.providers?.lifi?.gas_limit_multiplier?.extension,
       browser.runtime.getManifest().version,
-    )
-  }, [featureFlags])
+    );
+  }, [featureFlags]);
 
   const isSkipEnabled = useMemo(() => {
     if (!featureFlags?.swaps?.providers?.skip?.disabled_on_versions) {
-      return true
+      return true;
     }
-    const version = browser.runtime.getManifest().version
+    const version = browser.runtime.getManifest().version;
     return !featureFlags.swaps.providers.skip.disabled_on_versions?.some((disabledVersions) => {
-      return semver.satisfies(version, disabledVersions)
-    })
-  }, [featureFlags])
+      return semver.satisfies(version, disabledVersions);
+    });
+  }, [featureFlags]);
 
   const isEvmSwapEnabled = useMemo(() => {
     if (!featureFlags?.swaps?.evm?.disabled_on_versions) {
-      return true
+      return true;
     }
-    const version = browser.runtime.getManifest().version
+    const version = browser.runtime.getManifest().version;
     return !featureFlags.swaps.evm.disabled_on_versions?.some((disabledVersions) => {
-      return semver.satisfies(version, disabledVersions)
-    })
-  }, [featureFlags])
+      return semver.satisfies(version, disabledVersions);
+    });
+  }, [featureFlags]);
 
   return {
     isLifiEnabled,
@@ -75,5 +72,5 @@ export function useProviderFeatureFlags() {
     lifiGasPriceMultiplier,
     lifiGasLimitMultiplier,
     isEvmSwapEnabled,
-  }
+  };
 }

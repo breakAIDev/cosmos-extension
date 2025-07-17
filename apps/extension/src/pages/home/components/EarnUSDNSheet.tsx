@@ -1,32 +1,32 @@
-import { useChainInfo } from '@leapwallet/cosmos-wallet-hooks'
-import { Buttons, Header, HeaderActionType } from '@leapwallet/leap-ui'
-import { CheckCircle } from '@phosphor-icons/react'
-import BigNumber from 'bignumber.js'
-import Text from 'components/text'
-import { PageName } from 'config/analytics'
-import { usePageView } from 'hooks/analytics/usePageView'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import React from 'react'
-import { createPortal } from 'react-dom'
-import { useNavigate } from 'react-router'
-import { miscellaneousDataStore } from 'stores/chain-infos-store'
-import { earnFeatureShowStore } from 'stores/earn-feature-show'
-import { Colors } from 'theme/colors'
-import { imgOnError } from 'utils/imgOnError'
+import { useChainInfo } from '@leapwallet/cosmos-wallet-hooks';
+import { Buttons, Header, HeaderActionType } from '@leapwallet/leap-ui';
+import { CheckCircle } from '@phosphor-icons/react';
+import BigNumber from 'bignumber.js';
+import Text from 'components/text';
+import { PageName } from 'config/analytics';
+import { usePageView } from 'hooks/analytics/usePageView';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import React from 'react';
+import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router';
+import { miscellaneousDataStore } from 'stores/chain-infos-store';
+import { earnFeatureShowStore } from 'stores/earn-feature-show';
+import { Colors } from 'theme/colors';
+import { imgOnError } from 'utils/imgOnError';
 
 type Props = {
-  onClose: () => void
-}
+  onClose: () => void;
+};
 
 const EarnUSDNSheet = observer(({ onClose }: Props) => {
-  const navigate = useNavigate()
-  const chainInfo = useChainInfo('noble')
+  const navigate = useNavigate();
+  const chainInfo = useChainInfo('noble');
   const handleStartEarningClick = () => {
-    onClose()
-    earnFeatureShowStore.setShow('false')
-    navigate('/earn-usdn')
-  }
+    onClose();
+    earnFeatureShowStore.setShow('false');
+    navigate('/earn-usdn');
+  };
   return createPortal(
     <div className='panel-height panel-width bg-white-100 dark:bg-black-100 absolute top-0 z-10'>
       <Header
@@ -34,7 +34,7 @@ const EarnUSDNSheet = observer(({ onClose }: Props) => {
         action={{
           type: HeaderActionType.BACK,
           onClick: () => {
-            onClose()
+            onClose();
           },
         }}
       />
@@ -53,21 +53,14 @@ const EarnUSDNSheet = observer(({ onClose }: Props) => {
                 className='w-16 h-16 bg-white-100 rounded-full absolute right-0'
               />
             </div>
-            <Text className='font-bold text-xl px-[50px] text-center mt-6'>
-              Earn real-time rewards with USDC
-            </Text>
-            <Text
-              className='font-medium text-sm text-center mt-3 !inline'
-              color='text-gray-600 dark:text-gray-400'
-            >
+            <Text className='font-bold text-xl px-[50px] text-center mt-6'>Earn real-time rewards with USDC</Text>
+            <Text className='font-medium text-sm text-center mt-3 !inline' color='text-gray-600 dark:text-gray-400'>
               Put your stable asset to work and earn&nbsp;
               {
                 <strong className='text-green-600'>
                   &nbsp;
                   {parseFloat(miscellaneousDataStore.data?.noble?.usdnEarnApy) > 0
-                    ? new BigNumber(miscellaneousDataStore.data.noble.usdnEarnApy)
-                        .multipliedBy(100)
-                        .toFixed(2) + '%'
+                    ? new BigNumber(miscellaneousDataStore.data.noble.usdnEarnApy).multipliedBy(100).toFixed(2) + '%'
                     : '-'}
                   &nbsp;APY
                 </strong>
@@ -100,18 +93,14 @@ const EarnUSDNSheet = observer(({ onClose }: Props) => {
           >
             Start earning now
           </button>
-          <Text
-            color='dark:text-gray-400 text-gray-600'
-            size='xs'
-            className='font-medium text-center'
-          >
+          <Text color='dark:text-gray-400 text-gray-600' size='xs' className='font-medium text-center'>
             Powered by Noble
           </Text>
         </div>
       </div>
     </div>,
     document.getElementById('popup-layout')?.parentNode as HTMLElement,
-  )
-})
+  );
+});
 
-export default EarnUSDNSheet
+export default EarnUSDNSheet;

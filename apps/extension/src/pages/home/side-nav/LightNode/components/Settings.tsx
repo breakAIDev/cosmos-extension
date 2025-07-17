@@ -1,15 +1,15 @@
-import BottomModal from 'components/new-bottom-modal'
-import { Button } from 'components/ui/button'
-import React from 'react'
+import BottomModal from 'components/new-bottom-modal';
+import { Button } from 'components/ui/button';
+import React from 'react';
 
 const Settings = ({
   isVisible,
   onCloseHandler,
   handleClearStorage,
 }: {
-  isVisible: boolean
-  onCloseHandler: () => void
-  handleClearStorage: () => void
+  isVisible: boolean;
+  onCloseHandler: () => void;
+  handleClearStorage: () => void;
 }) => {
   return (
     <BottomModal isOpen={isVisible} onClose={onCloseHandler} title={'Light Node Settings'}>
@@ -21,11 +21,9 @@ const Settings = ({
         </Button>
       </div>
 
-      <span className='ml-2 text-sm text-muted-foreground'>
-        Clear sync information saved on this device
-      </span>
+      <span className='ml-2 text-sm text-muted-foreground'>Clear sync information saved on this device</span>
     </BottomModal>
-  )
-}
+  );
+};
 
-export default Settings
+export default Settings;

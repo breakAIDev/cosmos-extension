@@ -1,10 +1,10 @@
-import GasPriceOptions from 'components/gas-price-options'
-import { motion } from 'framer-motion'
-import { AnimatePresence } from 'framer-motion'
-import { TabSelectors } from 'pages/stake-v2/components/TabList/tab-list-selector'
-import React, { useState } from 'react'
-import { transition150 } from 'utils/motion-variants'
-import { slideVariants } from 'utils/motion-variants/global-layout-motions'
+import GasPriceOptions from 'components/gas-price-options';
+import { motion } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
+import { TabSelectors } from 'pages/stake-v2/components/TabList/tab-list-selector';
+import React, { useState } from 'react';
+import { transition150 } from 'utils/motion-variants';
+import { slideVariants } from 'utils/motion-variants/global-layout-motions';
 
 enum Tab {
   FEES = 'fees',
@@ -20,14 +20,14 @@ const tabs = [
     id: Tab.DETAILS,
     label: 'Details',
   },
-]
+];
 
 const indicatorDefaultScale = {
   transform: 'translateX(0px) scaleX(0.161044)',
-}
+};
 
 export const TabList = (props: { gasPriceError?: string | null; txData: unknown }) => {
-  const [selectedTab, setSelectedTab] = useState(tabs[0])
+  const [selectedTab, setSelectedTab] = useState(tabs[0]);
 
   return (
     <>
@@ -62,9 +62,7 @@ export const TabList = (props: { gasPriceError?: string | null; txData: unknown 
               </div>
 
               {!!props.gasPriceError && (
-                <p className='text-destructive-100 text-sm font-medium mt-2 px-1'>
-                  {props.gasPriceError}
-                </p>
+                <p className='text-destructive-100 text-sm font-medium mt-2 px-1'>{props.gasPriceError}</p>
               )}
             </motion.div>
           )}
@@ -79,15 +77,11 @@ export const TabList = (props: { gasPriceError?: string | null; txData: unknown 
               exit='enter'
               className='text-xs bg-secondary-100 p-5 w-full overflow-x-auto rounded-2xl'
             >
-              {JSON.stringify(
-                props.txData,
-                (_, value) => (typeof value === 'bigint' ? value.toString() : value),
-                2,
-              )}
+              {JSON.stringify(props.txData, (_, value) => (typeof value === 'bigint' ? value.toString() : value), 2)}
             </motion.pre>
           )}
         </AnimatePresence>
       </div>
     </>
-  )
-}
+  );
+};

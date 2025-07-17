@@ -1,41 +1,36 @@
-import {
-  LSProvider,
-  SelectedNetwork,
-  useActiveChain,
-  useStaking,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
+import { LSProvider, SelectedNetwork, useActiveChain, useStaking } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import {
   ClaimRewardsStore,
   DelegationsStore,
   RootDenomsStore,
   UndelegationsStore,
   ValidatorsStore,
-} from '@leapwallet/cosmos-wallet-store'
-import { GenericCard } from '@leapwallet/leap-ui'
-import { CaretDown, CaretUp } from '@phosphor-icons/react'
-import BottomModal from 'components/new-bottom-modal'
-import Text from 'components/text'
-import currency from 'currency.js'
-import { observer } from 'mobx-react-lite'
-import React, { useMemo, useState } from 'react'
+} from '@leapwallet/cosmos-wallet-store';
+import { GenericCard } from '@leapwallet/leap-ui';
+import { CaretDown, CaretUp } from '@phosphor-icons/react';
+import BottomModal from 'components/new-bottom-modal';
+import Text from 'components/text';
+import currency from 'currency.js';
+import { observer } from 'mobx-react-lite';
+import React, { useMemo, useState } from 'react';
 
-import { ProviderCard } from './SelectLSProvider'
+import { ProviderCard } from './SelectLSProvider';
 
 type StakeSelectSheetProps = {
-  isVisible: boolean
-  title: string
-  onClose: () => void
-  tokenLSProviders: LSProvider[]
-  handleStakeClick: () => void
-  rootDenomsStore: RootDenomsStore
-  delegationsStore: DelegationsStore
-  validatorsStore: ValidatorsStore
-  unDelegationsStore: UndelegationsStore
-  claimRewardsStore: ClaimRewardsStore
-  forceChain?: SupportedChain
-  forceNetwork?: SelectedNetwork
-}
+  isVisible: boolean;
+  title: string;
+  onClose: () => void;
+  tokenLSProviders: LSProvider[];
+  handleStakeClick: () => void;
+  rootDenomsStore: RootDenomsStore;
+  delegationsStore: DelegationsStore;
+  validatorsStore: ValidatorsStore;
+  unDelegationsStore: UndelegationsStore;
+  claimRewardsStore: ClaimRewardsStore;
+  forceChain?: SupportedChain;
+  forceNetwork?: SelectedNetwork;
+};
 
 const StakeSelectSheet = observer(
   ({
@@ -51,46 +46,40 @@ const StakeSelectSheet = observer(
     claimRewardsStore,
     forceChain,
   }: StakeSelectSheetProps) => {
-    const _activeChain = useActiveChain()
-    const activeChain = useMemo(() => forceChain || _activeChain, [_activeChain, forceChain])
+    const _activeChain = useActiveChain();
+    const activeChain = useMemo(() => forceChain || _activeChain, [_activeChain, forceChain]);
 
-    const denoms = rootDenomsStore.allDenoms
-    const chainDelegations = delegationsStore.delegationsForChain(activeChain)
-    const chainValidators = validatorsStore.validatorsForChain(activeChain)
-    const chainUnDelegations = unDelegationsStore.unDelegationsForChain(activeChain)
-    const chainClaimRewards = claimRewardsStore.claimRewardsForChain(activeChain)
+    const denoms = rootDenomsStore.allDenoms;
+    const chainDelegations = delegationsStore.delegationsForChain(activeChain);
+    const chainValidators = validatorsStore.validatorsForChain(activeChain);
+    const chainUnDelegations = unDelegationsStore.unDelegationsForChain(activeChain);
+    const chainClaimRewards = claimRewardsStore.claimRewardsForChain(activeChain);
 
-    const [showLSProviders, setShowLSProviders] = useState(false)
-    const { minMaxApr } = useStaking(
-      denoms,
-      chainDelegations,
-      chainValidators,
-      chainUnDelegations,
-      chainClaimRewards,
-    )
+    const [showLSProviders, setShowLSProviders] = useState(false);
+    const { minMaxApr } = useStaking(denoms, chainDelegations, chainValidators, chainUnDelegations, chainClaimRewards);
 
     const avgAprValue = useMemo(() => {
       if (minMaxApr) {
-        const avgApr = (minMaxApr[0] + minMaxApr[1]) / 2
-        return currency((avgApr * 100).toString(), { precision: 2, symbol: '' }).format()
+        const avgApr = (minMaxApr[0] + minMaxApr[1]) / 2;
+        return currency((avgApr * 100).toString(), { precision: 2, symbol: '' }).format();
       }
-      return null
-    }, [minMaxApr])
+      return null;
+    }, [minMaxApr]);
     const maxLSAPY = useMemo(() => {
       if (tokenLSProviders?.length > 0) {
-        const _maxAPY = Math.max(...tokenLSProviders.map((provider) => provider.apy))
-        return `APY ${currency((_maxAPY * 100).toString(), { precision: 2, symbol: '' }).format()}%`
+        const _maxAPY = Math.max(...tokenLSProviders.map((provider) => provider.apy));
+        return `APY ${currency((_maxAPY * 100).toString(), { precision: 2, symbol: '' }).format()}%`;
       } else {
-        return 'N/A'
+        return 'N/A';
       }
-    }, [tokenLSProviders])
+    }, [tokenLSProviders]);
 
     return (
       <BottomModal
         isOpen={isVisible}
         onClose={() => {
-          setShowLSProviders(false)
-          onClose()
+          setShowLSProviders(false);
+          onClose();
         }}
         title={title}
         className='p-6'
@@ -155,9 +144,7 @@ const StakeSelectSheet = observer(
                           <ProviderCard
                             key={provider.name}
                             provider={provider}
-                            backgroundColor={`${
-                              provider.priority ? '!bg-[#29A87426]' : 'bg-gray-50 dark:bg-gray-900'
-                            }`}
+                            backgroundColor={`${provider.priority ? '!bg-[#29A87426]' : 'bg-gray-50 dark:bg-gray-900'}`}
                             rootDenomsStore={rootDenomsStore}
                           />
                         </div>
@@ -169,8 +156,8 @@ const StakeSelectSheet = observer(
           )}
         </div>
       </BottomModal>
-    )
+    );
   },
-)
+);
 
-export default StakeSelectSheet
+export default StakeSelectSheet;

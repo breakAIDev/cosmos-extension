@@ -13,7 +13,7 @@ import {
   useIsSeiEvmChain,
   useSeiLinkedAddressState,
   WALLETTYPE,
-} from '@leapwallet/cosmos-wallet-hooks'
+} from '@leapwallet/cosmos-wallet-hooks';
 import {
   AccountDetails,
   BTC_CHAINS,
@@ -23,37 +23,37 @@ import {
   isValidBtcAddress,
   SeiEvmTx,
   SupportedChain,
-} from '@leapwallet/cosmos-wallet-sdk'
-import { SEI_EVM_LEDGER_ERROR_MESSAGE } from 'config/constants'
-import { useGetWalletAddresses } from 'hooks/useGetWalletAddresses'
-import { Wallet } from 'hooks/wallet/useWallet'
-import { ReactElement, useCallback, useEffect, useMemo } from 'react'
+} from '@leapwallet/cosmos-wallet-sdk';
+import { SEI_EVM_LEDGER_ERROR_MESSAGE } from 'config/constants';
+import { useGetWalletAddresses } from 'hooks/useGetWalletAddresses';
+import { Wallet } from 'hooks/wallet/useWallet';
+import { ReactElement, useCallback, useEffect, useMemo } from 'react';
 
 export type UseCheckAddressErrorParams = {
-  setAssociatedSeiAddress: React.Dispatch<React.SetStateAction<string>>
-  setAssociated0xAddress: React.Dispatch<React.SetStateAction<string>>
+  setAssociatedSeiAddress: React.Dispatch<React.SetStateAction<string>>;
+  setAssociated0xAddress: React.Dispatch<React.SetStateAction<string>>;
 
-  setAddressError: React.Dispatch<React.SetStateAction<string | undefined>>
-  setAddressWarning: React.Dispatch<React.SetStateAction<AddressWarning>>
-  setFetchAccountDetailsData: React.Dispatch<React.SetStateAction<AccountDetails | undefined>>
-  fetchAccountDetails: (address: string) => Promise<void>
+  setAddressError: React.Dispatch<React.SetStateAction<string | undefined>>;
+  setAddressWarning: React.Dispatch<React.SetStateAction<AddressWarning>>;
+  setFetchAccountDetailsData: React.Dispatch<React.SetStateAction<AccountDetails | undefined>>;
+  fetchAccountDetails: (address: string) => Promise<void>;
 
-  selectedToken: Token | null
-  recipientInputValue: string
-  allCW20Denoms: Record<string, any>
-  allERC20Denoms: Record<string, any>
-  addressWarningElementError: ReactElement
-  showNameServiceResults: boolean
-  compassEvmToSeiMapping: Record<string, string>
-  compassSeiToEvmMapping: Record<string, string>
+  selectedToken: Token | null;
+  recipientInputValue: string;
+  allCW20Denoms: Record<string, any>;
+  allERC20Denoms: Record<string, any>;
+  addressWarningElementError: ReactElement;
+  showNameServiceResults: boolean;
+  compassEvmToSeiMapping: Record<string, string>;
+  compassSeiToEvmMapping: Record<string, string>;
 
-  sendActiveChain: SupportedChain
-  sendSelectedNetwork: 'mainnet' | 'testnet'
-  setHasToUsePointerLogic: React.Dispatch<React.SetStateAction<boolean>>
-  setPointerAddress: React.Dispatch<React.SetStateAction<string>>
-  setHasToUseCw20PointerLogic: React.Dispatch<React.SetStateAction<boolean>>
-  setSelectedToken: React.Dispatch<React.SetStateAction<Token | null>>
-}
+  sendActiveChain: SupportedChain;
+  sendSelectedNetwork: 'mainnet' | 'testnet';
+  setHasToUsePointerLogic: React.Dispatch<React.SetStateAction<boolean>>;
+  setPointerAddress: React.Dispatch<React.SetStateAction<string>>;
+  setHasToUseCw20PointerLogic: React.Dispatch<React.SetStateAction<boolean>>;
+  setSelectedToken: React.Dispatch<React.SetStateAction<Token | null>>;
+};
 
 export function useCheckAddressError({
   setAssociated0xAddress,
@@ -80,30 +80,30 @@ export function useCheckAddressError({
   setHasToUseCw20PointerLogic,
   setSelectedToken,
 }: UseCheckAddressErrorParams) {
-  const { chains } = useChainsStore()
-  const walletAddresses = useGetWalletAddresses()
-  const { evmJsonRpc } = useChainApis(sendActiveChain, sendSelectedNetwork)
+  const { chains } = useChainsStore();
+  const walletAddresses = useGetWalletAddresses();
+  const { evmJsonRpc } = useChainApis(sendActiveChain, sendSelectedNetwork);
 
-  const currentWalletAddress = useAddress()
-  const activeWallet = useActiveWallet()
-  const isSeiEvmChain = useIsSeiEvmChain()
-  const isBtcTx = BTC_CHAINS.includes(sendActiveChain)
-  const isAptosTx = isAptosChain(sendActiveChain)
+  const currentWalletAddress = useAddress();
+  const activeWallet = useActiveWallet();
+  const isSeiEvmChain = useIsSeiEvmChain();
+  const isBtcTx = BTC_CHAINS.includes(sendActiveChain);
+  const isAptosTx = isAptosChain(sendActiveChain);
 
-  const { addressLinkState } = useSeiLinkedAddressState()
+  const { addressLinkState } = useSeiLinkedAddressState();
 
   const isErc20token = useMemo(() => {
-    return isERC20Token(Object.keys(allERC20Denoms), selectedToken?.coinMinimalDenom ?? '')
-  }, [allERC20Denoms, selectedToken?.coinMinimalDenom])
+    return isERC20Token(Object.keys(allERC20Denoms), selectedToken?.coinMinimalDenom ?? '');
+  }, [allERC20Denoms, selectedToken?.coinMinimalDenom]);
 
   /**
    * Check Has To Use Pointer Logic
    */
   const checkHasToUsePointerLogic = useCallback(async () => {
-    setHasToUsePointerLogic(false)
+    setHasToUsePointerLogic(false);
 
     if (selectedToken?.ibcDenom) {
-      return false
+      return false;
     }
 
     const [hasToUsePointerLogic, pointerAddress, errorMsg] = await checkToUsePointerLogic(
@@ -111,29 +111,29 @@ export function useCheckAddressError({
       Object.keys(allCW20Denoms),
       compassEvmToSeiMapping,
       compassSeiToEvmMapping,
-    )
+    );
 
     if (errorMsg) {
-      setAddressError(errorMsg)
-      return true
+      setAddressError(errorMsg);
+      return true;
     }
 
     if (hasToUsePointerLogic) {
-      setHasToUsePointerLogic(true)
-      setPointerAddress(pointerAddress)
-      return true
+      setHasToUsePointerLogic(true);
+      setPointerAddress(pointerAddress);
+      return true;
     }
 
-    return false
+    return false;
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allCW20Denoms, selectedToken?.coinMinimalDenom])
+  }, [allCW20Denoms, selectedToken?.coinMinimalDenom]);
 
   /**
    * Check Has To Use CW-20 Pointer Logic
    */
   const checkHasToUseCw20PointerLogic = useCallback(async () => {
-    setHasToUseCw20PointerLogic(false)
+    setHasToUseCw20PointerLogic(false);
 
     const [hasToUseCw20PointerLogic, cw20PointerAddress] = await checkToUsePointerLogic(
       selectedToken?.coinMinimalDenom ?? '',
@@ -141,80 +141,72 @@ export function useCheckAddressError({
       compassEvmToSeiMapping,
       compassSeiToEvmMapping,
       'CW20',
-    )
+    );
 
     if (hasToUseCw20PointerLogic) {
-      setHasToUseCw20PointerLogic(true)
-      setAddressWarning(INITIAL_ADDRESS_WARNING)
-      setFetchAccountDetailsData(undefined)
+      setHasToUseCw20PointerLogic(true);
+      setAddressWarning(INITIAL_ADDRESS_WARNING);
+      setFetchAccountDetailsData(undefined);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setSelectedToken((prev: any) => {
         return {
           ...(prev ?? {}),
           coinMinimalDenom: cw20PointerAddress,
-        }
-      })
+        };
+      });
     } else {
-      await fetchAccountDetails(recipientInputValue)
+      await fetchAccountDetails(recipientInputValue);
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    selectedToken?.coinMinimalDenom,
-    compassEvmToSeiMapping,
-    compassSeiToEvmMapping,
-    recipientInputValue,
-  ])
+  }, [selectedToken?.coinMinimalDenom, compassEvmToSeiMapping, compassSeiToEvmMapping, recipientInputValue]);
 
   /**
    * Check Bitcoin Address Error
    */
   const checkBitcoinAddressError = useCallback(() => {
-    const network = sendActiveChain === 'bitcoin' ? 'mainnet' : 'testnet'
-    const isValidAddress = isValidBtcAddress(recipientInputValue, network)
+    const network = sendActiveChain === 'bitcoin' ? 'mainnet' : 'testnet';
+    const isValidAddress = isValidBtcAddress(recipientInputValue, network);
     if (!isValidAddress) {
-      setAddressError('The entered address is invalid')
+      setAddressError('The entered address is invalid');
     } else {
-      setAddressError(undefined)
+      setAddressError(undefined);
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recipientInputValue, sendActiveChain])
+  }, [recipientInputValue, sendActiveChain]);
 
   /**
    * Check Sei Evm Cosmos Address
    */
   const checkSeiEvmCosmosAddress = useCallback(async () => {
-    if (
-      selectedToken?.isEvm &&
-      recipientInputValue.toLowerCase() === walletAddresses[1]?.toLowerCase()
-    ) {
-      setAssociated0xAddress(walletAddresses[0])
-      return
+    if (selectedToken?.isEvm && recipientInputValue.toLowerCase() === walletAddresses[1]?.toLowerCase()) {
+      setAssociated0xAddress(walletAddresses[0]);
+      return;
     }
 
     if (recipientInputValue.length >= 42) {
       if (isErc20token) {
-        await checkHasToUseCw20PointerLogic()
+        await checkHasToUseCw20PointerLogic();
       } else if (selectedToken?.isEvm) {
-        await fetchAccountDetails(recipientInputValue)
+        await fetchAccountDetails(recipientInputValue);
       } else {
-        setAddressWarning(INITIAL_ADDRESS_WARNING)
-        setFetchAccountDetailsData(undefined)
+        setAddressWarning(INITIAL_ADDRESS_WARNING);
+        setFetchAccountDetailsData(undefined);
       }
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recipientInputValue, selectedToken?.isEvm, walletAddresses, isErc20token])
+  }, [recipientInputValue, selectedToken?.isEvm, walletAddresses, isErc20token]);
 
   /**
    * Fill Associated Address
    */
   const fillAssociatedAddress = useCallback(async () => {
-    const isAddressLinked = ['done', 'unknown'].includes(addressLinkState)
-    const isEvmToken = selectedToken?.isEvm
-    const isNativeSeiToken = selectedToken?.coinMinimalDenom === 'usei'
+    const isAddressLinked = ['done', 'unknown'].includes(addressLinkState);
+    const isEvmToken = selectedToken?.isEvm;
+    const isNativeSeiToken = selectedToken?.coinMinimalDenom === 'usei';
 
     /**
      * Case: Sending Native EVM Sei.
@@ -222,7 +214,7 @@ export function useCheckAddressError({
      * Do, a native EVM transaction.
      */
     if (isNativeSeiToken && isEvmToken) {
-      return
+      return;
     }
 
     /**
@@ -231,8 +223,8 @@ export function useCheckAddressError({
      * Do, a native EVM transaction.
      */
     if (isAddressLinked && isNativeSeiToken && !isEvmToken) {
-      setAssociated0xAddress(recipientInputValue)
-      return
+      setAssociated0xAddress(recipientInputValue);
+      return;
     }
 
     /**
@@ -244,9 +236,9 @@ export function useCheckAddressError({
       setAddressWarning({
         type: 'link',
         message: 'To send Sei tokens to EVM address, link your EVM and Sei addresses first.',
-      })
+      });
 
-      return
+      return;
     }
 
     /**
@@ -254,27 +246,21 @@ export function useCheckAddressError({
      */
 
     // Sending to own 0x address
-    if (
-      recipientInputValue.toLowerCase() === walletAddresses[0].toLowerCase() &&
-      walletAddresses[1]
-    ) {
-      setAssociatedSeiAddress(walletAddresses[1])
-      return
+    if (recipientInputValue.toLowerCase() === walletAddresses[0].toLowerCase() && walletAddresses[1]) {
+      setAssociatedSeiAddress(walletAddresses[1]);
+      return;
     }
 
     try {
-      const associatedSeiAddress = await SeiEvmTx.GetSeiAddressFromHex(
-        recipientInputValue,
-        evmJsonRpc,
-      )
+      const associatedSeiAddress = await SeiEvmTx.GetSeiAddressFromHex(recipientInputValue, evmJsonRpc);
 
       if (!isErc20token && !isNativeSeiToken) {
-        setAssociatedSeiAddress(associatedSeiAddress)
+        setAssociatedSeiAddress(associatedSeiAddress);
 
         setAddressWarning({
           type: 'erc20',
           message: `Recipient will receive tokens on associated Sei address: ${associatedSeiAddress}`,
-        })
+        });
       }
     } catch {
       //
@@ -289,29 +275,29 @@ export function useCheckAddressError({
     selectedToken?.isEvm,
     walletAddresses,
     isErc20token,
-  ])
+  ]);
 
   useEffect(() => {
-    ;(async function () {
-      setAssociatedSeiAddress('')
-      setAssociated0xAddress('')
+    (async function () {
+      setAssociatedSeiAddress('');
+      setAssociated0xAddress('');
 
       // Skip address check for Aptos
       if (isAptosTx) {
-        return
+        return;
       }
 
       // Bitcoin Address Check
       if (isBtcTx && recipientInputValue.length) {
-        checkBitcoinAddressError()
-        return
+        checkBitcoinAddressError();
+        return;
       }
 
       if (!isSeiEvmChain && currentWalletAddress === recipientInputValue) {
-        return
+        return;
       } else if (chains[sendActiveChain]?.evmOnlyChain && recipientInputValue.length) {
         if (!recipientInputValue.toLowerCase().startsWith('0x')) {
-          setAddressError('The entered address is invalid')
+          setAddressError('The entered address is invalid');
         }
       } else if (isSeiEvmChain && recipientInputValue.length && selectedToken) {
         if (
@@ -319,19 +305,19 @@ export function useCheckAddressError({
           activeWallet?.walletType === WALLETTYPE.LEDGER &&
           activeWallet.app === 'cosmos'
         ) {
-          setAddressError(SEI_EVM_LEDGER_ERROR_MESSAGE)
-          return
+          setAddressError(SEI_EVM_LEDGER_ERROR_MESSAGE);
+          return;
         }
 
         if (addressLinkState === 'loading') {
           setAddressWarning({
             type: 'link',
             message: addressWarningElementError,
-          })
+          });
 
-          return
+          return;
         } else {
-          setAddressWarning(INITIAL_ADDRESS_WARNING)
+          setAddressWarning(INITIAL_ADDRESS_WARNING);
         }
 
         /**
@@ -345,19 +331,19 @@ export function useCheckAddressError({
 
         // Sei Evm Cosmos Address Check
         if (!recipientInputValue.toLowerCase().startsWith('0x')) {
-          await checkSeiEvmCosmosAddress()
-          return
+          await checkSeiEvmCosmosAddress();
+          return;
         }
 
         // Sei Evm 0x Address Check
         if (recipientInputValue.toLowerCase().startsWith('0x')) {
-          const usePointerLogic = await checkHasToUsePointerLogic()
+          const usePointerLogic = await checkHasToUsePointerLogic();
 
           if (!usePointerLogic) {
-            await fillAssociatedAddress()
+            await fillAssociatedAddress();
           }
 
-          return
+          return;
         }
       } else if (
         recipientInputValue &&
@@ -365,12 +351,12 @@ export function useCheckAddressError({
         !isEthAddress(recipientInputValue) &&
         !showNameServiceResults
       ) {
-        setAddressError('The entered address is invalid')
+        setAddressError('The entered address is invalid');
       } else {
-        setAddressWarning(INITIAL_ADDRESS_WARNING)
-        setAddressError(undefined)
+        setAddressWarning(INITIAL_ADDRESS_WARNING);
+        setAddressError(undefined);
       }
-    })()
+    })();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -388,5 +374,5 @@ export function useCheckAddressError({
     isAptosTx,
     isBtcTx,
     chains,
-  ])
+  ]);
 }

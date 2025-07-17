@@ -1,53 +1,43 @@
-import { useAddress } from '@leapwallet/cosmos-wallet-hooks'
-import { bech32ToEthAddress } from '@leapwallet/cosmos-wallet-sdk'
-import { sha256 } from '@noble/hashes/sha256'
-import { utils } from '@noble/secp256k1'
-import { ArrowUp } from '@phosphor-icons/react'
-import { captureException } from '@sentry/react'
-import { Button } from 'components/ui/button'
-import { EventName } from 'config/analytics'
-import dayjs from 'dayjs'
-import { AnimatePresence, motion, Variants } from 'framer-motion'
-import { Images } from 'images'
-import mixpanel from 'mixpanel-browser'
-import React, { useEffect, useMemo, useState } from 'react'
-import CanvasConfetti from 'react-canvas-confetti/dist/presets/fireworks'
-import { createPortal } from 'react-dom'
-import { handleSidePanelClick } from 'utils/isSidePanel'
+import { useAddress } from '@leapwallet/cosmos-wallet-hooks';
+import { bech32ToEthAddress } from '@leapwallet/cosmos-wallet-sdk';
+import { sha256 } from '@noble/hashes/sha256';
+import { utils } from '@noble/secp256k1';
+import { ArrowUp } from '@phosphor-icons/react';
+import { captureException } from '@sentry/react';
+import { Button } from 'components/ui/button';
+import { EventName } from 'config/analytics';
+import dayjs from 'dayjs';
+import { AnimatePresence, motion, Variants } from 'framer-motion';
+import { Images } from 'images';
+import mixpanel from 'mixpanel-browser';
+import React, { useEffect, useMemo, useState } from 'react';
+import CanvasConfetti from 'react-canvas-confetti/dist/presets/fireworks';
+import { createPortal } from 'react-dom';
+import { handleSidePanelClick } from 'utils/isSidePanel';
 
-import { OnboardingLayout } from '../layout'
+import { OnboardingLayout } from '../layout';
 
-const ctrlKey =
-  typeof navigator !== 'undefined' && navigator.userAgent.includes('Mac') ? 'Cmd' : 'Ctrl'
+const ctrlKey = typeof navigator !== 'undefined' && navigator.userAgent.includes('Mac') ? 'Cmd' : 'Ctrl';
 
 export default function OnboardingSuccess() {
-  const activeWalletCosmosAddress = useAddress('cosmos')
-  const activeWalletEvmAddress = useAddress('ethereum')
-  const activeWalletSolanaAddress = useAddress('solana')
-  const activeWalletSuiAddress = useAddress('sui')
+  const activeWalletCosmosAddress = useAddress('cosmos');
+  const activeWalletEvmAddress = useAddress('ethereum');
+  const activeWalletSolanaAddress = useAddress('solana');
+  const activeWalletSuiAddress = useAddress('sui');
 
   const activeWalletAddress = useMemo(
-    () =>
-      activeWalletCosmosAddress ||
-      activeWalletEvmAddress ||
-      activeWalletSolanaAddress ||
-      activeWalletSuiAddress,
-    [
-      activeWalletCosmosAddress,
-      activeWalletEvmAddress,
-      activeWalletSolanaAddress,
-      activeWalletSuiAddress,
-    ],
-  )
+    () => activeWalletCosmosAddress || activeWalletEvmAddress || activeWalletSolanaAddress || activeWalletSuiAddress,
+    [activeWalletCosmosAddress, activeWalletEvmAddress, activeWalletSolanaAddress, activeWalletSuiAddress],
+  );
 
   useEffect(() => {
-    const currentTime = new Date().getTime()
-    const timeStarted1 = Number(localStorage.getItem('timeStarted1'))
-    const timeStarted2 = Number(localStorage.getItem('timeStarted2'))
-    const methodChosen = localStorage.getItem('onboardingMethodChosen')
+    const currentTime = new Date().getTime();
+    const timeStarted1 = Number(localStorage.getItem('timeStarted1'));
+    const timeStarted2 = Number(localStorage.getItem('timeStarted2'));
+    const methodChosen = localStorage.getItem('onboardingMethodChosen');
 
     if (timeStarted1 && timeStarted2 && activeWalletAddress) {
-      const hashedAddress = utils.bytesToHex(sha256(activeWalletAddress))
+      const hashedAddress = utils.bytesToHex(sha256(activeWalletAddress));
 
       try {
         mixpanel.track(EventName.OnboardingCompleted, {
@@ -56,16 +46,16 @@ export default function OnboardingSuccess() {
           timeTaken2: dayjs(currentTime).diff(timeStarted2, 'seconds'),
           wallet: hashedAddress,
           time: Date.now() / 1000,
-        })
+        });
       } catch (e) {
-        captureException(e)
+        captureException(e);
       }
 
-      localStorage.removeItem('timeStarted1')
-      localStorage.removeItem('timeStarted2')
-      localStorage.removeItem('onboardingMethodChosen')
+      localStorage.removeItem('timeStarted1');
+      localStorage.removeItem('timeStarted2');
+      localStorage.removeItem('onboardingMethodChosen');
     }
-  }, [activeWalletAddress])
+  }, [activeWalletAddress]);
 
   return (
     <>
@@ -108,14 +98,14 @@ export default function OnboardingSuccess() {
         <Button
           className='w-full'
           onClick={() => {
-            handleSidePanelClick('https://app.leapwallet.io')
+            handleSidePanelClick('https://app.leapwallet.io');
           }}
         >
           Get started
         </Button>
       </OnboardingLayout>
     </>
-  )
+  );
 }
 
 const Confetti = () => {
@@ -125,23 +115,23 @@ const Confetti = () => {
       onInit={({ conductor }) => {
         conductor.run({
           speed: 1,
-        })
+        });
         setTimeout(() => {
-          conductor.stop()
-        }, 5_000)
+          conductor.stop();
+        }, 5_000);
       }}
       globalOptions={{
         useWorker: true,
         resize: true,
       }}
     />
-  )
-}
+  );
+};
 
 const transition = {
   duration: 0.3,
   ease: 'easeInOut',
-}
+};
 
 const pinVariants: Variants = {
   show: {
@@ -152,19 +142,19 @@ const pinVariants: Variants = {
     opacity: 0,
     y: -10,
   },
-}
+};
 
 const PinButton = () => {
-  const [isPinned, setIsPinned] = useState(true)
+  const [isPinned, setIsPinned] = useState(true);
 
   useEffect(() => {
     const checkPinned = setInterval(async () => {
-      const userSettings = await chrome.action.getUserSettings()
-      setIsPinned(userSettings?.isOnToolbar)
-    }, 2000)
+      const userSettings = await chrome.action.getUserSettings();
+      setIsPinned(userSettings?.isOnToolbar);
+    }, 2000);
 
-    return () => clearInterval(checkPinned)
-  }, [])
+    return () => clearInterval(checkPinned);
+  }, []);
 
   return (
     <AnimatePresence>
@@ -185,5 +175,5 @@ const PinButton = () => {
         </motion.div>
       )}
     </AnimatePresence>
-  )
-}
+  );
+};

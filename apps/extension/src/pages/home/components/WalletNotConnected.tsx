@@ -1,27 +1,27 @@
-import { useGetChains } from '@leapwallet/cosmos-wallet-hooks'
-import classNames from 'classnames'
-import { Button } from 'components/ui/button'
-import { useActiveChain } from 'hooks/settings/useActiveChain'
-import { WalletIcon } from 'icons/wallet-icon'
-import React, { useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { closeSidePanel } from 'utils/closeSidePanel'
-import { getLedgerEnabledEvmChainsKey } from 'utils/getLedgerEnabledEvmChains'
-import { isSidePanel } from 'utils/isSidePanel'
-import Browser from 'webextension-polyfill'
+import { useGetChains } from '@leapwallet/cosmos-wallet-hooks';
+import classNames from 'classnames';
+import { Button } from 'components/ui/button';
+import { useActiveChain } from 'hooks/settings/useActiveChain';
+import { WalletIcon } from 'icons/wallet-icon';
+import React, { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { closeSidePanel } from 'utils/closeSidePanel';
+import { getLedgerEnabledEvmChainsKey } from 'utils/getLedgerEnabledEvmChains';
+import { isSidePanel } from 'utils/isSidePanel';
+import Browser from 'webextension-polyfill';
 
 export function WalletNotConnected({ visible }: { visible: boolean }) {
-  const navigate = useNavigate()
-  const activeChain = useActiveChain()
-  const chains = useGetChains()
+  const navigate = useNavigate();
+  const activeChain = useActiveChain();
+  const chains = useGetChains();
 
   const ledgerEnabledEvmChainsKeys = useMemo(() => {
-    return getLedgerEnabledEvmChainsKey(Object.values(chains))
-  }, [chains])
+    return getLedgerEnabledEvmChainsKey(Object.values(chains));
+  }, [chains]);
 
   const ledgerApp = useMemo(() => {
-    return ledgerEnabledEvmChainsKeys.includes(activeChain) ? 'EVM' : 'Cosmos'
-  }, [activeChain, ledgerEnabledEvmChainsKeys])
+    return ledgerEnabledEvmChainsKeys.includes(activeChain) ? 'EVM' : 'Cosmos';
+  }, [activeChain, ledgerEnabledEvmChainsKeys]);
 
   return (
     <div
@@ -35,9 +35,7 @@ export function WalletNotConnected({ visible }: { visible: boolean }) {
             <WalletIcon className='text-foreground' size={24} />
           </div>
           <div className='text-center gap-3 flex flex-col justify-end items-center'>
-            <div className='!leading-[24px] font-bold text-foreground text-[18px]'>
-              Wallet not connected
-            </div>
+            <div className='!leading-[24px] font-bold text-foreground text-[18px]'>Wallet not connected</div>
             <div className='!leading-[16px] text-xs text-secondary-800'>
               You need to import Ledger using {ledgerApp} app to use this chain.
             </div>
@@ -46,12 +44,12 @@ export function WalletNotConnected({ visible }: { visible: boolean }) {
         <Button
           className='w-[260px] h-[44px] text-sm !leading-[20px] text-foreground mt-8'
           onClick={() => {
-            const views = Browser.extension.getViews({ type: 'popup' })
+            const views = Browser.extension.getViews({ type: 'popup' });
             if (views.length === 0 && !isSidePanel()) {
-              navigate(`/importLedger?app=${ledgerApp}`)
+              navigate(`/importLedger?app=${ledgerApp}`);
             } else {
-              window.open(Browser.runtime.getURL(`index.html#/importLedger?app=${ledgerApp}`))
-              closeSidePanel()
+              window.open(Browser.runtime.getURL(`index.html#/importLedger?app=${ledgerApp}`));
+              closeSidePanel();
             }
           }}
         >
@@ -59,5 +57,5 @@ export function WalletNotConnected({ visible }: { visible: boolean }) {
         </Button>
       </div>
     </div>
-  )
+  );
 }

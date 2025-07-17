@@ -1,44 +1,39 @@
-import {
-  getMayaTxFee,
-  getThorChainTxFee,
-  useChainApis,
-  useformatCurrency,
-} from '@leapwallet/cosmos-wallet-hooks'
-import BigNumber from 'bignumber.js'
-import { useSendContext } from 'pages/send/context'
-import React, { useEffect, useState } from 'react'
+import { getMayaTxFee, getThorChainTxFee, useChainApis, useformatCurrency } from '@leapwallet/cosmos-wallet-hooks';
+import BigNumber from 'bignumber.js';
+import { useSendContext } from 'pages/send/context';
+import React, { useEffect, useState } from 'react';
 
 export function FixedFee() {
-  const [fee, setFee] = useState(new BigNumber(1))
-  const [formatCurrency] = useformatCurrency()
+  const [fee, setFee] = useState(new BigNumber(1));
+  const [formatCurrency] = useformatCurrency();
 
   const {
     feeDenom,
     feeTokenFiatValue,
     sendActiveChain: sourceChain,
     sendSelectedNetwork: sourceNetwork,
-  } = useSendContext()
-  const { lcdUrl } = useChainApis(sourceChain, sourceNetwork)
+  } = useSendContext();
+  const { lcdUrl } = useChainApis(sourceChain, sourceNetwork);
 
   useEffect(() => {
-    ;(async function () {
+    (async function () {
       switch (sourceChain) {
         case 'mayachain': {
-          const fee = await getMayaTxFee(lcdUrl ?? '')
-          setFee(new BigNumber(fee).div(10 ** feeDenom.coinDecimals))
+          const fee = await getMayaTxFee(lcdUrl ?? '');
+          setFee(new BigNumber(fee).div(10 ** feeDenom.coinDecimals));
 
-          break
+          break;
         }
 
         case 'thorchain': {
-          const fee = await getThorChainTxFee(lcdUrl ?? '')
-          setFee(new BigNumber(fee).div(10 ** feeDenom.coinDecimals))
+          const fee = await getThorChainTxFee(lcdUrl ?? '');
+          setFee(new BigNumber(fee).div(10 ** feeDenom.coinDecimals));
 
-          break
+          break;
         }
       }
-    })()
-  }, [feeDenom.coinDecimals, lcdUrl, sourceChain])
+    })();
+  }, [feeDenom.coinDecimals, lcdUrl, sourceChain]);
 
   return (
     <div className='flex items-center justify-center text-gray-600 dark:text-gray-400'>
@@ -50,5 +45,5 @@ export function FixedFee() {
         {feeTokenFiatValue ? `(${formatCurrency(fee.multipliedBy(feeTokenFiatValue))})` : null}
       </p>
     </div>
-  )
+  );
 }

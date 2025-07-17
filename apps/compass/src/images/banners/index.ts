@@ -1,3 +1,3 @@
-import welcomeSeiV2Banner from './welcome-sei-v2.png'
+import welcomeSeiV2Banner from './welcome-sei-v2.png';
 
-export { welcomeSeiV2Banner }
+export { welcomeSeiV2Banner };

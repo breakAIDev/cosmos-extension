@@ -1,11 +1,11 @@
-import { RouteAggregator } from '@leapwallet/elements-hooks'
-import { TransferAssetRelease } from '@skip-go/client'
-import { useCallback } from 'react'
-import { SourceChain, SwapTxnStatus, TransferSequence } from 'types/swap'
+import { RouteAggregator } from '@leapwallet/elements-hooks';
+import { TransferAssetRelease } from '@skip-go/client';
+import { useCallback } from 'react';
+import { SourceChain, SwapTxnStatus, TransferSequence } from 'types/swap';
 
-import { RoutingInfo } from '../../useSwapsTx'
-import { usePollMosaicTx } from './usePollMosaicTx'
-import { usePollSkipTx } from './usePollSkipTx'
+import { RoutingInfo } from '../../useSwapsTx';
+import { usePollMosaicTx } from './usePollMosaicTx';
+import { usePollSkipTx } from './usePollSkipTx';
 
 export function usePollTx(
   setTrackingInSync: (value: boolean) => void,
@@ -28,7 +28,7 @@ export function usePollTx(
     handleTxError,
     refetchSourceBalances,
     refetchDestinationBalances,
-  )
+  );
 
   const pollMosaicTx = usePollMosaicTx(
     setTrackingInSync,
@@ -37,7 +37,7 @@ export function usePollTx(
     handleTxError,
     refetchSourceBalances,
     refetchDestinationBalances,
-  )
+  );
 
   const pollTx = useCallback(
     async ({
@@ -47,20 +47,20 @@ export function usePollTx(
       messageChainId,
       routingInfo,
     }: {
-      txHash: string
-      messageChain: SourceChain
-      messageIndex: number
-      messageChainId: string
-      routingInfo: RoutingInfo
+      txHash: string;
+      messageChain: SourceChain;
+      messageIndex: number;
+      messageChainId: string;
+      routingInfo: RoutingInfo;
     }) => {
       if (routingInfo.aggregator === RouteAggregator.MOSAIC) {
-        await pollMosaicTx({ txHash, messageIndex, messageChain, routingInfo })
-        return
+        await pollMosaicTx({ txHash, messageIndex, messageChain, routingInfo });
+        return;
       }
-      await pollSkipTx({ txHash, messageIndex, messageChain, messageChainId, routingInfo })
+      await pollSkipTx({ txHash, messageIndex, messageChain, messageChainId, routingInfo });
     },
     [pollMosaicTx, pollSkipTx],
-  )
+  );
 
-  return pollTx
+  return pollTx;
 }

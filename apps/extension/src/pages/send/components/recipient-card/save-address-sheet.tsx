@@ -1,4 +1,4 @@
-import { SelectedAddress, useAddressPrefixes, useGetChains } from '@leapwallet/cosmos-wallet-hooks'
+import { SelectedAddress, useAddressPrefixes, useGetChains } from '@leapwallet/cosmos-wallet-hooks';
 import {
   getBlockChainFromAddress,
   isAptosAddress,
@@ -8,35 +8,35 @@ import {
   isSolanaChain,
   isValidAddress,
   SupportedChain,
-} from '@leapwallet/cosmos-wallet-sdk'
-import { Plus, TrashSimple } from '@phosphor-icons/react'
-import { bech32 } from 'bech32'
-import { CustomCheckbox } from 'components/custom-checkbox'
-import { LoaderAnimation } from 'components/loader/Loader'
-import BottomModal from 'components/new-bottom-modal/index'
-import Text from 'components/text'
-import { Button } from 'components/ui/button'
-import { useActiveChain } from 'hooks/settings/useActiveChain'
-import { useContacts } from 'hooks/useContacts'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import { Images } from 'images'
-import React, { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react'
-import { Colors } from 'theme/colors'
-import { AddressBook } from 'utils/addressbook'
+} from '@leapwallet/cosmos-wallet-sdk';
+import { Plus, TrashSimple } from '@phosphor-icons/react';
+import { bech32 } from 'bech32';
+import { CustomCheckbox } from 'components/custom-checkbox';
+import { LoaderAnimation } from 'components/loader/Loader';
+import BottomModal from 'components/new-bottom-modal/index';
+import Text from 'components/text';
+import { Button } from 'components/ui/button';
+import { useActiveChain } from 'hooks/settings/useActiveChain';
+import { useContacts } from 'hooks/useContacts';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { Images } from 'images';
+import React, { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { Colors } from 'theme/colors';
+import { AddressBook } from 'utils/addressbook';
 
-import { SendContextType, useSendContext } from '../../context'
+import { SendContextType, useSendContext } from '../../context';
 
 type SaveAddressSheetProps = {
-  title?: string
-  isOpen: boolean
-  address: string
-  ethAddress?: string
-  sendActiveChain?: SupportedChain
-  onClose: () => void
+  title?: string;
+  isOpen: boolean;
+  address: string;
+  ethAddress?: string;
+  sendActiveChain?: SupportedChain;
+  onClose: () => void;
   // eslint-disable-next-line no-unused-vars
-  onSave?: (s: SelectedAddress) => void
-  showDeleteBtn?: boolean
-}
+  onSave?: (s: SelectedAddress) => void;
+  showDeleteBtn?: boolean;
+};
 
 export default function SaveAddressSheet({
   isOpen,
@@ -47,84 +47,79 @@ export default function SaveAddressSheet({
   sendActiveChain,
   showDeleteBtn,
 }: SaveAddressSheetProps) {
-  const [memo, setMemo] = useState<string>('')
-  const [name, setName] = useState<string>('')
-  const [emoji, setEmoji] = useState<number>(1)
-  const [saveAsCEX, setSaveAsCEX] = useState<boolean>(false)
-  const [addressError, setAddressError] = useState('')
-  const [nameError, setNameError] = useState('')
-  const [addressValue, setAddressValue] = useState('')
+  const [memo, setMemo] = useState<string>('');
+  const [name, setName] = useState<string>('');
+  const [emoji, setEmoji] = useState<number>(1);
+  const [saveAsCEX, setSaveAsCEX] = useState<boolean>(false);
+  const [addressError, setAddressError] = useState('');
+  const [nameError, setNameError] = useState('');
+  const [addressValue, setAddressValue] = useState('');
 
-  const [isSaving, setIsSaving] = useState<boolean>(false)
-  const { setMemo: setNewMemo, setSelectedAddress } = useSendContext() as SendContextType
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const { setMemo: setNewMemo, setSelectedAddress } = useSendContext() as SendContextType;
 
-  const existingContact = AddressBook.useGetContact(address)
-  const { contacts: savedContacts, loading: savedContactsLoading } = useContacts()
-  const addressPrefixes = useAddressPrefixes()
-  const defaultTokenLogo = useDefaultTokenLogo()
-  const enterNameRef = useRef<HTMLInputElement | null>(null)
+  const existingContact = AddressBook.useGetContact(address);
+  const { contacts: savedContacts, loading: savedContactsLoading } = useContacts();
+  const addressPrefixes = useAddressPrefixes();
+  const defaultTokenLogo = useDefaultTokenLogo();
+  const enterNameRef = useRef<HTMLInputElement | null>(null);
 
-  const chains = useGetChains()
-  const _activeChain = useActiveChain()
+  const chains = useGetChains();
+  const _activeChain = useActiveChain();
 
   const activeChain = useMemo(() => {
-    return sendActiveChain ?? _activeChain
-  }, [sendActiveChain, _activeChain])
+    return sendActiveChain ?? _activeChain;
+  }, [sendActiveChain, _activeChain]);
 
   const chain = useMemo(() => {
     try {
-      let chain: SupportedChain = 'cosmos'
+      let chain: SupportedChain = 'cosmos';
       if (isAptosAddress(address)) {
-        chain = 'movement'
+        chain = 'movement';
       } else if (isEthAddress(address)) {
-        chain = 'ethereum'
+        chain = 'ethereum';
       } else if (address.startsWith('tb1q')) {
-        chain = 'bitcoinSignet'
+        chain = 'bitcoinSignet';
       } else if (address.startsWith('bc1q')) {
-        chain = 'bitcoin'
+        chain = 'bitcoin';
       } else {
-        const { prefix } = bech32.decode(address)
-        chain = addressPrefixes[prefix] as SupportedChain
+        const { prefix } = bech32.decode(address);
+        chain = addressPrefixes[prefix] as SupportedChain;
       }
-      return chain
+      return chain;
     } catch (e) {
       if (isSolanaAddress(address)) {
-        return 'solana'
+        return 'solana';
       }
-      return 'cosmos'
+      return 'cosmos';
     }
-  }, [address, addressPrefixes])
+  }, [address, addressPrefixes]);
 
   useEffect(() => {
     if (existingContact) {
-      setName(existingContact.name)
-      setEmoji(existingContact.emoji)
-      setMemo(existingContact.memo ?? '')
-      setSaveAsCEX(existingContact?.saveAsCEX ?? false)
-      setAddressValue(existingContact.ethAddress || existingContact.address)
+      setName(existingContact.name);
+      setEmoji(existingContact.emoji);
+      setMemo(existingContact.memo ?? '');
+      setSaveAsCEX(existingContact?.saveAsCEX ?? false);
+      setAddressValue(existingContact.ethAddress || existingContact.address);
     }
-  }, [existingContact])
+  }, [existingContact]);
 
   useEffect(() => {
-    if (
-      isValidAddress(address) ||
-      isEthAddress(address) ||
-      isAptosAddress(address) ||
-      isSolanaAddress(address)
-    ) {
-      setAddressValue(address)
+    if (isValidAddress(address) || isEthAddress(address) || isAptosAddress(address) || isSolanaAddress(address)) {
+      setAddressValue(address);
     }
-  }, [address])
+  }, [address]);
 
   useEffect(() => {
     if (isOpen && enterNameRef.current) {
-      enterNameRef.current.focus()
+      enterNameRef.current.focus();
     }
-  }, [isOpen])
+  }, [isOpen]);
 
   const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
-    nameError && setNameError('')
-    const value = event.target.value
+    nameError && setNameError('');
+    const value = event.target.value;
 
     if (value.length < 24) {
       if (
@@ -135,21 +130,21 @@ export default function SaveAddressSheet({
             sCAddress !== address && name.trim().toLowerCase() === value.trim().toLowerCase(),
         )
       ) {
-        setNameError('Contact with same name already exists')
+        setNameError('Contact with same name already exists');
       } else {
         if (nameError === 'Contact with same name already exists') {
-          setNameError('')
+          setNameError('');
         }
       }
 
-      setName(value)
+      setName(value);
     }
-  }
+  };
 
   const handleAddressChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
-    addressError && setAddressError('')
-    const value = event.target.value
-    setAddressValue(value)
+    addressError && setAddressError('');
+    const value = event.target.value;
+    setAddressValue(value);
     if (
       value.length > 0 &&
       !isValidAddress(value) &&
@@ -157,24 +152,24 @@ export default function SaveAddressSheet({
       !isAptosAddress(value) &&
       !isSolanaAddress(value)
     ) {
-      setAddressError('Invalid address')
-      return
+      setAddressError('Invalid address');
+      return;
     }
     if (Object.values(savedContacts).some(({ address: sCAddress }) => sCAddress === value)) {
       if (value !== (existingContact?.ethAddress || existingContact?.address)) {
-        setAddressError('Contact with same address already exists')
-        return
+        setAddressError('Contact with same address already exists');
+        return;
       }
     }
-  }
+  };
 
   const handleSubmit = async () => {
     if (addressError || nameError) {
-      return
+      return;
     }
 
     if (name && addressValue && !isSaving) {
-      setIsSaving(true)
+      setIsSaving(true);
       await AddressBook.save({
         address: addressValue,
         blockchain: chain,
@@ -183,9 +178,9 @@ export default function SaveAddressSheet({
         memo: memo,
         ethAddress,
         saveAsCEX: saveAsCEX,
-      })
+      });
 
-      setNewMemo(memo)
+      setNewMemo(memo);
       onSave?.({
         ethAddress,
         address: addressValue,
@@ -195,31 +190,31 @@ export default function SaveAddressSheet({
         avatarIcon: '',
         chainName: chains[chain]?.chainName,
         selectionType: 'saved',
-      })
-      onClose()
-      setIsSaving(false)
-      setAddressError('')
-      setNameError('')
-      setAddressValue('')
-      setName('')
-      setMemo('')
-      setSaveAsCEX(false)
+      });
+      onClose();
+      setIsSaving(false);
+      setAddressError('');
+      setNameError('');
+      setAddressValue('');
+      setName('');
+      setMemo('');
+      setSaveAsCEX(false);
     }
-  }
+  };
 
   const handleDelete = async () => {
     if (existingContact?.ethAddress || existingContact?.address) {
-      setIsSaving(true)
-      await AddressBook.removeEntry(existingContact?.ethAddress || existingContact?.address)
-      setSelectedAddress(null)
-      setName('')
-      setMemo('')
-      setSaveAsCEX(false)
-      setAddressValue('')
-      setIsSaving(false)
-      onClose()
+      setIsSaving(true);
+      await AddressBook.removeEntry(existingContact?.ethAddress || existingContact?.address);
+      setSelectedAddress(null);
+      setName('');
+      setMemo('');
+      setSaveAsCEX(false);
+      setAddressValue('');
+      setIsSaving(false);
+      onClose();
     }
-  }
+  };
 
   return (
     <BottomModal
@@ -243,8 +238,8 @@ export default function SaveAddressSheet({
       <form
         className='flex flex-col items-center w-full gap-y-4'
         onSubmit={(event) => {
-          event.preventDefault()
-          handleSubmit()
+          event.preventDefault();
+          handleSubmit();
         }}
       >
         <div className='flex flex-col gap-y-5 w-full items-center'>
@@ -279,11 +274,7 @@ export default function SaveAddressSheet({
                 <Plus size={20} className='text-muted-foreground p-0.5' />
               ) : (
                 <div onClick={() => setMemo('')}>
-                  <Text
-                    size='xs'
-                    color='text-muted-foreground'
-                    className=' font-bold cursor-pointer ml-2'
-                  >
+                  <Text size='xs' color='text-muted-foreground' className=' font-bold cursor-pointer ml-2'>
                     Clear
                   </Text>
                 </div>
@@ -300,27 +291,18 @@ export default function SaveAddressSheet({
           ) : (
             <Button
               className='w-full mt-3'
-              disabled={
-                !name ||
-                !addressValue ||
-                !!addressError ||
-                !!nameError ||
-                (saveAsCEX && memo.length === 0)
-              }
+              disabled={!name || !addressValue || !!addressError || !!nameError || (saveAsCEX && memo.length === 0)}
               title='Save contact'
             >
               Save contact
             </Button>
           )}
           <div className='flex gap-1 w-full justify-center'>
-            <CustomCheckbox
-              checked={saveAsCEX}
-              onClick={() => setSaveAsCEX((prevValue) => !prevValue)}
-            />
+            <CustomCheckbox checked={saveAsCEX} onClick={() => setSaveAsCEX((prevValue) => !prevValue)} />
             <p className='text-sm font-medium text-accent-green'>Save as centralized exchange</p>
           </div>
         </div>
       </form>
     </BottomModal>
-  )
+  );
 }

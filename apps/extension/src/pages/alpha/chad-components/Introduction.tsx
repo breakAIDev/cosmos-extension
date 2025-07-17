@@ -1,23 +1,17 @@
-import Text from 'components/text'
-import { ButtonName, EventName, PageName } from 'config/analytics'
-import { Images } from 'images'
-import React from 'react'
-import { mixpanelTrack } from 'utils/tracking'
+import Text from 'components/text';
+import { ButtonName, EventName, PageName } from 'config/analytics';
+import { Images } from 'images';
+import React from 'react';
+import { mixpanelTrack } from 'utils/tracking';
 
-export function Introduction({
-  onJoinClick,
-  pageName,
-}: {
-  onJoinClick: () => void
-  pageName: PageName
-}) {
+export function Introduction({ onJoinClick, pageName }: { onJoinClick: () => void; pageName: PageName }) {
   const handleJoinClick = () => {
-    onJoinClick()
+    onJoinClick();
     mixpanelTrack(EventName.ButtonClick, {
       buttonName: ButtonName.JOIN_CHAD,
       ButtonPageName: pageName,
-    })
-  }
+    });
+  };
   return (
     <div className='pt-2 p-4 flex flex-col gap-2 items-center'>
       <img src={Images.Alpha.chadDefaultBanner} alt='FrogSad' className='mb-6' />
@@ -39,7 +33,7 @@ export function Introduction({
         Join the Chads
       </button>
     </div>
-  )
+  );
 }
 
 export function VerifyingEligibility() {
@@ -58,5 +52,5 @@ export function VerifyingEligibility() {
         </Text>
       </div>
     </div>
-  )
+  );
 }

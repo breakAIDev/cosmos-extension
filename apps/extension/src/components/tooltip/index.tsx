@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 
 export const Tooltip = ({ message }: { message: string }) => {
   return (
@@ -9,5 +9,5 @@ export const Tooltip = ({ message }: { message: string }) => {
       {message}
       <div className='tooltip-arrow' data-popper-arrow></div>
     </div>
-  )
-}
+  );
+};

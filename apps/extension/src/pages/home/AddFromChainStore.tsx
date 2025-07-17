@@ -1,75 +1,69 @@
-import { Key as WalletKey, useChainsStore } from '@leapwallet/cosmos-wallet-hooks'
-import { ChainInfo, sleep } from '@leapwallet/cosmos-wallet-sdk'
-import { Buttons, GenericCard, useTheme } from '@leapwallet/leap-ui'
-import { captureException } from '@sentry/react'
-import { Divider, KeyNew as Key, ValueNew as Value } from 'components/dapp'
-import { ErrorCard } from 'components/ErrorCard'
-import { InfoCard } from 'components/info-card'
-import { LoaderAnimation } from 'components/loader/Loader'
-import BottomModal from 'components/new-bottom-modal'
-import { Button } from 'components/ui/button'
-import { ButtonName, ButtonType, EventName } from 'config/analytics'
-import { BETA_CHAINS } from 'config/storage-keys'
-import { useSetActiveChain } from 'hooks/settings/useActiveChain'
-import useActiveWallet, { useUpdateKeyStore } from 'hooks/settings/useActiveWallet'
-import { useChainInfos } from 'hooks/useChainInfos'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import mixpanel from 'mixpanel-browser'
-import { observer } from 'mobx-react-lite'
-import React, { useCallback, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { chainTagsStore } from 'stores/chain-infos-store'
-import { rootStore } from 'stores/root-store'
-import { Colors } from 'theme/colors'
-import { imgOnError } from 'utils/imgOnError'
-import browser from 'webextension-polyfill'
+import { Key as WalletKey, useChainsStore } from '@leapwallet/cosmos-wallet-hooks';
+import { ChainInfo, sleep } from '@leapwallet/cosmos-wallet-sdk';
+import { Buttons, GenericCard, useTheme } from '@leapwallet/leap-ui';
+import { captureException } from '@sentry/react';
+import { Divider, KeyNew as Key, ValueNew as Value } from 'components/dapp';
+import { ErrorCard } from 'components/ErrorCard';
+import { InfoCard } from 'components/info-card';
+import { LoaderAnimation } from 'components/loader/Loader';
+import BottomModal from 'components/new-bottom-modal';
+import { Button } from 'components/ui/button';
+import { ButtonName, ButtonType, EventName } from 'config/analytics';
+import { BETA_CHAINS } from 'config/storage-keys';
+import { useSetActiveChain } from 'hooks/settings/useActiveChain';
+import useActiveWallet, { useUpdateKeyStore } from 'hooks/settings/useActiveWallet';
+import { useChainInfos } from 'hooks/useChainInfos';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import mixpanel from 'mixpanel-browser';
+import { observer } from 'mobx-react-lite';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { chainTagsStore } from 'stores/chain-infos-store';
+import { rootStore } from 'stores/root-store';
+import { Colors } from 'theme/colors';
+import { imgOnError } from 'utils/imgOnError';
+import browser from 'webextension-polyfill';
 
 type AddFromChainStoreProps = {
-  readonly isVisible: boolean
-  readonly onClose: VoidFunction
-  newAddChain: ChainInfo
-  skipUpdatingActiveChain?: boolean
-  successCallback?: () => void
-}
+  readonly isVisible: boolean;
+  readonly onClose: VoidFunction;
+  newAddChain: ChainInfo;
+  skipUpdatingActiveChain?: boolean;
+  successCallback?: () => void;
+};
 
 const AddFromChainStore = observer(
-  ({
-    isVisible,
-    onClose,
-    newAddChain,
-    skipUpdatingActiveChain,
-    successCallback,
-  }: AddFromChainStoreProps) => {
-    const [showMore, setShowMore] = useState(false)
-    const [isLoading, setIsLoading] = useState(false)
-    const [errors, setErrors] = useState<{ [key: string]: string }>({})
+  ({ isVisible, onClose, newAddChain, skipUpdatingActiveChain, successCallback }: AddFromChainStoreProps) => {
+    const [showMore, setShowMore] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
-    const defaultTokenLogo = useDefaultTokenLogo()
-    const setChains = useChainsStore((store) => store.setChains)
-    const updateKeyStore = useUpdateKeyStore()
-    const { activeWallet, setActiveWallet } = useActiveWallet()
-    const setActiveChain = useSetActiveChain()
-    const chainInfos = useChainInfos()
-    const navigate = useNavigate()
-    const { theme } = useTheme()
+    const defaultTokenLogo = useDefaultTokenLogo();
+    const setChains = useChainsStore((store) => store.setChains);
+    const updateKeyStore = useUpdateKeyStore();
+    const { activeWallet, setActiveWallet } = useActiveWallet();
+    const setActiveChain = useSetActiveChain();
+    const chainInfos = useChainInfos();
+    const navigate = useNavigate();
+    const { theme } = useTheme();
 
-    const isEvmChain = useMemo(() => !!newAddChain && 'evmOnlyChain' in newAddChain, [newAddChain])
+    const isEvmChain = useMemo(() => !!newAddChain && 'evmOnlyChain' in newAddChain, [newAddChain]);
 
     const networkUrl = useMemo(() => {
       if (!newAddChain) {
-        return
+        return;
       }
       if (isEvmChain) {
-        return newAddChain.apis?.evmJsonRpcTest ?? newAddChain.apis?.evmJsonRpc
+        return newAddChain.apis?.evmJsonRpcTest ?? newAddChain.apis?.evmJsonRpc;
       }
-      return newAddChain.apis?.restTest ?? newAddChain.apis?.rest
-    }, [isEvmChain, newAddChain])
+      return newAddChain.apis?.restTest ?? newAddChain.apis?.rest;
+    }, [isEvmChain, newAddChain]);
 
-    const newChainKey = newAddChain?.key ?? newAddChain?.chainName
+    const newChainKey = newAddChain?.key ?? newAddChain?.chainName;
 
     const handleCancel = useCallback(() => {
-      onClose()
-    }, [onClose])
+      onClose();
+    }, [onClose]);
 
     const onAddChain = async () => {
       try {
@@ -79,50 +73,45 @@ const AddFromChainStore = observer(
           redirectURL: '/home',
           addedChainName: newAddChain?.chainName,
           time: Date.now() / 1000,
-        })
+        });
       } catch (e) {
-        captureException(e)
+        captureException(e);
       }
 
-      setIsLoading(true)
-      setChains({ ...chainInfos, [newChainKey]: newAddChain })
-      rootStore.setChains({ ...chainInfos, [newChainKey]: newAddChain })
-      await sleep(500)
+      setIsLoading(true);
+      setChains({ ...chainInfos, [newChainKey]: newAddChain });
+      rootStore.setChains({ ...chainInfos, [newChainKey]: newAddChain });
+      await sleep(500);
 
       browser.storage.local.get([BETA_CHAINS]).then(async (resp) => {
         try {
-          const updatedKeystore = await updateKeyStore(
-            activeWallet as WalletKey,
-            newChainKey,
-            'UPDATE',
-            newAddChain,
-          )
-          let betaChains = resp?.[BETA_CHAINS]
-          betaChains = typeof betaChains === 'string' ? JSON.parse(betaChains) : {}
-          betaChains[newChainKey] = newAddChain
-          await browser.storage.local.set({ [BETA_CHAINS]: JSON.stringify(betaChains) })
+          const updatedKeystore = await updateKeyStore(activeWallet as WalletKey, newChainKey, 'UPDATE', newAddChain);
+          let betaChains = resp?.[BETA_CHAINS];
+          betaChains = typeof betaChains === 'string' ? JSON.parse(betaChains) : {};
+          betaChains[newChainKey] = newAddChain;
+          await browser.storage.local.set({ [BETA_CHAINS]: JSON.stringify(betaChains) });
 
           if (isEvmChain) {
-            chainTagsStore.setBetaChainTags(newAddChain.chainId, ['EVM'])
+            chainTagsStore.setBetaChainTags(newAddChain.chainId, ['EVM']);
           } else {
-            chainTagsStore.setBetaChainTags(newAddChain.chainId, ['Cosmos'])
+            chainTagsStore.setBetaChainTags(newAddChain.chainId, ['Cosmos']);
           }
 
           if (!skipUpdatingActiveChain) {
             if (activeWallet) {
-              await setActiveWallet(updatedKeystore[activeWallet.id] as WalletKey)
+              await setActiveWallet(updatedKeystore[activeWallet.id] as WalletKey);
             }
-            await setActiveChain(newChainKey, newAddChain)
-            navigate('/')
+            await setActiveChain(newChainKey, newAddChain);
+            navigate('/');
           }
-          successCallback?.()
+          successCallback?.();
         } catch (error) {
-          setErrors((s) => ({ ...s, submit: 'Unable to add chain' }))
+          setErrors((s) => ({ ...s, submit: 'Unable to add chain' }));
         } finally {
-          setIsLoading(false)
+          setIsLoading(false);
         }
-      })
-    }
+      });
+    };
 
     return (
       <BottomModal
@@ -237,8 +226,8 @@ const AddFromChainStore = observer(
           </Button>
         </div>
       </BottomModal>
-    )
+    );
   },
-)
+);
 
-export default AddFromChainStore
+export default AddFromChainStore;

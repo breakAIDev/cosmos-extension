@@ -1,12 +1,12 @@
-import { useSetIsCompassWallet } from '@leapwallet/cosmos-wallet-hooks'
-import { useEffect } from 'react'
+import { useSetIsCompassWallet } from '@leapwallet/cosmos-wallet-hooks';
+import { useEffect } from 'react';
 
 export function useInitIsCompassWallet() {
-  const setIsCompassWallet = useSetIsCompassWallet()
+  const setIsCompassWallet = useSetIsCompassWallet();
 
   useEffect(() => {
-    setIsCompassWallet(true)
+    setIsCompassWallet(true);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, []);
 }

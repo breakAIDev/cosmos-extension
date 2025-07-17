@@ -1,46 +1,46 @@
-import { useActiveChain } from '@leapwallet/cosmos-wallet-hooks'
-import { ChainTagsStore } from '@leapwallet/cosmos-wallet-store'
-import { CardDivider, Header, HeaderActionType } from '@leapwallet/leap-ui'
-import { CheckCircle } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import { TestnetAlertStrip } from 'components/alert-strip'
-import BottomModal from 'components/bottom-modal'
-import { EmptyCard } from 'components/empty-card'
-import PopupLayout from 'components/layout/popup-layout'
-import { LoaderAnimation } from 'components/loader/Loader'
-import GovCardSkeleton from 'components/Skeletons/GovCardSkeleton'
-import { SearchInput } from 'components/ui/input/search-input'
-import { useChainInfos } from 'hooks/useChainInfos'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import Sort from 'icons/sort'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import SelectChain from 'pages/home/SelectChain'
-import React, { Fragment, useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { isSidePanel } from 'utils/isSidePanel'
-import { sliceSearchWord } from 'utils/strings'
+import { useActiveChain } from '@leapwallet/cosmos-wallet-hooks';
+import { ChainTagsStore } from '@leapwallet/cosmos-wallet-store';
+import { CardDivider, Header, HeaderActionType } from '@leapwallet/leap-ui';
+import { CheckCircle } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import { TestnetAlertStrip } from 'components/alert-strip';
+import BottomModal from 'components/bottom-modal';
+import { EmptyCard } from 'components/empty-card';
+import PopupLayout from 'components/layout/popup-layout';
+import { LoaderAnimation } from 'components/loader/Loader';
+import GovCardSkeleton from 'components/Skeletons/GovCardSkeleton';
+import { SearchInput } from 'components/ui/input/search-input';
+import { useChainInfos } from 'hooks/useChainInfos';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import Sort from 'icons/sort';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import SelectChain from 'pages/home/SelectChain';
+import React, { Fragment, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { isSidePanel } from 'utils/isSidePanel';
+import { sliceSearchWord } from 'utils/strings';
 
-import { NtrnStatus } from './index'
-import { NtrnProposalStatus } from './NtrnStatus'
-import { getId, getStatus, getTitle } from './utils'
+import { NtrnStatus } from './index';
+import { NtrnProposalStatus } from './NtrnStatus';
+import { getId, getStatus, getTitle } from './utils';
 
 const FILTERS = [
   { key: 'all', label: 'All Proposals' },
   { key: NtrnProposalStatus.OPEN, label: 'In Progress' },
   { key: NtrnProposalStatus.EXECUTED, label: 'Executed' },
   { key: NtrnProposalStatus.REJECTED, label: 'Rejected' },
-]
+];
 
 type NtrnProposalListProps = {
-  onClick: (proposal: string) => void
+  onClick: (proposal: string) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  proposalList: any[]
-  proposalListStatus: 'success' | 'error' | 'loading' | 'fetching-more'
-  fetchMore: () => void
-  chainTagsStore: ChainTagsStore
-  shouldPreferFallback?: boolean
-}
+  proposalList: any[];
+  proposalListStatus: 'success' | 'error' | 'loading' | 'fetching-more';
+  fetchMore: () => void;
+  chainTagsStore: ChainTagsStore;
+  shouldPreferFallback?: boolean;
+};
 
 export const NtrnProposalList = observer(
   ({
@@ -51,34 +51,34 @@ export const NtrnProposalList = observer(
     fetchMore,
     chainTagsStore,
   }: NtrnProposalListProps) => {
-    const [showChainSelector, setShowChainSelector] = useState(false)
-    const [showFilter, setShowFilter] = useState(false)
-    const [propFilter, setPropFilter] = useState<string>('')
-    const [filter, setFilter] = useState('all')
+    const [showChainSelector, setShowChainSelector] = useState(false);
+    const [showFilter, setShowFilter] = useState(false);
+    const [propFilter, setPropFilter] = useState<string>('');
+    const [filter, setFilter] = useState('all');
 
-    const chainInfos = useChainInfos()
-    const activeChain = useActiveChain()
-    const defaultTokenLogo = useDefaultTokenLogo()
-    const navigate = useNavigate()
+    const chainInfos = useChainInfos();
+    const activeChain = useActiveChain();
+    const defaultTokenLogo = useDefaultTokenLogo();
+    const navigate = useNavigate();
 
-    const loading = proposalListStatus === 'loading'
-    const activeChainInfo = chainInfos[activeChain]
+    const loading = proposalListStatus === 'loading';
+    const activeChainInfo = chainInfos[activeChain];
 
     const filteredProposalList = useMemo(() => {
       return _proposalList?.reduce((acc, curr) => {
         if (filter === 'all') {
-          if (!propFilter) acc.push(curr)
+          if (!propFilter) acc.push(curr);
           else if (
             getTitle(curr, shouldPreferFallback ?? false)
               .toLowerCase()
               .includes(propFilter) ||
             String(curr.id) === propFilter
           ) {
-            acc.push(curr)
+            acc.push(curr);
           }
         } else {
           if (!propFilter && getStatus(curr, shouldPreferFallback ?? false) === filter) {
-            acc.push(curr)
+            acc.push(curr);
           } else if (
             getStatus(curr, shouldPreferFallback ?? false) === filter &&
             (getTitle(curr, shouldPreferFallback ?? false)
@@ -86,32 +86,32 @@ export const NtrnProposalList = observer(
               .includes(propFilter) ||
               String(curr.id) === propFilter)
           ) {
-            acc.push(curr)
+            acc.push(curr);
           }
         }
 
-        return acc
-      }, [])
-    }, [_proposalList, filter, propFilter, shouldPreferFallback])
+        return acc;
+      }, []);
+    }, [_proposalList, filter, propFilter, shouldPreferFallback]);
 
     useEffect(() => {
-      const bottom = document.querySelector('#bottom')
-      if (!bottom || filteredProposalList?.length === 0 || proposalListStatus !== 'success') return
+      const bottom = document.querySelector('#bottom');
+      if (!bottom || filteredProposalList?.length === 0 || proposalListStatus !== 'success') return;
       const handleIntersection = (entries: IntersectionObserverEntry[]) => {
         if (entries[0].isIntersecting) {
-          fetchMore()
+          fetchMore();
         }
-      }
+      };
       const observer = new IntersectionObserver(handleIntersection, {
         root: null,
         rootMargin: '0px',
         threshold: 1.0,
-      })
-      observer.observe(bottom)
+      });
+      observer.observe(bottom);
       return () => {
-        observer.disconnect()
-      }
-    }, [fetchMore, filteredProposalList?.length, proposalListStatus])
+        observer.disconnect();
+      };
+    }, [fetchMore, filteredProposalList?.length, proposalListStatus]);
 
     return (
       <div className='relative w-full overflow-clip panel-height enclosing-panel'>
@@ -131,12 +131,8 @@ export const NtrnProposalList = observer(
           <TestnetAlertStrip />
 
           <div className='w-full flex flex-col pt-6 pb-2 px-7 '>
-            <div className='text-[28px] text-black-100 dark:text-white-100 font-bold'>
-              Proposals
-            </div>
-            <div className='text-sm text-gray-600 font-bold'>
-              List of proposals in {activeChain.toUpperCase()}
-            </div>
+            <div className='text-[28px] text-black-100 dark:text-white-100 font-bold'>Proposals</div>
+            <div className='text-sm text-gray-600 font-bold'>List of proposals in {activeChain.toUpperCase()}</div>
 
             <div className='flex items-center justify-between mt-6 mb-4'>
               <SearchInput
@@ -159,18 +155,12 @@ export const NtrnProposalList = observer(
           <div id='governance-list' className='pb-20 px-7'>
             <div className='rounded-2xl flex flex-col items-center w-full m-auto justify-center dark:bg-gray-900 bg-white-100'>
               {loading ? (
-                Array.from({ length: 5 }).map((_, index) => (
-                  <GovCardSkeleton key={index} isLast={index === 4} />
-                ))
+                Array.from({ length: 5 }).map((_, index) => <GovCardSkeleton key={index} isLast={index === 4} />)
               ) : (filteredProposalList?.length ?? 0) === 0 ? (
                 <EmptyCard
                   isRounded
                   subHeading={propFilter ? 'Please try again with something else' : ''}
-                  heading={
-                    propFilter
-                      ? 'No results for “' + sliceSearchWord(propFilter) + '”'
-                      : 'No Proposals'
-                  }
+                  heading={propFilter ? 'No results for “' + sliceSearchWord(propFilter) + '”' : 'No Proposals'}
                   src={Images.Misc.Explore}
                 />
               ) : (
@@ -194,9 +184,7 @@ export const NtrnProposalList = observer(
                               </div>
                               <div className='text-gray-600 dark:text-gray-200 text-xs'>
                                 #{getId(proposal, shouldPreferFallback ?? false)} ·{' '}
-                                <NtrnStatus
-                                  status={getStatus(proposal, shouldPreferFallback ?? false)}
-                                />
+                                <NtrnStatus status={getStatus(proposal, shouldPreferFallback ?? false)} />
                               </div>
                             </div>
                           </div>
@@ -206,7 +194,7 @@ export const NtrnProposalList = observer(
 
                       {index < filteredProposalList.length - 1 ? <CardDivider /> : null}
                     </div>
-                  )
+                  );
                 })
               )}
             </div>
@@ -234,14 +222,12 @@ export const NtrnProposalList = observer(
                 <button
                   className='flex items-center justify-between text-md font-bold p-4 w-full text-gray-800 dark:text-white-100'
                   onClick={() => {
-                    setFilter(_filter.key)
-                    setShowFilter(false)
+                    setFilter(_filter.key);
+                    setShowFilter(false);
                   }}
                 >
                   <span>{_filter.label}</span>
-                  {filter === _filter.key ? (
-                    <CheckCircle size={24} weight='fill' className='text-[#E18881]' />
-                  ) : null}
+                  {filter === _filter.key ? <CheckCircle size={24} weight='fill' className='text-[#E18881]' /> : null}
                 </button>
                 {index === FILTERS.length - 1 ? null : <CardDivider />}
               </Fragment>
@@ -249,6 +235,6 @@ export const NtrnProposalList = observer(
           </div>
         </BottomModal>
       </div>
-    )
+    );
   },
-)
+);

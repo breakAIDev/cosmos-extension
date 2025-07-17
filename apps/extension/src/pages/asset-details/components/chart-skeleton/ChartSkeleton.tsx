@@ -1,5 +1,5 @@
-import classNames from 'classnames'
-import React from 'react'
+import classNames from 'classnames';
+import React from 'react';
 
 export default function ChartSkeleton({ className }: { className?: string }) {
   return (
@@ -9,5 +9,5 @@ export default function ChartSkeleton({ className }: { className?: string }) {
         <div className='h-[28px] w-[324px]' />
       </div>
     </div>
-  )
+  );
 }

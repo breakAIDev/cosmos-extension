@@ -4,22 +4,18 @@ import {
   useActiveChain,
   useGetChains,
   useSelectedNetwork,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { Avatar } from '@leapwallet/leap-ui'
-import Text from 'components/text'
-import {
-  NameServiceResolveResult,
-  nameServices,
-  useNameServiceResolver,
-} from 'hooks/nameService/useNameService'
-import { useChainInfos } from 'hooks/useChainInfos'
-import { Images } from 'images'
-import { GenericLight } from 'images/logos'
-import React, { useMemo } from 'react'
-import Skeleton from 'react-loading-skeleton'
-import { AggregatedSupportedChain } from 'types/utility'
-import { AddressBook } from 'utils/addressbook'
-import { Bech32Address } from 'utils/bech32'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { Avatar } from '@leapwallet/leap-ui';
+import Text from 'components/text';
+import { NameServiceResolveResult, nameServices, useNameServiceResolver } from 'hooks/nameService/useNameService';
+import { useChainInfos } from 'hooks/useChainInfos';
+import { Images } from 'images';
+import { GenericLight } from 'images/logos';
+import React, { useMemo } from 'react';
+import Skeleton from 'react-loading-skeleton';
+import { AggregatedSupportedChain } from 'types/utility';
+import { AddressBook } from 'utils/addressbook';
+import { Bech32Address } from 'utils/bech32';
 
 const NameServiceItemSkeleton = () => {
   return (
@@ -38,20 +34,17 @@ const NameServiceItemSkeleton = () => {
         <Skeleton count={1} className='z-0' />
       </div>
     </div>
-  )
-}
+  );
+};
 
 type ContactsMatchListProps = {
-  contacts: AddressBook.SavedAddress[]
+  contacts: AddressBook.SavedAddress[];
   // eslint-disable-next-line no-unused-vars
-  handleContactSelect: (contact: SelectedAddress) => void
-}
+  handleContactSelect: (contact: SelectedAddress) => void;
+};
 
-export const ContactsMatchList: React.FC<ContactsMatchListProps> = ({
-  contacts,
-  handleContactSelect,
-}) => {
-  const chainInfos = useChainInfos()
+export const ContactsMatchList: React.FC<ContactsMatchListProps> = ({ contacts, handleContactSelect }) => {
+  const chainInfos = useChainInfos();
 
   return (
     <div className='mt-4'>
@@ -60,7 +53,7 @@ export const ContactsMatchList: React.FC<ContactsMatchListProps> = ({
       </Text>
       <ul className='list-none space-y-2 mt-2 max-h-[180px] overflow-y-auto'>
         {contacts.map((contact) => {
-          const chainImage = chainInfos[contact.blockchain].chainSymbolImageUrl
+          const chainImage = chainInfos[contact.blockchain].chainSymbolImageUrl;
 
           return (
             <li
@@ -77,15 +70,10 @@ export const ContactsMatchList: React.FC<ContactsMatchListProps> = ({
                   address: contact.address,
                   emoji: contact.emoji,
                   selectionType: 'saved',
-                })
+                });
               }}
             >
-              <Avatar
-                chainIcon={chainImage}
-                emoji={contact.emoji ?? 1}
-                size='sm'
-                className='mr-2'
-              />
+              <Avatar chainIcon={chainImage} emoji={contact.emoji ?? 1} size='sm' className='mr-2' />
               <div>
                 <Text size='md' color='text-gray-800 dark:text-gray-100'>
                   {contact.name}
@@ -95,37 +83,34 @@ export const ContactsMatchList: React.FC<ContactsMatchListProps> = ({
                 </Text>
               </div>
             </li>
-          )
+          );
         })}
       </ul>
     </div>
-  )
-}
+  );
+};
 
 type NameServiceMatchListProps = {
-  address: string
+  address: string;
   // eslint-disable-next-line no-unused-vars
-  handleContactSelect: (contact: SelectedAddress) => void
-}
+  handleContactSelect: (contact: SelectedAddress) => void;
+};
 
-export const NameServiceMatchList: React.FC<NameServiceMatchListProps> = ({
-  address,
-  handleContactSelect,
-}) => {
-  const network = useSelectedNetwork()
-  const chainInfos = useChainInfos()
-  const activeChain = useActiveChain() as AggregatedSupportedChain
-  const chains = useGetChains()
+export const NameServiceMatchList: React.FC<NameServiceMatchListProps> = ({ address, handleContactSelect }) => {
+  const network = useSelectedNetwork();
+  const chainInfos = useChainInfos();
+  const activeChain = useActiveChain() as AggregatedSupportedChain;
+  const chains = useGetChains();
 
-  const [isLoading, nameServiceResults] = useNameServiceResolver(address, network)
+  const [isLoading, nameServiceResults] = useNameServiceResolver(address, network);
 
   const resultsList: [string, NameServiceResolveResult | null][] = useMemo(() => {
-    const entries = Object.entries(nameServiceResults)
+    const entries = Object.entries(nameServiceResults);
 
-    return entries.filter(([, result]) => result !== null)
-  }, [nameServiceResults])
+    return entries.filter(([, result]) => result !== null);
+  }, [nameServiceResults]);
 
-  let anyResultsForCurrentChain = false
+  let anyResultsForCurrentChain = false;
 
   return (
     <div className='mt-4'>
@@ -138,9 +123,9 @@ export const NameServiceMatchList: React.FC<NameServiceMatchListProps> = ({
             <>
               <ul className='list-none space-y-2 mt-2 max-h-[180px] overflow-y-auto'>
                 {resultsList.map(([nameService, result]) => {
-                  const nameServiceImg = Images.Logos.getNameServiceLogo(nameService)
+                  const nameServiceImg = Images.Logos.getNameServiceLogo(nameService);
                   if (result && typeof result === 'string') {
-                    const chain = Bech32Address.getChainKey(result)
+                    const chain = Bech32Address.getChainKey(result);
                     return (
                       <MatchListItem
                         key={`${nameService}-${result}`}
@@ -150,9 +135,7 @@ export const NameServiceMatchList: React.FC<NameServiceMatchListProps> = ({
                         handleClick={() => {
                           handleContactSelect({
                             avatarIcon: nameServiceImg,
-                            chainIcon: chain
-                              ? chainInfos[chain].chainSymbolImageUrl ?? GenericLight
-                              : GenericLight,
+                            chainIcon: chain ? chainInfos[chain].chainSymbolImageUrl ?? GenericLight : GenericLight,
                             chainName: chain ? chainInfos[chain].chainName : 'Chain',
                             name: address,
                             address: result,
@@ -162,34 +145,32 @@ export const NameServiceMatchList: React.FC<NameServiceMatchListProps> = ({
                               nameService: nameServices[nameService],
                               chain_id: chain ? chainInfos[chain].chainName : null,
                             },
-                          })
+                          });
                         }}
                       />
-                    )
+                    );
                   }
 
                   if (result && Array.isArray(result)) {
                     const filteredItems = result
                       .map(({ chain_id, address: resolvedAddress }) => {
-                        const chain = Bech32Address.getChainKey(resolvedAddress)
-                        const chainDetails = Object.values(chainInfos).find(
-                          (chain) => chain.chainId === chain_id,
-                        )
-                        const chainImage = chainDetails?.chainSymbolImageUrl ?? GenericLight
+                        const chain = Bech32Address.getChainKey(resolvedAddress);
+                        const chainDetails = Object.values(chainInfos).find((chain) => chain.chainId === chain_id);
+                        const chainImage = chainDetails?.chainSymbolImageUrl ?? GenericLight;
 
-                        let shouldShow = true
+                        let shouldShow = true;
                         if (activeChain !== 'aggregated') {
                           if (chains[activeChain]?.evmOnlyChain) {
                             //If active chain is EVM, only show addresses on the same chain
-                            if (chainDetails?.key !== activeChain) shouldShow = false
+                            if (chainDetails?.key !== activeChain) shouldShow = false;
                           } else {
                             // If active chain is non-EVM, filter out EVM addresses
-                            if (resolvedAddress.startsWith('0x')) shouldShow = false
+                            if (resolvedAddress.startsWith('0x')) shouldShow = false;
                           }
                         }
 
                         if (shouldShow) {
-                          anyResultsForCurrentChain = true
+                          anyResultsForCurrentChain = true;
                           return (
                             <MatchListItem
                               title={chainDetails?.chainName ?? nameService}
@@ -210,18 +191,18 @@ export const NameServiceMatchList: React.FC<NameServiceMatchListProps> = ({
                                     nameService: nameServices[nameService],
                                     chain_id,
                                   },
-                                })
+                                });
                               }}
                             />
-                          )
+                          );
                         }
-                        return null
+                        return null;
                       })
-                      .filter(Boolean)
+                      .filter(Boolean);
 
-                    return filteredItems.length > 0 ? <>{filteredItems}</> : null
+                    return filteredItems.length > 0 ? <>{filteredItems}</> : null;
                   }
-                  return null
+                  return null;
                 })}
               </ul>
 
@@ -232,9 +213,7 @@ export const NameServiceMatchList: React.FC<NameServiceMatchListProps> = ({
               )}
             </>
           ) : (
-            <p className='text-sm font-bold text-red-300 mt-2'>
-              No results found in any name service
-            </p>
+            <p className='text-sm font-bold text-red-300 mt-2'>No results found in any name service</p>
           )}
         </>
       ) : (
@@ -245,15 +224,15 @@ export const NameServiceMatchList: React.FC<NameServiceMatchListProps> = ({
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
 const MatchListItem: React.FC<{
-  address: string
-  title: string
-  nameServiceImg: string
-  chainIcon?: string
-  handleClick: () => void
+  address: string;
+  title: string;
+  nameServiceImg: string;
+  chainIcon?: string;
+  handleClick: () => void;
 }> = ({ address, title, nameServiceImg, chainIcon, handleClick }) => (
   <li className='flex items-center ml-0 py-1 cursor-pointer' onClick={handleClick}>
     <Avatar
@@ -271,4 +250,4 @@ const MatchListItem: React.FC<{
       </Text>
     </div>
   </li>
-)
+);

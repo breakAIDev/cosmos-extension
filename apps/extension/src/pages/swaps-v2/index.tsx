@@ -1,27 +1,27 @@
-import { useActiveWallet, WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks'
-import { ChainInfo, ChainInfos, toSmall } from '@leapwallet/cosmos-wallet-sdk'
-import { RootBalanceStore } from '@leapwallet/cosmos-wallet-store'
-import { Buttons } from '@leapwallet/leap-ui'
-import { ArrowSquareOut } from '@phosphor-icons/react'
-import BigNumber from 'bignumber.js'
-import classNames from 'classnames'
-import { AutoAdjustAmountSheet } from 'components/auto-adjust-amount-sheet'
-import Text from 'components/text'
-import { EventName, PageName } from 'config/analytics'
-import { usePageView } from 'hooks/analytics/usePageView'
-import { usePerformanceMonitor } from 'hooks/perf-monitoring/usePerformanceMonitor'
-import { useSelectedNetwork } from 'hooks/settings/useNetwork'
-import { useNonNativeCustomChains } from 'hooks/useNonNativeCustomChains'
-import useQuery from 'hooks/useQuery'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import mixpanel from 'mixpanel-browser'
-import { observer } from 'mobx-react-lite'
-import AddFromChainStore from 'pages/home/AddFromChainStore'
-import qs from 'qs'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { activeChainStore } from 'stores/active-chain-store'
-import { cw20TokenBalanceStore, priceStore } from 'stores/balance-store'
+import { useActiveWallet, WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks';
+import { ChainInfo, ChainInfos, toSmall } from '@leapwallet/cosmos-wallet-sdk';
+import { RootBalanceStore } from '@leapwallet/cosmos-wallet-store';
+import { Buttons } from '@leapwallet/leap-ui';
+import { ArrowSquareOut } from '@phosphor-icons/react';
+import BigNumber from 'bignumber.js';
+import classNames from 'classnames';
+import { AutoAdjustAmountSheet } from 'components/auto-adjust-amount-sheet';
+import Text from 'components/text';
+import { EventName, PageName } from 'config/analytics';
+import { usePageView } from 'hooks/analytics/usePageView';
+import { usePerformanceMonitor } from 'hooks/perf-monitoring/usePerformanceMonitor';
+import { useSelectedNetwork } from 'hooks/settings/useNetwork';
+import { useNonNativeCustomChains } from 'hooks/useNonNativeCustomChains';
+import useQuery from 'hooks/useQuery';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import mixpanel from 'mixpanel-browser';
+import { observer } from 'mobx-react-lite';
+import AddFromChainStore from 'pages/home/AddFromChainStore';
+import qs from 'qs';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { activeChainStore } from 'stores/active-chain-store';
+import { cw20TokenBalanceStore, priceStore } from 'stores/balance-store';
 import {
   autoFetchedCW20DenomsStore,
   betaCW20DenomsStore,
@@ -32,10 +32,10 @@ import {
   erc20DenomsStore,
   rootDenomsStore,
   whitelistedFactoryTokensStore,
-} from 'stores/denoms-store-instance'
-import { importWatchWalletSeedPopupStore } from 'stores/import-watch-wallet-seed-popup-store'
-import { SourceChain, SourceToken } from 'types/swap'
-import { cn } from 'utils/cn'
+} from 'stores/denoms-store-instance';
+import { importWatchWalletSeedPopupStore } from 'stores/import-watch-wallet-seed-popup-store';
+import { SourceChain, SourceToken } from 'types/swap';
+import { cn } from 'utils/cn';
 
 import {
   InterchangeButton,
@@ -48,66 +48,64 @@ import {
   SwapTxPage,
   TokenInputCard,
   TxReviewSheet,
-} from './components'
-import { TokenAssociatedChain } from './components/ChainsList'
-import FeesSheet from './components/FeesSheet'
-import { SwapHeader } from './components/swap-header'
-import { WarningsSection } from './components/WarningsSection'
-import { SwapContextProvider, useSwapContext } from './context'
-import { isNoRoutesAvailableError } from './hooks'
-import { SwapsLoader } from './SwapsLoader'
-import { getConversionRateRemark, getPriceImpactVars } from './utils/priceImpact'
+} from './components';
+import { TokenAssociatedChain } from './components/ChainsList';
+import FeesSheet from './components/FeesSheet';
+import { SwapHeader } from './components/swap-header';
+import { WarningsSection } from './components/WarningsSection';
+import { SwapContextProvider, useSwapContext } from './context';
+import { isNoRoutesAvailableError } from './hooks';
+import { SwapsLoader } from './SwapsLoader';
+import { getConversionRateRemark, getPriceImpactVars } from './utils/priceImpact';
 
 const SwapPage = observer(() => {
-  const navigate = useNavigate()
-  const defaultTokenLogo = useDefaultTokenLogo()
-  const counter = useRef(0)
-  const intervalTimeout = useRef<NodeJS.Timeout>()
+  const navigate = useNavigate();
+  const defaultTokenLogo = useDefaultTokenLogo();
+  const counter = useRef(0);
+  const intervalTimeout = useRef<NodeJS.Timeout>();
 
-  const activeWallet = useActiveWallet()
-  const [showTokenSelectSheet, setShowTokenSelectSheet] = useState<boolean>(false)
-  const [showSelectSheetFor, setShowSelectSheetFor] = useState<'source' | 'destination' | ''>(
-    'source',
-  )
-  const [isRefreshing, setIsRefreshing] = useState<boolean>(false)
+  const activeWallet = useActiveWallet();
+  const [showTokenSelectSheet, setShowTokenSelectSheet] = useState<boolean>(false);
+  const [showSelectSheetFor, setShowSelectSheetFor] = useState<'source' | 'destination' | ''>('source');
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
-  const [showTxReviewSheet, setShowTxReviewSheet] = useState<boolean>(false)
-  const [checkForAutoAdjust, setCheckForAutoAdjust] = useState(false)
-  const [isPriceImpactChecked, setIsPriceImpactChecked] = useState<boolean>(false)
-  const [showFeesSettingSheet, setShowFeesSettingSheet] = useState(false)
+  const [showTxReviewSheet, setShowTxReviewSheet] = useState<boolean>(false);
+  const [checkForAutoAdjust, setCheckForAutoAdjust] = useState(false);
+  const [isPriceImpactChecked, setIsPriceImpactChecked] = useState<boolean>(false);
+  const [showFeesSettingSheet, setShowFeesSettingSheet] = useState(false);
 
-  const [showMoreDetailsSheet, setShowMoreDetailsSheet] = useState<boolean>(false)
-  const [showChainSelectSheet, setShowChainSelectSheet] = useState<boolean>(false)
-  const [showTxPage, setShowTxPage] = useState<boolean>(false)
-  const [showSlippageSheet, setShowSlippageSheet] = useState(false)
-  const [showSlippageInfo, setShowSlippageInfo] = useState(false)
-  const [ledgerError, setLedgerError] = useState<string>()
-  const [isInputInUSDC, setIsInputInUSDC] = useState<boolean>(false)
-  const [showMainnetAlert, setShowMainnetAlert] = useState<boolean>(false)
-  const [isQuoteReady, setIsQuoteReady] = useState<boolean>(false)
-  const [isQuoteReadyEventLogged, setIsQuoteReadyEventLogged] = useState<boolean>(false)
-  const [newChain, setNewChain] = useState<ChainInfo | null>(null)
-  const [tokenToSet, setTokenToSet] = useState<SourceToken | null>(null)
+  const [showMoreDetailsSheet, setShowMoreDetailsSheet] = useState<boolean>(false);
+  const [showChainSelectSheet, setShowChainSelectSheet] = useState<boolean>(false);
+  const [showTxPage, setShowTxPage] = useState<boolean>(false);
+  const [showSlippageSheet, setShowSlippageSheet] = useState(false);
+  const [showSlippageInfo, setShowSlippageInfo] = useState(false);
+  const [ledgerError, setLedgerError] = useState<string>();
+  const [isInputInUSDC, setIsInputInUSDC] = useState<boolean>(false);
+  const [showMainnetAlert, setShowMainnetAlert] = useState<boolean>(false);
+  const [isQuoteReady, setIsQuoteReady] = useState<boolean>(false);
+  const [isQuoteReadyEventLogged, setIsQuoteReadyEventLogged] = useState<boolean>(false);
+  const [newChain, setNewChain] = useState<ChainInfo | null>(null);
+  const [tokenToSet, setTokenToSet] = useState<SourceToken | null>(null);
   const [chainToSet, setChainToSet] = useState<
     | (TokenAssociatedChain & {
-        callbackToUse: 'handleSetDestinationChain' | 'handleSetChain'
+        callbackToUse: 'handleSetDestinationChain' | 'handleSetChain';
       })
     | null
-  >(null)
+  >(null);
 
-  const customChains = useNonNativeCustomChains()
-  const pageViewSource = useQuery().get('pageSource') ?? undefined
-  const selectedNetwork = useSelectedNetwork()
+  const customChains = useNonNativeCustomChains();
+  const pageViewSource = useQuery().get('pageSource') ?? undefined;
+  const selectedNetwork = useSelectedNetwork();
 
   useEffect(() => {
     if (selectedNetwork === 'testnet') {
-      setShowMainnetAlert(true)
+      setShowMainnetAlert(true);
       const timeout = setTimeout(() => {
-        setShowMainnetAlert(false)
-      }, 10000)
-      return () => clearTimeout(timeout)
+        setShowMainnetAlert(false);
+      }, 10000);
+      return () => clearTimeout(timeout);
     }
-  }, [selectedNetwork])
+  }, [selectedNetwork]);
 
   const {
     inAmount,
@@ -145,76 +143,57 @@ const SwapPage = observer(() => {
     isChainAbstractionView,
     loadingRoutes,
     slippagePercent,
-  } = useSwapContext()
-  const {
-    priceImpactPercent,
-    usdValueDecreasePercent,
-    destinationAssetUSDValue,
-    sourceAssetUSDValue,
-  } = getPriceImpactVars(
-    routingInfo?.route,
-    sourceToken,
-    destinationToken,
-    rootDenomsStore.allDenoms,
-  )
+  } = useSwapContext();
+  const { priceImpactPercent, usdValueDecreasePercent, destinationAssetUSDValue, sourceAssetUSDValue } =
+    getPriceImpactVars(routingInfo?.route, sourceToken, destinationToken, rootDenomsStore.allDenoms);
 
   const checkNeeded = useMemo(() => {
     return (
-      getConversionRateRemark(
-        routingInfo.route,
-        sourceToken,
-        destinationToken,
-        rootDenomsStore.allDenoms,
-      ) === 'request-confirmation'
-    )
-  }, [routingInfo.route, sourceToken, destinationToken])
+      getConversionRateRemark(routingInfo.route, sourceToken, destinationToken, rootDenomsStore.allDenoms) ===
+      'request-confirmation'
+    );
+  }, [routingInfo.route, sourceToken, destinationToken]);
 
   useEffect(() => {
     if (checkNeeded) {
-      setIsPriceImpactChecked(false)
+      setIsPriceImpactChecked(false);
     } else {
-      setIsPriceImpactChecked(true)
+      setIsPriceImpactChecked(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [checkNeeded])
+  }, [checkNeeded]);
 
   const uncheckWarnings = useCallback(() => {
-    setIsPriceImpactChecked(false)
-  }, [])
+    setIsPriceImpactChecked(false);
+  }, []);
 
   useEffect(() => {
     if (
       Number(amountOut) &&
-      ![
-        showChainSelectSheet,
-        showSlippageSheet,
-        showTokenSelectSheet,
-        showTxPage,
-        showTxReviewSheet,
-      ].includes(true)
+      ![showChainSelectSheet, showSlippageSheet, showTokenSelectSheet, showTxPage, showTxReviewSheet].includes(true)
     ) {
       intervalTimeout.current = setInterval(async () => {
         if (counter.current === 10) {
-          counter.current = 0
-          setIsRefreshing(true)
-          uncheckWarnings()
+          counter.current = 0;
+          setIsRefreshing(true);
+          uncheckWarnings();
 
           try {
-            await refresh()
+            await refresh();
           } catch (_) {
             //
           }
-          setIsRefreshing(false)
-          return
+          setIsRefreshing(false);
+          return;
         }
 
-        counter.current += 1
-      }, 1000)
+        counter.current += 1;
+      }, 1000);
     } else {
-      counter.current = 0
+      counter.current = 0;
     }
 
-    return () => clearInterval(intervalTimeout.current)
+    return () => clearInterval(intervalTimeout.current);
   }, [
     amountOut,
     refresh,
@@ -224,17 +203,17 @@ const SwapPage = observer(() => {
     showTxPage,
     showTxReviewSheet,
     uncheckWarnings,
-  ])
+  ]);
 
   const additionalProperties = useMemo(() => {
-    let inAmountDollarValue, outAmountDollarValue
+    let inAmountDollarValue, outAmountDollarValue;
     if (
       sourceToken?.usdPrice &&
       !isNaN(parseFloat(sourceToken?.usdPrice)) &&
       inAmount &&
       !isNaN(parseFloat(inAmount))
     ) {
-      inAmountDollarValue = parseFloat(sourceToken?.usdPrice) * parseFloat(inAmount)
+      inAmountDollarValue = parseFloat(sourceToken?.usdPrice) * parseFloat(inAmount);
     }
     if (
       destinationToken?.usdPrice &&
@@ -242,7 +221,7 @@ const SwapPage = observer(() => {
       amountOut &&
       !isNaN(parseFloat(amountOut))
     ) {
-      outAmountDollarValue = parseFloat(destinationToken.usdPrice) * parseFloat(amountOut)
+      outAmountDollarValue = parseFloat(destinationToken.usdPrice) * parseFloat(amountOut);
     }
     return {
       pageName: PageName.SwapsQuoteReady,
@@ -261,7 +240,7 @@ const SwapPage = observer(() => {
       toChain: destinationChain?.chainName,
       toTokenAmount: outAmountDollarValue,
       transactionCount: routingInfo?.route?.transactionCount,
-    }
+    };
   }, [
     amountExceedsBalance,
     amountOut,
@@ -276,22 +255,22 @@ const SwapPage = observer(() => {
     sourceToken?.symbol,
     sourceToken?.usdPrice,
     usdValueDecreasePercent,
-  ])
+  ]);
 
   useEffect(() => {
     if (isQuoteReady && !isQuoteReadyEventLogged) {
       try {
-        mixpanel.track(EventName.PageView, additionalProperties)
-        setIsQuoteReadyEventLogged(true)
+        mixpanel.track(EventName.PageView, additionalProperties);
+        setIsQuoteReadyEventLogged(true);
       } catch (error) {
         // ignore
       }
     }
-  }, [additionalProperties, isQuoteReady, isQuoteReadyEventLogged])
+  }, [additionalProperties, isQuoteReady, isQuoteReadyEventLogged]);
 
   useEffect(() => {
-    setIsQuoteReadyEventLogged(false)
-  }, [inAmount, sourceToken, destinationToken])
+    setIsQuoteReadyEventLogged(false);
+  }, [inAmount, sourceToken, destinationToken]);
 
   useEffect(() => {
     if (
@@ -299,9 +278,9 @@ const SwapPage = observer(() => {
       !loadingRoutes &&
       (isNoRoutesAvailableError(errorMsg) || (!!routingInfo?.route && parseFloat(amountOut) > 0))
     ) {
-      setIsQuoteReady(true)
+      setIsQuoteReady(true);
     } else {
-      setIsQuoteReady(false)
+      setIsQuoteReady(false);
     }
   }, [
     inAmount,
@@ -312,207 +291,173 @@ const SwapPage = observer(() => {
     amountExceedsBalance,
     amountOut,
     errorMsg,
-  ])
+  ]);
 
   const _chainsToShow = useMemo(() => {
     if (activeWallet && activeWallet.walletType === WALLETTYPE.LEDGER) {
       return chainsToShow.filter((chain) => {
-        const chainInfo = Object.values(ChainInfos).find(
-          (chainInfo) => chainInfo.chainId === chain.chainId,
-        )
-        if (!chainInfo) return false
-        const hasAddress = activeWallet.addresses[chainInfo.key]
-        return hasAddress
-      })
+        const chainInfo = Object.values(ChainInfos).find((chainInfo) => chainInfo.chainId === chain.chainId);
+        if (!chainInfo) return false;
+        const hasAddress = activeWallet.addresses[chainInfo.key];
+        return hasAddress;
+      });
     }
-    return chainsToShow
-  }, [activeWallet, chainsToShow])
+    return chainsToShow;
+  }, [activeWallet, chainsToShow]);
 
   const { _destinationChainsToShow, _destinationAssets } = useMemo(() => {
     const _destinationAssets = destinationAssets.filter((asset) => {
-      return asset.skipAsset.symbol === destinationToken?.skipAsset.symbol
-    })
+      return asset.skipAsset.symbol === destinationToken?.skipAsset.symbol;
+    });
 
-    const _destinationChainsToShow: TokenAssociatedChain[] = []
+    const _destinationChainsToShow: TokenAssociatedChain[] = [];
     _destinationAssets.forEach((asset) => {
       _chainsToShow.forEach((chain) => {
         if (chain.chainId === asset.skipAsset.chainId) {
           _destinationChainsToShow.push({
             chain,
             asset,
-          })
+          });
         }
-      })
-    })
+      });
+    });
     return {
       _destinationAssets,
       _destinationChainsToShow,
-    }
-  }, [_chainsToShow, destinationToken, destinationAssets])
+    };
+  }, [_chainsToShow, destinationToken, destinationAssets]);
 
   const reviewBtnText = useMemo(() => {
     if (invalidAmount) {
-      return 'Amount must be greater than 0'
+      return 'Amount must be greater than 0';
     }
     if (amountExceedsBalance) {
-      return 'Insufficient balance'
+      return 'Insufficient balance';
     }
     if (isNoRoutesAvailableError(errorMsg)) {
-      return 'No transaction routes available'
+      return 'No transaction routes available';
     }
-    if (
-      activeChainStore.activeChain === 'evmos' &&
-      activeWallet?.walletType === WALLETTYPE.LEDGER
-    ) {
-      return 'Not supported using Ledger wallet'
+    if (activeChainStore.activeChain === 'evmos' && activeWallet?.walletType === WALLETTYPE.LEDGER) {
+      return 'Not supported using Ledger wallet';
     }
     if (!inAmount || parseFloat(inAmount) === 0) {
-      return 'Enter amount'
+      return 'Enter amount';
     }
 
-    return 'Review Transfer'
-  }, [activeWallet?.walletType, amountExceedsBalance, inAmount, errorMsg, invalidAmount])
+    return 'Review Transfer';
+  }, [activeWallet?.walletType, amountExceedsBalance, inAmount, errorMsg, invalidAmount]);
 
   const reviewDisabled = useMemo(() => {
-    if (
-      activeChainStore.activeChain === 'evmos' &&
-      activeWallet?.walletType === WALLETTYPE.LEDGER
-    ) {
-      return true
+    if (activeChainStore.activeChain === 'evmos' && activeWallet?.walletType === WALLETTYPE.LEDGER) {
+      return true;
     }
-    return reviewBtnDisabled || isRefreshing || (checkNeeded && !isPriceImpactChecked)
-  }, [activeWallet?.walletType, checkNeeded, isPriceImpactChecked, isRefreshing, reviewBtnDisabled])
+    return reviewBtnDisabled || isRefreshing || (checkNeeded && !isPriceImpactChecked);
+  }, [activeWallet?.walletType, checkNeeded, isPriceImpactChecked, isRefreshing, reviewBtnDisabled]);
 
   const autoAdjustAmountFee = useMemo(() => {
-    if (!displayFee || !feeDenom) return null
+    if (!displayFee || !feeDenom) return null;
 
     return {
       amount: toSmall(String(displayFee.value), feeDenom.coinDecimals),
       denom: feeDenom.coinMinimalDenom,
-    }
-  }, [displayFee, feeDenom])
+    };
+  }, [displayFee, feeDenom]);
 
   const sourceTokenLoading = useMemo(() => {
     return (
       loadingChains ||
       loadingSourceAssets ||
-      (isChainAbstractionView && sourceToken?.amount === '0'
-        ? sourceTokenBalanceStatus === 'loading'
-        : false)
-    )
-  }, [
-    isChainAbstractionView,
-    loadingChains,
-    loadingSourceAssets,
-    sourceToken,
-    sourceTokenBalanceStatus,
-  ])
+      (isChainAbstractionView && sourceToken?.amount === '0' ? sourceTokenBalanceStatus === 'loading' : false)
+    );
+  }, [isChainAbstractionView, loadingChains, loadingSourceAssets, sourceToken, sourceTokenBalanceStatus]);
 
   const autoAdjustAmountToken = useMemo(() => {
-    if (!sourceToken) return null
+    if (!sourceToken) return null;
 
     return {
       amount: sourceToken.amount,
       coinMinimalDenom: sourceToken.coinMinimalDenom,
       chain: sourceToken?.skipAsset?.originChainId,
-    }
-  }, [sourceToken])
+    };
+  }, [sourceToken]);
 
   const emitMixpanelDropdownOpenEvent = useCallback((dropdownType: string) => {
     try {
       mixpanel.track(EventName.DropdownOpened, {
         dropdownType,
-      })
+      });
     } catch (error) {
       // ignore
     }
-  }, [])
+  }, []);
 
   const handleOnBackClick = useCallback(() => {
     if (pageViewSource === 'swapAgain') {
-      navigate('/home')
+      navigate('/home');
     } else {
-      navigate(-1)
+      navigate(-1);
     }
-  }, [navigate, pageViewSource])
+  }, [navigate, pageViewSource]);
 
   const handleOnRefreshClick = useCallback(() => {
-    refresh()
-  }, [refresh])
+    refresh();
+  }, [refresh]);
 
   const handleOnSettingsClick = useCallback(() => {
-    setShowSlippageSheet(true)
-  }, [setShowSlippageSheet])
+    setShowSlippageSheet(true);
+  }, [setShowSlippageSheet]);
 
   const handleInputAmountChange = useCallback(
     (value: string) => {
-      handleInAmountChange(value)
-      uncheckWarnings()
+      handleInAmountChange(value);
+      uncheckWarnings();
     },
     [handleInAmountChange, uncheckWarnings],
-  )
+  );
 
   const handleInputTokenSelectSheetOpen = useCallback(() => {
-    setShowTokenSelectSheet(true)
-    setShowSelectSheetFor('source')
-    uncheckWarnings()
-    emitMixpanelDropdownOpenEvent('Source Token')
-  }, [
-    setShowTokenSelectSheet,
-    setShowSelectSheetFor,
-    uncheckWarnings,
-    emitMixpanelDropdownOpenEvent,
-  ])
+    setShowTokenSelectSheet(true);
+    setShowSelectSheetFor('source');
+    uncheckWarnings();
+    emitMixpanelDropdownOpenEvent('Source Token');
+  }, [setShowTokenSelectSheet, setShowSelectSheetFor, uncheckWarnings, emitMixpanelDropdownOpenEvent]);
 
   const handleInputChainSelectSheetOpen = useCallback(() => {
-    setShowChainSelectSheet(true)
-    setShowSelectSheetFor('source')
-    uncheckWarnings()
-  }, [uncheckWarnings, setShowChainSelectSheet, setShowSelectSheetFor])
+    setShowChainSelectSheet(true);
+    setShowSelectSheetFor('source');
+    uncheckWarnings();
+  }, [uncheckWarnings, setShowChainSelectSheet, setShowSelectSheetFor]);
 
   const handleOutputTokenSelectSheetOpen = useCallback(() => {
-    setShowTokenSelectSheet(true)
-    setShowSelectSheetFor('destination')
-    uncheckWarnings()
-    emitMixpanelDropdownOpenEvent('Destination Token')
-  }, [
-    setShowTokenSelectSheet,
-    setShowSelectSheetFor,
-    uncheckWarnings,
-    emitMixpanelDropdownOpenEvent,
-  ])
+    setShowTokenSelectSheet(true);
+    setShowSelectSheetFor('destination');
+    uncheckWarnings();
+    emitMixpanelDropdownOpenEvent('Destination Token');
+  }, [setShowTokenSelectSheet, setShowSelectSheetFor, uncheckWarnings, emitMixpanelDropdownOpenEvent]);
 
   const handleOutputChainSelectSheetOpen = useCallback(() => {
-    setShowChainSelectSheet(true)
-    setShowSelectSheetFor('destination')
-    uncheckWarnings()
-    emitMixpanelDropdownOpenEvent('Destination Chain')
-  }, [
-    uncheckWarnings,
-    setShowChainSelectSheet,
-    setShowSelectSheetFor,
-    emitMixpanelDropdownOpenEvent,
-  ])
+    setShowChainSelectSheet(true);
+    setShowSelectSheetFor('destination');
+    uncheckWarnings();
+    emitMixpanelDropdownOpenEvent('Destination Chain');
+  }, [uncheckWarnings, setShowChainSelectSheet, setShowSelectSheetFor, emitMixpanelDropdownOpenEvent]);
 
   const handleOnChainSelectSheetClose = useCallback(() => {
-    setShowChainSelectSheet(false)
-    setShowSelectSheetFor('')
-  }, [setShowChainSelectSheet, setShowSelectSheetFor])
+    setShowChainSelectSheet(false);
+    setShowSelectSheetFor('');
+  }, [setShowChainSelectSheet, setShowSelectSheetFor]);
 
   const handleSetChain = useCallback(
     (chain: SourceChain) => {
       if (showSelectSheetFor === 'source' && chain.chainId !== sourceChain?.chainId) {
-        setSourceChain(chain)
-        setSourceToken(null)
-      } else if (
-        showSelectSheetFor === 'destination' &&
-        chain.chainId !== destinationChain?.chainId
-      ) {
-        setDestinationChain(chain)
-        setDestinationToken(null)
+        setSourceChain(chain);
+        setSourceToken(null);
+      } else if (showSelectSheetFor === 'destination' && chain.chainId !== destinationChain?.chainId) {
+        setDestinationChain(chain);
+        setDestinationToken(null);
       }
-      setShowChainSelectSheet(false)
-      setShowSelectSheetFor('')
+      setShowChainSelectSheet(false);
+      setShowSelectSheetFor('');
     },
     [
       destinationChain?.chainId,
@@ -523,88 +468,81 @@ const SwapPage = observer(() => {
       showSelectSheetFor,
       sourceChain?.chainId,
     ],
-  )
+  );
 
   const handleOnChainSelect = useCallback(
     (tokenAssociatedChain: TokenAssociatedChain) => {
       const customChain = Object.values(customChains).find(
         (_customChain) => _customChain.chainId === tokenAssociatedChain.chain.chainId,
-      )
+      );
       if (customChain) {
         setChainToSet({
           chain: tokenAssociatedChain.chain,
           callbackToUse: 'handleSetChain',
-        })
-        setNewChain(customChain)
-        return
+        });
+        setNewChain(customChain);
+        return;
       }
-      handleSetChain(tokenAssociatedChain.chain)
+      handleSetChain(tokenAssociatedChain.chain);
     },
     [customChains, handleSetChain],
-  )
+  );
 
   const handleSetDestinationChain = useCallback(
     (tokenAssociatedChain: TokenAssociatedChain) => {
-      setDestinationChain(tokenAssociatedChain.chain)
+      setDestinationChain(tokenAssociatedChain.chain);
       const _destToken = _destinationAssets.find(
         (asset) =>
           asset.skipAsset.chainId === tokenAssociatedChain.chain.chainId &&
-          (!tokenAssociatedChain.asset ||
-            asset.skipAsset.denom === tokenAssociatedChain.asset.skipAsset.denom),
-      )
-      setDestinationToken(_destToken as SourceToken)
-      setShowChainSelectSheet(false)
-      setShowSelectSheetFor('')
+          (!tokenAssociatedChain.asset || asset.skipAsset.denom === tokenAssociatedChain.asset.skipAsset.denom),
+      );
+      setDestinationToken(_destToken as SourceToken);
+      setShowChainSelectSheet(false);
+      setShowSelectSheetFor('');
     },
-    [
-      _destinationAssets,
-      setDestinationChain,
-      setDestinationToken,
-      setShowChainSelectSheet,
-      setShowSelectSheetFor,
-    ],
-  )
+    [_destinationAssets, setDestinationChain, setDestinationToken, setShowChainSelectSheet, setShowSelectSheetFor],
+  );
 
   const handleOnDestinationChainSelect = useCallback(
     (tokenAssociatedChain: TokenAssociatedChain) => {
       const customChain = Object.values(customChains).find(
         (_customChain) => _customChain.chainId === tokenAssociatedChain.chain.chainId,
-      )
+      );
       if (customChain) {
         setChainToSet({
           asset: tokenAssociatedChain.asset,
           chain: tokenAssociatedChain.chain,
           callbackToUse: 'handleSetDestinationChain',
-        })
-        setNewChain(customChain)
-        return
+        });
+        setNewChain(customChain);
+        return;
       }
-      handleSetDestinationChain(tokenAssociatedChain)
+      handleSetDestinationChain(tokenAssociatedChain);
     },
     [customChains, handleSetDestinationChain],
-  )
+  );
 
   const handleOnTokenSelectSheetClose = useCallback(() => {
-    setShowTokenSelectSheet(false)
-    setShowSelectSheetFor('')
-  }, [setShowTokenSelectSheet, setShowSelectSheetFor])
+    setShowTokenSelectSheet(false);
+    setShowSelectSheetFor('');
+  }, [setShowTokenSelectSheet, setShowSelectSheetFor]);
 
   const handleSetToken = useCallback(
     (token: SourceToken) => {
-      const chain = _chainsToShow.find((chain) => chain.chainId === token.skipAsset.chainId)
+      const chain = _chainsToShow.find((chain) => chain.chainId === token.skipAsset.chainId);
       if (showSelectSheetFor === 'source') {
         if (isChainAbstractionView) {
-          setSourceChain(chain)
+          setSourceChain(chain);
         }
-        setSourceToken(token)
+        setSourceToken(token);
       } else if (showSelectSheetFor === 'destination') {
         if (isChainAbstractionView) {
-          setDestinationChain(chain)
+          setDestinationChain(chain);
         }
-        setDestinationToken(token)
+        setDestinationToken(token);
       }
-      setShowTokenSelectSheet(false)
-      setShowSelectSheetFor('')
+      setShowTokenSelectSheet(false);
+      setShowSelectSheetFor('');
     },
     [
       _chainsToShow,
@@ -615,111 +553,106 @@ const SwapPage = observer(() => {
       setDestinationToken,
       setDestinationChain,
     ],
-  )
+  );
 
   const handleOnTokenSelect = useCallback(
     (token: SourceToken) => {
       const customChain = Object.values(customChains).find(
         (_customChain) => _customChain.chainId === token.skipAsset.chainId,
-      )
+      );
       if (customChain) {
-        setTokenToSet(token)
-        setNewChain(customChain)
-        return
+        setTokenToSet(token);
+        setNewChain(customChain);
+        return;
       }
-      handleSetToken(token)
+      handleSetToken(token);
     },
     [customChains, handleSetToken],
-  )
+  );
 
   const handlePostAddChainCallback = useCallback(() => {
-    setNewChain(null)
+    setNewChain(null);
     if (tokenToSet) {
-      handleSetToken(tokenToSet)
-      setTokenToSet(null)
+      handleSetToken(tokenToSet);
+      setTokenToSet(null);
     } else if (chainToSet) {
       if (chainToSet.callbackToUse === 'handleSetChain') {
-        handleOnChainSelect(chainToSet)
+        handleOnChainSelect(chainToSet);
       } else if (chainToSet.callbackToUse === 'handleSetDestinationChain') {
         handleSetDestinationChain({
           asset: chainToSet.asset,
           chain: chainToSet.chain,
-        })
+        });
       }
-      setChainToSet(null)
+      setChainToSet(null);
     }
-  }, [tokenToSet, chainToSet, handleSetToken, handleOnChainSelect, handleSetDestinationChain])
+  }, [tokenToSet, chainToSet, handleSetToken, handleOnChainSelect, handleSetDestinationChain]);
 
   const handleOnSlippageInfoClick = useCallback(() => {
-    setShowSlippageInfo(true)
-  }, [setShowSlippageInfo])
+    setShowSlippageInfo(true);
+  }, [setShowSlippageInfo]);
 
   const handleOnSlippageInfoSheetClose = useCallback(() => {
-    setShowSlippageInfo(false)
-  }, [setShowSlippageInfo])
+    setShowSlippageInfo(false);
+  }, [setShowSlippageInfo]);
 
   const handleOnSlippageSheetClose = useCallback(() => {
-    setShowSlippageSheet(false)
-  }, [setShowSlippageSheet])
+    setShowSlippageSheet(false);
+  }, [setShowSlippageSheet]);
 
   const handleOnMoreDetailsSheetClose = useCallback(() => {
-    setShowMoreDetailsSheet(false)
-  }, [setShowMoreDetailsSheet])
+    setShowMoreDetailsSheet(false);
+  }, [setShowMoreDetailsSheet]);
 
   const handleOnAutoAdjustmentSheetClose = useCallback(() => {
-    setCheckForAutoAdjust(false)
-  }, [setCheckForAutoAdjust])
+    setCheckForAutoAdjust(false);
+  }, [setCheckForAutoAdjust]);
 
   const handleOnTxReviewSheetClose = useCallback(() => {
-    setShowTxReviewSheet(false)
-  }, [setShowTxReviewSheet])
+    setShowTxReviewSheet(false);
+  }, [setShowTxReviewSheet]);
 
   const handleOnTxReviewSheetProceed = useCallback(() => {
-    setShowTxReviewSheet(false)
-    setShowTxPage(true)
-    ledgerError && setLedgerError(undefined)
-  }, [setShowTxReviewSheet, setShowTxPage, ledgerError])
+    setShowTxReviewSheet(false);
+    setShowTxPage(true);
+    ledgerError && setLedgerError(undefined);
+  }, [setShowTxReviewSheet, setShowTxPage, ledgerError]);
 
   const handleOnTxPageClose = useCallback(
-    (
-      sourceChainId?: string,
-      sourceToken?: string,
-      destinationChainId?: string,
-      destinationToken?: string,
-    ) => {
+    (sourceChainId?: string, sourceToken?: string, destinationChainId?: string, destinationToken?: string) => {
       if (sourceChainId || sourceToken || destinationChainId || destinationToken) {
-        let queryStr = ''
+        let queryStr = '';
         queryStr = `?${qs.stringify({
           sourceChainId,
           sourceToken,
           destinationChainId,
           destinationToken,
           pageSource: 'swapAgain',
-        })}`
-        navigate(`/swap${queryStr}`)
+        })}`;
+        navigate(`/swap${queryStr}`);
       } else {
-        setInAmount('')
+        setInAmount('');
       }
-      setShowTxPage(false)
-      refresh()
+      setShowTxPage(false);
+      refresh();
     },
     [navigate, setInAmount, setShowTxPage, refresh],
-  )
+  );
 
   const swapTxPageSetLedgerError = useCallback(
     (ledgerError?: string) => {
-      setLedgerError(ledgerError)
-      ledgerError && setShowTxPage(false)
+      setLedgerError(ledgerError);
+      ledgerError && setShowTxPage(false);
     },
     [setLedgerError, setShowTxPage],
-  )
+  );
 
   usePerformanceMonitor({
     page: 'swaps',
     queryStatus: sourceTokenLoading || loadingDestinationAssets ? 'loading' : 'success',
     op: 'swapsPageLoad',
     description: 'loading state on swaps page',
-  })
+  });
 
   return (
     <div className={classNames('panel-width panel-height enclosing-panel')}>
@@ -732,12 +665,7 @@ const SwapPage = observer(() => {
             </Text>
           </div>
         )}
-        <div
-          className={cn(
-            'flex flex-col w-full gap-3 relative px-6',
-            showMainnetAlert ? 'pt-3' : 'pt-6',
-          )}
-        >
+        <div className={cn('flex flex-col w-full gap-3 relative px-6', showMainnetAlert ? 'pt-3' : 'pt-6')}>
           <div className='w-full flex flex-col items-center gap-y-1'>
             <TokenInputCard
               value={inAmount}
@@ -760,10 +688,7 @@ const SwapPage = observer(() => {
               isChainAbstractionView={isChainAbstractionView}
             />
 
-            <InterchangeButton
-              isSwitchOrderPossible={isSwitchOrderPossible}
-              handleSwitchOrder={handleSwitchOrder}
-            />
+            <InterchangeButton isSwitchOrderPossible={isSwitchOrderPossible} handleSwitchOrder={handleSwitchOrder} />
 
             <TokenInputCard
               readOnly
@@ -792,10 +717,7 @@ const SwapPage = observer(() => {
             ledgerError={ledgerError}
           />
 
-          <SwapInfo
-            setShowMoreDetailsSheet={setShowMoreDetailsSheet}
-            rootDenomsStore={rootDenomsStore}
-          />
+          <SwapInfo setShowMoreDetailsSheet={setShowMoreDetailsSheet} rootDenomsStore={rootDenomsStore} />
         </div>
         <div className='sticky bottom-0 left-0 z-[2] right-0 bg-secondary-100 px-5 py-4'>
           {isMoreThanOneStepTransaction ? (
@@ -812,21 +734,16 @@ const SwapPage = observer(() => {
             <>
               <Buttons.Generic
                 className={classNames('w-full  h-[52px] text-white-100', {
-                  [`!bg-primary`]: !(
-                    invalidAmount ||
-                    amountExceedsBalance ||
-                    isNoRoutesAvailableError(errorMsg)
-                  ),
-                  '!bg-destructive-100/40':
-                    invalidAmount || amountExceedsBalance || isNoRoutesAvailableError(errorMsg),
+                  [`!bg-primary`]: !(invalidAmount || amountExceedsBalance || isNoRoutesAvailableError(errorMsg)),
+                  '!bg-destructive-100/40': invalidAmount || amountExceedsBalance || isNoRoutesAvailableError(errorMsg),
                 })}
                 disabled={reviewDisabled}
                 style={{ boxShadow: 'none' }}
                 onClick={() => {
                   if (activeWallet?.watchWallet) {
-                    importWatchWalletSeedPopupStore.setShowPopup(true)
+                    importWatchWalletSeedPopupStore.setShowPopup(true);
                   } else {
-                    setCheckForAutoAdjust(true)
+                    setCheckForAutoAdjust(true);
                   }
                 }}
               >
@@ -849,9 +766,7 @@ const SwapPage = observer(() => {
         rootDenomsStore={rootDenomsStore}
         whitelistedFactorTokenStore={whitelistedFactoryTokensStore}
         isChainAbstractionView={isChainAbstractionView}
-        loadingTokens={
-          showSelectSheetFor === 'source' ? loadingSourceAssets : loadingDestinationAssets
-        }
+        loadingTokens={showSelectSheetFor === 'source' ? loadingSourceAssets : loadingDestinationAssets}
         loadingChains={loadingChains}
       />
       {isChainAbstractionView ? (
@@ -861,8 +776,8 @@ const SwapPage = observer(() => {
           chainsToShow={_destinationChainsToShow}
           loadingChains={loadingChains}
           onClose={() => {
-            setShowChainSelectSheet(false)
-            setShowSelectSheetFor('')
+            setShowChainSelectSheet(false);
+            setShowSelectSheetFor('');
           }}
           selectedChain={destinationChain}
           selectedToken={destinationToken}
@@ -892,22 +807,18 @@ const SwapPage = observer(() => {
         onSlippageInfoClick={handleOnSlippageInfoClick}
       />
       <SlippageInfoSheet isOpen={showSlippageInfo} onClose={handleOnSlippageInfoSheetClose} />
-      {checkForAutoAdjust &&
-        autoAdjustAmountFee &&
-        autoAdjustAmountToken &&
-        inAmount &&
-        sourceChain && (
-          <AutoAdjustAmountSheet
-            rootDenomsStore={rootDenomsStore}
-            amount={inAmount}
-            setAmount={setInAmount}
-            selectedToken={autoAdjustAmountToken}
-            fee={autoAdjustAmountFee}
-            forceChain={sourceChain?.key}
-            setShowReviewSheet={setShowTxReviewSheet}
-            closeAdjustmentSheet={handleOnAutoAdjustmentSheetClose}
-          />
-        )}
+      {checkForAutoAdjust && autoAdjustAmountFee && autoAdjustAmountToken && inAmount && sourceChain && (
+        <AutoAdjustAmountSheet
+          rootDenomsStore={rootDenomsStore}
+          amount={inAmount}
+          setAmount={setInAmount}
+          selectedToken={autoAdjustAmountToken}
+          fee={autoAdjustAmountFee}
+          forceChain={sourceChain?.key}
+          setShowReviewSheet={setShowTxReviewSheet}
+          closeAdjustmentSheet={handleOnAutoAdjustmentSheetClose}
+        />
+      )}
       <TxReviewSheet
         onSlippageInfoClick={handleOnSlippageInfoClick}
         isOpen={showTxReviewSheet}
@@ -918,18 +829,15 @@ const SwapPage = observer(() => {
         sourceAssetUSDValue={sourceAssetUSDValue}
       />
       {routingInfo?.route?.response && sourceChain && (
-        <FeesSheet
-          showFeesSettingSheet={showFeesSettingSheet}
-          setShowFeesSettingSheet={setShowFeesSettingSheet}
-        />
+        <FeesSheet showFeesSettingSheet={showFeesSettingSheet} setShowFeesSettingSheet={setShowFeesSettingSheet} />
       )}
       {newChain && (
         <AddFromChainStore
           isVisible={!!newChain}
           onClose={() => {
-            setNewChain(null)
-            setTokenToSet(null)
-            setChainToSet(null)
+            setNewChain(null);
+            setTokenToSet(null);
+            setChainToSet(null);
           }}
           newAddChain={newChain}
           skipUpdatingActiveChain={true}
@@ -937,87 +845,80 @@ const SwapPage = observer(() => {
         />
       )}
       {showTxPage ? (
-        <SwapTxPage
-          onClose={handleOnTxPageClose}
-          setLedgerError={swapTxPageSetLedgerError}
-          ledgerError={ledgerError}
-        />
+        <SwapTxPage onClose={handleOnTxPageClose} setLedgerError={swapTxPageSetLedgerError} ledgerError={ledgerError} />
       ) : null}
     </div>
-  )
-})
+  );
+});
 
 const Swap = observer(({ rootBalanceStore }: { rootBalanceStore: RootBalanceStore }) => {
-  const query = useQuery()
+  const query = useQuery();
 
-  const location = useLocation()
+  const location = useLocation();
 
   const totalFiatValue = useMemo(() => {
     return rootBalanceStore
       .getAggregatedBalances('mainnet')
-      .reduce(
-        (acc, asset) => (asset.usdValue ? acc.plus(new BigNumber(asset.usdValue)) : acc),
-        new BigNumber(0),
-      )
-      ?.toNumber()
-  }, [rootBalanceStore])
+      .reduce((acc, asset) => (asset.usdValue ? acc.plus(new BigNumber(asset.usdValue)) : acc), new BigNumber(0))
+      ?.toNumber();
+  }, [rootBalanceStore]);
 
   const pageViewAdditionalProperties = useMemo(() => {
-    let pageSourceFormatted
-    const pageViewSource = query.get('pageSource') ?? undefined
+    let pageSourceFormatted;
+    const pageViewSource = query.get('pageSource') ?? undefined;
     switch (pageViewSource) {
       case 'bottomNav': {
-        pageSourceFormatted = 'Bottom Nav'
-        break
+        pageSourceFormatted = 'Bottom Nav';
+        break;
       }
       case 'assetDetails': {
-        pageSourceFormatted = 'Asset Details'
-        break
+        pageSourceFormatted = 'Asset Details';
+        break;
       }
       case 'banners': {
-        pageSourceFormatted = 'Banners'
-        break
+        pageSourceFormatted = 'Banners';
+        break;
       }
       case 'swapAgain': {
-        pageSourceFormatted = 'Swap Again CTA'
-        break
+        pageSourceFormatted = 'Swap Again CTA';
+        break;
       }
       case 'quickSearch': {
-        pageSourceFormatted = 'Quick Search'
-        break
+        pageSourceFormatted = 'Quick Search';
+        break;
       }
       case 'stake': {
-        pageSourceFormatted = PageName.Stake
-        break
+        pageSourceFormatted = PageName.Stake;
+        break;
       }
       case PageName.Home: {
-        pageSourceFormatted = PageName.Home
-        break
+        pageSourceFormatted = PageName.Home;
+        break;
       }
       case 'search': {
-        pageSourceFormatted = PageName.Search
-        break
+        pageSourceFormatted = PageName.Search;
+        break;
       }
       case PageName.ZeroState: {
-        pageSourceFormatted = PageName.ZeroState
-        break
+        pageSourceFormatted = PageName.ZeroState;
+        break;
       }
       default: {
-        break
+        break;
       }
     }
-    const _properties = { pageViewSource: pageSourceFormatted, userBalance: totalFiatValue }
+    const _properties = { pageViewSource: pageSourceFormatted, userBalance: totalFiatValue };
     if (pageViewSource === 'banners') {
       return {
         ..._properties,
         pageViewSourceDetail: query.get('bannerId') ?? undefined,
-      }
+      };
     }
-    return _properties
+    return _properties;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, location?.key])
+  }, [query, location?.key]);
 
-  usePageView(PageName.SwapsStart, true, pageViewAdditionalProperties)
+  usePageView(PageName.SwapsStart, true, pageViewAdditionalProperties);
 
   return (
     <SwapContextProvider
@@ -1036,39 +937,37 @@ const Swap = observer(({ rootBalanceStore }: { rootBalanceStore: RootBalanceStor
     >
       <SwapPage />
     </SwapContextProvider>
-  )
-})
+  );
+});
 
-const SwapsPageWithLoader = observer(
-  ({ rootBalanceStore }: { rootBalanceStore: RootBalanceStore }) => {
-    const [showLoader, setShowLoader] = useState<boolean>(true)
-    const [firstLoadingComplete, setFirstLoadingComplete] = useState<boolean>(false)
+const SwapsPageWithLoader = observer(({ rootBalanceStore }: { rootBalanceStore: RootBalanceStore }) => {
+  const [showLoader, setShowLoader] = useState<boolean>(true);
+  const [firstLoadingComplete, setFirstLoadingComplete] = useState<boolean>(false);
 
-    useEffect(() => {
-      setTimeout(() => {
-        setShowLoader(false)
-      }, 150)
-    }, [])
+  useEffect(() => {
+    setTimeout(() => {
+      setShowLoader(false);
+    }, 150);
+  }, []);
 
-    useEffect(() => {
-      if (!rootBalanceStore.allAggregatedTokensLoading) {
-        setFirstLoadingComplete(true)
-      }
-    }, [rootBalanceStore.allAggregatedTokensLoading])
-
-    if (showLoader) {
-      return (
-        <div className='h-full'>
-          <SwapsLoader />
-        </div>
-      )
+  useEffect(() => {
+    if (!rootBalanceStore.allAggregatedTokensLoading) {
+      setFirstLoadingComplete(true);
     }
+  }, [rootBalanceStore.allAggregatedTokensLoading]);
 
-    if ((rootBalanceStore.allAggregatedTokensLoading && !firstLoadingComplete) || showLoader) {
-      return <SwapsLoader />
-    }
-    return <Swap rootBalanceStore={rootBalanceStore} />
-  },
-)
+  if (showLoader) {
+    return (
+      <div className='h-full'>
+        <SwapsLoader />
+      </div>
+    );
+  }
 
-export default SwapsPageWithLoader
+  if ((rootBalanceStore.allAggregatedTokensLoading && !firstLoadingComplete) || showLoader) {
+    return <SwapsLoader />;
+  }
+  return <Swap rootBalanceStore={rootBalanceStore} />;
+});
+
+export default SwapsPageWithLoader;

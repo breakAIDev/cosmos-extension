@@ -1,19 +1,19 @@
-import { ArrowLeft } from '@phosphor-icons/react'
-import { Button } from 'components/ui/button'
-import StepProgress from 'components/ui/step-progress'
-import React from 'react'
-import { cn } from 'utils/cn'
+import { ArrowLeft } from '@phosphor-icons/react';
+import { Button } from 'components/ui/button';
+import StepProgress from 'components/ui/step-progress';
+import React from 'react';
+import { cn } from 'utils/cn';
 
-import { OnboardingLayout } from '../layout'
-import { useImportWalletContext } from './import-wallet-context'
+import { OnboardingLayout } from '../layout';
+import { useImportWalletContext } from './import-wallet-context';
 
 const NavHeader = () => {
-  const { backToPreviousStep, currentStep, totalSteps, walletName } = useImportWalletContext()
+  const { backToPreviousStep, currentStep, totalSteps, walletName } = useImportWalletContext();
 
-  const isShortStep = walletName === 'private-key' || walletName === 'watch-wallet'
-  const isLongStep = walletName === 'ledger' || walletName === 'evm-ledger'
+  const isShortStep = walletName === 'private-key' || walletName === 'watch-wallet';
+  const isLongStep = walletName === 'ledger' || walletName === 'evm-ledger';
 
-  const totalStepsToShow = isShortStep ? totalSteps - 1 : isLongStep ? totalSteps + 1 : totalSteps
+  const totalStepsToShow = isShortStep ? totalSteps - 1 : isLongStep ? totalSteps + 1 : totalSteps;
 
   return (
     <div className='flex flex-row items-center justify-between align-center w-full relative -m-1'>
@@ -26,8 +26,8 @@ const NavHeader = () => {
       {/* to center the progress bar horizontally */}
       <div className='size-9 shrink-0' />
     </div>
-  )
-}
+  );
+};
 
 export const ImportWalletLayout = (props: React.PropsWithChildren<{ className?: string }>) => {
   return (
@@ -41,5 +41,5 @@ export const ImportWalletLayout = (props: React.PropsWithChildren<{ className?: 
 
       {props.children}
     </OnboardingLayout>
-  )
-}
+  );
+};

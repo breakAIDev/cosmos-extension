@@ -1,47 +1,41 @@
-import { sliceWord } from '@leapwallet/cosmos-wallet-hooks'
-import { Collection } from '@leapwallet/cosmos-wallet-store'
-import { Heart } from '@phosphor-icons/react'
-import BottomModal from 'components/new-bottom-modal'
-import Text from 'components/text'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import React, { useMemo } from 'react'
-import { favNftStore, hiddenNftStore } from 'stores/manage-nft-store'
-import { nftStore } from 'stores/nft-store'
-import { imgOnError } from 'utils/imgOnError'
+import { sliceWord } from '@leapwallet/cosmos-wallet-hooks';
+import { Collection } from '@leapwallet/cosmos-wallet-store';
+import { Heart } from '@phosphor-icons/react';
+import BottomModal from 'components/new-bottom-modal';
+import Text from 'components/text';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import React, { useMemo } from 'react';
+import { favNftStore, hiddenNftStore } from 'stores/manage-nft-store';
+import { nftStore } from 'stores/nft-store';
+import { imgOnError } from 'utils/imgOnError';
 
-import { useNftContext } from './context'
+import { useNftContext } from './context';
 
 const CollectionDetails = observer(() => {
-  const { showCollectionDetailsFor, setShowCollectionDetailsFor, setNftDetails } = useNftContext()
-  const collectionData = nftStore.nftDetails.collectionData
+  const { showCollectionDetailsFor, setShowCollectionDetailsFor, setNftDetails } = useNftContext();
+  const collectionData = nftStore.nftDetails.collectionData;
 
   const { collection, nfts } = useMemo(() => {
     const collection =
-      collectionData?.collections.find(
-        (collection) => collection.address === showCollectionDetailsFor,
-      ) ?? ({} as Collection)
+      collectionData?.collections.find((collection) => collection.address === showCollectionDetailsFor) ??
+      ({} as Collection);
 
     const collectionNfts = collection
       ? collectionData?.nfts[collection?.chain]?.filter((nft) =>
           [nft.collection?.address ?? ''].includes(collection.address),
         ) ?? []
-      : []
+      : [];
 
-    return { collection, nfts: collectionNfts }
+    return { collection, nfts: collectionNfts };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    collectionData?.collections,
-    collectionData?.nfts,
-    hiddenNftStore.hiddenNfts,
-    showCollectionDetailsFor,
-  ])
+  }, [collectionData?.collections, collectionData?.nfts, hiddenNftStore.hiddenNfts, showCollectionDetailsFor]);
 
-  if (!nfts?.length) return null
+  if (!nfts?.length) return null;
 
   if (nfts.length === 1) {
-    setNftDetails({ ...nfts[0], chain: collection.chain })
-    setShowCollectionDetailsFor('')
+    setNftDetails({ ...nfts[0], chain: collection.chain });
+    setShowCollectionDetailsFor('');
   }
 
   return (
@@ -53,16 +47,16 @@ const CollectionDetails = observer(() => {
     >
       <div className='grid grid-cols-2 gap-5'>
         {nfts.map((nft) => {
-          const nftIndex = `${nft?.collection.address ?? ''}-:-${nft?.tokenId ?? nft?.domain ?? ''}`
-          const isInFavNfts = favNftStore.favNfts.includes(nftIndex)
+          const nftIndex = `${nft?.collection.address ?? ''}-:-${nft?.tokenId ?? nft?.domain ?? ''}`;
+          const isInFavNfts = favNftStore.favNfts.includes(nftIndex);
 
           return (
             <div
               key={nft.name}
               className='flex flex-col gap-y-4 cursor-pointer'
               onClick={() => {
-                setNftDetails({ ...nft, chain: collection.chain })
-                setShowCollectionDetailsFor('')
+                setNftDetails({ ...nft, chain: collection.chain });
+                setShowCollectionDetailsFor('');
               }}
             >
               <div className='relative rounded-xl w-[166px] h-[166px] overflow-hidden'>
@@ -76,21 +70,12 @@ const CollectionDetails = observer(() => {
                 {isInFavNfts && (
                   <div>
                     <Heart size={26} className='absolute top-[9px] right-[9px]' />
-                    <Heart
-                      size={24}
-                      weight='fill'
-                      color='#D0414F'
-                      className='absolute top-2.5 right-2.5'
-                    />
+                    <Heart size={24} weight='fill' color='#D0414F' className='absolute top-2.5 right-2.5' />
                   </div>
                 )}
               </div>
               <div className='flex flex-col gap-y-0.5'>
-                <Text
-                  size='md'
-                  color='text-monochrome'
-                  className='font-bold !leading-[21.6px] break-all'
-                >
+                <Text size='md' color='text-monochrome' className='font-bold !leading-[21.6px] break-all'>
                   {sliceWord(nft.name, 12, 0)}
                 </Text>
                 <Text size='sm' color='text-muted-foreground' className='!leading-[18.9px]'>
@@ -98,11 +83,11 @@ const CollectionDetails = observer(() => {
                 </Text>
               </div>
             </div>
-          )
+          );
         })}
       </div>
     </BottomModal>
-  )
-})
+  );
+});
 
-export default CollectionDetails
+export default CollectionDetails;

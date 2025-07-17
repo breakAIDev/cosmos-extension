@@ -1,1 +1,1 @@
-export * from './SeedPhraseInput'
+export * from './SeedPhraseInput';

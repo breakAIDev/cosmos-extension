@@ -1,20 +1,20 @@
-import { CheckCircle } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import { motion } from 'framer-motion'
-import { CopySvg, FilledDownArrowSvg } from 'images/misc'
-import React from 'react'
-import { sliceWord } from 'utils/strings'
+import { CheckCircle } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import { motion } from 'framer-motion';
+import { CopySvg, FilledDownArrowSvg } from 'images/misc';
+import React from 'react';
+import { sliceWord } from 'utils/strings';
 
 type WalletButtonProps = {
-  showWalletAvatar?: boolean
-  giveCopyOption?: boolean
-  handleCopyClick?: () => void
-  walletName: string
-  showDropdown?: boolean
-  handleDropdownClick?: () => void
-  walletAvatar?: string
-  isAddressCopied?: boolean
-}
+  showWalletAvatar?: boolean;
+  giveCopyOption?: boolean;
+  handleCopyClick?: () => void;
+  walletName: string;
+  showDropdown?: boolean;
+  handleDropdownClick?: () => void;
+  walletAvatar?: string;
+  isAddressCopied?: boolean;
+};
 
 const WalletButton = React.memo(
   ({
@@ -34,18 +34,13 @@ const WalletButton = React.memo(
         )}
       >
         <button
-          className={classNames(
-            'flex items-center justify-center gap-2 py-[6px] pl-[12px] pr-[2px]',
-            {
-              'cursor-pointer': handleDropdownClick,
-              'border-r-[1px] border-solid border-gray-100 dark:border-gray-850': giveCopyOption,
-            },
-          )}
+          className={classNames('flex items-center justify-center gap-2 py-[6px] pl-[12px] pr-[2px]', {
+            'cursor-pointer': handleDropdownClick,
+            'border-r-[1px] border-solid border-gray-100 dark:border-gray-850': giveCopyOption,
+          })}
           onClick={handleDropdownClick}
         >
-          {showWalletAvatar ? (
-            <img className='w-[16px] h-[16px]' src={walletAvatar} alt='wallet avatar' />
-          ) : null}
+          {showWalletAvatar ? <img className='w-[16px] h-[16px]' src={walletAvatar} alt='wallet avatar' /> : null}
 
           <span
             className='dark:text-white-100 text-black-100 truncate text-[14px] font-bold max-w-[96px] !leading-[19.6px]'
@@ -54,9 +49,7 @@ const WalletButton = React.memo(
             {sliceWord(walletName, 8, 0)}
           </span>
 
-          {showDropdown ? (
-            <FilledDownArrowSvg className='fill-black-100 dark:fill-white-100 mr-[4px]' />
-          ) : null}
+          {showDropdown ? <FilledDownArrowSvg className='fill-black-100 dark:fill-white-100 mr-[4px]' /> : null}
         </button>
 
         {giveCopyOption ? (
@@ -88,9 +81,9 @@ const WalletButton = React.memo(
           </motion.div>
         )}
       </div>
-    )
+    );
   },
-)
+);
 
-WalletButton.displayName = 'WalletButton'
-export { WalletButton }
+WalletButton.displayName = 'WalletButton';
+export { WalletButton };

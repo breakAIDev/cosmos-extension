@@ -5,36 +5,36 @@ import {
   useActiveStakingDenom,
   useDualStaking,
   useSelectedNetwork,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { Buttons, ThemeName, useTheme } from '@leapwallet/leap-ui'
-import BigNumber from 'bignumber.js'
-import BottomModal from 'components/bottom-modal'
-import { ValidatorItemSkeleton } from 'components/Skeletons/StakeSkeleton'
-import Text from 'components/text'
-import { useFormatCurrency } from 'hooks/settings/useCurrency'
-import { Images } from 'images'
-import React, { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Colors } from 'theme/colors'
-import { imgOnError } from 'utils/imgOnError'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { Buttons, ThemeName, useTheme } from '@leapwallet/leap-ui';
+import BigNumber from 'bignumber.js';
+import BottomModal from 'components/bottom-modal';
+import { ValidatorItemSkeleton } from 'components/Skeletons/StakeSkeleton';
+import Text from 'components/text';
+import { useFormatCurrency } from 'hooks/settings/useCurrency';
+import { Images } from 'images';
+import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Colors } from 'theme/colors';
+import { imgOnError } from 'utils/imgOnError';
 
-import { StakeInputPageState } from '../StakeInputPage'
-import { ProviderDelegation, Provider, SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { RootDenomsStore } from '@leapwallet/cosmos-wallet-store'
-import { observer } from 'mobx-react-lite'
-import { rootDenomsStore } from 'stores/denoms-store-instance'
-import { isSidePanel } from 'utils/isSidePanel'
-import { hideAssetsStore } from 'stores/hide-assets-store'
+import { StakeInputPageState } from '../StakeInputPage';
+import { ProviderDelegation, Provider, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { RootDenomsStore } from '@leapwallet/cosmos-wallet-store';
+import { observer } from 'mobx-react-lite';
+import { rootDenomsStore } from 'stores/denoms-store-instance';
+import { isSidePanel } from 'utils/isSidePanel';
+import { hideAssetsStore } from 'stores/hide-assets-store';
 
 interface StakedProviderDetailsProps {
-  isOpen: boolean
-  onClose: () => void
-  onSwitchValidator: () => void
-  provider?: Provider
-  delegation: ProviderDelegation
-  rootDenomsStore: RootDenomsStore
-  forceChain?: SupportedChain
-  forceNetwork?: 'mainnet' | 'testnet'
+  isOpen: boolean;
+  onClose: () => void;
+  onSwitchValidator: () => void;
+  provider?: Provider;
+  delegation: ProviderDelegation;
+  rootDenomsStore: RootDenomsStore;
+  forceChain?: SupportedChain;
+  forceNetwork?: 'mainnet' | 'testnet';
 }
 
 const StakedProviderDetails = observer(
@@ -48,49 +48,36 @@ const StakedProviderDetails = observer(
     forceChain,
     forceNetwork,
   }: StakedProviderDetailsProps) => {
-    const denoms = rootDenomsStore.allDenoms
-    const _activeChain = useActiveChain()
-    const activeChain = useMemo(() => forceChain || _activeChain, [_activeChain, forceChain])
+    const denoms = rootDenomsStore.allDenoms;
+    const _activeChain = useActiveChain();
+    const activeChain = useMemo(() => forceChain || _activeChain, [_activeChain, forceChain]);
 
-    const _activeNetwork = useSelectedNetwork()
-    const activeNetwork = useMemo(
-      () => forceNetwork || _activeNetwork,
-      [_activeNetwork, forceNetwork],
-    )
+    const _activeNetwork = useSelectedNetwork();
+    const activeNetwork = useMemo(() => forceNetwork || _activeNetwork, [_activeNetwork, forceNetwork]);
 
-    const [activeStakingDenom] = useActiveStakingDenom(denoms, activeChain, activeNetwork)
-    const [formatCurrency] = useFormatCurrency()
-    const { theme } = useTheme()
+    const [activeStakingDenom] = useActiveStakingDenom(denoms, activeChain, activeNetwork);
+    const [formatCurrency] = useFormatCurrency();
+    const { theme } = useTheme();
 
     const amountTitleText = useMemo(() => {
       if (new BigNumber(delegation.amount.currencyAmount ?? '').gt(0)) {
-        return hideAssetsStore.formatHideBalance(
-          formatCurrency(new BigNumber(delegation.amount.currencyAmount ?? '')),
-        )
+        return hideAssetsStore.formatHideBalance(formatCurrency(new BigNumber(delegation.amount.currencyAmount ?? '')));
       } else {
-        return hideAssetsStore.formatHideBalance(
-          delegation.amount.formatted_amount ?? delegation.amount.amount,
-        )
+        return hideAssetsStore.formatHideBalance(delegation.amount.formatted_amount ?? delegation.amount.amount);
       }
     }, [
       delegation.amount.amount,
       delegation.amount.currencyAmount,
       delegation.amount.formatted_amount,
       formatCurrency,
-    ])
+    ]);
 
     const amountSubtitleText = useMemo(() => {
       if (new BigNumber(delegation.amount.currencyAmount ?? '').gt(0)) {
-        return hideAssetsStore.formatHideBalance(
-          delegation.amount.formatted_amount ?? delegation.amount.amount,
-        )
+        return hideAssetsStore.formatHideBalance(delegation.amount.formatted_amount ?? delegation.amount.amount);
       }
-      return ''
-    }, [
-      delegation.amount.amount,
-      delegation.amount.currencyAmount,
-      delegation.amount.formatted_amount,
-    ])
+      return '';
+    }, [delegation.amount.amount, delegation.amount.currencyAmount, delegation.amount.formatted_amount]);
 
     return (
       <BottomModal isOpen={isOpen} onClose={onClose} title='Provider Details' className='p-6'>
@@ -106,9 +93,7 @@ const StakedProviderDetails = observer(
             <Text size='lg' color='text-black-100 dark:text-white-100' className='font-bold'>
               {sliceWord(
                 provider?.moniker,
-                isSidePanel()
-                  ? 8 + Math.floor(((Math.min(window.innerWidth, 400) - 320) / 81) * 7)
-                  : 15,
+                isSidePanel() ? 8 + Math.floor(((Math.min(window.innerWidth, 400) - 320) / 81) * 7) : 15,
                 3,
               )}
             </Text>
@@ -167,48 +152,33 @@ const StakedProviderDetails = observer(
           </Buttons.Generic>
         </div>
       </BottomModal>
-    )
+    );
   },
-)
+);
 
 interface ProviderCardProps {
-  provider: Provider
-  delegation: ProviderDelegation
-  onClick?: () => void
+  provider: Provider;
+  delegation: ProviderDelegation;
+  onClick?: () => void;
 }
 
 const ProviderCard = observer(({ provider, delegation, onClick }: ProviderCardProps) => {
-  const [formatCurrency] = useFormatCurrency()
+  const [formatCurrency] = useFormatCurrency();
 
   const amountTitleText = useMemo(() => {
     if (new BigNumber(delegation.amount.currencyAmount ?? '').gt(0)) {
-      return hideAssetsStore.formatHideBalance(
-        formatCurrency(new BigNumber(delegation.amount.currencyAmount ?? '')),
-      )
+      return hideAssetsStore.formatHideBalance(formatCurrency(new BigNumber(delegation.amount.currencyAmount ?? '')));
     } else {
-      return hideAssetsStore.formatHideBalance(
-        delegation.amount.formatted_amount ?? delegation.amount.amount,
-      )
+      return hideAssetsStore.formatHideBalance(delegation.amount.formatted_amount ?? delegation.amount.amount);
     }
-  }, [
-    delegation.amount.amount,
-    delegation.amount.currencyAmount,
-    delegation.amount.formatted_amount,
-    formatCurrency,
-  ])
+  }, [delegation.amount.amount, delegation.amount.currencyAmount, delegation.amount.formatted_amount, formatCurrency]);
 
   const amountSubtitleText = useMemo(() => {
     if (new BigNumber(delegation.amount.currencyAmount ?? '').gt(0)) {
-      return hideAssetsStore.formatHideBalance(
-        delegation.amount.formatted_amount ?? delegation.amount.amount,
-      )
+      return hideAssetsStore.formatHideBalance(delegation.amount.formatted_amount ?? delegation.amount.amount);
     }
-    return ''
-  }, [
-    delegation.amount.amount,
-    delegation.amount.currencyAmount,
-    delegation.amount.formatted_amount,
-  ])
+    return '';
+  }, [delegation.amount.amount, delegation.amount.currencyAmount, delegation.amount.formatted_amount]);
 
   return (
     <div
@@ -225,16 +195,10 @@ const ProviderCard = observer(({ provider, delegation, onClick }: ProviderCardPr
         />
         <div className='flex justify-between items-center w-full'>
           <div className='flex flex-col justify-center items-start'>
-            <Text
-              size='sm'
-              color='text-black-100 dark:text-white-100'
-              className='font-bold  overflow-hidden'
-            >
+            <Text size='sm' color='text-black-100 dark:text-white-100' className='font-bold  overflow-hidden'>
               {sliceWord(
                 provider?.moniker,
-                isSidePanel()
-                  ? 5 + Math.floor(((Math.min(window.innerWidth, 400) - 320) / 81) * 7)
-                  : 10,
+                isSidePanel() ? 5 + Math.floor(((Math.min(window.innerWidth, 400) - 320) / 81) * 7) : 10,
                 3,
               )}
             </Text>
@@ -255,31 +219,31 @@ const ProviderCard = observer(({ provider, delegation, onClick }: ProviderCardPr
         </div>
       </div>
     </div>
-  )
-})
+  );
+});
 
 export default function ProviderList({
   forceChain,
   forceNetwork,
 }: {
-  forceChain?: SupportedChain
-  forceNetwork?: 'mainnet' | 'testnet'
+  forceChain?: SupportedChain;
+  forceNetwork?: 'mainnet' | 'testnet';
 }) {
-  const navigate = useNavigate()
-  const [showStakedProviderDetails, setShowStakedProviderDetails] = useState(false)
-  const [selectedDelegation, setSelectedDelegation] = useState<ProviderDelegation | undefined>()
-  const { delegations: providerDelegations, loadingDelegations, providers } = useDualStaking()
+  const navigate = useNavigate();
+  const [showStakedProviderDetails, setShowStakedProviderDetails] = useState(false);
+  const [selectedDelegation, setSelectedDelegation] = useState<ProviderDelegation | undefined>();
+  const { delegations: providerDelegations, loadingDelegations, providers } = useDualStaking();
 
   const emptyProviderDelegation = useMemo(() => {
-    return Object.values(providerDelegations ?? {}).find((d) => d.provider === 'empty_provider')
-  }, [providerDelegations])
+    return Object.values(providerDelegations ?? {}).find((d) => d.provider === 'empty_provider');
+  }, [providerDelegations]);
 
   const sortedDelegations = useMemo(() => {
     const _sortedDelegations = Object.values(providerDelegations ?? {}).sort(
       (a, b) => parseFloat(b.amount.amount) - parseFloat(a.amount.amount),
-    )
-    return _sortedDelegations
-  }, [providerDelegations])
+    );
+    return _sortedDelegations;
+  }, [providerDelegations]);
 
   const emptyProvider = useMemo(() => {
     return {
@@ -287,8 +251,8 @@ export default function ProviderList({
       moniker: 'Empty Provider',
       address: emptyProviderDelegation?.provider ?? '',
       specs: [],
-    }
-  }, [emptyProviderDelegation?.provider])
+    };
+  }, [emptyProviderDelegation?.provider]);
 
   return (
     <>
@@ -310,8 +274,8 @@ export default function ProviderList({
                   delegation={emptyProviderDelegation}
                   provider={emptyProvider}
                   onClick={() => {
-                    setSelectedDelegation(emptyProviderDelegation)
-                    setShowStakedProviderDetails(true)
+                    setSelectedDelegation(emptyProviderDelegation);
+                    setShowStakedProviderDetails(true);
                   }}
                 />
               </>
@@ -327,7 +291,7 @@ export default function ProviderList({
               </div>
             )}
             {sortedDelegations.map((d) => {
-              const provider = providers?.find((el) => el.address === d.provider)
+              const provider = providers?.find((el) => el.address === d.provider);
               return (
                 provider && (
                   <ProviderCard
@@ -335,12 +299,12 @@ export default function ProviderList({
                     delegation={d}
                     provider={provider}
                     onClick={() => {
-                      setSelectedDelegation(d)
-                      setShowStakedProviderDetails(true)
+                      setSelectedDelegation(d);
+                      setShowStakedProviderDetails(true);
                     }}
                   />
                 )
-              )
+              );
             })}
           </>
         )}
@@ -366,12 +330,12 @@ export default function ProviderList({
                     : providers.find((p) => p.address === selectedDelegation.provider),
                 providerDelegation: selectedDelegation,
               } as StakeInputPageState,
-            })
+            });
           }}
           forceChain={forceChain}
           forceNetwork={forceNetwork}
         />
       )}
     </>
-  )
+  );
 }

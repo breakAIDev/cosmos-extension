@@ -1,2 +1,2 @@
-export * from './getDerivationPathToShow'
-export * from './sendMessageToTab'
+export * from './getDerivationPathToShow';
+export * from './sendMessageToTab';

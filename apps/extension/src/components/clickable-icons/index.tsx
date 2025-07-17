@@ -1,10 +1,10 @@
-import React, { ComponentPropsWithoutRef, forwardRef } from 'react'
-import { cn } from 'utils/cn'
+import React, { ComponentPropsWithoutRef, forwardRef } from 'react';
+import { cn } from 'utils/cn';
 
 interface ClickableIconProps extends ComponentPropsWithoutRef<'button'> {
-  disabled?: boolean
-  label: string
-  icon: React.ElementType
+  disabled?: boolean;
+  label: string;
+  icon: React.ElementType;
 }
 
 const ClickableIcon = forwardRef<HTMLButtonElement, ClickableIconProps>(
@@ -23,14 +23,12 @@ const ClickableIcon = forwardRef<HTMLButtonElement, ClickableIconProps>(
           <Icon className='size-5' weight='fill' />
         </button>
 
-        {!!label && (
-          <p className='text-sm mt-[10px] tracking-wide font-medium !leading-[22px]'>{label}</p>
-        )}
+        {!!label && <p className='text-sm mt-[10px] tracking-wide font-medium !leading-[22px]'>{label}</p>}
       </div>
-    )
+    );
   },
-)
+);
 
-ClickableIcon.displayName = 'ClickableIcon'
+ClickableIcon.displayName = 'ClickableIcon';
 
-export default ClickableIcon
+export default ClickableIcon;

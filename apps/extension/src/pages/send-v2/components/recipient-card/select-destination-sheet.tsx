@@ -1,25 +1,25 @@
-import { SelectedAddress, useChainsStore } from '@leapwallet/cosmos-wallet-hooks'
-import { isAptosChain } from '@leapwallet/cosmos-wallet-sdk'
-import { isBitcoinChain } from '@leapwallet/cosmos-wallet-store/dist/utils'
-import classNames from 'classnames'
-import BottomModal from 'components/bottom-modal'
-import { useSendContext } from 'pages/send-v2/context'
-import React, { useEffect, useState } from 'react'
+import { SelectedAddress, useChainsStore } from '@leapwallet/cosmos-wallet-hooks';
+import { isAptosChain } from '@leapwallet/cosmos-wallet-sdk';
+import { isBitcoinChain } from '@leapwallet/cosmos-wallet-store/dist/utils';
+import classNames from 'classnames';
+import BottomModal from 'components/bottom-modal';
+import { useSendContext } from 'pages/send-v2/context';
+import React, { useEffect, useState } from 'react';
 
-import MyContacts from './MyContacts'
-import { MyEvmWalletAddresses } from './MyEvmWalletAddresses'
-import MyWallets from './MyWallets'
+import MyContacts from './MyContacts';
+import { MyEvmWalletAddresses } from './MyEvmWalletAddresses';
+import MyWallets from './MyWallets';
 
-export type DestinationType = 'My Wallets' | 'My Contacts'
+export type DestinationType = 'My Wallets' | 'My Contacts';
 
 type SelectDestinationSheetProps = {
-  isOpenType: DestinationType | null
-  onClose: () => void
-  setSelectedAddress: (address: SelectedAddress) => void
-  handleContactSelect: (contact: SelectedAddress) => void
-  skipSupportedDestinationChainsIDs: string[]
-  showOnlyMyWallets?: boolean
-}
+  isOpenType: DestinationType | null;
+  onClose: () => void;
+  setSelectedAddress: (address: SelectedAddress) => void;
+  handleContactSelect: (contact: SelectedAddress) => void;
+  skipSupportedDestinationChainsIDs: string[];
+  showOnlyMyWallets?: boolean;
+};
 
 export const SelectDestinationSheet: React.FC<SelectDestinationSheetProps> = ({
   isOpenType,
@@ -29,18 +29,16 @@ export const SelectDestinationSheet: React.FC<SelectDestinationSheetProps> = ({
   skipSupportedDestinationChainsIDs,
   showOnlyMyWallets,
 }) => {
-  const [destinationType, setDestinationType] = useState<DestinationType>(
-    isOpenType as DestinationType,
-  )
+  const [destinationType, setDestinationType] = useState<DestinationType>(isOpenType as DestinationType);
 
-  const { chains } = useChainsStore()
-  const { sendActiveChain } = useSendContext()
+  const { chains } = useChainsStore();
+  const { sendActiveChain } = useSendContext();
 
-  const chainData = chains[sendActiveChain]
+  const chainData = chains[sendActiveChain];
 
   useEffect(() => {
-    setDestinationType(isOpenType as DestinationType)
-  }, [isOpenType])
+    setDestinationType(isOpenType as DestinationType);
+  }, [isOpenType]);
 
   return (
     <BottomModal
@@ -58,8 +56,7 @@ export const SelectDestinationSheet: React.FC<SelectDestinationSheetProps> = ({
             className={classNames(
               'rounded-[40px] flex-1 text-center py-2 cursor-pointer text-sm font-bold transition-all duration-200',
               {
-                'bg-white-100 dark:bg-gray-950 text-black-100 dark:text-white-100':
-                  destinationType === type,
+                'bg-white-100 dark:bg-gray-950 text-black-100 dark:text-white-100': destinationType === type,
               },
               { 'bg-[transparent] text-gray-600 dark:text-gray-400': destinationType !== type },
             )}
@@ -86,5 +83,5 @@ export const SelectDestinationSheet: React.FC<SelectDestinationSheetProps> = ({
         )}
       </div>
     </BottomModal>
-  )
-}
+  );
+};

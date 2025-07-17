@@ -1,5 +1,5 @@
-import React from 'react'
-import Skeleton from 'react-loading-skeleton'
+import React from 'react';
+import Skeleton from 'react-loading-skeleton';
 
 export function AmountCardSkeleton() {
   return (
@@ -11,7 +11,7 @@ export function AmountCardSkeleton() {
       </div>
       <Skeleton count={1} borderRadius={16} height={70} />
     </div>
-  )
+  );
 }
 
 export default function StakeCardSkeleton() {
@@ -21,7 +21,7 @@ export default function StakeCardSkeleton() {
       <Skeleton count={2} />
       <Skeleton count={4} />
     </div>
-  )
+  );
 }
 
 export function YouStakeSkeleton() {
@@ -31,17 +31,14 @@ export function YouStakeSkeleton() {
       <Skeleton className='w-80 h-10' />
       <Skeleton className='w-24 h-6' />
     </div>
-  )
+  );
 }
 
 export function ValidatorItemSkeleton(props: { count?: number }) {
   return (
     <div className='flex flex-col gap-4 text-xs'>
       {Array.from({ length: props.count ?? 1 }).map((_, index) => (
-        <div
-          key={index}
-          className='flex items-center px-4 py-3 bg-secondary-100 w-full rounded-xl gap-4'
-        >
+        <div key={index} className='flex items-center px-4 py-3 bg-secondary-100 w-full rounded-xl gap-4'>
           <Skeleton width={36} height={36} circle />
           <Skeleton width={100} height={12} />
 
@@ -52,5 +49,5 @@ export function ValidatorItemSkeleton(props: { count?: number }) {
         </div>
       ))}
     </div>
-  )
+  );
 }

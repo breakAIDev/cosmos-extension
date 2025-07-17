@@ -1,39 +1,34 @@
 // eslint-disable-next-line simple-import-sort/imports
-import '../styles/globals.css'
-import { fetchIbcTraceData } from './initializeGlobalConfigs'
+import '../styles/globals.css';
+import { fetchIbcTraceData } from './initializeGlobalConfigs';
 
-import { setSpeculosTransport, setUseSpeculosTransport } from '@leapwallet/cosmos-wallet-sdk'
-import { LeapUiTheme, ThemeName } from '@leapwallet/leap-ui'
-import { createSentryConfig } from '@leapwallet/sentry-config/dist/extension'
-import * as Sentry from '@sentry/react'
-import { BrowserTracing } from '@sentry/tracing'
-import { QueryClientProvider } from '@tanstack/react-query'
-import ErrorBoundaryFallback from 'components/error-boundary-fallback'
-import mixpanel from 'mixpanel-browser'
-import * as React from 'react'
-import { createRoot } from 'react-dom/client'
-import {
-  createRoutesFromChildren,
-  matchRoutes,
-  useLocation,
-  useNavigationType,
-} from 'react-router-dom'
-import { beforeCapture } from 'utils/sentry'
-import browser from 'webextension-polyfill'
+import { setSpeculosTransport, setUseSpeculosTransport } from '@leapwallet/cosmos-wallet-sdk';
+import { LeapUiTheme, ThemeName } from '@leapwallet/leap-ui';
+import { createSentryConfig } from '@leapwallet/sentry-config/dist/extension';
+import * as Sentry from '@sentry/react';
+import { BrowserTracing } from '@sentry/tracing';
+import { QueryClientProvider } from '@tanstack/react-query';
+import ErrorBoundaryFallback from 'components/error-boundary-fallback';
+import mixpanel from 'mixpanel-browser';
+import * as React from 'react';
+import { createRoot } from 'react-dom/client';
+import { createRoutesFromChildren, matchRoutes, useLocation, useNavigationType } from 'react-router-dom';
+import { beforeCapture } from 'utils/sentry';
+import browser from 'webextension-polyfill';
 
-import App from './App'
-import { queryClient } from './query-client'
+import App from './App';
+import { queryClient } from './query-client';
 
-fetchIbcTraceData()
+fetchIbcTraceData();
 
 async function importSpeculosTransport() {
-  setUseSpeculosTransport(true)
-  const SpeculosHttpTransport = await import('@empiricalrun/hw-transport-speculos-http')
-  setSpeculosTransport(SpeculosHttpTransport.default)
+  setUseSpeculosTransport(true);
+  const SpeculosHttpTransport = await import('@empiricalrun/hw-transport-speculos-http');
+  setSpeculosTransport(SpeculosHttpTransport.default);
 }
 
 if (process.env.buildType === 'staging') {
-  importSpeculosTransport()
+  importSpeculosTransport();
 }
 
 //const persister = createAsyncStoragePersister({
@@ -86,7 +81,7 @@ if (process.env.SENTRY_DSN) {
       tracesSampleRate: 0.1,
       enabled: process.env.NODE_ENV === 'production',
     }),
-  )
+  );
 }
 
 mixpanel.init(process.env.MIXPANEL_TOKEN as string, {
@@ -95,7 +90,7 @@ mixpanel.init(process.env.MIXPANEL_TOKEN as string, {
   ignore_dnt: process.env.NODE_ENV === 'development',
   batch_requests: window.location.href.includes('sign') ? false : true,
   batch_flush_interval_ms: 1000 * 30,
-})
+});
 
 // if (process.env.NODE_ENV === 'development') {
 //   import('./dev-watcher-client')
@@ -110,15 +105,13 @@ mixpanel.init(process.env.MIXPANEL_TOKEN as string, {
 //
 setInterval(() => {
   if (document.hasFocus()) {
-    browser.runtime.sendMessage({ type: 'popup-ping', data: { timestamp: Date.now() } })
+    browser.runtime.sendMessage({ type: 'popup-ping', data: { timestamp: Date.now() } });
   }
-}, 1000)
+}, 1000);
 
-const container = document.getElementById('root')
+const container = document.getElementById('root');
 if (!container) {
-  throw new Error(
-    'Root element not found. Make sure you have a div with id="root" in your index.html',
-  )
+  throw new Error('Root element not found. Make sure you have a div with id="root" in your index.html');
 }
 
 createRoot(container).render(
@@ -133,4 +126,4 @@ createRoot(container).render(
       </LeapUiTheme>
     </Sentry.ErrorBoundary>
   </React.StrictMode>,
-)
+);

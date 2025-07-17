@@ -1,1 +1,1 @@
-export * from './CopyAddressCard'
+export * from './CopyAddressCard';

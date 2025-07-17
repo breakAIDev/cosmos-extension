@@ -1,20 +1,20 @@
-import { CaretRight } from '@phosphor-icons/react'
-import { BigNumber } from 'bignumber.js'
-import classNames from 'classnames'
-import { Images } from 'images'
-import React from 'react'
-import { imgOnError } from 'utils/imgOnError'
+import { CaretRight } from '@phosphor-icons/react';
+import { BigNumber } from 'bignumber.js';
+import classNames from 'classnames';
+import { Images } from 'images';
+import React from 'react';
+import { imgOnError } from 'utils/imgOnError';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function DefiRow({ token }: { token: any }) {
-  const formatter = Intl.NumberFormat('en', { notation: 'compact' })
-  const productName = token?.productName
+  const formatter = Intl.NumberFormat('en', { notation: 'compact' });
+  const productName = token?.productName;
 
   const logos = productName?.includes('/')
     ? productName?.split('/').join(' ').split(' ').slice(0, 2)
     : productName?.includes('(')
     ? [productName?.replace('(', '').replace(')', '').split(' ')[1]]
-    : [productName?.split(' ')[0]]
+    : [productName?.split(' ')[0]];
 
   return (
     <div
@@ -35,9 +35,7 @@ export default function DefiRow({ token }: { token: any }) {
         </div>
         <div className='flex flex-col items-start justify-center'>
           <div className='flex flex-row items-center justify-start gap-[4px]'>
-            <div className='text-xs font-medium leading-[20px] text-black-100 dark:text-white-100'>
-              {productName}
-            </div>
+            <div className='text-xs font-medium leading-[20px] text-black-100 dark:text-white-100'>{productName}</div>
           </div>
           <div className='text-[10px] font-medium !leading-[12px] capitalize text-gray-500 dark:text-gray-500'>
             {token?.dappCategory?.replace(/([a-z])([A-Z])/g, '$1 $2') ?? 'NA'}
@@ -46,9 +44,7 @@ export default function DefiRow({ token }: { token: any }) {
       </div>
 
       <div className='flex flex-row items-center justify-start gap-2'>
-        <div
-          className={classNames('text-xs sm:!text-sm font-medium !leading-[20px] text-orange-300')}
-        >
+        <div className={classNames('text-xs sm:!text-sm font-medium !leading-[20px] text-orange-300')}>
           ${formatter.format(token?.tvl)}
         </div>
       </div>
@@ -71,5 +67,5 @@ export default function DefiRow({ token }: { token: any }) {
         />
       </div>
     </div>
-  )
+  );
 }

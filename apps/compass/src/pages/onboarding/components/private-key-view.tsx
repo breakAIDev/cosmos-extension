@@ -1,19 +1,19 @@
-import { Button } from 'components/ui/button'
-import { PrivateKeyInput } from 'components/ui/input/private-key-input'
-import { KeySlimIcon } from 'icons/key-slim-icon'
-import React, { useEffect, useState } from 'react'
-import { validateSeedPhrase } from 'utils/validateSeedPhrase'
+import { Button } from 'components/ui/button';
+import { PrivateKeyInput } from 'components/ui/input/private-key-input';
+import { KeySlimIcon } from 'icons/key-slim-icon';
+import React, { useEffect, useState } from 'react';
+import { validateSeedPhrase } from 'utils/validateSeedPhrase';
 
-import { useImportWalletContext } from '../import/import-wallet-context'
-import { OnboardingWrapper } from '../wrapper'
+import { useImportWalletContext } from '../import/import-wallet-context';
+import { OnboardingWrapper } from '../wrapper';
 
 type PrivateKeyProps = {
-  onProceed: () => void
-  secret: string
-  setSecret: React.Dispatch<React.SetStateAction<string>>
-  privateKeyError?: string
-  setPrivateKeyError?: React.Dispatch<React.SetStateAction<string>>
-}
+  onProceed: () => void;
+  secret: string;
+  setSecret: React.Dispatch<React.SetStateAction<string>>;
+  privateKeyError?: string;
+  setPrivateKeyError?: React.Dispatch<React.SetStateAction<string>>;
+};
 
 export const PrivateKeyView = ({
   onProceed,
@@ -22,26 +22,26 @@ export const PrivateKeyView = ({
   privateKeyError,
   setPrivateKeyError,
 }: PrivateKeyProps) => {
-  const [error, setError] = useState(privateKeyError ?? '')
-  const { prevStep, currentStep } = useImportWalletContext()
+  const [error, setError] = useState(privateKeyError ?? '');
+  const { prevStep, currentStep } = useImportWalletContext();
 
   useEffect(() => {
     if (privateKeyError?.length) {
-      setError(privateKeyError)
+      setError(privateKeyError);
     }
-  }, [privateKeyError])
+  }, [privateKeyError]);
 
   const onChangeHandler = (value: string) => {
-    setError('')
-    setPrivateKeyError && setPrivateKeyError('')
-    setSecret(value)
-  }
+    setError('');
+    setPrivateKeyError && setPrivateKeyError('');
+    setSecret(value);
+  };
 
   const handleImportWalletClick = () => {
     if (validateSeedPhrase({ phrase: secret, isPrivateKey: true, setError, setSecret })) {
-      onProceed()
+      onProceed();
     }
-  }
+  };
 
   return (
     <OnboardingWrapper
@@ -62,5 +62,5 @@ export const PrivateKeyView = ({
         Import private key
       </Button>
     </OnboardingWrapper>
-  )
-}
+  );
+};

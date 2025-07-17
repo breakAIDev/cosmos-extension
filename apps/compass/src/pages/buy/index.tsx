@@ -1,40 +1,40 @@
-import { formatTokenAmount, useDebounce } from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { ArrowLeft, ArrowSquareOut, CaretDown } from '@phosphor-icons/react'
-import { captureException } from '@sentry/react'
-import BigNumber from 'bignumber.js'
-import classNames from 'classnames'
-import { WalletButton } from 'components/button'
-import { PageHeader } from 'components/header'
-import Text from 'components/text'
-import { Button } from 'components/ui/button'
-import { PageName } from 'config/analytics'
-import { useWalletInfo } from 'hooks'
-import { AssetProps } from 'hooks/kado/useGetSupportedAssets'
-import { useChainInfos } from 'hooks/useChainInfos'
-import { getConversionRateKado, getQuoteKado } from 'hooks/useGetKadoDetails'
-import { getQuoteMoonpay } from 'hooks/useGetMoonpayDetails'
-import { getQuoteTransak } from 'hooks/useGetTransakDetails'
-import useQuery from 'hooks/useQuery'
-import { useAddress } from 'hooks/wallet/useAddress'
-import { Wallet } from 'hooks/wallet/useWallet'
-import { Images } from 'images'
-import { isString } from 'markdown-it/lib/common/utils'
-import SelectWallet from 'pages/home/SelectWallet'
-import { convertObjInQueryParams } from 'pages/home/utils'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import Skeleton from 'react-loading-skeleton'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { cn } from 'utils/cn'
-import { getCountryLogo } from 'utils/getCountryLogo'
-import { uiErrorTags } from 'utils/sentry'
-import { removeLeadingZeroes } from 'utils/strings'
+import { formatTokenAmount, useDebounce } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { ArrowLeft, ArrowSquareOut, CaretDown } from '@phosphor-icons/react';
+import { captureException } from '@sentry/react';
+import BigNumber from 'bignumber.js';
+import classNames from 'classnames';
+import { WalletButton } from 'components/button';
+import { PageHeader } from 'components/header';
+import Text from 'components/text';
+import { Button } from 'components/ui/button';
+import { PageName } from 'config/analytics';
+import { useWalletInfo } from 'hooks';
+import { AssetProps } from 'hooks/kado/useGetSupportedAssets';
+import { useChainInfos } from 'hooks/useChainInfos';
+import { getConversionRateKado, getQuoteKado } from 'hooks/useGetKadoDetails';
+import { getQuoteMoonpay } from 'hooks/useGetMoonpayDetails';
+import { getQuoteTransak } from 'hooks/useGetTransakDetails';
+import useQuery from 'hooks/useQuery';
+import { useAddress } from 'hooks/wallet/useAddress';
+import { Wallet } from 'hooks/wallet/useWallet';
+import { Images } from 'images';
+import { isString } from 'markdown-it/lib/common/utils';
+import SelectWallet from 'pages/home/SelectWallet';
+import { convertObjInQueryParams } from 'pages/home/utils';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Skeleton from 'react-loading-skeleton';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { cn } from 'utils/cn';
+import { getCountryLogo } from 'utils/getCountryLogo';
+import { uiErrorTags } from 'utils/sentry';
+import { removeLeadingZeroes } from 'utils/strings';
 
-import SelectAssetSheet from './components/SelectAssetSheet'
-import SelectCurrencySheet from './components/SelectCurrencySheet'
-import useWallets = Wallet.useWallets
+import SelectAssetSheet from './components/SelectAssetSheet';
+import SelectCurrencySheet from './components/SelectCurrencySheet';
+import useWallets = Wallet.useWallets;
 
-import SelectProvider from './components/SelectProvider'
+import SelectProvider from './components/SelectProvider';
 
 export enum ServiceProviderEnum {
   KADO = 'kado',
@@ -44,18 +44,18 @@ export enum ServiceProviderEnum {
 
 export type ProviderQuote = {
   [key in ServiceProviderEnum]?: {
-    crypto?: string | null
-    fiat?: string | null
-  }
-}
+    crypto?: string | null;
+    fiat?: string | null;
+  };
+};
 
 export type ProviderDetailsType = {
   [key in ServiceProviderEnum]: {
-    name: string
-    image: string
-    url: string
-  }
-}
+    name: string;
+    image: string;
+    url: string;
+  };
+};
 
 export const ProviderDetails: ProviderDetailsType = {
   [ServiceProviderEnum.KADO]: {
@@ -73,61 +73,61 @@ export const ProviderDetails: ProviderDetailsType = {
     image: 'https://assets.leapwallet.io/transak.svg',
     url: 'https://global.transak.com',
   },
-}
+};
 
 const Buy = () => {
-  const pageViewSource = useQuery().get('pageSource') ?? undefined
-  const { walletAvatar, walletName } = useWalletInfo()
+  const pageViewSource = useQuery().get('pageSource') ?? undefined;
+  const { walletAvatar, walletName } = useWalletInfo();
 
-  const navigate = useNavigate()
-  const location = useLocation()
+  const navigate = useNavigate();
+  const location = useLocation();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const asset: any = location.state
+  const asset: any = location.state;
 
-  const [showSelectCurrencySheet, setShowSelectCurrencySheet] = useState(false)
-  const [showSelectTokenSheet, setShowSelectTokenSheet] = useState(false)
-  const [showSelectProviderSheet, setShowSelectProviderSheet] = useState(false)
-  const [showSelectWallet, setShowSelectWallet] = useState(false)
-  const [provider, setProvider] = useState<ServiceProviderEnum>()
-  const [userSelectedProvider, setUserSelectedProvider] = useState(false)
-  const [providersQuote, setProvidersQuote] = useState<ProviderQuote>({})
+  const [showSelectCurrencySheet, setShowSelectCurrencySheet] = useState(false);
+  const [showSelectTokenSheet, setShowSelectTokenSheet] = useState(false);
+  const [showSelectProviderSheet, setShowSelectProviderSheet] = useState(false);
+  const [showSelectWallet, setShowSelectWallet] = useState(false);
+  const [provider, setProvider] = useState<ServiceProviderEnum>();
+  const [userSelectedProvider, setUserSelectedProvider] = useState(false);
+  const [providersQuote, setProvidersQuote] = useState<ProviderQuote>({});
 
-  const [selectedCurrency, setSelectedCurrency] = useState('USD')
-  const [selectedAsset, setSelectedAsset] = useState<AssetProps | undefined>(undefined)
-  const selectedAddress = useAddress()
+  const [selectedCurrency, setSelectedCurrency] = useState('USD');
+  const [selectedAsset, setSelectedAsset] = useState<AssetProps | undefined>(undefined);
+  const selectedAddress = useAddress();
 
-  const [payFiatAmount, setPayFiatAmount] = useState<string>('0')
-  const debouncedPayAmount = useDebounce<string>(payFiatAmount, 500)
-  const [fiatAmountInUsd, setFiatAmountInUsd] = useState('0')
-  const [getAssetAmount, setGetAssetAmount] = useState<string>('0')
-  const [loadingQuote, setLoadingQuote] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const inputAmountRef = useRef(null)
-  const chains = useChainInfos()
-  const wallets = useWallets()
+  const [payFiatAmount, setPayFiatAmount] = useState<string>('0');
+  const debouncedPayAmount = useDebounce<string>(payFiatAmount, 500);
+  const [fiatAmountInUsd, setFiatAmountInUsd] = useState('0');
+  const [getAssetAmount, setGetAssetAmount] = useState<string>('0');
+  const [loadingQuote, setLoadingQuote] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const inputAmountRef = useRef(null);
+  const chains = useChainInfos();
+  const wallets = useWallets();
 
   const selectedAddressIsSelf: boolean | null = useMemo(() => {
     const walletAddresses = wallets
       ? Object.values(wallets)
           .map((wallet) => Object.values(wallet.addresses))
           .flat()
-      : []
+      : [];
     if (selectedAddress) {
-      return walletAddresses.includes(selectedAddress)
+      return walletAddresses.includes(selectedAddress);
     } else {
-      return null
+      return null;
     }
-  }, [selectedAddress, wallets])
+  }, [selectedAddress, wallets]);
 
-  const handleOpenWalletSheet = useCallback(() => setShowSelectWallet(true), [])
+  const handleOpenWalletSheet = useCallback(() => setShowSelectWallet(true), []);
 
-  const multipleProvider = Object.values(providersQuote).length > 1
+  const multipleProvider = Object.values(providersQuote).length > 1;
 
   useEffect(() => {
-    let isCancelled = false
+    let isCancelled = false;
     async function getQuote() {
       try {
-        setLoadingQuote(true)
+        setLoadingQuote(true);
         const allQuotes = await Promise.all([
           getQuoteKado({
             transactionType: 'buy',
@@ -154,7 +154,7 @@ const Buy = () => {
             paymentMethod: 'credit_debit_card',
             symbol: selectedAsset?.symbol?.toLowerCase() ?? '',
           }),
-        ])
+        ]);
         if (!isCancelled) {
           if (allQuotes[0].success) {
             setProvidersQuote((prevState) => ({
@@ -163,13 +163,13 @@ const Buy = () => {
                 crypto: allQuotes[0]?.data?.quote?.receiveUnitCountAfterFees?.amount,
                 fiat: allQuotes[0]?.data?.quote?.receiveAmountAfterFees?.amount,
               },
-            }))
+            }));
           } else {
             setProvidersQuote((prevState) => {
-              const newVal = { ...prevState }
-              delete newVal[ServiceProviderEnum.KADO]
-              return newVal
-            })
+              const newVal = { ...prevState };
+              delete newVal[ServiceProviderEnum.KADO];
+              return newVal;
+            });
           }
 
           if (allQuotes[1].success) {
@@ -181,13 +181,13 @@ const Buy = () => {
                   .dividedBy(allQuotes[1]?.response?.conversionPrice)
                   .toFixed(2),
               },
-            }))
+            }));
           } else {
             setProvidersQuote((prevState) => {
-              const newVal = { ...prevState }
-              delete newVal[ServiceProviderEnum.TRANSAK]
-              return newVal
-            })
+              const newVal = { ...prevState };
+              delete newVal[ServiceProviderEnum.TRANSAK];
+              return newVal;
+            });
           }
 
           if (allQuotes[2].success) {
@@ -199,64 +199,64 @@ const Buy = () => {
                   .multipliedBy(allQuotes[2]?.quoteCurrencyPrice)
                   .toFixed(2),
               },
-            }))
+            }));
           } else {
             setProvidersQuote((prevState) => {
-              const newVal = { ...prevState }
-              delete newVal[ServiceProviderEnum.MOONPAY]
-              return newVal
-            })
+              const newVal = { ...prevState };
+              delete newVal[ServiceProviderEnum.MOONPAY];
+              return newVal;
+            });
           }
         }
       } catch (error) {
-        if (isCancelled) return
+        if (isCancelled) return;
         captureException(error, {
           tags: uiErrorTags,
-        })
+        });
 
-        const message = error instanceof Error ? error.message : 'An error occurred'
+        const message = error instanceof Error ? error.message : 'An error occurred';
         if (message.toLowerCase().includes('timeout')) {
-          setError('Request timed out. Unable to fetch quote.')
+          setError('Request timed out. Unable to fetch quote.');
         } else {
-          setError(message)
+          setError(message);
         }
       } finally {
-        if (!isCancelled) setLoadingQuote(false)
+        if (!isCancelled) setLoadingQuote(false);
       }
     }
     if (debouncedPayAmount && new BigNumber(debouncedPayAmount).isGreaterThan('0')) {
-      getQuote()
+      getQuote();
     } else {
-      setGetAssetAmount('0')
+      setGetAssetAmount('0');
     }
 
     return () => {
-      isCancelled = true
-    }
-  }, [debouncedPayAmount, selectedAsset, selectedCurrency])
+      isCancelled = true;
+    };
+  }, [debouncedPayAmount, selectedAsset, selectedCurrency]);
 
   useEffect(() => {
     if (inputAmountRef.current) {
-      ;(inputAmountRef.current as HTMLElement)?.focus()
+      (inputAmountRef.current as HTMLElement)?.focus();
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
     if (pageViewSource === PageName.AssetDetails) {
-      const chain = chains[asset.chain as SupportedChain]
+      const chain = chains[asset.chain as SupportedChain];
       setSelectedAsset({
         symbol: asset.symbol,
         assetImg: asset.img,
         origin: chain.chainName,
-      })
+      });
     }
-  }, [asset, chains, pageViewSource])
+  }, [asset, chains, pageViewSource]);
 
   useEffect(() => {
     if (!selectedAsset) {
-      setShowSelectTokenSheet(true)
+      setShowSelectTokenSheet(true);
     }
-  }, [selectedAsset])
+  }, [selectedAsset]);
 
   useEffect(() => {
     async function currencyToUsd(amount: string, currency: string) {
@@ -264,84 +264,78 @@ const Buy = () => {
         const conversionRateToUsd = await getConversionRateKado({
           from: currency,
           to: 'USD',
-        })
-        const usdAmount = new BigNumber(amount).multipliedBy(conversionRateToUsd)
-        setFiatAmountInUsd(usdAmount.toString())
+        });
+        const usdAmount = new BigNumber(amount).multipliedBy(conversionRateToUsd);
+        setFiatAmountInUsd(usdAmount.toString());
       } else {
-        setFiatAmountInUsd(amount)
+        setFiatAmountInUsd(amount);
       }
     }
-    currencyToUsd(debouncedPayAmount, selectedCurrency)
-  }, [debouncedPayAmount, selectedCurrency])
+    currencyToUsd(debouncedPayAmount, selectedCurrency);
+  }, [debouncedPayAmount, selectedCurrency]);
 
   useEffect(() => {
     async function setLimitError() {
-      setError(null)
+      setError(null);
       if (parseFloat(fiatAmountInUsd) > 0) {
         const conversionRate = await getConversionRateKado({
           from: 'USD',
           to: selectedCurrency,
-        })
+        });
         if (parseFloat(fiatAmountInUsd) < 10) {
-          setError(
-            `Amount should be at least ${(10 * conversionRate).toFixed(2)} ${selectedCurrency}`,
-          )
+          setError(`Amount should be at least ${(10 * conversionRate).toFixed(2)} ${selectedCurrency}`);
         } else if (parseFloat(fiatAmountInUsd) > 10000) {
-          setError(
-            `Amount exceeds your daily limit of ${(10000 * conversionRate).toFixed(
-              2,
-            )} ${selectedCurrency}`,
-          )
+          setError(`Amount exceeds your daily limit of ${(10000 * conversionRate).toFixed(2)} ${selectedCurrency}`);
         }
       }
     }
-    setLimitError()
-  }, [fiatAmountInUsd, selectedCurrency])
+    setLimitError();
+  }, [fiatAmountInUsd, selectedCurrency]);
 
   useEffect(() => {
     if (!provider && selectedAsset) {
       if (selectedAsset.symbol === 'SEI') {
-        setProvider(ServiceProviderEnum.TRANSAK)
+        setProvider(ServiceProviderEnum.TRANSAK);
         setProvidersQuote({
           [ServiceProviderEnum.TRANSAK]: {},
           [ServiceProviderEnum.KADO]: {},
           [ServiceProviderEnum.MOONPAY]: {},
-        })
+        });
       } else {
-        setProvider(ServiceProviderEnum.KADO)
+        setProvider(ServiceProviderEnum.KADO);
         setProvidersQuote({
           [ServiceProviderEnum.KADO]: {},
-        })
+        });
       }
     }
-  }, [provider, selectedAsset])
+  }, [provider, selectedAsset]);
 
   useEffect(() => {
     if (!userSelectedProvider) {
-      let maxProvider: ServiceProviderEnum | null = null
-      let maxCrypto = 0
+      let maxProvider: ServiceProviderEnum | null = null;
+      let maxCrypto = 0;
 
       for (const key in providersQuote) {
-        const provider = key as ServiceProviderEnum
-        const cryptoValue = parseFloat(providersQuote[provider]?.crypto || '0')
+        const provider = key as ServiceProviderEnum;
+        const cryptoValue = parseFloat(providersQuote[provider]?.crypto || '0');
 
         if (cryptoValue > maxCrypto) {
-          maxCrypto = cryptoValue
-          maxProvider = provider
+          maxCrypto = cryptoValue;
+          maxProvider = provider;
         }
       }
 
       if (maxProvider) {
-        setProvider(maxProvider)
+        setProvider(maxProvider);
       }
     }
-  }, [providersQuote, userSelectedProvider])
+  }, [providersQuote, userSelectedProvider]);
 
   useEffect(() => {
     if (provider) {
-      setGetAssetAmount(providersQuote[provider]?.crypto || '0')
+      setGetAssetAmount(providersQuote[provider]?.crypto || '0');
     }
-  }, [provider, providersQuote])
+  }, [provider, providersQuote]);
 
   const getQueryParams = useCallback(
     (val: ServiceProviderEnum) => {
@@ -358,7 +352,7 @@ const Buy = () => {
             productList: 'BUY',
             mode: 'minimal',
             theme: 'dark',
-          }
+          };
         case ServiceProviderEnum.TRANSAK:
           return {
             apiKey: process.env.TRANSAK_API_KEY,
@@ -369,7 +363,7 @@ const Buy = () => {
             paymentMethod: 'credit_debit_card',
             cryptoCurrencyCode: selectedAsset?.symbol,
             walletAddress: selectedAddress,
-          }
+          };
         case ServiceProviderEnum.MOONPAY:
           return {
             apiKey: process.env.MOONPAY_API_KEY,
@@ -377,38 +371,28 @@ const Buy = () => {
             walletAddress: selectedAddress,
             baseCurrencyCode: selectedCurrency?.toLowerCase(),
             baseCurrencyAmount: payFiatAmount,
-          }
+          };
       }
     },
-    [
-      payFiatAmount,
-      selectedAddress,
-      selectedAsset?.origin,
-      selectedAsset?.symbol,
-      selectedCurrency,
-    ],
-  )
+    [payFiatAmount, selectedAddress, selectedAsset?.origin, selectedAsset?.symbol, selectedCurrency],
+  );
 
   const handleBuyClick = useCallback(() => {
     if (provider) {
-      const params = getQueryParams(provider)
+      const params = getQueryParams(provider);
 
-      const queryParams = convertObjInQueryParams(params)
-      const url = `${ProviderDetails[provider].url}?${queryParams}`
-      window.open(url, '_blank')
+      const queryParams = convertObjInQueryParams(params);
+      const url = `${ProviderDetails[provider].url}?${queryParams}`;
+      window.open(url, '_blank');
     }
-  }, [provider, getQueryParams])
+  }, [provider, getQueryParams]);
 
   return (
     <>
       {selectedAsset ? (
         <>
           <PageHeader>
-            <ArrowLeft
-              size={48}
-              className='text-monochrome cursor-pointer p-3'
-              onClick={() => navigate(-1)}
-            />
+            <ArrowLeft size={48} className='text-monochrome cursor-pointer p-3' onClick={() => navigate(-1)} />
 
             <WalletButton
               className='absolute top-1/2 right-1/2 translate-x-1/2 -translate-y-1/2'
@@ -423,22 +407,20 @@ const Buy = () => {
           <div className='flex flex-col gap-3 p-6'>
             <div className='w-full bg-secondary-100 rounded-2xl p-5 flex flex-col gap-3'>
               <div className='flex justify-between items-center'>
-                <p className='text-muted-foreground text-sm font-medium !leading-[22.4px]'>
-                  You pay
-                </p>
+                <p className='text-muted-foreground text-sm font-medium !leading-[22.4px]'>You pay</p>
               </div>
 
               <div className='flex rounded-2xl justify-between w-full items-center gap-2 h-[34px] p-[2px]'>
                 <input
                   value={payFiatAmount}
                   onChange={(e) => {
-                    setError(null)
-                    const val = e.target.value
-                    const amount = removeLeadingZeroes(val)
+                    setError(null);
+                    const val = e.target.value;
+                    const amount = removeLeadingZeroes(val);
                     if (parseFloat(amount) < 0) {
-                      setError('Please enter a valid positive number.')
+                      setError('Please enter a valid positive number.');
                     } else {
-                      setPayFiatAmount(amount)
+                      setPayFiatAmount(amount);
                     }
                   }}
                   type='number'
@@ -462,14 +444,9 @@ const Buy = () => {
                   )}
                   onClick={() => setShowSelectCurrencySheet(true)}
                 >
-                  <img
-                    src={getCountryLogo(selectedCurrency)}
-                    className='w-[24px] h-[24px] rounded-full'
-                  />
+                  <img src={getCountryLogo(selectedCurrency)} className='w-[24px] h-[24px] rounded-full' />
 
-                  <p className={classNames('dark:text-white-100 text-sm font-medium')}>
-                    {selectedCurrency}
-                  </p>
+                  <p className={classNames('dark:text-white-100 text-sm font-medium')}>{selectedCurrency}</p>
                   <CaretDown size={14} className='dark:text-white-100' />
                 </button>
               </div>
@@ -488,16 +465,14 @@ const Buy = () => {
                     >
                       {element}
                     </button>
-                  )
+                  );
                 })}
               </div>
             </div>
 
             <div className='w-full bg-secondary-100 rounded-2xl p-5 flex flex-col gap-3'>
               <div className='flex justify-between items-center'>
-                <p className='text-muted-foreground text-sm font-medium !leading-[22.4px]'>
-                  You get
-                </p>
+                <p className='text-muted-foreground text-sm font-medium !leading-[22.4px]'>You get</p>
               </div>
 
               <div className='flex rounded-2xl justify-between w-full items-center gap-2 h-[34px] p-[2px]'>
@@ -527,9 +502,7 @@ const Buy = () => {
                 >
                   <img src={selectedAsset?.assetImg} className='w-[24px] h-[24px] rounded-full' />
 
-                  <p className={classNames('dark:text-white-100 text-sm font-medium')}>
-                    {selectedAsset?.symbol}
-                  </p>
+                  <p className={classNames('dark:text-white-100 text-sm font-medium')}>{selectedAsset?.symbol}</p>
                   <CaretDown size={14} className='dark:text-white-100' />
                 </button>
               </div>
@@ -545,10 +518,7 @@ const Buy = () => {
                 })}
                 onClick={() => setShowSelectProviderSheet(true)}
               >
-                <img
-                  src={provider ? ProviderDetails[provider].image : Images.Logos.GenericDark}
-                  className='w-5 h-5'
-                />
+                <img src={provider ? ProviderDetails[provider].image : Images.Logos.GenericDark} className='w-5 h-5' />
                 <Text size='sm' color='text-monochrome' className='font-medium'>
                   {provider ? ProviderDetails[provider].name : ''}
                 </Text>
@@ -561,9 +531,7 @@ const Buy = () => {
                 '!bg-red-300 text-white-100': error,
               })}
               onClick={handleBuyClick}
-              disabled={
-                !new BigNumber(getAssetAmount).isGreaterThan(0) || loadingQuote || isString(error)
-              }
+              disabled={!new BigNumber(getAssetAmount).isGreaterThan(0) || loadingQuote || isString(error)}
             >
               {!new BigNumber(getAssetAmount).isGreaterThan(0) ? (
                 'Enter amount'
@@ -582,13 +550,13 @@ const Buy = () => {
         isVisible={showSelectCurrencySheet}
         onClose={() => setShowSelectCurrencySheet(false)}
         onCurrencySelect={(currency) => {
-          setSelectedCurrency(currency)
-          setUserSelectedProvider(false)
-          setProvider(undefined)
-          setProvidersQuote({})
-          setShowSelectCurrencySheet(false)
+          setSelectedCurrency(currency);
+          setUserSelectedProvider(false);
+          setProvider(undefined);
+          setProvidersQuote({});
+          setShowSelectCurrencySheet(false);
           if (inputAmountRef.current) {
-            ;(inputAmountRef.current as HTMLElement).focus()
+            (inputAmountRef.current as HTMLElement).focus();
           }
         }}
       />
@@ -597,19 +565,19 @@ const Buy = () => {
         isVisible={showSelectTokenSheet}
         onClose={() => {
           if (!selectedAsset) {
-            navigate(-1)
+            navigate(-1);
           } else {
-            setShowSelectTokenSheet(false)
+            setShowSelectTokenSheet(false);
           }
         }}
         onAssetSelect={(asset) => {
-          setSelectedAsset(asset)
-          setUserSelectedProvider(false)
-          setProvider(undefined)
-          setProvidersQuote({})
-          setShowSelectTokenSheet(false)
+          setSelectedAsset(asset);
+          setUserSelectedProvider(false);
+          setProvider(undefined);
+          setProvidersQuote({});
+          setShowSelectTokenSheet(false);
           if (inputAmountRef.current) {
-            ;(inputAmountRef.current as HTMLElement).focus()
+            (inputAmountRef.current as HTMLElement).focus();
           }
         }}
       />
@@ -617,8 +585,8 @@ const Buy = () => {
       <SelectWallet
         isVisible={showSelectWallet}
         onClose={() => {
-          setShowSelectWallet(false)
-          navigate('/home')
+          setShowSelectWallet(false);
+          navigate('/home');
         }}
         title='Wallets'
       />
@@ -627,15 +595,15 @@ const Buy = () => {
         isVisible={showSelectProviderSheet}
         onClose={() => setShowSelectProviderSheet(false)}
         onProviderSelect={(val: ServiceProviderEnum) => {
-          setProvider(val)
-          setUserSelectedProvider(true)
-          setShowSelectProviderSheet(false)
+          setProvider(val);
+          setUserSelectedProvider(true);
+          setShowSelectProviderSheet(false);
         }}
         providersQuote={providersQuote}
         asset={selectedAsset}
       />
     </>
-  )
-}
+  );
+};
 
-export default Buy
+export default Buy;

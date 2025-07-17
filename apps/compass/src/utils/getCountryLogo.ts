@@ -1,4 +1,4 @@
-import { Images } from 'images'
+import { Images } from 'images';
 
 export enum Countries {
   USD = 'USD',
@@ -31,6 +31,6 @@ export enum Countries {
 }
 
 export const getCountryLogo = (country: string) => {
-  const countryCode = country?.toUpperCase() as keyof typeof Countries
-  return Images.Countries[countryCode] ?? Images.Logos.GenericDark
-}
+  const countryCode = country?.toUpperCase() as keyof typeof Countries;
+  return Images.Countries[countryCode] ?? Images.Logos.GenericDark;
+};

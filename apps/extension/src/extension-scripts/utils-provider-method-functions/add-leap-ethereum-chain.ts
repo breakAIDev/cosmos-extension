@@ -1,15 +1,15 @@
-import { getEvmError } from '@leapwallet/cosmos-wallet-provider'
+import { getEvmError } from '@leapwallet/cosmos-wallet-provider';
 import {
   ETHEREUM_METHOD_TYPE,
   ETHEREUM_RPC_ERROR,
   WalletAddEthereumChainParams,
-} from '@leapwallet/cosmos-wallet-provider/dist/provider/types'
-import { formatNewEvmChainInfo, NewEvmChainInfo } from '@leapwallet/cosmos-wallet-sdk'
-import { NEW_CHAIN_REQUEST } from 'config/storage-keys'
-import { isNotValidURL } from 'utils/regex'
-import browser from 'webextension-polyfill'
+} from '@leapwallet/cosmos-wallet-provider/dist/provider/types';
+import { formatNewEvmChainInfo, NewEvmChainInfo } from '@leapwallet/cosmos-wallet-sdk';
+import { NEW_CHAIN_REQUEST } from 'config/storage-keys';
+import { isNotValidURL } from 'utils/regex';
+import browser from 'webextension-polyfill';
 
-import { awaitEnableChainResponse, Page } from '../utils'
+import { awaitEnableChainResponse, Page } from '../utils';
 
 export async function addLeapEthereumChain(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -17,13 +17,13 @@ export async function addLeapEthereumChain(
   evmChainIdMap: Record<
     string,
     {
-      key: string
-      isTestnet: boolean
+      key: string;
+      isTestnet: boolean;
     }
   >,
   evmCustomOpenPopup: (page: Page, queryString?: string) => Promise<void>,
 ) {
-  const chainInfo: WalletAddEthereumChainParams = payload.params[0]
+  const chainInfo: WalletAddEthereumChainParams = payload.params[0];
   const validChainInfo: NewEvmChainInfo = {
     chainId: Number(chainInfo.chainId),
     chainName: chainInfo.chainName,
@@ -31,22 +31,16 @@ export async function addLeapEthereumChain(
     rpcUrl: '',
     blockExplorerUrl: '',
     iconUrl: '',
-  }
+  };
 
   if (!chainInfo.chainId) {
     return {
-      error: getEvmError(
-        ETHEREUM_RPC_ERROR.INVALID_PARAMS,
-        `ChainId is required'. Received: ${chainInfo.chainId}`,
-      ),
-    }
+      error: getEvmError(ETHEREUM_RPC_ERROR.INVALID_PARAMS, `ChainId is required'. Received: ${chainInfo.chainId}`),
+    };
   } else if (evmChainIdMap[Number(chainInfo.chainId).toString()]) {
     return {
-      error: getEvmError(
-        ETHEREUM_RPC_ERROR.INVALID_PARAMS,
-        `ChainId ${chainInfo.chainId} already exists.`,
-      ),
-    }
+      error: getEvmError(ETHEREUM_RPC_ERROR.INVALID_PARAMS, `ChainId ${chainInfo.chainId} already exists.`),
+    };
   }
 
   if (!chainInfo.nativeCurrency) {
@@ -55,17 +49,17 @@ export async function addLeapEthereumChain(
         ETHEREUM_RPC_ERROR.INVALID_PARAMS,
         `Expected an object with 'name', 'symbol', and 'decimals'. Received: ${chainInfo.nativeCurrency}`,
       ),
-    }
+    };
   }
 
   if (chainInfo.rpcUrls?.length > 0) {
     const validRpcUrls = chainInfo.rpcUrls.filter((rpcUrl: string) => {
       if (isNotValidURL(rpcUrl)) {
-        return false
+        return false;
       }
 
-      return true
-    })
+      return true;
+    });
 
     if (validRpcUrls.length === 0) {
       return {
@@ -73,9 +67,9 @@ export async function addLeapEthereumChain(
           ETHEREUM_RPC_ERROR.INVALID_PARAMS,
           `Expected an array with at least one valid string HTTPS URL 'rpcUrls'. Received: ${chainInfo.rpcUrls}`,
         ),
-      }
+      };
     } else {
-      validChainInfo.rpcUrl = validRpcUrls[0]
+      validChainInfo.rpcUrl = validRpcUrls[0];
     }
   } else {
     return {
@@ -83,19 +77,17 @@ export async function addLeapEthereumChain(
         ETHEREUM_RPC_ERROR.INVALID_PARAMS,
         `Expected an array with at least one valid string HTTPS URL 'rpcUrls'. Received: ${chainInfo.rpcUrls}`,
       ),
-    }
+    };
   }
 
   if (chainInfo.blockExplorerUrls?.length ?? 0 > 0) {
-    const validBlockExplorerUrls = chainInfo.blockExplorerUrls?.filter(
-      (blockExplorerUrl: string) => {
-        if (isNotValidURL(blockExplorerUrl)) {
-          return false
-        }
+    const validBlockExplorerUrls = chainInfo.blockExplorerUrls?.filter((blockExplorerUrl: string) => {
+      if (isNotValidURL(blockExplorerUrl)) {
+        return false;
+      }
 
-        return true
-      },
-    )
+      return true;
+    });
 
     if (validBlockExplorerUrls?.length === 0) {
       return {
@@ -103,20 +95,20 @@ export async function addLeapEthereumChain(
           ETHEREUM_RPC_ERROR.INVALID_PARAMS,
           `Expected undefined or array with at least one valid string HTTPS URL 'blockExplorerUrl'. Received: ${chainInfo.blockExplorerUrls}`,
         ),
-      }
+      };
     } else {
-      validChainInfo.blockExplorerUrl = validBlockExplorerUrls?.[0]
+      validChainInfo.blockExplorerUrl = validBlockExplorerUrls?.[0];
     }
   }
 
   if (chainInfo.iconUrls?.length ?? 0 > 0) {
     const validIconUrls = chainInfo.iconUrls?.filter((iconUrl: string) => {
       if (isNotValidURL(iconUrl)) {
-        return false
+        return false;
       }
 
-      return true
-    })
+      return true;
+    });
 
     if (validIconUrls?.length === 0) {
       return {
@@ -124,13 +116,13 @@ export async function addLeapEthereumChain(
           ETHEREUM_RPC_ERROR.INVALID_PARAMS,
           `Expected undefined or array with at least one valid string HTTPS URL 'iconUrls'. Received: ${chainInfo.iconUrls}`,
         ),
-      }
+      };
     } else {
-      validChainInfo.iconUrl = validIconUrls?.[0]
+      validChainInfo.iconUrl = validIconUrls?.[0];
     }
   }
 
-  const newChainInfo = formatNewEvmChainInfo(validChainInfo)
+  const newChainInfo = formatNewEvmChainInfo(validChainInfo);
   await browser.storage.local.set({
     [NEW_CHAIN_REQUEST]: {
       type: ETHEREUM_METHOD_TYPE.WALLET__ADD_ETHEREUM_CHAIN,
@@ -139,14 +131,14 @@ export async function addLeapEthereumChain(
         origin: payload.origin,
       },
     },
-  })
+  });
 
-  await evmCustomOpenPopup('suggest-ethereum-chain')
+  await evmCustomOpenPopup('suggest-ethereum-chain');
 
   try {
-    await awaitEnableChainResponse()
-    return { success: { chainId: chainInfo.chainId } }
+    await awaitEnableChainResponse();
+    return { success: { chainId: chainInfo.chainId } };
   } catch (_) {
-    return { error: getEvmError(ETHEREUM_RPC_ERROR.USER_REJECTED_REQUEST) }
+    return { error: getEvmError(ETHEREUM_RPC_ERROR.USER_REJECTED_REQUEST) };
   }
 }

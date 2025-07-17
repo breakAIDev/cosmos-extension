@@ -1,18 +1,18 @@
-import { GoogleColorIcon } from 'icons/google-color-icon'
-import { RecoveryPhraseIcon } from 'icons/recovery-phrase'
-import { WalletIcon } from 'icons/wallet-icon'
-import React from 'react'
-import { cn } from 'utils/cn'
+import { GoogleColorIcon } from 'icons/google-color-icon';
+import { RecoveryPhraseIcon } from 'icons/recovery-phrase';
+import { WalletIcon } from 'icons/wallet-icon';
+import React from 'react';
+import { cn } from 'utils/cn';
 
-import { OnboardingWrapper } from '../wrapper'
-import { useCreateWalletContext } from './create-wallet-context'
+import { OnboardingWrapper } from '../wrapper';
+import { useCreateWalletContext } from './create-wallet-context';
 
 const SelectWalletButton = (props: {
-  title: string
-  description: string
-  icon: React.ReactNode
-  onClick: () => void
-  className?: string
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  onClick: () => void;
+  className?: string;
 }) => {
   return (
     <button
@@ -29,11 +29,11 @@ const SelectWalletButton = (props: {
         <span className='text-sm'>{props.description}</span>
       </div>
     </button>
-  )
-}
+  );
+};
 
 export const SelectCreateWalletType = () => {
-  const { moveToNextStep, prevStep, currentStep, socialLogin } = useCreateWalletContext()
+  const { moveToNextStep, prevStep, currentStep, socialLogin } = useCreateWalletContext();
 
   return (
     <OnboardingWrapper
@@ -65,9 +65,7 @@ export const SelectCreateWalletType = () => {
         />
       </div>
 
-      {socialLogin.error && (
-        <div className='text-destructive-100 text-sm text-center'>{socialLogin.error}</div>
-      )}
+      {socialLogin.error && <div className='text-destructive-100 text-sm text-center'>{socialLogin.error}</div>}
     </OnboardingWrapper>
-  )
-}
+  );
+};

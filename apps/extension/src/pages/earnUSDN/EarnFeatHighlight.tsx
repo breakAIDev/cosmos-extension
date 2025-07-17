@@ -1,24 +1,24 @@
-import { useChainInfo } from '@leapwallet/cosmos-wallet-hooks'
-import BigNumber from 'bignumber.js'
-import Text from 'components/text'
-import useEarnHighlightFeature from 'hooks/useEarnHighlightFeature'
-import { Images } from 'images'
-import React from 'react'
-import { useNavigate } from 'react-router'
-import { miscellaneousDataStore } from 'stores/chain-infos-store'
-import { imgOnError } from 'utils/imgOnError'
+import { useChainInfo } from '@leapwallet/cosmos-wallet-hooks';
+import BigNumber from 'bignumber.js';
+import Text from 'components/text';
+import useEarnHighlightFeature from 'hooks/useEarnHighlightFeature';
+import { Images } from 'images';
+import React from 'react';
+import { useNavigate } from 'react-router';
+import { miscellaneousDataStore } from 'stores/chain-infos-store';
+import { imgOnError } from 'utils/imgOnError';
 
 const EarnFeatHighlight = () => {
-  const { hideFeature, showFeature } = useEarnHighlightFeature()
-  const navigate = useNavigate()
-  const chainInfo = useChainInfo('noble')
+  const { hideFeature, showFeature } = useEarnHighlightFeature();
+  const navigate = useNavigate();
+  const chainInfo = useChainInfo('noble');
 
   const handleStartEarningClick = () => {
-    hideFeature()
-    navigate('/earn-usdn')
-  }
+    hideFeature();
+    navigate('/earn-usdn');
+  };
 
-  if (!showFeature) return null
+  if (!showFeature) return null;
 
   return (
     <div className='px-[29px] pt-[56px] pb-10 bg-[#000000cc] absolute bottom-0 w-full h-full z-10'>
@@ -37,21 +37,14 @@ const EarnFeatHighlight = () => {
                 className='w-20 h-20 bg-white-100 rounded-full absolute right-0'
               />
             </div>
-            <Text className='font-bold text-[28px] px-[20px] text-center mt-10'>
-              Earn real-time rewards with USDC
-            </Text>
-            <Text
-              className='font-light text-sm text-center mt-3 !inline p-4'
-              color='text-white-100'
-            >
+            <Text className='font-bold text-[28px] px-[20px] text-center mt-10'>Earn real-time rewards with USDC</Text>
+            <Text className='font-light text-sm text-center mt-3 !inline p-4' color='text-white-100'>
               Put your stable asset to work and&nbsp;
               {
                 <span className='text-white-100 font-bold'>
                   earn up to&nbsp;
                   {parseFloat(miscellaneousDataStore.data?.noble?.usdnEarnApy) > 0
-                    ? new BigNumber(miscellaneousDataStore.data.noble.usdnEarnApy)
-                        .multipliedBy(100)
-                        .toFixed(2) + '%'
+                    ? new BigNumber(miscellaneousDataStore.data.noble.usdnEarnApy).multipliedBy(100).toFixed(2) + '%'
                     : '-'}
                   &nbsp;APY
                 </span>
@@ -66,15 +59,12 @@ const EarnFeatHighlight = () => {
             </div>
           </div>
         </div>
-        <div
-          className='text-md font-bold cursor-pointer text-black-100 dark:text-white-100'
-          onClick={hideFeature}
-        >
+        <div className='text-md font-bold cursor-pointer text-black-100 dark:text-white-100' onClick={hideFeature}>
           Dismiss
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default EarnFeatHighlight
+export default EarnFeatHighlight;

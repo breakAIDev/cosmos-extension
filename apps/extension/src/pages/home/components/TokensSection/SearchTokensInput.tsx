@@ -1,28 +1,28 @@
-import { SearchInput } from 'components/ui/input/search-input'
-import { AnimatePresence } from 'framer-motion'
-import { motion } from 'framer-motion'
-import React, { useEffect } from 'react'
-import { transition250 } from 'utils/motion-variants'
+import { SearchInput } from 'components/ui/input/search-input';
+import { AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+import React, { useEffect } from 'react';
+import { transition250 } from 'utils/motion-variants';
 
 const searchInputVariants = {
   hidden: { opacity: 0, height: 0 },
   visible: { opacity: 1, height: 'auto' },
-}
+};
 
 export const SearchTokensInput = ({
   searchQuery,
   setSearchQuery,
   showSearch,
 }: {
-  searchQuery: string
-  setSearchQuery: (value: string) => void
-  showSearch: boolean
+  searchQuery: string;
+  setSearchQuery: (value: string) => void;
+  showSearch: boolean;
 }) => {
   useEffect(() => {
     if (!showSearch) {
-      setSearchQuery('')
+      setSearchQuery('');
     }
-  }, [showSearch])
+  }, [showSearch]);
 
   return (
     <AnimatePresence>
@@ -45,5 +45,5 @@ export const SearchTokensInput = ({
         </motion.div>
       ) : null}
     </AnimatePresence>
-  )
-}
+  );
+};

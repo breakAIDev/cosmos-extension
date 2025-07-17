@@ -1,5 +1,5 @@
-import { Skeleton } from 'components/ui/skeleton'
-import React from 'react'
+import { Skeleton } from 'components/ui/skeleton';
+import React from 'react';
 
 export function YouStakeSkeleton() {
   return (
@@ -8,17 +8,14 @@ export function YouStakeSkeleton() {
       <Skeleton className='w-80 h-10' />
       <Skeleton className='w-24 h-6' />
     </div>
-  )
+  );
 }
 
 export function ValidatorItemSkeleton(props: { count?: number }) {
   return (
     <div className='flex flex-col gap-4'>
       {Array.from({ length: props.count ?? 1 }).map((_, index) => (
-        <div
-          key={index}
-          className='flex items-center px-5 py-4 bg-secondary-100 w-full rounded-xl gap-4'
-        >
+        <div key={index} className='flex items-center px-5 py-4 bg-secondary-100 w-full rounded-xl gap-4'>
           <Skeleton className='size-9 rounded-full' />
           <Skeleton className='w-24 h-3' />
 
@@ -29,5 +26,5 @@ export function ValidatorItemSkeleton(props: { count?: number }) {
         </div>
       ))}
     </div>
-  )
+  );
 }

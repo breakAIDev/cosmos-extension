@@ -1,89 +1,89 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import React, { Component } from 'react'
+import React, { Component } from 'react';
 
 type RecaptchaProps = {
-  className: string
-  onloadCallbackName: string
-  elementID: string
-  onloadCallback?: () => void
-  verifyCallback?: (token: string) => void
-  expiredCallback?: () => void
-  render: 'onload' | 'explicit'
-  sitekey: string
-  theme: 'light' | 'dark'
-  type: string
-  verifyCallbackName: string
-  expiredCallbackName: string
-  size: 'invisible' | 'compact' | 'normal'
-  tabindex: string
-  hl?: string
-  badge: 'bottomright' | 'bottomleft' | 'inline' | 'none'
-  action?: string
-}
+  className: string;
+  onloadCallbackName: string;
+  elementID: string;
+  onloadCallback?: () => void;
+  verifyCallback?: (token: string) => void;
+  expiredCallback?: () => void;
+  render: 'onload' | 'explicit';
+  sitekey: string;
+  theme: 'light' | 'dark';
+  type: string;
+  verifyCallbackName: string;
+  expiredCallbackName: string;
+  size: 'invisible' | 'compact' | 'normal';
+  tabindex: string;
+  hl?: string;
+  badge: 'bottomright' | 'bottomleft' | 'inline' | 'none';
+  action?: string;
+};
 
 type RecaptchaState = {
-  ready: boolean
-  widget: null
-}
+  ready: boolean;
+  widget: null;
+};
 
 const isReady = () =>
   typeof window !== 'undefined' &&
   // @ts-ignore
   typeof window.grecaptcha !== 'undefined' &&
   // @ts-ignore
-  typeof window.grecaptcha.render === 'function'
+  typeof window.grecaptcha.render === 'function';
 
 export class Recaptcha extends Component<RecaptchaProps, RecaptchaState> {
   constructor(props: RecaptchaProps) {
-    super(props)
-    this._renderGrecaptcha = this._renderGrecaptcha.bind(this)
-    this.reset = this.reset.bind(this)
+    super(props);
+    this._renderGrecaptcha = this._renderGrecaptcha.bind(this);
+    this.reset = this.reset.bind(this);
     this.state = {
       ready: isReady(),
       widget: null,
-    }
+    };
 
     // @ts-ignore
-    this.readyCheck = null
+    this.readyCheck = null;
 
     if (!this.state.ready && typeof window !== 'undefined') {
       // @ts-ignore
-      this.readyCheck = setInterval(this._updateReadyState.bind(this), 1000)
+      this.readyCheck = setInterval(this._updateReadyState.bind(this), 1000);
     }
   }
 
   componentDidMount() {
     if (this.state.ready) {
-      this._renderGrecaptcha()
+      this._renderGrecaptcha();
     }
   }
 
   componentDidUpdate(_: RecaptchaProps, prevState: RecaptchaState) {
-    const { render, onloadCallback } = this.props
+    const { render, onloadCallback } = this.props;
 
     if (render === 'explicit' && onloadCallback && this.state.ready && !prevState.ready) {
-      this._renderGrecaptcha()
+      this._renderGrecaptcha();
     }
   }
 
   componentWillUnmount() {
     // @ts-ignore
-    clearInterval(this.readyCheck)
+    clearInterval(this.readyCheck);
   }
 
   reset() {
-    const { ready, widget } = this.state
+    const { ready, widget } = this.state;
     if (ready && widget !== null) {
       // @ts-ignore
-      window.grecaptcha.reset(widget)
+      window.grecaptcha.reset(widget);
     }
   }
 
   execute() {
-    const { ready, widget } = this.state
+    const { ready, widget } = this.state;
     if (ready && widget !== null) {
       // @ts-ignore
-      window.grecaptcha.execute(widget)
+      window.grecaptcha.execute(widget);
     }
   }
 
@@ -91,10 +91,10 @@ export class Recaptcha extends Component<RecaptchaProps, RecaptchaState> {
     if (isReady()) {
       this.setState({
         ready: true,
-      })
+      });
 
       // @ts-ignore
-      clearInterval(this.readyCheck)
+      clearInterval(this.readyCheck);
     }
   }
 
@@ -113,10 +113,10 @@ export class Recaptcha extends Component<RecaptchaProps, RecaptchaState> {
         'expired-callback': this.props.expiredCallback ? this.props.expiredCallback : undefined,
         action: this.props.action,
       }),
-    })
+    });
 
     if (this.props.onloadCallback) {
-      this.props.onloadCallback()
+      this.props.onloadCallback();
     }
   }
 
@@ -128,7 +128,7 @@ export class Recaptcha extends Component<RecaptchaProps, RecaptchaState> {
           data-onloadcallbackname={this.props.onloadCallbackName}
           data-verifycallbackname={this.props.verifyCallbackName}
         />
-      )
+      );
     }
 
     return (
@@ -143,6 +143,6 @@ export class Recaptcha extends Component<RecaptchaProps, RecaptchaState> {
         data-tabindex={this.props.tabindex}
         data-action={this.props.action}
       />
-    )
+    );
   }
 }

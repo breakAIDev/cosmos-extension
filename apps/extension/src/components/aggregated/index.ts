@@ -1,3 +1,3 @@
-export * from './AggregatedLoading'
-export * from './AggregatedNullComponents'
-export * from './AggregatedSearchComponent'
+export * from './AggregatedLoading';
+export * from './AggregatedNullComponents';
+export * from './AggregatedSearchComponent';

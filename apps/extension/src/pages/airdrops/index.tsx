@@ -1,9 +1,9 @@
-import { PageName } from 'config/analytics'
-import { usePageView } from 'hooks/analytics/usePageView'
-import React from 'react'
+import { PageName } from 'config/analytics';
+import { usePageView } from 'hooks/analytics/usePageView';
+import React from 'react';
 
-import { AirdropsHeader } from './AirdropsHeader'
-import AirdropsHome from './AirdropsHome'
+import { AirdropsHeader } from './AirdropsHeader';
+import AirdropsHome from './AirdropsHome';
 
 export default function Airdrops() {
   // usePageView(PageName.Airdrops)
@@ -15,5 +15,5 @@ export default function Airdrops() {
         <AirdropsHome />
       </div>
     </div>
-  )
+  );
 }

@@ -1,7 +1,7 @@
-import { StdFee } from '@cosmjs/stargate'
-import { ChainInfos, EthermintTxHandler, LeapLedgerSignerEth } from '@leapwallet/cosmos-wallet-sdk'
-import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx'
-import { SourceChain } from 'types/swap'
+import { StdFee } from '@cosmjs/stargate';
+import { ChainInfos, EthermintTxHandler, LeapLedgerSignerEth } from '@leapwallet/cosmos-wallet-sdk';
+import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
+import { SourceChain } from 'types/swap';
 
 export async function handleEthermintTx(
   messageChain: SourceChain,
@@ -14,10 +14,10 @@ export async function handleEthermintTx(
     wallet,
     ChainInfos[messageChain.key].chainId,
     ChainInfos[messageChain.key].evmChainId,
-  )
-  const msgValue = encodedMessage.value
+  );
+  const msgValue = encodedMessage.value;
   if (!msgValue.token) {
-    throw new Error('Invalid token')
+    throw new Error('Invalid token');
   }
 
   return await ethermintTx.signIbcTx({
@@ -31,5 +31,5 @@ export async function handleEthermintTx(
     fee,
     memo: '',
     txMemo: msgValue.memo,
-  })
+  });
 }

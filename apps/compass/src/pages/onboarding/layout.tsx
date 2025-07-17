@@ -1,18 +1,14 @@
-import { motion, MotionProps } from 'framer-motion'
-import React, { PropsWithChildren, ReactNode } from 'react'
-import { cn } from 'utils/cn'
+import { motion, MotionProps } from 'framer-motion';
+import React, { PropsWithChildren, ReactNode } from 'react';
+import { cn } from 'utils/cn';
 
 type ExtensionPageProps = {
-  children?: ReactNode
-  className?: string
-  hideRightActions?: boolean
-} & MotionProps
+  children?: ReactNode;
+  className?: string;
+  hideRightActions?: boolean;
+} & MotionProps;
 
-export const OnboardingLayout = ({
-  className,
-  children,
-  ...props
-}: PropsWithChildren<ExtensionPageProps>) => {
+export const OnboardingLayout = ({ className, children, ...props }: PropsWithChildren<ExtensionPageProps>) => {
   return (
     <motion.div
       className={cn(
@@ -23,5 +19,5 @@ export const OnboardingLayout = ({
     >
       {children}
     </motion.div>
-  )
-}
+  );
+};

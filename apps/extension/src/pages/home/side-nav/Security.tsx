@@ -1,24 +1,24 @@
-import { useActiveChain, WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks'
-import { CardDivider } from '@leapwallet/leap-ui'
-import { Faders, GlobeHemisphereWest } from '@phosphor-icons/react'
-import { AGGREGATED_CHAIN_KEY } from 'config/constants'
-import { useAuth } from 'context/auth-context'
-import useActiveWallet from 'hooks/settings/useActiveWallet'
-import { LockIcon } from 'icons/lock'
-import { Phone } from 'icons/phone'
-import { ShieldIcon } from 'icons/shield'
-import { observer } from 'mobx-react-lite'
-import React, { useMemo } from 'react'
-import { globalSheetsStore } from 'stores/global-sheets-store'
+import { useActiveChain, WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks';
+import { CardDivider } from '@leapwallet/leap-ui';
+import { Faders, GlobeHemisphereWest } from '@phosphor-icons/react';
+import { AGGREGATED_CHAIN_KEY } from 'config/constants';
+import { useAuth } from 'context/auth-context';
+import useActiveWallet from 'hooks/settings/useActiveWallet';
+import { LockIcon } from 'icons/lock';
+import { Phone } from 'icons/phone';
+import { ShieldIcon } from 'icons/shield';
+import { observer } from 'mobx-react-lite';
+import React, { useMemo } from 'react';
+import { globalSheetsStore } from 'stores/global-sheets-store';
 
-import { SideNavSection } from '.'
-import { NavItem } from './NavItem'
-import { NavPages } from './types'
+import { SideNavSection } from '.';
+import { NavItem } from './NavItem';
+import { NavPages } from './types';
 
 const SecurityView = ({ setShowNavPage }: { setShowNavPage: (page: NavPages) => void }) => {
-  const { activeWallet } = useActiveWallet()
-  const auth = useAuth()
-  const activeChain = useActiveChain()
+  const { activeWallet } = useActiveWallet();
+  const auth = useAuth();
+  const activeChain = useActiveChain();
 
   const privacyOpts = useMemo(
     () => [
@@ -26,7 +26,7 @@ const SecurityView = ({ setShowNavPage }: { setShowNavPage: (page: NavPages) => 
         title: 'Security & Privacy',
         titleIcon: ShieldIcon,
         onClick: () => {
-          setShowNavPage(NavPages.Security)
+          setShowNavPage(NavPages.Security);
         },
         enabled: true,
         'data-testing-id': 'sidenav-security-privacy-card',
@@ -36,7 +36,7 @@ const SecurityView = ({ setShowNavPage }: { setShowNavPage: (page: NavPages) => 
         title: 'Preferences',
         titleIcon: Faders,
         onClick: () => {
-          setShowNavPage(NavPages.Preferences)
+          setShowNavPage(NavPages.Preferences);
         },
         enabled: true,
         'data-testing-id': 'sidenav-lock-wallet-card',
@@ -45,7 +45,7 @@ const SecurityView = ({ setShowNavPage }: { setShowNavPage: (page: NavPages) => 
         title: 'Sync with Mobile App',
         titleIcon: Phone,
         onClick: () => {
-          setShowNavPage(NavPages.SyncWithMobile)
+          setShowNavPage(NavPages.SyncWithMobile);
         },
         enabled: activeWallet?.walletType !== WALLETTYPE.LEDGER,
       },
@@ -53,7 +53,7 @@ const SecurityView = ({ setShowNavPage }: { setShowNavPage: (page: NavPages) => 
         title: 'Network',
         titleIcon: GlobeHemisphereWest,
         onClick: () => {
-          setShowNavPage(NavPages.Network)
+          setShowNavPage(NavPages.Network);
         },
         enabled: (activeChain as string) !== AGGREGATED_CHAIN_KEY,
         'data-testing-id': 'sidenav-network-card',
@@ -64,15 +64,15 @@ const SecurityView = ({ setShowNavPage }: { setShowNavPage: (page: NavPages) => 
         trailingIcon: <></>,
         onClick: () => {
           auth?.signout(() => {
-            globalSheetsStore.setSideNavOpen(false)
-          })
+            globalSheetsStore.setSideNavOpen(false);
+          });
         },
         enabled: true,
         'data-testing-id': 'sidenav-lock-wallet-card',
       },
     ],
     [activeWallet?.walletType, auth, setShowNavPage],
-  )
+  );
 
   return (
     <SideNavSection>
@@ -90,10 +90,10 @@ const SecurityView = ({ setShowNavPage }: { setShowNavPage: (page: NavPages) => 
                 data-testing-id={item['data-testing-id'] ?? ''}
               />
             </React.Fragment>
-          )
+          );
         })}
     </SideNavSection>
-  )
-}
+  );
+};
 
-export const Security = observer(SecurityView)
+export const Security = observer(SecurityView);

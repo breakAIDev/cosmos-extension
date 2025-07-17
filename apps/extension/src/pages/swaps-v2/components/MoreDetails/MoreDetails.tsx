@@ -1,25 +1,25 @@
-import { formatPercentAmount } from '@leapwallet/cosmos-wallet-hooks'
-import BigNumber from 'bignumber.js'
-import classNames from 'classnames'
-import { InfoIcon } from 'icons/info-icon'
-import { useSwapContext } from 'pages/swaps-v2/context'
-import { useAggregatorBridgeRelayerFee } from 'pages/swaps-v2/hooks/useBridgeFee'
-import { getPriceImpactPercent } from 'pages/swaps-v2/utils/priceImpact'
-import { getSlippageRemarks } from 'pages/swaps-v2/utils/slippage'
-import React, { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react'
+import { formatPercentAmount } from '@leapwallet/cosmos-wallet-hooks';
+import BigNumber from 'bignumber.js';
+import classNames from 'classnames';
+import { InfoIcon } from 'icons/info-icon';
+import { useSwapContext } from 'pages/swaps-v2/context';
+import { useAggregatorBridgeRelayerFee } from 'pages/swaps-v2/hooks/useBridgeFee';
+import { getPriceImpactPercent } from 'pages/swaps-v2/utils/priceImpact';
+import { getSlippageRemarks } from 'pages/swaps-v2/utils/slippage';
+import React, { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
 
-import LeapFeesInfoSheet from './LeapFeesInfoSheet'
-import PriceImpactSheet from './PriceImpactSheet'
+import LeapFeesInfoSheet from './LeapFeesInfoSheet';
+import PriceImpactSheet from './PriceImpactSheet';
 
 function formatAmount(amount: BigNumber.Value) {
-  const amountBN = new BigNumber(amount)
+  const amountBN = new BigNumber(amount);
   return amountBN.isEqualTo(0)
     ? '0'
     : amountBN.isNaN()
     ? '-'
     : amountBN.isLessThan('0.00001')
     ? '< 0.00001'
-    : amountBN.toFormat(5, BigNumber.ROUND_DOWN)
+    : amountBN.toFormat(5, BigNumber.ROUND_DOWN);
 }
 
 // function OrderRoutingDisplay({
@@ -42,11 +42,11 @@ function formatAmount(amount: BigNumber.Value) {
 // }
 
 type MoreDetailsProps = {
-  showInfo?: boolean
-  isReviewSheet?: boolean
-  onSlippageInfoClick?: () => void
-  setShowFeesSettingSheet: Dispatch<SetStateAction<boolean>>
-}
+  showInfo?: boolean;
+  isReviewSheet?: boolean;
+  onSlippageInfoClick?: () => void;
+  setShowFeesSettingSheet: Dispatch<SetStateAction<boolean>>;
+};
 
 export function MoreDetails({
   showInfo = true,
@@ -54,112 +54,97 @@ export function MoreDetails({
   onSlippageInfoClick,
   setShowFeesSettingSheet,
 }: MoreDetailsProps) {
-  const { slippagePercent, displayFee, routingInfo, leapFeeBps, isSwapFeeEnabled } =
-    useSwapContext()
+  const { slippagePercent, displayFee, routingInfo, leapFeeBps, isSwapFeeEnabled } = useSwapContext();
 
-  const { bridgeFee, relayerFee } = useAggregatorBridgeRelayerFee(routingInfo?.route)
+  const { bridgeFee, relayerFee } = useAggregatorBridgeRelayerFee(routingInfo?.route);
 
   const slippageRemarks = useMemo(() => {
-    return getSlippageRemarks(String(slippagePercent))
-  }, [slippagePercent])
+    return getSlippageRemarks(String(slippagePercent));
+  }, [slippagePercent]);
 
-  const [showPriceImpactInfo, setShowPriceImpactInfo] = useState(false)
-  const [showLeapFeesInfo, setShowLeapFeesInfo] = useState(false)
+  const [showPriceImpactInfo, setShowPriceImpactInfo] = useState(false);
+  const [showLeapFeesInfo, setShowLeapFeesInfo] = useState(false);
   // const chains = useChainInfos()
   // const skipChains = useSkipSupportedChains()
 
   const priceImpactPercentage = useMemo(() => {
-    const priceImpactPercent = getPriceImpactPercent(routingInfo.route)
+    const priceImpactPercent = getPriceImpactPercent(routingInfo.route);
     if (priceImpactPercent.isNaN()) {
-      return null
+      return null;
     }
-    return priceImpactPercent
-  }, [routingInfo.route])
+    return priceImpactPercent;
+  }, [routingInfo.route]);
 
   const bridgeFeeDisplay = () => {
     if (bridgeFee?.bridgeFees?.length) {
       return bridgeFee.bridgeFees.map((fee, index) => {
         if (!fee) {
-          return null
+          return null;
         }
-        const [amt, symbol] = fee.split(' ')
+        const [amt, symbol] = fee.split(' ');
 
         if (!amt) {
-          return null
+          return null;
         }
-        const formattedAmount = formatAmount(amt)
+        const formattedAmount = formatAmount(amt);
 
-        const usdFee = bridgeFee.usdBridgeFees?.[index]
+        const usdFee = bridgeFee.usdBridgeFees?.[index];
 
-        const hasUsdFee = usdFee?.isGreaterThan(0)
+        const hasUsdFee = usdFee?.isGreaterThan(0);
 
         return (
           <>
-            {!isReviewSheet && (
-              <div className='w-full border-t border-dashed border-secondary-300' />
-            )}
+            {!isReviewSheet && <div className='w-full border-t border-dashed border-secondary-300' />}
             <div className='flex w-full justify-between items-center' key='bridge-fees'>
               <div className='flex justify-start items-center gap-1'>
                 <span className='text-sm font-medium text-muted-foreground !leading-[22.4px]'>
                   {bridgeFee?.feeLabels?.[index] || 'Bridge fee'}
                 </span>
               </div>
-              <span
-                className={classNames(
-                  'text-sm font-bold !leading-[22.4px] text-right text-foreground',
-                )}
-              >
+              <span className={classNames('text-sm font-bold !leading-[22.4px] text-right text-foreground')}>
                 {hasUsdFee
-                  ? `(${formattedAmount} ${symbol}) $${bridgeFee.usdBridgeFees?.[
-                      index
-                    ]?.toString()}`
+                  ? `(${formattedAmount} ${symbol}) $${bridgeFee.usdBridgeFees?.[index]?.toString()}`
                   : `${formattedAmount} ${symbol}`}
               </span>
             </div>
           </>
-        )
-      })
+        );
+      });
     }
-    return null
-  }
+    return null;
+  };
 
   const relayerFeeDisplay = () => {
     if (relayerFee?.gasFees) {
-      const [amt, symbol] = relayerFee.gasFees.split(' ')
+      const [amt, symbol] = relayerFee.gasFees.split(' ');
 
       if (!amt) {
-        return null
+        return null;
       }
 
-      const formattedAmount = formatAmount(amt)
+      const formattedAmount = formatAmount(amt);
 
-      const usdFee = relayerFee.usdGasFees
-      const hasUsdFee = usdFee?.isGreaterThan(0)
+      const usdFee = relayerFee.usdGasFees;
+      const hasUsdFee = usdFee?.isGreaterThan(0);
 
       return (
         <>
           {!isReviewSheet && <div className='w-full border-t border-dashed border-secondary-300' />}
           <div className='flex w-full justify-between items-center' key='bridge-fees'>
             <div className='flex justify-start items-center gap-1'>
-              <span className='text-sm font-medium text-muted-foreground !leading-[22.4px]'>
-                Relayer fee
-              </span>
+              <span className='text-sm font-medium text-muted-foreground !leading-[22.4px]'>Relayer fee</span>
             </div>
-            <span
-              className={classNames(
-                'text-sm font-bold !leading-[22.4px] text-right text-foreground',
-              )}
-            >
+            <span className={classNames('text-sm font-bold !leading-[22.4px] text-right text-foreground')}>
               {hasUsdFee
                 ? `(${formattedAmount} ${symbol}) $${relayerFee.usdGasFees.toString()}`
                 : `${formattedAmount} ${symbol}`}
             </span>
           </div>
         </>
-      )
+      );
     }
-    return null
-  }
+    return null;
+  };
 
   // const orderRouting = useMemo(() => {
   //   const chainIds = getChainIdsFromRoute(routingInfo.route)
@@ -190,38 +175,31 @@ export function MoreDetails({
   // }, [routingInfo.route, chains, skipChains?.data])
 
   const showLeapFees = useMemo(() => {
-    return Number(leapFeeBps) > 0 && isSwapFeeEnabled
-  }, [leapFeeBps, isSwapFeeEnabled])
+    return Number(leapFeeBps) > 0 && isSwapFeeEnabled;
+  }, [leapFeeBps, isSwapFeeEnabled]);
 
   const handlePriceImpactInfoClick = useCallback(() => {
-    setShowPriceImpactInfo(true)
-  }, [setShowPriceImpactInfo])
+    setShowPriceImpactInfo(true);
+  }, [setShowPriceImpactInfo]);
 
   const handleLeapFeesInfoClick = useCallback(() => {
-    setShowLeapFeesInfo(true)
-  }, [setShowLeapFeesInfo])
+    setShowLeapFeesInfo(true);
+  }, [setShowLeapFeesInfo]);
 
   const handleSlippageInfoClick = useCallback(() => {
-    onSlippageInfoClick?.()
-  }, [onSlippageInfoClick])
+    onSlippageInfoClick?.();
+  }, [onSlippageInfoClick]);
 
   const handleTransactionFeesClick = useCallback(() => {
-    setShowFeesSettingSheet(true)
-  }, [setShowFeesSettingSheet])
+    setShowFeesSettingSheet(true);
+  }, [setShowFeesSettingSheet]);
 
   return (
     <>
-      <div
-        className={classNames(
-          'flex flex-col justify-start w-full items-start',
-          !isReviewSheet ? 'gap-5' : 'gap-4',
-        )}
-      >
+      <div className={classNames('flex flex-col justify-start w-full items-start', !isReviewSheet ? 'gap-5' : 'gap-4')}>
         <div className='flex w-full justify-between items-center'>
           <div className='flex justify-start items-center gap-1'>
-            <span className='text-sm font-medium text-muted-foreground !leading-[22.4px]'>
-              Price impact
-            </span>
+            <span className='text-sm font-medium text-muted-foreground !leading-[22.4px]'>Price impact</span>
             {showInfo && (
               <button onClick={handlePriceImpactInfoClick} className='text-secondary-600'>
                 <InfoIcon size={16} className='p-[2px]' />
@@ -232,14 +210,11 @@ export function MoreDetails({
             className={classNames('text-sm font-bold !leading-[22.4px]', {
               'text-foreground': !priceImpactPercentage || priceImpactPercentage.isLessThan(3),
               'text-accent-warning':
-                priceImpactPercentage?.isGreaterThanOrEqualTo(3) &&
-                priceImpactPercentage?.isLessThan(5),
+                priceImpactPercentage?.isGreaterThanOrEqualTo(3) && priceImpactPercentage?.isLessThan(5),
               'text-destructive-100': priceImpactPercentage?.isGreaterThanOrEqualTo(5),
             })}
           >
-            {priceImpactPercentage
-              ? `${formatPercentAmount(priceImpactPercentage.toString(), 2)}%`
-              : '-'}
+            {priceImpactPercentage ? `${formatPercentAmount(priceImpactPercentage.toString(), 2)}%` : '-'}
           </span>
         </div>
 
@@ -247,9 +222,7 @@ export function MoreDetails({
 
         <div className='flex w-full justify-between items-center'>
           <div className='flex justify-start items-center gap-1'>
-            <span className='text-sm font-medium text-muted-foreground !leading-[22.4px]'>
-              Max. slippage
-            </span>
+            <span className='text-sm font-medium text-muted-foreground !leading-[22.4px]'>Max. slippage</span>
             {showInfo && (
               <button onClick={handleSlippageInfoClick} className='text-secondary-600'>
                 <InfoIcon size={16} className='p-[2px]' />
@@ -269,14 +242,10 @@ export function MoreDetails({
 
         {showLeapFees && (
           <>
-            {!isReviewSheet && (
-              <div className='w-full border-t border-dashed border-secondary-300' />
-            )}
+            {!isReviewSheet && <div className='w-full border-t border-dashed border-secondary-300' />}
             <div className='flex w-full justify-between items-center'>
               <div className='flex justify-start items-center gap-1'>
-                <span className='text-sm font-medium text-muted-foreground !leading-[22.4px]'>
-                  Leap fee
-                </span>
+                <span className='text-sm font-medium text-muted-foreground !leading-[22.4px]'>Leap fee</span>
                 {showInfo && (
                   <button onClick={handleLeapFeesInfoClick} className='text-secondary-600'>
                     <InfoIcon size={16} className='p-[2px]' />
@@ -342,7 +311,7 @@ export function MoreDetails({
       <PriceImpactSheet
         isOpen={showPriceImpactInfo}
         onClose={() => {
-          setShowPriceImpactInfo(false)
+          setShowPriceImpactInfo(false);
         }}
       />
       {showLeapFees && (
@@ -350,10 +319,10 @@ export function MoreDetails({
           isOpen={showLeapFeesInfo}
           leapFeeBps={leapFeeBps}
           onClose={() => {
-            setShowLeapFeesInfo(false)
+            setShowLeapFeesInfo(false);
           }}
         />
       )}
     </>
-  )
+  );
 }

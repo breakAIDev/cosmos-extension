@@ -1,6 +1,6 @@
-import Text from 'components/text'
-import React from 'react'
-import { Colors } from 'theme/colors'
+import Text from 'components/text';
+import React from 'react';
+import { Colors } from 'theme/colors';
 
 export const BetaTag = ({ className }: { className?: string }) => {
   return (
@@ -11,5 +11,5 @@ export const BetaTag = ({ className }: { className?: string }) => {
     >
       Beta
     </Text>
-  )
-}
+  );
+};

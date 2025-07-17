@@ -1,30 +1,30 @@
-import { toBase64, toUtf8 } from '@cosmjs/encoding'
+import { toBase64, toUtf8 } from '@cosmjs/encoding';
 import {
   currencyDetail,
   formatTokenAmount,
   useActiveChain,
   useGetChains,
   useGetExplorerAccountUrl,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { ArrowSquareOut, CopySimple } from '@phosphor-icons/react'
-import BigNumber from 'bignumber.js'
-import classNames from 'classnames'
-import Text from 'components/text'
-import { TokenImageWithFallback } from 'components/token-image-with-fallback'
-import { AGGREGATED_CHAIN_KEY } from 'config/constants'
-import { useNonNativeCustomChains } from 'hooks'
-import { useFormatCurrency, useUserPreferredCurrency } from 'hooks/settings/useCurrency'
-import { observer } from 'mobx-react-lite'
-import React, { useCallback, useMemo, useState } from 'react'
-import Skeleton from 'react-loading-skeleton'
-import { hideAssetsStore } from 'stores/hide-assets-store'
-import { SourceChain, SourceToken } from 'types/swap'
-import { AggregatedSupportedChain } from 'types/utility'
-import { UserClipboard } from 'utils/clipboard'
-import { cn } from 'utils/cn'
-import { sliceWord } from 'utils/strings'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { ArrowSquareOut, CopySimple } from '@phosphor-icons/react';
+import BigNumber from 'bignumber.js';
+import classNames from 'classnames';
+import Text from 'components/text';
+import { TokenImageWithFallback } from 'components/token-image-with-fallback';
+import { AGGREGATED_CHAIN_KEY } from 'config/constants';
+import { useNonNativeCustomChains } from 'hooks';
+import { useFormatCurrency, useUserPreferredCurrency } from 'hooks/settings/useCurrency';
+import { observer } from 'mobx-react-lite';
+import React, { useCallback, useMemo, useState } from 'react';
+import Skeleton from 'react-loading-skeleton';
+import { hideAssetsStore } from 'stores/hide-assets-store';
+import { SourceChain, SourceToken } from 'types/swap';
+import { AggregatedSupportedChain } from 'types/utility';
+import { UserClipboard } from 'utils/clipboard';
+import { cn } from 'utils/cn';
+import { sliceWord } from 'utils/strings';
 
-import { useGetChainsToShow } from '../hooks'
+import { useGetChainsToShow } from '../hooks';
 
 export const TokenCardSkeleton = () => {
   return (
@@ -48,8 +48,8 @@ export const TokenCardSkeleton = () => {
         <Skeleton width={70} className='z-0 h-[14px]' />
       </div>
     </div>
-  )
-}
+  );
+};
 
 function TokenCardView({
   onTokenSelect,
@@ -64,21 +64,21 @@ function TokenCardView({
   isFirst = false,
   isLast = false,
 }: {
-  onTokenSelect: (token: SourceToken) => void
-  token: SourceToken
-  isSelected: boolean
-  verified?: boolean
-  hideAmount?: boolean
-  selectedChain: SourceChain | undefined
-  showRedirection?: boolean
-  isChainAbstractionView?: boolean
-  showChainNames?: boolean
-  isFirst?: boolean
-  isLast?: boolean
+  onTokenSelect: (token: SourceToken) => void;
+  token: SourceToken;
+  isSelected: boolean;
+  verified?: boolean;
+  hideAmount?: boolean;
+  selectedChain: SourceChain | undefined;
+  showRedirection?: boolean;
+  isChainAbstractionView?: boolean;
+  showChainNames?: boolean;
+  isFirst?: boolean;
+  isLast?: boolean;
 }) {
-  const activeChain = useActiveChain() as AggregatedSupportedChain
-  const [formatCurrency] = useFormatCurrency()
-  const [preferredCurrency] = useUserPreferredCurrency()
+  const activeChain = useActiveChain() as AggregatedSupportedChain;
+  const [formatCurrency] = useFormatCurrency();
+  const [preferredCurrency] = useUserPreferredCurrency();
   const formattedTokenAmount = hideAssetsStore.formatHideBalance(
     formatTokenAmount(
       token?.amount || '0',
@@ -86,147 +86,130 @@ function TokenCardView({
       3,
       currencyDetail[preferredCurrency].locale,
     ),
-  )
+  );
 
-  const nonNativeChains = useNonNativeCustomChains()
-  const chains = useGetChains()
+  const nonNativeChains = useNonNativeCustomChains();
+  const chains = useGetChains();
 
-  const { chainsToShow: skipChains } = useGetChainsToShow()
+  const { chainsToShow: skipChains } = useGetChainsToShow();
   const ibcChainInfo = useMemo(() => {
-    if (!token.ibcChainInfo) return
+    if (!token.ibcChainInfo) return;
     let _chainInfo = Object.values(chains).find(
-      (chain) =>
-        chain.chainId === token.ibcChainInfo?.name ||
-        chain.testnetChainId === token.ibcChainInfo?.name,
-    )
+      (chain) => chain.chainId === token.ibcChainInfo?.name || chain.testnetChainId === token.ibcChainInfo?.name,
+    );
     if (_chainInfo) {
-      return _chainInfo
+      return _chainInfo;
     }
     _chainInfo = Object.values(nonNativeChains).find(
-      (chain) =>
-        chain.chainId === token.ibcChainInfo?.name ||
-        chain.testnetChainId === token.ibcChainInfo?.name,
-    )
+      (chain) => chain.chainId === token.ibcChainInfo?.name || chain.testnetChainId === token.ibcChainInfo?.name,
+    );
     if (_chainInfo) {
-      return _chainInfo
+      return _chainInfo;
     }
-    return skipChains?.find((chain) => chain.chainId === token.ibcChainInfo?.name)
-  }, [chains, nonNativeChains, skipChains, token.ibcChainInfo])
+    return skipChains?.find((chain) => chain.chainId === token.ibcChainInfo?.name);
+  }, [chains, nonNativeChains, skipChains, token.ibcChainInfo]);
 
   const tokenChain = useMemo(() => {
     if (token?.tokenBalanceOnChain) {
-      const chainFromBalanceInfo =
-        chains[token?.tokenBalanceOnChain] ?? nonNativeChains[token?.tokenBalanceOnChain]
+      const chainFromBalanceInfo = chains[token?.tokenBalanceOnChain] ?? nonNativeChains[token?.tokenBalanceOnChain];
       if (chainFromBalanceInfo) {
-        return chainFromBalanceInfo
+        return chainFromBalanceInfo;
       }
     }
 
-    if (!token?.skipAsset?.chainId) return
+    if (!token?.skipAsset?.chainId) return;
 
     let _chainInfo = Object.values(chains).find(
-      (chain) =>
-        chain.chainId === token?.skipAsset?.chainId ||
-        chain.testnetChainId === token?.skipAsset?.chainId,
-    )
+      (chain) => chain.chainId === token?.skipAsset?.chainId || chain.testnetChainId === token?.skipAsset?.chainId,
+    );
     if (_chainInfo) {
-      return _chainInfo
+      return _chainInfo;
     }
 
     _chainInfo = Object.values(nonNativeChains).find(
-      (chain) =>
-        chain.chainId === token?.skipAsset?.chainId ||
-        chain.testnetChainId === token?.skipAsset?.chainId,
-    )
+      (chain) => chain.chainId === token?.skipAsset?.chainId || chain.testnetChainId === token?.skipAsset?.chainId,
+    );
 
     if (_chainInfo) {
-      return _chainInfo
+      return _chainInfo;
     }
-    return skipChains?.find((chain) => chain.chainId === token?.skipAsset?.chainId)
-  }, [chains, nonNativeChains, skipChains, token?.skipAsset?.chainId, token?.tokenBalanceOnChain])
+    return skipChains?.find((chain) => chain.chainId === token?.skipAsset?.chainId);
+  }, [chains, nonNativeChains, skipChains, token?.skipAsset?.chainId, token?.tokenBalanceOnChain]);
 
   const formattedFiatValue = hideAssetsStore.formatHideBalance(
     token.usdValue ? formatCurrency(new BigNumber(token.usdValue)) : '-',
-  )
+  );
 
   const { getExplorerAccountUrl, explorerAccountUrl } = useGetExplorerAccountUrl({
     forceChain: selectedChain?.key,
-  })
+  });
 
-  const [isAddressCopied, setIsAddressCopied] = useState(false)
+  const [isAddressCopied, setIsAddressCopied] = useState(false);
   const [_showRedirection, showAddressCopy] = useMemo(() => {
-    const _showRedirection = showRedirection && selectedChain
+    const _showRedirection = showRedirection && selectedChain;
 
     if (
       _showRedirection &&
       token.coinMinimalDenom.toLowerCase().startsWith('factory/') &&
       !explorerAccountUrl?.toLowerCase().includes('mintscan')
     ) {
-      return [false, true]
+      return [false, true];
     }
 
-    return [_showRedirection, false]
-  }, [explorerAccountUrl, selectedChain, showRedirection, token.coinMinimalDenom])
+    return [_showRedirection, false];
+  }, [explorerAccountUrl, selectedChain, showRedirection, token.coinMinimalDenom]);
 
   const ibcInfo = useMemo(() => {
-    if (!token?.ibcChainInfo) return ''
+    if (!token?.ibcChainInfo) return '';
 
     return `${ibcChainInfo?.chainName ?? token.ibcChainInfo?.pretty_name} • Channel ${sliceWord(
       token.ibcChainInfo?.channelId?.replace('channel-', ''),
       4,
       4,
-    )}`
-  }, [ibcChainInfo?.chainName, token?.ibcChainInfo])
+    )}`;
+  }, [ibcChainInfo?.chainName, token?.ibcChainInfo]);
 
   const handleRedirectionClick = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
-      e.stopPropagation()
+      e.stopPropagation();
 
       if (token.coinMinimalDenom.toLowerCase().startsWith('factory/')) {
-        const asset = toBase64(toUtf8(token.coinMinimalDenom))
-        const explorerURL = getExplorerAccountUrl(asset, true)
+        const asset = toBase64(toUtf8(token.coinMinimalDenom));
+        const explorerURL = getExplorerAccountUrl(asset, true);
 
-        window.open(explorerURL, '_blank')
+        window.open(explorerURL, '_blank');
       } else {
-        const explorerURL = getExplorerAccountUrl(token.coinMinimalDenom)
-        window.open(explorerURL, '_blank')
+        const explorerURL = getExplorerAccountUrl(token.coinMinimalDenom);
+        window.open(explorerURL, '_blank');
       }
     },
     [getExplorerAccountUrl, token.coinMinimalDenom],
-  )
+  );
 
   const handleContentCopyClick = useCallback(
     async (e: React.MouseEvent<HTMLButtonElement>) => {
-      e.stopPropagation()
+      e.stopPropagation();
 
-      setIsAddressCopied(true)
-      await UserClipboard.copyText(token.coinMinimalDenom)
-      setTimeout(() => setIsAddressCopied(false), 2000)
+      setIsAddressCopied(true);
+      await UserClipboard.copyText(token.coinMinimalDenom);
+      setTimeout(() => setIsAddressCopied(false), 2000);
     },
     [token.coinMinimalDenom],
-  )
+  );
 
   const handleTokenSelect = useCallback(() => {
-    if (isSelected) return
-    onTokenSelect(token)
-  }, [isSelected, onTokenSelect, token])
+    if (isSelected) return;
+    onTokenSelect(token);
+  }, [isSelected, onTokenSelect, token]);
 
-  const tokenName = token.symbol ?? token?.name
+  const tokenName = token.symbol ?? token?.name;
   const chainIcon =
-    (tokenChain
-      ? 'icon' in tokenChain
-        ? tokenChain?.icon
-        : tokenChain?.chainSymbolImageUrl
-      : '') ?? ''
+    (tokenChain ? ('icon' in tokenChain ? tokenChain?.icon : tokenChain?.chainSymbolImageUrl) : '') ?? '';
 
   return (
     <div
       onClick={handleTokenSelect}
-      className={classNames(
-        'flex flex-1 items-center w-full px-6',
-        isFirst ? 'mt-4' : 'mt-3',
-        isLast ? 'mb-4' : '',
-      )}
+      className={classNames('flex flex-1 items-center w-full px-6', isFirst ? 'mt-4' : 'mt-3', isLast ? 'mb-4' : '')}
     >
       <div
         className={cn(
@@ -247,11 +230,7 @@ function TokenCardView({
               textClassName='text-[11px] !leading-[15px]'
             />
 
-            <img
-              src={chainIcon}
-              alt=''
-              className='absolute bottom-0 right-0 h-[14px] w-[14px] rounded-full'
-            />
+            <img src={chainIcon} alt='' className='absolute bottom-0 right-0 h-[14px] w-[14px] rounded-full' />
 
             {/* {verified && (
               <div className='absolute group -bottom-[3px] -right-[6px]'>
@@ -285,15 +264,13 @@ function TokenCardView({
                 size='md'
                 className={classNames('font-bold !leading-[22px] text-foreground', {
                   'items-center justify-center gap-1':
-                    (activeChain === AGGREGATED_CHAIN_KEY || isChainAbstractionView) &&
-                    token?.ibcChainInfo,
+                    (activeChain === AGGREGATED_CHAIN_KEY || isChainAbstractionView) && token?.ibcChainInfo,
                 })}
                 data-testing-id={`switch-token-${tokenName.toLowerCase()}-ele`}
               >
                 {tokenName?.length > 20 ? sliceWord(tokenName, 6, 6) : tokenName}
 
-                {(activeChain === AGGREGATED_CHAIN_KEY || isChainAbstractionView) &&
-                token?.ibcChainInfo ? (
+                {(activeChain === AGGREGATED_CHAIN_KEY || isChainAbstractionView) && token?.ibcChainInfo ? (
                   <span
                     className='py-[2px] px-[6px] rounded-[4px] font-medium text-[10px] !leading-[16px] text-foreground bg-secondary-200'
                     title={ibcInfo}
@@ -322,9 +299,7 @@ function TokenCardView({
               ) : null}
             </div>
 
-            {(activeChain === AGGREGATED_CHAIN_KEY || isChainAbstractionView) &&
-            tokenChain &&
-            showChainNames ? (
+            {(activeChain === AGGREGATED_CHAIN_KEY || isChainAbstractionView) && tokenChain && showChainNames ? (
               <p className='text-xs !leading-[19px] font-medium text-muted-foreground'>
                 {tokenChain?.chainName ?? 'Unknown Chain'}
               </p>
@@ -347,14 +322,12 @@ function TokenCardView({
                 {formattedFiatValue}
               </Text>
             )}
-            <div className='text-xs !leading-[19px] font-medium text-muted-foreground'>
-              {formattedTokenAmount}
-            </div>
+            <div className='text-xs !leading-[19px] font-medium text-muted-foreground'>{formattedTokenAmount}</div>
           </div>
         )}
       </div>
     </div>
-  )
+  );
 }
 
-export const TokenCard = observer(TokenCardView)
+export const TokenCard = observer(TokenCardView);

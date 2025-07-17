@@ -1,16 +1,9 @@
-import { IconProps } from '@phosphor-icons/react'
-import React from 'react'
+import { IconProps } from '@phosphor-icons/react';
+import React from 'react';
 
 export const InfoIcon = (props: IconProps) => {
   return (
-    <svg
-      width='20'
-      height='20'
-      viewBox='0 0 20 20'
-      fill='none'
-      xmlns='http://www.w3.org/2000/svg'
-      {...props}
-    >
+    <svg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
       <mask
         id='mask0_536_3786'
         style={{ maskType: 'alpha' }}
@@ -20,12 +13,7 @@ export const InfoIcon = (props: IconProps) => {
         width='24'
         height='24'
       >
-        <rect
-          width='24'
-          height='24'
-          transform='matrix(-1 8.74228e-08 8.74228e-08 1 20 0)'
-          fill='currentColor'
-        />
+        <rect width='24' height='24' transform='matrix(-1 8.74228e-08 8.74228e-08 1 20 0)' fill='currentColor' />
       </mask>
       <g mask='url(#mask0_536_3786)'>
         <path
@@ -34,5 +22,5 @@ export const InfoIcon = (props: IconProps) => {
         />
       </g>
     </svg>
-  )
-}
+  );
+};

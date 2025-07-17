@@ -4,138 +4,133 @@ import {
   useFetchDualStakeProviders,
   useInitCustomChains,
   useLuminaTxClientStore,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { useChains, useSkipSupportedChains } from '@leapwallet/elements-hooks'
-import * as Sentry from '@sentry/react'
-import { AppInitLoader } from 'components/loader/AppInitLoader'
-import { SidePanelNavigation } from 'components/side-panel-navigation'
-import ImportWatchWalletSeedPopup from 'components/watch-watch/ImportWatchWalletSeedPopup'
-import { useActiveInfoEventDispatcher } from 'hooks/settings/useActiveInfoEventDispatcher'
-import useActiveWallet from 'hooks/settings/useActiveWallet'
-import { useChainAbstractionView } from 'hooks/settings/useChainAbstractionView'
-import { useAirdropsData } from 'hooks/useAirdropsData'
-import { InitHooks } from 'init-hooks'
-import { GlobalLayout } from 'layout'
-import { ActivityPageLoader } from 'pages/activity/ActivityPageLoader'
-import { ActivityHeader } from 'pages/activity/components/activity-header'
-import { EligibleDetailsDrawer } from 'pages/alpha/chad-components/EligibilityDetailsDrawer'
-import { AlphaContextProvider } from 'pages/alpha/context'
-import EarnPage from 'pages/earnUSDN'
-import Home from 'pages/home/Home'
-import SideNav from 'pages/home/side-nav'
-import { NFTLoading } from 'pages/nfts/NFTLoading'
-import useAssets from 'pages/swaps-v2/hooks/useAssets'
-import { SwapsLoader } from 'pages/swaps-v2/SwapsLoader'
-import React, { lazy, Suspense, useEffect } from 'react'
-import { HashRouter, Route, Routes, useLocation } from 'react-router-dom'
-import { percentageChangeDataStore, priceStore } from 'stores/balance-store'
-import { chainTagsStore } from 'stores/chain-infos-store'
-import { denomsStore, rootDenomsStore } from 'stores/denoms-store-instance'
-import { nftStore } from 'stores/nft-store'
-import { rootBalanceStore, rootStakeStore, rootStore } from 'stores/root-store'
-import {
-  claimRewardsStore,
-  delegationsStore,
-  unDelegationsStore,
-  validatorsStore,
-} from 'stores/stake-store'
-import { LuminaTxClientWasm } from 'utils/luminaTxClient'
-import Browser from 'webextension-polyfill'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { useChains, useSkipSupportedChains } from '@leapwallet/elements-hooks';
+import * as Sentry from '@sentry/react';
+import { AppInitLoader } from 'components/loader/AppInitLoader';
+import { SidePanelNavigation } from 'components/side-panel-navigation';
+import ImportWatchWalletSeedPopup from 'components/watch-watch/ImportWatchWalletSeedPopup';
+import { useActiveInfoEventDispatcher } from 'hooks/settings/useActiveInfoEventDispatcher';
+import useActiveWallet from 'hooks/settings/useActiveWallet';
+import { useChainAbstractionView } from 'hooks/settings/useChainAbstractionView';
+import { useAirdropsData } from 'hooks/useAirdropsData';
+import { InitHooks } from 'init-hooks';
+import { GlobalLayout } from 'layout';
+import { ActivityPageLoader } from 'pages/activity/ActivityPageLoader';
+import { ActivityHeader } from 'pages/activity/components/activity-header';
+import { EligibleDetailsDrawer } from 'pages/alpha/chad-components/EligibilityDetailsDrawer';
+import { AlphaContextProvider } from 'pages/alpha/context';
+import EarnPage from 'pages/earnUSDN';
+import Home from 'pages/home/Home';
+import SideNav from 'pages/home/side-nav';
+import { NFTLoading } from 'pages/nfts/NFTLoading';
+import useAssets from 'pages/swaps-v2/hooks/useAssets';
+import { SwapsLoader } from 'pages/swaps-v2/SwapsLoader';
+import React, { lazy, Suspense, useEffect } from 'react';
+import { HashRouter, Route, Routes, useLocation } from 'react-router-dom';
+import { percentageChangeDataStore, priceStore } from 'stores/balance-store';
+import { chainTagsStore } from 'stores/chain-infos-store';
+import { denomsStore, rootDenomsStore } from 'stores/denoms-store-instance';
+import { nftStore } from 'stores/nft-store';
+import { rootBalanceStore, rootStakeStore, rootStore } from 'stores/root-store';
+import { claimRewardsStore, delegationsStore, unDelegationsStore, validatorsStore } from 'stores/stake-store';
+import { LuminaTxClientWasm } from 'utils/luminaTxClient';
+import Browser from 'webextension-polyfill';
 
-import { AuthProvider, RequireAuth, RequireAuthOnboarding } from './context/auth-context'
+import { AuthProvider, RequireAuth, RequireAuthOnboarding } from './context/auth-context';
 
-const Activity = lazy(() => import('pages/activity/Activity'))
-const Swap = lazy(() => import('pages/swaps-v2'))
-const ApproveConnection = React.lazy(() => import('pages/ApproveConnection/ApproveConnection'))
-const TokensDetails = React.lazy(() => import('pages/asset-details/components/chart-details'))
-const Login = React.lazy(() => import('pages/auth/login'))
-const Earn = React.lazy(() => import('pages/earn'))
-const InitiaVip = React.lazy(() => import('pages/initia-vip'))
-const ForgotPassword = React.lazy(() => import('pages/forgot-password'))
+const Activity = lazy(() => import('pages/activity/Activity'));
+const Swap = lazy(() => import('pages/swaps-v2'));
+const ApproveConnection = React.lazy(() => import('pages/ApproveConnection/ApproveConnection'));
+const TokensDetails = React.lazy(() => import('pages/asset-details/components/chart-details'));
+const Login = React.lazy(() => import('pages/auth/login'));
+const Earn = React.lazy(() => import('pages/earn'));
+const InitiaVip = React.lazy(() => import('pages/initia-vip'));
+const ForgotPassword = React.lazy(() => import('pages/forgot-password'));
 
-const ManageChain = React.lazy(() => import('pages/manageChain'))
-const Onboarding = React.lazy(() => import('pages/onboarding'))
-const ImportLedger = React.lazy(() => import('pages/importLedger'))
+const ManageChain = React.lazy(() => import('pages/manageChain'));
+const Onboarding = React.lazy(() => import('pages/onboarding'));
+const ImportLedger = React.lazy(() => import('pages/importLedger'));
 
-const OnboardingCreateWallet = React.lazy(() => import('pages/onboarding/create'))
-const OnboardingImportWallet = React.lazy(() => import('pages/onboarding/import'))
-const OnboardingSuccess = React.lazy(() => import('pages/onboarding/success'))
-const AddSecretToken = React.lazy(() => import('pages/suggest/SuggestSecret'))
-const Send = React.lazy(() => import('pages/send'))
-const Buy = React.lazy(() => import('pages/buy'))
-const Sign = React.lazy(() => import('pages/sign/sign-transaction'))
-const SignAptos = React.lazy(() => import('pages/sign-aptos/sign-transaction'))
-const SignBitcoin = React.lazy(() => import('pages/sign-bitcoin/SignBitcoinTransaction'))
-const SignSeiEvm = React.lazy(() => import('pages/sign-sei-evm/SignSeiEvmTransaction'))
-const SignSolana = React.lazy(() => import('pages/sign-solana/sign-transaction'))
-const SignSui = React.lazy(() => import('pages/sign-sui/sign-transaction'))
-const Stake = React.lazy(() => import('pages/stake-v2'))
-const StakeInputPage = React.lazy(() => import('pages/stake-v2/StakeInputPage'))
-const StakeTxnPage = React.lazy(() => import('pages/stake-v2/StakeTxnPage'))
+const OnboardingCreateWallet = React.lazy(() => import('pages/onboarding/create'));
+const OnboardingImportWallet = React.lazy(() => import('pages/onboarding/import'));
+const OnboardingSuccess = React.lazy(() => import('pages/onboarding/success'));
+const AddSecretToken = React.lazy(() => import('pages/suggest/SuggestSecret'));
+const Send = React.lazy(() => import('pages/send'));
+const Buy = React.lazy(() => import('pages/buy'));
+const Sign = React.lazy(() => import('pages/sign/sign-transaction'));
+const SignAptos = React.lazy(() => import('pages/sign-aptos/sign-transaction'));
+const SignBitcoin = React.lazy(() => import('pages/sign-bitcoin/SignBitcoinTransaction'));
+const SignSeiEvm = React.lazy(() => import('pages/sign-sei-evm/SignSeiEvmTransaction'));
+const SignSolana = React.lazy(() => import('pages/sign-solana/sign-transaction'));
+const SignSui = React.lazy(() => import('pages/sign-sui/sign-transaction'));
+const Stake = React.lazy(() => import('pages/stake-v2'));
+const StakeInputPage = React.lazy(() => import('pages/stake-v2/StakeInputPage'));
+const StakeTxnPage = React.lazy(() => import('pages/stake-v2/StakeTxnPage'));
 
-const AddChain = React.lazy(() => import('pages/suggestChain/addChain'))
-const SuggestChain = React.lazy(() => import('pages/suggestChain/suggestChain'))
-const Airdrops = React.lazy(() => import('pages/airdrops'))
-const AirdropsDetails = React.lazy(() => import('pages/airdrops/AirdropsDetails'))
-const Alpha = React.lazy(() => import('pages/alpha'))
-const SecretManageTokens = React.lazy(() => import('pages/snip20-manage-tokens'))
-const SuggestErc20 = React.lazy(() => import('pages/suggest/SuggestErc20'))
-const PendingTx = React.lazy(() => import('pages/activity/PendingTx'))
-const NFTs = React.lazy(() => import('pages/nfts/NFTPage'))
-const AddToken = React.lazy(() => import('pages/add-token/AddToken'))
-const ManageTokens = React.lazy(() => import('pages/manage-tokens'))
-const Proposals = React.lazy(() => import('pages/governance/Proposals'))
+const AddChain = React.lazy(() => import('pages/suggestChain/addChain'));
+const SuggestChain = React.lazy(() => import('pages/suggestChain/suggestChain'));
+const Airdrops = React.lazy(() => import('pages/airdrops'));
+const AirdropsDetails = React.lazy(() => import('pages/airdrops/AirdropsDetails'));
+const Alpha = React.lazy(() => import('pages/alpha'));
+const SecretManageTokens = React.lazy(() => import('pages/snip20-manage-tokens'));
+const SuggestErc20 = React.lazy(() => import('pages/suggest/SuggestErc20'));
+const PendingTx = React.lazy(() => import('pages/activity/PendingTx'));
+const NFTs = React.lazy(() => import('pages/nfts/NFTPage'));
+const AddToken = React.lazy(() => import('pages/add-token/AddToken'));
+const ManageTokens = React.lazy(() => import('pages/manage-tokens'));
+const Proposals = React.lazy(() => import('pages/governance/Proposals'));
 
-const SwitchEthereumChain = React.lazy(() => import('pages/switch-ethereum-chain'))
-const SwitchSolanaChain = React.lazy(() => import('pages/switch-solana-chain'))
-const SuggestEthereumChain = React.lazy(() => import('pages/suggestChain/SuggestEthereumChain'))
-const SwitchChain = React.lazy(() => import('pages/switch-chain'))
+const SwitchEthereumChain = React.lazy(() => import('pages/switch-ethereum-chain'));
+const SwitchSolanaChain = React.lazy(() => import('pages/switch-solana-chain'));
+const SuggestEthereumChain = React.lazy(() => import('pages/suggestChain/SuggestEthereumChain'));
+const SwitchChain = React.lazy(() => import('pages/switch-chain'));
 
-const RoutesMatch = Sentry.withSentryReactRouterV6Routing(Routes)
+const RoutesMatch = Sentry.withSentryReactRouterV6Routing(Routes);
 
 export default function AppRoutes(): JSX.Element {
-  const { activeWallet } = useActiveWallet()
-  const fetchAirdropsData = useAirdropsData()
+  const { activeWallet } = useActiveWallet();
+  const fetchAirdropsData = useAirdropsData();
 
-  useInitCustomChains()
-  useChainAbstractionView()
-  useFetchDualStakeDelegations(rootDenomsStore.allDenoms)
-  useFetchDualStakeProviders(rootDenomsStore.allDenoms)
-  useFetchDualStakeProviderRewards(rootDenomsStore.allDenoms)
+  useInitCustomChains();
+  useChainAbstractionView();
+  useFetchDualStakeDelegations(rootDenomsStore.allDenoms);
+  useFetchDualStakeProviders(rootDenomsStore.allDenoms);
+  useFetchDualStakeProviderRewards(rootDenomsStore.allDenoms);
 
-  useActiveInfoEventDispatcher()
+  useActiveInfoEventDispatcher();
 
-  useChains()
+  useChains();
   useSkipSupportedChains({
     chainTypes: ['cosmos', 'evm'],
-  })
-  useAssets()
+  });
+  useAssets();
 
-  const { setLuminaTxClient, setForceLuminaTxClient } = useLuminaTxClientStore()
+  const { setLuminaTxClient, setForceLuminaTxClient } = useLuminaTxClientStore();
 
   useEffect(() => {
-    const rpcUrl = 'https://celestia-rpc.publicnode.com:443'
-    setLuminaTxClient(new LuminaTxClientWasm(rpcUrl))
+    const rpcUrl = 'https://celestia-rpc.publicnode.com:443';
+    setLuminaTxClient(new LuminaTxClientWasm(rpcUrl));
     Browser.storage.local.get('useCelestiaBalanceStore').then((res) => {
       if (res.useCelestiaBalanceStore === 'true') {
-        setForceLuminaTxClient(true)
+        setForceLuminaTxClient(true);
       }
-    })
-  }, [setLuminaTxClient])
+    });
+  }, [setLuminaTxClient]);
 
   useEffect(() => {
     if (activeWallet) {
-      fetchAirdropsData()
+      fetchAirdropsData();
     }
-  }, [activeWallet, activeWallet?.id, fetchAirdropsData])
+  }, [activeWallet, activeWallet?.id, fetchAirdropsData]);
 
   useEffect(() => {
-    ;(function () {
+    (function () {
       if (nftStore.haveToFetchNfts === false) {
-        nftStore.haveToFetchNfts = true
+        nftStore.haveToFetchNfts = true;
       }
-    })()
-  }, [activeWallet?.addresses])
+    })();
+  }, [activeWallet?.addresses]);
 
   return (
     <Suspense fallback={<AppInitLoader />}>
@@ -151,11 +146,11 @@ export default function AppRoutes(): JSX.Element {
         </HashRouter>
       </AuthProvider>
     </Suspense>
-  )
+  );
 }
 
 const AnimatedRoutes = () => {
-  const location = useLocation()
+  const location = useLocation();
 
   return (
     <GlobalLayout location={location}>
@@ -543,5 +538,5 @@ const AnimatedRoutes = () => {
         />
       </RoutesMatch>
     </GlobalLayout>
-  )
-}
+  );
+};

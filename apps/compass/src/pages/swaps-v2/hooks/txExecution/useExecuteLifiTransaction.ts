@@ -1,4 +1,4 @@
-import { StdFee } from '@cosmjs/stargate'
+import { StdFee } from '@cosmjs/stargate';
 import {
   CosmosTxType,
   getChainId,
@@ -10,65 +10,65 @@ import {
   useGasPriceStepForChain,
   useGetChains,
   useInvalidateTokenBalances,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { NativeDenom, SeiEvmTx, SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { TRANSFER_STATE, TXN_STATUS } from '@leapwallet/elements-core'
-import { EthWallet } from '@leapwallet/leap-keychain'
-import { TransferAssetRelease } from '@skip-go/client'
-import { BigNumber } from 'bignumber.js'
-import { Wallet } from 'hooks/wallet/useWallet'
-import { useInvalidateSwapAssetsQueries } from 'pages/swaps-v2/hooks/txExecution/useInvalidateSwapAssetsQueries'
-import { useGetChainsToShow } from 'pages/swaps-v2/hooks/useGetChainsToShow'
-import { useProviderFeatureFlags } from 'pages/swaps-v2/hooks/useProviderFeatureFlags'
-import { LifiRouteOverallResponse } from 'pages/swaps-v2/hooks/useRoute'
-import { LifiMsgWithCustomTxHash, RoutingInfo } from 'pages/swaps-v2/hooks/useSwapsTx'
-import { SWAP_NETWORK } from 'pages/swaps-v2/hooks/useSwapsTx'
-import { approveTokenAllowanceIfNeeded, capitalizeFirstLetter } from 'pages/swaps-v2/utils'
-import { useCallback } from 'react'
-import { compassSeiEvmConfigStore } from 'stores/balance-store'
-import { SourceChain, SourceToken, SwapFeeInfo, SwapTxnStatus, TransferSequence } from 'types/swap'
-import { isCompassWallet } from 'utils/isCompassWallet'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { NativeDenom, SeiEvmTx, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { TRANSFER_STATE, TXN_STATUS } from '@leapwallet/elements-core';
+import { EthWallet } from '@leapwallet/leap-keychain';
+import { TransferAssetRelease } from '@skip-go/client';
+import { BigNumber } from 'bignumber.js';
+import { Wallet } from 'hooks/wallet/useWallet';
+import { useInvalidateSwapAssetsQueries } from 'pages/swaps-v2/hooks/txExecution/useInvalidateSwapAssetsQueries';
+import { useGetChainsToShow } from 'pages/swaps-v2/hooks/useGetChainsToShow';
+import { useProviderFeatureFlags } from 'pages/swaps-v2/hooks/useProviderFeatureFlags';
+import { LifiRouteOverallResponse } from 'pages/swaps-v2/hooks/useRoute';
+import { LifiMsgWithCustomTxHash, RoutingInfo } from 'pages/swaps-v2/hooks/useSwapsTx';
+import { SWAP_NETWORK } from 'pages/swaps-v2/hooks/useSwapsTx';
+import { approveTokenAllowanceIfNeeded, capitalizeFirstLetter } from 'pages/swaps-v2/utils';
+import { useCallback } from 'react';
+import { compassSeiEvmConfigStore } from 'stores/balance-store';
+import { SourceChain, SourceToken, SwapFeeInfo, SwapTxnStatus, TransferSequence } from 'types/swap';
+import { isCompassWallet } from 'utils/isCompassWallet';
 
-import { usePollTx } from './polling/usePollTx'
+import { usePollTx } from './polling/usePollTx';
 
 export type ExecuteLifiTransactionParams = {
-  setLedgerError?: (ledgerError?: string) => void
-  setTrackingInSync: React.Dispatch<React.SetStateAction<boolean>>
-  setIsSigningComplete: React.Dispatch<React.SetStateAction<boolean>>
-  swapFeeInfo?: SwapFeeInfo
-  fee: StdFee | undefined
-  feeAmount: string | undefined
-  sourceChain: SourceChain | undefined
-  routingInfo: RoutingInfo
-  inAmount: string
-  sourceToken: SourceToken | null
-  destinationToken: SourceToken | null
-  destinationChain: SourceChain | undefined
-  amountOut: string
+  setLedgerError?: (ledgerError?: string) => void;
+  setTrackingInSync: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsSigningComplete: React.Dispatch<React.SetStateAction<boolean>>;
+  swapFeeInfo?: SwapFeeInfo;
+  fee: StdFee | undefined;
+  feeAmount: string | undefined;
+  sourceChain: SourceChain | undefined;
+  routingInfo: RoutingInfo;
+  inAmount: string;
+  sourceToken: SourceToken | null;
+  destinationToken: SourceToken | null;
+  destinationChain: SourceChain | undefined;
+  amountOut: string;
   feeDenom: NativeDenom & {
-    ibcDenom?: string | undefined
-  }
+    ibcDenom?: string | undefined;
+  };
   handleTxError: (
     messageIndex: number,
     errorMessage: string,
     chain?: SourceChain,
     transferSequence?: TransferSequence[] | undefined,
     transferAssetRelease?: TransferAssetRelease | undefined,
-  ) => void
-  setIsLoading: (isLoading: boolean) => void
-  setTimeoutError: (timeoutError: boolean) => void
-  setFirstTxnError: (firstTxnError: string | undefined) => void
-  setUnableToTrackError: (unableToTrackError: boolean | null) => void
-  updateTxStatus: (messageIndex: number, args: SwapTxnStatus) => void
-  refetchSourceBalances?: (() => void) | undefined
-  refetchDestinationBalances?: (() => void) | undefined
+  ) => void;
+  setIsLoading: (isLoading: boolean) => void;
+  setTimeoutError: (timeoutError: boolean) => void;
+  setFirstTxnError: (firstTxnError: string | undefined) => void;
+  setUnableToTrackError: (unableToTrackError: boolean | null) => void;
+  updateTxStatus: (messageIndex: number, args: SwapTxnStatus) => void;
+  refetchSourceBalances?: (() => void) | undefined;
+  refetchDestinationBalances?: (() => void) | undefined;
   getSwapFeeInfo: () => Promise<{
-    feeCharged: number
-    feeCollectionAddress: string | undefined
-    feeAmount: number | null
-  } | null>
-  callbackPostTx?: (() => void) | undefined
-}
+    feeCharged: number;
+    feeCollectionAddress: string | undefined;
+    feeAmount: number | null;
+  } | null>;
+  callbackPostTx?: (() => void) | undefined;
+};
 
 export function useExecuteLifiTransaction({
   feeDenom,
@@ -95,46 +95,42 @@ export function useExecuteLifiTransaction({
   getSwapFeeInfo,
   callbackPostTx,
 }: ExecuteLifiTransactionParams) {
-  const defaultSeiGasPriceSteps = useGasPriceStepForChain('seiTestnet2', SWAP_NETWORK)
-  const defaultSeiGasPrice = defaultSeiGasPriceSteps.low
-  const { evmJsonRpc } = useChainApis((sourceChain?.key ?? '') as SupportedChain, SWAP_NETWORK)
-  const txPostToDB = LeapWalletApi.useOperateCosmosTx()
-  const activeWallet = useActiveWallet()
-  const { chainsToShow } = useGetChainsToShow()
-  const getWallet = Wallet.useGetWallet()
-  const chainInfos = useGetChains()
+  const defaultSeiGasPriceSteps = useGasPriceStepForChain('seiTestnet2', SWAP_NETWORK);
+  const defaultSeiGasPrice = defaultSeiGasPriceSteps.low;
+  const { evmJsonRpc } = useChainApis((sourceChain?.key ?? '') as SupportedChain, SWAP_NETWORK);
+  const txPostToDB = LeapWalletApi.useOperateCosmosTx();
+  const activeWallet = useActiveWallet();
+  const { chainsToShow } = useGetChainsToShow();
+  const getWallet = Wallet.useGetWallet();
+  const chainInfos = useGetChains();
 
-  const invalidateBalances = useInvalidateTokenBalances()
-  const invalidateSwapAssets = useInvalidateSwapAssetsQueries()
-  const { lifiGasPriceMultiplier, lifiGasLimitMultiplier } = useProviderFeatureFlags()
+  const invalidateBalances = useInvalidateTokenBalances();
+  const invalidateSwapAssets = useInvalidateSwapAssetsQueries();
+  const { lifiGasPriceMultiplier, lifiGasLimitMultiplier } = useProviderFeatureFlags();
 
   const logTxToDB = useCallback(
     async (txHash: string) => {
-      const sourceDenomChainInfo = chainInfos[(sourceToken?.chain ?? '') as SupportedChain]
-      const destinationDenomChainInfo =
-        chainInfos[(destinationToken?.chain ?? '') as SupportedChain]
+      const sourceDenomChainInfo = chainInfos[(sourceToken?.chain ?? '') as SupportedChain];
+      const destinationDenomChainInfo = chainInfos[(destinationToken?.chain ?? '') as SupportedChain];
 
       const txnLogAmountValue = await getTxnLogAmountValue(
         inAmount,
         {
           coinGeckoId: sourceToken?.coinGeckoId ?? '',
           coinMinimalDenom: sourceToken?.coinMinimalDenom ?? '',
-          chainId:
-            getChainId(sourceDenomChainInfo, SWAP_NETWORK) ?? String(sourceChain?.chainId ?? ''),
+          chainId: getChainId(sourceDenomChainInfo, SWAP_NETWORK) ?? String(sourceChain?.chainId ?? ''),
           chain: (sourceToken?.chain ?? '') as SupportedChain,
         },
         amountOut,
         {
           coinGeckoId: destinationToken?.coinGeckoId ?? '',
           coinMinimalDenom: destinationToken?.coinMinimalDenom ?? '',
-          chainId:
-            getChainId(destinationDenomChainInfo, SWAP_NETWORK) ??
-            String(destinationChain?.chainId ?? ''),
+          chainId: getChainId(destinationDenomChainInfo, SWAP_NETWORK) ?? String(destinationChain?.chainId ?? ''),
           chain: (destinationToken?.chain ?? '') as SupportedChain,
         },
-      )
+      );
 
-      let metadata
+      let metadata;
       metadata = getMetaDataForSwapTx(
         'lifi_api',
         {
@@ -145,15 +141,15 @@ export function useExecuteLifiTransaction({
           denom: destinationToken?.coinMinimalDenom ?? '',
           amount: Number(amountOut) * 10 ** Number(destinationToken?.coinDecimals ?? 0),
         },
-      )
+      );
 
       try {
-        const swapFeeInfo = await getSwapFeeInfo()
+        const swapFeeInfo = await getSwapFeeInfo();
         if (swapFeeInfo) {
           metadata = {
             ...metadata,
             ...swapFeeInfo,
-          }
+          };
         }
       } catch (_) {
         //
@@ -166,34 +162,33 @@ export function useExecuteLifiTransaction({
         metadata,
         feeDenomination: feeDenom.coinMinimalDenom,
         feeQuantity: feeAmount ?? fee?.amount[0].amount,
-        forceWalletAddress:
-          activeWallet?.addresses?.[(sourceChain?.key as SupportedChain) ?? 'cosmos'],
+        forceWalletAddress: activeWallet?.addresses?.[(sourceChain?.key as SupportedChain) ?? 'cosmos'],
         forceChain: String(sourceChain?.key ?? ''),
         forceNetwork: SWAP_NETWORK,
-      })
+      });
 
       const timerId = setTimeout(() => {
-        invalidateBalances((sourceChain?.key as SupportedChain) ?? 'cosmos')
-        invalidateBalances(destinationChain?.key as SupportedChain)
+        invalidateBalances((sourceChain?.key as SupportedChain) ?? 'cosmos');
+        invalidateBalances(destinationChain?.key as SupportedChain);
 
         try {
-          refetchSourceBalances && refetchSourceBalances()
-          refetchDestinationBalances && refetchDestinationBalances()
+          refetchSourceBalances && refetchSourceBalances();
+          refetchDestinationBalances && refetchDestinationBalances();
         } catch (_) {
           //
         }
 
         try {
-          callbackPostTx && callbackPostTx()
+          callbackPostTx && callbackPostTx();
         } catch (_) {
           //
         }
 
-        invalidateSwapAssets((sourceChain?.key as SupportedChain) ?? 'cosmos')
-        invalidateSwapAssets(destinationChain?.key as SupportedChain)
+        invalidateSwapAssets((sourceChain?.key as SupportedChain) ?? 'cosmos');
+        invalidateSwapAssets(destinationChain?.key as SupportedChain);
 
-        clearTimeout(timerId)
-      }, 2000)
+        clearTimeout(timerId);
+      }, 2000);
     },
     [
       chainInfos,
@@ -223,7 +218,7 @@ export function useExecuteLifiTransaction({
       refetchDestinationBalances,
       callbackPostTx,
     ],
-  )
+  );
 
   const pollTx = usePollTx(
     setTrackingInSync,
@@ -232,39 +227,36 @@ export function useExecuteLifiTransaction({
     handleTxError,
     refetchSourceBalances,
     refetchDestinationBalances,
-  )
+  );
 
   return useCallback(
-    async (
-      messages: LifiMsgWithCustomTxHash[] | undefined,
-      route: LifiRouteOverallResponse | undefined,
-    ) => {
-      if (!fee && !feeAmount) return
+    async (messages: LifiMsgWithCustomTxHash[] | undefined, route: LifiRouteOverallResponse | undefined) => {
+      if (!fee && !feeAmount) return;
       if (!messages || !route) {
-        handleTxError(0, 'Error fetching route info', sourceChain)
-        setIsLoading(false)
-        return
+        handleTxError(0, 'Error fetching route info', sourceChain);
+        setIsLoading(false);
+        return;
       }
 
-      setTimeoutError(false)
-      setFirstTxnError(undefined)
-      setUnableToTrackError(null)
-      setLedgerError && setLedgerError(undefined)
+      setTimeoutError(false);
+      setFirstTxnError(undefined);
+      setUnableToTrackError(null);
+      setLedgerError && setLedgerError(undefined);
 
-      const messageIndex = 0
+      const messageIndex = 0;
 
       if (!isCompassWallet()) {
-        handleTxError(messageIndex, 'Lifi routes are only supported on Compass Wallet', sourceChain)
-        setIsLoading(false)
-        return
+        handleTxError(messageIndex, 'Lifi routes are only supported on Compass Wallet', sourceChain);
+        setIsLoading(false);
+        return;
       }
-      const message = messages[messageIndex]
-      const messageObj = messages[messageIndex]
-      const messageChain = chainsToShow.find((chain) => chain.key === 'seiTestnet2')
+      const message = messages[messageIndex];
+      const messageObj = messages[messageIndex];
+      const messageChain = chainsToShow.find((chain) => chain.key === 'seiTestnet2');
       if (!messageChain) {
-        handleTxError(messageIndex, 'Transaction failed as chain is not found', messageChain)
-        setIsLoading(false)
-        return
+        handleTxError(messageIndex, 'Transaction failed as chain is not found', messageChain);
+        setIsLoading(false);
+        return;
       }
 
       updateTxStatus(messageIndex, {
@@ -280,34 +272,34 @@ export function useExecuteLifiTransaction({
           },
         ],
         isComplete: false,
-      })
+      });
 
       try {
-        let txHash: string | undefined
+        let txHash: string | undefined;
 
-        txHash = message?.customTxHash
+        txHash = message?.customTxHash;
 
         if (!txHash) {
-          const wallet = (await getWallet('seiTestnet2', true)) as unknown as EthWallet
+          const wallet = (await getWallet('seiTestnet2', true)) as unknown as EthWallet;
 
           const seiEvmTx = SeiEvmTx.GetSeiEvmClient(
             wallet,
             evmJsonRpc ?? '',
             Number(compassSeiEvmConfigStore.compassSeiEvmConfig.PACIFIC_ETH_CHAIN_ID),
-          )
+          );
 
           if (!fee) {
-            handleTxError(messageIndex, 'Error calculating fee', messageChain)
-            setIsLoading(false)
-            return
+            handleTxError(messageIndex, 'Error calculating fee', messageChain);
+            setIsLoading(false);
+            return;
           }
-          const gasPriceMultiplier = lifiGasPriceMultiplier?.[messageChain.chainId] ?? 1
-          const gasLimitMultiplier = lifiGasLimitMultiplier?.[messageChain.chainId] ?? 1
+          const gasPriceMultiplier = lifiGasPriceMultiplier?.[messageChain.chainId] ?? 1;
+          const gasLimitMultiplier = lifiGasLimitMultiplier?.[messageChain.chainId] ?? 1;
 
           const gasPrice =
             message.gasPrice && !isNaN(Number(message.gasPrice))
               ? Math.ceil(Number(message.gasPrice) * gasPriceMultiplier)
-              : undefined
+              : undefined;
           const gas = Number(
             new BigNumber(fee.gas)
               .multipliedBy(gasLimitMultiplier)
@@ -315,14 +307,12 @@ export function useExecuteLifiTransaction({
               .multipliedBy(1e12)
               .dividedBy(message.gasPrice ? message.gasPrice.toString() : 1000_000_000)
               .toFixed(0, 2),
-          )
+          );
 
           const allowanceAmount = new BigNumber(inAmount)
             .multipliedBy(1.2)
-            .multipliedBy(
-              new BigNumber(10).exponentiatedBy(routingInfo?.route?.sourceAsset?.decimals ?? 18),
-            )
-            .toFixed(0)
+            .multipliedBy(new BigNumber(10).exponentiatedBy(routingInfo?.route?.sourceAsset?.decimals ?? 18))
+            .toFixed(0);
 
           await approveTokenAllowanceIfNeeded(
             Number(compassSeiEvmConfigStore.compassSeiEvmConfig.PACIFIC_ETH_CHAIN_ID),
@@ -340,7 +330,7 @@ export function useExecuteLifiTransaction({
             (text: string) => {
               // TODO: replace this callback with a proper way to show ledger popup
             },
-          )
+          );
 
           const res = await seiEvmTx.sendTransaction(
             '',
@@ -349,25 +339,25 @@ export function useExecuteLifiTransaction({
             gas,
             gasPrice,
             message.data,
-          )
+          );
 
-          txHash = res?.hash
+          txHash = res?.hash;
         }
 
         if (!txHash) {
-          setUnableToTrackError(true)
-          setIsLoading(false)
-          return
+          setUnableToTrackError(true);
+          setIsLoading(false);
+          return;
         }
 
         if (messageIndex === 0) {
-          logTxToDB(txHash)
+          logTxToDB(txHash);
         }
 
-        messageObj.customTxHash = txHash
-        messageObj.customMessageChainId = String(messageChain.chainId)
+        messageObj.customTxHash = txHash;
+        messageObj.customMessageChainId = String(messageChain.chainId);
 
-        setIsSigningComplete(true)
+        setIsSigningComplete(true);
 
         await pollTx({
           txHash,
@@ -375,27 +365,27 @@ export function useExecuteLifiTransaction({
           messageIndex,
           messageChainId: messageChain.chainId,
           routingInfo,
-        })
+        });
 
-        return
+        return;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
-        let errorMessage = ''
+        let errorMessage = '';
         if (e?.code === 'INSUFFICIENT_FUNDS') {
-          errorMessage = 'Insufficient funds for transaction'
+          errorMessage = 'Insufficient funds for transaction';
         } else if (e?.reason) {
-          errorMessage = capitalizeFirstLetter(e.reason)
+          errorMessage = capitalizeFirstLetter(e.reason);
         }
         if (!errorMessage) {
-          errorMessage = (e as Error)?.message ?? 'Transaction failed'
+          errorMessage = (e as Error)?.message ?? 'Transaction failed';
         }
         if (e?.transactionHash) {
-          errorMessage += ` - https://seitrace.com/tx/${e.transactionHash}?chain=pacific-1`
+          errorMessage += ` - https://seitrace.com/tx/${e.transactionHash}?chain=pacific-1`;
         }
-        handleTxError(messageIndex, errorMessage, messageChain)
-        setIsSigningComplete(true)
-        setIsLoading(false)
-        return
+        handleTxError(messageIndex, errorMessage, messageChain);
+        setIsSigningComplete(true);
+        setIsLoading(false);
+        return;
       }
     },
     [
@@ -419,5 +409,5 @@ export function useExecuteLifiTransaction({
       inAmount,
       logTxToDB,
     ],
-  )
+  );
 }

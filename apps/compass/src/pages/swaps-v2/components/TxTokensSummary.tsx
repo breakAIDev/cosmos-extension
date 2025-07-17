@@ -1,22 +1,22 @@
-import { ArrowRight } from '@phosphor-icons/react'
-import BigNumber from 'bignumber.js'
-import classNames from 'classnames'
-import React from 'react'
-import { SourceChain, SourceToken } from 'types/swap'
+import { ArrowRight } from '@phosphor-icons/react';
+import BigNumber from 'bignumber.js';
+import classNames from 'classnames';
+import React from 'react';
+import { SourceChain, SourceToken } from 'types/swap';
 
-import { TxReviewTokenInfo } from './TxReviewTokenInfo'
+import { TxReviewTokenInfo } from './TxReviewTokenInfo';
 
 type Props = {
-  inAmount: string
-  sourceToken: SourceToken | null
-  sourceChain: SourceChain | undefined
-  amountOut: string
-  destinationToken: SourceToken | null
-  destinationChain: SourceChain | undefined
-  className?: string
-  sourceAssetUSDValue?: BigNumber
-  destinationAssetUSDValue?: BigNumber
-}
+  inAmount: string;
+  sourceToken: SourceToken | null;
+  sourceChain: SourceChain | undefined;
+  amountOut: string;
+  destinationToken: SourceToken | null;
+  destinationChain: SourceChain | undefined;
+  className?: string;
+  sourceAssetUSDValue?: BigNumber;
+  destinationAssetUSDValue?: BigNumber;
+};
 
 function TxTokensSummary({
   inAmount,
@@ -59,7 +59,7 @@ function TxTokensSummary({
         />
       </div>
     </div>
-  )
+  );
 }
 
-export default TxTokensSummary
+export default TxTokensSummary;

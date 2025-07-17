@@ -1,27 +1,25 @@
-import { HyperlaneTransferInfoJSON, HyperlaneTransferState, TransferState } from '@skip-go/client'
-import { HyperlanePacketTxnSeq } from 'types/swap'
+import { HyperlaneTransferInfoJSON, HyperlaneTransferState, TransferState } from '@skip-go/client';
+import { HyperlanePacketTxnSeq } from 'types/swap';
 
-import { convertPacketFromJSON } from './convertPackageFromJson'
+import { convertPacketFromJSON } from './convertPackageFromJson';
 
 export function convertHyperlaneTransferState(state: HyperlaneTransferState): TransferState {
   switch (state) {
     case 'HYPERLANE_TRANSFER_SENT':
-      return 'TRANSFER_PENDING'
+      return 'TRANSFER_PENDING';
     case 'HYPERLANE_TRANSFER_FAILED':
-      return 'TRANSFER_FAILURE'
+      return 'TRANSFER_FAILURE';
     case 'HYPERLANE_TRANSFER_RECEIVED':
-      return 'TRANSFER_SUCCESS'
+      return 'TRANSFER_SUCCESS';
     case 'HYPERLANE_TRANSFER_UNKNOWN':
-      return 'TRANSFER_UNKNOWN'
+      return 'TRANSFER_UNKNOWN';
     default:
-      return 'TRANSFER_UNKNOWN'
+      return 'TRANSFER_UNKNOWN';
   }
 }
 
-export function getHyperlaneTransactionSequence(
-  transferInfo: HyperlaneTransferInfoJSON,
-): HyperlanePacketTxnSeq {
-  const hyperlaneState: TransferState = convertHyperlaneTransferState(transferInfo.state)
+export function getHyperlaneTransactionSequence(transferInfo: HyperlaneTransferInfoJSON): HyperlanePacketTxnSeq {
+  const hyperlaneState: TransferState = convertHyperlaneTransferState(transferInfo.state);
 
   return {
     type: 'hyperlaneTransfer' as const,
@@ -33,5 +31,5 @@ export function getHyperlaneTransactionSequence(
     },
     state: hyperlaneState,
     originalState: transferInfo.state,
-  }
+  };
 }

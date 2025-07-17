@@ -1,18 +1,18 @@
-import { useCustomChains } from '@leapwallet/cosmos-wallet-hooks'
-import { ChainInfo } from '@leapwallet/cosmos-wallet-sdk'
-import { LineDivider } from '@leapwallet/leap-ui'
-import classNames from 'classnames'
-import { ActionButton } from 'components/button'
-import { useDefaultTokenLogo } from 'hooks'
-import useNewChainTooltip from 'hooks/useNewChainTooltip'
-import { Images } from 'images'
-import AddFromChainStore from 'pages/home/AddFromChainStore'
-import React, { useState } from 'react'
-import { PageHeaderProps } from 'types/components'
-import { imgOnError } from 'utils/imgOnError'
-import { isSidePanel } from 'utils/isSidePanel'
+import { useCustomChains } from '@leapwallet/cosmos-wallet-hooks';
+import { ChainInfo } from '@leapwallet/cosmos-wallet-sdk';
+import { LineDivider } from '@leapwallet/leap-ui';
+import classNames from 'classnames';
+import { ActionButton } from 'components/button';
+import { useDefaultTokenLogo } from 'hooks';
+import useNewChainTooltip from 'hooks/useNewChainTooltip';
+import { Images } from 'images';
+import AddFromChainStore from 'pages/home/AddFromChainStore';
+import React, { useState } from 'react';
+import { PageHeaderProps } from 'types/components';
+import { imgOnError } from 'utils/imgOnError';
+import { isSidePanel } from 'utils/isSidePanel';
 
-import NewChainSupportTooltip from './NewChainSupportTooltip'
+import NewChainSupportTooltip from './NewChainSupportTooltip';
 
 const PageHeader = React.memo(
   ({
@@ -24,11 +24,11 @@ const PageHeader = React.memo(
     dontShowFilledArrowIcon = false,
     dontShowBottomDivider = false,
   }: PageHeaderProps) => {
-    const { showToolTip: _showToolTip, toolTipData, handleToolTipClose } = useNewChainTooltip()
-    const defaultTokenLogo = useDefaultTokenLogo()
-    const showToolTip = _showToolTip && !!toolTipData && !!onImgClick
-    const [newChain, setNewChain] = useState<string | null>(null)
-    const customChains = useCustomChains()
+    const { showToolTip: _showToolTip, toolTipData, handleToolTipClose } = useNewChainTooltip();
+    const defaultTokenLogo = useDefaultTokenLogo();
+    const showToolTip = _showToolTip && !!toolTipData && !!onImgClick;
+    const [newChain, setNewChain] = useState<string | null>(null);
+    const customChains = useCustomChains();
 
     return (
       <>
@@ -70,8 +70,7 @@ const PageHeader = React.memo(
             >
               <div
                 className={classNames('relative flex items-center', {
-                  'cursor-pointer bg-[#FFFFFF] dark:bg-gray-950 h-fit rounded-3xl px-3 py-2':
-                    onImgClick,
+                  'cursor-pointer bg-[#FFFFFF] dark:bg-gray-950 h-fit rounded-3xl px-3 py-2': onImgClick,
                   'h-full': !onImgClick,
                 })}
                 onClick={onImgClick}
@@ -106,9 +105,9 @@ const PageHeader = React.memo(
           newAddChain={customChains.find((d) => d.chainName === newChain) as ChainInfo}
         />
       </>
-    )
+    );
   },
-)
+);
 
-PageHeader.displayName = 'PageHeader'
-export { PageHeader }
+PageHeader.displayName = 'PageHeader';
+export { PageHeader };

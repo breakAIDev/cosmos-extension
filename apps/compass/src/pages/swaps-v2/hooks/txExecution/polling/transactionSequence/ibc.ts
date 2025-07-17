@@ -1,7 +1,7 @@
-import { TransferInfoJSON } from '@skip-go/client'
-import { IBCPacketTxnSeq } from 'types/swap'
+import { TransferInfoJSON } from '@skip-go/client';
+import { IBCPacketTxnSeq } from 'types/swap';
 
-import { convertPacketFromJSON } from './convertPackageFromJson'
+import { convertPacketFromJSON } from './convertPackageFromJson';
 
 export function getIBCTransactionSequence(transferInfo: TransferInfoJSON): IBCPacketTxnSeq {
   return {
@@ -17,5 +17,5 @@ export function getIBCTransactionSequence(transferInfo: TransferInfoJSON): IBCPa
     state: transferInfo.state,
     originalState: transferInfo.state,
     error: transferInfo.packet_txs.error,
-  }
+  };
 }

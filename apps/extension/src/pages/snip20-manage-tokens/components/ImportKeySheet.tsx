@@ -1,75 +1,68 @@
-import { SecretToken, useAddress, useChainApis, useChainId } from '@leapwallet/cosmos-wallet-hooks'
-import { Buttons, GenericCard, Input } from '@leapwallet/leap-ui'
-import BottomModal from 'components/bottom-modal'
-import { ErrorCard } from 'components/ErrorCard'
-import { LoaderAnimation } from 'components/loader/Loader'
-import { useCreateViewingKey } from 'hooks/secret/useCreateViewingKey'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { rootDenomsStore } from 'stores/denoms-store-instance'
-import { rootBalanceStore } from 'stores/root-store'
-import { Colors } from 'theme/colors'
-import { UserClipboard } from 'utils/clipboard'
+import { SecretToken, useAddress, useChainApis, useChainId } from '@leapwallet/cosmos-wallet-hooks';
+import { Buttons, GenericCard, Input } from '@leapwallet/leap-ui';
+import BottomModal from 'components/bottom-modal';
+import { ErrorCard } from 'components/ErrorCard';
+import { LoaderAnimation } from 'components/loader/Loader';
+import { useCreateViewingKey } from 'hooks/secret/useCreateViewingKey';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { rootDenomsStore } from 'stores/denoms-store-instance';
+import { rootBalanceStore } from 'stores/root-store';
+import { Colors } from 'theme/colors';
+import { UserClipboard } from 'utils/clipboard';
 
-import { useSnip20ManageTokens } from '../context'
-import { CopyViewingKey, Fee } from './index'
+import { useSnip20ManageTokens } from '../context';
+import { CopyViewingKey, Fee } from './index';
 
 type ImportKeySheetProps = {
-  isVisible: boolean
-  onClose: () => void
-  type: 'import' | 'update'
-  token?: SecretToken & { contractAddr: string }
-  onSuccess: VoidFunction
-}
+  isVisible: boolean;
+  onClose: () => void;
+  type: 'import' | 'update';
+  token?: SecretToken & { contractAddr: string };
+  onSuccess: VoidFunction;
+};
 
-export function ImportKeySheet({
-  isVisible,
-  onClose,
-  type,
-  token,
-  onSuccess,
-}: ImportKeySheetProps) {
-  const defaultLogo = useDefaultTokenLogo()
-  const [viewingKeyLoader, setViewingKeyLoader] = useState(false)
-  const [inputViewingKey, setInputViewingKey] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const createViewingKey = useCreateViewingKey()
-  const [showCopyKey, setShowCopyKey] = useState(false)
-  const address = useAddress()
-  const { lcdUrl } = useChainApis('secret')
-  const chainId = useChainId()
-  const inputEleRef = useRef<HTMLInputElement>(null)
+export function ImportKeySheet({ isVisible, onClose, type, token, onSuccess }: ImportKeySheetProps) {
+  const defaultLogo = useDefaultTokenLogo();
+  const [viewingKeyLoader, setViewingKeyLoader] = useState(false);
+  const [inputViewingKey, setInputViewingKey] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const createViewingKey = useCreateViewingKey();
+  const [showCopyKey, setShowCopyKey] = useState(false);
+  const address = useAddress();
+  const { lcdUrl } = useChainApis('secret');
+  const chainId = useChainId();
+  const inputEleRef = useRef<HTMLInputElement>(null);
 
-  const { setContractAddress, userPreferredGasLimit, userPreferredGasPrice } =
-    useSnip20ManageTokens()
+  const { setContractAddress, userPreferredGasLimit, userPreferredGasPrice } = useSnip20ManageTokens();
   useEffect(() => {
     if (token?.contractAddr) {
-      setContractAddress(token.contractAddr)
+      setContractAddress(token.contractAddr);
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token?.contractAddr])
+  }, [token?.contractAddr]);
 
   useEffect(() => {
     if (inputEleRef?.current) {
-      inputEleRef.current.focus()
+      inputEleRef.current.focus();
     }
-  }, [inputEleRef])
+  }, [inputEleRef]);
 
   const clearState = useCallback(() => {
-    setViewingKeyLoader(false)
-    setError(null)
-    setInputViewingKey('')
-    setShowCopyKey(false)
-    onClose()
-  }, [onClose])
+    setViewingKeyLoader(false);
+    setError(null);
+    setInputViewingKey('');
+    setShowCopyKey(false);
+    onClose();
+  }, [onClose]);
 
   const handleConfirmClick = useCallback(async () => {
     if (showCopyKey) {
-      onSuccess()
-      clearState()
+      onSuccess();
+      clearState();
     } else {
-      setViewingKeyLoader(true)
+      setViewingKeyLoader(true);
       const res = await createViewingKey(
         lcdUrl ?? '',
         chainId ?? '',
@@ -82,14 +75,14 @@ export function ImportKeySheet({
           feeDenom: userPreferredGasPrice?.denom,
           gasPriceStep: Number(userPreferredGasPrice?.amount ?? 0),
         },
-      )
+      );
 
       if (res.error) {
-        setError(res.error)
-        setViewingKeyLoader(false)
+        setError(res.error);
+        setViewingKeyLoader(false);
       } else {
-        setShowCopyKey(true)
-        setViewingKeyLoader(false)
+        setShowCopyKey(true);
+        setViewingKeyLoader(false);
       }
     }
   }, [
@@ -106,7 +99,7 @@ export function ImportKeySheet({
     userPreferredGasLimit,
     userPreferredGasPrice?.amount,
     userPreferredGasPrice?.denom,
-  ])
+  ]);
 
   return (
     <BottomModal
@@ -119,18 +112,13 @@ export function ImportKeySheet({
           className='rounded-2xl mb-4 p-4'
           title={token?.symbol}
           subtitle={token?.name}
-          img={
-            <img
-              src={token?.icon === '' ? defaultLogo : token?.icon}
-              className='w-[40px] h-[40px] mr-4'
-            />
-          }
+          img={<img src={token?.icon === '' ? defaultLogo : token?.icon} className='w-[40px] h-[40px] mr-4' />}
         />
 
         <Input
           onChange={(e) => {
-            setInputViewingKey(e.target.value)
-            setError(null)
+            setInputViewingKey(e.target.value);
+            setError(null);
           }}
           placeholder='enter key'
           className='mb-4 w-[344px]'
@@ -150,7 +138,7 @@ export function ImportKeySheet({
           <CopyViewingKey
             generatedViewingKey={inputViewingKey}
             onCopy={async () => {
-              UserClipboard.copyText(inputViewingKey)
+              UserClipboard.copyText(inputViewingKey);
             }}
           />
         ) : null}
@@ -172,5 +160,5 @@ export function ImportKeySheet({
         )}
       </div>
     </BottomModal>
-  )
+  );
 }

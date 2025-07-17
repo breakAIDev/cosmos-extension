@@ -1,5 +1,5 @@
-import React from 'react'
-import Skeleton from 'react-loading-skeleton'
+import React from 'react';
+import Skeleton from 'react-loading-skeleton';
 
 export function ValidatorListItemSkeleton() {
   return (
@@ -10,7 +10,7 @@ export function ValidatorListItemSkeleton() {
         <Skeleton count={1} className='z-0' />
       </div>
     </div>
-  )
+  );
 }
 
 export default function ValidatorListSkeleton() {
@@ -22,5 +22,5 @@ export default function ValidatorListSkeleton() {
       <ValidatorListItemSkeleton />
       <ValidatorListItemSkeleton />
     </>
-  )
+  );
 }

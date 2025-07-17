@@ -1,21 +1,19 @@
-import { formatTokenAmount, useAirdropsEligibilityData } from '@leapwallet/cosmos-wallet-hooks'
-import { CaretRight } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import Text from 'components/text'
-import React from 'react'
-import { useNavigate } from 'react-router-dom'
-import { cn } from 'utils/cn'
-import { isSidePanel } from 'utils/isSidePanel'
-import { trim } from 'utils/strings'
+import { formatTokenAmount, useAirdropsEligibilityData } from '@leapwallet/cosmos-wallet-hooks';
+import { CaretRight } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import Text from 'components/text';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { cn } from 'utils/cn';
+import { isSidePanel } from 'utils/isSidePanel';
+import { trim } from 'utils/strings';
 
-import EmptyAirdrops from './EmptyAirdrops'
+import EmptyAirdrops from './EmptyAirdrops';
 
 export default function EligibleAirdrops() {
-  const airdropsEligibilityData = useAirdropsEligibilityData() || {}
-  const eligibleAirdrops = Object.values(airdropsEligibilityData).filter(
-    (d) => d?.isEligible && !d?.isHidden,
-  )
-  const navigate = useNavigate()
+  const airdropsEligibilityData = useAirdropsEligibilityData() || {};
+  const eligibleAirdrops = Object.values(airdropsEligibilityData).filter((d) => d?.isEligible && !d?.isHidden);
+  const navigate = useNavigate();
 
   if (eligibleAirdrops.length < 1) {
     return (
@@ -28,7 +26,7 @@ export default function EligibleAirdrops() {
         }
         showLeapBoardButton={true}
       />
-    )
+    );
   }
 
   return (
@@ -48,12 +46,7 @@ export default function EligibleAirdrops() {
           >
             <img src={d.airdropIcon} alt='airdrop-icon' className='w-8 h-8 rounded-full' />
             <Text size='sm' className='flex-1 font-medium'>
-              {trim(
-                d.name,
-                isSidePanel()
-                  ? 10 + Math.floor(((Math.min(window.innerWidth, 400) - 320) / 81) * 7)
-                  : 17,
-              )}
+              {trim(d.name, isSidePanel() ? 10 + Math.floor(((Math.min(window.innerWidth, 400) - 320) / 81) * 7) : 17)}
             </Text>
             <Text
               size='sm'
@@ -71,5 +64,5 @@ export default function EligibleAirdrops() {
         ))}
       </div>
     </div>
-  )
+  );
 }

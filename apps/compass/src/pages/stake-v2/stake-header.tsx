@@ -1,16 +1,16 @@
-import { ArrowLeft } from '@phosphor-icons/react'
-import { WalletButton } from 'components/button/WalletButton'
-import { PageHeader } from 'components/header'
-import { Button } from 'components/ui/button'
-import { useWalletInfo } from 'hooks/useWalletInfo'
-import SelectWallet from 'pages/home/SelectWallet'
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { ArrowLeft } from '@phosphor-icons/react';
+import { WalletButton } from 'components/button/WalletButton';
+import { PageHeader } from 'components/header';
+import { Button } from 'components/ui/button';
+import { useWalletInfo } from 'hooks/useWalletInfo';
+import SelectWallet from 'pages/home/SelectWallet';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export const StakeHeader = (props: { disableWalletButton?: boolean }) => {
-  const navigate = useNavigate()
-  const walletInfo = useWalletInfo()
-  const [showSelectWallet, setShowSelectWallet] = useState(false)
+  const navigate = useNavigate();
+  const walletInfo = useWalletInfo();
+  const [showSelectWallet, setShowSelectWallet] = useState(false);
 
   return (
     <>
@@ -37,5 +37,5 @@ export const StakeHeader = (props: { disableWalletButton?: boolean }) => {
 
       <SelectWallet isVisible={showSelectWallet} onClose={() => setShowSelectWallet(false)} />
     </>
-  )
-}
+  );
+};

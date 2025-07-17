@@ -1,19 +1,19 @@
-import { Buttons, ThemeName, useTheme } from '@leapwallet/leap-ui'
-import { X } from '@phosphor-icons/react'
-import Text from 'components/text'
-import { LedgerEvmChains } from 'images/logos'
-import { CheckGreenNew } from 'images/misc'
-import React from 'react'
-import { Colors } from 'theme/colors'
+import { Buttons, ThemeName, useTheme } from '@leapwallet/leap-ui';
+import { X } from '@phosphor-icons/react';
+import Text from 'components/text';
+import { LedgerEvmChains } from 'images/logos';
+import { CheckGreenNew } from 'images/misc';
+import React from 'react';
+import { Colors } from 'theme/colors';
 
 interface ImportEvmModalProps {
-  onYes: () => void
-  onNo: () => void
-  onClose: () => void
+  onYes: () => void;
+  onNo: () => void;
+  onClose: () => void;
 }
 
 export default function ImportEvmModal({ onYes, onNo, onClose }: ImportEvmModalProps) {
-  const { theme } = useTheme()
+  const { theme } = useTheme();
 
   return (
     <div className='absolute w-full h-full flex items-center justify-center left-0 top-0 bg-[#0003] backdrop-blur-[10px] z-10'>
@@ -38,8 +38,7 @@ export default function ImportEvmModal({ onYes, onNo, onClose }: ImportEvmModalP
           <img src={LedgerEvmChains} className='height-[32px] width-[88px]' />
 
           <Text size='md' className='text-center'>
-            You can now import your EVM based wallets to use <br /> chains like Dymension, Evmos &
-            Injective.
+            You can now import your EVM based wallets to use <br /> chains like Dymension, Evmos & Injective.
           </Text>
         </div>
 
@@ -53,12 +52,7 @@ export default function ImportEvmModal({ onYes, onNo, onClose }: ImportEvmModalP
             <Text color='text-green-600'>Skip</Text>
           </Buttons.Generic>
 
-          <Buttons.Generic
-            color={Colors.green600}
-            size='normal'
-            className={'w-full'}
-            onClick={onYes}
-          >
+          <Buttons.Generic color={Colors.green600} size='normal' className={'w-full'} onClick={onYes}>
             Import
           </Buttons.Generic>
         </div>
@@ -70,5 +64,5 @@ export default function ImportEvmModal({ onYes, onNo, onClose }: ImportEvmModalP
         </div>
       </div>
     </div>
-  )
+  );
 }

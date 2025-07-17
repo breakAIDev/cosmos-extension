@@ -1,14 +1,14 @@
-import classNames from 'classnames'
-import { Images } from 'images'
-import React, { useEffect, useRef } from 'react'
+import classNames from 'classnames';
+import { Images } from 'images';
+import React, { useEffect, useRef } from 'react';
 
 type AggregatedSearchComponentsProps = {
-  handleClose: () => void
-  value: string
-  handleChange: (value: string) => void
-  placeholder?: string
-  className?: string
-}
+  handleClose: () => void;
+  value: string;
+  handleChange: (value: string) => void;
+  placeholder?: string;
+  className?: string;
+};
 
 export function AggregatedSearchComponent({
   handleClose,
@@ -17,11 +17,11 @@ export function AggregatedSearchComponent({
   placeholder,
   className,
 }: AggregatedSearchComponentsProps) {
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    inputRef.current?.focus()
-  }, [])
+    inputRef.current?.focus();
+  }, []);
 
   return (
     <div
@@ -49,5 +49,5 @@ export function AggregatedSearchComponent({
         <img src={Images.Misc.Cross} className='w-[12px] h-[12px] invert dark:invert-0' />
       </button>
     </div>
-  )
+  );
 }

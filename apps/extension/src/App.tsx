@@ -1,33 +1,31 @@
-import 'react-loading-skeleton/dist/skeleton.css'
+import 'react-loading-skeleton/dist/skeleton.css';
 
-import { ThemeName, useTheme } from '@leapwallet/leap-ui'
-import { IconContext } from '@phosphor-icons/react'
-import { useInitClientId } from 'hooks/settings/useClientId'
-import { useInitNodeUrls } from 'hooks/useInitNodeUrls'
-import { observer } from 'mobx-react-lite'
-import React, { PropsWithChildren, useEffect } from 'react'
-import { SkeletonTheme } from 'react-loading-skeleton'
-import { clientIdStore } from 'stores/client-id-store'
+import { ThemeName, useTheme } from '@leapwallet/leap-ui';
+import { IconContext } from '@phosphor-icons/react';
+import { useInitClientId } from 'hooks/settings/useClientId';
+import { useInitNodeUrls } from 'hooks/useInitNodeUrls';
+import { observer } from 'mobx-react-lite';
+import React, { PropsWithChildren, useEffect } from 'react';
+import { SkeletonTheme } from 'react-loading-skeleton';
+import { clientIdStore } from 'stores/client-id-store';
 
-import Routes from './Routes'
-import { Colors } from './theme/colors'
+import Routes from './Routes';
+import { Colors } from './theme/colors';
 
 const AppWrapper = observer((props: PropsWithChildren) => {
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme } = useTheme();
 
-  useInitNodeUrls()
-  useInitClientId(clientIdStore)
+  useInitNodeUrls();
+  useInitClientId(clientIdStore);
 
   useEffect(() => {
     if (theme === ThemeName.SYSTEM) {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? ThemeName.DARK
-        : ThemeName.LIGHT
-      setTheme(systemTheme)
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? ThemeName.DARK : ThemeName.LIGHT;
+      setTheme(systemTheme);
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [theme])
+  }, [theme]);
 
   return (
     <SkeletonTheme
@@ -36,8 +34,8 @@ const AppWrapper = observer((props: PropsWithChildren) => {
     >
       {props.children}
     </SkeletonTheme>
-  )
-})
+  );
+});
 
 export default function App() {
   return (
@@ -50,5 +48,5 @@ export default function App() {
         <Routes />
       </IconContext.Provider>
     </AppWrapper>
-  )
+  );
 }

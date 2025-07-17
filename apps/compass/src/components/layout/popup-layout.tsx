@@ -1,13 +1,13 @@
-import React, { ReactNode } from 'react'
-import { cn } from 'utils/cn'
+import React, { ReactNode } from 'react';
+import { cn } from 'utils/cn';
 
 type PopupLayoutProps = {
-  children: ReactNode
-  header?: ReactNode
-  className?: string
-  headerZIndex?: number
-  skipWatchingWalletHeader?: boolean
-}
+  children: ReactNode;
+  header?: ReactNode;
+  className?: string;
+  headerZIndex?: number;
+  skipWatchingWalletHeader?: boolean;
+};
 
 export default function PopupLayout({ children, className }: PopupLayoutProps) {
   return (
@@ -20,5 +20,5 @@ export default function PopupLayout({ children, className }: PopupLayoutProps) {
     >
       {children}
     </div>
-  )
+  );
 }

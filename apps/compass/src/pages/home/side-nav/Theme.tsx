@@ -1,26 +1,20 @@
-import { Avatar, Card, CardDivider, ThemeName, useTheme } from '@leapwallet/leap-ui'
-import BottomModal from 'components/bottom-modal'
-import { useActiveChain } from 'hooks/settings/useActiveChain'
-import { Images } from 'images'
-import React from 'react'
+import { Avatar, Card, CardDivider, ThemeName, useTheme } from '@leapwallet/leap-ui';
+import BottomModal from 'components/bottom-modal';
+import { useActiveChain } from 'hooks/settings/useActiveChain';
+import { Images } from 'images';
+import React from 'react';
 
-export default function ThemeDropUp({
-  isVisible,
-  onCloseHandler,
-}: {
-  isVisible: boolean
-  onCloseHandler: () => void
-}) {
-  const activeChain = useActiveChain()
-  const { theme, setTheme } = useTheme()
+export default function ThemeDropUp({ isVisible, onCloseHandler }: { isVisible: boolean; onCloseHandler: () => void }) {
+  const activeChain = useActiveChain();
+  const { theme, setTheme } = useTheme();
   const themes = [
     {
       title: 'Light',
       isSelected: theme === ThemeName.LIGHT,
       icon: Images.Nav.LightIcon,
       onClick: () => {
-        setTheme(ThemeName.LIGHT)
-        onCloseHandler()
+        setTheme(ThemeName.LIGHT);
+        onCloseHandler();
       },
     },
     {
@@ -28,11 +22,11 @@ export default function ThemeDropUp({
       isSelected: theme === ThemeName.DARK,
       icon: Images.Nav.DarkIcon,
       onClick: () => {
-        setTheme(ThemeName.DARK)
-        onCloseHandler()
+        setTheme(ThemeName.DARK);
+        onCloseHandler();
       },
     },
-  ]
+  ];
 
   return (
     <BottomModal isOpen={isVisible} onClose={onCloseHandler} title={'Select Theme'}>
@@ -49,8 +43,8 @@ export default function ThemeDropUp({
               className='w-full'
             />
           </React.Fragment>
-        )
+        );
       })}
     </BottomModal>
-  )
+  );
 }

@@ -1,7 +1,7 @@
-import React from 'react'
+import React from 'react';
 
-import AlphaTimeline from './components/alpha-timeline'
+import AlphaTimeline from './components/alpha-timeline';
 
 export default function AlphaHome() {
-  return <AlphaTimeline />
+  return <AlphaTimeline />;
 }

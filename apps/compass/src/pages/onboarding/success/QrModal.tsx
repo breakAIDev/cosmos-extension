@@ -1,16 +1,16 @@
-import { QrCode } from '@leapwallet/leap-ui'
-import { X } from '@phosphor-icons/react'
-import Text from 'components/text'
-import { Images } from 'images'
-import React, { Dispatch, SetStateAction } from 'react'
+import { QrCode } from '@leapwallet/leap-ui';
+import { X } from '@phosphor-icons/react';
+import Text from 'components/text';
+import { Images } from 'images';
+import React, { Dispatch, SetStateAction } from 'react';
 
 export function QrModal({ setShowQrModal }: { setShowQrModal: Dispatch<SetStateAction<boolean>> }) {
   return (
     <div
       className='fixed top-0 left-0 z-[5] h-screen w-screen bg-[#000000B2] p-2 backdrop-blur-[2.5px] dark:bg-[#000000B2]'
       onClick={(event) => {
-        event.stopPropagation()
-        setShowQrModal(false)
+        event.stopPropagation();
+        setShowQrModal(false);
       }}
     >
       <div
@@ -34,11 +34,7 @@ export function QrModal({ setShowQrModal }: { setShowQrModal: Dispatch<SetStateA
               <QrCode data={'https://onelink.to/gq7zmg'} height={350} width={350} />
             </div>
           </div>
-          <Text
-            size='sm'
-            color='dark:text-gray-400 text-gray-600'
-            className='pb-6 px-10 text-center'
-          >
+          <Text size='sm' color='dark:text-gray-400 text-gray-600' className='pb-6 px-10 text-center'>
             Scan the QR code to download our app on Android/iOS
           </Text>
           <div className='flex pb-6 gap-4'>
@@ -64,5 +60,5 @@ export function QrModal({ setShowQrModal }: { setShowQrModal: Dispatch<SetStateA
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,9 +1,9 @@
-import { Proposal, ProposalApi } from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import React from 'react'
+import { Proposal, ProposalApi } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import React from 'react';
 
-import { NtrnProposalDetails } from '../neutron'
-import { ProposalDetails } from './index'
+import { NtrnProposalDetails } from '../neutron';
+import { ProposalDetails } from './index';
 
 export default function GenericProposalDetails({
   selectedProposalChain,
@@ -13,12 +13,12 @@ export default function GenericProposalDetails({
   shouldUseFallback,
   forceNetwork,
 }: {
-  selectedProposalChain: SupportedChain
-  selectedProposalId: string
-  handleProposalDetailsBack: () => void
-  allProposals: (Proposal | ProposalApi)[]
-  shouldUseFallback: boolean
-  forceNetwork: 'mainnet' | 'testnet'
+  selectedProposalChain: SupportedChain;
+  selectedProposalId: string;
+  handleProposalDetailsBack: () => void;
+  allProposals: (Proposal | ProposalApi)[];
+  shouldUseFallback: boolean;
+  forceNetwork: 'mainnet' | 'testnet';
 }) {
   if (selectedProposalChain === 'neutron') {
     return (
@@ -30,7 +30,7 @@ export default function GenericProposalDetails({
         forceChain={selectedProposalChain}
         forceNetwork={forceNetwork}
       />
-    )
+    );
   }
 
   return (
@@ -48,5 +48,5 @@ export default function GenericProposalDetails({
         },
       }}
     />
-  )
+  );
 }

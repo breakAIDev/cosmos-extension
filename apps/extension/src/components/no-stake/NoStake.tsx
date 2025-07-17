@@ -1,22 +1,22 @@
-import { Header, HeaderActionType } from '@leapwallet/leap-ui'
-import BottomNav, { BottomNavLabel } from 'components/bottom-nav/BottomNav'
-import PopupLayout from 'components/layout/popup-layout'
-import Text from 'components/text'
-import { useChainPageInfo } from 'hooks'
-import { useDontShowSelectChain } from 'hooks/useDontShowSelectChain'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import SelectChain from 'pages/home/SelectChain'
-import React, { useState } from 'react'
-import { chainTagsStore } from 'stores/chain-infos-store'
-import { globalSheetsStore } from 'stores/global-sheets-store'
-import { manageChainsStore } from 'stores/manage-chains-store'
+import { Header, HeaderActionType } from '@leapwallet/leap-ui';
+import BottomNav, { BottomNavLabel } from 'components/bottom-nav/BottomNav';
+import PopupLayout from 'components/layout/popup-layout';
+import Text from 'components/text';
+import { useChainPageInfo } from 'hooks';
+import { useDontShowSelectChain } from 'hooks/useDontShowSelectChain';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import SelectChain from 'pages/home/SelectChain';
+import React, { useState } from 'react';
+import { chainTagsStore } from 'stores/chain-infos-store';
+import { globalSheetsStore } from 'stores/global-sheets-store';
+import { manageChainsStore } from 'stores/manage-chains-store';
 
 export const NoStake = observer(() => {
-  const [showSideNav, setShowSideNav] = useState(false)
-  const [showChainSelector, setShowChainSelector] = useState(false)
-  const { headerChainImgSrc } = useChainPageInfo()
-  const dontShowSelectChain = useDontShowSelectChain(manageChainsStore)
+  const [showSideNav, setShowSideNav] = useState(false);
+  const [showChainSelector, setShowChainSelector] = useState(false);
+  const { headerChainImgSrc } = useChainPageInfo();
+  const dontShowSelectChain = useDontShowSelectChain(manageChainsStore);
 
   return (
     <div className='relative w-full overflow-clip panel-height'>
@@ -53,5 +53,5 @@ export const NoStake = observer(() => {
         onClose={() => setShowChainSelector(false)}
       />
     </div>
-  )
-})
+  );
+});

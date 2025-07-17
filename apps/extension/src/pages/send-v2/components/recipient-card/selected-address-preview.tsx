@@ -1,31 +1,31 @@
-import { SelectedAddress, sliceAddress } from '@leapwallet/cosmos-wallet-hooks'
-import { Avatar } from '@leapwallet/leap-ui'
-import Text from 'components/text'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import { Images } from 'images'
-import React, { useState } from 'react'
-import { imgOnError } from 'utils/imgOnError'
+import { SelectedAddress, sliceAddress } from '@leapwallet/cosmos-wallet-hooks';
+import { Avatar } from '@leapwallet/leap-ui';
+import Text from 'components/text';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { Images } from 'images';
+import React, { useState } from 'react';
+import { imgOnError } from 'utils/imgOnError';
 
-import WalletDetailsSheet from '../wallet-details-sheet'
+import WalletDetailsSheet from '../wallet-details-sheet';
 
 type SelectedAddressPreviewProps = {
-  selectedAddress: SelectedAddress
-  showEditMenu: boolean
-  onDelete: () => void
-}
+  selectedAddress: SelectedAddress;
+  showEditMenu: boolean;
+  onDelete: () => void;
+};
 
 export const SelectedAddressPreview: React.FC<SelectedAddressPreviewProps> = ({
   selectedAddress,
   showEditMenu,
   onDelete,
 }) => {
-  const defaultTokenLogo = useDefaultTokenLogo()
-  const [showContactDetailsSheet, setShowContactDetailsSheet] = useState(false)
+  const defaultTokenLogo = useDefaultTokenLogo();
+  const [showContactDetailsSheet, setShowContactDetailsSheet] = useState(false);
 
   const handleClick: React.MouseEventHandler<HTMLButtonElement> = (e) => {
-    e.stopPropagation()
-    setShowContactDetailsSheet(true)
-  }
+    e.stopPropagation();
+    setShowContactDetailsSheet(true);
+  };
 
   return (
     <>
@@ -40,11 +40,7 @@ export const SelectedAddressPreview: React.FC<SelectedAddressPreviewProps> = ({
           avatarImage={selectedAddress.avatarIcon ?? defaultTokenLogo}
           avatarOnError={imgOnError(defaultTokenLogo)}
           emoji={selectedAddress.emoji}
-          chainIcon={
-            selectedAddress.avatarIcon === selectedAddress.chainIcon
-              ? undefined
-              : selectedAddress.chainIcon
-          }
+          chainIcon={selectedAddress.avatarIcon === selectedAddress.chainIcon ? undefined : selectedAddress.chainIcon}
           className='bg-gray-200 dark:bg-gray-800 !h-8 !w-8'
         />
         <Text size='md' className='text-black-100 dark:text-white-100 ml-2 font-bold'>
@@ -65,5 +61,5 @@ export const SelectedAddressPreview: React.FC<SelectedAddressPreviewProps> = ({
         onCloseHandler={() => setShowContactDetailsSheet(false)}
       />
     </>
-  )
-}
+  );
+};

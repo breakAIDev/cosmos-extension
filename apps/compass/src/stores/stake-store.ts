@@ -9,17 +9,17 @@ import {
   StakingDenomsStore,
   UndelegationsStore,
   ValidatorsStore,
-} from '@leapwallet/cosmos-wallet-store'
+} from '@leapwallet/cosmos-wallet-store';
 
-import { activeChainStore } from './active-chain-store'
-import { addressStore } from './address-store-instance'
-import { aggregatedChainsStore, nmsStore, priceStore } from './balance-store'
-import { chainInfosConfigStore, chainInfoStore } from './chain-infos-store'
-import { denomsStore } from './denoms-store-instance'
-import { selectedNetworkStore } from './selected-network-store'
+import { activeChainStore } from './active-chain-store';
+import { addressStore } from './address-store-instance';
+import { aggregatedChainsStore, nmsStore, priceStore } from './balance-store';
+import { chainInfosConfigStore, chainInfoStore } from './chain-infos-store';
+import { denomsStore } from './denoms-store-instance';
+import { selectedNetworkStore } from './selected-network-store';
 
-const priorityValidatorsStore = new PriorityValidatorsStore()
-const stakingDenomsStore = new StakingDenomsStore()
+const priorityValidatorsStore = new PriorityValidatorsStore();
+const stakingDenomsStore = new StakingDenomsStore();
 
 const activeStakingDenomStore = new ActiveStakingDenomStore(
   activeChainStore,
@@ -27,9 +27,9 @@ const activeStakingDenomStore = new ActiveStakingDenomStore(
   stakingDenomsStore,
   chainInfoStore,
   denomsStore,
-)
+);
 
-const chainsAprStore = new ChainsAprStore()
+const chainsAprStore = new ChainsAprStore();
 
 export const validatorsStore = new ValidatorsStore(
   chainInfoStore,
@@ -42,7 +42,7 @@ export const validatorsStore = new ValidatorsStore(
   priorityValidatorsStore,
   aggregatedChainsStore,
   chainsAprStore,
-)
+);
 
 export const delegationsStore = new DelegationsStore(
   chainInfoStore,
@@ -54,7 +54,7 @@ export const delegationsStore = new DelegationsStore(
   aggregatedChainsStore,
   activeStakingDenomStore,
   priceStore,
-)
+);
 
 export const unDelegationsStore = new UndelegationsStore(
   chainInfoStore,
@@ -67,9 +67,9 @@ export const unDelegationsStore = new UndelegationsStore(
   aggregatedChainsStore,
   activeStakingDenomStore,
   priceStore,
-)
+);
 
-const ibcDenomInfoStore = new IbcDenomInfoStore(nmsStore, chainInfoStore, denomsStore)
+const ibcDenomInfoStore = new IbcDenomInfoStore(nmsStore, chainInfoStore, denomsStore);
 
 export const claimRewardsStore = new ClaimRewardsStore(
   chainInfoStore,
@@ -82,7 +82,7 @@ export const claimRewardsStore = new ClaimRewardsStore(
   activeStakingDenomStore,
   priceStore,
   ibcDenomInfoStore,
-)
+);
 
 export const aggregateStakeStore = new AggregateStakeStore(
   chainInfoStore,
@@ -94,4 +94,4 @@ export const aggregateStakeStore = new AggregateStakeStore(
   validatorsStore,
   claimRewardsStore,
   chainInfosConfigStore,
-)
+);

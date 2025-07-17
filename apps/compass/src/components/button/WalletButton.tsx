@@ -1,15 +1,15 @@
-import { FilledDownArrowSvg } from 'images/misc'
-import React from 'react'
-import { cn } from 'utils/cn'
+import { FilledDownArrowSvg } from 'images/misc';
+import React from 'react';
+import { cn } from 'utils/cn';
 
 type WalletButtonProps = {
-  showWalletAvatar?: boolean
-  walletName: string
-  showDropdown?: boolean
-  handleDropdownClick?: () => void
-  walletAvatar?: string | React.ReactNode
-  className?: string
-}
+  showWalletAvatar?: boolean;
+  walletName: string;
+  showDropdown?: boolean;
+  handleDropdownClick?: () => void;
+  walletAvatar?: string | React.ReactNode;
+  className?: string;
+};
 
 const WalletButton = ({
   showWalletAvatar,
@@ -39,12 +39,10 @@ const WalletButton = ({
         {walletName}
       </span>
 
-      {showDropdown ? (
-        <FilledDownArrowSvg className='fill-muted-foreground size-2 shrink-0 ml-1' />
-      ) : null}
+      {showDropdown ? <FilledDownArrowSvg className='fill-muted-foreground size-2 shrink-0 ml-1' /> : null}
     </button>
-  )
-}
+  );
+};
 
-WalletButton.displayName = 'WalletButton'
-export { WalletButton }
+WalletButton.displayName = 'WalletButton';
+export { WalletButton };

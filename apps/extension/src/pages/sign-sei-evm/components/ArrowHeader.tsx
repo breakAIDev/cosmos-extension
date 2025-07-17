@@ -1,24 +1,24 @@
-import { Images } from 'images'
-import React from 'react'
+import { Images } from 'images';
+import React from 'react';
 
 type ArrowHeaderProps = {
-  activeIndex: number
-  setActiveIndex: (index: number) => void
-  limit: number
-}
+  activeIndex: number;
+  setActiveIndex: (index: number) => void;
+  limit: number;
+};
 
 export function ArrowHeader({ activeIndex, setActiveIndex, limit }: ArrowHeaderProps) {
   const handlePrevClick = () => {
     if (activeIndex > 0) {
-      setActiveIndex(activeIndex - 1)
+      setActiveIndex(activeIndex - 1);
     }
-  }
+  };
 
   const handleNextClick = () => {
     if (activeIndex < limit - 1) {
-      setActiveIndex(activeIndex + 1)
+      setActiveIndex(activeIndex + 1);
     }
-  }
+  };
 
   return (
     <div className='flex items-center gap-1'>
@@ -40,9 +40,7 @@ export function ArrowHeader({ activeIndex, setActiveIndex, limit }: ArrowHeaderP
             {activeIndex + 1} of {limit}
           </strong>
         </p>
-        <p className='dark:text-white-100 text-gray-900 text-[10px]'>
-          requests waiting to be acknowledged
-        </p>
+        <p className='dark:text-white-100 text-gray-900 text-[10px]'>requests waiting to be acknowledged</p>
       </div>
 
       {activeIndex < limit - 1 ? (
@@ -57,5 +55,5 @@ export function ArrowHeader({ activeIndex, setActiveIndex, limit }: ArrowHeaderP
         </div>
       ) : null}
     </div>
-  )
+  );
 }

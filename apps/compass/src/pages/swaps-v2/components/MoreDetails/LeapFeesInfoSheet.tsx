@@ -1,8 +1,8 @@
-import BottomModal from 'components/bottom-modal'
-import React from 'react'
-import { isCompassWallet } from 'utils/isCompassWallet'
+import BottomModal from 'components/bottom-modal';
+import React from 'react';
+import { isCompassWallet } from 'utils/isCompassWallet';
 
-type LeapFeesInfoSheetProps = { isOpen: boolean; onClose: () => void; leapFeeBps: string }
+type LeapFeesInfoSheetProps = { isOpen: boolean; onClose: () => void; leapFeeBps: string };
 
 function LeapFeesInfoSheet({ isOpen, onClose, leapFeeBps }: LeapFeesInfoSheetProps) {
   return (
@@ -19,7 +19,7 @@ function LeapFeesInfoSheet({ isOpen, onClose, leapFeeBps }: LeapFeesInfoSheetPro
         infrastructure provider`}
       </div>
     </BottomModal>
-  )
+  );
 }
 
-export default LeapFeesInfoSheet
+export default LeapFeesInfoSheet;

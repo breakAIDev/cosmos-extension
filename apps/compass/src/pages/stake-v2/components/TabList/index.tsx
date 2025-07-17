@@ -1,21 +1,16 @@
-import { useActiveChain, useSelectedNetwork, useStaking } from '@leapwallet/cosmos-wallet-hooks'
-import { AnimatePresence, motion } from 'framer-motion'
-import { observer } from 'mobx-react-lite'
-import React, { useMemo, useState } from 'react'
-import { rootDenomsStore } from 'stores/denoms-store-instance'
-import { rootBalanceStore } from 'stores/root-store'
-import {
-  claimRewardsStore,
-  delegationsStore,
-  unDelegationsStore,
-  validatorsStore,
-} from 'stores/stake-store'
-import { transition150 } from 'utils/motion-variants'
-import { slideVariants } from 'utils/motion-variants/global-layout-motions'
+import { useActiveChain, useSelectedNetwork, useStaking } from '@leapwallet/cosmos-wallet-hooks';
+import { AnimatePresence, motion } from 'framer-motion';
+import { observer } from 'mobx-react-lite';
+import React, { useMemo, useState } from 'react';
+import { rootDenomsStore } from 'stores/denoms-store-instance';
+import { rootBalanceStore } from 'stores/root-store';
+import { claimRewardsStore, delegationsStore, unDelegationsStore, validatorsStore } from 'stores/stake-store';
+import { transition150 } from 'utils/motion-variants';
+import { slideVariants } from 'utils/motion-variants/global-layout-motions';
 
-import PendingUnstakeList from '../PendingUnstakeList'
-import ValidatorList from '../ValidatorList'
-import { TabSelectors } from './tab-list-selector'
+import PendingUnstakeList from '../PendingUnstakeList';
+import ValidatorList from '../ValidatorList';
+import { TabSelectors } from './tab-list-selector';
 
 export enum TabElements {
   YOUR_DELEGATIONS = 'Your delegations',
@@ -23,21 +18,16 @@ export enum TabElements {
 }
 
 const TabList = observer(() => {
-  const activeChain = useActiveChain()
-  const activeNetwork = useSelectedNetwork()
+  const activeChain = useActiveChain();
+  const activeNetwork = useSelectedNetwork();
 
-  const denoms = rootDenomsStore.allDenoms
-  const chainDelegations = delegationsStore.delegationsForChain(activeChain)
-  const chainValidators = validatorsStore.validatorsForChain(activeChain)
-  const chainUnDelegations = unDelegationsStore.unDelegationsForChain(activeChain)
-  const chainClaimRewards = claimRewardsStore.claimRewardsForChain(activeChain)
+  const denoms = rootDenomsStore.allDenoms;
+  const chainDelegations = delegationsStore.delegationsForChain(activeChain);
+  const chainValidators = validatorsStore.validatorsForChain(activeChain);
+  const chainUnDelegations = unDelegationsStore.unDelegationsForChain(activeChain);
+  const chainClaimRewards = claimRewardsStore.claimRewardsForChain(activeChain);
 
-  const {
-    delegations,
-    unboundingDelegationsInfo,
-    loadingDelegations,
-    loadingUnboundingDelegations,
-  } = useStaking(
+  const { delegations, unboundingDelegationsInfo, loadingDelegations, loadingUnboundingDelegations } = useStaking(
     denoms,
     chainDelegations,
     chainValidators,
@@ -45,30 +35,30 @@ const TabList = observer(() => {
     chainClaimRewards,
     activeChain,
     activeNetwork,
-  )
+  );
 
-  const [selectedTab, setSelectedTab] = useState<{ label: TabElements }>()
-  const isLoading = loadingDelegations || loadingUnboundingDelegations
+  const [selectedTab, setSelectedTab] = useState<{ label: TabElements }>();
+  const isLoading = loadingDelegations || loadingUnboundingDelegations;
 
   const tabs = useMemo(() => {
-    const _tabs = []
+    const _tabs = [];
     if (Object.values(delegations ?? {}).length > 0) {
-      _tabs.push({ label: TabElements.YOUR_DELEGATIONS })
+      _tabs.push({ label: TabElements.YOUR_DELEGATIONS });
     }
 
     if (Object.values(unboundingDelegationsInfo ?? {}).length > 0) {
-      _tabs.push({ label: TabElements.PENDING_UNSTAKE })
+      _tabs.push({ label: TabElements.PENDING_UNSTAKE });
     }
 
     if (_tabs.length > 0) {
-      setSelectedTab(_tabs[0])
+      setSelectedTab(_tabs[0]);
     }
 
-    return _tabs
-  }, [delegations, unboundingDelegationsInfo])
+    return _tabs;
+  }, [delegations, unboundingDelegationsInfo]);
 
   if (isLoading) {
-    return <></>
+    return <></>;
   }
 
   return (
@@ -129,7 +119,7 @@ const TabList = observer(() => {
         )}
       </AnimatePresence>
     </div>
-  )
-})
+  );
+});
 
-export default TabList
+export default TabList;

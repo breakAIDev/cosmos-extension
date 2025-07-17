@@ -1,23 +1,21 @@
-import { useGetChains } from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { Avatar } from '@leapwallet/leap-ui'
-import { parfait, ParsedMessage } from '@leapwallet/parser-parfait'
-import dayjs from 'dayjs'
-import { useActivityImage } from 'hooks/activity/useActivityImage'
-import { DollarIcon } from 'icons/dollar-icon'
-import { Images } from 'images'
-import React, { useMemo } from 'react'
-import { UserClipboard } from 'utils/clipboard'
-import { cn } from 'utils/cn'
-import { formatTokenAmount, sliceAddress } from 'utils/strings'
+import { useGetChains } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { Avatar } from '@leapwallet/leap-ui';
+import { parfait, ParsedMessage } from '@leapwallet/parser-parfait';
+import dayjs from 'dayjs';
+import { useActivityImage } from 'hooks/activity/useActivityImage';
+import { DollarIcon } from 'icons/dollar-icon';
+import { Images } from 'images';
+import React, { useMemo } from 'react';
+import { UserClipboard } from 'utils/clipboard';
+import { cn } from 'utils/cn';
+import { formatTokenAmount, sliceAddress } from 'utils/strings';
 
-import { SelectedTx } from './ChainActivity'
-import { CopyButton } from './copy-button'
-import { DetailsCard } from './tx-detail-card'
+import { SelectedTx } from './ChainActivity';
+import { CopyButton } from './copy-button';
+import { DetailsCard } from './tx-detail-card';
 
-const getActivityIconAndTitle = (
-  activeChain: SupportedChain,
-): Record<string, { icon: string; title: string }> => {
+const getActivityIconAndTitle = (activeChain: SupportedChain): Record<string, { icon: string; title: string }> => {
   return {
     send: { icon: Images.Activity.SendIcon, title: 'Sent' },
     receive: { icon: Images.Activity.ReceiveIcon, title: 'Received' },
@@ -40,8 +38,8 @@ const getActivityIconAndTitle = (
       icon: Images.Activity.Undelegate,
       title: 'Remove Liquidity',
     },
-  }
-}
+  };
+};
 
 export const TxDetailsContent = ({
   tx,
@@ -49,45 +47,34 @@ export const TxDetailsContent = ({
   activeChain,
   txnMessage,
 }: {
-  tx: SelectedTx
-  contact: { name: string; emoji: number }
-  activeChain: SupportedChain
-  txnMessage?: ParsedMessage
+  tx: SelectedTx;
+  contact: { name: string; emoji: number };
+  activeChain: SupportedChain;
+  txnMessage?: ParsedMessage;
 }) => {
-  const chainInfos = useGetChains()
-  const chainInfo = chainInfos[activeChain]
+  const chainInfos = useGetChains();
+  const chainInfo = chainInfos[activeChain];
 
   const isSimpleTokenTransfer =
-    tx?.content?.txType === 'send' ||
-    tx?.content?.txType === 'receive' ||
-    tx?.content?.txType === 'ibc/transfer'
+    tx?.content?.txType === 'send' || tx?.content?.txType === 'receive' || tx?.content?.txType === 'ibc/transfer';
 
-  const isTxSuccessful = tx?.parsedTx?.code === 0
+  const isTxSuccessful = tx?.parsedTx?.code === 0;
 
-  const {
-    sentAmount,
-    sentTokenInfo,
-    receivedAmount,
-    receivedTokenInfo,
-    sentUsdValue,
-    receivedUsdValue,
-    txType,
-  } = tx?.content ?? {}
+  const { sentAmount, sentTokenInfo, receivedAmount, receivedTokenInfo, sentUsdValue, receivedUsdValue, txType } =
+    tx?.content ?? {};
 
-  const defaultImg = useActivityImage(txType ?? 'fallback', activeChain)
-  const iconAndTitle = getActivityIconAndTitle(activeChain)
+  const defaultImg = useActivityImage(txType ?? 'fallback', activeChain);
+  const iconAndTitle = getActivityIconAndTitle(activeChain);
 
-  const { icon, title } = iconAndTitle[txType ?? ''] || iconAndTitle.fallback
-  const date = useMemo(() => dayjs(tx?.parsedTx?.timestamp).format('D MMMM YYYY h:mm A'), [tx])
+  const { icon, title } = iconAndTitle[txType ?? ''] || iconAndTitle.fallback;
+  const date = useMemo(() => dayjs(tx?.parsedTx?.timestamp).format('D MMMM YYYY h:mm A'), [tx]);
 
   const sentAmountInfo =
-    sentAmount && sentTokenInfo?.coinDenom
-      ? formatTokenAmount(sentAmount, sentTokenInfo.coinDenom)
-      : undefined
+    sentAmount && sentTokenInfo?.coinDenom ? formatTokenAmount(sentAmount, sentTokenInfo.coinDenom) : undefined;
   const receivedAmountInfo =
     receivedAmount && receivedTokenInfo?.coinDenom
       ? formatTokenAmount(receivedAmount, receivedTokenInfo.coinDenom)
-      : undefined
+      : undefined;
 
   return (
     <div className='flex flex-col gap-4'>
@@ -141,7 +128,7 @@ export const TxDetailsContent = ({
               trailing={
                 <CopyButton
                   onClick={() => {
-                    UserClipboard.copyText((txnMessage as parfait.cosmos.bank.send).toAddress)
+                    UserClipboard.copyText((txnMessage as parfait.cosmos.bank.send).toAddress);
                   }}
                 />
               }
@@ -156,7 +143,7 @@ export const TxDetailsContent = ({
               trailing={
                 <CopyButton
                   onClick={() => {
-                    UserClipboard.copyText((txnMessage as parfait.cosmos.bank.send).fromAddress)
+                    UserClipboard.copyText((txnMessage as parfait.cosmos.bank.send).fromAddress);
                   }}
                 />
               }
@@ -180,7 +167,7 @@ export const TxDetailsContent = ({
           trailing={
             <CopyButton
               onClick={() => {
-                UserClipboard.copyText(tx?.parsedTx?.txHash ?? '')
+                UserClipboard.copyText(tx?.parsedTx?.txHash ?? '');
               }}
             />
           }
@@ -202,5 +189,5 @@ export const TxDetailsContent = ({
         )}
       </div>
     </div>
-  )
-}
+  );
+};

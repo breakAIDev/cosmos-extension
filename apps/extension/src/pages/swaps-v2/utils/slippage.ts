@@ -1,24 +1,24 @@
 type SlippageRemarks =
   | {
-      type: 'error' | 'warn'
-      color: 'orange' | 'red'
-      message: string
+      type: 'error' | 'warn';
+      color: 'orange' | 'red';
+      message: string;
     }
-  | undefined
+  | undefined;
 
 function getSlippageRemarks(slippage: string | undefined): SlippageRemarks {
   if (!slippage) {
-    return undefined
+    return undefined;
   }
 
-  const parsedSlippage = parseFloat(slippage)
+  const parsedSlippage = parseFloat(slippage);
 
   if (isNaN(parsedSlippage)) {
-    return { type: 'error', color: 'red', message: 'Please enter a valid number.' }
+    return { type: 'error', color: 'red', message: 'Please enter a valid number.' };
   }
 
   if (parsedSlippage > 99 || parsedSlippage < 0) {
-    return { type: 'error', color: 'red', message: 'Slippage must be between 0 and 99.' }
+    return { type: 'error', color: 'red', message: 'Slippage must be between 0 and 99.' };
   }
 
   if (parsedSlippage > 30) {
@@ -26,7 +26,7 @@ function getSlippageRemarks(slippage: string | undefined): SlippageRemarks {
       type: 'error',
       color: 'red',
       message: 'Please enter a value less than 30%.',
-    }
+    };
   }
 
   if (parsedSlippage > 3) {
@@ -35,7 +35,7 @@ function getSlippageRemarks(slippage: string | undefined): SlippageRemarks {
       color: 'orange',
       message:
         'High slippage can result in an unfavorable trade if the price shifts significantly when the transaction is executed.',
-    }
+    };
   }
 
   if (parsedSlippage < 0.1) {
@@ -43,8 +43,8 @@ function getSlippageRemarks(slippage: string | undefined): SlippageRemarks {
       type: 'warn',
       color: 'orange',
       message: 'Very low slippage. Your transaction may fail.',
-    }
+    };
   }
 }
 
-export { getSlippageRemarks, SlippageRemarks }
+export { getSlippageRemarks, SlippageRemarks };

@@ -1,25 +1,22 @@
-import classNames from 'classnames'
-import { SwapVert } from 'images/misc'
-import React, { useCallback, useState } from 'react'
+import classNames from 'classnames';
+import { SwapVert } from 'images/misc';
+import React, { useCallback, useState } from 'react';
 
 type InterchangeButtonProps = {
-  isSwitchOrderPossible: boolean
-  handleSwitchOrder: () => void
-}
+  isSwitchOrderPossible: boolean;
+  handleSwitchOrder: () => void;
+};
 
-export function InterchangeButton({
-  isSwitchOrderPossible,
-  handleSwitchOrder,
-}: InterchangeButtonProps) {
-  const [animate, setAnimate] = useState<boolean>(false)
+export function InterchangeButton({ isSwitchOrderPossible, handleSwitchOrder }: InterchangeButtonProps) {
+  const [animate, setAnimate] = useState<boolean>(false);
 
   const handleBtnClick = useCallback(() => {
-    handleSwitchOrder()
-    setAnimate(true)
+    handleSwitchOrder();
+    setAnimate(true);
     setTimeout(() => {
-      setAnimate(false)
-    }, 600)
-  }, [handleSwitchOrder, setAnimate])
+      setAnimate(false);
+    }, 600);
+  }, [handleSwitchOrder, setAnimate]);
 
   return (
     <div
@@ -36,5 +33,5 @@ export function InterchangeButton({
         })}
       />
     </div>
-  )
+  );
 }

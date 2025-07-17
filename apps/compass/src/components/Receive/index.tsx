@@ -1,48 +1,48 @@
-import { useActiveChain } from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { Buttons, OnboardCard, QrCode, ThemeName, useTheme } from '@leapwallet/leap-ui'
-import BottomModal from 'components/bottom-modal'
-import { ON_RAMP_SUPPORT_CHAINS } from 'config/config'
-import { useChainPageInfo } from 'hooks'
-import useActiveWallet from 'hooks/settings/useActiveWallet'
-import { useGetWalletAddresses } from 'hooks/useGetWalletAddresses'
-import { Images } from 'images'
-import kadoDarkLogo from 'images/logos/Kado-dark.svg'
-import kadoLightLogo from 'images/logos/Kado-light.svg'
-import rightArrow from 'images/misc/right-arrow.svg'
-import React, { ReactElement } from 'react'
-import { UserClipboard } from 'utils/clipboard'
-import { formatWalletName } from 'utils/formatWalletName'
-import { sliceAddress } from 'utils/strings'
+import { useActiveChain } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { Buttons, OnboardCard, QrCode, ThemeName, useTheme } from '@leapwallet/leap-ui';
+import BottomModal from 'components/bottom-modal';
+import { ON_RAMP_SUPPORT_CHAINS } from 'config/config';
+import { useChainPageInfo } from 'hooks';
+import useActiveWallet from 'hooks/settings/useActiveWallet';
+import { useGetWalletAddresses } from 'hooks/useGetWalletAddresses';
+import { Images } from 'images';
+import kadoDarkLogo from 'images/logos/Kado-dark.svg';
+import kadoLightLogo from 'images/logos/Kado-light.svg';
+import rightArrow from 'images/misc/right-arrow.svg';
+import React, { ReactElement } from 'react';
+import { UserClipboard } from 'utils/clipboard';
+import { formatWalletName } from 'utils/formatWalletName';
+import { sliceAddress } from 'utils/strings';
 
 export type ReceiveTokenProps = {
-  isVisible: boolean
-  chain?: SupportedChain
-  onCloseHandler?: () => void
-  tokenBalanceOnChain?: SupportedChain
-}
+  isVisible: boolean;
+  chain?: SupportedChain;
+  onCloseHandler?: () => void;
+  tokenBalanceOnChain?: SupportedChain;
+};
 
 export default function ReceiveToken({
   isVisible,
   onCloseHandler,
   tokenBalanceOnChain,
 }: ReceiveTokenProps): ReactElement {
-  const wallet = useActiveWallet().activeWallet
-  const _activeChain = useActiveChain()
-  const activeChain = tokenBalanceOnChain ?? _activeChain
-  const { topChainColor } = useChainPageInfo()
+  const wallet = useActiveWallet().activeWallet;
+  const _activeChain = useActiveChain();
+  const activeChain = tokenBalanceOnChain ?? _activeChain;
+  const { topChainColor } = useChainPageInfo();
 
-  const address = wallet?.addresses[activeChain]
-  const { theme } = useTheme()
-  const isDark = theme === ThemeName.DARK
-  const walletAddress = useGetWalletAddresses(activeChain)
+  const address = wallet?.addresses[activeChain];
+  const { theme } = useTheme();
+  const isDark = theme === ThemeName.DARK;
+  const walletAddress = useGetWalletAddresses(activeChain);
 
   const QrCodeProps = {
     height: 250,
     width: 250,
     data: address ?? '',
     image: Images.Logos.CompassCircle,
-  }
+  };
 
   return (
     <BottomModal isOpen={isVisible} onClose={onCloseHandler} title={'Your QR code'}>
@@ -63,8 +63,8 @@ export default function ReceiveToken({
                 walletAddress={sliceAddress(address)}
                 data-testing-id='copy-wallet-address'
                 onCopy={() => {
-                  if (!address) return
-                  UserClipboard.copyText(address)
+                  if (!address) return;
+                  UserClipboard.copyText(address);
                 }}
               />
             </React.Fragment>
@@ -74,7 +74,7 @@ export default function ReceiveToken({
             <div
               className='mt-2'
               onClick={() => {
-                window.open(`https://app.kado.money/?apiKey=${process.env.KADO_ON_RAMP_API_KEY}`)
+                window.open(`https://app.kado.money/?apiKey=${process.env.KADO_ON_RAMP_API_KEY}`);
               }}
             >
               <OnboardCard
@@ -92,5 +92,5 @@ export default function ReceiveToken({
         <></>
       )}
     </BottomModal>
-  )
+  );
 }

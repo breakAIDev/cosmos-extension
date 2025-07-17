@@ -1,52 +1,52 @@
-import { KeyChain } from '@leapwallet/leap-keychain'
-import { captureException } from '@sentry/react'
-import { Button } from 'components/ui/button'
-import { EventName } from 'config/analytics'
-import { AuthContextType, useAuth } from 'context/auth-context'
-import { motion, Variants } from 'framer-motion'
-import { Images } from 'images'
-import mixpanel from 'mixpanel-browser'
-import { observer } from 'mobx-react-lite'
-import React, { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { passwordStore } from 'stores/password-store'
-import { hasMnemonicWallet } from 'utils/hasMnemonicWallet'
-import { preloadOnboardingRoutes } from 'utils/preload'
-import extension from 'webextension-polyfill'
+import { KeyChain } from '@leapwallet/leap-keychain';
+import { captureException } from '@sentry/react';
+import { Button } from 'components/ui/button';
+import { EventName } from 'config/analytics';
+import { AuthContextType, useAuth } from 'context/auth-context';
+import { motion, Variants } from 'framer-motion';
+import { Images } from 'images';
+import mixpanel from 'mixpanel-browser';
+import { observer } from 'mobx-react-lite';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { passwordStore } from 'stores/password-store';
+import { hasMnemonicWallet } from 'utils/hasMnemonicWallet';
+import { preloadOnboardingRoutes } from 'utils/preload';
+import extension from 'webextension-polyfill';
 
-import { OnboardingLayout } from './layout'
+import { OnboardingLayout } from './layout';
 
 const logoTransition = {
   duration: 0.5,
   ease: 'easeOut',
-}
+};
 
 const headerLogoVariants: Variants = {
   hidden: { opacity: 0, y: '100%', scale: 0.95 },
   visible: { opacity: 1, y: 0, scale: 1 },
   exit: { opacity: 0, y: '-100%', scale: 0.95 },
-}
+};
 
 const transition = {
   duration: 0.5,
   delay: 0.3,
   ease: 'easeOut',
-}
+};
 
 const headerTextVariants: Variants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1 },
-}
+};
 
 const buttonVariants: Variants = {
   hidden: { opacity: 0, y: '25%' },
   visible: { opacity: 1, y: 0 },
-}
+};
 
 const containerTransition = {
   duration: 1,
   ease: 'easeOut',
-}
+};
 
 const containerVariants: Variants = {
   hidden: {
@@ -59,42 +59,42 @@ const containerVariants: Variants = {
     backgroundImage:
       'linear-gradient(250deg, hsl(var(--bg-linear-gradient-start)) 19.35%, hsl(var(--bg-linear-gradient-end)) 80.65%)',
   },
-}
+};
 
 export default observer(function Onboarding() {
-  const navigate = useNavigate()
-  const { loading, noAccount } = useAuth() as AuthContextType
+  const navigate = useNavigate();
+  const { loading, noAccount } = useAuth() as AuthContextType;
 
   const trackCTAEvent = (methodChosen: string) => {
-    localStorage.setItem('onboardingMethodChosen', methodChosen)
-    localStorage.setItem('timeStarted2', new Date().getTime().toString())
-  }
+    localStorage.setItem('onboardingMethodChosen', methodChosen);
+    localStorage.setItem('timeStarted2', new Date().getTime().toString());
+  };
 
   useEffect(() => {
-    ;(async () => {
-      const wallets = await KeyChain.getAllWallets()
+    (async () => {
+      const wallets = await KeyChain.getAllWallets();
 
       if (loading === false && hasMnemonicWallet(wallets)) {
         if (!noAccount || passwordStore.password) {
-          navigate('/onboardingSuccess')
+          navigate('/onboardingSuccess');
         }
       }
-    })()
-  }, [loading, navigate, noAccount, passwordStore.password])
+    })();
+  }, [loading, navigate, noAccount, passwordStore.password]);
 
   useEffect(() => {
-    preloadOnboardingRoutes()
+    preloadOnboardingRoutes();
 
-    extension.extension.getViews({ type: 'popup' })
+    extension.extension.getViews({ type: 'popup' });
 
-    const timeStarted1 = localStorage.getItem('timeStarted1')
+    const timeStarted1 = localStorage.getItem('timeStarted1');
     if (!timeStarted1) {
-      localStorage.setItem('timeStarted1', new Date().getTime().toString())
+      localStorage.setItem('timeStarted1', new Date().getTime().toString());
     }
-  }, [])
+  }, []);
 
   if (loading) {
-    return null
+    return null;
   }
 
   return (
@@ -139,8 +139,8 @@ export default observer(function Onboarding() {
           className='w-full'
           data-testing-id='create-new-wallet'
           onClick={() => {
-            navigate('/onboardingCreate')
-            trackCTAEvent('new')
+            navigate('/onboardingCreate');
+            trackCTAEvent('new');
           }}
         >
           Create a new wallet
@@ -151,13 +151,13 @@ export default observer(function Onboarding() {
           className='w-full'
           data-testing-id='import-existing-wallet'
           onClick={() => {
-            navigate('/onboardingImport')
-            trackCTAEvent('import-seed-phrase')
+            navigate('/onboardingImport');
+            trackCTAEvent('import-seed-phrase');
           }}
         >
           Import an existing wallet
         </Button>
       </motion.div>
     </OnboardingLayout>
-  )
-})
+  );
+});

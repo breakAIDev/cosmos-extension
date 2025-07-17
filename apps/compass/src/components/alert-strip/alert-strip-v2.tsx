@@ -1,8 +1,8 @@
-import { Info, Warning, WarningCircle } from '@phosphor-icons/react'
-import { motion } from 'framer-motion'
-import React from 'react'
-import { cn } from 'utils/cn'
-import { opacityFadeInOut, transition150 } from 'utils/motion-variants'
+import { Info, Warning, WarningCircle } from '@phosphor-icons/react';
+import { motion } from 'framer-motion';
+import React from 'react';
+import { cn } from 'utils/cn';
+import { opacityFadeInOut, transition150 } from 'utils/motion-variants';
 
 const alertStripV2Config = {
   info: {
@@ -20,15 +20,14 @@ const alertStripV2Config = {
     Icon: WarningCircle,
     weight: 'fill',
   },
-} as const
+} as const;
 
 export const AlertStripV2 = (props: {
-  children: React.ReactNode
-  type?: 'info' | 'warning' | 'error'
-  className?: string
+  children: React.ReactNode;
+  type?: 'info' | 'warning' | 'error';
+  className?: string;
 }) => {
-  const { className, Icon, weight } =
-    alertStripV2Config[props.type ?? 'info'] || alertStripV2Config.info
+  const { className, Icon, weight } = alertStripV2Config[props.type ?? 'info'] || alertStripV2Config.info;
 
   return (
     <motion.div
@@ -37,14 +36,10 @@ export const AlertStripV2 = (props: {
       initial='hidden'
       animate='visible'
       exit='hidden'
-      className={cn(
-        'w-full flex justify-center items-center gap-2 p-2 text-xs font-bold',
-        className,
-        props.className,
-      )}
+      className={cn('w-full flex justify-center items-center gap-2 p-2 text-xs font-bold', className, props.className)}
     >
       <Icon weight={weight} className='size-4' />
       <p>{props.children}</p>
     </motion.div>
-  )
-}
+  );
+};

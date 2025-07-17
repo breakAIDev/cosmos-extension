@@ -1,48 +1,45 @@
-import { CaretDown, CaretUp } from '@phosphor-icons/react'
-import BottomModal from 'components/bottom-modal'
-import Text from 'components/text'
-import { Button } from 'components/ui/button'
-import { AnimatePresence, motion } from 'framer-motion'
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router'
-import { closeSidePanel } from 'utils/closeSidePanel'
-import { isSidePanel } from 'utils/isSidePanel'
-import browser from 'webextension-polyfill'
+import { CaretDown, CaretUp } from '@phosphor-icons/react';
+import BottomModal from 'components/bottom-modal';
+import Text from 'components/text';
+import { Button } from 'components/ui/button';
+import { AnimatePresence, motion } from 'framer-motion';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router';
+import { closeSidePanel } from 'utils/closeSidePanel';
+import { isSidePanel } from 'utils/isSidePanel';
+import browser from 'webextension-polyfill';
 
 const ListItem = ({ order, text }: { order: number; text: string }) => {
   return (
     <div className='flex items-center mb-4'>
-      <Text
-        size='sm'
-        className='flex h-[27px] w-[27px] justify-center items-center rounded-full bg-gray-900 mr-4'
-      >
+      <Text size='sm' className='flex h-[27px] w-[27px] justify-center items-center rounded-full bg-gray-900 mr-4'>
         {order}
       </Text>
       <Text size='sm' className='font-medium w-[300px]'>
         {text}
       </Text>
     </div>
-  )
-}
+  );
+};
 
 export const LedgerAppGuide = () => {
-  const [showDetails, setShowDetails] = useState<boolean>(false)
-  const navigate = useNavigate()
-  const [showPopup, setShowPopup] = useState(false)
+  const [showDetails, setShowDetails] = useState<boolean>(false);
+  const navigate = useNavigate();
+  const [showPopup, setShowPopup] = useState(false);
 
   const handleAccordionClick = () => {
-    setShowDetails((prevShowDetails) => !prevShowDetails)
-  }
+    setShowDetails((prevShowDetails) => !prevShowDetails);
+  };
 
   const goToImportSeiLedger = () => {
-    const views = browser.extension.getViews({ type: 'popup' })
+    const views = browser.extension.getViews({ type: 'popup' });
     if (views.length === 0 && !isSidePanel()) {
-      navigate('/onboardingImport?walletName=ledger&app=sei')
+      navigate('/onboardingImport?walletName=ledger&app=sei');
     } else {
-      window.open('index.html#/onboardingImport?walletName=ledger&app=sei')
-      closeSidePanel()
+      window.open('index.html#/onboardingImport?walletName=ledger&app=sei');
+      closeSidePanel();
     }
-  }
+  };
   return (
     <>
       <Button
@@ -62,9 +59,7 @@ export const LedgerAppGuide = () => {
         contentClassName='bg-secondary-50'
       >
         <Text size='sm' className='font-medium mb-4'>
-          {
-            "You're using the Cosmos App on Ledger, which only supports Cosmos-style addresses (starting with sei...)"
-          }
+          {"You're using the Cosmos App on Ledger, which only supports Cosmos-style addresses (starting with sei...)"}
         </Text>
         <Text size='sm' className='font-medium mb-4'>
           {"Since you're trying to send to a 0x address, you'll need to:"}{' '}
@@ -104,21 +99,18 @@ export const LedgerAppGuide = () => {
                 className='w-full p-3 border-t border-secondary-300 border-dashed'
               >
                 <Text size='sm'>
-                  Ledger creates different wallet addresses depending on the app (Cosmos vs. Sei),
-                  even when using the same recovery phrase. The Cosmos App uses coin type 118, while
-                  the Sei App uses coin type 60 for EVM-compatible addresses.
+                  Ledger creates different wallet addresses depending on the app (Cosmos vs. Sei), even when using the
+                  same recovery phrase. The Cosmos App uses coin type 118, while the Sei App uses coin type 60 for
+                  EVM-compatible addresses.
                 </Text>
               </motion.div>
             </AnimatePresence>
           ) : null}
         </div>
-        <Button
-          className='absolute bottom-4 left-5 w-[360px]'
-          onClick={() => goToImportSeiLedger()}
-        >
+        <Button className='absolute bottom-4 left-5 w-[360px]' onClick={() => goToImportSeiLedger()}>
           Import with Sei App
         </Button>
       </BottomModal>
     </>
-  )
-}
+  );
+};

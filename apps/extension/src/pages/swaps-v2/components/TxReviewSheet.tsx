@@ -1,28 +1,28 @@
-import { CaretDown, CaretUp, GasPump } from '@phosphor-icons/react'
-import BigNumber from 'bignumber.js'
-import classNames from 'classnames'
-import BottomModal from 'components/new-bottom-modal'
-import { Button } from 'components/ui/button'
-import { PageName } from 'config/analytics'
-import { AnimatePresence, motion } from 'framer-motion'
-import { usePageView } from 'hooks/analytics/usePageView'
-import React, { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react'
+import { CaretDown, CaretUp, GasPump } from '@phosphor-icons/react';
+import BigNumber from 'bignumber.js';
+import classNames from 'classnames';
+import BottomModal from 'components/new-bottom-modal';
+import { Button } from 'components/ui/button';
+import { PageName } from 'config/analytics';
+import { AnimatePresence, motion } from 'framer-motion';
+import { usePageView } from 'hooks/analytics/usePageView';
+import React, { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
 
-import { useSwapContext } from '../context'
-import { useAggregatorBridgeRelayerFee } from '../hooks/useBridgeFee'
-import { MoreDetails } from './MoreDetails'
-import { ConversionRateDisplay } from './SwapInfo/ConversionRateDisplay'
-import TxTokensSummary from './TxTokensSummary'
+import { useSwapContext } from '../context';
+import { useAggregatorBridgeRelayerFee } from '../hooks/useBridgeFee';
+import { MoreDetails } from './MoreDetails';
+import { ConversionRateDisplay } from './SwapInfo/ConversionRateDisplay';
+import TxTokensSummary from './TxTokensSummary';
 
 type TxReviewSheetProps = {
-  isOpen: boolean
-  onClose: () => void
-  onProceed: () => void
-  setShowFeesSettingSheet: Dispatch<SetStateAction<boolean>>
-  destinationAssetUSDValue?: BigNumber
-  sourceAssetUSDValue?: BigNumber
-  onSlippageInfoClick: () => void
-}
+  isOpen: boolean;
+  onClose: () => void;
+  onProceed: () => void;
+  setShowFeesSettingSheet: Dispatch<SetStateAction<boolean>>;
+  destinationAssetUSDValue?: BigNumber;
+  sourceAssetUSDValue?: BigNumber;
+  onSlippageInfoClick: () => void;
+};
 
 export function TxReviewSheet({
   isOpen,
@@ -43,19 +43,19 @@ export function TxReviewSheet({
     destinationChain,
     routingInfo,
     loadingRoutes,
-  } = useSwapContext()
+  } = useSwapContext();
 
-  const { totalBridgeFee } = useAggregatorBridgeRelayerFee(routingInfo?.route)
+  const { totalBridgeFee } = useAggregatorBridgeRelayerFee(routingInfo?.route);
 
   const reviewPageProperties = useMemo(() => {
-    let inAmountDollarValue, outAmountDollarValue
+    let inAmountDollarValue, outAmountDollarValue;
     if (
       sourceToken?.usdPrice &&
       !isNaN(parseFloat(sourceToken?.usdPrice)) &&
       inAmount &&
       !isNaN(parseFloat(inAmount))
     ) {
-      inAmountDollarValue = parseFloat(sourceToken?.usdPrice) * parseFloat(inAmount)
+      inAmountDollarValue = parseFloat(sourceToken?.usdPrice) * parseFloat(inAmount);
     }
     if (
       destinationToken?.usdPrice &&
@@ -63,7 +63,7 @@ export function TxReviewSheet({
       amountOut &&
       !isNaN(parseFloat(amountOut))
     ) {
-      outAmountDollarValue = parseFloat(destinationToken.usdPrice) * parseFloat(amountOut)
+      outAmountDollarValue = parseFloat(destinationToken.usdPrice) * parseFloat(amountOut);
     }
     return {
       fromToken: sourceToken?.symbol,
@@ -73,7 +73,7 @@ export function TxReviewSheet({
       toChain: destinationChain?.chainName,
       toTokenAmount: outAmountDollarValue,
       transactionCount: routingInfo?.route?.transactionCount,
-    }
+    };
   }, [
     sourceToken?.usdPrice,
     sourceToken?.symbol,
@@ -84,32 +84,27 @@ export function TxReviewSheet({
     sourceChain?.chainName,
     destinationChain?.chainName,
     routingInfo?.route?.transactionCount,
-  ])
+  ]);
 
-  usePageView(PageName.SwapsReview, isOpen, reviewPageProperties)
+  usePageView(PageName.SwapsReview, isOpen, reviewPageProperties);
 
-  const [showMoreDetails, setShowMoreDetails] = useState<boolean>(false)
+  const [showMoreDetails, setShowMoreDetails] = useState<boolean>(false);
 
   const handleAccordionClick = useCallback(() => {
-    setShowMoreDetails((prevShowMoreDetails) => !prevShowMoreDetails)
-  }, [setShowMoreDetails])
+    setShowMoreDetails((prevShowMoreDetails) => !prevShowMoreDetails);
+  }, [setShowMoreDetails]);
 
   const handleAccordingKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
       if (e.key === 'Enter' || e.key === ' ') {
-        handleAccordionClick()
+        handleAccordionClick();
       }
     },
     [handleAccordionClick],
-  )
+  );
 
   return (
-    <BottomModal
-      onClose={onClose}
-      isOpen={isOpen}
-      className='p-6 max-[399px]:!px-4'
-      title='Review Transaction'
-    >
+    <BottomModal onClose={onClose} isOpen={isOpen} className='p-6 max-[399px]:!px-4' title='Review Transaction'>
       <div
         className={classNames('flex flex-col items-center w-full', {
           'gap-y-6': !showMoreDetails,
@@ -181,5 +176,5 @@ export function TxReviewSheet({
         </Button>
       </div>
     </BottomModal>
-  )
+  );
 }

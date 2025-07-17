@@ -1,21 +1,20 @@
-import { X } from '@phosphor-icons/react'
-import Text from 'components/text'
-import React from 'react'
+import { X } from '@phosphor-icons/react';
+import Text from 'components/text';
+import React from 'react';
 
-import { useChadProvider } from '../context/chad-exclusives-context'
-import { useFilters } from '../context/filter-context'
+import { useChadProvider } from '../context/chad-exclusives-context';
+import { useFilters } from '../context/filter-context';
 
 export default function SelectedFilterTags() {
-  const { selectedOpportunities, selectedEcosystems, setOpportunities, setEcosystems } =
-    useFilters()
+  const { selectedOpportunities, selectedEcosystems, setOpportunities, setEcosystems } = useFilters();
 
   const handleRemoveCategory = (category: string) => {
-    setOpportunities(selectedOpportunities?.filter((c) => c !== category) || [])
-  }
+    setOpportunities(selectedOpportunities?.filter((c) => c !== category) || []);
+  };
 
   const handleRemoveEcosystem = (ecosystem: string) => {
-    setEcosystems(selectedEcosystems?.filter((e) => e !== ecosystem) || [])
-  }
+    setEcosystems(selectedEcosystems?.filter((e) => e !== ecosystem) || []);
+  };
 
   return (
     <section className='flex flex-wrap gap-2'>
@@ -35,7 +34,7 @@ export default function SelectedFilterTags() {
               <X size={10} weight='bold' className='text-gray-100 dark:text-gray-900' />
             </button>
           </div>
-        )
+        );
       })}
       {selectedEcosystems.map((ecosystem) => {
         return (
@@ -53,23 +52,22 @@ export default function SelectedFilterTags() {
               <X size={10} weight='bold' className='text-gray-100 dark:text-gray-900' />
             </button>
           </div>
-        )
+        );
       })}
     </section>
-  )
+  );
 }
 
 export function SelectedChadFilterTags() {
-  const { selectedOpportunities, selectedEcosystems, setOpportunities, setEcosystems } =
-    useChadProvider()
+  const { selectedOpportunities, selectedEcosystems, setOpportunities, setEcosystems } = useChadProvider();
 
   const handleRemoveCategory = (category: string) => {
-    setOpportunities(selectedOpportunities?.filter((c) => c !== category) || [])
-  }
+    setOpportunities(selectedOpportunities?.filter((c) => c !== category) || []);
+  };
 
   const handleRemoveEcosystem = (ecosystem: string) => {
-    setEcosystems(selectedEcosystems?.filter((e) => e !== ecosystem) || [])
-  }
+    setEcosystems(selectedEcosystems?.filter((e) => e !== ecosystem) || []);
+  };
 
   return (
     <section className='flex flex-wrap gap-2 mb-2'>
@@ -87,7 +85,7 @@ export function SelectedChadFilterTags() {
               <X size={10} weight='bold' className='text-gray-100 dark:text-gray-900' />
             </button>
           </div>
-        )
+        );
       })}
       {selectedEcosystems.map((ecosystem) => {
         return (
@@ -103,8 +101,8 @@ export function SelectedChadFilterTags() {
               <X size={10} weight='bold' className='text-gray-100 dark:text-gray-900' />
             </button>
           </div>
-        )
+        );
       })}
     </section>
-  )
+  );
 }

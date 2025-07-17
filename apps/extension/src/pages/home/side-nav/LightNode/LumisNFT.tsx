@@ -5,65 +5,54 @@ import {
   useFeatureFlags,
   useGetEvmGasPrices,
   WALLETTYPE,
-} from '@leapwallet/cosmos-wallet-hooks'
-import {
-  bech32ToEthAddress,
-  mintNft,
-  NFTMetadata,
-  simulateMintTx,
-} from '@leapwallet/cosmos-wallet-sdk'
-import { EvmBalanceStore } from '@leapwallet/cosmos-wallet-store'
-import { EthWallet, Key } from '@leapwallet/leap-keychain'
-import { CardDivider } from '@leapwallet/leap-ui'
-import { CaretRight, CheckCircle, ShareNetwork } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import LedgerConfirmationPopup from 'components/ledger-confirmation/LedgerConfirmationPopup'
-import Text from 'components/text'
-import { Button } from 'components/ui/button'
-import { Separator } from 'components/ui/separator'
-import { AnimatePresence, motion } from 'framer-motion'
-import useActiveWallet from 'hooks/settings/useActiveWallet'
-import { Wallet } from 'hooks/wallet/useWallet'
-import { Images } from 'images'
-import { CopySvg, getWalletIconAtIndex } from 'images/misc'
-import loadingImage from 'lottie-files/swaps-btn-loading.json'
-import Lottie from 'lottie-react'
-import { observer } from 'mobx-react-lite'
-import { Chip, NonFractionalizedNftDescription } from 'pages/nfts-v2/components'
-import React, { useCallback, useEffect, useState } from 'react'
-import { chainInfoStore } from 'stores/chain-infos-store'
-import { lightNodeStore } from 'stores/light-node-store'
-import { Colors } from 'theme/colors'
-import { UserClipboard } from 'utils/clipboard'
-import { getChainName } from 'utils/getChainName'
-import { isSidePanel } from 'utils/isSidePanel'
-import { opacityFadeInOut, transition150 } from 'utils/motion-variants'
-import { formatTokenAmount, sliceWord } from 'utils/strings'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { bech32ToEthAddress, mintNft, NFTMetadata, simulateMintTx } from '@leapwallet/cosmos-wallet-sdk';
+import { EvmBalanceStore } from '@leapwallet/cosmos-wallet-store';
+import { EthWallet, Key } from '@leapwallet/leap-keychain';
+import { CardDivider } from '@leapwallet/leap-ui';
+import { CaretRight, CheckCircle, ShareNetwork } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import LedgerConfirmationPopup from 'components/ledger-confirmation/LedgerConfirmationPopup';
+import Text from 'components/text';
+import { Button } from 'components/ui/button';
+import { Separator } from 'components/ui/separator';
+import { AnimatePresence, motion } from 'framer-motion';
+import useActiveWallet from 'hooks/settings/useActiveWallet';
+import { Wallet } from 'hooks/wallet/useWallet';
+import { Images } from 'images';
+import { CopySvg, getWalletIconAtIndex } from 'images/misc';
+import loadingImage from 'lottie-files/swaps-btn-loading.json';
+import Lottie from 'lottie-react';
+import { observer } from 'mobx-react-lite';
+import { Chip, NonFractionalizedNftDescription } from 'pages/nfts-v2/components';
+import React, { useCallback, useEffect, useState } from 'react';
+import { chainInfoStore } from 'stores/chain-infos-store';
+import { lightNodeStore } from 'stores/light-node-store';
+import { Colors } from 'theme/colors';
+import { UserClipboard } from 'utils/clipboard';
+import { getChainName } from 'utils/getChainName';
+import { isSidePanel } from 'utils/isSidePanel';
+import { opacityFadeInOut, transition150 } from 'utils/motion-variants';
+import { formatTokenAmount, sliceWord } from 'utils/strings';
 
-const NFTDetails = ({
-  showSuccess: _showSuccess,
-  nftData,
-}: {
-  showSuccess?: boolean
-  nftData: NFTMetadata
-}) => {
-  const [showSuccess, setShowSuccess] = useState(_showSuccess ?? false)
-  const { data: featureFlags } = useFeatureFlags()
+const NFTDetails = ({ showSuccess: _showSuccess, nftData }: { showSuccess?: boolean; nftData: NFTMetadata }) => {
+  const [showSuccess, setShowSuccess] = useState(_showSuccess ?? false);
+  const { data: featureFlags } = useFeatureFlags();
 
   const handleShare = async () => {
-    const tweetText = featureFlags?.lightNodeNFT?.tweetText ?? ''
-    const shareUrl = featureFlags?.lightNodeNFT?.tweetImageUrl ?? ''
+    const tweetText = featureFlags?.lightNodeNFT?.tweetText ?? '';
+    const shareUrl = featureFlags?.lightNodeNFT?.tweetImageUrl ?? '';
     const twitterShareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
       tweetText,
-    )}&url=${encodeURIComponent(shareUrl)}`
-    window.open(twitterShareUrl.toString(), '_blank')
-  }
+    )}&url=${encodeURIComponent(shareUrl)}`;
+    window.open(twitterShareUrl.toString(), '_blank');
+  };
 
   useEffect(() => {
     setTimeout(() => {
-      setShowSuccess(false)
-    }, 5000)
-  }, [])
+      setShowSuccess(false);
+    }, 5000);
+  }, []);
 
   return (
     <div className='h-[calc(100%-116px)]'>
@@ -83,23 +72,15 @@ const NFTDetails = ({
             Your browser does not support this video player.
           </video>
         ) : (
-          <img
-            src={nftData.image ?? Images.Logos.GenericDark}
-            width={352}
-            height={352}
-            className='rounded-xl'
-          />
+          <img src={nftData.image ?? Images.Logos.GenericDark} width={352} height={352} className='rounded-xl' />
         )}
 
         <div className='flex items-center justify-between'>
           <div className='flex flex-col flex-1'>
             <p
-              className={classNames(
-                'text-gray-800 dark:text-white-100 truncate max-w-[200px] text-lg font-bold',
-                {
-                  '!max-w-[160px]': isSidePanel(),
-                },
-              )}
+              className={classNames('text-gray-800 dark:text-white-100 truncate max-w-[200px] text-lg font-bold', {
+                '!max-w-[160px]': isSidePanel(),
+              })}
             >
               {nftData.name}
             </p>
@@ -156,34 +137,28 @@ const NFTDetails = ({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-const AlreadyMinted = ({
-  nftData,
-  mintedWallet,
-}: {
-  nftData?: NFTMetadata
-  mintedWallet: Key<string> | null
-}) => {
-  const [isWalletAddressCopied, setIsWalletAddressCopied] = useState(false)
-  const ethAddress = bech32ToEthAddress(mintedWallet?.addresses.forma ?? '')
+const AlreadyMinted = ({ nftData, mintedWallet }: { nftData?: NFTMetadata; mintedWallet: Key<string> | null }) => {
+  const [isWalletAddressCopied, setIsWalletAddressCopied] = useState(false);
+  const ethAddress = bech32ToEthAddress(mintedWallet?.addresses.forma ?? '');
 
   const handleCopyClick = useCallback(() => {
-    setIsWalletAddressCopied(true)
-    setTimeout(() => setIsWalletAddressCopied(false), 2000)
-    UserClipboard.copyText(ethAddress)
-  }, [ethAddress])
+    setIsWalletAddressCopied(true);
+    setTimeout(() => setIsWalletAddressCopied(false), 2000);
+    UserClipboard.copyText(ethAddress);
+  }, [ethAddress]);
 
   const handleViewDetails = useCallback(async () => {
-    let explorerUrl = 'https://explorer.forma.art/token/0xd4368164DEb9Dc170FC27FeAd657192EEe4eA57c'
+    let explorerUrl = 'https://explorer.forma.art/token/0xd4368164DEb9Dc170FC27FeAd657192EEe4eA57c';
 
     if (nftData?.tokenId) {
-      explorerUrl += `/instance/${nftData.tokenId}`
+      explorerUrl += `/instance/${nftData.tokenId}`;
     }
 
-    window.open(explorerUrl, '_blank')
-  }, [nftData?.tokenId])
+    window.open(explorerUrl, '_blank');
+  }, [nftData?.tokenId]);
 
   return (
     <div className='flex flex-col gap-5 items-center p-6'>
@@ -251,8 +226,8 @@ const AlreadyMinted = ({
         <img src={nftData?.image} className='w-[312px] h-[312px] rounded-xl' />
       </div>
     </div>
-  )
-}
+  );
+};
 
 export const LightNodeBanner = ({ title }: { title: string }) => {
   return (
@@ -260,8 +235,8 @@ export const LightNodeBanner = ({ title }: { title: string }) => {
       <span className='text-sm font-bold text-gray-950'>{title}</span>
       <img src={Images.Misc.Lumi} width={70} height={60} />
     </div>
-  )
-}
+  );
+};
 
 const LumisNFT = observer(
   ({
@@ -271,51 +246,42 @@ const LumisNFT = observer(
     evmBalanceStore,
     mintedWallet,
   }: {
-    isEligible: boolean
-    nftData?: NFTMetadata
-    fetcher: () => Promise<void>
-    evmBalanceStore: EvmBalanceStore
-    mintedWallet: Key<string> | null
+    isEligible: boolean;
+    nftData?: NFTMetadata;
+    fetcher: () => Promise<void>;
+    evmBalanceStore: EvmBalanceStore;
+    mintedWallet: Key<string> | null;
   }) => {
-    const getWallet = Wallet.useGetWallet()
-    const txPostToDB = LeapWalletApi.useOperateCosmosTx()
-    const { gasPrice } = useGetEvmGasPrices('forma')
-    const [error, setError] = useState('')
-    const [loading, setLoading] = useState(false)
-    const eligibleToMint = isEligible && lightNodeStore.isLightNodeRunning
-    const [showSuccess, setShowSuccess] = useState(false)
-    const { primaryAddress } = useAddressStore()
-    const { activeWallet } = useActiveWallet()
-    const [showLedgerPopup, setShowLedgerPopup] = useState(false)
-    const [gasLimit, setGasLimit] = useState(0)
-    const nativeDenom = Object.values(chainInfoStore.chainInfos['forma'].nativeDenoms)[0]
+    const getWallet = Wallet.useGetWallet();
+    const txPostToDB = LeapWalletApi.useOperateCosmosTx();
+    const { gasPrice } = useGetEvmGasPrices('forma');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+    const eligibleToMint = isEligible && lightNodeStore.isLightNodeRunning;
+    const [showSuccess, setShowSuccess] = useState(false);
+    const { primaryAddress } = useAddressStore();
+    const { activeWallet } = useActiveWallet();
+    const [showLedgerPopup, setShowLedgerPopup] = useState(false);
+    const [gasLimit, setGasLimit] = useState(0);
+    const nativeDenom = Object.values(chainInfoStore.chainInfos['forma'].nativeDenoms)[0];
     const nativeBalance = evmBalanceStore
       .evmBalanceForChain('forma')
-      .evmBalance.find(
-        (token) =>
-          token.chain === 'forma' && token.coinMinimalDenom === nativeDenom.coinMinimalDenom,
-      )
-    const fees = (gasLimit * gasPrice.low) / 10 ** nativeDenom.coinDecimals
+      .evmBalance.find((token) => token.chain === 'forma' && token.coinMinimalDenom === nativeDenom.coinMinimalDenom);
+    const fees = (gasLimit * gasPrice.low) / 10 ** nativeDenom.coinDecimals;
 
     const handleMintClick = async () => {
       try {
-        setLoading(true)
-        const wallet = await getWallet('forma', true)
+        setLoading(true);
+        const wallet = await getWallet('forma', true);
         if (activeWallet?.walletType === WALLETTYPE.LEDGER) {
-          setShowLedgerPopup(true)
+          setShowLedgerPopup(true);
         }
-        const address = (await wallet.getAccounts())[0].address
-        const txHash = await mintNft(
-          primaryAddress,
-          address,
-          wallet as unknown as EthWallet,
-          gasLimit,
-          gasPrice.low,
-        )
+        const address = (await wallet.getAccounts())[0].address;
+        const txHash = await mintNft(primaryAddress, address, wallet as unknown as EthWallet, gasLimit, gasPrice.low);
 
         if (txHash) {
-          await fetcher()
-          setShowSuccess(true)
+          await fetcher();
+          setShowSuccess(true);
           await txPostToDB({
             txHash,
             txType: CosmosTxType.NFTMint,
@@ -325,49 +291,45 @@ const LumisNFT = observer(
             forceNetwork: 'mainnet',
             feeDenomination: nativeDenom.coinMinimalDenom,
             feeQuantity: (gasLimit * gasPrice.low).toString(),
-          })
+          });
         } else {
-          throw new Error('Something went wrong')
+          throw new Error('Something went wrong');
         }
       } catch (error: any) {
-        setError(
-          error.code === 'INSUFFICIENT_FUNDS'
-            ? 'Insufficient funds for fees'
-            : 'Something went wrong',
-        )
+        setError(error.code === 'INSUFFICIENT_FUNDS' ? 'Insufficient funds for fees' : 'Something went wrong');
         setTimeout(() => {
-          setError('')
-        }, 7000)
+          setError('');
+        }, 7000);
       } finally {
-        setLoading(false)
-        setShowLedgerPopup(false)
+        setLoading(false);
+        setShowLedgerPopup(false);
       }
-    }
+    };
 
     const simulateTx = useCallback(async () => {
-      if (!activeWallet?.addresses.forma) return
-      const value = await simulateMintTx(primaryAddress, activeWallet?.addresses.forma ?? '')
-      setGasLimit(value)
-    }, [activeWallet?.addresses.forma, primaryAddress])
+      if (!activeWallet?.addresses.forma) return;
+      const value = await simulateMintTx(primaryAddress, activeWallet?.addresses.forma ?? '');
+      setGasLimit(value);
+    }, [activeWallet?.addresses.forma, primaryAddress]);
 
     useEffect(() => {
       if (!mintedWallet && !nftData && eligibleToMint) {
-        simulateTx()
+        simulateTx();
       }
-    }, [eligibleToMint, mintedWallet, nftData, simulateTx])
+    }, [eligibleToMint, mintedWallet, nftData, simulateTx]);
 
     useEffect(() => {
       if (nativeBalance?.amount && fees > 0 && +nativeBalance.amount < fees) {
-        setError('Insufficient funds for fees')
+        setError('Insufficient funds for fees');
       }
-    }, [fees, nativeBalance?.amount])
+    }, [fees, nativeBalance?.amount]);
 
     if (mintedWallet && nftData) {
-      return <AlreadyMinted nftData={nftData} mintedWallet={mintedWallet} />
+      return <AlreadyMinted nftData={nftData} mintedWallet={mintedWallet} />;
     }
 
     if (nftData) {
-      return <NFTDetails showSuccess={showSuccess} nftData={nftData} />
+      return <NFTDetails showSuccess={showSuccess} nftData={nftData} />;
     }
 
     return (
@@ -394,8 +356,8 @@ const LumisNFT = observer(
             <div className='flex flex-col items-center gap-2 text-center'>
               <span className='text-2xl font-bold'>Introducing Lumis!</span>
               <span className='text-sm font-medium text-muted-foreground'>
-                Lumis are flying companions for the amazing Celestia Mammoths. Your Lumi will grow &
-                evolve as you run a light node.
+                Lumis are flying companions for the amazing Celestia Mammoths. Your Lumi will grow & evolve as you run a
+                light node.
               </span>
             </div>
           )}
@@ -404,8 +366,7 @@ const LumisNFT = observer(
         <div className='flex flex-col items-center gap-3 p-4 bg-secondary-100'>
           {error && (
             <span className='text-xs font-medium text-orange-300'>
-              You need {formatTokenAmount(fees.toString(), nativeDenom.coinDenom, 4)} on Forma to
-              mint your Lumi NFT!
+              You need {formatTokenAmount(fees.toString(), nativeDenom.coinDenom, 4)} on Forma to mint your Lumi NFT!
             </span>
           )}
 
@@ -455,8 +416,8 @@ const LumisNFT = observer(
           />
         )}
       </div>
-    )
+    );
   },
-)
+);
 
-export default LumisNFT
+export default LumisNFT;

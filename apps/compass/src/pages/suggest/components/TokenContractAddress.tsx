@@ -1,10 +1,10 @@
-import { GenericCard } from '@leapwallet/leap-ui'
-import React, { ReactNode } from 'react'
+import { GenericCard } from '@leapwallet/leap-ui';
+import React, { ReactNode } from 'react';
 
 type TokenContractAddressProps = {
-  address: string
-  img?: ReactNode
-}
+  address: string;
+  img?: ReactNode;
+};
 
 export function TokenContractAddress({ address, img }: TokenContractAddressProps) {
   return (
@@ -16,5 +16,5 @@ export function TokenContractAddress({ address, img }: TokenContractAddressProps
       size='sm'
       isRounded
     />
-  )
+  );
 }

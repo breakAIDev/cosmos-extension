@@ -1,7 +1,7 @@
-import { FeatureFlagStore } from '@leapwallet/cosmos-wallet-store'
+import { FeatureFlagStore } from '@leapwallet/cosmos-wallet-store';
 
-import { getStorageAdapter } from '../utils/storageAdapter'
+import { getStorageAdapter } from '../utils/storageAdapter';
 
-const storageAdapter = getStorageAdapter()
+const storageAdapter = getStorageAdapter();
 
-export const featureFlagStore = new FeatureFlagStore(storageAdapter)
+export const featureFlagStore = new FeatureFlagStore(storageAdapter);

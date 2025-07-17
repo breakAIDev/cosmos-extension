@@ -1,13 +1,13 @@
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { EmptyCard } from 'components/empty-card'
-import { Images } from 'images'
-import React from 'react'
-import { Colors } from 'theme/colors'
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { EmptyCard } from 'components/empty-card';
+import { Images } from 'images';
+import React from 'react';
+import { Colors } from 'theme/colors';
 
 type ErrorActivityViewProps = {
-  accountExplorerLink: string
-  chain: SupportedChain
-}
+  accountExplorerLink: string;
+  chain: SupportedChain;
+};
 
 export function ErrorActivityView({ accountExplorerLink }: ErrorActivityViewProps) {
   return (
@@ -26,5 +26,5 @@ export function ErrorActivityView({ accountExplorerLink }: ErrorActivityViewProp
         </a>
       ) : null}
     </div>
-  )
+  );
 }

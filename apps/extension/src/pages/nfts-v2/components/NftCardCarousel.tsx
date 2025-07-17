@@ -1,39 +1,39 @@
-import { CaretLeft, CaretRight } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import React, { useState } from 'react'
+import { CaretLeft, CaretRight } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import React, { useState } from 'react';
 
-import { NftCard, NftCardProps } from './index'
+import { NftCard, NftCardProps } from './index';
 
 type NftCardCarouselProps = NftCardProps & {
-  images: string[]
-}
+  images: string[];
+};
 
 export function NftCardCarousel({ images, ...nftCardProps }: NftCardCarouselProps) {
-  const [activeIndex, setActiveIndex] = useState(0)
+  const [activeIndex, setActiveIndex] = useState(0);
 
   const handleArrowClick = (direction: 'left' | 'right') => {
     switch (direction) {
       case 'left':
         setActiveIndex((prevIndex) => {
           if (prevIndex === 0) {
-            return images.length - 1
+            return images.length - 1;
           }
 
-          return prevIndex - 1
-        })
-        break
+          return prevIndex - 1;
+        });
+        break;
 
       case 'right':
         setActiveIndex((prevIndex) => {
           if (prevIndex === images.length - 1) {
-            return 0
+            return 0;
           }
 
-          return prevIndex + 1
-        })
-        break
+          return prevIndex + 1;
+        });
+        break;
     }
-  }
+  };
 
   return (
     <div className={classNames('relative overflow-hidden', nftCardProps.imgClassName)}>
@@ -70,5 +70,5 @@ export function NftCardCarousel({ images, ...nftCardProps }: NftCardCarouselProp
         </>
       ) : null}
     </div>
-  )
+  );
 }

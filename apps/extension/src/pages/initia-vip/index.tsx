@@ -1,40 +1,40 @@
-import { ArrowSquareOut, Info, X } from '@phosphor-icons/react'
-import PopupLayout from 'components/layout/popup-layout'
-import Text from 'components/text'
-import { PageName } from 'config/analytics'
-import { usePageView } from 'hooks/analytics/usePageView'
-import { observer } from 'mobx-react-lite'
-import React, { useState } from 'react'
-import Skeleton from 'react-loading-skeleton'
-import { useNavigate } from 'react-router'
-import { formatForSubstring } from 'utils/strings'
+import { ArrowSquareOut, Info, X } from '@phosphor-icons/react';
+import PopupLayout from 'components/layout/popup-layout';
+import Text from 'components/text';
+import { PageName } from 'config/analytics';
+import { usePageView } from 'hooks/analytics/usePageView';
+import { observer } from 'mobx-react-lite';
+import React, { useState } from 'react';
+import Skeleton from 'react-loading-skeleton';
+import { useNavigate } from 'react-router';
+import { formatForSubstring } from 'utils/strings';
 
-import { ClaimableRewardInfo } from './components/ClaimableRewardInfo'
-import { LastUpdatedScoreInfo } from './components/LastUpdatedScoreInfo'
-import { RollupSkeleton } from './components/RollupSkeleton'
-import { VipGaugeInfo } from './components/VipGaugeInfo'
-import { VipRewardsInfo } from './components/VipRewardsInfo'
-import { useVipData } from './useVipData'
+import { ClaimableRewardInfo } from './components/ClaimableRewardInfo';
+import { LastUpdatedScoreInfo } from './components/LastUpdatedScoreInfo';
+import { RollupSkeleton } from './components/RollupSkeleton';
+import { VipGaugeInfo } from './components/VipGaugeInfo';
+import { VipRewardsInfo } from './components/VipRewardsInfo';
+import { useVipData } from './useVipData';
 
 const InitiaVip = observer(() => {
-  usePageView(PageName.InitiaVip)
-  const [isLastUpdatedScoreInfoOpen, setIsLastUpdatedScoreInfoOpen] = useState(false)
-  const [isClaimableRewardInfoOpen, setIsClaimableRewardInfoOpen] = useState(false)
-  const [isVipRewardsInfoOpen, setIsVipRewardsInfoOpen] = useState(false)
-  const [isVipGaugeInfoOpen, setIsVipGaugeInfoOpen] = useState(false)
-  const navigate = useNavigate()
+  usePageView(PageName.InitiaVip);
+  const [isLastUpdatedScoreInfoOpen, setIsLastUpdatedScoreInfoOpen] = useState(false);
+  const [isClaimableRewardInfoOpen, setIsClaimableRewardInfoOpen] = useState(false);
+  const [isVipRewardsInfoOpen, setIsVipRewardsInfoOpen] = useState(false);
+  const [isVipGaugeInfoOpen, setIsVipGaugeInfoOpen] = useState(false);
+  const navigate = useNavigate();
   const {
     isLoading,
     data: { rollupList, totalClaimableReward, votingEndsIn },
-  } = useVipData()
+  } = useVipData();
 
   const handleClose = () => {
-    navigate('/home')
-  }
+    navigate('/home');
+  };
 
   const handleClaim = () => {
-    window.open('https://app.initia.xyz/vip', '_blank')
-  }
+    window.open('https://app.initia.xyz/vip', '_blank');
+  };
 
   return (
     <>
@@ -47,15 +47,12 @@ const InitiaVip = observer(() => {
           <Info
             className='text-gray-400 dark:text-gray-600 w-5 h-5 cursor-pointer'
             onClick={(e) => {
-              e.stopPropagation()
-              setIsVipRewardsInfoOpen(true)
+              e.stopPropagation();
+              setIsVipRewardsInfoOpen(true);
             }}
           />
         </div>
-        <X
-          className='text-muted-foreground hover:text-foreground w-5 h-5 cursor-pointer'
-          onClick={handleClose}
-        />
+        <X className='text-muted-foreground hover:text-foreground w-5 h-5 cursor-pointer' onClick={handleClose} />
       </div>
 
       <div className='flex flex-col gap-8 pt-8 h-[calc(100%-61px)] overflow-y-scroll'>
@@ -80,8 +77,8 @@ const InitiaVip = observer(() => {
             <Info
               className='text-gray-400 dark:text-gray-600 w-4 h-4 cursor-pointer'
               onClick={(e) => {
-                e.stopPropagation()
-                setIsClaimableRewardInfoOpen(true)
+                e.stopPropagation();
+                setIsClaimableRewardInfoOpen(true);
               }}
             />
           </div>
@@ -128,8 +125,8 @@ const InitiaVip = observer(() => {
             <Info
               className='text-gray-400 dark:text-gray-600 w-4 h-4 cursor-pointer'
               onClick={(e) => {
-                e.stopPropagation()
-                setIsVipGaugeInfoOpen(true)
+                e.stopPropagation();
+                setIsVipGaugeInfoOpen(true);
               }}
             />
           </div>
@@ -150,18 +147,10 @@ const InitiaVip = observer(() => {
                     <div className='flex gap-3'>
                       <img src={rollup.logo} alt={rollup.name} className='w-10 h-10 rounded-full' />
                       <div className='flex flex-col'>
-                        <Text
-                          className='font-bold'
-                          size='md'
-                          color='text-black-100 dark:text-white-100'
-                        >
+                        <Text className='font-bold' size='md' color='text-black-100 dark:text-white-100'>
                           {rollup.prettyName}
                         </Text>
-                        <Text
-                          className='font-medium'
-                          size='xs'
-                          color='text-gray-600 dark:text-gray-400'
-                        >
+                        <Text className='font-medium' size='xs' color='text-gray-600 dark:text-gray-400'>
                           Gauge vote: {(rollup.votePercent * 100).toFixed(2)}%
                         </Text>
                       </div>
@@ -176,16 +165,12 @@ const InitiaVip = observer(() => {
                           <Info
                             className='text-gray-400 dark:text-gray-600 w-3 h-3 cursor-pointer'
                             onClick={(e) => {
-                              e.stopPropagation()
-                              setIsLastUpdatedScoreInfoOpen(true)
+                              e.stopPropagation();
+                              setIsLastUpdatedScoreInfoOpen(true);
                             }}
                           />
                         </div>
-                        <Text
-                          className='font-bold'
-                          size='sm'
-                          color='text-black-100 dark:text-white-100'
-                        >
+                        <Text className='font-bold' size='sm' color='text-black-100 dark:text-white-100'>
                           {formatForSubstring(rollup.lastUpdatedScore.toString())}
                         </Text>
                       </div>
@@ -196,9 +181,7 @@ const InitiaVip = observer(() => {
                         </Text>
 
                         <Text size='sm' color='text-green-600'>
-                          <span className='font-bold'>
-                            {formatForSubstring(rollup.claimableReward.toString())}
-                          </span>
+                          <span className='font-bold'>{formatForSubstring(rollup.claimableReward.toString())}</span>
                           &nbsp; INIT
                         </Text>
                       </div>
@@ -206,26 +189,17 @@ const InitiaVip = observer(() => {
                   </div>
                   <ArrowSquareOut size={20} className='text-gray-400 dark:text-gray-600' />
                 </div>
-              )
+              );
             })
           )}
         </div>
       </div>
-      <LastUpdatedScoreInfo
-        isOpen={isLastUpdatedScoreInfoOpen}
-        onClose={() => setIsLastUpdatedScoreInfoOpen(false)}
-      />
-      <ClaimableRewardInfo
-        isOpen={isClaimableRewardInfoOpen}
-        onClose={() => setIsClaimableRewardInfoOpen(false)}
-      />
-      <VipRewardsInfo
-        isOpen={isVipRewardsInfoOpen}
-        onClose={() => setIsVipRewardsInfoOpen(false)}
-      />
+      <LastUpdatedScoreInfo isOpen={isLastUpdatedScoreInfoOpen} onClose={() => setIsLastUpdatedScoreInfoOpen(false)} />
+      <ClaimableRewardInfo isOpen={isClaimableRewardInfoOpen} onClose={() => setIsClaimableRewardInfoOpen(false)} />
+      <VipRewardsInfo isOpen={isVipRewardsInfoOpen} onClose={() => setIsVipRewardsInfoOpen(false)} />
       <VipGaugeInfo isOpen={isVipGaugeInfoOpen} onClose={() => setIsVipGaugeInfoOpen(false)} />
     </>
-  )
-})
+  );
+});
 
-export default InitiaVip
+export default InitiaVip;

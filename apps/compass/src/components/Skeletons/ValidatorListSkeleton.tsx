@@ -1,5 +1,5 @@
-import { Skeleton } from 'components/ui/skeleton'
-import React from 'react'
+import { Skeleton } from 'components/ui/skeleton';
+import React from 'react';
 
 export function ValidatorListItemSkeleton() {
   return (
@@ -12,7 +12,7 @@ export function ValidatorListItemSkeleton() {
         <Skeleton className='h-1.5 w-8' />
       </div>
     </div>
-  )
+  );
 }
 
 export default function ValidatorListSkeleton() {
@@ -24,5 +24,5 @@ export default function ValidatorListSkeleton() {
       <ValidatorListItemSkeleton />
       <ValidatorListItemSkeleton />
     </div>
-  )
+  );
 }

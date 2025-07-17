@@ -1,25 +1,25 @@
-import { Buttons, LineDivider } from '@leapwallet/leap-ui'
-import { ArrowClockwise, GearSix } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import React, { useCallback, useState } from 'react'
+import { Buttons, LineDivider } from '@leapwallet/leap-ui';
+import { ArrowClockwise, GearSix } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import React, { useCallback, useState } from 'react';
 
 type InputPageHeaderProps = {
-  onBack: () => void
-  onRefresh: () => void
-  onSettings: () => void
-  topColor: string
-}
+  onBack: () => void;
+  onRefresh: () => void;
+  onSettings: () => void;
+  topColor: string;
+};
 
 function InputPageHeader({ onBack, onRefresh, onSettings, topColor }: InputPageHeaderProps) {
-  const [animate, setAnimate] = useState<boolean>(false)
+  const [animate, setAnimate] = useState<boolean>(false);
 
   const handleRefreshClick = useCallback(() => {
-    onRefresh()
-    setAnimate(true)
+    onRefresh();
+    setAnimate(true);
     setTimeout(() => {
-      setAnimate(false)
-    }, 700)
-  }, [onRefresh])
+      setAnimate(false);
+    }, 700);
+  }, [onRefresh]);
 
   return (
     <div className='w-[400px] h-[72px]'>
@@ -28,9 +28,7 @@ function InputPageHeader({ onBack, onRefresh, onSettings, topColor }: InputPageH
         <div className='absolute top-6 left-6'>
           <Buttons.Back onClick={onBack} />
         </div>
-        <div className='font-bold text-black-100 dark:text-white-100 text-lg !leading-[28px]'>
-          Swap
-        </div>
+        <div className='font-bold text-black-100 dark:text-white-100 text-lg !leading-[28px]'>Swap</div>
         <div className='absolute top-6 right-6 flex justify-end items-center gap-4'>
           <button
             onClick={handleRefreshClick}
@@ -47,7 +45,7 @@ function InputPageHeader({ onBack, onRefresh, onSettings, topColor }: InputPageH
       </div>
       <LineDivider />
     </div>
-  )
+  );
 }
 
-export default InputPageHeader
+export default InputPageHeader;

@@ -1,10 +1,10 @@
-import { SupportedToken } from '../components'
+import { SupportedToken } from '../components';
 
 export function sortBySymbols(tokenA: SupportedToken, tokenB: SupportedToken) {
-  const symbolA = tokenA.coinDenom.toUpperCase()
-  const symbolB = tokenB.coinDenom.toUpperCase()
+  const symbolA = tokenA.coinDenom.toUpperCase();
+  const symbolB = tokenB.coinDenom.toUpperCase();
 
-  if (symbolA < symbolB) return -1
-  if (symbolA < symbolB) return 1
-  return 0
+  if (symbolA < symbolB) return -1;
+  if (symbolA < symbolB) return 1;
+  return 0;
 }

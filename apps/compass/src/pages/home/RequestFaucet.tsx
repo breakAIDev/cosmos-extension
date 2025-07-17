@@ -1,44 +1,40 @@
-import HCaptcha from '@hcaptcha/react-hcaptcha'
-import { Faucet, useActiveChain, useChainInfo, useGetFaucet } from '@leapwallet/cosmos-wallet-hooks'
-import { getBlockChainFromAddress } from '@leapwallet/cosmos-wallet-sdk'
-import { RootBalanceStore } from '@leapwallet/cosmos-wallet-store'
-import { useMutation } from '@tanstack/react-query'
-import CssLoader from 'components/css-loader/CssLoader'
-import { Recaptcha } from 'components/re-captcha'
-import Text from 'components/text'
-import { RECAPTCHA_CHAINS } from 'config/config'
-import dayjs from 'dayjs'
-import utc from 'dayjs/plugin/utc'
-import { useSelectedNetwork } from 'hooks/settings/useNetwork'
-import React, { useCallback, useEffect, useRef } from 'react'
-import { Colors } from 'theme/colors'
-import { isCompassWallet } from 'utils/isCompassWallet'
+import HCaptcha from '@hcaptcha/react-hcaptcha';
+import { Faucet, useActiveChain, useChainInfo, useGetFaucet } from '@leapwallet/cosmos-wallet-hooks';
+import { getBlockChainFromAddress } from '@leapwallet/cosmos-wallet-sdk';
+import { RootBalanceStore } from '@leapwallet/cosmos-wallet-store';
+import { useMutation } from '@tanstack/react-query';
+import CssLoader from 'components/css-loader/CssLoader';
+import { Recaptcha } from 'components/re-captcha';
+import Text from 'components/text';
+import { RECAPTCHA_CHAINS } from 'config/config';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import { useSelectedNetwork } from 'hooks/settings/useNetwork';
+import React, { useCallback, useEffect, useRef } from 'react';
+import { Colors } from 'theme/colors';
+import { isCompassWallet } from 'utils/isCompassWallet';
 
-dayjs.extend(utc)
+dayjs.extend(utc);
 
 type RequestFaucetProps = {
-  address: string
+  address: string;
   // eslint-disable-next-line no-unused-vars
-  setShowFaucetResp: (data: { msg: string; status: 'success' | 'fail' | null }) => void
-  rootBalanceStore: RootBalanceStore
-}
+  setShowFaucetResp: (data: { msg: string; status: 'success' | 'fail' | null }) => void;
+  rootBalanceStore: RootBalanceStore;
+};
 
-export default function RequestFaucet({
-  rootBalanceStore,
-  address,
-  setShowFaucetResp,
-}: RequestFaucetProps) {
-  const chain = useChainInfo()
-  const activeChain = useActiveChain()
-  const selectedNetwork = useSelectedNetwork()
-  const hCaptchaRef = useRef<HCaptcha>(null)
-  const reCaptchaRef = useRef<Recaptcha>(null)
+export default function RequestFaucet({ rootBalanceStore, address, setShowFaucetResp }: RequestFaucetProps) {
+  const chain = useChainInfo();
+  const activeChain = useActiveChain();
+  const selectedNetwork = useSelectedNetwork();
+  const hCaptchaRef = useRef<HCaptcha>(null);
+  const reCaptchaRef = useRef<Recaptcha>(null);
 
   const invalidateBalances = useCallback(() => {
-    rootBalanceStore.refetchBalances(activeChain, selectedNetwork)
-  }, [activeChain, rootBalanceStore, selectedNetwork])
+    rootBalanceStore.refetchBalances(activeChain, selectedNetwork);
+  }, [activeChain, rootBalanceStore, selectedNetwork]);
 
-  let faucetDetails: Faucet = useGetFaucet(chain?.testnetChainId ?? chain?.chainId ?? '')
+  let faucetDetails: Faucet = useGetFaucet(chain?.testnetChainId ?? chain?.chainId ?? '');
 
   faucetDetails = RECAPTCHA_CHAINS.includes(activeChain)
     ? {
@@ -56,7 +52,7 @@ export default function RequestFaucet({
           recaptcha_response: '${captchaKey}',
         },
       }
-    : faucetDetails
+    : faucetDetails;
 
   const {
     data: faucetResponse,
@@ -64,142 +60,140 @@ export default function RequestFaucet({
     isLoading,
   } = useMutation(
     async (args: Record<string, string>) => {
-      const { method } = faucetDetails
+      const { method } = faucetDetails;
       // Resolve payload
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let payload: Record<string, any> = {}
+      let payload: Record<string, any> = {};
       if (faucetDetails.payloadResolution) {
         payload = Object.entries(faucetDetails.payloadResolution).reduce((acc, val) => {
-          let resolve
+          let resolve;
           switch (val[1]) {
             case '${walletAddress}':
-              resolve = address
-              break
+              resolve = address;
+              break;
             case '${captchaKey}':
-              resolve = args['captchaKey']
-              break
+              resolve = args['captchaKey'];
+              break;
             default:
-              resolve = val[1]
-              break
+              resolve = val[1];
+              break;
           }
-          return { ...acc, [val[0]]: resolve }
-        }, {})
+          return { ...acc, [val[0]]: resolve };
+        }, {});
       }
       if (method === 'POST') {
         if (faucetDetails.payloadSchema?.type === 'form-data') {
-          const body = new FormData()
+          const body = new FormData();
           Object.keys(args).forEach((field: string) => {
-            body.append(field, payload[field])
-          })
+            body.append(field, payload[field]);
+          });
           return fetch(faucetDetails.url, {
             method: 'POST',
             headers: {
               'Content-Type': 'multipart/form-data',
             },
             body: body,
-          })
+          });
         } else {
           const headers: { 'Content-Type': string; Authorization?: string } = {
             'Content-Type': 'application/json',
-          }
+          };
 
           if (chain.chainId === 'constantine-3') {
             headers['Authorization'] = `Basic ${Buffer.from(
               `${process.env.ARCHWAY_FAUCET_USERNAME}:${process.env.ARCHWAY_FAUCET_PASSWORD}`,
-            ).toString('base64')}`
+            ).toString('base64')}`;
           }
 
           return fetch(faucetDetails.url, {
             method: 'POST',
             headers,
             body: JSON.stringify(payload),
-          })
+          });
         }
       } else {
-        const url = new URL(faucetDetails.url)
-        Object.keys(args).forEach((field: string) =>
-          url.searchParams.set(field, encodeURIComponent(args[field])),
-        )
-        return fetch(url.toString())
+        const url = new URL(faucetDetails.url);
+        Object.keys(args).forEach((field: string) => url.searchParams.set(field, encodeURIComponent(args[field])));
+        return fetch(url.toString());
       }
     },
     {
       cacheTime: 0,
     },
-  )
+  );
 
   // TODO:- handle the case where there are more properties on faucetDetails.payloadSchema.schema
   // TODO:- in future when we have configuration for multiple faucets, add a responseSchema to the faucet config
   const handleSubmit = async () => {
     try {
       if (getBlockChainFromAddress(address) === 'sei') {
-        window.open('https://atlantic-2.app.sei.io/faucet', '_blank')
-        return
+        window.open('https://atlantic-2.app.sei.io/faucet', '_blank');
+        return;
       }
 
       if (RECAPTCHA_CHAINS.includes(activeChain)) {
-        reCaptchaRef.current?.execute()
-        return
+        reCaptchaRef.current?.execute();
+        return;
       }
 
-      const result = await hCaptchaRef.current?.execute({ async: true })
+      const result = await hCaptchaRef.current?.execute({ async: true });
       if (!result) {
-        throw new Error('could not get hCaptcha response')
+        throw new Error('could not get hCaptcha response');
       }
 
       requestTokens({
         address,
         captchaKey: result.response,
-      })
+      });
     } catch (error) {
       setShowFaucetResp({
         status: 'fail',
         msg: 'Failed to verify captcha. Please try again.',
-      })
+      });
     }
-  }
+  };
 
   const handleRecaptchaVerify = (token: string) => {
     requestTokens({
       address,
       recaptcha_response: token,
-    })
-  }
+    });
+  };
 
   useEffect(() => {
     const fn = async () => {
       if (faucetResponse?.ok || faucetResponse?.status) {
-        let data: Record<string, unknown> | null = {}
+        let data: Record<string, unknown> | null = {};
         try {
-          data = await faucetResponse.json()
+          data = await faucetResponse.json();
         } catch (e) {
           setShowFaucetResp({
             status: 'fail',
             msg: 'Something went wrong. Please try again.',
-          })
+          });
         }
 
         if (faucetResponse.status === 200 && data?.status !== 'fail') {
-          invalidateBalances()
+          invalidateBalances();
           setShowFaucetResp({
             status: 'success',
             msg: 'Your wallet will receive the tokens shortly',
-          })
+          });
         } else {
           setShowFaucetResp({
             status: 'fail',
             msg: (data?.message ?? data?.error) as string,
-          })
+          });
         }
       }
-    }
+    };
 
-    fn()
+    fn();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [faucetResponse, invalidateBalances])
+  }, [faucetResponse, invalidateBalances]);
 
-  if (!faucetDetails) return null
+  if (!faucetDetails) return null;
 
   return (
     <>
@@ -247,16 +241,13 @@ export default function RequestFaucet({
               <Text size='sm' color='dark:text-white-100 text-gray-800 font-black'>
                 {faucetDetails.title}
               </Text>
-              <Text
-                size='xs'
-                color='dark:text-gray-400 text-gray-700 font-medium mt-[2px] text-left'
-              >
+              <Text size='xs' color='dark:text-gray-400 text-gray-700 font-medium mt-[2px] text-left'>
                 {faucetDetails.description.includes('Leap')
                   ? faucetDetails.description.replace('Leap', () => {
                       if (isCompassWallet()) {
-                        return 'Compass'
+                        return 'Compass';
                       } else {
-                        return 'Leap'
+                        return 'Leap';
                       }
                     })
                   : faucetDetails.description}
@@ -286,14 +277,9 @@ export default function RequestFaucet({
             action='faucet'
           />
         ) : (
-          <HCaptcha
-            ref={hCaptchaRef}
-            sitekey={faucetDetails.security?.key ?? ''}
-            size='invisible'
-            theme='dark'
-          />
+          <HCaptcha ref={hCaptchaRef} sitekey={faucetDetails.security?.key ?? ''} size='invisible' theme='dark' />
         )}
       </form>
     </>
-  )
+  );
 }

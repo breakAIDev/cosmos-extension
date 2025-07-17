@@ -1,18 +1,15 @@
-import React, { useMemo } from 'react'
-import { cn } from 'utils/cn'
+import React, { useMemo } from 'react';
+import { cn } from 'utils/cn';
 
 type StepProgressProps = {
-  currentStep: number
-  totalSteps: number
-  className?: string
-  moveToStep?: (step: number) => void
-}
+  currentStep: number;
+  totalSteps: number;
+  className?: string;
+  moveToStep?: (step: number) => void;
+};
 
 const StepProgress = ({ currentStep, totalSteps, className, moveToStep }: StepProgressProps) => {
-  const steps = useMemo(
-    () => Array.from({ length: totalSteps }, (_, index) => index + 1),
-    [totalSteps],
-  )
+  const steps = useMemo(() => Array.from({ length: totalSteps }, (_, index) => index + 1), [totalSteps]);
 
   return (
     <div className={cn('flex flex-row items-center justify-center align-center gap-3', className)}>
@@ -27,7 +24,7 @@ const StepProgress = ({ currentStep, totalSteps, className, moveToStep }: StepPr
         />
       ))}
     </div>
-  )
-}
+  );
+};
 
-export default StepProgress
+export default StepProgress;

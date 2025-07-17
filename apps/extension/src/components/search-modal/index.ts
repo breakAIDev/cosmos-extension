@@ -1,2 +1,2 @@
-export * from './SearchModal'
-export * from './useHardCodedActions'
+export * from './SearchModal';
+export * from './useHardCodedActions';

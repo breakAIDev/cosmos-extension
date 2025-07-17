@@ -1,15 +1,15 @@
-import { Button } from 'components/ui/button'
-import { motion } from 'framer-motion'
-import React from 'react'
+import { Button } from 'components/ui/button';
+import { motion } from 'framer-motion';
+import React from 'react';
 
-import { onboardingWrapperVariants } from '../wrapper'
+import { onboardingWrapperVariants } from '../wrapper';
 
 export const ContinueWithSocialWallet = (props: {
-  title: string
-  description: string
-  cta: string
-  isLoading?: boolean
-  onClick: () => void
+  title: string;
+  description: string;
+  cta: string;
+  isLoading?: boolean;
+  onClick: () => void;
 }) => {
   return (
     <motion.div
@@ -32,5 +32,5 @@ export const ContinueWithSocialWallet = (props: {
         {props.cta}
       </Button>
     </motion.div>
-  )
-}
+  );
+};

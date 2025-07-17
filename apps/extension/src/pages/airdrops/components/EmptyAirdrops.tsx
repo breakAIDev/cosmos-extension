@@ -1,23 +1,23 @@
-import { Buttons } from '@leapwallet/leap-ui'
-import { ArrowCounterClockwise } from '@phosphor-icons/react'
-import { captureException } from '@sentry/react'
-import classNames from 'classnames'
-import Loader from 'components/loader/Loader'
-import Text from 'components/text'
-import { ButtonName, ButtonType, EventName } from 'config/analytics'
-import { useAirdropsData } from 'hooks/useAirdropsData'
-import { Images } from 'images'
-import mixpanel from 'mixpanel-browser'
-import React, { useState } from 'react'
+import { Buttons } from '@leapwallet/leap-ui';
+import { ArrowCounterClockwise } from '@phosphor-icons/react';
+import { captureException } from '@sentry/react';
+import classNames from 'classnames';
+import Loader from 'components/loader/Loader';
+import Text from 'components/text';
+import { ButtonName, ButtonType, EventName } from 'config/analytics';
+import { useAirdropsData } from 'hooks/useAirdropsData';
+import { Images } from 'images';
+import mixpanel from 'mixpanel-browser';
+import React, { useState } from 'react';
 
-import GoToLeapboard from './GoToLeapboard'
+import GoToLeapboard from './GoToLeapboard';
 
 interface EmptyAirdropsProps {
-  title: string
-  subTitle: string | React.ReactNode
-  className?: string
-  showLeapBoardButton?: boolean
-  showRetryButton?: boolean
+  title: string;
+  subTitle: string | React.ReactNode;
+  className?: string;
+  showLeapBoardButton?: boolean;
+  showRetryButton?: boolean;
 }
 
 export default function EmptyAirdrops({
@@ -27,9 +27,9 @@ export default function EmptyAirdrops({
   showRetryButton = false,
   showLeapBoardButton = false,
 }: EmptyAirdropsProps) {
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [numberOfRetries, setNumberOfRetries] = useState<number>(1)
-  const fetchAirdropsData = useAirdropsData()
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [numberOfRetries, setNumberOfRetries] = useState<number>(1);
+  const fetchAirdropsData = useAirdropsData();
 
   const trackCTAEvent = () => {
     try {
@@ -39,28 +39,25 @@ export default function EmptyAirdrops({
         redirectURL: '',
         numberOfRetries,
         time: Date.now() / 1000,
-      })
+      });
     } catch (e) {
-      captureException(e)
+      captureException(e);
     }
-  }
+  };
 
   const onRetry = () => {
-    setIsLoading(true)
+    setIsLoading(true);
     setTimeout(() => {
-      setIsLoading(false)
-    }, 10000)
-    setNumberOfRetries((prevState) => prevState + 1)
-    fetchAirdropsData()
-    trackCTAEvent()
-  }
+      setIsLoading(false);
+    }, 10000);
+    setNumberOfRetries((prevState) => prevState + 1);
+    fetchAirdropsData();
+    trackCTAEvent();
+  };
 
   return (
     <div
-      className={classNames(
-        'bg-white-100 dark:bg-gray-950 rounded-xl pt-8 p-4 flex flex-col items-center',
-        className,
-      )}
+      className={classNames('bg-white-100 dark:bg-gray-950 rounded-xl pt-8 p-4 flex flex-col items-center', className)}
     >
       {isLoading ? (
         <div className='flex justify-center items-center min-h-[208px]'>
@@ -73,11 +70,7 @@ export default function EmptyAirdrops({
           <Text size='sm' className='font-bold mb-1'>
             {title}
           </Text>
-          <Text
-            size='xs'
-            color='text-gray-800 dark:text-gray-200'
-            className='font-medium text-center !leading-5'
-          >
+          <Text size='xs' color='text-gray-800 dark:text-gray-200' className='font-medium text-center !leading-5'>
             {subTitle}
           </Text>
         </>
@@ -106,5 +99,5 @@ export default function EmptyAirdrops({
         </Buttons.Generic>
       )}
     </div>
-  )
+  );
 }

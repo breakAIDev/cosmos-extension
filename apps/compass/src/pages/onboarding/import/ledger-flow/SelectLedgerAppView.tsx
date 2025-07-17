@@ -1,31 +1,28 @@
-import { isLedgerUnlocked } from '@leapwallet/cosmos-wallet-sdk'
-import { CaretRight } from '@phosphor-icons/react'
-import Text from 'components/text'
-import { LedgerAppId } from 'hooks/wallet/useWallet'
-import { Images } from 'images'
-import { CosmosHubLogo, SeiLogo } from 'images/logos'
-import React, { Dispatch, SetStateAction, useEffect } from 'react'
+import { isLedgerUnlocked } from '@leapwallet/cosmos-wallet-sdk';
+import { CaretRight } from '@phosphor-icons/react';
+import Text from 'components/text';
+import { LedgerAppId } from 'hooks/wallet/useWallet';
+import { Images } from 'images';
+import { CosmosHubLogo, SeiLogo } from 'images/logos';
+import React, { Dispatch, SetStateAction, useEffect } from 'react';
 
-import { useImportWalletContext } from '../import-wallet-context'
+import { useImportWalletContext } from '../import-wallet-context';
 
 type SelectLedgerAppViewProps = {
-  readonly onNext: () => void
-}
+  readonly onNext: () => void;
+};
 
 type SelectAppCardProps = {
-  onClick: () => void
-  title: string
-  descriptions: Array<string>
-  headerBadge?: string
-  icon: string
-}
+  onClick: () => void;
+  title: string;
+  descriptions: Array<string>;
+  headerBadge?: string;
+  icon: string;
+};
 
 const SelectAppCard = ({ onClick, title, descriptions, headerBadge, icon }: SelectAppCardProps) => {
   return (
-    <button
-      onClick={onClick}
-      className='block dark:bg-gray-900 bg-gray-200 rounded-xl p-5 w-full mb-4'
-    >
+    <button onClick={onClick} className='block dark:bg-gray-900 bg-gray-200 rounded-xl p-5 w-full mb-4'>
       <div className='flex items-center mb-4'>
         <img src={icon} className='w-8 h-8' />
         <Text size='md' className='font-bold ml-3'>
@@ -48,15 +45,15 @@ const SelectAppCard = ({ onClick, title, descriptions, headerBadge, icon }: Sele
         ))}
       </ul>
     </button>
-  )
-}
+  );
+};
 
 export const SelectLedgerAppView = ({ onNext }: SelectLedgerAppViewProps) => {
-  const { setSelectedApp } = useImportWalletContext()
+  const { setSelectedApp } = useImportWalletContext();
   const onSelectApp = (app: LedgerAppId) => {
-    setSelectedApp(app)
-    onNext()
-  }
+    setSelectedApp(app);
+    onNext();
+  };
 
   return (
     <div>
@@ -73,12 +70,9 @@ export const SelectLedgerAppView = ({ onNext }: SelectLedgerAppViewProps) => {
       <SelectAppCard
         onClick={() => onSelectApp('cosmos')}
         title='Cosmos App'
-        descriptions={[
-          'No support for EVM transactions',
-          'Cannot access EVM dApps with this setup',
-        ]}
+        descriptions={['No support for EVM transactions', 'Cannot access EVM dApps with this setup']}
         icon={CosmosHubLogo}
       />
     </div>
-  )
-}
+  );
+};

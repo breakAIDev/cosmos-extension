@@ -1,11 +1,11 @@
-import { SearchIcon } from 'icons/search-icon'
-import React from 'react'
-import { cn } from 'utils/cn'
+import { SearchIcon } from 'icons/search-icon';
+import React from 'react';
+import { cn } from 'utils/cn';
 
-import { Input } from '.'
+import { Input } from '.';
 
 interface SearchInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  onClear: () => void
+  onClear: () => void;
 }
 
 export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
@@ -28,8 +28,8 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
           )
         }
       />
-    )
+    );
   },
-)
+);
 
-SearchInput.displayName = 'SearchInput'
+SearchInput.displayName = 'SearchInput';

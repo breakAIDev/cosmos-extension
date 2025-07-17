@@ -1,52 +1,51 @@
-import { sliceAddress, useActiveWallet } from '@leapwallet/cosmos-wallet-hooks'
-import { Check } from '@phosphor-icons/react'
-import { AGGREGATED_CHAIN_KEY } from 'config/constants'
-import { motion } from 'framer-motion'
-import { useActiveChain } from 'hooks/settings/useActiveChain'
-import { useGetWalletAddresses } from 'hooks/useGetWalletAddresses'
-import { useQueryParams } from 'hooks/useQuery'
-import { CopyIcon } from 'icons/copy-icon'
-import { observer } from 'mobx-react-lite'
-import React, { useMemo, useState } from 'react'
-import { UserClipboard } from 'utils/clipboard'
-import { cn } from 'utils/cn'
-import { opacityFadeInOut, transition150 } from 'utils/motion-variants'
-import { queryParams } from 'utils/query-params'
+import { sliceAddress, useActiveWallet } from '@leapwallet/cosmos-wallet-hooks';
+import { Check } from '@phosphor-icons/react';
+import { AGGREGATED_CHAIN_KEY } from 'config/constants';
+import { motion } from 'framer-motion';
+import { useActiveChain } from 'hooks/settings/useActiveChain';
+import { useGetWalletAddresses } from 'hooks/useGetWalletAddresses';
+import { useQueryParams } from 'hooks/useQuery';
+import { CopyIcon } from 'icons/copy-icon';
+import { observer } from 'mobx-react-lite';
+import React, { useMemo, useState } from 'react';
+import { UserClipboard } from 'utils/clipboard';
+import { cn } from 'utils/cn';
+import { opacityFadeInOut, transition150 } from 'utils/motion-variants';
+import { queryParams } from 'utils/query-params';
 
 export const CopyAddress = observer(() => {
-  const activeChain = useActiveChain()
-  const activeWallet = useActiveWallet()
-  const walletAddresses = useGetWalletAddresses()
+  const activeChain = useActiveChain();
+  const activeWallet = useActiveWallet();
+  const walletAddresses = useGetWalletAddresses();
 
-  const query = useQueryParams()
+  const query = useQueryParams();
 
-  const [isWalletAddressCopied, setIsWalletAddressCopied] = useState(false)
+  const [isWalletAddressCopied, setIsWalletAddressCopied] = useState(false);
 
-  const showCopySheet =
-    walletAddresses?.length > 1 || (activeChain as string) === AGGREGATED_CHAIN_KEY
+  const showCopySheet = walletAddresses?.length > 1 || (activeChain as string) === AGGREGATED_CHAIN_KEY;
 
   const address = useMemo(() => {
     if (!activeWallet || !walletAddresses?.[0] || showCopySheet) {
-      return 'copy address'
+      return 'copy address';
     }
 
-    return sliceAddress(walletAddresses[0])
-  }, [activeWallet, showCopySheet, walletAddresses])
+    return sliceAddress(walletAddresses[0]);
+  }, [activeWallet, showCopySheet, walletAddresses]);
 
   const handleCopyAddress = () => {
     if (showCopySheet) {
-      query.set(queryParams.copyAddress, 'true')
-      return
+      query.set(queryParams.copyAddress, 'true');
+      return;
     }
 
-    setIsWalletAddressCopied(true)
-    setTimeout(() => setIsWalletAddressCopied(false), 2000)
+    setIsWalletAddressCopied(true);
+    setTimeout(() => setIsWalletAddressCopied(false), 2000);
 
-    UserClipboard.copyText(walletAddresses?.[0])
-  }
+    UserClipboard.copyText(walletAddresses?.[0]);
+  };
 
   if (!address && (activeChain as string) !== AGGREGATED_CHAIN_KEY) {
-    return null
+    return null;
   }
 
   return (
@@ -67,11 +66,7 @@ export const CopyAddress = observer(() => {
     >
       {isWalletAddressCopied ? 'Copied!' : address}
 
-      {isWalletAddressCopied ? (
-        <Check className='size-4' />
-      ) : (
-        <CopyIcon className='text-secondary-600 size-4' />
-      )}
+      {isWalletAddressCopied ? <Check className='size-4' /> : <CopyIcon className='text-secondary-600 size-4' />}
     </motion.button>
-  )
-})
+  );
+});

@@ -1,22 +1,16 @@
-import { ArrowLeft, ArrowRight } from '@phosphor-icons/react'
-import React from 'react'
-import { cn } from 'utils/cn'
+import { ArrowLeft, ArrowRight } from '@phosphor-icons/react';
+import React from 'react';
+import { cn } from 'utils/cn';
 
 export const BannerControls = (props: {
-  activeBannerIndex: number
-  activeBannerId: string
-  totalItems: number
-  handleContainerScroll: (index: number) => void
-  handleMouseEnter: () => void
-  handleMouseLeave: () => void
+  activeBannerIndex: number;
+  activeBannerId: string;
+  totalItems: number;
+  handleContainerScroll: (index: number) => void;
+  handleMouseEnter: () => void;
+  handleMouseLeave: () => void;
 }) => {
-  const {
-    activeBannerIndex,
-    totalItems,
-    handleContainerScroll,
-    handleMouseEnter,
-    handleMouseLeave,
-  } = props
+  const { activeBannerIndex, totalItems, handleContainerScroll, handleMouseEnter, handleMouseLeave } = props;
 
   return (
     <div className='flex w-full items-center px-4 justify-between mt-1'>
@@ -32,7 +26,7 @@ export const BannerControls = (props: {
 
       <div className='flex gap-1' onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
         {Array.from({ length: totalItems }).map((_, i) => {
-          const isActive = activeBannerIndex === i
+          const isActive = activeBannerIndex === i;
 
           return (
             <button
@@ -44,7 +38,7 @@ export const BannerControls = (props: {
               )}
               onClick={() => handleContainerScroll(i)}
             />
-          )
+          );
         })}
       </div>
       <ArrowRight
@@ -55,5 +49,5 @@ export const BannerControls = (props: {
         }`}
       />
     </div>
-  )
-}
+  );
+};

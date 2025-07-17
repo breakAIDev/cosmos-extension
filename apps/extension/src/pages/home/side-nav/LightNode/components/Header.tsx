@@ -1,5 +1,5 @@
-import { BetaTag } from 'components/BetaTag/BetaTag'
-import React from 'react'
+import { BetaTag } from 'components/BetaTag/BetaTag';
+import React from 'react';
 
 function LightNodeHeader() {
   return (
@@ -7,7 +7,7 @@ function LightNodeHeader() {
       <span className='text-md font-medium'>Celestia Light Node</span>
       <BetaTag className='relative' />
     </div>
-  )
+  );
 }
 
-export default LightNodeHeader
+export default LightNodeHeader;

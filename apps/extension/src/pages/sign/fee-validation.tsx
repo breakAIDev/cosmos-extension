@@ -4,28 +4,22 @@ import {
   useChainApis,
   useChainId,
   useTransactionConfigs,
-} from '@leapwallet/cosmos-wallet-hooks'
-import {
-  DenomsRecord,
-  fromSmallBN,
-  NativeDenom,
-  SupportedChain,
-  SupportedDenoms,
-} from '@leapwallet/cosmos-wallet-sdk'
-import { FeeTokensStoreData } from '@leapwallet/cosmos-wallet-store'
-import Long from 'long'
-import { useCallback } from 'react'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { DenomsRecord, fromSmallBN, NativeDenom, SupportedChain, SupportedDenoms } from '@leapwallet/cosmos-wallet-sdk';
+import { FeeTokensStoreData } from '@leapwallet/cosmos-wallet-store';
+import Long from 'long';
+import { useCallback } from 'react';
 
 type FeeValidationParams = {
-  feeDenomData: NativeDenom
-  gaslimit: Long
-  feeAmount: string
-  feeDenom: string
-  chain: SupportedChain
-  maxFeeUsdValue: number
-  feeDenomUsdValue?: string
-  lcdUrl: string
-}
+  feeDenomData: NativeDenom;
+  gaslimit: Long;
+  feeAmount: string;
+  feeDenom: string;
+  chain: SupportedChain;
+  maxFeeUsdValue: number;
+  feeDenomUsdValue?: string;
+  lcdUrl: string;
+};
 
 export async function feeValidation({
   feeDenomData,
@@ -33,15 +27,13 @@ export async function feeValidation({
   feeDenomUsdValue,
   maxFeeUsdValue,
 }: FeeValidationParams) {
-  if (!feeDenomUsdValue) return null
-  let isValidUsdValue = false
+  if (!feeDenomUsdValue) return null;
+  let isValidUsdValue = false;
   if (feeDenomUsdValue) {
-    const feeAmountUsd = fromSmallBN(feeAmount, feeDenomData.coinDecimals).multipliedBy(
-      feeDenomUsdValue,
-    )
-    isValidUsdValue = feeAmountUsd.lt(maxFeeUsdValue)
+    const feeAmountUsd = fromSmallBN(feeAmount, feeDenomData.coinDecimals).multipliedBy(feeDenomUsdValue);
+    isValidUsdValue = feeAmountUsd.lt(maxFeeUsdValue);
   }
-  return isValidUsdValue
+  return isValidUsdValue;
 }
 
 /*
@@ -51,12 +43,9 @@ export async function feeValidation({
  */
 
 type UseFeeValidationReturn = (
-  feeValidationParams: Omit<
-    FeeValidationParams,
-    'feeDenomData' | 'maxFeeUsdValue' | 'feeDenomUsdValue' | 'lcdUrl'
-  >,
+  feeValidationParams: Omit<FeeValidationParams, 'feeDenomData' | 'maxFeeUsdValue' | 'feeDenomUsdValue' | 'lcdUrl'>,
   onValidationFailed: (tokenData: NativeDenom, isFeesValid: boolean | null) => void,
-) => Promise<boolean | null>
+) => Promise<boolean | null>;
 
 export function useFeeValidation(
   denoms: DenomsRecord,
@@ -64,26 +53,26 @@ export function useFeeValidation(
   feeTokens: FeeTokensStoreData | null | undefined,
   isFeeTokensLoading: boolean | undefined,
 ): UseFeeValidationReturn {
-  const { data: txConfig } = useTransactionConfigs()
+  const { data: txConfig } = useTransactionConfigs();
 
-  const { lcdUrl } = useChainApis(chain)
-  const chainId = useChainId()
+  const { lcdUrl } = useChainApis(chain);
+  const chainId = useChainId();
 
   return useCallback(
     async (feeValidationParams, onValidationFailed) => {
-      const maxFeeUsdValue = txConfig?.allChains.maxFeeValueUSD ?? 10
+      const maxFeeUsdValue = txConfig?.allChains.maxFeeValueUSD ?? 10;
       const feeToken = feeTokens?.find(({ ibcDenom, denom }) => {
         if (ibcDenom === feeValidationParams.feeDenom) {
-          return ibcDenom === feeValidationParams.feeDenom
+          return ibcDenom === feeValidationParams.feeDenom;
         }
-        return denom?.coinMinimalDenom === feeValidationParams.feeDenom
-      })
-      let feeDenomData = feeToken?.denom
+        return denom?.coinMinimalDenom === feeValidationParams.feeDenom;
+      });
+      let feeDenomData = feeToken?.denom;
       if (!feeDenomData) {
-        feeDenomData = denoms[feeValidationParams.feeDenom as SupportedDenoms]
+        feeDenomData = denoms[feeValidationParams.feeDenom as SupportedDenoms];
       }
 
-      let usdValue
+      let usdValue;
       if (feeDenomData?.chain) {
         usdValue = await fetchCurrency(
           '1',
@@ -91,7 +80,7 @@ export function useFeeValidation(
           feeDenomData.chain as SupportedChain,
           currencyDetail.US.currencyPointer,
           `${chainId}-${feeDenomData.coinMinimalDenom}`,
-        )
+        );
       }
 
       const isFeeValid = await feeValidation({
@@ -100,12 +89,12 @@ export function useFeeValidation(
         feeDenomUsdValue: usdValue,
         lcdUrl: lcdUrl ?? '',
         ...feeValidationParams,
-      })
-      if (!isFeeValid) onValidationFailed(feeDenomData, isFeeValid)
-      return isFeeValid
+      });
+      if (!isFeeValid) onValidationFailed(feeDenomData, isFeeValid);
+      return isFeeValid;
     },
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [feeTokens, txConfig, isFeeTokensLoading, lcdUrl],
-  )
+  );
 }

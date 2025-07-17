@@ -1,82 +1,78 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useInvestData } from '@leapwallet/cosmos-wallet-hooks'
-import { CardDivider } from '@leapwallet/leap-ui'
-import { CaretRight } from '@phosphor-icons/react'
-import { BigNumber } from 'bignumber.js'
-import Text from 'components/text'
-import { LEAPBOARD_URL } from 'config/constants'
-import React, { useMemo, useState } from 'react'
+import { useInvestData } from '@leapwallet/cosmos-wallet-hooks';
+import { CardDivider } from '@leapwallet/leap-ui';
+import { CaretRight } from '@phosphor-icons/react';
+import { BigNumber } from 'bignumber.js';
+import Text from 'components/text';
+import { LEAPBOARD_URL } from 'config/constants';
+import React, { useMemo, useState } from 'react';
 
-import DefiRow from '../DefiRow/DefiRow'
-import { SortingButton } from '../DefiRow/SortingButton'
+import DefiRow from '../DefiRow/DefiRow';
+import { SortingButton } from '../DefiRow/SortingButton';
 
 function sortByDefiName(a: any, b: any) {
-  return b?.productName?.toLowerCase() <= a?.productName?.toLowerCase() ? -1 : 1
+  return b?.productName?.toLowerCase() <= a?.productName?.toLowerCase() ? -1 : 1;
 }
 
 function sortByDefiType(a: any, b: any) {
-  return b?.dappCategory?.toLowerCase() <= a?.dappCategory?.toLowerCase() ? -1 : 1
+  return b?.dappCategory?.toLowerCase() <= a?.dappCategory?.toLowerCase() ? -1 : 1;
 }
 
 function sortByDefiTvl(a: any, b: any) {
-  return new BigNumber(b?.tvl ?? '0').comparedTo(a?.tvl)
+  return new BigNumber(b?.tvl ?? '0').comparedTo(a?.tvl);
 }
 
 function sortByDefiApr(a: any, b: any) {
-  return new BigNumber(b?.apr ?? '0').comparedTo(a?.apr)
+  return new BigNumber(b?.apr ?? '0').comparedTo(a?.apr);
 }
 
 function DefiList({ tokenName }: { tokenName: string }) {
-  const [selectedSortBy, setSelectedSortBy] = useState<string>('apr')
-  const [sortingDirection, setSortingDirection] = useState<string>('dsc')
-  const [searchInput] = useState<string>(tokenName)
-  const [filterList] = useState<string>('all')
+  const [selectedSortBy, setSelectedSortBy] = useState<string>('apr');
+  const [sortingDirection, setSortingDirection] = useState<string>('dsc');
+  const [searchInput] = useState<string>(tokenName);
+  const [filterList] = useState<string>('all');
 
-  const investData: any = useInvestData()
+  const investData: any = useInvestData();
 
-  const { products: _products } = investData?.data ?? { products: undefined }
+  const { products: _products } = investData?.data ?? { products: undefined };
 
   const data = useMemo(() => {
-    return Object.values(_products).filter((d: any) => d?.visible)
-  }, [_products])
+    return Object.values(_products).filter((d: any) => d?.visible);
+  }, [_products]);
 
   const sortedTokens = useMemo(() => {
     return data
       ?.filter((a: any) => {
-        return (
-          a?.tokens
-            ?.map((t: any) => t?.toUpperCase())
-            ?.indexOf(searchInput?.trim()?.toUpperCase()) !== -1
-        )
+        return a?.tokens?.map((t: any) => t?.toUpperCase())?.indexOf(searchInput?.trim()?.toUpperCase()) !== -1;
       })
       ?.sort((a: any, b: any) => {
-        let sortOrder = -1
+        let sortOrder = -1;
         switch (selectedSortBy) {
           case 'dappCategory': {
-            sortOrder = sortByDefiType(a, b)
-            break
+            sortOrder = sortByDefiType(a, b);
+            break;
           }
           case 'tvl': {
-            sortOrder = sortByDefiTvl(a, b)
-            break
+            sortOrder = sortByDefiTvl(a, b);
+            break;
           }
           case 'apr': {
-            sortOrder = sortByDefiApr(a, b)
-            break
+            sortOrder = sortByDefiApr(a, b);
+            break;
           }
           case 'productName':
           default: {
-            sortOrder = sortByDefiName(a, b)
-            break
+            sortOrder = sortByDefiName(a, b);
+            break;
           }
         }
-        return sortingDirection === 'asc' ? -1 * sortOrder : sortOrder
-      })
+        return sortingDirection === 'asc' ? -1 * sortOrder : sortOrder;
+      });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, filterList, searchInput, selectedSortBy, sortingDirection])
+  }, [data, filterList, searchInput, selectedSortBy, sortingDirection]);
 
-  if (!investData?.data || sortedTokens.length === 0) return null
+  if (!investData?.data || sortedTokens.length === 0) return null;
 
   return (
     <div>
@@ -95,8 +91,7 @@ function DefiList({ tokenName }: { tokenName: string }) {
             label='Name'
             sortName='productName'
             classNamesObj={{
-              outerContainer:
-                'h-[40px] sm:h-[55px] pl-6 pr-[24px] text-xs sm:!text-sm !font-medium sm:!font-bold',
+              outerContainer: 'h-[40px] sm:h-[55px] pl-6 pr-[24px] text-xs sm:!text-sm !font-medium sm:!font-bold',
             }}
           />
           <SortingButton
@@ -130,14 +125,14 @@ function DefiList({ tokenName }: { tokenName: string }) {
               <CardDivider />
               <DefiRow token={token} />
             </React.Fragment>
-          )
+          );
         })}
         <CardDivider />
 
         <div className='flex pr-3 flex-row items-center justify-end mr-3 group z-0 w-full cursor-pointer transition'>
           <div
             onClick={() => {
-              window.open(`${LEAPBOARD_URL}/explore/defi`, '_blank')
+              window.open(`${LEAPBOARD_URL}/explore/defi`, '_blank');
             }}
             className='flex flex-row items-center justify-end gap-2'
           >
@@ -155,7 +150,7 @@ function DefiList({ tokenName }: { tokenName: string }) {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default DefiList
+export default DefiList;

@@ -1,21 +1,19 @@
-import { useAirdropsEligibilityData } from '@leapwallet/cosmos-wallet-hooks'
-import { CaretRight } from '@phosphor-icons/react'
-import Text from 'components/text'
-import { Images } from 'images'
-import React from 'react'
-import { useNavigate } from 'react-router-dom'
-import { cn } from 'utils/cn'
-import { trim } from 'utils/strings'
+import { useAirdropsEligibilityData } from '@leapwallet/cosmos-wallet-hooks';
+import { CaretRight } from '@phosphor-icons/react';
+import Text from 'components/text';
+import { Images } from 'images';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { cn } from 'utils/cn';
+import { trim } from 'utils/strings';
 
 export default function FailedAirdrops() {
-  const navigate = useNavigate()
-  const airdropsEligibilityData = useAirdropsEligibilityData() || {}
-  const failedAirdrops = Object.values(airdropsEligibilityData).filter(
-    (d) => d?.status === 'failed' && !d?.isHidden,
-  )
+  const navigate = useNavigate();
+  const airdropsEligibilityData = useAirdropsEligibilityData() || {};
+  const failedAirdrops = Object.values(airdropsEligibilityData).filter((d) => d?.status === 'failed' && !d?.isHidden);
 
   if (failedAirdrops.length < 1) {
-    return null
+    return null;
   }
 
   return (
@@ -47,5 +45,5 @@ export default function FailedAirdrops() {
         ))}
       </div>
     </div>
-  )
+  );
 }

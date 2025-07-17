@@ -1,31 +1,31 @@
-import { SelectedAddress } from '@leapwallet/cosmos-wallet-hooks'
-import { ChainInfo, SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { ChainFeatureFlagsStore, ChainInfosStore } from '@leapwallet/cosmos-wallet-store'
-import Text from 'components/text'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import { useSendContext } from 'pages/send/context'
-import React, { forwardRef, useState } from 'react'
-import { AddressBook } from 'utils/addressbook'
+import { SelectedAddress } from '@leapwallet/cosmos-wallet-hooks';
+import { ChainInfo, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { ChainFeatureFlagsStore, ChainInfosStore } from '@leapwallet/cosmos-wallet-store';
+import Text from 'components/text';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import { useSendContext } from 'pages/send/context';
+import React, { forwardRef, useState } from 'react';
+import { AddressBook } from 'utils/addressbook';
 
-import { ErrorWarning } from '../error-warning'
-import InputCard from './input-card'
-import { RecipientChainInfo } from './recipient-chain-info'
-import RecipientDisplayCard from './recipient-display-card'
+import { ErrorWarning } from '../error-warning';
+import InputCard from './input-card';
+import { RecipientChainInfo } from './recipient-chain-info';
+import RecipientDisplayCard from './recipient-display-card';
 
 interface RecipientCardProps {
-  isIBCTransfer: boolean
-  sendSelectedNetwork: string
-  destChainInfo: ChainInfo | null
-  selectedAddress: SelectedAddress | null
-  setSelectedContact: (contact: AddressBook.SavedAddress) => void
-  setIsAddContactSheetVisible: (visible: boolean) => void
-  setShowSelectRecipient: (visible: boolean) => void
-  setInputInProgress: (inProgress: boolean) => void
-  inputInProgress: boolean
-  activeChain: SupportedChain
-  chainInfoStore: ChainInfosStore
-  chainFeatureFlagsStore: ChainFeatureFlagsStore
+  isIBCTransfer: boolean;
+  sendSelectedNetwork: string;
+  destChainInfo: ChainInfo | null;
+  selectedAddress: SelectedAddress | null;
+  setSelectedContact: (contact: AddressBook.SavedAddress) => void;
+  setIsAddContactSheetVisible: (visible: boolean) => void;
+  setShowSelectRecipient: (visible: boolean) => void;
+  setInputInProgress: (inProgress: boolean) => void;
+  inputInProgress: boolean;
+  activeChain: SupportedChain;
+  chainInfoStore: ChainInfosStore;
+  chainFeatureFlagsStore: ChainFeatureFlagsStore;
 }
 
 const RecipientCard = forwardRef(
@@ -46,8 +46,8 @@ const RecipientCard = forwardRef(
     }: RecipientCardProps,
     ref: React.Ref<HTMLInputElement>,
   ) => {
-    const [recipientInputValue, setRecipientInputValue] = useState<string>('')
-    const { setSelectedAddress } = useSendContext()
+    const [recipientInputValue, setRecipientInputValue] = useState<string>('');
+    const { setSelectedAddress } = useSendContext();
 
     return (
       <div className=' bg-secondary-100 rounded-xl mx-6'>
@@ -71,16 +71,14 @@ const RecipientCard = forwardRef(
               setIsAddContactSheetVisible={setIsAddContactSheetVisible}
               activeChain={activeChain}
               onEdit={() => {
-                setInputInProgress(true)
-                setRecipientInputValue(
-                  selectedAddress?.ethAddress || selectedAddress?.address || '',
-                )
-                setSelectedAddress(null)
+                setInputInProgress(true);
+                setRecipientInputValue(selectedAddress?.ethAddress || selectedAddress?.address || '');
+                setSelectedAddress(null);
                 setTimeout(() => {
                   if (ref && 'current' in ref) {
-                    ref.current?.focus()
+                    ref.current?.focus();
                   }
-                }, 200)
+                }, 200);
               }}
             />
           ) : (
@@ -101,10 +99,10 @@ const RecipientCard = forwardRef(
 
         <ErrorWarning />
       </div>
-    )
+    );
   },
-)
+);
 
-RecipientCard.displayName = 'RecipientCard'
+RecipientCard.displayName = 'RecipientCard';
 
-export default observer(RecipientCard)
+export default observer(RecipientCard);

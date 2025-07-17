@@ -1,10 +1,5 @@
-import {
-  formatTokenAmount,
-  useActiveStakingDenom,
-  useDualStaking,
-  useStaking,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
+import { formatTokenAmount, useActiveStakingDenom, useDualStaking, useStaking } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import {
   ClaimRewardsStore,
   DelegationsStore,
@@ -12,34 +7,34 @@ import {
   RootDenomsStore,
   UndelegationsStore,
   ValidatorsStore,
-} from '@leapwallet/cosmos-wallet-store'
-import { GenericCard } from '@leapwallet/leap-ui'
-import BigNumber from 'bignumber.js'
-import BottomModal from 'components/new-bottom-modal'
-import Text from 'components/text'
-import { Button } from 'components/ui/button'
-import { useActiveChain } from 'hooks/settings/useActiveChain'
-import { useFormatCurrency } from 'hooks/settings/useCurrency'
-import { SelectedNetwork, useSelectedNetwork } from 'hooks/settings/useNetwork'
-import { observer } from 'mobx-react-lite'
-import React, { useMemo } from 'react'
-import { hideAssetsStore } from 'stores/hide-assets-store'
+} from '@leapwallet/cosmos-wallet-store';
+import { GenericCard } from '@leapwallet/leap-ui';
+import BigNumber from 'bignumber.js';
+import BottomModal from 'components/new-bottom-modal';
+import Text from 'components/text';
+import { Button } from 'components/ui/button';
+import { useActiveChain } from 'hooks/settings/useActiveChain';
+import { useFormatCurrency } from 'hooks/settings/useCurrency';
+import { SelectedNetwork, useSelectedNetwork } from 'hooks/settings/useNetwork';
+import { observer } from 'mobx-react-lite';
+import React, { useMemo } from 'react';
+import { hideAssetsStore } from 'stores/hide-assets-store';
 
-import { ClaimCard } from '../components/ClaimInfo'
+import { ClaimCard } from '../components/ClaimInfo';
 
 interface LavaClaimInfoProps {
-  isOpen: boolean
-  onClose: () => void
-  onClaimValidatorRewards: () => void
-  onClaimProviderRewards: () => void
-  rootDenomsStore: RootDenomsStore
-  rootBalanceStore: RootBalanceStore
-  delegationsStore: DelegationsStore
-  validatorsStore: ValidatorsStore
-  unDelegationsStore: UndelegationsStore
-  claimRewardsStore: ClaimRewardsStore
-  forceChain?: SupportedChain
-  forceNetwork?: SelectedNetwork
+  isOpen: boolean;
+  onClose: () => void;
+  onClaimValidatorRewards: () => void;
+  onClaimProviderRewards: () => void;
+  rootDenomsStore: RootDenomsStore;
+  rootBalanceStore: RootBalanceStore;
+  delegationsStore: DelegationsStore;
+  validatorsStore: ValidatorsStore;
+  unDelegationsStore: UndelegationsStore;
+  claimRewardsStore: ClaimRewardsStore;
+  forceChain?: SupportedChain;
+  forceNetwork?: SelectedNetwork;
 }
 
 const LavaClaimInfo = observer(
@@ -56,23 +51,20 @@ const LavaClaimInfo = observer(
     forceChain,
     forceNetwork,
   }: LavaClaimInfoProps) => {
-    const [formatCurrency] = useFormatCurrency()
-    const denoms = rootDenomsStore.allDenoms
+    const [formatCurrency] = useFormatCurrency();
+    const denoms = rootDenomsStore.allDenoms;
 
-    const _activeChain = useActiveChain()
-    const activeChain = useMemo(() => forceChain || _activeChain, [_activeChain, forceChain])
+    const _activeChain = useActiveChain();
+    const activeChain = useMemo(() => forceChain || _activeChain, [_activeChain, forceChain]);
 
-    const _activeNetwork = useSelectedNetwork()
-    const activeNetwork = useMemo(
-      () => forceNetwork || _activeNetwork,
-      [_activeNetwork, forceNetwork],
-    )
+    const _activeNetwork = useSelectedNetwork();
+    const activeNetwork = useMemo(() => forceNetwork || _activeNetwork, [_activeNetwork, forceNetwork]);
 
-    const [activeStakingDenom] = useActiveStakingDenom(denoms, activeChain, activeNetwork)
-    const chainDelegations = delegationsStore.delegationsForChain(activeChain)
-    const chainValidators = validatorsStore.validatorsForChain(activeChain)
-    const chainUnDelegations = unDelegationsStore.unDelegationsForChain(activeChain)
-    const chainClaimRewards = claimRewardsStore.claimRewardsForChain(activeChain)
+    const [activeStakingDenom] = useActiveStakingDenom(denoms, activeChain, activeNetwork);
+    const chainDelegations = delegationsStore.delegationsForChain(activeChain);
+    const chainValidators = validatorsStore.validatorsForChain(activeChain);
+    const chainUnDelegations = unDelegationsStore.unDelegationsForChain(activeChain);
+    const chainClaimRewards = claimRewardsStore.claimRewardsForChain(activeChain);
 
     const {
       totalRewardsDollarAmt = 0,
@@ -86,23 +78,19 @@ const LavaClaimInfo = observer(
       chainClaimRewards,
       activeChain,
       activeNetwork,
-    )
-    const isClaimDisabled = useMemo(
-      () => !totalRewards || new BigNumber(totalRewards).lt(0.00001),
-      [totalRewards],
-    )
-    const { rewards: providerRewards } = useDualStaking()
+    );
+    const isClaimDisabled = useMemo(() => !totalRewards || new BigNumber(totalRewards).lt(0.00001), [totalRewards]);
+    const { rewards: providerRewards } = useDualStaking();
 
     const isProviderClaimDisabled = useMemo(
-      () =>
-        !providerRewards?.totalRewards || new BigNumber(providerRewards?.totalRewards).lt(0.00001),
+      () => !providerRewards?.totalRewards || new BigNumber(providerRewards?.totalRewards).lt(0.00001),
       [providerRewards?.totalRewards],
-    )
+    );
     const nativeTokenReward = useMemo(() => {
       if (rewards) {
-        return rewards?.total?.find((token) => token.denom === activeStakingDenom?.coinMinimalDenom)
+        return rewards?.total?.find((token) => token.denom === activeStakingDenom?.coinMinimalDenom);
       }
-    }, [activeStakingDenom?.coinMinimalDenom, rewards])
+    }, [activeStakingDenom?.coinMinimalDenom, rewards]);
 
     const formattedTokenProviderReward = useMemo(() => {
       if (providerRewards) {
@@ -111,67 +99,56 @@ const LavaClaimInfo = observer(
           .reduce((acc, curr) => {
             acc[curr.denom] = acc[curr.denom]
               ? new BigNumber(acc[curr.denom]).plus(new BigNumber(curr.amount))
-              : new BigNumber(curr.amount)
-            return acc
-          }, {} as Record<string, BigNumber>)
-        const rewardsLength = Object.keys(rewardItems ?? {}).length
+              : new BigNumber(curr.amount);
+            return acc;
+          }, {} as Record<string, BigNumber>);
+        const rewardsLength = Object.keys(rewardItems ?? {}).length;
         return hideAssetsStore.formatHideBalance(
-          `${providerRewards.formattedTotalRewards} ${
-            rewardsLength > 1 ? `+${rewardsLength - 1} more` : ''
-          }`,
-        )
+          `${providerRewards.formattedTotalRewards} ${rewardsLength > 1 ? `+${rewardsLength - 1} more` : ''}`,
+        );
       }
-    }, [providerRewards])
+    }, [providerRewards]);
 
     const formattedTokenReward = useMemo(() => {
       return hideAssetsStore.formatHideBalance(
         `${formatTokenAmount(nativeTokenReward?.amount ?? '', activeStakingDenom.coinDenom)} ${
           rewards?.total?.length > 1 ? `+${rewards?.total?.length - 1} more` : ''
         }`,
-      )
-    }, [activeStakingDenom?.coinDenom, nativeTokenReward?.amount, rewards?.total.length])
+      );
+    }, [activeStakingDenom?.coinDenom, nativeTokenReward?.amount, rewards?.total.length]);
 
     const validatorRewardTitle = useMemo(() => {
       if (new BigNumber(totalRewardsDollarAmt).gt(0)) {
-        return hideAssetsStore.formatHideBalance(
-          formatCurrency(new BigNumber(totalRewardsDollarAmt)),
-        )
+        return hideAssetsStore.formatHideBalance(formatCurrency(new BigNumber(totalRewardsDollarAmt)));
       } else {
-        return formattedTokenReward
+        return formattedTokenReward;
       }
-    }, [formatCurrency, formattedTokenReward, totalRewardsDollarAmt])
+    }, [formatCurrency, formattedTokenReward, totalRewardsDollarAmt]);
 
     const validatorRewardSubtitle = useMemo(() => {
       if (new BigNumber(totalRewardsDollarAmt).gt(0)) {
-        return formattedTokenReward
+        return formattedTokenReward;
       }
-      return ''
-    }, [formattedTokenReward, totalRewardsDollarAmt])
+      return '';
+    }, [formattedTokenReward, totalRewardsDollarAmt]);
 
     const providerRewardTitle = useMemo(() => {
       if (new BigNumber(providerRewards?.totalRewardsDollarAmt).gt(0)) {
-        return hideAssetsStore.formatHideBalance(
-          formatCurrency(new BigNumber(providerRewards?.totalRewardsDollarAmt)),
-        )
+        return hideAssetsStore.formatHideBalance(formatCurrency(new BigNumber(providerRewards?.totalRewardsDollarAmt)));
       } else {
-        return formattedTokenProviderReward
+        return formattedTokenProviderReward;
       }
-    }, [formatCurrency, formattedTokenProviderReward, providerRewards?.totalRewardsDollarAmt])
+    }, [formatCurrency, formattedTokenProviderReward, providerRewards?.totalRewardsDollarAmt]);
 
     const providerRewardSubtitle = useMemo(() => {
       if (new BigNumber(providerRewards?.totalRewardsDollarAmt).gt(0)) {
-        return formattedTokenProviderReward
+        return formattedTokenProviderReward;
       }
-      return ''
-    }, [formattedTokenProviderReward, providerRewards?.totalRewardsDollarAmt])
+      return '';
+    }, [formattedTokenProviderReward, providerRewards?.totalRewardsDollarAmt]);
 
     return (
-      <BottomModal
-        isOpen={isOpen}
-        onClose={onClose}
-        title='Claim rewards'
-        className='flex flex-col gap-8 mt-4'
-      >
+      <BottomModal isOpen={isOpen} onClose={onClose} title='Claim rewards' className='flex flex-col gap-8 mt-4'>
         {/* <div className='flex flex-col items-center w-full gap-y-4'>
           <div className='flex flex-col gap-y-2'>
             <Text size='xs' color='text-gray-700 dark:text-gray-400'>
@@ -282,8 +259,8 @@ const LavaClaimInfo = observer(
           />
         </div>
       </BottomModal>
-    )
+    );
   },
-)
+);
 
-export default LavaClaimInfo
+export default LavaClaimInfo;

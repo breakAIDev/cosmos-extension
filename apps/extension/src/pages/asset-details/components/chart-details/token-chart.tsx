@@ -1,7 +1,7 @@
-import { useformatCurrency } from '@leapwallet/cosmos-wallet-hooks'
-import { MarketChartPrice } from '@leapwallet/cosmos-wallet-hooks'
-import { BigNumber } from 'bignumber.js'
-import React, { useEffect, useState } from 'react'
+import { useformatCurrency } from '@leapwallet/cosmos-wallet-hooks';
+import { MarketChartPrice } from '@leapwallet/cosmos-wallet-hooks';
+import { BigNumber } from 'bignumber.js';
+import React, { useEffect, useState } from 'react';
 import {
   Area,
   AreaChart,
@@ -20,8 +20,8 @@ import {
   LinearYAxisTickSeries,
   MarkLine,
   TooltipArea,
-} from 'reaviz'
-import { Colors } from 'theme/colors'
+} from 'reaviz';
+import { Colors } from 'theme/colors';
 
 export function TokensChart({
   chartData,
@@ -31,16 +31,16 @@ export function TokensChart({
   chainColor,
   selectedDays,
 }: {
-  chartData: MarketChartPrice[]
-  loadingCharts: boolean
-  price: number
-  chainColor: string
-  minMax: MarketChartPrice[]
-  selectedDays: string
+  chartData: MarketChartPrice[];
+  loadingCharts: boolean;
+  price: number;
+  chainColor: string;
+  minMax: MarketChartPrice[];
+  selectedDays: string;
 }) {
-  const [formatCurrency] = useformatCurrency()
+  const [formatCurrency] = useformatCurrency();
 
-  const [formattedChartData, setFormattedChartData] = useState<ChartDataShape[] | undefined>()
+  const [formattedChartData, setFormattedChartData] = useState<ChartDataShape[] | undefined>();
 
   useEffect(
     () =>
@@ -52,11 +52,11 @@ export function TokensChart({
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             key: new Date((val as any).timestamp),
             metadata: val.date,
-          }
+          };
         }),
       ),
     [chartData],
-  )
+  );
 
   return chartData && !loadingCharts && price ? (
     <AreaChart
@@ -70,9 +70,7 @@ export function TokensChart({
       }
       yAxis={
         <LinearYAxis
-          tickSeries={
-            <LinearYAxisTickSeries tickSize={0} width={0} interval={5} label={null} line={null} />
-          }
+          tickSeries={<LinearYAxisTickSeries tickSize={0} width={0} interval={5} label={null} line={null} />}
           axisLine={<LinearAxisLine strokeWidth={0} />}
         />
       }
@@ -90,28 +88,28 @@ export function TokensChart({
                   }}
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   content={(data: any) => {
-                    let price = data.value + minMax[0].price
+                    let price = data.value + minMax[0].price;
 
-                    const date = new Date(data.key)
-                    let formattedDate
+                    const date = new Date(data.key);
+                    let formattedDate;
 
                     if (selectedDays === '1Y' || selectedDays === 'YTD' || selectedDays === 'All') {
                       formattedDate = date.toLocaleString('en-US', {
                         year: 'numeric',
                         month: 'short',
                         day: 'numeric',
-                      })
+                      });
                     } else {
                       formattedDate = date.toLocaleString('en-US', {
                         month: 'short',
                         day: 'numeric',
                         hour: '2-digit',
                         minute: '2-digit',
-                      })
+                      });
                     }
 
                     try {
-                      price = formatCurrency(new BigNumber(price))
+                      price = formatCurrency(new BigNumber(price));
                     } catch (_) {
                       //
                     }
@@ -119,7 +117,7 @@ export function TokensChart({
                       <div className='text-xs font-medium !text-black-100 dark:!text-white-100'>
                         {price} | {formattedDate}
                       </div>
-                    )
+                    );
                   }}
                 />
               }
@@ -147,5 +145,5 @@ export function TokensChart({
     />
   ) : (
     <>{price && <div className='h-auto' />}</>
-  )
+  );
 }

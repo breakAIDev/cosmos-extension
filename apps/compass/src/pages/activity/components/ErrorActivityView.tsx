@@ -1,12 +1,12 @@
-import { EmptyCard } from 'components/empty-card'
-import { Images } from 'images'
-import React from 'react'
+import { EmptyCard } from 'components/empty-card';
+import { Images } from 'images';
+import React from 'react';
 
-import { CheckMoreLink } from './check-more-link'
+import { CheckMoreLink } from './check-more-link';
 
 type ErrorActivityViewProps = {
-  accountExplorerLink: string
-}
+  accountExplorerLink: string;
+};
 
 export function ErrorActivityView({ accountExplorerLink }: ErrorActivityViewProps) {
   return (
@@ -15,5 +15,5 @@ export function ErrorActivityView({ accountExplorerLink }: ErrorActivityViewProp
 
       {accountExplorerLink ? <CheckMoreLink href={accountExplorerLink} /> : null}
     </div>
-  )
+  );
 }

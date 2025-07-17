@@ -1,10 +1,10 @@
-import { formatTokenAmount, sliceWord } from '@leapwallet/cosmos-wallet-hooks'
-import React, { useMemo } from 'react'
-import { SourceChain, SourceToken } from 'types/swap'
+import { formatTokenAmount, sliceWord } from '@leapwallet/cosmos-wallet-hooks';
+import React, { useMemo } from 'react';
+import { SourceChain, SourceToken } from 'types/swap';
 
-import { useOnline } from '../hooks/useOnline'
-import { SwapFailureIcon } from './SwapFailureIcon'
-import { SwapSuccessfulIcon } from './SwapSuccessfulIcon'
+import { useOnline } from '../hooks/useOnline';
+import { SwapFailureIcon } from './SwapFailureIcon';
+import { SwapSuccessfulIcon } from './SwapSuccessfulIcon';
 
 export function TxStatusOverview({
   isSuccessFull,
@@ -14,35 +14,35 @@ export function TxStatusOverview({
   unableToTrackError,
   failedActionWasSwap,
 }: {
-  isSuccessFull: boolean
-  amountOut: string
-  failedActionWasSwap: boolean
-  unableToTrackError: boolean | null
-  timeoutError: boolean | undefined
-  destinationToken: SourceToken | null
-  destinationChain: SourceChain | undefined
+  isSuccessFull: boolean;
+  amountOut: string;
+  failedActionWasSwap: boolean;
+  unableToTrackError: boolean | null;
+  timeoutError: boolean | undefined;
+  destinationToken: SourceToken | null;
+  destinationChain: SourceChain | undefined;
 }) {
-  const isOnline = useOnline()
+  const isOnline = useOnline();
 
   const errorTitle = useMemo(() => {
     if (!isOnline || unableToTrackError) {
-      return 'Tracking unavailable'
+      return 'Tracking unavailable';
     }
 
-    return 'Swap failed'
-  }, [isOnline, unableToTrackError])
+    return 'Swap failed';
+  }, [isOnline, unableToTrackError]);
 
   const errorSubtitle = useMemo(() => {
     if (!isOnline) {
-      return
+      return;
     }
 
     if (failedActionWasSwap) {
-      return 'Due to slippage'
+      return 'Due to slippage';
     }
 
-    return ''
-  }, [failedActionWasSwap, isOnline])
+    return '';
+  }, [failedActionWasSwap, isOnline]);
 
   return (
     <div className='flex w-full rounded-2xl bg-white-100 dark:bg-gray-950 flex-col items-center justify-center py-4'>
@@ -63,5 +63,5 @@ export function TxStatusOverview({
         )}
       </div>
     </div>
-  )
+  );
 }

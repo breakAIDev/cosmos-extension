@@ -1,10 +1,6 @@
-import {
-  Currency,
-  getCoingeckoPricesStoreSnapshot,
-  LeapWalletApi,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk/dist/browser/constants'
-import { BigNumber } from 'bignumber.js'
+import { Currency, getCoingeckoPricesStoreSnapshot, LeapWalletApi } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk/dist/browser/constants';
+import { BigNumber } from 'bignumber.js';
 
 // TODO: replace getCoingeckoPricesStoreSnapshot with price store and remove duplicate code
 /**
@@ -23,31 +19,29 @@ export async function fetchCurrency(
   currencySelected: Currency,
   alternatePriceKey?: string,
 ): Promise<string | null> {
-  if (quantity === '0') return '0'
+  if (quantity === '0') return '0';
   if (alternatePriceKey) {
     /**
      * Above condition is so that we can roll out this change in non-breaking manner
      */
-    const coingeckoPrices = await getCoingeckoPricesStoreSnapshot()
+    const coingeckoPrices = await getCoingeckoPricesStoreSnapshot();
     if (coingeckoPrices) {
-      let tokenPrice
+      let tokenPrice;
       if (token) {
-        tokenPrice = coingeckoPrices?.[currencySelected]?.[token]
+        tokenPrice = coingeckoPrices?.[currencySelected]?.[token];
       }
       if (!tokenPrice) {
-        tokenPrice = coingeckoPrices?.[currencySelected]?.[alternatePriceKey]
+        tokenPrice = coingeckoPrices?.[currencySelected]?.[alternatePriceKey];
       }
       if (tokenPrice) {
-        return new BigNumber(quantity).times(tokenPrice).toString()
+        return new BigNumber(quantity).times(tokenPrice).toString();
       }
     }
   }
 
-  if (!token) return null
+  if (!token) return null;
 
-  const rate = await LeapWalletApi.operateMarketPrices([token], chain, currencySelected)
+  const rate = await LeapWalletApi.operateMarketPrices([token], chain, currencySelected);
 
-  return rate !== null && rate?.[token]
-    ? new BigNumber(quantity).times(rate?.[token] ?? 0).toString()
-    : null
+  return rate !== null && rate?.[token] ? new BigNumber(quantity).times(rate?.[token] ?? 0).toString() : null;
 }

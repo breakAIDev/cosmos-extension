@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { AminoSignResponse, OfflineAminoSigner, StdSignature, StdSignDoc } from '@cosmjs/amino'
-import { DirectSignResponse, OfflineDirectSigner } from '@cosmjs/proto-signing'
+import { AminoSignResponse, OfflineAminoSigner, StdSignature, StdSignDoc } from '@cosmjs/amino';
+import { DirectSignResponse, OfflineDirectSigner } from '@cosmjs/proto-signing';
 import {
   convertObjectCasingFromCamelToSnake,
   DirectSignDocDecoder,
   MsgConverter,
   UnknownMessage,
-} from '@leapwallet/buffer-boba'
+} from '@leapwallet/buffer-boba';
 import {
   GasOptions,
   LeapWalletApi,
@@ -15,7 +15,7 @@ import {
   useDappDefaultFeeStore,
   useDefaultGasEstimates,
   WALLETTYPE,
-} from '@leapwallet/cosmos-wallet-hooks'
+} from '@leapwallet/cosmos-wallet-hooks';
 import {
   chainIdToChain,
   ethSign,
@@ -26,95 +26,85 @@ import {
   sleep,
   SupportedChain,
   transactionDeclinedError,
-} from '@leapwallet/cosmos-wallet-sdk'
-import {
-  EvmBalanceStore,
-  RootBalanceStore,
-  RootDenomsStore,
-  RootStakeStore,
-} from '@leapwallet/cosmos-wallet-store'
-import { EthWallet } from '@leapwallet/leap-keychain'
-import { Avatar, Buttons, Header, ThemeName, useTheme } from '@leapwallet/leap-ui'
-import {
-  MessageParser,
-  parfait,
-  ParsedMessage,
-  ParsedMessageType,
-} from '@leapwallet/parser-parfait'
-import { CheckSquare, Square } from '@phosphor-icons/react'
-import { captureException } from '@sentry/react'
-import BigNumber from 'bignumber.js'
-import classNames from 'classnames'
-import Tooltip from 'components/better-tooltip'
-import { ErrorCard } from 'components/ErrorCard'
-import GasPriceOptions, { useDefaultGasPrice } from 'components/gas-price-options'
-import PopupLayout from 'components/layout/popup-layout'
-import LedgerConfirmationModal from 'components/ledger-confirmation/confirmation-modal'
-import { LoaderAnimation } from 'components/loader/Loader'
-import { Tabs } from 'components/tabs'
-import Text from 'components/text'
-import { MessageTypes } from 'config/message-types'
-import { BG_RESPONSE } from 'config/storage-keys'
-import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
-import { decodeChainIdToChain } from 'extension-scripts/utils'
-import { usePerformanceMonitor } from 'hooks/perf-monitoring/usePerformanceMonitor'
-import { useSiteLogo } from 'hooks/utility/useSiteLogo'
-import { Wallet } from 'hooks/wallet/useWallet'
-import { Images } from 'images'
-import { GenericDark, GenericLight } from 'images/logos'
-import Long from 'long'
-import mixpanel from 'mixpanel-browser'
-import { observer } from 'mobx-react-lite'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { evmBalanceStore } from 'stores/balance-store'
-import { rootDenomsStore } from 'stores/denoms-store-instance'
-import { dappDefaultFeeStore, feeTokensStore } from 'stores/fee-store'
-import { rootBalanceStore, rootStakeStore } from 'stores/root-store'
-import { Colors } from 'theme/colors'
-import { assert } from 'utils/assert'
-import { formatWalletName } from 'utils/formatWalletName'
-import { imgOnError } from 'utils/imgOnError'
-import { isSidePanel } from 'utils/isSidePanel'
-import { uiErrorTags } from 'utils/sentry'
-import { trim } from 'utils/strings'
-import { uint8ArrayToBase64 } from 'utils/uint8Utils'
-import browser from 'webextension-polyfill'
+} from '@leapwallet/cosmos-wallet-sdk';
+import { EvmBalanceStore, RootBalanceStore, RootDenomsStore, RootStakeStore } from '@leapwallet/cosmos-wallet-store';
+import { EthWallet } from '@leapwallet/leap-keychain';
+import { Avatar, Buttons, Header, ThemeName, useTheme } from '@leapwallet/leap-ui';
+import { MessageParser, parfait, ParsedMessage, ParsedMessageType } from '@leapwallet/parser-parfait';
+import { CheckSquare, Square } from '@phosphor-icons/react';
+import { captureException } from '@sentry/react';
+import BigNumber from 'bignumber.js';
+import classNames from 'classnames';
+import Tooltip from 'components/better-tooltip';
+import { ErrorCard } from 'components/ErrorCard';
+import GasPriceOptions, { useDefaultGasPrice } from 'components/gas-price-options';
+import PopupLayout from 'components/layout/popup-layout';
+import LedgerConfirmationModal from 'components/ledger-confirmation/confirmation-modal';
+import { LoaderAnimation } from 'components/loader/Loader';
+import { Tabs } from 'components/tabs';
+import Text from 'components/text';
+import { MessageTypes } from 'config/message-types';
+import { BG_RESPONSE } from 'config/storage-keys';
+import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
+import { decodeChainIdToChain } from 'extension-scripts/utils';
+import { usePerformanceMonitor } from 'hooks/perf-monitoring/usePerformanceMonitor';
+import { useSiteLogo } from 'hooks/utility/useSiteLogo';
+import { Wallet } from 'hooks/wallet/useWallet';
+import { Images } from 'images';
+import { GenericDark, GenericLight } from 'images/logos';
+import Long from 'long';
+import mixpanel from 'mixpanel-browser';
+import { observer } from 'mobx-react-lite';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { evmBalanceStore } from 'stores/balance-store';
+import { rootDenomsStore } from 'stores/denoms-store-instance';
+import { dappDefaultFeeStore, feeTokensStore } from 'stores/fee-store';
+import { rootBalanceStore, rootStakeStore } from 'stores/root-store';
+import { Colors } from 'theme/colors';
+import { assert } from 'utils/assert';
+import { formatWalletName } from 'utils/formatWalletName';
+import { imgOnError } from 'utils/imgOnError';
+import { isSidePanel } from 'utils/isSidePanel';
+import { uiErrorTags } from 'utils/sentry';
+import { trim } from 'utils/strings';
+import { uint8ArrayToBase64 } from 'utils/uint8Utils';
+import browser from 'webextension-polyfill';
 
-import { EventName } from '../../config/analytics'
-import { NotAllowSignTxGasOptions } from './additional-fee-settings'
-import { useFeeValidation } from './fee-validation'
-import { MemoInput } from './memo-input'
-import MessageDetailsSheet from './message-details-sheet'
-import MessageList from './message-list'
-import StaticFeeDisplay from './static-fee-display'
-import TransactionDetails from './transaction-details'
-import { isGenericOrSendAuthzGrant } from './utils/is-generic-or-send-authz-grant'
-import { mapWalletTypeToMixpanelWalletType, mixpanelTrackOptions } from './utils/mixpanel-config'
-import { getAminoSignDoc } from './utils/sign-amino'
-import { getDirectSignDoc, getProtoSignDocDecoder } from './utils/sign-direct'
+import { EventName } from '../../config/analytics';
+import { NotAllowSignTxGasOptions } from './additional-fee-settings';
+import { useFeeValidation } from './fee-validation';
+import { MemoInput } from './memo-input';
+import MessageDetailsSheet from './message-details-sheet';
+import MessageList from './message-list';
+import StaticFeeDisplay from './static-fee-display';
+import TransactionDetails from './transaction-details';
+import { isGenericOrSendAuthzGrant } from './utils/is-generic-or-send-authz-grant';
+import { mapWalletTypeToMixpanelWalletType, mixpanelTrackOptions } from './utils/mixpanel-config';
+import { getAminoSignDoc } from './utils/sign-amino';
+import { getDirectSignDoc, getProtoSignDocDecoder } from './utils/sign-direct';
 import {
   getTxHashFromAminoSignResponse,
   getTxHashFromDirectSignResponse,
   logDirectTx,
   logSignAmino,
   logSignAminoInj,
-} from './utils/tx-logger'
+} from './utils/tx-logger';
 
-const useGetWallet = Wallet.useGetWallet
+const useGetWallet = Wallet.useGetWallet;
 
-const messageParser = new MessageParser()
+const messageParser = new MessageParser();
 
 type SignTransactionProps = {
-  data: Record<string, any>
-  chainId: string
-  isSignArbitrary: boolean
-  rootBalanceStore: RootBalanceStore
-  rootStakeStore: RootStakeStore
-  evmBalanceStore: EvmBalanceStore
-  rootDenomsStore: RootDenomsStore
-  activeChain: SupportedChain
-}
+  data: Record<string, any>;
+  chainId: string;
+  isSignArbitrary: boolean;
+  rootBalanceStore: RootBalanceStore;
+  rootStakeStore: RootStakeStore;
+  evmBalanceStore: EvmBalanceStore;
+  rootDenomsStore: RootDenomsStore;
+  activeChain: SupportedChain;
+};
 
 const SignTransaction = observer(
   ({
@@ -126,96 +116,94 @@ const SignTransaction = observer(
     rootDenomsStore,
     activeChain,
   }: SignTransactionProps) => {
-    const isDappTxnInitEventLogged = useRef(false)
-    const isRejectedRef = useRef(false)
-    const isApprovedRef = useRef(false)
-    const { theme } = useTheme()
+    const isDappTxnInitEventLogged = useRef(false);
+    const isRejectedRef = useRef(false);
+    const isApprovedRef = useRef(false);
+    const { theme } = useTheme();
 
-    const [showMessageDetailsSheet, setShowMessageDetailsSheet] = useState(false)
+    const [showMessageDetailsSheet, setShowMessageDetailsSheet] = useState(false);
     const [selectedMessage, setSelectedMessage] = useState<{
-      index: number
-      parsed: ParsedMessage
-      raw: null
-    } | null>(null)
+      index: number;
+      parsed: ParsedMessage;
+      raw: null;
+    } | null>(null);
 
-    const [showLedgerPopup, setShowLedgerPopup] = useState(false)
-    const [ledgerError, setLedgerError] = useState<string>()
-    const [signingError, setSigningError] = useState<string | null>(null)
-    const [gasPriceError, setGasPriceError] = useState<string | null>(null)
-    const [userPreferredGasLimit, setUserPreferredGasLimit] = useState<string>('')
-    const [userMemo, setUserMemo] = useState<string>('')
+    const [showLedgerPopup, setShowLedgerPopup] = useState(false);
+    const [ledgerError, setLedgerError] = useState<string>();
+    const [signingError, setSigningError] = useState<string | null>(null);
+    const [gasPriceError, setGasPriceError] = useState<string | null>(null);
+    const [userPreferredGasLimit, setUserPreferredGasLimit] = useState<string>('');
+    const [userMemo, setUserMemo] = useState<string>('');
 
-    const [checkedGrantAuthBox, setCheckedGrantAuthBox] = useState(false)
-    const chainInfo = useChainInfo(activeChain)
-    const activeWallet = useActiveWallet()
-    const getWallet = useGetWallet(activeChain)
-    const navigate = useNavigate()
+    const [checkedGrantAuthBox, setCheckedGrantAuthBox] = useState(false);
+    const chainInfo = useChainInfo(activeChain);
+    const activeWallet = useActiveWallet();
+    const getWallet = useGetWallet(activeChain);
+    const navigate = useNavigate();
 
     const selectedNetwork = useMemo(() => {
-      return !!chainInfo?.testnetChainId && chainInfo?.testnetChainId === chainId
-        ? 'testnet'
-        : 'mainnet'
-    }, [chainInfo?.testnetChainId, chainId])
+      return !!chainInfo?.testnetChainId && chainInfo?.testnetChainId === chainId ? 'testnet' : 'mainnet';
+    }, [chainInfo?.testnetChainId, chainId]);
 
-    const denoms = rootDenomsStore.allDenoms
-    const defaultGasPrice = useDefaultGasPrice(denoms, { activeChain })
-    const txPostToDb = LeapWalletApi.useLogCosmosDappTx()
-    const defaultGasEstimates = useDefaultGasEstimates()
-    const selectedGasOptionRef = useRef(false)
-    const [isFeesValid, setIsFeesValid] = useState<boolean | null>(null)
-    const [highFeeAccepted, setHighFeeAccepted] = useState<boolean>(false)
+    const denoms = rootDenomsStore.allDenoms;
+    const defaultGasPrice = useDefaultGasPrice(denoms, { activeChain });
+    const txPostToDb = LeapWalletApi.useLogCosmosDappTx();
+    const defaultGasEstimates = useDefaultGasEstimates();
+    const selectedGasOptionRef = useRef(false);
+    const [isFeesValid, setIsFeesValid] = useState<boolean | null>(null);
+    const [highFeeAccepted, setHighFeeAccepted] = useState<boolean>(false);
 
-    const { setDefaultFee: setDappDefaultFee } = useDappDefaultFeeStore()
+    const { setDefaultFee: setDappDefaultFee } = useDappDefaultFeeStore();
 
-    const errorMessageRef = useRef<any>(null)
-    const activeChainfeeTokensStore = feeTokensStore.getStore(activeChain, selectedNetwork, false)
-    const feeTokens = activeChainfeeTokensStore?.data
-    const isFeeTokensLoading = activeChainfeeTokensStore?.isLoading
-    const feeValidation = useFeeValidation(denoms, activeChain, feeTokens, isFeeTokensLoading)
+    const errorMessageRef = useRef<any>(null);
+    const activeChainfeeTokensStore = feeTokensStore.getStore(activeChain, selectedNetwork, false);
+    const feeTokens = activeChainfeeTokensStore?.data;
+    const isFeeTokensLoading = activeChainfeeTokensStore?.isLoading;
+    const feeValidation = useFeeValidation(denoms, activeChain, feeTokens, isFeeTokensLoading);
 
     useEffect(() => {
       // Check if the error message is rendered and visible
       if (!isFeesValid && errorMessageRef.current) {
         // Scroll the parent component to the error message
         setTimeout(() => {
-          errorMessageRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-        }, 10)
+          errorMessageRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 10);
       }
-    }, [isFeesValid])
+    }, [isFeesValid]);
 
     useEffect(() => {
-      rootBalanceStore.loadBalances(activeChain, selectedNetwork)
+      rootBalanceStore.loadBalances(activeChain, selectedNetwork);
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [activeChain, selectedNetwork])
+    }, [activeChain, selectedNetwork]);
 
     const [gasPriceOption, setGasPriceOption] = useState<{
-      option: GasOptions
-      gasPrice: GasPrice
-    }>({ gasPrice: defaultGasPrice.gasPrice, option: GasOptions.LOW })
+      option: GasOptions;
+      gasPrice: GasPrice;
+    }>({ gasPrice: defaultGasPrice.gasPrice, option: GasOptions.LOW });
 
-    assert(activeWallet !== null, 'activeWallet is null')
+    assert(activeWallet !== null, 'activeWallet is null');
 
     const walletName = useMemo(() => {
-      return formatWalletName(activeWallet.name)
-    }, [activeWallet.name])
+      return formatWalletName(activeWallet.name);
+    }, [activeWallet.name]);
 
     const { isAmino, isAdr36, ethSignType, signOptions, eip712Types } = useMemo(() => {
-      const isAmino = !!txnSigningRequest?.isAmino
-      const isAdr36 = !!txnSigningRequest?.isAdr36
+      const isAmino = !!txnSigningRequest?.isAmino;
+      const isAdr36 = !!txnSigningRequest?.isAdr36;
 
-      const ethSignType = txnSigningRequest?.ethSignType
-      const eip712Types = txnSigningRequest?.eip712Types
-      const signOptions = txnSigningRequest?.signOptions
+      const ethSignType = txnSigningRequest?.ethSignType;
+      const eip712Types = txnSigningRequest?.eip712Types;
+      const signOptions = txnSigningRequest?.signOptions;
 
-      return { isAmino, isAdr36, ethSignType, signOptions, eip712Types }
-    }, [txnSigningRequest])
+      return { isAmino, isAdr36, ethSignType, signOptions, eip712Types };
+    }, [txnSigningRequest]);
 
     const [allowSetFee, messages, txnDoc, signDoc, fee, defaultFee, defaultMemo]: [
       boolean,
       (
         | {
-            parsed: ParsedMessage
-            raw: any
+            parsed: ParsedMessage;
+            raw: any;
           }[]
         | null
       ),
@@ -235,14 +223,14 @@ const SignTransaction = observer(
           isAdr36: !!isAdr36,
           memo: userMemo,
           isGasOptionSelected: selectedGasOptionRef.current,
-        })
+        });
 
-        let parsedMessages
+        let parsedMessages;
 
         if (isSignArbitrary) {
           parsedMessages = txnSigningRequest?.signOptions?.isADR36WithString
             ? Buffer.from(result.signDoc.msgs[0].value.data, 'base64').toString('utf-8')
-            : result.signDoc.msgs[0].value.data
+            : result.signDoc.msgs[0].value.data;
         } else if (ethSignType) {
           parsedMessages = [
             {
@@ -252,20 +240,20 @@ const SignTransaction = observer(
                 message: result.signDoc.msgs[0].value.data,
               },
             },
-          ]
+          ];
         } else {
           parsedMessages = result.signDoc.msgs.map((msg: any) => {
-            let convertedMessage
+            let convertedMessage;
             try {
-              convertedMessage = MsgConverter.convertFromAminoToDirect(msg.type, msg)
-              if (!convertedMessage) throw new Error('unable to convert amino message to direct')
+              convertedMessage = MsgConverter.convertFromAminoToDirect(msg.type, msg);
+              if (!convertedMessage) throw new Error('unable to convert amino message to direct');
               return {
                 raw: msg,
                 parsed: messageParser.parse({
                   '@type': convertedMessage.typeUrl,
                   ...msg.value,
                 }),
-              }
+              };
             } catch (e) {
               return {
                 raw: msg,
@@ -273,9 +261,9 @@ const SignTransaction = observer(
                   __type: ParsedMessageType.Unimplemented,
                   message: msg,
                 } as parfait.unimplemented,
-              }
+              };
             }
-          })
+          });
         }
 
         return [
@@ -286,7 +274,7 @@ const SignTransaction = observer(
           result.fee,
           result.defaultFee,
           result.defaultMemo,
-        ]
+        ];
       } else {
         const result = getDirectSignDoc({
           signRequestData: {
@@ -296,19 +284,19 @@ const SignTransaction = observer(
           gasLimit: userPreferredGasLimit,
           memo: userMemo,
           isGasOptionSelected: selectedGasOptionRef.current,
-        })
+        });
 
         const docDecoder = getProtoSignDocDecoder({
           'sign-request': {
             signDoc: result.signDoc,
           },
-        })
+        });
 
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         const parsedMessages = docDecoder.txMsgs.map((msg: { unpacked: any; typeUrl: string }) => {
           if (msg instanceof UnknownMessage) {
-            const raw = msg.toJSON()
+            const raw = msg.toJSON();
             return {
               raw: raw,
               parsed: {
@@ -318,23 +306,21 @@ const SignTransaction = observer(
                   body: raw.value,
                 },
               } as parfait.unimplemented,
-            }
+            };
           }
 
           if (msg.unpacked.msg instanceof Uint8Array) {
-            const base64String = uint8ArrayToBase64(msg.unpacked.msg)
-            const decodedString = Buffer.from(base64String, 'base64').toString()
+            const base64String = uint8ArrayToBase64(msg.unpacked.msg);
+            const decodedString = Buffer.from(base64String, 'base64').toString();
             try {
-              const decodedJson = JSON.parse(decodedString)
-              msg.unpacked.msg = decodedJson
+              const decodedJson = JSON.parse(decodedString);
+              msg.unpacked.msg = decodedJson;
             } catch {
-              msg.unpacked.msg = decodedString
+              msg.unpacked.msg = decodedString;
             }
           }
 
-          const convertedMsg = convertObjectCasingFromCamelToSnake(
-            (msg as unknown as { unpacked: any }).unpacked,
-          )
+          const convertedMsg = convertObjectCasingFromCamelToSnake((msg as unknown as { unpacked: any }).unpacked);
 
           return {
             raw: {
@@ -345,8 +331,8 @@ const SignTransaction = observer(
               '@type': msg.typeUrl,
               ...convertedMsg,
             }),
-          }
-        })
+          };
+        });
         return [
           result.allowSetFee,
           parsedMessages,
@@ -355,7 +341,7 @@ const SignTransaction = observer(
           result.fee,
           result.defaultFee,
           result.defaultMemo,
-        ]
+        ];
       }
     }, [
       isAmino,
@@ -366,29 +352,29 @@ const SignTransaction = observer(
       userMemo,
       isSignArbitrary,
       ethSignType,
-    ])
+    ]);
 
-    const siteOrigin = txnSigningRequest?.origin as string | undefined
-    const siteName = siteOrigin?.split('//')?.at(-1)?.split('.')?.at(-2)
-    const siteLogo = useSiteLogo(siteOrigin)
+    const siteOrigin = txnSigningRequest?.origin as string | undefined;
+    const siteName = siteOrigin?.split('//')?.at(-1)?.split('.')?.at(-2);
+    const siteLogo = useSiteLogo(siteOrigin);
 
     const transactionTypes = useMemo(() => {
       if (Array.isArray(messages)) {
-        return messages.map((msg) => msg.raw['@type'] ?? msg.raw['type']).filter(Boolean)
+        return messages.map((msg) => msg.raw['@type'] ?? msg.raw['type']).filter(Boolean);
       }
-      return undefined
-    }, [messages])
+      return undefined;
+    }, [messages]);
 
     const refetchData = useCallback(() => {
       setTimeout(() => {
-        rootBalanceStore.refetchBalances(activeChain, selectedNetwork)
-        rootStakeStore.updateStake(activeChain, selectedNetwork, true)
-      }, 3000)
-    }, [activeChain, rootBalanceStore, rootStakeStore, selectedNetwork])
+        rootBalanceStore.refetchBalances(activeChain, selectedNetwork);
+        rootStakeStore.updateStake(activeChain, selectedNetwork, true);
+      }, 3000);
+    }, [activeChain, rootBalanceStore, rootStakeStore, selectedNetwork]);
 
     const handleCancel = useCallback(async () => {
-      if (isRejectedRef.current || isApprovedRef.current) return
-      isRejectedRef.current = true
+      if (isRejectedRef.current || isApprovedRef.current) return;
+      isRejectedRef.current = true;
 
       try {
         // mixpanel.track(
@@ -406,21 +392,21 @@ const SignTransaction = observer(
         //   mixpanelTrackOptions,
         // )
       } catch (e) {
-        captureException(e)
+        captureException(e);
       }
 
       browser.runtime.sendMessage({
         type: MessageTypes.signResponse,
         payload: { status: 'error', data: 'Transaction cancelled by the user.' },
-      })
+      });
       if (isSidePanel()) {
-        navigate('/home')
+        navigate('/home');
       } else {
-        await sleep(100)
+        await sleep(100);
 
         setTimeout(async () => {
-          window.close()
-        }, 10)
+          window.close();
+        }, 10);
       }
     }, [
       siteOrigin,
@@ -430,43 +416,43 @@ const SignTransaction = observer(
       chainInfo.chainId,
       chainInfo.chainName,
       navigate,
-    ])
+    ]);
 
     const recommendedGasLimit: string = useMemo(() => {
       if (defaultFee) {
-        return 'gasLimit' in defaultFee ? defaultFee.gasLimit.toString() : defaultFee.gas.toString()
+        return 'gasLimit' in defaultFee ? defaultFee.gasLimit.toString() : defaultFee.gas.toString();
       }
-      return defaultGasEstimates[activeChain].DEFAULT_GAS_IBC.toString()
+      return defaultGasEstimates[activeChain].DEFAULT_GAS_IBC.toString();
 
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [activeChain, defaultFee])
+    }, [activeChain, defaultFee]);
 
     const dappFeeDenom = useMemo(() => {
       if (defaultFee && defaultFee?.amount[0]) {
-        const { denom } = defaultFee.amount[0]
+        const { denom } = defaultFee.amount[0];
         // calculate gas price based on recommended gas limit
-        return denom
+        return denom;
       }
-      return defaultGasPrice.gasPrice.denom
-    }, [defaultFee, defaultGasPrice.gasPrice])
+      return defaultGasPrice.gasPrice.denom;
+    }, [defaultFee, defaultGasPrice.gasPrice]);
 
     const approveTransaction = useCallback(async () => {
-      const activeAddress = activeWallet.addresses[activeChain]
+      const activeAddress = activeWallet.addresses[activeChain];
       if (!activeChain || !signDoc || !activeAddress) {
-        return
+        return;
       }
-      const skipFeeCheck = isSignArbitrary || ethSignType
+      const skipFeeCheck = isSignArbitrary || ethSignType;
       // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars, no-unused-vars
-      const onValidationFailed = (txFee: any) => () => {}
+      const onValidationFailed = (txFee: any) => () => {};
 
       if (!isAmino) {
         try {
           if (!skipFeeCheck) {
-            let feeCheck: boolean | null = null
-            const decodedTx = new DirectSignDocDecoder(signDoc as SignDoc)
-            const fee = decodedTx.authInfo.fee
+            let feeCheck: boolean | null = null;
+            const decodedTx = new DirectSignDocDecoder(signDoc as SignDoc);
+            const fee = decodedTx.authInfo.fee;
             if (!fee) {
-              throw new Error('Transaction does not have fee')
+              throw new Error('Transaction does not have fee');
             }
             try {
               feeCheck = await feeValidation(
@@ -477,37 +463,35 @@ const SignTransaction = observer(
                   chain: activeChain,
                 },
                 onValidationFailed(fee),
-              )
+              );
             } catch (e) {
-              captureException(e)
+              captureException(e);
             }
             if (feeCheck === false) {
-              throw new Error(
-                'Unusually high fees detected, could not process transaction. Please try again.',
-              )
+              throw new Error('Unusually high fees detected, could not process transaction. Please try again.');
             }
           }
 
-          const wallet = (await getWallet(activeChain)) as OfflineDirectSigner
+          const wallet = (await getWallet(activeChain)) as OfflineDirectSigner;
           const data = await (async () => {
             try {
               if (typeof wallet.signDirect === 'function') {
-                return wallet.signDirect(activeAddress, SignDoc.fromPartial(signDoc as any))
+                return wallet.signDirect(activeAddress, SignDoc.fromPartial(signDoc as any));
               }
-              return null
+              return null;
             } catch (e) {
               captureException(e, {
                 tags: uiErrorTags,
-              })
-              return null
+              });
+              return null;
             }
-          })()
+          })();
 
           if (!data) {
-            throw new Error('Could not sign transaction')
+            throw new Error('Could not sign transaction');
           }
 
-          isApprovedRef.current = true
+          isApprovedRef.current = true;
           logDirectTx(
             data as DirectSignResponse,
             messages ?? [],
@@ -519,11 +503,11 @@ const SignTransaction = observer(
             txnDoc.chain_id,
             selectedNetwork,
           ).catch((e) => {
-            captureException(e)
-          })
+            captureException(e);
+          });
 
           try {
-            const txHash = getTxHashFromDirectSignResponse(data)
+            const txHash = getTxHashFromDirectSignResponse(data);
 
             // mixpanel.track(
             //   EventName.DappTxnApproved,
@@ -543,43 +527,43 @@ const SignTransaction = observer(
             //   mixpanelTrackOptions,
             // )
           } catch (e) {
-            captureException(e)
+            captureException(e);
           }
 
-          await sleep(100)
+          await sleep(100);
 
           try {
             browser.runtime.sendMessage({
               type: MessageTypes.signResponse,
               payload: { status: 'success', data },
-            })
+            });
           } catch {
-            throw new Error('Could not send transaction to the dApp')
+            throw new Error('Could not send transaction to the dApp');
           }
           if (isSidePanel()) {
-            refetchData()
-            navigate('/home')
+            refetchData();
+            navigate('/home');
           } else {
             setTimeout(async () => {
-              window.close()
-            }, 10)
+              window.close();
+            }, 10);
           }
         } catch (e) {
           if (e instanceof Error) {
             if (e.message === transactionDeclinedError) {
-              handleCancel()
+              handleCancel();
             } else {
-              setSigningError(e.message)
+              setSigningError(e.message);
             }
           }
         }
       } else {
-        setSigningError(null)
+        setSigningError(null);
         try {
           if (!skipFeeCheck) {
-            let feeCheck = null
+            let feeCheck = null;
             try {
-              const fee = (signDoc as StdSignDoc).fee
+              const fee = (signDoc as StdSignDoc).fee;
               feeCheck = await feeValidation(
                 {
                   feeDenom: fee.amount[0].denom,
@@ -588,22 +572,17 @@ const SignTransaction = observer(
                   chain: activeChain,
                 },
                 onValidationFailed(fee),
-              )
+              );
             } catch (e) {
-              captureException(e)
+              captureException(e);
             }
 
             if (feeCheck === false) {
-              throw new Error(
-                'Unusually high fees detected, could not process transaction. Please try again.',
-              )
+              throw new Error('Unusually high fees detected, could not process transaction. Please try again.');
             }
           }
 
-          const wallet = (await getWallet(
-            activeChain,
-            !!(ethSignType || eip712Types),
-          )) as OfflineAminoSigner & {
+          const wallet = (await getWallet(activeChain, !!(ethSignType || eip712Types))) as OfflineAminoSigner & {
             signAmino: (
               // eslint-disable-next-line no-unused-vars
               address: string,
@@ -611,47 +590,35 @@ const SignTransaction = observer(
               signDoc: StdSignDoc,
               // eslint-disable-next-line no-unused-vars
               options?: { extraEntropy?: boolean },
-            ) => Promise<StdSignature>
-          }
+            ) => Promise<StdSignature>;
+          };
           if (activeWallet.walletType === WALLETTYPE.LEDGER) {
-            setShowLedgerPopup(true)
+            setShowLedgerPopup(true);
           }
-          const walletAccounts = await wallet.getAccounts()
-          const publicKey = walletAccounts[0].pubkey
+          const walletAccounts = await wallet.getAccounts();
+          const publicKey = walletAccounts[0].pubkey;
 
           const data = await (async () => {
             try {
               if (ethSignType) {
-                return ethSign(
-                  activeAddress,
-                  wallet as unknown as EthWallet,
-                  signDoc as StdSignDoc,
-                  ethSignType,
-                )
+                return ethSign(activeAddress, wallet as unknown as EthWallet, signDoc as StdSignDoc, ethSignType);
               }
               if (eip712Types) {
-                return ethSignEip712(
-                  activeAddress,
-                  wallet as unknown as EthWallet,
-                  signDoc as StdSignDoc,
-                  eip712Types,
-                )
+                return ethSignEip712(activeAddress, wallet as unknown as EthWallet, signDoc as StdSignDoc, eip712Types);
               }
               return wallet.signAmino(activeAddress, signDoc as StdSignDoc, {
-                extraEntropy: !signOptions?.enableExtraEntropy
-                  ? false
-                  : signOptions?.enableExtraEntropy,
-              })
+                extraEntropy: !signOptions?.enableExtraEntropy ? false : signOptions?.enableExtraEntropy,
+              });
             } catch (e) {
               captureException(e, {
                 tags: uiErrorTags,
-              })
-              return null
+              });
+              return null;
             }
-          })()
+          })();
 
           if (!data) {
-            throw new Error('Could not sign transaction')
+            throw new Error('Could not sign transaction');
           }
 
           if (!isSignArbitrary) {
@@ -660,7 +627,7 @@ const SignTransaction = observer(
                 const evmChainId =
                   chainInfo.chainId === (signDoc as StdSignDoc).chain_id
                     ? chainInfo.evmChainId
-                    : chainInfo.evmChainIdTestnet
+                    : chainInfo.evmChainIdTestnet;
                 await logSignAminoInj(
                   data as AminoSignResponse,
                   publicKey,
@@ -670,7 +637,7 @@ const SignTransaction = observer(
                   activeAddress,
                   siteOrigin ?? origin,
                   selectedNetwork,
-                )
+                );
               } else {
                 await logSignAmino(
                   data as AminoSignResponse,
@@ -680,71 +647,69 @@ const SignTransaction = observer(
                   activeAddress,
                   siteOrigin ?? origin,
                   selectedNetwork,
-                )
+                );
               }
             } catch (e) {
-              captureException(e)
+              captureException(e);
             }
           }
 
           try {
             const trackingData: Record<string, unknown> = {
               dAppURL: siteOrigin,
-              transactionTypes: Array.isArray(messages)
-                ? messages?.map((msg) => msg.raw['type']).filter(Boolean)
-                : [],
+              transactionTypes: Array.isArray(messages) ? messages?.map((msg) => msg.raw['type']).filter(Boolean) : [],
               signMode: 'sign-amino',
               walletType: mapWalletTypeToMixpanelWalletType(activeWallet.walletType),
               chainId: chainInfo.chainId,
               chainName: chainInfo.chainName,
               productVersion: browser.runtime.getManifest().version,
               time: Date.now() / 1000,
-            }
+            };
 
             try {
-              const txHash = getTxHashFromAminoSignResponse(data as AminoSignResponse, publicKey)
-              trackingData.txHash = txHash
+              const txHash = getTxHashFromAminoSignResponse(data as AminoSignResponse, publicKey);
+              trackingData.txHash = txHash;
             } catch (_) {
               //
             }
 
             // mixpanel.track(EventName.DappTxnApproved, trackingData, mixpanelTrackOptions)
           } catch (e) {
-            captureException(e)
+            captureException(e);
           }
 
-          isApprovedRef.current = true
-          await sleep(100)
+          isApprovedRef.current = true;
+          await sleep(100);
 
           try {
             browser.runtime.sendMessage({
               type: MessageTypes.signResponse,
               payload: { status: 'success', data },
-            })
+            });
           } catch {
-            throw new Error('Could not send transaction to the dApp')
+            throw new Error('Could not send transaction to the dApp');
           }
 
           if (isSidePanel()) {
-            refetchData()
-            navigate('/home')
+            refetchData();
+            navigate('/home');
           } else {
             setTimeout(async () => {
               //await browser.storage.local.remove(SIGN_REQUEST)
-              window.close()
-            }, 10)
+              window.close();
+            }, 10);
           }
         } catch (e) {
           if (e instanceof Error) {
             if (e instanceof LedgerError) {
-              setLedgerError(e.message)
-              e.message === transactionDeclinedError && handleCancel()
+              setLedgerError(e.message);
+              e.message === transactionDeclinedError && handleCancel();
             } else {
-              e.message === transactionDeclinedError ? handleCancel() : setSigningError(e.message)
+              e.message === transactionDeclinedError ? handleCancel() : setSigningError(e.message);
             }
           }
         } finally {
-          setShowLedgerPopup(false)
+          setShowLedgerPopup(false);
         }
       }
 
@@ -762,27 +727,27 @@ const SignTransaction = observer(
       txPostToDb,
       handleCancel,
       ethSignType,
-    ])
+    ]);
 
     useEffect(() => {
-      setDappDefaultFee(defaultFee)
-      dappDefaultFeeStore.setDefaultFee(defaultFee)
+      setDappDefaultFee(defaultFee);
+      dappDefaultFeeStore.setDefaultFee(defaultFee);
 
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [defaultFee])
+    }, [defaultFee]);
 
     useEffect(() => {
-      window.addEventListener('beforeunload', handleCancel)
-      browser.storage.local.remove(BG_RESPONSE)
+      window.addEventListener('beforeunload', handleCancel);
+      browser.storage.local.remove(BG_RESPONSE);
       return () => {
-        window.removeEventListener('beforeunload', handleCancel)
-      }
-    }, [handleCancel])
+        window.removeEventListener('beforeunload', handleCancel);
+      };
+    }, [handleCancel]);
 
     useEffect(() => {
-      if (!siteOrigin || !transactionTypes) return
+      if (!siteOrigin || !transactionTypes) return;
 
-      if (isDappTxnInitEventLogged.current) return
+      if (isDappTxnInitEventLogged.current) return;
 
       try {
         // mixpanel.track(
@@ -800,48 +765,39 @@ const SignTransaction = observer(
         //   mixpanelTrackOptions,
         // )
 
-        isDappTxnInitEventLogged.current = true
+        isDappTxnInitEventLogged.current = true;
       } catch (e) {
-        captureException(e)
+        captureException(e);
       }
-    }, [
-      activeWallet.walletType,
-      chainInfo.chainId,
-      chainInfo.chainName,
-      isAmino,
-      siteOrigin,
-      transactionTypes,
-    ])
+    }, [activeWallet.walletType, chainInfo.chainId, chainInfo.chainName, isAmino, siteOrigin, transactionTypes]);
 
     usePerformanceMonitor({
       page: 'sign-transaction',
       queryStatus: txnSigningRequest ? 'success' : 'loading',
       op: 'signTransactionPageLoad',
       description: 'Load tome for sign transaction page',
-    })
+    });
 
     const hasToShowCheckbox = useMemo(() => {
       if (isSignArbitrary) {
-        return ''
+        return '';
       }
 
       return Array.isArray(messages)
-        ? isGenericOrSendAuthzGrant(
-            Array.isArray(messages) ? messages?.map((msg) => msg.parsed) : null,
-          )
-        : ''
-    }, [isSignArbitrary, messages])
+        ? isGenericOrSendAuthzGrant(Array.isArray(messages) ? messages?.map((msg) => msg.parsed) : null)
+        : '';
+    }, [isSignArbitrary, messages]);
 
     const disableBalanceCheck = useMemo(() => {
-      return !!fee?.granter || !!fee?.payer || !!signOptions?.disableBalanceCheck
-    }, [fee?.granter, fee?.payer, signOptions?.disableBalanceCheck])
+      return !!fee?.granter || !!fee?.payer || !!signOptions?.disableBalanceCheck;
+    }, [fee?.granter, fee?.payer, signOptions?.disableBalanceCheck]);
 
     const isApproveBtnDisabled =
       !dappFeeDenom ||
       !!signingError ||
       !!gasPriceError ||
       (!!hasToShowCheckbox && checkedGrantAuthBox === false) ||
-      (isFeesValid === false && !highFeeAccepted)
+      (isFeesValid === false && !highFeeAccepted);
 
     return (
       <div
@@ -860,14 +816,9 @@ const SignTransaction = observer(
             header={
               <div className='w-[396px]'>
                 <Header
-                  imgSrc={
-                    chainInfo.chainSymbolImageUrl ??
-                    (theme === ThemeName.DARK ? GenericDark : GenericLight)
-                  }
-                  imgOnError={imgOnError(theme === ThemeName.DARK ? GenericDark : GenericLight)}
-                  title={
-                    <Buttons.Wallet title={trim(walletName, 10)} className='pr-4 cursor-default' />
-                  }
+                  imgSrc={chainInfo.chainSymbolImageUrl ?? (theme === ThemeName.DARK ? GenericDark : GenericLight)}
+                  // imgOnError={imgOnError(theme === ThemeName.DARK ? GenericDark : GenericLight)}
+                  title={<Buttons.Wallet title={trim(walletName, 10)} className='pr-4 cursor-default' />}
                 />
               </div>
             }
@@ -889,12 +840,8 @@ const SignTransaction = observer(
                   className='rounded-full overflow-hidden'
                 />
                 <div className='ml-3'>
-                  <p className='capitalize text-gray-900 dark:text-white-100 text-base font-bold'>
-                    {siteName}
-                  </p>
-                  <p className='lowercase text-gray-500 dark:text-gray-400 text-xs font-medium'>
-                    {siteOrigin}
-                  </p>
+                  <p className='capitalize text-gray-900 dark:text-white-100 text-base font-bold'>{siteName}</p>
+                  <p className='lowercase text-gray-500 dark:text-gray-400 text-xs font-medium'>{siteOrigin}</p>
                 </div>
               </div>
 
@@ -902,9 +849,7 @@ const SignTransaction = observer(
                 <TransactionDetails
                   activeChain={activeChain}
                   selectedNetwork={selectedNetwork}
-                  parsedMessages={
-                    Array.isArray(messages) ? messages?.map((msg) => msg.parsed) : null
-                  }
+                  parsedMessages={Array.isArray(messages) ? messages?.map((msg) => msg.parsed) : null}
                 />
               )}
 
@@ -912,9 +857,7 @@ const SignTransaction = observer(
                 <GasPriceOptions
                   initialFeeDenom={dappFeeDenom}
                   gasLimit={userPreferredGasLimit || recommendedGasLimit}
-                  setGasLimit={(value: string | BigNumber | number) =>
-                    setUserPreferredGasLimit(value.toString())
-                  }
+                  setGasLimit={(value: string | BigNumber | number) => setUserPreferredGasLimit(value.toString())}
                   recommendedGasLimit={recommendedGasLimit}
                   gasPriceOption={
                     selectedGasOptionRef.current || allowSetFee
@@ -922,8 +865,8 @@ const SignTransaction = observer(
                       : { ...gasPriceOption, option: '' as GasOptions }
                   }
                   onGasPriceOptionChange={(value: any) => {
-                    selectedGasOptionRef.current = true
-                    setGasPriceOption(value)
+                    selectedGasOptionRef.current = true;
+                    setGasPriceOption(value);
                   }}
                   error={gasPriceError}
                   setError={setGasPriceError}
@@ -936,10 +879,10 @@ const SignTransaction = observer(
                   onInvalidFees={(feeTokenData: NativeDenom, isFeesValid: boolean | null) => {
                     try {
                       if (isFeesValid === false) {
-                        setIsFeesValid(false)
+                        setIsFeesValid(false);
                       }
                     } catch (e) {
-                      captureException(e)
+                      captureException(e);
                     }
                   }}
                   hasUserTouchedFees={!!selectedGasOptionRef?.current}
@@ -991,9 +934,7 @@ const SignTransaction = observer(
                           />
 
                           {gasPriceError ? (
-                            <p className='text-red-300 text-sm font-medium mt-2 px-1'>
-                              {gasPriceError}
-                            </p>
+                            <p className='text-red-300 text-sm font-medium mt-2 px-1'>{gasPriceError}</p>
                           ) : null}
                         </div>
                       ) : (
@@ -1012,10 +953,7 @@ const SignTransaction = observer(
                             <div className='flex items-center justify-end'>
                               <GasPriceOptions.AdditionalSettingsToggle className='p-0 mt-3' />
                             </div>
-                            <NotAllowSignTxGasOptions
-                              gasPriceOption={gasPriceOption}
-                              gasPriceError={gasPriceError}
-                            />
+                            <NotAllowSignTxGasOptions gasPriceOption={gasPriceOption} gasPriceError={gasPriceError} />
                           </div>
                         </>
                       ),
@@ -1025,7 +963,7 @@ const SignTransaction = observer(
                             disabled={!!defaultMemo}
                             memo={defaultMemo ? defaultMemo : userMemo}
                             setMemo={(memo) => {
-                              setUserMemo(memo)
+                              setUserMemo(memo);
                             }}
                             activeChain={activeChain}
                           />
@@ -1048,8 +986,8 @@ const SignTransaction = observer(
                                   index,
                                   parsed: messages[index].parsed,
                                   raw: messages[index].raw,
-                                })
-                                setShowMessageDetailsSheet(true)
+                                });
+                                setShowMessageDetailsSheet(true);
                               }}
                             />
                           ) : (
@@ -1095,15 +1033,13 @@ const SignTransaction = observer(
               )}
 
               <div className='mt-3'>
-                {signingError ?? ledgerError ? (
-                  <ErrorCard text={signingError ?? ledgerError} />
-                ) : null}
+                {signingError ?? ledgerError ? <ErrorCard text={signingError ?? ledgerError} /> : null}
               </div>
 
               <LedgerConfirmationModal
                 showLedgerPopup={showLedgerPopup}
                 onClose={() => {
-                  setShowLedgerPopup(false)
+                  setShowLedgerPopup(false);
                 }}
               />
 
@@ -1124,11 +1060,7 @@ const SignTransaction = observer(
                     {!highFeeAccepted ? (
                       <Square size={16} className='text-gray-700 cursor-pointer' />
                     ) : (
-                      <CheckSquare
-                        size={16}
-                        className='cursor-pointer'
-                        color={Colors.getChainColor(activeChain)}
-                      />
+                      <CheckSquare size={16} className='cursor-pointer' color={Colors.getChainColor(activeChain)} />
                     )}
                   </div>
 
@@ -1143,20 +1075,13 @@ const SignTransaction = observer(
             <div className='py-3 px-7 dark:bg-black-100 bg-gray-50 w-full mt-auto'>
               {hasToShowCheckbox && (
                 <div className='flex flex-row items-start mb-3 border border-yellow-600 rounded-lg p-[4px]'>
-                  <div
-                    className='mr-2'
-                    onClick={() => setCheckedGrantAuthBox(!checkedGrantAuthBox)}
-                  >
+                  <div className='mr-2' onClick={() => setCheckedGrantAuthBox(!checkedGrantAuthBox)}>
                     {!checkedGrantAuthBox ? (
                       <Square size={16} className='text-gray-900 cursor-pointer relative'>
                         <span className='absolute w-[10px] h-[6px] bg-gray-900 top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2' />
                       </Square>
                     ) : (
-                      <CheckSquare
-                        size={16}
-                        className='cursor-pointer'
-                        color={Colors.getChainColor(activeChain)}
-                      />
+                      <CheckSquare size={16} className='cursor-pointer' color={Colors.getChainColor(activeChain)} />
                     )}
                   </div>
 
@@ -1165,11 +1090,7 @@ const SignTransaction = observer(
               )}
 
               <div className='flex items-center justify-center w-full space-x-3 mt-2'>
-                <Buttons.Generic
-                  title={'Reject Button'}
-                  color={Colors.gray900}
-                  onClick={handleCancel}
-                >
+                <Buttons.Generic title={'Reject Button'} color={Colors.gray900} onClick={handleCancel}>
                   Reject
                 </Buttons.Generic>
                 <Buttons.Generic
@@ -1186,70 +1107,70 @@ const SignTransaction = observer(
           </PopupLayout>
         </div>
       </div>
-    )
+    );
   },
-)
+);
 
 /**
  * This HOC helps makes sure that the txn signing request is decoded and the chain is set
  */
 const withTxnSigningRequest = (Component: React.FC<any>) => {
   const Wrapped = () => {
-    const [chain, setChain] = useState<SupportedChain>()
-    const [_chainIdToChain, setChainIdToChain] = useState(chainIdToChain)
-    const [isSignArbitrary, setIsSignArbitrary] = useState(false)
+    const [chain, setChain] = useState<SupportedChain>();
+    const [_chainIdToChain, setChainIdToChain] = useState(chainIdToChain);
+    const [isSignArbitrary, setIsSignArbitrary] = useState(false);
 
-    const [txnData, setTxnData] = useState<any | null>(null)
-    const [chainId, setChainId] = useState<string>()
+    const [txnData, setTxnData] = useState<any | null>(null);
+    const [chainId, setChainId] = useState<string>();
     const [error] = useState<{
-      message: string
-      code: string
-    } | null>(null)
+      message: string;
+      code: string;
+    } | null>(null);
 
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     useEffect(() => {
-      decodeChainIdToChain().then(setChainIdToChain).catch(captureException)
-    }, [])
+      decodeChainIdToChain().then(setChainIdToChain).catch(captureException);
+    }, []);
 
     const signTxEventHandler = (message: any, sender: any) => {
-      if (sender.id !== browser.runtime.id) return
+      if (sender.id !== browser.runtime.id) return;
       if (message.type === MessageTypes.signTransaction) {
-        const txnData = message.payload
-        const chainId = txnData.chainId ? txnData.chainId : txnData.signDoc?.chainId
-        const chain = chainId ? (_chainIdToChain[chainId] as SupportedChain) : undefined
+        const txnData = message.payload;
+        const chainId = txnData.chainId ? txnData.chainId : txnData.signDoc?.chainId;
+        const chain = chainId ? (_chainIdToChain[chainId] as SupportedChain) : undefined;
         if (!chain) {
           browser.runtime.sendMessage({
             type: MessageTypes.signResponse,
             payload: { status: 'error', data: `Invalid chainId ${chainId}` },
-          })
+          });
           if (isSidePanel()) {
-            navigate('/home')
+            navigate('/home');
           } else {
             setTimeout(async () => {
-              window.close()
-            }, 10)
+              window.close();
+            }, 10);
           }
-          return
+          return;
         }
         if (txnData.signOptions.isSignArbitrary) {
-          setIsSignArbitrary(true)
+          setIsSignArbitrary(true);
         }
-        setChain(chain)
-        setChainId(chainId)
-        setTxnData(txnData)
+        setChain(chain);
+        setChainId(chainId);
+        setTxnData(txnData);
       }
-    }
+    };
 
     useEffect(() => {
-      browser.runtime.sendMessage({ type: MessageTypes.signingPopupOpen })
-      browser.runtime.onMessage.addListener(signTxEventHandler)
+      browser.runtime.sendMessage({ type: MessageTypes.signingPopupOpen });
+      browser.runtime.onMessage.addListener(signTxEventHandler);
       return () => {
-        browser.runtime.onMessage.removeListener(signTxEventHandler)
-      }
+        browser.runtime.onMessage.removeListener(signTxEventHandler);
+      };
 
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, []);
 
     if (chain && txnData && chainId) {
       return (
@@ -1263,36 +1184,31 @@ const withTxnSigningRequest = (Component: React.FC<any>) => {
           evmBalanceStore={evmBalanceStore}
           rootStakeStore={rootStakeStore}
         />
-      )
+      );
     }
 
     if (error) {
       const heading = ((code) => {
         switch (code) {
           case 'no-data':
-            return 'No Transaction Data'
+            return 'No Transaction Data';
           default:
-            return 'Something Went Wrong'
+            return 'Something Went Wrong';
         }
-      })(error.code)
+      })(error.code);
 
       return (
-        <PopupLayout
-          className='self-center justify-self-center'
-          header={<Header title='Sign Transaction' />}
-        >
+        <PopupLayout className='self-center justify-self-center' header={<Header title='Sign Transaction' />}>
           <div className='h-full w-full flex flex-col gap-4 items-center justify-center'>
             <h1 className='text-red-300 text-2xl font-bold px-4 text-center'>{heading}</h1>
-            <p className='text-black-100 dark:text-white-100 text-sm font-medium px-4 text-center'>
-              {error.message}
-            </p>
+            <p className='text-black-100 dark:text-white-100 text-sm font-medium px-4 text-center'>{error.message}</p>
             <button
               className='mt-8 py-1 px-4 text-center text-sm font-medium dark:text-white-100 text-black-100 bg-indigo-300 rounded-full'
               onClick={() => {
                 if (isSidePanel()) {
-                  navigate('/home')
+                  navigate('/home');
                 } else {
-                  window.close()
+                  window.close();
                 }
               }}
             >
@@ -1300,26 +1216,23 @@ const withTxnSigningRequest = (Component: React.FC<any>) => {
             </button>
           </div>
         </PopupLayout>
-      )
+      );
     }
 
     return (
-      <PopupLayout
-        className='self-center justify-self-center'
-        header={<Header title='Sign Transaction' />}
-      >
+      <PopupLayout className='self-center justify-self-center' header={<Header title='Sign Transaction' />}>
         <div className='h-full w-full flex flex-col gap-4 items-center justify-center'>
           <LoaderAnimation color='white' />
         </div>
       </PopupLayout>
-    )
-  }
+    );
+  };
 
-  Wrapped.displayName = `withTxnSigningRequest(${Component.displayName})`
+  Wrapped.displayName = `withTxnSigningRequest(${Component.displayName})`;
 
-  return Wrapped
-}
+  return Wrapped;
+};
 
-const signTx = withTxnSigningRequest(React.memo(SignTransaction))
+const signTx = withTxnSigningRequest(React.memo(SignTransaction));
 
-export default signTx
+export default signTx;

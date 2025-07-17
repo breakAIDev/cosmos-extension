@@ -4,5 +4,5 @@ export const preloadOnboardingRoutes = () => {
     import('pages/onboarding/create'),
     import('pages/onboarding/import'),
     import('pages/onboarding/success'),
-  ])
-}
+  ]);
+};

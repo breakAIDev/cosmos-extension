@@ -1,11 +1,11 @@
-import { GenericCard } from '@leapwallet/leap-ui'
-import React, { ReactNode } from 'react'
-import Skeleton from 'react-loading-skeleton'
+import { GenericCard } from '@leapwallet/leap-ui';
+import React, { ReactNode } from 'react';
+import Skeleton from 'react-loading-skeleton';
 
 type TokenContractAddressProps = {
-  address: string
-  img?: ReactNode
-}
+  address: string;
+  img?: ReactNode;
+};
 
 export function TokenContractAddress({ address, img }: TokenContractAddressProps) {
   return !address ? (
@@ -13,11 +13,7 @@ export function TokenContractAddress({ address, img }: TokenContractAddressProps
       <div className='text-[15px] font-bold text-black-100 dark:text-white-100 text-left max-w-[170px] text-ellipsis overflow-hidden'>
         Contract Address
       </div>
-      <Skeleton
-        height={14}
-        className='w-full'
-        containerClassName='w-full mt-[2px] block !leading-none'
-      />
+      <Skeleton height={14} className='w-full' containerClassName='w-full mt-[2px] block !leading-none' />
       <Skeleton height={14} width={90} containerClassName='block mt-[2px] !leading-none' />
     </div>
   ) : (
@@ -29,5 +25,5 @@ export function TokenContractAddress({ address, img }: TokenContractAddressProps
       size='sm'
       isRounded
     />
-  )
+  );
 }

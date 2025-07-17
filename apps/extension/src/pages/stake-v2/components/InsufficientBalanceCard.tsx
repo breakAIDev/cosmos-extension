@@ -1,37 +1,29 @@
-import {
-  SelectedNetwork,
-  useActiveStakingDenom,
-  useChainInfo,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { RootDenomsStore } from '@leapwallet/cosmos-wallet-store'
-import { Button } from 'components/ui/button'
-import { observer } from 'mobx-react-lite'
-import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import { SelectedNetwork, useActiveStakingDenom, useChainInfo } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { RootDenomsStore } from '@leapwallet/cosmos-wallet-store';
+import { Button } from 'components/ui/button';
+import { observer } from 'mobx-react-lite';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 type InsufficientBalanceCardProps = {
-  rootDenomsStore: RootDenomsStore
-  activeChain?: SupportedChain
-  activeNetwork?: SelectedNetwork
-}
+  rootDenomsStore: RootDenomsStore;
+  activeChain?: SupportedChain;
+  activeNetwork?: SelectedNetwork;
+};
 
 const InsufficientBalanceCard = observer(
   ({ rootDenomsStore, activeChain, activeNetwork }: InsufficientBalanceCardProps) => {
-    const [activeStakingDenom] = useActiveStakingDenom(
-      rootDenomsStore.allDenoms,
-      activeChain,
-      activeNetwork,
-    )
-    const chain = useChainInfo()
-    const navigate = useNavigate()
-    const osmosisChainInfo = useChainInfo('osmosis')
+    const [activeStakingDenom] = useActiveStakingDenom(rootDenomsStore.allDenoms, activeChain, activeNetwork);
+    const chain = useChainInfo();
+    const navigate = useNavigate();
+    const osmosisChainInfo = useChainInfo('osmosis');
 
     const handleButtonClick = () => {
       navigate(
         `/swap?sourceChainId=${osmosisChainInfo.chainId}&sourceToken=${osmosisChainInfo.denom}&destinationChainId=${chain.chainId}&destinationToken=${activeStakingDenom.coinDenom}&pageSource=stake`,
-      )
-    }
+      );
+    };
 
     return (
       <div className='flex w-full items-center justify-between p-5 rounded-xl bg-secondary-100'>
@@ -45,8 +37,8 @@ const InsufficientBalanceCard = observer(
           Get {activeStakingDenom.coinDenom ?? ''}
         </Button>
       </div>
-    )
+    );
   },
-)
+);
 
-export default InsufficientBalanceCard
+export default InsufficientBalanceCard;

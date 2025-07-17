@@ -1,49 +1,38 @@
-import {
-  sliceAddress,
-  sliceWord,
-  TxCallback,
-  useAddress,
-  useChainInfo,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { ArrowDown, Info } from '@phosphor-icons/react'
-import { ErrorCard } from 'components/ErrorCard'
-import LedgerConfirmationPopup from 'components/ledger-confirmation/LedgerConfirmationPopup'
-import BottomModal from 'components/new-bottom-modal'
-import Text from 'components/text'
-import { Button } from 'components/ui/button'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import { Wallet } from 'hooks/wallet/useWallet'
-import React, { useCallback, useEffect, useState } from 'react'
-import { nftStore } from 'stores/nft-store'
-import { cn } from 'utils/cn'
+import { sliceAddress, sliceWord, TxCallback, useAddress, useChainInfo } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { ArrowDown, Info } from '@phosphor-icons/react';
+import { ErrorCard } from 'components/ErrorCard';
+import LedgerConfirmationPopup from 'components/ledger-confirmation/LedgerConfirmationPopup';
+import BottomModal from 'components/new-bottom-modal';
+import Text from 'components/text';
+import { Button } from 'components/ui/button';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { Wallet } from 'hooks/wallet/useWallet';
+import React, { useCallback, useEffect, useState } from 'react';
+import { nftStore } from 'stores/nft-store';
+import { cn } from 'utils/cn';
 
-import { NftDetailsType, useNftContext } from '../context'
-import { useNFTSendContext } from './context'
-import { FeesView } from './fees-view'
+import { NftDetailsType, useNftContext } from '../context';
+import { useNFTSendContext } from './context';
+import { FeesView } from './fees-view';
 
 type ReviewNFTTransactionSheetProps = {
-  isOpen: boolean
-  onClose: () => void
-  nftDetails: NftDetailsType
-}
+  isOpen: boolean;
+  onClose: () => void;
+  nftDetails: NftDetailsType;
+};
 
-export const ReviewNFTTransferSheet: React.FC<ReviewNFTTransactionSheetProps> = ({
-  isOpen,
-  onClose,
-  nftDetails,
-}) => {
-  const defaultTokenLogo = useDefaultTokenLogo()
-  const { txError, receiverAddress, collectionAddress, sendNftReturn, setTxError } =
-    useNFTSendContext()
-  const { chainSymbolImageUrl: chainImage } = useChainInfo('mainCoreum')
-  const { setNftDetails, setShowTxPage } = useNftContext()
-  const [memo, setMemo] = useState('')
-  const activeChain: SupportedChain = 'mainCoreum'
-  const [isProcessing, setIsProcessing] = useState(false)
-  const getWallet = Wallet.useGetWallet(activeChain)
+export const ReviewNFTTransferSheet: React.FC<ReviewNFTTransactionSheetProps> = ({ isOpen, onClose, nftDetails }) => {
+  const defaultTokenLogo = useDefaultTokenLogo();
+  const { txError, receiverAddress, collectionAddress, sendNftReturn, setTxError } = useNFTSendContext();
+  const { chainSymbolImageUrl: chainImage } = useChainInfo('mainCoreum');
+  const { setNftDetails, setShowTxPage } = useNftContext();
+  const [memo, setMemo] = useState('');
+  const activeChain: SupportedChain = 'mainCoreum';
+  const [isProcessing, setIsProcessing] = useState(false);
+  const getWallet = Wallet.useGetWallet(activeChain);
 
-  const fromAddress = useAddress(activeChain)
+  const fromAddress = useAddress(activeChain);
 
   const {
     isSending,
@@ -53,23 +42,16 @@ export const ReviewNFTTransferSheet: React.FC<ReviewNFTTransactionSheetProps> = 
     simulateTransferNFTContract,
     fetchAccountDetailsStatus,
     addressWarning,
-  } = sendNftReturn
+  } = sendNftReturn;
 
   useEffect(() => {
-    ;(async function () {
-      if (
-        isSending ||
-        isProcessing ||
-        !nftDetails ||
-        !collectionAddress ||
-        !receiverAddress?.address ||
-        !fromAddress
-      ) {
-        return
+    (async function () {
+      if (isSending || isProcessing || !nftDetails || !collectionAddress || !receiverAddress?.address || !fromAddress) {
+        return;
       }
 
-      const wallet = await getWallet(activeChain)
-      const toAddress = receiverAddress?.address
+      const wallet = await getWallet(activeChain);
+      const toAddress = receiverAddress?.address;
 
       await simulateTransferNFTContract({
         wallet: wallet,
@@ -78,29 +60,29 @@ export const ReviewNFTTransferSheet: React.FC<ReviewNFTTransactionSheetProps> = 
         toAddress: toAddress,
         tokenId: nftDetails?.tokenId ?? '',
         memo: memo,
-      })
-    })()
+      });
+    })();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fromAddress, collectionAddress, isProcessing, isSending, memo, nftDetails, receiverAddress])
+  }, [fromAddress, collectionAddress, isProcessing, isSending, memo, nftDetails, receiverAddress]);
 
   const modifiedCallback: TxCallback = useCallback(
     (status) => {
-      setShowTxPage(true)
-      onClose()
-      setNftDetails(null)
+      setShowTxPage(true);
+      onClose();
+      setNftDetails(null);
     },
     [onClose, setNftDetails, setShowTxPage],
-  )
+  );
 
   const handleSendNft = async () => {
     if (!nftDetails || !collectionAddress || !receiverAddress?.address || !fromAddress || !fee) {
-      return
+      return;
     }
-    setIsProcessing(true)
+    setIsProcessing(true);
 
-    const wallet = await getWallet(activeChain)
-    const toAddress = receiverAddress?.address
+    const wallet = await getWallet(activeChain);
+    const toAddress = receiverAddress?.address;
 
     const res = await transferNFTContract({
       wallet: wallet,
@@ -110,22 +92,21 @@ export const ReviewNFTTransferSheet: React.FC<ReviewNFTTransactionSheetProps> = 
       tokenId: nftDetails?.tokenId ?? '',
       memo: memo,
       fees: fee,
-    })
+    });
 
-    nftStore.loadNfts()
+    nftStore.loadNfts();
     if (res?.success) {
-      modifiedCallback(res.success ? 'success' : 'txDeclined')
+      modifiedCallback(res.success ? 'success' : 'txDeclined');
     } else {
-      setTxError(res?.errors?.[0])
+      setTxError(res?.errors?.[0]);
     }
-    setIsProcessing(false)
-  }
+    setIsProcessing(false);
+  };
 
-  const isReviewDisabled =
-    !receiverAddress || ['loading', 'error'].includes(fetchAccountDetailsStatus)
+  const isReviewDisabled = !receiverAddress || ['loading', 'error'].includes(fetchAccountDetailsStatus);
 
   if (showLedgerPopup && !txError) {
-    return <LedgerConfirmationPopup showLedgerPopup={showLedgerPopup} />
+    return <LedgerConfirmationPopup showLedgerPopup={showLedgerPopup} />;
   }
 
   return (
@@ -137,8 +118,7 @@ export const ReviewNFTTransferSheet: React.FC<ReviewNFTTransactionSheetProps> = 
               className='text-lg text-monochrome font-bold !leading-[27px] break-all'
               data-testing-id='send-review-sheet-inputAmount-ele'
             >
-              {sliceWord(nftDetails?.collection.name ?? '', 12, 0)} #
-              {sliceWord(nftDetails?.tokenId ?? '', 5, 0)}
+              {sliceWord(nftDetails?.collection.name ?? '', 12, 0)} #{sliceWord(nftDetails?.tokenId ?? '', 5, 0)}
             </p>
 
             <p className='text-sm text-muted-foreground !leading-[18.9px]'>
@@ -157,14 +137,10 @@ export const ReviewNFTTransferSheet: React.FC<ReviewNFTTransactionSheetProps> = 
 
         <div className='rounded-xl w-full overflow-hidden'>
           <div className='rounded-t-xl bg-secondary-200 p-6 flex w-full justify-between items-center'>
-            <p
-              className='text-lg text-monochrome font-bold !leading-[27px]'
-              data-testing-id='send-review-sheet-to-ele'
-            >
+            <p className='text-lg text-monochrome font-bold !leading-[27px]' data-testing-id='send-review-sheet-to-ele'>
               {receiverAddress?.ethAddress
                 ? sliceAddress(receiverAddress.ethAddress)
-                : receiverAddress?.selectionType === 'currentWallet' ||
-                  receiverAddress?.selectionType === 'saved'
+                : receiverAddress?.selectionType === 'currentWallet' || receiverAddress?.selectionType === 'saved'
                 ? receiverAddress?.name?.split('-')[0]
                 : sliceAddress(receiverAddress?.address)}
             </p>
@@ -183,9 +159,7 @@ export const ReviewNFTTransferSheet: React.FC<ReviewNFTTransactionSheetProps> = 
         {memo ? (
           <div className='w-full flex items-baseline gap-2.5 p-5 rounded-xl bg-secondary-50 border border-secondary mt-0.5'>
             <p className='text-sm text-muted-foreground font-medium'>Memo:</p>
-            <p className='font-medium text-sm text-monochrome !leading-[22.4px] overflow-auto break-words'>
-              {memo}
-            </p>
+            <p className='font-medium text-sm text-monochrome !leading-[22.4px] overflow-auto break-words'>{memo}</p>
           </div>
         ) : null}
 
@@ -202,5 +176,5 @@ export const ReviewNFTTransferSheet: React.FC<ReviewNFTTransactionSheetProps> = 
         {txError ? <ErrorCard text={txError} /> : null}
       </div>
     </BottomModal>
-  )
-}
+  );
+};

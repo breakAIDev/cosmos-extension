@@ -1,38 +1,38 @@
-import { Token, useChainInfo } from '@leapwallet/cosmos-wallet-hooks'
-import { ChainInfos, DenomsRecord, isSuiChain } from '@leapwallet/cosmos-wallet-sdk'
-import { MagnifyingGlassMinus } from '@phosphor-icons/react'
-import { BigNumber } from 'bignumber.js'
-import BottomModal from 'components/new-bottom-modal'
-import { SearchInput } from 'components/ui/input/search-input'
-import { observer } from 'mobx-react-lite'
-import { TokenCard } from 'pages/send/components/TokenCard'
-import { useSendContext } from 'pages/send/context'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { Virtuoso } from 'react-virtuoso'
-import { SourceToken } from 'types/swap'
+import { Token, useChainInfo } from '@leapwallet/cosmos-wallet-hooks';
+import { ChainInfos, DenomsRecord, isSuiChain } from '@leapwallet/cosmos-wallet-sdk';
+import { MagnifyingGlassMinus } from '@phosphor-icons/react';
+import { BigNumber } from 'bignumber.js';
+import BottomModal from 'components/new-bottom-modal';
+import { SearchInput } from 'components/ui/input/search-input';
+import { observer } from 'mobx-react-lite';
+import { TokenCard } from 'pages/send/components/TokenCard';
+import { useSendContext } from 'pages/send/context';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Virtuoso } from 'react-virtuoso';
+import { SourceToken } from 'types/swap';
 
 type SelectTokenSheetProps = {
-  assets: Token[]
-  isOpen: boolean
-  onClose: (isTokenSelected?: boolean) => void
-  selectedToken: Token | null
-  onTokenSelect: (token: Token) => void
-  denoms: DenomsRecord
-}
+  assets: Token[];
+  isOpen: boolean;
+  onClose: (isTokenSelected?: boolean) => void;
+  selectedToken: Token | null;
+  onTokenSelect: (token: Token) => void;
+  denoms: DenomsRecord;
+};
 
 export const priorityChainsIds = [
   ChainInfos.ethereum.key,
   ChainInfos.cosmos.key,
   ChainInfos.movement.key,
   ChainInfos.base.key,
-]
+];
 
 export const SelectTokenSheet = observer(
   ({ assets, selectedToken, isOpen, onClose, onTokenSelect, denoms }: SelectTokenSheetProps) => {
-    const searchInputRef = useRef<HTMLInputElement>(null)
-    const [searchQuery, setSearchQuery] = useState('')
-    const { sendActiveChain } = useSendContext()
-    const activeChainInfo = useChainInfo(sendActiveChain)
+    const searchInputRef = useRef<HTMLInputElement>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const { sendActiveChain } = useSendContext();
+    const activeChainInfo = useChainInfo(sendActiveChain);
 
     const assetsToShow = useMemo(() => {
       return assets.filter((token) => {
@@ -45,23 +45,23 @@ export const SelectTokenSheet = observer(
                 (_denom) => _denom.coinMinimalDenom === token.coinMinimalDenom,
               ))) &&
           token?.symbol?.toLowerCase().includes(searchQuery.trim().toLowerCase())
-        )
-      })
-    }, [activeChainInfo?.nativeDenoms, searchQuery, assets, denoms])
+        );
+      });
+    }, [activeChainInfo?.nativeDenoms, searchQuery, assets, denoms]);
 
     const handleSelectToken = (token: Token) => {
-      onTokenSelect(token)
-      onClose(true)
-    }
+      onTokenSelect(token);
+      onClose(true);
+    };
 
     useEffect(() => {
       if (isOpen) {
-        setSearchQuery('')
+        setSearchQuery('');
         setTimeout(() => {
-          searchInputRef.current?.focus()
-        }, 400)
+          searchInputRef.current?.focus();
+        }, 400);
       }
-    }, [isOpen])
+    }, [isOpen]);
 
     return (
       <>
@@ -88,14 +88,14 @@ export const SelectTokenSheet = observer(
                   <Virtuoso
                     data={assetsToShow}
                     itemContent={(index, asset) => {
-                      const isLast = index === assetsToShow.length - 1
+                      const isLast = index === assetsToShow.length - 1;
 
-                      let isSelected = selectedToken?.coinMinimalDenom === asset.coinMinimalDenom
+                      let isSelected = selectedToken?.coinMinimalDenom === asset.coinMinimalDenom;
                       if (selectedToken?.ibcDenom || asset.ibcDenom) {
-                        isSelected = selectedToken?.ibcDenom === asset.ibcDenom
+                        isSelected = selectedToken?.ibcDenom === asset.ibcDenom;
                       }
                       if (selectedToken?.isEvm || asset?.isEvm) {
-                        isSelected = isSelected && selectedToken?.isEvm === asset?.isEvm
+                        isSelected = isSelected && selectedToken?.isEvm === asset?.isEvm;
                       }
 
                       return (
@@ -111,7 +111,7 @@ export const SelectTokenSheet = observer(
                             isLast={isLast}
                           />
                         </React.Fragment>
-                      )
+                      );
                     }}
                   />
                 </div>
@@ -135,8 +135,8 @@ export const SelectTokenSheet = observer(
           </div>
         </BottomModal>
       </>
-    )
+    );
   },
-)
+);
 
-SelectTokenSheet.displayName = 'SelectTokenSheet'
+SelectTokenSheet.displayName = 'SelectTokenSheet';

@@ -6,39 +6,39 @@ import {
   useActiveChain,
   useGetChains,
   useUserPreferredCurrency,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { GenericCard } from '@leapwallet/leap-ui'
-import BigNumber from 'bignumber.js'
-import Badge from 'components/badge/Badge'
-import IBCTokenBadge from 'components/badge/IbcTokenBadge'
-import { TokenImageWithFallback } from 'components/token-image-with-fallback'
-import { AGGREGATED_CHAIN_KEY } from 'config/constants'
-import { useFormatCurrency } from 'hooks/settings/useCurrency'
-import { observer } from 'mobx-react-lite'
-import React, { useMemo } from 'react'
-import { hideAssetsStore } from 'stores/hide-assets-store'
-import { AggregatedSupportedChain } from 'types/utility'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { GenericCard } from '@leapwallet/leap-ui';
+import BigNumber from 'bignumber.js';
+import Badge from 'components/badge/Badge';
+import IBCTokenBadge from 'components/badge/IbcTokenBadge';
+import { TokenImageWithFallback } from 'components/token-image-with-fallback';
+import { AGGREGATED_CHAIN_KEY } from 'config/constants';
+import { useFormatCurrency } from 'hooks/settings/useCurrency';
+import { observer } from 'mobx-react-lite';
+import React, { useMemo } from 'react';
+import { hideAssetsStore } from 'stores/hide-assets-store';
+import { AggregatedSupportedChain } from 'types/utility';
 
 type TokenCardProps = {
-  readonly title: string
-  readonly usdValue: string | undefined
-  readonly amount: string
-  readonly symbol: string
-  readonly assetImg: string | undefined
-  readonly isRounded: boolean
-  readonly onClick?: () => void
-  readonly cardClassName?: string
-  readonly isIconVisible?: boolean
-  readonly iconSrc?: string
-  readonly size?: 'sm' | 'md' | 'lg'
-  readonly ibcChainInfo?: IbcChainInfo | undefined
-  readonly hasToShowIbcTag?: boolean
-  readonly hasToShowEvmTag?: boolean
-  readonly isEvm?: boolean
-  readonly hideAmount?: boolean
-  readonly tokenBalanceOnChain?: SupportedChain
-}
+  readonly title: string;
+  readonly usdValue: string | undefined;
+  readonly amount: string;
+  readonly symbol: string;
+  readonly assetImg: string | undefined;
+  readonly isRounded: boolean;
+  readonly onClick?: () => void;
+  readonly cardClassName?: string;
+  readonly isIconVisible?: boolean;
+  readonly iconSrc?: string;
+  readonly size?: 'sm' | 'md' | 'lg';
+  readonly ibcChainInfo?: IbcChainInfo | undefined;
+  readonly hasToShowIbcTag?: boolean;
+  readonly hasToShowEvmTag?: boolean;
+  readonly isEvm?: boolean;
+  readonly hideAmount?: boolean;
+  readonly tokenBalanceOnChain?: SupportedChain;
+};
 
 function TokenCardView({
   title,
@@ -59,39 +59,37 @@ function TokenCardView({
   hideAmount = false,
   tokenBalanceOnChain,
 }: TokenCardProps) {
-  const activeChain = useActiveChain() as AggregatedSupportedChain
-  const chains = useGetChains()
-  const [formatCurrency] = useFormatCurrency()
+  const activeChain = useActiveChain() as AggregatedSupportedChain;
+  const chains = useGetChains();
+  const [formatCurrency] = useFormatCurrency();
 
-  const [preferredCurrency] = useUserPreferredCurrency()
-  const formattedFiatValue = usdValue ? formatCurrency(new BigNumber(usdValue)) : '-'
+  const [preferredCurrency] = useUserPreferredCurrency();
+  const formattedFiatValue = usdValue ? formatCurrency(new BigNumber(usdValue)) : '-';
 
   const ibcInfo = useMemo(() => {
-    if (!ibcChainInfo) return ''
+    if (!ibcChainInfo) return '';
 
-    return `${ibcChainInfo.pretty_name} / ${sliceWord(ibcChainInfo?.channelId ?? '', 7, 5)}`
-  }, [ibcChainInfo])
+    return `${ibcChainInfo.pretty_name} / ${sliceWord(ibcChainInfo?.channelId ?? '', 7, 5)}`;
+  }, [ibcChainInfo]);
 
   const Title = useMemo(() => {
     let _Title = (
       <h3 className='text-md text-ellipsis overflow-hidden whitespace-nowrap' title={title}>
         {sliceWord(title, 7, 4)}
       </h3>
-    )
+    );
 
     if (activeChain === AGGREGATED_CHAIN_KEY && ibcChainInfo) {
       _Title = (
         <div className='flex items-center justify-center gap-1'>
           {title}
-          {activeChain === AGGREGATED_CHAIN_KEY && ibcChainInfo ? (
-            <Badge text='IBC' title={ibcInfo} />
-          ) : null}
+          {activeChain === AGGREGATED_CHAIN_KEY && ibcChainInfo ? <Badge text='IBC' title={ibcInfo} /> : null}
         </div>
-      )
+      );
     }
 
-    return _Title
-  }, [title, activeChain, ibcChainInfo, ibcInfo])
+    return _Title;
+  }, [title, activeChain, ibcChainInfo, ibcInfo]);
 
   return (
     <GenericCard
@@ -121,12 +119,7 @@ function TokenCardView({
         hideAmount === false && (
           <p className='whitespace-nowrap text-gray-400 font-medium text-xs'>
             {hideAssetsStore.formatHideBalance(
-              formatTokenAmount(
-                amount,
-                sliceWord(symbol, 4, 4),
-                3,
-                currencyDetail[preferredCurrency].locale,
-              ),
+              formatTokenAmount(amount, sliceWord(symbol, 4, 4), 3, currencyDetail[preferredCurrency].locale),
             )}
           </p>
         )
@@ -147,7 +140,7 @@ function TokenCardView({
       onClick={onClick}
       size={size}
     />
-  )
+  );
 }
 
-export const TokenCard = observer(TokenCardView)
+export const TokenCard = observer(TokenCardView);

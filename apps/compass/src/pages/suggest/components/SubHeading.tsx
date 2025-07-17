@@ -1,9 +1,9 @@
-import Text from 'components/text'
-import React from 'react'
+import Text from 'components/text';
+import React from 'react';
 
 type SubHeadingProps = {
-  text: string
-}
+  text: string;
+};
 
 export function SubHeading({ text }: SubHeadingProps) {
   return (
@@ -14,5 +14,5 @@ export function SubHeading({ text }: SubHeadingProps) {
     >
       {text}
     </Text>
-  )
+  );
 }

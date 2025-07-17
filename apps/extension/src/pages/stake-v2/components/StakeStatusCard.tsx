@@ -1,19 +1,19 @@
-import { Buttons, ThemeName, useTheme } from '@leapwallet/leap-ui'
-import { Info } from '@phosphor-icons/react'
-import Text from 'components/text'
-import { Button } from 'components/ui/button'
-import { Images } from 'images'
-import React from 'react'
-import { Colors } from 'theme/colors'
+import { Buttons, ThemeName, useTheme } from '@leapwallet/leap-ui';
+import { Info } from '@phosphor-icons/react';
+import Text from 'components/text';
+import { Button } from 'components/ui/button';
+import { Images } from 'images';
+import React from 'react';
+import { Colors } from 'theme/colors';
 
 type StakeStatusCardProps = {
-  title: string
-  message: string
-  backgroundColor: string
-  backgroundColorDark: string
-  color: string
-  onAction: () => void
-}
+  title: string;
+  message: string;
+  backgroundColor: string;
+  backgroundColorDark: string;
+  color: string;
+  onAction: () => void;
+};
 
 export default function StakeStatusCard({
   title,
@@ -23,7 +23,7 @@ export default function StakeStatusCard({
   color,
   onAction,
 }: StakeStatusCardProps) {
-  const { theme } = useTheme()
+  const { theme } = useTheme();
   return (
     <>
       <div className={`flex flex-col gap-y-2 w-full p-4 rounded-2xl ${backgroundColor}`}>
@@ -37,15 +37,12 @@ export default function StakeStatusCard({
           {message}
         </Text>
         <div className={`rounded-2xl ${backgroundColorDark}`}>
-          <img
-            className='w-[200px] h-[106px] object-cover my-5 mx-auto'
-            src={Images.Logos.LeapLogo}
-          />
+          <img className='w-[200px] h-[106px] object-cover my-5 mx-auto' src={Images.Logos.LeapLogo} />
         </div>
       </div>
       <Button onClick={onAction} className='w-full' variant='mono'>
         <Text color='text-white-100 dark:text-black-100'>Stake on a different chain</Text>
       </Button>
     </>
-  )
+  );
 }

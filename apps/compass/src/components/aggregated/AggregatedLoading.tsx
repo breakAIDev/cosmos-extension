@@ -1,16 +1,14 @@
-import { Skeleton } from 'components/ui/skeleton'
-import React from 'react'
-import { cn } from 'utils/cn'
+import { Skeleton } from 'components/ui/skeleton';
+import React from 'react';
+import { cn } from 'utils/cn';
 
 type AggregatedLoadingProps = {
-  className?: string
-}
+  className?: string;
+};
 
 export const AggregatedLoadingCard = ({ className }: AggregatedLoadingProps) => {
   return (
-    <div
-      className={cn('py-3 px-4 bg-secondary-100 rounded-2xl flex items-center gap-3', className)}
-    >
+    <div className={cn('py-3 px-4 bg-secondary-100 rounded-2xl flex items-center gap-3', className)}>
       <Skeleton className='size-10 rounded-full bg-secondary-300' />
 
       <div className='flex flex-col'>
@@ -23,24 +21,22 @@ export const AggregatedLoadingCard = ({ className }: AggregatedLoadingProps) => 
         <Skeleton className='h-2 my-1 w-[35px] rounded-full bg-secondary-300' />
       </div>
     </div>
-  )
-}
+  );
+};
 
 type AggregatedLoadingListProps = {
-  className?: string
-  count?: number
-}
+  className?: string;
+  count?: number;
+};
 
-export const AggregatedLoadingList = React.memo(
-  ({ className, count = 7 }: AggregatedLoadingListProps) => {
-    return (
-      <div className={cn('flex flex-col gap-3 w-full', className)}>
-        {Array.from({ length: count }).map((_, index) => (
-          <AggregatedLoadingCard key={index} />
-        ))}
-      </div>
-    )
-  },
-)
+export const AggregatedLoadingList = React.memo(({ className, count = 7 }: AggregatedLoadingListProps) => {
+  return (
+    <div className={cn('flex flex-col gap-3 w-full', className)}>
+      {Array.from({ length: count }).map((_, index) => (
+        <AggregatedLoadingCard key={index} />
+      ))}
+    </div>
+  );
+});
 
-AggregatedLoadingList.displayName = 'AggregatedLoadingList'
+AggregatedLoadingList.displayName = 'AggregatedLoadingList';

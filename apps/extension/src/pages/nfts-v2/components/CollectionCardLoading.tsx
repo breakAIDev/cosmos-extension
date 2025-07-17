@@ -1,5 +1,5 @@
-import { Images } from 'images'
-import React from 'react'
+import { Images } from 'images';
+import React from 'react';
 
 export function CollectionCardLoading() {
   return (
@@ -13,9 +13,9 @@ export function CollectionCardLoading() {
             >
               <img src={Images.Misc.NFTImageLoading} className='animate-spin'></img>
             </div>
-          )
+          );
         })}
       </div>
     </div>
-  )
+  );
 }

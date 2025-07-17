@@ -1,52 +1,52 @@
-import { AirdropEligibilityInfo, sliceAddress } from '@leapwallet/cosmos-wallet-hooks'
-import { CheckCircle, CopySimple, Wallet, WarningCircle } from '@phosphor-icons/react'
-import Text from 'components/text'
-import useActiveWallet from 'hooks/settings/useActiveWallet'
-import { Images } from 'images'
-import React, { useEffect, useMemo, useState } from 'react'
-import { UserClipboard } from 'utils/clipboard'
-import { formatWalletName } from 'utils/formatWalletName'
-import { trim } from 'utils/strings'
+import { AirdropEligibilityInfo, sliceAddress } from '@leapwallet/cosmos-wallet-hooks';
+import { CheckCircle, CopySimple, Wallet, WarningCircle } from '@phosphor-icons/react';
+import Text from 'components/text';
+import useActiveWallet from 'hooks/settings/useActiveWallet';
+import { Images } from 'images';
+import React, { useEffect, useMemo, useState } from 'react';
+import { UserClipboard } from 'utils/clipboard';
+import { formatWalletName } from 'utils/formatWalletName';
+import { trim } from 'utils/strings';
 
 interface EligibleWalletsProps {
-  selectedAirdrop: AirdropEligibilityInfo
+  selectedAirdrop: AirdropEligibilityInfo;
 }
 
 export default function EligibleWallets({ selectedAirdrop }: EligibleWalletsProps) {
-  const [showAddreessError, setShowAddreessError] = useState<boolean>(false)
-  const [copied, setCopied] = useState(false)
+  const [showAddreessError, setShowAddreessError] = useState<boolean>(false);
+  const [copied, setCopied] = useState(false);
 
-  const { activeWallet } = useActiveWallet()
-  const walletName = formatWalletName(activeWallet?.name || '')
+  const { activeWallet } = useActiveWallet();
+  const walletName = formatWalletName(activeWallet?.name || '');
 
   const walletAvatar = useMemo(() => {
     if (activeWallet?.avatar) {
-      return activeWallet.avatar
+      return activeWallet.avatar;
     }
 
-    return
-  }, [activeWallet?.avatar])
+    return;
+  }, [activeWallet?.avatar]);
 
   useEffect(() => {
-    const addressNotFound = selectedAirdrop?.tokenInfo?.find((token) => !token?.address)
+    const addressNotFound = selectedAirdrop?.tokenInfo?.find((token) => !token?.address);
     if (addressNotFound) {
-      setShowAddreessError(true)
+      setShowAddreessError(true);
     }
-  }, [selectedAirdrop])
+  }, [selectedAirdrop]);
 
   useEffect(() => {
-    let timeout: NodeJS.Timeout
+    let timeout: NodeJS.Timeout;
     if (copied) {
-      timeout = setTimeout(() => setCopied(false), 2000)
+      timeout = setTimeout(() => setCopied(false), 2000);
     }
-    return () => clearTimeout(timeout)
-  }, [copied])
+    return () => clearTimeout(timeout);
+  }, [copied]);
 
   const onCopy = (address: string | undefined) => {
-    if (!address) return
-    UserClipboard.copyText(address)
-    setCopied(true)
-  }
+    if (!address) return;
+    UserClipboard.copyText(address);
+    setCopied(true);
+  };
 
   return (
     <div className='flex flex-col gap-2 bg-secondary-100 rounded-xl p-4'>
@@ -78,17 +78,13 @@ export default function EligibleWallets({ selectedAirdrop }: EligibleWalletsProp
                     onClick={() => onCopy(token?.address)}
                   >
                     {copied ? (
-                      <CheckCircle
-                        weight='fill'
-                        size={20}
-                        className='text-black-100 dark:text-white-100'
-                      />
+                      <CheckCircle weight='fill' size={20} className='text-black-100 dark:text-white-100' />
                     ) : (
                       <CopySimple size={20} className='text-black-100 dark:text-white-100' />
                     )}
                   </div>
                 </div>
-              )
+              );
             }
           })}
           {showAddreessError && (
@@ -102,5 +98,5 @@ export default function EligibleWallets({ selectedAirdrop }: EligibleWalletsProp
         </div>
       </div>
     </div>
-  )
+  );
 }

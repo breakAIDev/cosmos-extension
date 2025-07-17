@@ -1,13 +1,13 @@
-import { Warning } from '@phosphor-icons/react'
-import BottomModal from 'components/bottom-modal'
-import React, { Dispatch, SetStateAction } from 'react'
+import { Warning } from '@phosphor-icons/react';
+import BottomModal from 'components/bottom-modal';
+import React, { Dispatch, SetStateAction } from 'react';
 
 type RedirectionConfirmationProps = {
-  isOpen: boolean
-  onClose: () => void
-  url: string
-  setUrl: Dispatch<SetStateAction<string>>
-}
+  isOpen: boolean;
+  onClose: () => void;
+  url: string;
+  setUrl: Dispatch<SetStateAction<string>>;
+};
 
 const RedirectionConfirmation = ({ url, setUrl, onClose }: RedirectionConfirmationProps) => {
   return (
@@ -19,15 +19,13 @@ const RedirectionConfirmation = ({ url, setUrl, onClose }: RedirectionConfirmati
         <div className='dark:text-gray-200 text-gray-800 text-sm !leading-[22.4px] font-medium text-center'>
           You will be redirected to an external site. Proceed only if you have verified the link.
         </div>
-        <div className='text-red-300 text-md !leading-[24px] font-medium max-w-full break-words'>
-          {url}
-        </div>
+        <div className='text-red-300 text-md !leading-[24px] font-medium max-w-full break-words'>{url}</div>
       </div>
 
       <div className='flex flex-row justify-between w-full gap-6 items-center'>
         <button
           onClick={() => {
-            onClose()
+            onClose();
           }}
           className='w-full dark:bg-gray-800 bg-gray-200 h-[46px] rounded-full text-center dark:shadow-[0px_3px_0px_0px_#00000066] shadow-[0px_3px_0px_0px_#FFFFFF66] font-bold text-md !leading-[21.6px] dark:text-white-100 text-black-100'
         >
@@ -35,9 +33,9 @@ const RedirectionConfirmation = ({ url, setUrl, onClose }: RedirectionConfirmati
         </button>
         <button
           onClick={() => {
-            window.open(url, '_blank', 'noopener noreferrer')
-            setUrl('')
-            onClose()
+            window.open(url, '_blank', 'noopener noreferrer');
+            setUrl('');
+            onClose();
           }}
           className='w-full dark:bg-white-100 bg-black-100 h-[46px] rounded-full text-center dark:shadow-[0px_3px_0px_0px_#00000066] shadow-[0px_3px_0px_0px_#FFFFFF66] font-bold text-md !leading-[21.6px] text-white-100 dark:text-black-100'
         >
@@ -45,14 +43,10 @@ const RedirectionConfirmation = ({ url, setUrl, onClose }: RedirectionConfirmati
         </button>
       </div>
     </div>
-  )
-}
+  );
+};
 
-const RedirectionConfirmationModal = ({
-  isOpen,
-  onClose,
-  ...rest
-}: RedirectionConfirmationProps) => {
+const RedirectionConfirmationModal = ({ isOpen, onClose, ...rest }: RedirectionConfirmationProps) => {
   return (
     <BottomModal
       isOpen={isOpen}
@@ -63,7 +57,7 @@ const RedirectionConfirmationModal = ({
     >
       <RedirectionConfirmation isOpen={isOpen} onClose={onClose} {...rest} />
     </BottomModal>
-  )
-}
+  );
+};
 
-export default RedirectionConfirmationModal
+export default RedirectionConfirmationModal;

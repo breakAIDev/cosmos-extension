@@ -1,13 +1,13 @@
-import { Check } from '@phosphor-icons/react'
-import React from 'react'
-import { cn } from 'utils/cn'
+import { Check } from '@phosphor-icons/react';
+import React from 'react';
+import { cn } from 'utils/cn';
 
-import { Colors } from '../../theme/colors'
+import { Colors } from '../../theme/colors';
 
 type Props = {
-  selectColorIndex: (index: number) => void
-  colorIndex: number
-}
+  selectColorIndex: (index: number) => void;
+  colorIndex: number;
+};
 
 export default function SelectWalletColors({ selectColorIndex, colorIndex }: Props) {
   return (
@@ -18,7 +18,7 @@ export default function SelectWalletColors({ selectColorIndex, colorIndex }: Pro
             type='button'
             key={index}
             onClick={() => {
-              selectColorIndex(index)
+              selectColorIndex(index);
             }}
             className={cn('p-[5px] rounded-full', colorIndex === index && 'ring-2 ring-offset-0')}
             style={
@@ -28,15 +28,12 @@ export default function SelectWalletColors({ selectColorIndex, colorIndex }: Pro
               } as React.CSSProperties
             }
           >
-            <div
-              className={'flex items-center justify-center rounded-full size-6'}
-              style={{ backgroundColor: color }}
-            >
+            <div className={'flex items-center justify-center rounded-full size-6'} style={{ backgroundColor: color }}>
               {index === colorIndex && <Check size={16} className='text-white-100' />}
             </div>
           </button>
-        )
+        );
       })}
     </div>
-  )
+  );
 }

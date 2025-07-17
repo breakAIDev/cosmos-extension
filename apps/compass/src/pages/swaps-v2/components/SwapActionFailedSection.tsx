@@ -1,19 +1,19 @@
-import { LightbulbFilament } from '@phosphor-icons/react'
-import { TransferAssetRelease } from '@skip-go/client'
-import { TokenImageWithFallback } from 'components/token-image-with-fallback'
-import React from 'react'
-import Skeleton from 'react-loading-skeleton'
+import { LightbulbFilament } from '@phosphor-icons/react';
+import { TransferAssetRelease } from '@skip-go/client';
+import { TokenImageWithFallback } from 'components/token-image-with-fallback';
+import React from 'react';
+import Skeleton from 'react-loading-skeleton';
 
-import { useDenomData, useGetChainsToShow } from '../hooks'
+import { useDenomData, useGetChainsToShow } from '../hooks';
 
-type Props = { transferAssetRelease: TransferAssetRelease }
+type Props = { transferAssetRelease: TransferAssetRelease };
 
 export default function SwapActionFailedSection({ transferAssetRelease }: Props) {
-  const { chainsToShow: chains, chainsToShowLoading: isLoadingChainsInfo } = useGetChainsToShow()
-  const { chainID, denom, released } = transferAssetRelease
-  const { data: denomInfo, isLoading: isLoadingDenomsInfo } = useDenomData(denom, chainID)
+  const { chainsToShow: chains, chainsToShowLoading: isLoadingChainsInfo } = useGetChainsToShow();
+  const { chainID, denom, released } = transferAssetRelease;
+  const { data: denomInfo, isLoading: isLoadingDenomsInfo } = useDenomData(denom, chainID);
 
-  const chain = chains?.find((chain) => chain.chainId === chainID)
+  const chain = chains?.find((chain) => chain.chainId === chainID);
 
   return (
     <div className='flex w-full rounded-2xl bg-white-100 dark:bg-gray-950 flex-col items-center justify-center gap-4 p-4'>
@@ -29,11 +29,7 @@ export default function SwapActionFailedSection({ transferAssetRelease }: Props)
           />
           <span className='text-sm font-bold text-black-100 dark:text-white-100 !leading-[19.6px]'>
             {isLoadingDenomsInfo ? (
-              <Skeleton
-                width={50}
-                height={20}
-                containerClassName='block !leading-none rounded-xl'
-              />
+              <Skeleton width={50} height={20} containerClassName='block !leading-none rounded-xl' />
             ) : (
               denomInfo?.coinDenom ?? denom
             )}
@@ -55,5 +51,5 @@ export default function SwapActionFailedSection({ transferAssetRelease }: Props)
         </span>
       </div>
     </div>
-  )
+  );
 }

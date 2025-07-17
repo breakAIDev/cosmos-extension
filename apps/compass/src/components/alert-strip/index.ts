@@ -1,2 +1,2 @@
-export * from './AlertStrip'
-export * from './TestnetAlertStrip'
+export * from './AlertStrip';
+export * from './TestnetAlertStrip';

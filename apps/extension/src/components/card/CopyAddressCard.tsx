@@ -1,24 +1,24 @@
-import { sliceAddress, useActiveChain, useGetChains } from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { Check } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import { AnimatePresence, motion } from 'framer-motion'
-import { useDefaultTokenLogo } from 'hooks'
-import { CopySvg } from 'images/misc'
-import React, { ReactNode, useCallback, useMemo, useState } from 'react'
-import { UserClipboard } from 'utils/clipboard'
-import { imgOnError } from 'utils/imgOnError'
-import { scaleInOut, transition200 } from 'utils/motion-variants/global-layout-motions'
+import { sliceAddress, useActiveChain, useGetChains } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { Check } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useDefaultTokenLogo } from 'hooks';
+import { CopySvg } from 'images/misc';
+import React, { ReactNode, useCallback, useMemo, useState } from 'react';
+import { UserClipboard } from 'utils/clipboard';
+import { imgOnError } from 'utils/imgOnError';
+import { scaleInOut, transition200 } from 'utils/motion-variants/global-layout-motions';
 
 type CopyAddressCardProps = {
-  forceChain?: SupportedChain
-  address: string
-  showDifferentIconForButton?: boolean
-  DifferentIconToShow?: ReactNode
-  differentIconButtonClassName?: string
-  differentIconButtonOnClick?: () => void
-  forceName?: string
-}
+  forceChain?: SupportedChain;
+  address: string;
+  showDifferentIconForButton?: boolean;
+  DifferentIconToShow?: ReactNode;
+  differentIconButtonClassName?: string;
+  differentIconButtonOnClick?: () => void;
+  forceName?: string;
+};
 
 const CopyAddressCard = React.memo(
   ({
@@ -30,34 +30,34 @@ const CopyAddressCard = React.memo(
     differentIconButtonOnClick,
     forceName,
   }: CopyAddressCardProps) => {
-    const chains = useGetChains()
-    const _activeChain = useActiveChain()
-    const activeChain = useMemo(() => forceChain || _activeChain, [_activeChain, forceChain])
+    const chains = useGetChains();
+    const _activeChain = useActiveChain();
+    const activeChain = useMemo(() => forceChain || _activeChain, [_activeChain, forceChain]);
 
-    const activeChainInfo = chains[activeChain]
-    const defaultTokenLogo = useDefaultTokenLogo()
-    const [isCopied, setIsCopied] = useState(false)
+    const activeChainInfo = chains[activeChain];
+    const defaultTokenLogo = useDefaultTokenLogo();
+    const [isCopied, setIsCopied] = useState(false);
 
     const name = useMemo(() => {
       if (forceName) {
-        return forceName
+        return forceName;
       }
 
-      let _name = activeChainInfo?.chainName
+      let _name = activeChainInfo?.chainName;
 
       if (address.toLowerCase().startsWith('0x')) {
-        _name = `${_name} (EVM)`
+        _name = `${_name} (EVM)`;
       }
 
-      return _name
-    }, [activeChainInfo?.chainName, address, forceName])
+      return _name;
+    }, [activeChainInfo?.chainName, address, forceName]);
 
     const handleCopyClick = useCallback(() => {
-      setIsCopied(true)
-      setTimeout(() => setIsCopied(false), 2000)
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
 
-      UserClipboard.copyText(address)
-    }, [address])
+      UserClipboard.copyText(address);
+    }, [address]);
 
     return (
       <div className='rounded-xl flex items-center justify-between w-full bg-secondary-100 px-4 py-3'>
@@ -126,9 +126,9 @@ const CopyAddressCard = React.memo(
           </button>
         )}
       </div>
-    )
+    );
   },
-)
+);
 
-CopyAddressCard.displayName = 'CopyAddressCard'
-export { CopyAddressCard }
+CopyAddressCard.displayName = 'CopyAddressCard';
+export { CopyAddressCard };

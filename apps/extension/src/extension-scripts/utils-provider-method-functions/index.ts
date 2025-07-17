@@ -1,1 +1,1 @@
-export * from './add-leap-ethereum-chain'
+export * from './add-leap-ethereum-chain';

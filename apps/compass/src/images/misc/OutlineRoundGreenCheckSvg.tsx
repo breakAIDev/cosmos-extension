@@ -1,14 +1,7 @@
-import React from 'react'
+import React from 'react';
 
 const OutlinRoundGreenCheckSvg = React.memo((props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    width='20'
-    height='20'
-    viewBox='0 0 20 20'
-    fill='none'
-    xmlns='http://www.w3.org/2000/svg'
-    {...props}
-  >
+  <svg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
     <g clipPath='url(#clip0_565_35992)'>
       <mask
         id='mask0_565_35992'
@@ -34,7 +27,7 @@ const OutlinRoundGreenCheckSvg = React.memo((props: React.SVGProps<SVGSVGElement
       </clipPath>
     </defs>
   </svg>
-))
+));
 
-OutlinRoundGreenCheckSvg.displayName = 'DownArrowSvg'
-export { OutlinRoundGreenCheckSvg }
+OutlinRoundGreenCheckSvg.displayName = 'DownArrowSvg';
+export { OutlinRoundGreenCheckSvg };

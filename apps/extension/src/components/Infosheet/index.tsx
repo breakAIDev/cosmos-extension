@@ -1,6 +1,6 @@
-import BottomModal from 'components/bottom-modal'
-import Text from 'components/text'
-import React from 'react'
+import BottomModal from 'components/bottom-modal';
+import Text from 'components/text';
+import React from 'react';
 
 export default function InfoSheet({
   desc,
@@ -10,13 +10,13 @@ export default function InfoSheet({
   setVisible,
   className,
 }: {
-  heading: string
-  title: string
-  desc: string
-  isVisible: boolean
+  heading: string;
+  title: string;
+  desc: string;
+  isVisible: boolean;
   // eslint-disable-next-line no-unused-vars
-  setVisible: (v: boolean) => void
-  className?: string
+  setVisible: (v: boolean) => void;
+  className?: string;
 }) {
   return (
     <BottomModal
@@ -33,5 +33,5 @@ export default function InfoSheet({
         {desc}
       </Text>
     </BottomModal>
-  )
+  );
 }

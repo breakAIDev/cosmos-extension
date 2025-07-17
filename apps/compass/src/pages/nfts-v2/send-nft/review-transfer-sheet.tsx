@@ -5,69 +5,59 @@ import {
   useChainInfo,
   useGetEvmGasPrices,
   useIsSeiEvmChain,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { pubKeyToEvmAddressToShow } from '@leapwallet/cosmos-wallet-sdk'
-import { ArrowDown, Info } from '@phosphor-icons/react'
-import BottomModal from 'components/bottom-modal'
-import { ErrorCard } from 'components/ErrorCard'
-import LedgerConfirmationPopup from 'components/ledger-confirmation/LedgerConfirmationPopup'
-import Text from 'components/text'
-import { Button } from 'components/ui/button'
-import { useActiveChain } from 'hooks/settings/useActiveChain'
-import { useGetWalletAddresses } from 'hooks/useGetWalletAddresses'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import { Wallet } from 'hooks/wallet/useWallet'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { nftStore } from 'stores/nft-store'
-import { cn } from 'utils/cn'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { pubKeyToEvmAddressToShow } from '@leapwallet/cosmos-wallet-sdk';
+import { ArrowDown, Info } from '@phosphor-icons/react';
+import BottomModal from 'components/bottom-modal';
+import { ErrorCard } from 'components/ErrorCard';
+import LedgerConfirmationPopup from 'components/ledger-confirmation/LedgerConfirmationPopup';
+import Text from 'components/text';
+import { Button } from 'components/ui/button';
+import { useActiveChain } from 'hooks/settings/useActiveChain';
+import { useGetWalletAddresses } from 'hooks/useGetWalletAddresses';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { Wallet } from 'hooks/wallet/useWallet';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { nftStore } from 'stores/nft-store';
+import { cn } from 'utils/cn';
 
-import { FeesView } from '../components/fees-view'
-import { NftDetailsType, useNftContext } from '../context'
-import { useNFTSendContext } from './context'
+import { FeesView } from '../components/fees-view';
+import { NftDetailsType, useNftContext } from '../context';
+import { useNFTSendContext } from './context';
 
 type ReviewNFTTransactionSheetProps = {
-  isOpen: boolean
-  onClose: () => void
-  nftDetails: NftDetailsType
-}
+  isOpen: boolean;
+  onClose: () => void;
+  nftDetails: NftDetailsType;
+};
 
-export const ReviewNFTTransferSheet: React.FC<ReviewNFTTransactionSheetProps> = ({
-  isOpen,
-  onClose,
-  nftDetails,
-}) => {
-  const defaultTokenLogo = useDefaultTokenLogo()
-  const {
-    txError,
-    receiverAddress,
-    associatedSeiAddress,
-    collectionAddress,
-    sendNftReturn,
-    setTxError,
-  } = useNFTSendContext()
-  const { chainSymbolImageUrl: chainImage, addressPrefix } = useChainInfo()
-  const { setNftDetails, setShowTxPage } = useNftContext()
-  const [memo, setMemo] = useState('')
-  const activeChain = useActiveChain()
-  const isSeiEvmChain = useIsSeiEvmChain(activeChain)
-  const walletAddresses = useGetWalletAddresses(activeChain)
-  const [isProcessing, setIsProcessing] = useState(false)
-  const getWallet = Wallet.useGetWallet(activeChain)
+export const ReviewNFTTransferSheet: React.FC<ReviewNFTTransactionSheetProps> = ({ isOpen, onClose, nftDetails }) => {
+  const defaultTokenLogo = useDefaultTokenLogo();
+  const { txError, receiverAddress, associatedSeiAddress, collectionAddress, sendNftReturn, setTxError } =
+    useNFTSendContext();
+  const { chainSymbolImageUrl: chainImage, addressPrefix } = useChainInfo();
+  const { setNftDetails, setShowTxPage } = useNftContext();
+  const [memo, setMemo] = useState('');
+  const activeChain = useActiveChain();
+  const isSeiEvmChain = useIsSeiEvmChain(activeChain);
+  const walletAddresses = useGetWalletAddresses(activeChain);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const getWallet = Wallet.useGetWallet(activeChain);
 
   const fromAddress = useMemo(() => {
-    let address = walletAddresses[0]
+    let address = walletAddresses[0];
     if (isSeiEvmChain && !collectionAddress.toLowerCase().startsWith('0x')) {
       if (!address.toLowerCase().startsWith('0x')) {
-        return address
+        return address;
       }
 
-      address = walletAddresses[1]
+      address = walletAddresses[1];
     }
 
-    return address
-  }, [collectionAddress, isSeiEvmChain, walletAddresses])
+    return address;
+  }, [collectionAddress, isSeiEvmChain, walletAddresses]);
 
-  const { status: gasPriceStatus } = useGetEvmGasPrices(activeChain)
+  const { status: gasPriceStatus } = useGetEvmGasPrices(activeChain);
   const {
     isSending,
     fee,
@@ -77,10 +67,10 @@ export const ReviewNFTTransferSheet: React.FC<ReviewNFTTransactionSheetProps> = 
     fetchAccountDetailsStatus,
     fetchAccountDetailsData,
     addressWarning,
-  } = sendNftReturn
+  } = sendNftReturn;
 
   useEffect(() => {
-    ;(async function () {
+    (async function () {
       if (
         isSending ||
         isProcessing ||
@@ -89,30 +79,27 @@ export const ReviewNFTTransferSheet: React.FC<ReviewNFTTransactionSheetProps> = 
         !receiverAddress?.address ||
         !walletAddresses.length
       ) {
-        return
+        return;
       }
 
-      let wallet
-      let toAddress = receiverAddress?.address
+      let wallet;
+      let toAddress = receiverAddress?.address;
 
       if (collectionAddress.toLowerCase().startsWith('0x')) {
-        wallet = await getWallet(activeChain, true)
+        wallet = await getWallet(activeChain, true);
 
-        if (
-          toAddress.toLowerCase().startsWith(addressPrefix) &&
-          fetchAccountDetailsData?.pubKey.key
-        ) {
-          toAddress = pubKeyToEvmAddressToShow(fetchAccountDetailsData.pubKey.key)
+        if (toAddress.toLowerCase().startsWith(addressPrefix) && fetchAccountDetailsData?.pubKey.key) {
+          toAddress = pubKeyToEvmAddressToShow(fetchAccountDetailsData.pubKey.key);
         }
       } else {
-        wallet = await getWallet(activeChain)
+        wallet = await getWallet(activeChain);
 
         if (
           receiverAddress?.address.toLowerCase().startsWith('0x') &&
           !collectionAddress.toLowerCase().startsWith('0x') &&
           associatedSeiAddress
         ) {
-          toAddress = associatedSeiAddress
+          toAddress = associatedSeiAddress;
         }
       }
 
@@ -123,8 +110,8 @@ export const ReviewNFTTransferSheet: React.FC<ReviewNFTTransactionSheetProps> = 
         toAddress: toAddress,
         tokenId: nftDetails?.tokenId ?? '',
         memo: memo,
-      })
-    })()
+      });
+    })();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -136,44 +123,41 @@ export const ReviewNFTTransferSheet: React.FC<ReviewNFTTransactionSheetProps> = 
     nftDetails,
     receiverAddress,
     walletAddresses.length,
-  ])
+  ]);
 
   const modifiedCallback: TxCallback = useCallback(
     (status) => {
-      setShowTxPage(true)
-      onClose()
-      setNftDetails(null)
+      setShowTxPage(true);
+      onClose();
+      setNftDetails(null);
     },
     [onClose, setNftDetails, setShowTxPage],
-  )
+  );
 
   const handleSendNft = async () => {
     if (!nftDetails || !collectionAddress || !receiverAddress?.address || !fromAddress || !fee) {
-      return
+      return;
     }
-    setIsProcessing(true)
+    setIsProcessing(true);
 
-    let wallet
-    let toAddress = receiverAddress?.address
+    let wallet;
+    let toAddress = receiverAddress?.address;
 
     if (collectionAddress.toLowerCase().startsWith('0x')) {
-      wallet = await getWallet(activeChain, true)
+      wallet = await getWallet(activeChain, true);
 
-      if (
-        toAddress.toLowerCase().startsWith(addressPrefix) &&
-        fetchAccountDetailsData?.pubKey.key
-      ) {
-        toAddress = pubKeyToEvmAddressToShow(fetchAccountDetailsData.pubKey.key)
+      if (toAddress.toLowerCase().startsWith(addressPrefix) && fetchAccountDetailsData?.pubKey.key) {
+        toAddress = pubKeyToEvmAddressToShow(fetchAccountDetailsData.pubKey.key);
       }
     } else {
-      wallet = await getWallet(activeChain)
+      wallet = await getWallet(activeChain);
 
       if (
         receiverAddress?.address.toLowerCase().startsWith('0x') &&
         !collectionAddress.toLowerCase().startsWith('0x') &&
         associatedSeiAddress
       ) {
-        toAddress = associatedSeiAddress
+        toAddress = associatedSeiAddress;
       }
     }
 
@@ -185,26 +169,24 @@ export const ReviewNFTTransferSheet: React.FC<ReviewNFTTransactionSheetProps> = 
       tokenId: nftDetails?.tokenId ?? '',
       memo: memo,
       fees: fee,
-    })
+    });
 
-    nftStore.loadNfts()
+    nftStore.loadNfts();
     if (res?.success) {
-      modifiedCallback(res.success ? 'success' : 'txDeclined')
+      modifiedCallback(res.success ? 'success' : 'txDeclined');
     } else {
-      setTxError(res?.errors?.[0])
+      setTxError(res?.errors?.[0]);
     }
-    setIsProcessing(false)
-  }
+    setIsProcessing(false);
+  };
 
   const isReviewDisabled =
     !receiverAddress ||
     ['loading', 'error'].includes(fetchAccountDetailsStatus) ||
-    (isSeiEvmChain &&
-      collectionAddress.toLowerCase().startsWith('0x') &&
-      gasPriceStatus === 'loading')
+    (isSeiEvmChain && collectionAddress.toLowerCase().startsWith('0x') && gasPriceStatus === 'loading');
 
   if (showLedgerPopup && !txError) {
-    return <LedgerConfirmationPopup showLedgerPopup={showLedgerPopup} />
+    return <LedgerConfirmationPopup showLedgerPopup={showLedgerPopup} />;
   }
 
   return (
@@ -216,8 +198,7 @@ export const ReviewNFTTransferSheet: React.FC<ReviewNFTTransactionSheetProps> = 
               className='text-lg text-monochrome font-bold !leading-[27px]'
               data-testing-id='send-review-sheet-inputAmount-ele'
             >
-              {sliceWord(nftDetails?.collection.name ?? '', 15, 0)} #
-              {sliceWord(nftDetails?.tokenId ?? '', 5, 0)}
+              {sliceWord(nftDetails?.collection.name ?? '', 15, 0)} #{sliceWord(nftDetails?.tokenId ?? '', 5, 0)}
             </p>
 
             <p className='text-sm text-muted-foreground !leading-[18.9px]'>
@@ -236,14 +217,10 @@ export const ReviewNFTTransferSheet: React.FC<ReviewNFTTransactionSheetProps> = 
 
         <div className='rounded-xl w-full overflow-hidden'>
           <div className='rounded-t-xl bg-secondary-200 p-6 flex w-full justify-between items-center'>
-            <p
-              className='text-lg text-monochrome font-bold !leading-[27px]'
-              data-testing-id='send-review-sheet-to-ele'
-            >
+            <p className='text-lg text-monochrome font-bold !leading-[27px]' data-testing-id='send-review-sheet-to-ele'>
               {receiverAddress?.ethAddress
                 ? sliceAddress(receiverAddress.ethAddress)
-                : receiverAddress?.selectionType === 'currentWallet' ||
-                  receiverAddress?.selectionType === 'saved'
+                : receiverAddress?.selectionType === 'currentWallet' || receiverAddress?.selectionType === 'saved'
                 ? receiverAddress?.name?.split('-')[0]
                 : sliceAddress(receiverAddress?.address)}
             </p>
@@ -262,9 +239,7 @@ export const ReviewNFTTransferSheet: React.FC<ReviewNFTTransactionSheetProps> = 
         {memo ? (
           <div className='w-full flex items-baseline gap-2.5 p-5 rounded-xl bg-secondary-50 border border-secondary mt-0.5'>
             <p className='text-sm text-muted-foreground font-medium'>Memo:</p>
-            <p className='font-medium text-sm text-monochrome !leading-[22.4px] overflow-auto break-words'>
-              {memo}
-            </p>
+            <p className='font-medium text-sm text-monochrome !leading-[22.4px] overflow-auto break-words'>{memo}</p>
           </div>
         ) : null}
 
@@ -281,5 +256,5 @@ export const ReviewNFTTransferSheet: React.FC<ReviewNFTTransactionSheetProps> = 
         {txError ? <ErrorCard text={txError} /> : null}
       </div>
     </BottomModal>
-  )
-}
+  );
+};

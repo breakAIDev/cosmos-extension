@@ -1,99 +1,99 @@
-import { getBlockChainFromAddress, isValidWalletAddress } from '@leapwallet/cosmos-wallet-sdk'
-import { KeyChain } from '@leapwallet/leap-keychain'
-import SelectWalletColors from 'components/create-wallet-form/SelectWalletColors'
-import BottomModal from 'components/new-bottom-modal'
-import { Button } from 'components/ui/button'
-import { Input } from 'components/ui/input'
-import { Textarea } from 'components/ui/input/textarea'
-import { LEDGER_NAME_EDITED_SUFFIX_REGEX } from 'config/config'
-import { useChainInfos } from 'hooks/useChainInfos'
-import React, { useEffect, useRef, useState } from 'react'
-import { passwordStore } from 'stores/password-store'
+import { getBlockChainFromAddress, isValidWalletAddress } from '@leapwallet/cosmos-wallet-sdk';
+import { KeyChain } from '@leapwallet/leap-keychain';
+import SelectWalletColors from 'components/create-wallet-form/SelectWalletColors';
+import BottomModal from 'components/new-bottom-modal';
+import { Button } from 'components/ui/button';
+import { Input } from 'components/ui/input';
+import { Textarea } from 'components/ui/input/textarea';
+import { LEDGER_NAME_EDITED_SUFFIX_REGEX } from 'config/config';
+import { useChainInfos } from 'hooks/useChainInfos';
+import React, { useEffect, useRef, useState } from 'react';
+import { passwordStore } from 'stores/password-store';
 
-import { Wallet } from '../../hooks/wallet/useWallet'
-import { getWalletName } from './utils/wallet-names'
-import { WatchWalletAvatar } from './WalletCardWrapper'
+import { Wallet } from '../../hooks/wallet/useWallet';
+import { getWalletName } from './utils/wallet-names';
+import { WatchWalletAvatar } from './WalletCardWrapper';
 
 type ImportWatchAddressProps = {
-  isVisible: boolean
+  isVisible: boolean;
   // eslint-disable-next-line no-unused-vars
-  onClose: (closeParent: boolean) => void
-}
+  onClose: (closeParent: boolean) => void;
+};
 
 export default function ImportWatchWallet({ isVisible, onClose }: ImportWatchAddressProps) {
-  const wallets = Wallet.useWallets()
-  const [watchAddress, setWatchAddress] = useState('')
-  const [walletName, setWalletName] = useState('')
-  const [error, setError] = useState<string>('')
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-  const password = passwordStore.password
-  const saveWatchWallet = Wallet.useSaveWatchWallet()
-  const chainInfos = useChainInfos()
-  const shouldAutoFillName = useRef(true)
-  const [colorIndex, setColorIndex] = useState(0)
+  const wallets = Wallet.useWallets();
+  const [watchAddress, setWatchAddress] = useState('');
+  const [walletName, setWalletName] = useState('');
+  const [error, setError] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const password = passwordStore.password;
+  const saveWatchWallet = Wallet.useSaveWatchWallet();
+  const chainInfos = useChainInfos();
+  const shouldAutoFillName = useRef(true);
+  const [colorIndex, setColorIndex] = useState(0);
 
   const onChangeHandler = (value: string) => {
-    setError('')
-    setWatchAddress(value)
-  }
+    setError('');
+    setWatchAddress(value);
+  };
 
   const handleImportWallet = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
 
     if (watchAddress && password && !error) {
       try {
-        await saveWatchWallet(watchAddress, walletName)
-        setWatchAddress('')
-        setWalletName('')
-        shouldAutoFillName.current = true
-        onClose(true)
+        await saveWatchWallet(watchAddress, walletName);
+        setWatchAddress('');
+        setWalletName('');
+        shouldAutoFillName.current = true;
+        onClose(true);
       } catch (error: any) {
-        setError(error.message)
+        setError(error.message);
       }
     }
 
-    setIsLoading(false)
-  }
+    setIsLoading(false);
+  };
 
   const handleClose = () => {
-    onClose(false)
-    setError('')
-    setWatchAddress('')
-    setWalletName('')
-    shouldAutoFillName.current = true
-  }
+    onClose(false);
+    setError('');
+    setWatchAddress('');
+    setWalletName('');
+    shouldAutoFillName.current = true;
+  };
 
   useEffect(() => {
     async function validate() {
       if (!watchAddress) {
-        setError('')
-        return
+        setError('');
+        return;
       }
       if (!isValidWalletAddress(watchAddress)) {
-        setError('Invalid public address, please enter a valid address')
-        return
+        setError('Invalid public address, please enter a valid address');
+        return;
       }
 
-      const prefix = getBlockChainFromAddress(watchAddress)
-      const chain = Object.values(chainInfos).find((chain) => chain.addressPrefix === prefix)
-      const wallets = await KeyChain.getAllWallets()
+      const prefix = getBlockChainFromAddress(watchAddress);
+      const chain = Object.values(chainInfos).find((chain) => chain.addressPrefix === prefix);
+      const wallets = await KeyChain.getAllWallets();
       const addresses = Object.values(wallets).reduce((acc, wallet) => {
         if (chain) {
-          const existingAddress = wallet.addresses[chain?.key]
+          const existingAddress = wallet.addresses[chain?.key];
           if (existingAddress) {
-            acc.push(existingAddress)
+            acc.push(existingAddress);
           }
         }
-        return acc
-      }, [] as string[])
+        return acc;
+      }, [] as string[]);
       if (addresses.includes(watchAddress)) {
-        setError('This address already exists in your wallet')
-        return
+        setError('This address already exists in your wallet');
+        return;
       }
-      setError('')
+      setError('');
     }
-    validate()
-  }, [chainInfos, watchAddress])
+    validate();
+  }, [chainInfos, watchAddress]);
 
   useEffect(() => {
     if (isVisible && shouldAutoFillName.current) {
@@ -102,10 +102,10 @@ export default function ImportWatchWallet({ isVisible, onClose }: ImportWatchAdd
           Object.values(wallets || {}).filter((wallet) => wallet.watchWallet),
           'Watch Wallet',
         ),
-      )
-      shouldAutoFillName.current = false
+      );
+      shouldAutoFillName.current = false;
     }
-  }, [wallets, isVisible])
+  }, [wallets, isVisible]);
 
   return (
     <BottomModal
@@ -163,5 +163,5 @@ export default function ImportWatchWallet({ isVisible, onClose }: ImportWatchAdd
         <SelectWalletColors selectColorIndex={setColorIndex} colorIndex={colorIndex} />
       </div>
     </BottomModal>
-  )
+  );
 }

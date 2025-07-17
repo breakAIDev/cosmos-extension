@@ -1,1 +1,1 @@
-export * from './CustomCardDivider'
+export * from './CustomCardDivider';

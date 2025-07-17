@@ -1,4 +1,4 @@
-import { DeliverTxResponse, isDeliverTxSuccess } from '@cosmjs/stargate'
+import { DeliverTxResponse, isDeliverTxSuccess } from '@cosmjs/stargate';
 import {
   CosmosTxType,
   getMetaDataForSendTx,
@@ -10,78 +10,68 @@ import {
   useInvalidateActivity,
   usePendingTxState,
   useSelectedNetwork,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { CaretRight } from '@phosphor-icons/react'
-import BigNumber from 'bignumber.js'
-import classNames from 'classnames'
-import BottomModal from 'components/new-bottom-modal'
-import Text from 'components/text'
-import { Button } from 'components/ui/button'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { rootBalanceStore } from 'stores/root-store'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { CaretRight } from '@phosphor-icons/react';
+import BigNumber from 'bignumber.js';
+import classNames from 'classnames';
+import BottomModal from 'components/new-bottom-modal';
+import Text from 'components/text';
+import { Button } from 'components/ui/button';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { rootBalanceStore } from 'stores/root-store';
 
 const TxPage = observer(({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
-  const navigate = useNavigate()
-  const [txHash, setTxHash] = useState('')
-  const { pendingTx, setPendingTx } = usePendingTxState()
-  const txPostToDB = LeapWalletApi.useOperateCosmosTx()
+  const navigate = useNavigate();
+  const [txHash, setTxHash] = useState('');
+  const { pendingTx, setPendingTx } = usePendingTxState();
+  const txPostToDB = LeapWalletApi.useOperateCosmosTx();
 
-  const {
-    txStatus,
-    txHash: _txHash,
-    sourceChain,
-    sourceNetwork,
-    toAddress,
-    toChain,
-  } = pendingTx ?? {}
+  const { txStatus, txHash: _txHash, sourceChain, sourceNetwork, toAddress, toChain } = pendingTx ?? {};
 
-  const _activeChain = useActiveChain()
-  const activeChain = useMemo(() => sourceChain || _activeChain, [_activeChain, sourceChain])
+  const _activeChain = useActiveChain();
+  const activeChain = useMemo(() => sourceChain || _activeChain, [_activeChain, sourceChain]);
 
-  const _selectedNetwork = useSelectedNetwork()
-  const selectedNetwork = useMemo(
-    () => sourceNetwork || _selectedNetwork,
-    [_selectedNetwork, sourceNetwork],
-  )
+  const _selectedNetwork = useSelectedNetwork();
+  const selectedNetwork = useMemo(() => sourceNetwork || _selectedNetwork, [_selectedNetwork, sourceNetwork]);
 
-  const activeChainId = useChainId(activeChain, selectedNetwork)
-  const address = useAddress(activeChain)
+  const activeChainId = useChainId(activeChain, selectedNetwork);
+  const address = useAddress(activeChain);
 
   const invalidateBalances = useCallback(() => {
-    rootBalanceStore.refetchBalances(activeChain, selectedNetwork)
+    rootBalanceStore.refetchBalances(activeChain, selectedNetwork);
     if (toAddress) {
-      rootBalanceStore.refetchBalances(toChain ?? activeChain, selectedNetwork, toAddress)
+      rootBalanceStore.refetchBalances(toChain ?? activeChain, selectedNetwork, toAddress);
     }
-  }, [activeChain, selectedNetwork, toAddress, toChain])
+  }, [activeChain, selectedNetwork, toAddress, toChain]);
 
-  const invalidateActivity = useInvalidateActivity()
+  const invalidateActivity = useInvalidateActivity();
 
   useEffect(() => {
     const invalidateQueries = () => {
-      invalidateBalances()
-      invalidateActivity(activeChain)
-    }
+      invalidateBalances();
+      invalidateActivity(activeChain);
+    };
 
     if (pendingTx && pendingTx.promise) {
       pendingTx.promise
         .then(async (result) => {
           if ('code' in result) {
             if (result && isDeliverTxSuccess(result as DeliverTxResponse)) {
-              setPendingTx({ ...pendingTx, txStatus: 'success' })
+              setPendingTx({ ...pendingTx, txStatus: 'success' });
             } else {
-              setPendingTx({ ...pendingTx, txStatus: 'failed' })
+              setPendingTx({ ...pendingTx, txStatus: 'failed' });
             }
           } else if (pendingTx.txType === 'cw20TokenTransfer') {
-            setPendingTx({ ...pendingTx, txStatus: 'success' })
+            setPendingTx({ ...pendingTx, txStatus: 'success' });
           } else if ('status' in result) {
-            setPendingTx({ ...pendingTx, txStatus: 'submitted' })
+            setPendingTx({ ...pendingTx, txStatus: 'submitted' });
           }
 
           if (pendingTx.txType === 'cw20TokenTransfer') {
-            setTxHash(result.transactionHash)
+            setTxHash(result.transactionHash);
 
             txPostToDB({
               txHash: result.transactionHash,
@@ -99,38 +89,38 @@ const TxPage = observer(({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
               forceNetwork: selectedNetwork,
               forceWalletAddress: address,
               chainId: activeChainId,
-            })
+            });
           }
 
-          invalidateQueries()
+          invalidateQueries();
         })
         .catch(() => {
           if (pendingTx.txType === 'cw20TokenTransfer') {
-            setPendingTx({ ...pendingTx, txStatus: 'failed' })
+            setPendingTx({ ...pendingTx, txStatus: 'failed' });
           }
 
-          invalidateQueries()
-        })
+          invalidateQueries();
+        });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeChain, address, selectedNetwork, activeChainId])
+  }, [activeChain, address, selectedNetwork, activeChainId]);
 
   useEffect(() => {
-    if (_txHash) setTxHash(_txHash)
-  }, [_txHash])
+    if (_txHash) setTxHash(_txHash);
+  }, [_txHash]);
 
   const { explorerTxnUrl: txnUrl } = useGetExplorerTxnUrl({
     forceTxHash: txHash,
     forceChain: activeChain,
     forceNetwork: selectedNetwork,
-  })
+  });
 
   return (
     <BottomModal
       title={''}
       fullScreen
       onClose={() => {
-        onClose()
+        onClose();
       }}
       isOpen={isOpen}
       containerClassName='h-full'
@@ -177,7 +167,7 @@ const TxPage = observer(({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
             <div
               className='flex gap-x-1 items-center cursor-pointer'
               onClick={() => {
-                navigate('/activity')
+                navigate('/activity');
               }}
             >
               <Text size='sm' color='text-accent-green' className='font-medium'>
@@ -190,9 +180,7 @@ const TxPage = observer(({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
       </div>
       <div className=' flex flex-row items-center justify-between gap-4 absolute bottom-0 left-0 right-0 p-6 max-[350px]:!px-4 !z-[1000]'>
         <Button
-          className={classNames(
-            `flex-1 bg-monochrome hover:bg-monochrome text-monochrome-foreground`,
-          )}
+          className={classNames(`flex-1 bg-monochrome hover:bg-monochrome text-monochrome-foreground`)}
           style={{ boxShadow: 'none' }}
           onClick={() => navigate('/home')}
         >
@@ -210,7 +198,7 @@ const TxPage = observer(({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
         </Button>
       </div>
     </BottomModal>
-  )
-})
+  );
+});
 
-export default TxPage
+export default TxPage;

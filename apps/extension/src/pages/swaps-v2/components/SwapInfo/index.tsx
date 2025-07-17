@@ -1,24 +1,24 @@
-import { capitalize, GasOptions } from '@leapwallet/cosmos-wallet-hooks'
-import { RootDenomsStore } from '@leapwallet/cosmos-wallet-store'
-import { RouteAggregator } from '@leapwallet/elements-hooks'
-import { CaretDown, GasPump, Info } from '@phosphor-icons/react'
-import { useDefaultGasPrice } from 'components/gas-price-options'
-import Text from 'components/text'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import { observer } from 'mobx-react-lite'
-import { useSwapContext } from 'pages/swaps-v2/context'
-import { useAggregatorBridgeRelayerFee } from 'pages/swaps-v2/hooks/useBridgeFee'
-import React, { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react'
-import Skeleton from 'react-loading-skeleton'
-import { imgOnError } from 'utils/imgOnError'
+import { capitalize, GasOptions } from '@leapwallet/cosmos-wallet-hooks';
+import { RootDenomsStore } from '@leapwallet/cosmos-wallet-store';
+import { RouteAggregator } from '@leapwallet/elements-hooks';
+import { CaretDown, GasPump, Info } from '@phosphor-icons/react';
+import { useDefaultGasPrice } from 'components/gas-price-options';
+import Text from 'components/text';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { observer } from 'mobx-react-lite';
+import { useSwapContext } from 'pages/swaps-v2/context';
+import { useAggregatorBridgeRelayerFee } from 'pages/swaps-v2/hooks/useBridgeFee';
+import React, { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
+import Skeleton from 'react-loading-skeleton';
+import { imgOnError } from 'utils/imgOnError';
 
-import { ConversionRateDisplay } from './ConversionRateDisplay'
-import { MOSAIC_DEXES } from './mosaicDexes'
+import { ConversionRateDisplay } from './ConversionRateDisplay';
+import { MOSAIC_DEXES } from './mosaicDexes';
 
 type SwapInfoProps = {
-  setShowMoreDetailsSheet: Dispatch<SetStateAction<boolean>>
-  rootDenomsStore: RootDenomsStore
-}
+  setShowMoreDetailsSheet: Dispatch<SetStateAction<boolean>>;
+  rootDenomsStore: RootDenomsStore;
+};
 
 const providerMapping = {
   'terra-astroport': 'Astroport',
@@ -53,7 +53,7 @@ const providerMapping = {
   'ethereum-uniswap': 'Uniswap',
   'arbitrum-uniswap': 'Uniswap',
   'base-uniswap': 'Uniswap',
-}
+};
 
 export const SwapInfo = observer(({ setShowMoreDetailsSheet, rootDenomsStore }: SwapInfoProps) => {
   const {
@@ -67,16 +67,16 @@ export const SwapInfo = observer(({ setShowMoreDetailsSheet, rootDenomsStore }: 
     loadingRoutes,
     loadingMessages,
     routingInfo,
-  } = useSwapContext()
-  const { totalBridgeFee } = useAggregatorBridgeRelayerFee(routingInfo?.route)
-  const defaultTokenLogo = useDefaultTokenLogo()
-  const [showProviderInfo, setShowProviderInfo] = useState(false)
+  } = useSwapContext();
+  const { totalBridgeFee } = useAggregatorBridgeRelayerFee(routingInfo?.route);
+  const defaultTokenLogo = useDefaultTokenLogo();
+  const [showProviderInfo, setShowProviderInfo] = useState(false);
 
-  const denoms = rootDenomsStore.allDenoms
+  const denoms = rootDenomsStore.allDenoms;
 
   const defaultGasPrice = useDefaultGasPrice(denoms, {
     activeChain: sourceChain?.key ?? 'cosmos',
-  })
+  });
 
   const providerInfo = useMemo(() => {
     if (
@@ -84,80 +84,74 @@ export const SwapInfo = observer(({ setShowMoreDetailsSheet, rootDenomsStore }: 
       Number(debouncedInAmount) === 0 ||
       ![RouteAggregator.SKIP, RouteAggregator.MOSAIC].includes(routingInfo.aggregator)
     ) {
-      return null
+      return null;
     }
 
     if (routingInfo.aggregator === RouteAggregator.MOSAIC) {
-      const dexes = routingInfo.route?.paths?.[0]?.map(
-        (path) => MOSAIC_DEXES[path?.source as string],
-      )
-      const dex = dexes?.find((dex) => dex !== undefined)
+      const dexes = routingInfo.route?.paths?.[0]?.map((path) => MOSAIC_DEXES[path?.source as string]);
+      const dex = dexes?.find((dex) => dex !== undefined);
       if (!dex) {
-        return null
+        return null;
       }
 
       return {
         name: dex?.name,
         icon: dex?.logoUrl,
-      }
+      };
     }
 
     if (routingInfo.route?.response.swap_venue?.name) {
       return {
         name:
-          providerMapping[
-            routingInfo.route?.response.swap_venue.name as keyof typeof providerMapping
-          ] ??
+          providerMapping[routingInfo.route?.response.swap_venue.name as keyof typeof providerMapping] ??
           routingInfo.route?.response.swap_venue.name
             ?.split('-')
             .map((item) => capitalize(item))
             .join(' '),
         icon: (routingInfo.route?.response.swap_venue as any)?.logo_uri,
-      }
+      };
     }
 
     if ((routingInfo.route?.response.swap_venues?.length ?? 0) > 0) {
       return {
         name:
-          providerMapping[
-            routingInfo.route?.response.swap_venues?.[0].name as keyof typeof providerMapping
-          ] ??
+          providerMapping[routingInfo.route?.response.swap_venues?.[0].name as keyof typeof providerMapping] ??
           (routingInfo.route?.response.swap_venues?.[0].name as string)
             ?.split('-')
             .map((item) => capitalize(item))
             .join(' '),
         icon: (routingInfo.route?.response.swap_venues?.[0] as any)?.logo_uri,
-      }
+      };
     }
 
-    return null
-  }, [debouncedInAmount, routingInfo?.aggregator, routingInfo?.route?.response, routingInfo?.route])
+    return null;
+  }, [debouncedInAmount, routingInfo?.aggregator, routingInfo?.route?.response, routingInfo?.route]);
 
   useEffect(() => {
     setGasPriceOption({
       option: GasOptions.LOW,
       gasPrice: defaultGasPrice.gasPrice,
-    })
-    setGasOption(GasOptions.LOW)
-    setUserPreferredGasPrice(defaultGasPrice.gasPrice)
+    });
+    setGasOption(GasOptions.LOW);
+    setUserPreferredGasPrice(defaultGasPrice.gasPrice);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultGasPrice.gasPrice.amount.toString(), defaultGasPrice.gasPrice.denom])
+  }, [defaultGasPrice.gasPrice.amount.toString(), defaultGasPrice.gasPrice.denom]);
 
   const handleGasClick = useCallback(() => {
-    setShowMoreDetailsSheet(true)
-  }, [setShowMoreDetailsSheet])
+    setShowMoreDetailsSheet(true);
+  }, [setShowMoreDetailsSheet]);
 
   const handleTooltipMouseEnter = useCallback(() => {
-    setShowProviderInfo(true)
-  }, [])
+    setShowProviderInfo(true);
+  }, []);
 
   const handleTooltipMouseLeave = useCallback(() => {
-    setShowProviderInfo(false)
-  }, [])
+    setShowProviderInfo(false);
+  }, []);
 
   if (debouncedInAmount === '' || Number(debouncedInAmount) === 0) {
-    return null
+    return null;
   }
 
   return (
@@ -168,11 +162,7 @@ export const SwapInfo = observer(({ setShowMoreDetailsSheet, rootDenomsStore }: 
           <button onClick={handleGasClick} className='flex items-center justify-end'>
             <GasPump size={16} className='text-monochrome' />
             {loadingRoutes || loadingMessages || isSkipGasFeeLoading ? (
-              <Skeleton
-                containerClassName='block !leading-none rounded-xl ml-1'
-                width={35}
-                height={16}
-              />
+              <Skeleton containerClassName='block !leading-none rounded-xl ml-1' width={35} height={16} />
             ) : (
               <span className='text-secondary-800 text-xs font-medium ml-1'>
                 {displayFee?.fiatValue}
@@ -197,11 +187,7 @@ export const SwapInfo = observer(({ setShowMoreDetailsSheet, rootDenomsStore }: 
               />
             </div>
             <div className='flex gap-x-1 items-center'>
-              <img
-                src={providerInfo.icon}
-                onError={imgOnError(defaultTokenLogo)}
-                className='w-[14px] h-[14px]'
-              />
+              <img src={providerInfo.icon} onError={imgOnError(defaultTokenLogo)} className='w-[14px] h-[14px]' />
               <Text size='xs' color='text-secondary-800' className='font-medium'>
                 {providerInfo.name}
               </Text>
@@ -221,5 +207,5 @@ export const SwapInfo = observer(({ setShowMoreDetailsSheet, rootDenomsStore }: 
         </div>
       )}
     </div>
-  )
-})
+  );
+});

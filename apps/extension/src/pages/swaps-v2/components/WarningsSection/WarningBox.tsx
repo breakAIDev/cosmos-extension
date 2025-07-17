@@ -1,23 +1,14 @@
-import { Warning } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import React from 'react'
+import { Warning } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import React from 'react';
 
-export function WarningBox({
-  type = 'warning',
-  message,
-}: {
-  type?: 'warning' | 'error'
-  message: string
-}) {
+export function WarningBox({ type = 'warning', message }: { type?: 'warning' | 'error'; message: string }) {
   return (
     <div
-      className={classNames(
-        'flex flex-row justify-start items-start gap-2 px-4 py-3 rounded-2xl ',
-        {
-          'bg-orange-200 dark:bg-orange-900': type === 'warning',
-          'bg-red-200 dark:bg-red-900': type === 'error',
-        },
-      )}
+      className={classNames('flex flex-row justify-start items-start gap-2 px-4 py-3 rounded-2xl ', {
+        'bg-orange-200 dark:bg-orange-900': type === 'warning',
+        'bg-red-200 dark:bg-red-900': type === 'error',
+      })}
     >
       <Warning
         size={16}
@@ -30,5 +21,5 @@ export function WarningBox({
         {message}
       </span>
     </div>
-  )
+  );
 }

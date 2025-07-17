@@ -1,25 +1,20 @@
-import { CardDivider, GenericCard } from '@leapwallet/leap-ui'
-import { CheckCircle } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import NoSearchResults from 'components/no-search-results'
-import { useChainPageInfo } from 'hooks'
-import {
-  currencyDetail,
-  CurrencyMap,
-  useCurrencyUpdater,
-  useUserPreferredCurrency,
-} from 'hooks/settings/useCurrency'
-import { Images } from 'images'
-import React from 'react'
-import ReactCountryFlag from 'react-country-flag'
-import { rootStore } from 'stores/root-store'
-import { isSidePanel } from 'utils/isSidePanel'
+import { CardDivider, GenericCard } from '@leapwallet/leap-ui';
+import { CheckCircle } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import NoSearchResults from 'components/no-search-results';
+import { useChainPageInfo } from 'hooks';
+import { currencyDetail, CurrencyMap, useCurrencyUpdater, useUserPreferredCurrency } from 'hooks/settings/useCurrency';
+import { Images } from 'images';
+import React from 'react';
+import ReactCountryFlag from 'react-country-flag';
+import { rootStore } from 'stores/root-store';
+import { isSidePanel } from 'utils/isSidePanel';
 
 export const CurrencyList = () => {
-  const [searchQuery, setSearchQuery] = React.useState('')
-  const [selectedCurrency] = useUserPreferredCurrency()
-  const { topChainColor } = useChainPageInfo()
-  const [currencyUpdater] = useCurrencyUpdater()
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [selectedCurrency] = useUserPreferredCurrency();
+  const { topChainColor } = useChainPageInfo();
+  const [currencyUpdater] = useCurrencyUpdater();
 
   const currencyData =
     searchQuery === ''
@@ -28,10 +23,8 @@ export const CurrencyList = () => {
           (currency) =>
             currency.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             currency.country.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            currencyDetail[currency.country].ISOname.toLowerCase().includes(
-              searchQuery.toLowerCase(),
-            ),
-        )
+            currencyDetail[currency.country].ISOname.toLowerCase().includes(searchQuery.toLowerCase()),
+        );
 
   return (
     <div className='flex flex-col items-center px-[28px] h-full'>
@@ -45,11 +38,7 @@ export const CurrencyList = () => {
         {searchQuery.length === 0 ? (
           <img src={Images.Misc.Search} />
         ) : (
-          <img
-            className='cursor-pointer'
-            src={Images.Misc.CrossFilled}
-            onClick={() => setSearchQuery('')}
-          />
+          <img className='cursor-pointer' src={Images.Misc.CrossFilled} onClick={() => setSearchQuery('')} />
         )}
       </div>
       <div
@@ -60,14 +49,14 @@ export const CurrencyList = () => {
       >
         {currencyData.length > 0 ? (
           currencyData.map((currency, index) => {
-            const isFirst = index === 0
-            const isLast = index === CurrencyMap.length - 1
+            const isFirst = index === 0;
+            const isLast = index === CurrencyMap.length - 1;
             return (
               <div className='mx-auto w-full' key={index}>
                 <GenericCard
                   onClick={() => {
-                    currencyUpdater(currency.country)
-                    rootStore.setPreferredCurrency(currency.country)
+                    currencyUpdater(currency.country);
+                    rootStore.setPreferredCurrency(currency.country);
                   }}
                   className='mx-auto'
                   img={
@@ -87,23 +76,18 @@ export const CurrencyList = () => {
                   title={<span className='ml-2'>{currency.name}</span>}
                   icon={
                     selectedCurrency.toString() === currency.country ? (
-                      <CheckCircle
-                        weight='fill'
-                        size={24}
-                        style={{ color: topChainColor }}
-                        color={topChainColor}
-                      />
+                      <CheckCircle weight='fill' size={24} style={{ color: topChainColor }} color={topChainColor} />
                     ) : null
                   }
                 />
                 <CardDivider />
               </div>
-            )
+            );
           })
         ) : (
           <NoSearchResults searchQuery={searchQuery} />
         )}
       </div>
     </div>
-  )
-}
+  );
+};

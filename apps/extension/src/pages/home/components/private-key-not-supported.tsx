@@ -1,13 +1,13 @@
-import { useChainInfo } from '@leapwallet/cosmos-wallet-hooks'
-import { Button } from 'components/ui/button'
-import { KeyIcon } from 'icons/key-icon'
-import React, { useState } from 'react'
+import { useChainInfo } from '@leapwallet/cosmos-wallet-hooks';
+import { Button } from 'components/ui/button';
+import { KeyIcon } from 'icons/key-icon';
+import React, { useState } from 'react';
 
-import CreateImportActions from '../SelectWallet/CreateImportActions'
+import CreateImportActions from '../SelectWallet/CreateImportActions';
 
 export const PrivateKeyNotSupported = () => {
-  const chainInfo = useChainInfo()
-  const [showCreateImportActions, setShowCreateImportActions] = useState(false)
+  const chainInfo = useChainInfo();
+  const [showCreateImportActions, setShowCreateImportActions] = useState(false);
 
   return (
     <>
@@ -21,8 +21,8 @@ export const PrivateKeyNotSupported = () => {
             Imported private key not <br /> supported on {chainInfo?.chainName}
           </h1>
           <p className='text-xs text-secondary-800'>
-            In the meanwhile, you can import your wallet using a <br /> recovery phrase or a
-            supported private key <br /> to access {chainInfo?.chainName}.
+            In the meanwhile, you can import your wallet using a <br /> recovery phrase or a supported private key{' '}
+            <br /> to access {chainInfo?.chainName}.
           </p>
         </header>
 
@@ -37,9 +37,9 @@ export const PrivateKeyNotSupported = () => {
         title='Create / Import Wallet'
         isVisible={showCreateImportActions}
         onClose={() => {
-          setShowCreateImportActions(false)
+          setShowCreateImportActions(false);
         }}
       />
     </>
-  )
-}
+  );
+};

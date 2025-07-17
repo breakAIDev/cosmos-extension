@@ -1,25 +1,21 @@
-import { Question } from '@phosphor-icons/react'
-import { routeToLabelMap } from 'components/bottom-nav/bottom-nav-items'
-import { BottomNav } from 'components/bottom-nav/v2'
-import { Button } from 'components/ui/button'
-import { useAuth } from 'context/auth-context'
-import { AnimatePresence, motion } from 'framer-motion'
-import { LeapLogoFullSm } from 'icons/leap-logo'
-import { observer } from 'mobx-react-lite'
-import React, { PropsWithChildren, ReactNode } from 'react'
-import { Location } from 'react-router'
-import { cn } from 'utils/cn'
-import { sidePanel } from 'utils/isSidePanel'
-import {
-  opacityVariants,
-  slideVariants,
-  transition,
-} from 'utils/motion-variants/global-layout-motions'
+import { Question } from '@phosphor-icons/react';
+import { routeToLabelMap } from 'components/bottom-nav/bottom-nav-items';
+import { BottomNav } from 'components/bottom-nav/v2';
+import { Button } from 'components/ui/button';
+import { useAuth } from 'context/auth-context';
+import { AnimatePresence, motion } from 'framer-motion';
+import { LeapLogoFullSm } from 'icons/leap-logo';
+import { observer } from 'mobx-react-lite';
+import React, { PropsWithChildren, ReactNode } from 'react';
+import { Location } from 'react-router';
+import { cn } from 'utils/cn';
+import { sidePanel } from 'utils/isSidePanel';
+import { opacityVariants, slideVariants, transition } from 'utils/motion-variants/global-layout-motions';
 
 type GlobalLayoutProps = {
-  children?: ReactNode
-  location?: Location
-}
+  children?: ReactNode;
+  location?: Location;
+};
 
 const dAppPages = new Set([
   '/approveConnection',
@@ -32,13 +28,13 @@ const dAppPages = new Set([
   '/switch-ethereum-chain',
   '/switch-chain',
   '/suggest-ethereum-chain',
-])
+]);
 
 type CustomState = {
-  from: { pathname: string; search?: string } | string
-}
+  from: { pathname: string; search?: string } | string;
+};
 
-const pagesWithDarkerBg = ['/send', '/assetDetails']
+const pagesWithDarkerBg = ['/send', '/assetDetails'];
 
 export const v2LayoutPages = new Set([
   '/onboarding',
@@ -67,30 +63,28 @@ export const v2LayoutPages = new Set([
   '/forgotPassword',
   '/add-token',
   '/manage-tokens',
-])
+]);
 
 // TODO: Remove the location check once home layout is implemented
 export const GlobalLayout = (props: PropsWithChildren<GlobalLayoutProps>) => {
   if (v2LayoutPages.has(props.location?.pathname ?? '')) {
-    return <GlobalLayoutView {...props} />
+    return <GlobalLayoutView {...props} />;
   }
 
-  return props.children as JSX.Element
-}
+  return props.children as JSX.Element;
+};
 
 const GlobalLayoutView = observer((props: PropsWithChildren<GlobalLayoutProps>) => {
   const isOnboarding =
-    props.location?.pathname.includes('onboarding') ||
-    props.location?.pathname.includes('importLedger')
-  const isDarkerBg = pagesWithDarkerBg.some((page) => props.location?.pathname.includes(page))
-  const isLogin = props.location?.pathname === '/'
-  const auth = useAuth()
+    props.location?.pathname.includes('onboarding') || props.location?.pathname.includes('importLedger');
+  const isDarkerBg = pagesWithDarkerBg.some((page) => props.location?.pathname.includes(page));
+  const isLogin = props.location?.pathname === '/';
+  const auth = useAuth();
 
-  const { from: fromLogin } = (props.location?.state || {}) as CustomState
-  const variants = isLogin || isOnboarding ? opacityVariants : slideVariants
+  const { from: fromLogin } = (props.location?.state || {}) as CustomState;
+  const variants = isLogin || isOnboarding ? opacityVariants : slideVariants;
 
-  const isFullScreen =
-    window.innerWidth >= 450 && !sidePanel && !dAppPages.has(props.location?.pathname ?? '')
+  const isFullScreen = window.innerWidth >= 450 && !sidePanel && !dAppPages.has(props.location?.pathname ?? '');
 
   return (
     <>
@@ -120,13 +114,11 @@ const GlobalLayoutView = observer((props: PropsWithChildren<GlobalLayoutProps>) 
           </motion.div>
         </AnimatePresence>
 
-        {auth?.locked === 'unlocked' && (
-          <BottomNav label={routeToLabelMap[props?.location?.pathname ?? '']} />
-        )}
+        {auth?.locked === 'unlocked' && <BottomNav label={routeToLabelMap[props?.location?.pathname ?? '']} />}
       </div>
     </>
-  )
-})
+  );
+});
 
 export const LayoutHeader = () => {
   return (
@@ -144,5 +136,5 @@ export const LayoutHeader = () => {
         </a>
       </Button>
     </div>
-  )
-}
+  );
+};

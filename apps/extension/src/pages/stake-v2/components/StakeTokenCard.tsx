@@ -1,15 +1,15 @@
-import { TokenImageWithFallback } from 'components/token-image-with-fallback'
-import React from 'react'
+import { TokenImageWithFallback } from 'components/token-image-with-fallback';
+import React from 'react';
 
 type StakeTokenCardProps = {
-  tokenName: string
-  chainName: string
-  chainLogo: string
-  apr: string
-  amount: string
-  dollarAmount: string
-  onClick: () => void
-}
+  tokenName: string;
+  chainName: string;
+  chainLogo: string;
+  apr: string;
+  amount: string;
+  dollarAmount: string;
+  onClick: () => void;
+};
 
 export function StakeTokenCard({
   tokenName,
@@ -44,15 +44,11 @@ export function StakeTokenCard({
 
       <div className='flex flex-col items-end w-[90px]'>
         {dollarAmount !== '-' ? (
-          <p className='text-black-100 dark:text-white-100 font-[700] text-[14px] text-right'>
-            {dollarAmount}
-          </p>
+          <p className='text-black-100 dark:text-white-100 font-[700] text-[14px] text-right'>{dollarAmount}</p>
         ) : null}
 
-        <p className='text-gray-600 dark:text-gray-400 text-[12px] font-[500] text-right'>
-          {amount}
-        </p>
+        <p className='text-gray-600 dark:text-gray-400 text-[12px] font-[500] text-right'>{amount}</p>
       </div>
     </div>
-  )
+  );
 }

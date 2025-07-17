@@ -1,19 +1,19 @@
-import { SecretToken } from '@leapwallet/cosmos-wallet-hooks'
-import { CardDivider, GenericCard } from '@leapwallet/leap-ui'
-import { CaretRight, ClipboardText, PencilSimple, PlusCircle } from '@phosphor-icons/react'
-import BottomModal from 'components/bottom-modal'
-import Text from 'components/text'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import React from 'react'
+import { SecretToken } from '@leapwallet/cosmos-wallet-hooks';
+import { CardDivider, GenericCard } from '@leapwallet/leap-ui';
+import { CaretRight, ClipboardText, PencilSimple, PlusCircle } from '@phosphor-icons/react';
+import BottomModal from 'components/bottom-modal';
+import Text from 'components/text';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import React from 'react';
 
 type AddTokenSheetProps = {
-  isVisible: boolean
-  onClose: VoidFunction
-  token?: SecretToken
-  onCreateViewingKey: VoidFunction
-  onUpdateViewingKey: VoidFunction
-  onImportViewingKey: VoidFunction
-}
+  isVisible: boolean;
+  onClose: VoidFunction;
+  token?: SecretToken;
+  onCreateViewingKey: VoidFunction;
+  onUpdateViewingKey: VoidFunction;
+  onImportViewingKey: VoidFunction;
+};
 
 export function AddTokenSheet({
   isVisible,
@@ -23,17 +23,14 @@ export function AddTokenSheet({
   onUpdateViewingKey,
   onImportViewingKey,
 }: AddTokenSheetProps) {
-  const defaultLogo = useDefaultTokenLogo()
+  const defaultLogo = useDefaultTokenLogo();
 
   return (
     <BottomModal isOpen={isVisible} onClose={onClose} title={'Add Token'}>
       <div>
         <div className='mb-4 px-5'>
           <div className='flex items-center'>
-            <img
-              src={token?.icon === '' ? defaultLogo : token?.icon}
-              className='h-[32px] w-[32px] mr-3'
-            />
+            <img src={token?.icon === '' ? defaultLogo : token?.icon} className='h-[32px] w-[32px] mr-3' />
             <Text size='xxl'>{token?.symbol}</Text>
           </div>
           <Text size='md' className='font-bold text-gray-200'>
@@ -58,7 +55,7 @@ export function AddTokenSheet({
           <CardDivider />
           <GenericCard
             onClick={() => {
-              onImportViewingKey()
+              onImportViewingKey();
             }}
             className='rounded-b-2xl'
             title={<Text size='md'>Import key</Text>}
@@ -68,5 +65,5 @@ export function AddTokenSheet({
         </div>
       </div>
     </BottomModal>
-  )
+  );
 }

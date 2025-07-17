@@ -1,5 +1,5 @@
-import React from 'react'
-import Skeleton from 'react-loading-skeleton'
+import React from 'react';
+import Skeleton from 'react-loading-skeleton';
 
 export function WalletInfoCardSkeleton() {
   return (
@@ -24,7 +24,7 @@ export function WalletInfoCardSkeleton() {
         <Skeleton className='light:bg-gray-200 bg-gray-800 z-0' />
       </div>
     </div>
-  )
+  );
 }
 
 export function WalletInfoCardSkeletons() {
@@ -33,5 +33,5 @@ export function WalletInfoCardSkeletons() {
       <WalletInfoCardSkeleton />
       <WalletInfoCardSkeleton />
     </div>
-  )
+  );
 }

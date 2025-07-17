@@ -1,19 +1,19 @@
-import { Header, HeaderActionType } from '@leapwallet/leap-ui'
-import classNames from 'classnames'
-import { observer } from 'mobx-react-lite'
-import React from 'react'
-import { hidePercentChangeStore } from 'stores/hide-percent-change'
-import { hideSmallBalancesStore } from 'stores/hide-small-balances-store'
-import { isSidePanel } from 'utils/isSidePanel'
+import { Header, HeaderActionType } from '@leapwallet/leap-ui';
+import classNames from 'classnames';
+import { observer } from 'mobx-react-lite';
+import React from 'react';
+import { hidePercentChangeStore } from 'stores/hide-percent-change';
+import { hideSmallBalancesStore } from 'stores/hide-small-balances-store';
+import { isSidePanel } from 'utils/isSidePanel';
 
 const ToggleCard = ({
   title,
   isEnabled,
   onClick,
 }: {
-  title: string
-  isEnabled: boolean
-  onClick: (val: boolean) => void
+  title: string;
+  isEnabled: boolean;
+  onClick: (val: boolean) => void;
 }) => {
   return (
     <div
@@ -30,8 +30,8 @@ const ToggleCard = ({
         className='h-7 w-[50px] appearance-none rounded-full cursor-pointer bg-gray-600/30 transition duration-200 checked:bg-green-600 relative'
       />
     </div>
-  )
-}
+  );
+};
 
 export const TokenDisplay = observer(({ goBack }: { goBack: () => void }) => {
   return (
@@ -54,5 +54,5 @@ export const TokenDisplay = observer(({ goBack }: { goBack: () => void }) => {
         />
       </div>
     </div>
-  )
-})
+  );
+});

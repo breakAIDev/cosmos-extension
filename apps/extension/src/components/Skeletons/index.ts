@@ -1,2 +1,2 @@
-export * from './GlobalBannersLoading'
-export * from './WalletInfoCardSkeleton'
+export * from './GlobalBannersLoading';
+export * from './WalletInfoCardSkeleton';

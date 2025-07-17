@@ -1,20 +1,20 @@
-import { sliceAddress, useChainApis } from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { ParsedMessage, ParsedMessageType } from '@leapwallet/parser-parfait'
-import React, { useMemo } from 'react'
-import Skeleton from 'react-loading-skeleton'
+import { sliceAddress, useChainApis } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { ParsedMessage, ParsedMessageType } from '@leapwallet/parser-parfait';
+import React, { useMemo } from 'react';
+import Skeleton from 'react-loading-skeleton';
 
-import { useMessageDetails } from './message-details'
+import { useMessageDetails } from './message-details';
 
 type DetailItemProps = {
-  message: ParsedMessage
-  activeChain: SupportedChain
-  selectedNetwork: 'mainnet' | 'testnet'
-}
+  message: ParsedMessage;
+  activeChain: SupportedChain;
+  selectedNetwork: 'mainnet' | 'testnet';
+};
 
 const DetailItem: React.FC<DetailItemProps> = ({ message, activeChain, selectedNetwork }) => {
-  const { lcdUrl } = useChainApis(activeChain, selectedNetwork)
-  const { data, isLoading } = useMessageDetails(message, lcdUrl ?? '', activeChain)
+  const { lcdUrl } = useChainApis(activeChain, selectedNetwork);
+  const { data, isLoading } = useMessageDetails(message, lcdUrl ?? '', activeChain);
 
   return isLoading ? (
     <Skeleton />
@@ -23,55 +23,51 @@ const DetailItem: React.FC<DetailItemProps> = ({ message, activeChain, selectedN
       {data === 'unknown'
         ? message.__type === ParsedMessageType.Unimplemented
           ? ((typeUrl: string) => {
-              const splitTypeUrl = typeUrl.split('.')
-              const messageType = splitTypeUrl[splitTypeUrl.length - 1]
-              return <span className='text-red-500'>{messageType}</span>
+              const splitTypeUrl = typeUrl.split('.');
+              const messageType = splitTypeUrl[splitTypeUrl.length - 1];
+              return <span className='text-red-500'>{messageType}</span>;
             })(message.message['@type'])
           : 'Unknown'
         : data}
     </li>
-  )
-}
+  );
+};
 
 type TransactionDetailsProps = {
-  parsedMessages: ParsedMessage[] | null
-  activeChain: SupportedChain
-  selectedNetwork: 'mainnet' | 'testnet'
-}
+  parsedMessages: ParsedMessage[] | null;
+  activeChain: SupportedChain;
+  selectedNetwork: 'mainnet' | 'testnet';
+};
 
-const TransactionDetails: React.FC<TransactionDetailsProps> = ({
-  parsedMessages,
-  activeChain,
-  selectedNetwork,
-}) => {
-  const noMessageIsParsed = parsedMessages === null || parsedMessages.length === 0
+const TransactionDetails: React.FC<TransactionDetailsProps> = ({ parsedMessages, activeChain, selectedNetwork }) => {
+  const noMessageIsParsed = parsedMessages === null || parsedMessages.length === 0;
   const noMessageIsDecoded = noMessageIsParsed
     ? true
-    : parsedMessages.every((msg) => msg.__type === ParsedMessageType.Unimplemented)
+    : parsedMessages.every((msg) => msg.__type === ParsedMessageType.Unimplemented);
 
   const claimRewardsMessage = useMemo(() => {
     if (parsedMessages) {
-      let message = ''
-      let counter = 0
+      let message = '';
+      let counter = 0;
 
       for (const parsedMessage of parsedMessages) {
         if (parsedMessage.__type === ParsedMessageType.ClaimReward) {
           if (counter === 0) {
-            message = `Claim staking reward from ${sliceAddress(parsedMessage.validatorAddress)}`
+            message = `Claim staking reward from ${sliceAddress(parsedMessage.validatorAddress)}`;
           }
-          counter += 1
+          counter += 1;
         }
       }
 
       if (counter > 1) {
-        message += ` and +${counter - 1} more validator${counter - 1 === 1 ? '' : 's'}`
+        message += ` and +${counter - 1} more validator${counter - 1 === 1 ? '' : 's'}`;
       }
 
-      return message
+      return message;
     }
 
-    return ''
-  }, [parsedMessages])
+    return '';
+  }, [parsedMessages]);
 
   return noMessageIsDecoded ? null : (
     <div
@@ -80,9 +76,7 @@ const TransactionDetails: React.FC<TransactionDetailsProps> = ({
         backgroundColor: 'rgba(58, 207, 146, 0.17)',
       }}
     >
-      <p className='text-gray-500 dark:text-gray-100 text-sm font-medium tracking-wide'>
-        Transaction Summary
-      </p>
+      <p className='text-gray-500 dark:text-gray-100 text-sm font-medium tracking-wide'>Transaction Summary</p>
 
       <ul className='mt-2'>
         {claimRewardsMessage ? (
@@ -91,17 +85,12 @@ const TransactionDetails: React.FC<TransactionDetailsProps> = ({
           </li>
         ) : (
           parsedMessages?.map((msg, i) => (
-            <DetailItem
-              key={i}
-              message={msg}
-              activeChain={activeChain}
-              selectedNetwork={selectedNetwork}
-            />
+            <DetailItem key={i} message={msg} activeChain={activeChain} selectedNetwork={selectedNetwork} />
           )) ?? 'No information available'
         )}
       </ul>
     </div>
-  )
-}
+  );
+};
 
-export default TransactionDetails
+export default TransactionDetails;

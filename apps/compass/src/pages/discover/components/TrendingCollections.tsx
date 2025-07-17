@@ -1,12 +1,12 @@
-import { DiscoverCollection } from '@leapwallet/cosmos-wallet-hooks'
-import { ArrowSquareOut } from '@phosphor-icons/react'
-import Text from 'components/text'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import React from 'react'
-import { cn } from 'utils/cn'
+import { DiscoverCollection } from '@leapwallet/cosmos-wallet-hooks';
+import { ArrowSquareOut } from '@phosphor-icons/react';
+import Text from 'components/text';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import React from 'react';
+import { cn } from 'utils/cn';
 
-import { AssetType } from '..'
+import { AssetType } from '..';
 
 const Collection = observer(({ collection }: { collection: DiscoverCollection }) => {
   return (
@@ -24,8 +24,8 @@ const Collection = observer(({ collection }: { collection: DiscoverCollection })
       </Text>
       <ArrowSquareOut size={32} className='p-2 text-muted-foreground' />
     </div>
-  )
-})
+  );
+});
 
 const TrendingCollections = observer(
   ({
@@ -35,11 +35,11 @@ const TrendingCollections = observer(
     isSearched = false,
     isExpanded = false,
   }: {
-    collections: DiscoverCollection[]
-    showHeading?: boolean
-    onExpand?: (val: AssetType) => void
-    isSearched?: boolean
-    isExpanded?: boolean
+    collections: DiscoverCollection[];
+    showHeading?: boolean;
+    onExpand?: (val: AssetType) => void;
+    isSearched?: boolean;
+    isExpanded?: boolean;
   }) => {
     return (
       <div className='flex flex-col gap-3 w-full'>
@@ -62,15 +62,13 @@ const TrendingCollections = observer(
             'rounded-2xl': showHeading,
           })}
         >
-          {(isExpanded === false && showHeading ? collections.slice(0, 3) : collections).map(
-            (collection) => (
-              <Collection key={collection.name} collection={collection} />
-            ),
-          )}
+          {(isExpanded === false && showHeading ? collections.slice(0, 3) : collections).map((collection) => (
+            <Collection key={collection.name} collection={collection} />
+          ))}
         </div>
       </div>
-    )
+    );
   },
-)
+);
 
-export default TrendingCollections
+export default TrendingCollections;

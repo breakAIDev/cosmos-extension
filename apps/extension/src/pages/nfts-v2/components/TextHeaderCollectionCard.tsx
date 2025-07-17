@@ -1,48 +1,40 @@
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { NftInfo } from '@leapwallet/cosmos-wallet-store'
-import classNames from 'classnames'
-import { useChainPageInfo } from 'hooks'
-import { useChainInfos } from 'hooks/useChainInfos'
-import React from 'react'
-import { normalizeImageSrc } from 'utils/normalizeImageSrc'
-import { sessionStoreItem } from 'utils/sessionStorage'
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { NftInfo } from '@leapwallet/cosmos-wallet-store';
+import classNames from 'classnames';
+import { useChainPageInfo } from 'hooks';
+import { useChainInfos } from 'hooks/useChainInfos';
+import React from 'react';
+import { normalizeImageSrc } from 'utils/normalizeImageSrc';
+import { sessionStoreItem } from 'utils/sessionStorage';
 
-import { useNftContext } from '../context'
-import { NftCard, Text, ViewAllButton } from './index'
+import { useNftContext } from '../context';
+import { NftCard, Text, ViewAllButton } from './index';
 
 type TextHeaderCollectionCardProps = {
-  nfts: (NftInfo & { chain: SupportedChain })[]
-  headerTitle: string
-  noChip?: boolean
-}
+  nfts: (NftInfo & { chain: SupportedChain })[];
+  headerTitle: string;
+  noChip?: boolean;
+};
 
-export function TextHeaderCollectionCard({
-  nfts,
-  headerTitle,
-  noChip,
-}: TextHeaderCollectionCardProps) {
-  const chainInfos = useChainInfos()
-  const { topChainColor } = useChainPageInfo()
-  const { activePage, setActivePage, setNftDetails, setActiveTab } = useNftContext()
-  const isFavoriteHeaderTitle = headerTitle === 'Favorites'
+export function TextHeaderCollectionCard({ nfts, headerTitle, noChip }: TextHeaderCollectionCardProps) {
+  const chainInfos = useChainInfos();
+  const { topChainColor } = useChainPageInfo();
+  const { activePage, setActivePage, setNftDetails, setActiveTab } = useNftContext();
+  const isFavoriteHeaderTitle = headerTitle === 'Favorites';
 
   const handleOnClick = () => {
     if (isFavoriteHeaderTitle) {
-      setActiveTab('Favorites')
+      setActiveTab('Favorites');
     }
-  }
+  };
 
   return (
     <div className='rounded-2xl border dark:border-gray-900 mb-4'>
       <div className='flex items-center p-4 border-b dark:border-gray-900'>
         <h2
-          className={classNames(
-            'text-gray-800 dark:text-white-100 max-w-[160px] truncate font-bold',
-            {
-              'border dark:border-gray-900 rounded-md py-[3px] px-[6px] text-[14px]':
-                !isFavoriteHeaderTitle,
-            },
-          )}
+          className={classNames('text-gray-800 dark:text-white-100 max-w-[160px] truncate font-bold', {
+            'border dark:border-gray-900 rounded-md py-[3px] px-[6px] text-[14px]': !isFavoriteHeaderTitle,
+          })}
           style={isFavoriteHeaderTitle ? {} : { color: topChainColor }}
         >
           {headerTitle}
@@ -64,19 +56,19 @@ export function TextHeaderCollectionCard({
         {nfts.map((nft, index) => {
           if (isFavoriteHeaderTitle) {
             if (index === 6) {
-              return <ViewAllButton key={`${nft.tokenId}-${index}`} onClick={handleOnClick} />
+              return <ViewAllButton key={`${nft.tokenId}-${index}`} onClick={handleOnClick} />;
             }
 
-            if (index > 6) return null
+            if (index > 6) return null;
           }
 
           return (
             <div
               key={`${nft.tokenId}-${index}`}
               onClick={() => {
-                sessionStoreItem('nftLastActivePage', activePage)
-                setActivePage('NftDetails')
-                setNftDetails({ ...nft, chain: nft?.chain ?? '' })
+                sessionStoreItem('nftLastActivePage', activePage);
+                setActivePage('NftDetails');
+                setNftDetails({ ...nft, chain: nft?.chain ?? '' });
               }}
               className='cursor-pointer'
             >
@@ -86,18 +78,14 @@ export function TextHeaderCollectionCard({
                 imgSrc={normalizeImageSrc(nft.image ?? '', nft.collection?.address ?? '')}
                 textNft={{
                   name: nft?.domain ?? '',
-                  description:
-                    nft.extension?.description ?? `${nft.collection?.name ?? ''} - ${nft.name}`,
+                  description: nft.extension?.description ?? `${nft.collection?.name ?? ''} - ${nft.name}`,
                 }}
                 chainName={noChip ? undefined : chainInfos[nft.chain].chainName}
                 chainLogo={noChip ? undefined : chainInfos[nft.chain].chainSymbolImageUrl}
                 imgClassName='h-[150px] w-[150px] object-contain'
               />
 
-              <Text
-                className='text-gray-800 dark:text-white-100 mt-2'
-                title={nft.collection?.name ?? nft.name ?? ''}
-              >
+              <Text className='text-gray-800 dark:text-white-100 mt-2' title={nft.collection?.name ?? nft.name ?? ''}>
                 {nft.collection?.name ?? nft.name ?? ''}
               </Text>
 
@@ -107,9 +95,9 @@ export function TextHeaderCollectionCard({
                 </Text>
               )}
             </div>
-          )
+          );
         })}
       </div>
     </div>
-  )
+  );
 }

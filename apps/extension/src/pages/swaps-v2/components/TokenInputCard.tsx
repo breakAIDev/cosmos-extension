@@ -1,50 +1,42 @@
-import { formatTokenAmount, sliceWord, useGetChains } from '@leapwallet/cosmos-wallet-hooks'
-import { ArrowsLeftRight, CaretDown } from '@phosphor-icons/react'
-import { QueryStatus } from '@tanstack/react-query'
-import BigNumber from 'bignumber.js'
-import classNames from 'classnames'
-import { TokenImageWithFallback } from 'components/token-image-with-fallback'
-import { useFormatCurrency } from 'hooks/settings/useCurrency'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import { observer } from 'mobx-react-lite'
-import React, {
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
-import Skeleton from 'react-loading-skeleton'
-import { hideAssetsStore } from 'stores/hide-assets-store'
-import { SourceChain, SourceToken } from 'types/swap'
-import { imgOnError } from 'utils/imgOnError'
-import { formatForSubstring } from 'utils/strings'
+import { formatTokenAmount, sliceWord, useGetChains } from '@leapwallet/cosmos-wallet-hooks';
+import { ArrowsLeftRight, CaretDown } from '@phosphor-icons/react';
+import { QueryStatus } from '@tanstack/react-query';
+import BigNumber from 'bignumber.js';
+import classNames from 'classnames';
+import { TokenImageWithFallback } from 'components/token-image-with-fallback';
+import { useFormatCurrency } from 'hooks/settings/useCurrency';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { observer } from 'mobx-react-lite';
+import React, { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Skeleton from 'react-loading-skeleton';
+import { hideAssetsStore } from 'stores/hide-assets-store';
+import { SourceChain, SourceToken } from 'types/swap';
+import { imgOnError } from 'utils/imgOnError';
+import { formatForSubstring } from 'utils/strings';
 
 type TokenInputCardProps = {
-  readOnly?: boolean
-  isInputInUSDC: boolean
-  setIsInputInUSDC: Dispatch<SetStateAction<boolean>>
-  value: string
-  token?: SourceToken | null
-  balanceStatus?: QueryStatus
-  chainName?: string
-  chainLogo?: string
-  loadingAssets?: boolean
-  loadingChains?: boolean
+  readOnly?: boolean;
+  isInputInUSDC: boolean;
+  setIsInputInUSDC: Dispatch<SetStateAction<boolean>>;
+  value: string;
+  token?: SourceToken | null;
+  balanceStatus?: QueryStatus;
+  chainName?: string;
+  chainLogo?: string;
+  loadingAssets?: boolean;
+  loadingChains?: boolean;
   // eslint-disable-next-line no-unused-vars
-  onChange?: (value: string) => void
-  onTokenSelectSheet?: () => void
-  selectTokenDisabled?: boolean
-  selectChainDisabled?: boolean
-  onChainSelectSheet?: () => void
-  amountError?: boolean
-  showFor?: 'source' | 'destination'
-  selectedChain?: SourceChain
-  isChainAbstractionView?: boolean
-  assetUsdValue?: BigNumber
-}
+  onChange?: (value: string) => void;
+  onTokenSelectSheet?: () => void;
+  selectTokenDisabled?: boolean;
+  selectChainDisabled?: boolean;
+  onChainSelectSheet?: () => void;
+  amountError?: boolean;
+  showFor?: 'source' | 'destination';
+  selectedChain?: SourceChain;
+  isChainAbstractionView?: boolean;
+  assetUsdValue?: BigNumber;
+};
 
 function TokenInputCardView({
   isInputInUSDC,
@@ -68,156 +60,140 @@ function TokenInputCardView({
   isChainAbstractionView,
   assetUsdValue,
 }: TokenInputCardProps) {
-  const [formatCurrency] = useFormatCurrency()
-  const chains = useGetChains()
+  const [formatCurrency] = useFormatCurrency();
+  const chains = useGetChains();
 
-  const inputRef = useRef<HTMLInputElement>(null)
-  const [isFocused, setIsFocused] = useState(false)
-  const defaultTokenLogo = useDefaultTokenLogo()
-  const [textInputValue, setTextInputValue] = useState<string>(value?.toString())
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [isFocused, setIsFocused] = useState(false);
+  const defaultTokenLogo = useDefaultTokenLogo();
+  const [textInputValue, setTextInputValue] = useState<string>(value?.toString());
 
   const selectedAssetUSDPrice = useMemo(() => {
     if (token && token.usdPrice && token.usdPrice !== '0') {
-      return token.usdPrice
+      return token.usdPrice;
     }
 
-    return undefined
-  }, [token])
+    return undefined;
+  }, [token]);
 
   useEffect(() => {
     if (showFor === 'source' && !selectedAssetUSDPrice && isInputInUSDC) {
-      setIsInputInUSDC(false)
+      setIsInputInUSDC(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedAssetUSDPrice, isInputInUSDC])
+  }, [selectedAssetUSDPrice, isInputInUSDC]);
 
   const { dollarAmount, formattedDollarAmount } = useMemo(() => {
-    let _dollarAmount = '0'
+    let _dollarAmount = '0';
 
     if (value === '' || (value && isNaN(parseFloat(value)))) {
-      return { formattedDollarAmount: '', dollarAmount: '' }
+      return { formattedDollarAmount: '', dollarAmount: '' };
     }
 
     if (token && token.usdPrice && value) {
-      _dollarAmount = String(parseFloat(token.usdPrice) * parseFloat(value))
+      _dollarAmount = String(parseFloat(token.usdPrice) * parseFloat(value));
     }
 
-    if (
-      (!_dollarAmount || _dollarAmount === '0') &&
-      assetUsdValue &&
-      !assetUsdValue.isNaN() &&
-      assetUsdValue.gt(0)
-    ) {
-      _dollarAmount = assetUsdValue.toString()
+    if ((!_dollarAmount || _dollarAmount === '0') && assetUsdValue && !assetUsdValue.isNaN() && assetUsdValue.gt(0)) {
+      _dollarAmount = assetUsdValue.toString();
     }
 
     return {
       dollarAmount: _dollarAmount,
-      formattedDollarAmount: hideAssetsStore.formatHideBalance(
-        formatCurrency(new BigNumber(_dollarAmount)),
-      ),
-    }
+      formattedDollarAmount: hideAssetsStore.formatHideBalance(formatCurrency(new BigNumber(_dollarAmount))),
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formatCurrency, token, value, assetUsdValue])
+  }, [formatCurrency, token, value, assetUsdValue]);
 
   const formattedInputValue = useMemo(() => {
-    return hideAssetsStore.formatHideBalance(
-      formatTokenAmount(value ?? '0', sliceWord(token?.symbol ?? '', 4, 4), 3),
-    )
+    return hideAssetsStore.formatHideBalance(formatTokenAmount(value ?? '0', sliceWord(token?.symbol ?? '', 4, 4), 3));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, token?.symbol])
+  }, [value, token?.symbol]);
 
   const balanceAmount = useMemo(() => {
-    return hideAssetsStore.formatHideBalance(
-      formatForSubstring(token?.amount ?? '0', { skipK: true }),
-    )
+    return hideAssetsStore.formatHideBalance(formatForSubstring(token?.amount ?? '0', { skipK: true }));
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token?.amount, token?.symbol])
+  }, [token?.amount, token?.symbol]);
 
   const showAmountButtons = useMemo(() => {
     return (
-      showFor === 'source' &&
-      token?.amount &&
-      token?.amount !== '0' &&
-      (!balanceStatus || balanceStatus === 'success')
-    )
-  }, [balanceStatus, showFor, token?.amount])
+      showFor === 'source' && token?.amount && token?.amount !== '0' && (!balanceStatus || balanceStatus === 'success')
+    );
+  }, [balanceStatus, showFor, token?.amount]);
 
   const switchToUSDDisabled = useMemo(() => {
-    return !selectedAssetUSDPrice || new BigNumber(selectedAssetUSDPrice ?? 0).isLessThan(10 ** -6)
-  }, [selectedAssetUSDPrice])
+    return !selectedAssetUSDPrice || new BigNumber(selectedAssetUSDPrice ?? 0).isLessThan(10 ** -6);
+  }, [selectedAssetUSDPrice]);
 
   useEffect(() => {
-    if (!onChange) return
+    if (!onChange) return;
     if (isInputInUSDC && selectedAssetUSDPrice) {
-      const cleanedInputValue = textInputValue.trim()
+      const cleanedInputValue = textInputValue.trim();
       if (!cleanedInputValue) {
-        onChange('')
-        return
+        onChange('');
+        return;
       }
-      const cryptoAmount = new BigNumber(textInputValue).dividedBy(selectedAssetUSDPrice)
-      onChange(!isNaN(parseFloat(cryptoAmount.toString())) ? cryptoAmount?.toFixed(6) : '')
+      const cryptoAmount = new BigNumber(textInputValue).dividedBy(selectedAssetUSDPrice);
+      onChange(!isNaN(parseFloat(cryptoAmount.toString())) ? cryptoAmount?.toFixed(6) : '');
     } else {
-      onChange(!isNaN(parseFloat(textInputValue)) ? textInputValue : '')
+      onChange(!isNaN(parseFloat(textInputValue)) ? textInputValue : '');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [textInputValue, isInputInUSDC, selectedAssetUSDPrice])
+  }, [textInputValue, isInputInUSDC, selectedAssetUSDPrice]);
 
   const handleInputFocus = useCallback(() => {
     if (!readOnly) {
-      setIsFocused(true)
+      setIsFocused(true);
     }
-  }, [readOnly, setIsFocused])
+  }, [readOnly, setIsFocused]);
 
   const handleInputBlur = useCallback(() => {
     if (!readOnly) {
-      setIsFocused(false)
+      setIsFocused(false);
     }
-  }, [readOnly, setIsFocused])
+  }, [readOnly, setIsFocused]);
 
   const onMaxBtnClick = useCallback(() => {
     if (isInputInUSDC) {
-      if (!selectedAssetUSDPrice) throw 'USD price is not available'
+      if (!selectedAssetUSDPrice) throw 'USD price is not available';
 
-      const usdAmount = new BigNumber(token?.amount ?? '0').multipliedBy(selectedAssetUSDPrice)
-      setTextInputValue(usdAmount.toString())
+      const usdAmount = new BigNumber(token?.amount ?? '0').multipliedBy(selectedAssetUSDPrice);
+      setTextInputValue(usdAmount.toString());
     } else {
-      setTextInputValue(token?.amount ?? '0')
+      setTextInputValue(token?.amount ?? '0');
     }
-  }, [isInputInUSDC, selectedAssetUSDPrice, token?.amount, setTextInputValue])
+  }, [isInputInUSDC, selectedAssetUSDPrice, token?.amount, setTextInputValue]);
 
   const onHalfBtnClick = useCallback(() => {
     if (isInputInUSDC) {
-      if (!selectedAssetUSDPrice) throw 'USD price is not available'
+      if (!selectedAssetUSDPrice) throw 'USD price is not available';
 
-      const usdAmount = new BigNumber(token?.amount ?? '0')
-        .dividedBy(2)
-        .multipliedBy(selectedAssetUSDPrice)
-      setTextInputValue(usdAmount.toString())
+      const usdAmount = new BigNumber(token?.amount ?? '0').dividedBy(2).multipliedBy(selectedAssetUSDPrice);
+      setTextInputValue(usdAmount.toString());
     } else {
-      const amount = new BigNumber(token?.amount ?? '0').dividedBy(2).toFixed(6, 1)
-      setTextInputValue(amount)
+      const amount = new BigNumber(token?.amount ?? '0').dividedBy(2).toFixed(6, 1);
+      setTextInputValue(amount);
     }
-  }, [isInputInUSDC, selectedAssetUSDPrice, token?.amount, setTextInputValue])
+  }, [isInputInUSDC, selectedAssetUSDPrice, token?.amount, setTextInputValue]);
 
   const handleInputTypeSwitchClick = useCallback(() => {
     if (!selectedAssetUSDPrice) {
-      throw 'USD price is not available'
+      throw 'USD price is not available';
     }
 
     if (isInputInUSDC) {
-      setIsInputInUSDC(false)
-      const cryptoAmount = new BigNumber(textInputValue).dividedBy(selectedAssetUSDPrice)
-      setTextInputValue(cryptoAmount.toString())
+      setIsInputInUSDC(false);
+      const cryptoAmount = new BigNumber(textInputValue).dividedBy(selectedAssetUSDPrice);
+      setTextInputValue(cryptoAmount.toString());
     } else {
-      setIsInputInUSDC(true)
-      const usdAmount = new BigNumber(textInputValue).multipliedBy(selectedAssetUSDPrice)
-      setTextInputValue(usdAmount.toString())
+      setIsInputInUSDC(true);
+      const usdAmount = new BigNumber(textInputValue).multipliedBy(selectedAssetUSDPrice);
+      setTextInputValue(usdAmount.toString());
     }
-  }, [isInputInUSDC, selectedAssetUSDPrice, setIsInputInUSDC, textInputValue])
+  }, [isInputInUSDC, selectedAssetUSDPrice, setIsInputInUSDC, textInputValue]);
 
-  const inputValue = showFor === 'source' ? textInputValue : isInputInUSDC ? dollarAmount : value
+  const inputValue = showFor === 'source' ? textInputValue : isInputInUSDC ? dollarAmount : value;
 
   return (
     <div className='w-full bg-secondary-100 rounded-xl p-5 flex flex-col gap-3' key={balanceAmount}>
@@ -227,26 +203,15 @@ function TokenInputCardView({
         </p>
         {!isChainAbstractionView &&
           (loadingChains ? (
-            <Skeleton
-              width={100}
-              height={36}
-              containerClassName='block !leading-none overflow-hidden rounded-full'
-            />
+            <Skeleton width={100} height={36} containerClassName='block !leading-none overflow-hidden rounded-full' />
           ) : (
             <button
-              className={classNames(
-                'rounded-full p-2 flex gap-2 items-center bg-gray-50 dark:bg-gray-900',
-                {
-                  'opacity-50 pointer-events-none': selectChainDisabled,
-                },
-              )}
+              className={classNames('rounded-full p-2 flex gap-2 items-center bg-gray-50 dark:bg-gray-900', {
+                'opacity-50 pointer-events-none': selectChainDisabled,
+              })}
               onClick={onChainSelectSheet}
             >
-              <img
-                src={chainLogo}
-                className='w-[20px] h-[20px] rounded-full'
-                onError={imgOnError(defaultTokenLogo)}
-              />
+              <img src={chainLogo} className='w-[20px] h-[20px] rounded-full' onError={imgOnError(defaultTokenLogo)} />
               <p className='dark:text-white-100 text-xs font-bold'>{chainName ?? 'Select Chain'}</p>
               <CaretDown size={14} className='dark:text-white-100' />
             </button>
@@ -302,15 +267,11 @@ function TokenInputCardView({
                 altText={token?.symbol ?? token?.name ?? ''}
                 imageClassName={classNames(
                   'rounded-full',
-                  selectedChain && chains[selectedChain.key]?.chainSymbolImageUrl
-                    ? 'w-5 h-5 ml-0.5 mt-0.5'
-                    : 'w-6 h-6',
+                  selectedChain && chains[selectedChain.key]?.chainSymbolImageUrl ? 'w-5 h-5 ml-0.5 mt-0.5' : 'w-6 h-6',
                 )}
                 containerClassName={classNames(
                   '!bg-gray-200 dark:!bg-gray-800',
-                  selectedChain && chains[selectedChain.key]?.chainSymbolImageUrl
-                    ? 'w-5 h-5'
-                    : 'w-6 h-6',
+                  selectedChain && chains[selectedChain.key]?.chainSymbolImageUrl ? 'w-5 h-5' : 'w-6 h-6',
                 )}
                 textClassName='text-[7px] !leading-[11px]'
                 key={token?.img}
@@ -405,7 +366,7 @@ function TokenInputCardView({
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export const TokenInputCard = observer(TokenInputCardView)
+export const TokenInputCard = observer(TokenInputCardView);

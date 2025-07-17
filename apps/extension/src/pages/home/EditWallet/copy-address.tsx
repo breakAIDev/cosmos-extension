@@ -1,27 +1,27 @@
-import { CheckCircle } from '@phosphor-icons/react'
-import { Button } from 'components/ui/button'
-import { AnimatePresence, motion } from 'framer-motion'
-import { CopyIcon } from 'icons/copy-icon'
-import React, { useEffect, useState } from 'react'
-import { UserClipboard } from 'utils/clipboard'
-import { transition150 } from 'utils/motion-variants'
-import { sliceAddress } from 'utils/strings'
+import { CheckCircle } from '@phosphor-icons/react';
+import { Button } from 'components/ui/button';
+import { AnimatePresence, motion } from 'framer-motion';
+import { CopyIcon } from 'icons/copy-icon';
+import React, { useEffect, useState } from 'react';
+import { UserClipboard } from 'utils/clipboard';
+import { transition150 } from 'utils/motion-variants';
+import { sliceAddress } from 'utils/strings';
 
 const copyVariants = {
   hide: { opacity: 0, scale: 0.8 },
   animate: { opacity: 1, scale: 1 },
-}
+};
 
 export const CopyButton = ({ address }: { address: string }) => {
-  const [isCopied, setIsCopied] = useState(false)
+  const [isCopied, setIsCopied] = useState(false);
 
   useEffect(() => {
     if (isCopied) {
       setTimeout(() => {
-        setIsCopied(false)
-      }, 2_000)
+        setIsCopied(false);
+      }, 2_000);
     }
-  }, [isCopied])
+  }, [isCopied]);
 
   return (
     <Button
@@ -31,8 +31,8 @@ export const CopyButton = ({ address }: { address: string }) => {
         '!text-xs font-medium text-secondary-800 flex items-center gap-x-2 py-2 px-4 rounded-full bg-secondary-100 hover:bg-secondary-200 transition-colors relative font-DMMono'
       }
       onClick={(e) => {
-        setIsCopied(true)
-        UserClipboard.copyText(address)
+        setIsCopied(true);
+        UserClipboard.copyText(address);
       }}
     >
       {sliceAddress(address)}
@@ -62,5 +62,5 @@ export const CopyButton = ({ address }: { address: string }) => {
         )}
       </AnimatePresence>
     </Button>
-  )
-}
+  );
+};

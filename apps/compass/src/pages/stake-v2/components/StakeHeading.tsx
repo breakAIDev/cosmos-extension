@@ -1,33 +1,28 @@
-import { useChainInfo, useSelectedNetwork, useStaking } from '@leapwallet/cosmos-wallet-hooks'
-import { Skeleton } from 'components/ui/skeleton'
-import currency from 'currency.js'
-import { AnimatePresence, motion } from 'framer-motion'
-import { useActiveChain } from 'hooks/settings/useActiveChain'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import { observer } from 'mobx-react-lite'
-import React, { useMemo } from 'react'
-import { rootDenomsStore } from 'stores/denoms-store-instance'
-import {
-  claimRewardsStore,
-  delegationsStore,
-  unDelegationsStore,
-  validatorsStore,
-} from 'stores/stake-store'
-import { imgOnError } from 'utils/imgOnError'
-import { opacityFadeInOut, transition150 } from 'utils/motion-variants'
+import { useChainInfo, useSelectedNetwork, useStaking } from '@leapwallet/cosmos-wallet-hooks';
+import { Skeleton } from 'components/ui/skeleton';
+import currency from 'currency.js';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useActiveChain } from 'hooks/settings/useActiveChain';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { observer } from 'mobx-react-lite';
+import React, { useMemo } from 'react';
+import { rootDenomsStore } from 'stores/denoms-store-instance';
+import { claimRewardsStore, delegationsStore, unDelegationsStore, validatorsStore } from 'stores/stake-store';
+import { imgOnError } from 'utils/imgOnError';
+import { opacityFadeInOut, transition150 } from 'utils/motion-variants';
 
 const StakeHeading = observer(() => {
-  const activeChain = useActiveChain()
-  const activeNetwork = useSelectedNetwork()
+  const activeChain = useActiveChain();
+  const activeNetwork = useSelectedNetwork();
 
-  const defaultTokenLogo = useDefaultTokenLogo()
-  const activeChainInfo = useChainInfo(activeChain)
+  const defaultTokenLogo = useDefaultTokenLogo();
+  const activeChainInfo = useChainInfo(activeChain);
 
-  const denoms = rootDenomsStore.allDenoms
-  const chainDelegations = delegationsStore.delegationsForChain(activeChain)
-  const chainValidators = validatorsStore.validatorsForChain(activeChain)
-  const chainUnDelegations = unDelegationsStore.unDelegationsForChain(activeChain)
-  const chainClaimRewards = claimRewardsStore.claimRewardsForChain(activeChain)
+  const denoms = rootDenomsStore.allDenoms;
+  const chainDelegations = delegationsStore.delegationsForChain(activeChain);
+  const chainValidators = validatorsStore.validatorsForChain(activeChain);
+  const chainUnDelegations = unDelegationsStore.unDelegationsForChain(activeChain);
+  const chainClaimRewards = claimRewardsStore.claimRewardsForChain(activeChain);
 
   const { network, loadingNetwork } = useStaking(
     denoms,
@@ -37,16 +32,16 @@ const StakeHeading = observer(() => {
     chainClaimRewards,
     activeChain,
     activeNetwork,
-  )
+  );
 
   const aprValue = useMemo(() => {
     if (network?.chainApr) {
       return currency((network?.chainApr * 100).toString(), {
         precision: 2,
         symbol: '',
-      }).format()
+      }).format();
     }
-  }, [network?.chainApr])
+  }, [network?.chainApr]);
 
   return (
     <div className='flex justify-between w-full items-center'>
@@ -88,7 +83,7 @@ const StakeHeading = observer(() => {
         )}
       </AnimatePresence>
     </div>
-  )
-})
+  );
+});
 
-export default StakeHeading
+export default StakeHeading;

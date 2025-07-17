@@ -1,60 +1,56 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { TXN_STATUS } from '@leapwallet/elements-core'
-import { CaretRight, CheckCircle, XCircle } from '@phosphor-icons/react'
-import { AnimatePresence, motion } from 'framer-motion'
-import { Images } from 'images'
-import React, { Dispatch, SetStateAction, useCallback, useEffect, useMemo } from 'react'
-import { scaleInOutHalf, transition } from 'utils/motion-variants/global-layout-motions'
-import { generateObjectKey, removePendingSwapTxs, TxStoreObject } from 'utils/pendingSwapsTxsStore'
-import { sliceWord } from 'utils/strings'
+import { TXN_STATUS } from '@leapwallet/elements-core';
+import { CaretRight, CheckCircle, XCircle } from '@phosphor-icons/react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Images } from 'images';
+import React, { Dispatch, SetStateAction, useCallback, useEffect, useMemo } from 'react';
+import { scaleInOutHalf, transition } from 'utils/motion-variants/global-layout-motions';
+import { generateObjectKey, removePendingSwapTxs, TxStoreObject } from 'utils/pendingSwapsTxsStore';
+import { sliceWord } from 'utils/strings';
 
 type Props = {
-  setShowSwapTxPageFor: Dispatch<SetStateAction<TxStoreObject | undefined>>
-  selectedPendingSwapTx: TxStoreObject
-}
+  setShowSwapTxPageFor: Dispatch<SetStateAction<TxStoreObject | undefined>>;
+  selectedPendingSwapTx: TxStoreObject;
+};
 
 const PendingSwapsAlertStrip = ({ setShowSwapTxPageFor, selectedPendingSwapTx }: Props) => {
   const handleViewClick = useCallback(() => {
-    setShowSwapTxPageFor(selectedPendingSwapTx)
-  }, [selectedPendingSwapTx, setShowSwapTxPageFor])
+    setShowSwapTxPageFor(selectedPendingSwapTx);
+  }, [selectedPendingSwapTx, setShowSwapTxPageFor]);
 
   useEffect(() => {
-    if (
-      [TXN_STATUS.SUCCESS, TXN_STATUS.FAILED].includes(
-        selectedPendingSwapTx?.state ?? TXN_STATUS.PENDING,
-      )
-    ) {
+    if ([TXN_STATUS.SUCCESS, TXN_STATUS.FAILED].includes(selectedPendingSwapTx?.state ?? TXN_STATUS.PENDING)) {
       setTimeout(() => {
         const txKey = generateObjectKey(
           selectedPendingSwapTx?.routingInfo ?? {
             messages: (selectedPendingSwapTx as any)?.route?.messages,
           },
-        )
+        );
         if (txKey) {
-          removePendingSwapTxs(txKey)
+          removePendingSwapTxs(txKey);
         }
-      }, 5000)
+      }, 5000);
     }
-  }, [selectedPendingSwapTx])
+  }, [selectedPendingSwapTx]);
 
   const { icon, title } = useMemo(() => {
     if (selectedPendingSwapTx?.state === TXN_STATUS.SUCCESS) {
       return {
         icon: <CheckCircle size={36} className='text-foreground' />,
         title: 'Swap successful',
-      }
+      };
     }
     if (selectedPendingSwapTx?.state === TXN_STATUS.FAILED) {
       return {
         icon: <XCircle size={36} className='text-foreground' />,
         title: 'Swap failed',
-      }
+      };
     }
     return {
       icon: Images.Swap.Rotate,
       title: 'Swap in progress...',
-    }
-  }, [selectedPendingSwapTx?.state])
+    };
+  }, [selectedPendingSwapTx?.state]);
 
   return (
     <div
@@ -100,7 +96,7 @@ const PendingSwapsAlertStrip = ({ setShowSwapTxPageFor, selectedPendingSwapTx }:
       </div>
       <CaretRight size={12} className='text-muted-foreground' />
     </div>
-  )
-}
+  );
+};
 
-export default PendingSwapsAlertStrip
+export default PendingSwapsAlertStrip;

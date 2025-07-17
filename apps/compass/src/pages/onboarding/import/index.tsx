@@ -1,17 +1,17 @@
-import ChoosePasswordView from 'components/choose-password-view'
-import { AnimatePresence } from 'framer-motion'
-import { observer } from 'mobx-react-lite'
-import React from 'react'
+import ChoosePasswordView from 'components/choose-password-view';
+import { AnimatePresence } from 'framer-motion';
+import { observer } from 'mobx-react-lite';
+import React from 'react';
 
-import { PrivateKeyView, SeedPhraseView } from '../components'
-import { CreatingWalletLoader } from '../create/creating-wallet-loader'
-import { ImportWalletProvider, useImportWalletContext } from './import-wallet-context'
-import ImportLedgerView from './ImportLedgerView'
-import { ImportWalletLayout } from './layout'
-import { LedgerFlow } from './ledger-flow/LedgerFlow'
-import SelectImportType from './select-import-type'
-import SelectLedgerWalletView from './SelectLedgerWalletView'
-import { SelectWalletView } from './SelectWalletView'
+import { PrivateKeyView, SeedPhraseView } from '../components';
+import { CreatingWalletLoader } from '../create/creating-wallet-loader';
+import { ImportWalletProvider, useImportWalletContext } from './import-wallet-context';
+import ImportLedgerView from './ImportLedgerView';
+import { ImportWalletLayout } from './layout';
+import { LedgerFlow } from './ledger-flow/LedgerFlow';
+import SelectImportType from './select-import-type';
+import SelectLedgerWalletView from './SelectLedgerWalletView';
+import { SelectWalletView } from './SelectWalletView';
 
 const OnboardingImportWalletView = observer(() => {
   const {
@@ -31,7 +31,7 @@ const OnboardingImportWalletView = observer(() => {
     currentStepName,
     customWalletAccounts,
     getCustomLedgerAccountDetails,
-  } = useImportWalletContext()
+  } = useImportWalletContext();
 
   return (
     <AnimatePresence mode='wait' presenceAffectsLayout>
@@ -109,8 +109,8 @@ const OnboardingImportWalletView = observer(() => {
         />
       )}
     </AnimatePresence>
-  )
-})
+  );
+});
 
 const OnboardingImportWallet = () => (
   <ImportWalletProvider>
@@ -118,6 +118,6 @@ const OnboardingImportWallet = () => (
       <OnboardingImportWalletView />
     </ImportWalletLayout>
   </ImportWalletProvider>
-)
+);
 
-export default OnboardingImportWallet
+export default OnboardingImportWallet;

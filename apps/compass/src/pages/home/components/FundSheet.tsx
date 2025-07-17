@@ -1,25 +1,19 @@
-import { CheckCircle } from '@phosphor-icons/react'
-import BottomModal from 'components/bottom-modal'
-import Text from 'components/text'
-import React from 'react'
+import { CheckCircle } from '@phosphor-icons/react';
+import BottomModal from 'components/bottom-modal';
+import Text from 'components/text';
+import React from 'react';
 
-import { FundBannerData } from './FundBanners'
+import { FundBannerData } from './FundBanners';
 
 interface FundsSheetProps {
-  isVisible: boolean
-  onClose: () => void
-  bannerData: FundBannerData[]
-  showCopyAddress: boolean
-  modalTitle: string
+  isVisible: boolean;
+  onClose: () => void;
+  bannerData: FundBannerData[];
+  showCopyAddress: boolean;
+  modalTitle: string;
 }
 
-const FundsSheet = ({
-  isVisible,
-  onClose,
-  bannerData,
-  showCopyAddress,
-  modalTitle,
-}: FundsSheetProps) => {
+const FundsSheet = ({ isVisible, onClose, bannerData, showCopyAddress, modalTitle }: FundsSheetProps) => {
   return (
     <BottomModal isOpen={isVisible} onClose={onClose} title={modalTitle}>
       <div className='flex flex-col gap-3'>
@@ -53,7 +47,7 @@ const FundsSheet = ({
         ))}
       </div>
     </BottomModal>
-  )
-}
+  );
+};
 
-export default FundsSheet
+export default FundsSheet;

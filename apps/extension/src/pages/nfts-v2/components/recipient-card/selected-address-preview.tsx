@@ -1,45 +1,35 @@
-import { SelectedAddress } from '@leapwallet/cosmos-wallet-hooks'
-import { Avatar } from '@leapwallet/leap-ui'
-import Text from 'components/text'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import { Images } from 'images'
-import React, { useState } from 'react'
-import { imgOnError } from 'utils/imgOnError'
+import { SelectedAddress } from '@leapwallet/cosmos-wallet-hooks';
+import { Avatar } from '@leapwallet/leap-ui';
+import Text from 'components/text';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { Images } from 'images';
+import React, { useState } from 'react';
+import { imgOnError } from 'utils/imgOnError';
 
 type SelectedAddressPreviewProps = {
-  selectedAddress: SelectedAddress
-  showEditMenu: boolean
-  onDelete: () => void
-}
+  selectedAddress: SelectedAddress;
+  showEditMenu: boolean;
+  onDelete: () => void;
+};
 
-export const SelectedAddressPreview: React.FC<SelectedAddressPreviewProps> = ({
-  selectedAddress,
-  showEditMenu,
-}) => {
-  const defaultTokenLogo = useDefaultTokenLogo()
-  const [, setShowContactDetailsSheet] = useState(false)
+export const SelectedAddressPreview: React.FC<SelectedAddressPreviewProps> = ({ selectedAddress, showEditMenu }) => {
+  const defaultTokenLogo = useDefaultTokenLogo();
+  const [, setShowContactDetailsSheet] = useState(false);
 
   const handleClick: React.MouseEventHandler<HTMLButtonElement> = (e) => {
-    e.stopPropagation()
-    setShowContactDetailsSheet(true)
-  }
+    e.stopPropagation();
+    setShowContactDetailsSheet(true);
+  };
 
   return (
     <>
-      <div
-        className='flex items-center'
-        title={`${selectedAddress.chainName}: ${selectedAddress.address}`}
-      >
+      <div className='flex items-center' title={`${selectedAddress.chainName}: ${selectedAddress.address}`}>
         <Avatar
           size='sm'
           avatarImage={selectedAddress.avatarIcon ?? defaultTokenLogo}
           avatarOnError={imgOnError(defaultTokenLogo)}
           emoji={selectedAddress.emoji}
-          chainIcon={
-            selectedAddress.avatarIcon === selectedAddress.chainIcon
-              ? undefined
-              : selectedAddress.chainIcon
-          }
+          chainIcon={selectedAddress.avatarIcon === selectedAddress.chainIcon ? undefined : selectedAddress.chainIcon}
           className='bg-gray-200 dark:bg-gray-800 !h-8 !w-8'
         />
         <Text size='md' className='text-gray-800 dark:text-gray-200 ml-2'>
@@ -52,5 +42,5 @@ export const SelectedAddressPreview: React.FC<SelectedAddressPreviewProps> = ({
         ) : null}
       </div>
     </>
-  )
-}
+  );
+};

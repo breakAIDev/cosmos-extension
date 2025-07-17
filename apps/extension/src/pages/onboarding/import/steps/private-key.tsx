@@ -1,35 +1,35 @@
-import { Button } from 'components/ui/button'
-import { PrivateKeyInput } from 'components/ui/input/private-key-input'
-import { KeySlimIcon } from 'icons/key-slim-icon'
-import React, { useEffect, useState } from 'react'
-import { validateSeedPhrase } from 'utils/validateSeedPhrase'
+import { Button } from 'components/ui/button';
+import { PrivateKeyInput } from 'components/ui/input/private-key-input';
+import { KeySlimIcon } from 'icons/key-slim-icon';
+import React, { useEffect, useState } from 'react';
+import { validateSeedPhrase } from 'utils/validateSeedPhrase';
 
-import { OnboardingWrapper } from '../../wrapper'
-import { useImportWalletContext } from '../import-wallet-context'
+import { OnboardingWrapper } from '../../wrapper';
+import { useImportWalletContext } from '../import-wallet-context';
 
 export const PrivateKey = () => {
   const { secret, setSecret, privateKeyError, setPrivateKeyError, importWalletFromSeedPhrase } =
-    useImportWalletContext()
-  const [error, setError] = useState(privateKeyError ?? '')
-  const { prevStep, currentStep } = useImportWalletContext()
+    useImportWalletContext();
+  const [error, setError] = useState(privateKeyError ?? '');
+  const { prevStep, currentStep } = useImportWalletContext();
 
   useEffect(() => {
     if (privateKeyError?.length) {
-      setError(privateKeyError)
+      setError(privateKeyError);
     }
-  }, [privateKeyError])
+  }, [privateKeyError]);
 
   const onChangeHandler = (value: string) => {
-    setError('')
-    setPrivateKeyError && setPrivateKeyError('')
-    setSecret(value)
-  }
+    setError('');
+    setPrivateKeyError && setPrivateKeyError('');
+    setSecret(value);
+  };
 
   const handleImportWalletClick = () => {
     if (validateSeedPhrase({ phrase: secret, isPrivateKey: true, setError, setSecret })) {
-      importWalletFromSeedPhrase()
+      importWalletFromSeedPhrase();
     }
-  }
+  };
 
   return (
     <OnboardingWrapper
@@ -50,5 +50,5 @@ export const PrivateKey = () => {
         Import private key
       </Button>
     </OnboardingWrapper>
-  )
-}
+  );
+};

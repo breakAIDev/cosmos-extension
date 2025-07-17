@@ -1,59 +1,59 @@
-import { captureException } from '@sentry/react'
-import { ButtonName, ButtonType, EventName } from 'config/analytics'
-import mixpanel from 'mixpanel-browser'
-import browser from 'webextension-polyfill'
-export const BRANDS_SUPPORTING_SIDE_PANEL = ['Google Chrome', 'Microsoft Edge', 'Brave']
+import { captureException } from '@sentry/react';
+import { ButtonName, ButtonType, EventName } from 'config/analytics';
+import mixpanel from 'mixpanel-browser';
+import browser from 'webextension-polyfill';
+export const BRANDS_SUPPORTING_SIDE_PANEL = ['Google Chrome', 'Microsoft Edge', 'Brave'];
 
 export function isSidePanel() {
-  return window.location.pathname.includes('sidepanel.html')
+  return window.location.pathname.includes('sidepanel.html');
 }
 
-export const sidePanel = isSidePanel()
+export const sidePanel = isSidePanel();
 
 declare global {
   interface Navigator {
     userAgentData?: {
-      brands: { brand: string; version: string }[]
-      mobile: boolean
-      platform: string
-    }
+      brands: { brand: string; version: string }[];
+      mobile: boolean;
+      platform: string;
+    };
   }
 }
 
 export function isSidePanelSupported() {
-  const brands = navigator.userAgentData?.brands?.map(({ brand }) => brand) ?? []
-  return BRANDS_SUPPORTING_SIDE_PANEL.some((brand) => brands.includes(brand)) && !!chrome?.sidePanel
+  const brands = navigator.userAgentData?.brands?.map(({ brand }) => brand) ?? [];
+  return BRANDS_SUPPORTING_SIDE_PANEL.some((brand) => brands.includes(brand)) && !!chrome?.sidePanel;
 }
 
-export const sidePanelSupported = isSidePanelSupported()
+export const sidePanelSupported = isSidePanelSupported();
 
-export const isInExpandView = browser.extension.getViews({ type: 'tab' }).length > 0
+export const isInExpandView = browser.extension.getViews({ type: 'tab' }).length > 0;
 
 export const handleSidePanelClick = async () => {
   if (!isSidePanelSupported() || sidePanel) {
     if (sidePanel) {
       await chrome.sidePanel.setPanelBehavior({
         openPanelOnActionClick: false,
-      })
+      });
     }
-    window.close()
-    return
+    window.close();
+    return;
   }
   if (!chrome.windows) {
-    return
+    return;
   }
-  const currentWindow = await chrome.windows.getCurrent()
-  const windowId = currentWindow?.id
+  const currentWindow = await chrome.windows.getCurrent();
+  const windowId = currentWindow?.id;
   if (!windowId || !chrome.sidePanel) {
-    return
+    return;
   }
   await chrome.sidePanel.setOptions({
     path: 'sidepanel.html#/home',
     enabled: true,
-  })
-  await chrome.sidePanel.open({ windowId })
+  });
+  await chrome.sidePanel.open({ windowId });
   await chrome.sidePanel.setPanelBehavior({
     openPanelOnActionClick: true,
-  })
-  window.close()
-}
+  });
+  window.close();
+};

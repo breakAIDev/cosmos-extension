@@ -1,11 +1,11 @@
-import { EventName, PageName } from 'config/analytics'
-import { Images } from 'images'
-import React, { useCallback } from 'react'
-import { mixpanelTrack } from 'utils/tracking'
+import { EventName, PageName } from 'config/analytics';
+import { Images } from 'images';
+import React, { useCallback } from 'react';
+import { mixpanelTrack } from 'utils/tracking';
 
-import FilterItem from '../components/FilterItem'
-import { useChadProvider } from '../context/chad-exclusives-context'
-import { CategoryIcon } from '../utils/filters'
+import FilterItem from '../components/FilterItem';
+import { useChadProvider } from '../context/chad-exclusives-context';
+import { CategoryIcon } from '../utils/filters';
 
 export default function CategoryFilter({
   categoryFilters,
@@ -13,29 +13,29 @@ export default function CategoryFilter({
   isChad,
   onClose,
 }: {
-  categoryFilters: string[]
-  pageName: PageName
-  isChad: boolean
-  onClose: () => void
+  categoryFilters: string[];
+  pageName: PageName;
+  isChad: boolean;
+  onClose: () => void;
 }) {
-  const { selectedOpportunities, selectedEcosystems, setOpportunities } = useChadProvider()
+  const { selectedOpportunities, selectedEcosystems, setOpportunities } = useChadProvider();
 
   const handleCategoryToggle = useCallback(
     (category: string) => {
       const newCategories = selectedOpportunities?.includes(category)
         ? selectedOpportunities.filter((o) => o !== category)
-        : [...(selectedOpportunities || []), category]
+        : [...(selectedOpportunities || []), category];
 
-      setOpportunities(newCategories)
-      onClose()
+      setOpportunities(newCategories);
+      onClose();
       mixpanelTrack(EventName.Filters, {
         filterSelected: [...(newCategories || []), ...(selectedEcosystems || [])],
         filterApplySource: pageName,
         isChad,
-      })
+      });
     },
     [selectedOpportunities, setOpportunities, selectedEcosystems, pageName, isChad, onClose],
-  )
+  );
 
   return (
     <div className='flex flex-col gap-5'>
@@ -57,5 +57,5 @@ export default function CategoryFilter({
           ))}
       </div>
     </div>
-  )
+  );
 }

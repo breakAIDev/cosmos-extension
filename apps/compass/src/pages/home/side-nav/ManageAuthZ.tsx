@@ -9,61 +9,57 @@ import {
   useActiveChain,
   useAuthzTx,
   useGetGivenAuthz,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { RootDenomsStore } from '@leapwallet/cosmos-wallet-store'
-import { CardDivider, Header, HeaderActionType } from '@leapwallet/leap-ui'
-import { CaretRight } from '@phosphor-icons/react'
-import { ProposalDescription } from 'components/proposal-description'
-import Text from 'components/text'
-import { AGGREGATED_CHAIN_KEY } from 'config/constants'
-import { Wallet } from 'hooks/wallet/useWallet'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import React, { createContext, ReactNode, useContext, useMemo } from 'react'
-import Skeleton from 'react-loading-skeleton'
-import { rootDenomsStore } from 'stores/denoms-store-instance'
-import { AggregatedSupportedChain } from 'types/utility'
-import { assert } from 'utils/assert'
-import { formatAuthzDate } from 'utils/formatAuthzDate'
-import { useTxCallBack } from 'utils/txCallback'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { RootDenomsStore } from '@leapwallet/cosmos-wallet-store';
+import { CardDivider, Header, HeaderActionType } from '@leapwallet/leap-ui';
+import { CaretRight } from '@phosphor-icons/react';
+import { ProposalDescription } from 'components/proposal-description';
+import Text from 'components/text';
+import { AGGREGATED_CHAIN_KEY } from 'config/constants';
+import { Wallet } from 'hooks/wallet/useWallet';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import React, { createContext, ReactNode, useContext, useMemo } from 'react';
+import Skeleton from 'react-loading-skeleton';
+import { rootDenomsStore } from 'stores/denoms-store-instance';
+import { AggregatedSupportedChain } from 'types/utility';
+import { assert } from 'utils/assert';
+import { formatAuthzDate } from 'utils/formatAuthzDate';
+import { useTxCallBack } from 'utils/txCallback';
 
-import { AuthzDetails } from './AuthzDetails'
+import { AuthzDetails } from './AuthzDetails';
 
-const AuthZContext = createContext<
-  (AuthzTxType & { onReviewRevokeTx: () => Promise<void> }) | null
->(null)
+const AuthZContext = createContext<(AuthzTxType & { onReviewRevokeTx: () => Promise<void> }) | null>(null);
 
 export const AuthZContextProvider = observer(
   ({ children, rootDenomsStore }: { children: ReactNode; rootDenomsStore: RootDenomsStore }) => {
-    const denoms = rootDenomsStore.allDenoms
-    const txCallback = useTxCallBack()
-    const { selectedChain, onReviewRevokeTransaction, ...rest } = useAuthzTx({ denoms })
+    const denoms = rootDenomsStore.allDenoms;
+    const txCallback = useTxCallBack();
+    const { selectedChain, onReviewRevokeTransaction, ...rest } = useAuthzTx({ denoms });
 
-    const getWallet = Wallet.useGetWallet()
+    const getWallet = Wallet.useGetWallet();
 
     const onReviewRevokeTx = async () => {
-      const wallet = await getWallet(selectedChain)
-      await onReviewRevokeTransaction(wallet, txCallback)
-    }
+      const wallet = await getWallet(selectedChain);
+      await onReviewRevokeTransaction(wallet, txCallback);
+    };
 
     return (
-      <AuthZContext.Provider
-        value={{ selectedChain, onReviewRevokeTransaction, onReviewRevokeTx, ...rest }}
-      >
+      <AuthZContext.Provider value={{ selectedChain, onReviewRevokeTransaction, onReviewRevokeTx, ...rest }}>
         {children}
       </AuthZContext.Provider>
-    )
+    );
   },
-)
+);
 
 export function useAuthZContext() {
-  const context = useContext(AuthZContext)
-  assert(context !== null, 'useManageAuthZContext must be used within ManageAuthZContextProvider')
-  return context
+  const context = useContext(AuthZContext);
+  assert(context !== null, 'useManageAuthZContext must be used within ManageAuthZContextProvider');
+  return context;
 }
 
 const _ManageAuthZ = observer(({ goBack }: { goBack: () => void }) => {
-  const activeChain = useActiveChain()
+  const activeChain = useActiveChain();
 
   const {
     selectedChain,
@@ -73,12 +69,9 @@ const _ManageAuthZ = observer(({ goBack }: { goBack: () => void }) => {
     setGasError,
     setError,
     selectedChainHasMainnetOnly,
-  } = useAuthZContext()
+  } = useAuthZContext();
 
-  const { data, isLoading } = useGetGivenAuthz(
-    selectedChain,
-    selectedChainHasMainnetOnly ? 'mainnet' : undefined,
-  )
+  const { data, isLoading } = useGetGivenAuthz(selectedChain, selectedChainHasMainnetOnly ? 'mainnet' : undefined);
 
   const { formattedGrants, isEmpty } = useMemo(() => {
     const _formattedGrants: Record<TypeOfAuthzGrant, Grant[]> = {
@@ -90,77 +83,77 @@ const _ManageAuthZ = observer(({ goBack }: { goBack: () => void }) => {
       Undelegate: [],
       Vote: [],
       'Withdraw Reward': [],
-    }
+    };
 
     if (data) {
       data.forEach((grant: Grant) => {
         switch (typeOfAuthzGrant(grant)) {
           case TypeOfAuthzGrant.Custom: {
-            _formattedGrants.Custom.push(grant)
-            break
+            _formattedGrants.Custom.push(grant);
+            break;
           }
 
           case TypeOfAuthzGrant.Delegate: {
-            _formattedGrants.Delegate.push(grant)
-            break
+            _formattedGrants.Delegate.push(grant);
+            break;
           }
 
           case TypeOfAuthzGrant.Deposit: {
-            _formattedGrants.Deposit.push(grant)
-            break
+            _formattedGrants.Deposit.push(grant);
+            break;
           }
 
           case TypeOfAuthzGrant.Redelegate: {
-            _formattedGrants.Redelegate.push(grant)
-            break
+            _formattedGrants.Redelegate.push(grant);
+            break;
           }
 
           case TypeOfAuthzGrant.Send: {
-            _formattedGrants.Send.push(grant)
-            break
+            _formattedGrants.Send.push(grant);
+            break;
           }
 
           case TypeOfAuthzGrant.Undelegate: {
-            _formattedGrants.Undelegate.push(grant)
-            break
+            _formattedGrants.Undelegate.push(grant);
+            break;
           }
 
           case TypeOfAuthzGrant.Vote: {
-            _formattedGrants.Vote.push(grant)
-            break
+            _formattedGrants.Vote.push(grant);
+            break;
           }
 
           case TypeOfAuthzGrant.WithdrawReward: {
-            _formattedGrants['Withdraw Reward'].push(grant)
-            break
+            _formattedGrants['Withdraw Reward'].push(grant);
+            break;
           }
         }
-      })
+      });
     }
 
     return {
       formattedGrants: _formattedGrants,
       isEmpty: Object.values(_formattedGrants).every((entry) => entry.length === 0),
-    }
-  }, [data])
+    };
+  }, [data]);
 
   const handleGrantClick = (grant: Grant, grantType: TypeOfAuthzGrant) => {
-    setShowAuthzDetailsFor(grant)
+    setShowAuthzDetailsFor(grant);
 
     if (grantType !== TypeOfAuthzGrant.Custom) {
-      setMsgType(AuthZtypeToMsgTypeMap[grantType])
+      setMsgType(AuthZtypeToMsgTypeMap[grantType]);
     } else if (grant.authorization['@type'] === GenericAuthzMessageType) {
-      setMsgType(grant.authorization.msg ?? '')
+      setMsgType(grant.authorization.msg ?? '');
     }
-  }
+  };
 
   return showAuthzDetailsFor ? (
     <AuthzDetails
       goBack={() => {
-        setShowAuthzDetailsFor(undefined)
-        setMsgType('')
-        setError('')
-        setGasError('')
+        setShowAuthzDetailsFor(undefined);
+        setMsgType('');
+        setError('');
+        setGasError('');
       }}
       grant={showAuthzDetailsFor}
     />
@@ -183,13 +176,9 @@ const _ManageAuthZ = observer(({ goBack }: { goBack: () => void }) => {
                   <img src={Images.Nav.NoAuthZ} alt='' className='w-6 h-6 invert dark:invert-0' />
                 </div>
 
-                <h1 className='font-bold text-gray-800 dark:text-white-100 text-base mt-3'>
-                  No AuthZ
-                </h1>
+                <h1 className='font-bold text-gray-800 dark:text-white-100 text-base mt-3'>No AuthZ</h1>
 
-                <p className='text-gray-400 font-medium text-sm'>
-                  Your AuthZ grants will appear here
-                </p>
+                <p className='text-gray-400 font-medium text-sm'>Your AuthZ grants will appear here</p>
               </div>
             )}
 
@@ -197,7 +186,7 @@ const _ManageAuthZ = observer(({ goBack }: { goBack: () => void }) => {
               <div className='max-h-[400px] overflow-y-auto w-full'>
                 <div className='flex flex-col gap-4 overflow-hidden'>
                   {Object.entries(formattedGrants).map(([grantType, grants], index) => {
-                    if (grants.length === 0) return null
+                    if (grants.length === 0) return null;
 
                     return (
                       <div className='overflow-y-auto rounded-2xl w-full' key={grantType + index}>
@@ -206,13 +195,13 @@ const _ManageAuthZ = observer(({ goBack }: { goBack: () => void }) => {
                         </h2>
 
                         {grants.map((grant, index) => {
-                          let date = ''
+                          let date = '';
 
                           if (grant.expiration) {
-                            date = formatAuthzDate(grant.expiration)
+                            date = formatAuthzDate(grant.expiration);
 
                             if (date !== 'Expired') {
-                              date = `Expiration Date: ${date}`
+                              date = `Expiration Date: ${date}`;
                             }
                           }
 
@@ -221,9 +210,7 @@ const _ManageAuthZ = observer(({ goBack }: { goBack: () => void }) => {
                               {index !== 0 && <CardDivider />}
 
                               <div
-                                onClick={() =>
-                                  handleGrantClick(grant, grantType as TypeOfAuthzGrant)
-                                }
+                                onClick={() => handleGrantClick(grant, grantType as TypeOfAuthzGrant)}
                                 className='flex justify-between h-[72px] items-center px-4 bg-white-100 dark:bg-gray-900 cursor-pointer'
                               >
                                 <p className='flex flex-col flex-1 justify-center items-start'>
@@ -234,18 +221,16 @@ const _ManageAuthZ = observer(({ goBack }: { goBack: () => void }) => {
                                   </span>
 
                                   {grant.expiration && (
-                                    <span className='text-xs font-medium text-gray-400'>
-                                      {date}
-                                    </span>
+                                    <span className='text-xs font-medium text-gray-400'>{date}</span>
                                   )}
                                 </p>
                                 <CaretRight size={20} className='text-gray-400' />
                               </div>
                             </React.Fragment>
-                          )
+                          );
                         })}
                       </div>
-                    )
+                    );
                   })}
                 </div>
               </div>
@@ -255,22 +240,18 @@ const _ManageAuthZ = observer(({ goBack }: { goBack: () => void }) => {
           <ProposalDescription
             title='About AuthZ'
             description='AuthZ empowers you to delegate specific tasks, like voting or claiming rewards, to another wallet without compromising the security of your account. On this page, you can view and manage all AuthZ transactions initiated by your wallet.'
-            btnColor={
-              (activeChain as AggregatedSupportedChain) === AGGREGATED_CHAIN_KEY
-                ? 'cosmos'
-                : activeChain
-            }
+            btnColor={(activeChain as AggregatedSupportedChain) === AGGREGATED_CHAIN_KEY ? 'cosmos' : activeChain}
           />
         </div>
       </div>
     </>
-  )
-})
+  );
+});
 
 export const ManageAuthZ = observer(({ goBack }: { goBack: () => void }) => {
   return (
     <AuthZContextProvider rootDenomsStore={rootDenomsStore}>
       <_ManageAuthZ goBack={goBack} />
     </AuthZContextProvider>
-  )
-})
+  );
+});

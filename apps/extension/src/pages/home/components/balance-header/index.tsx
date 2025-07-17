@@ -1,15 +1,15 @@
-import { Button } from 'components/ui/button'
-import { Skeleton } from 'components/ui/skeleton'
-import { AnimatePresence, motion } from 'framer-motion'
-import useActiveWallet from 'hooks/settings/useActiveWallet'
-import { EyeIcon } from 'icons/eye-icon'
-import { observer } from 'mobx-react-lite'
-import React from 'react'
-import { rootBalanceStore } from 'stores/root-store'
-import { opacityFadeInOut, transition250 } from 'utils/motion-variants'
+import { Button } from 'components/ui/button';
+import { Skeleton } from 'components/ui/skeleton';
+import { AnimatePresence, motion } from 'framer-motion';
+import useActiveWallet from 'hooks/settings/useActiveWallet';
+import { EyeIcon } from 'icons/eye-icon';
+import { observer } from 'mobx-react-lite';
+import React from 'react';
+import { rootBalanceStore } from 'stores/root-store';
+import { opacityFadeInOut, transition250 } from 'utils/motion-variants';
 
-import { CopyAddress } from './copy-address'
-import { TotalBalance } from './total-balance'
+import { CopyAddress } from './copy-address';
+import { TotalBalance } from './total-balance';
 
 export const BalanceHeaderLoading = (props: { watchWallet?: boolean }) => {
   return (
@@ -20,8 +20,8 @@ export const BalanceHeaderLoading = (props: { watchWallet?: boolean }) => {
       <Skeleton className='h-4 m-[6px] rounded-full w-28' />
       {props.watchWallet ? <Skeleton className='w-56 h-8 rounded-full my-3' /> : null}
     </div>
-  )
-}
+  );
+};
 
 const WatchWalletIndicator = () => {
   return (
@@ -37,13 +37,13 @@ const WatchWalletIndicator = () => {
       <EyeIcon className='size-4' />
       <span className='font-medium text-sm'>You are watching this wallet</span>
     </Button>
-  )
-}
+  );
+};
 
 export const BalanceHeader = observer(() => {
-  const { activeWallet } = useActiveWallet()
-  const watchWallet = activeWallet?.watchWallet
-  const isTokenLoading = rootBalanceStore.loading
+  const { activeWallet } = useActiveWallet();
+  const watchWallet = activeWallet?.watchWallet;
+  const isTokenLoading = rootBalanceStore.loading;
 
   return (
     <div className='w-full py-8 px-7 flex flex-col items-center justify-center'>
@@ -68,5 +68,5 @@ export const BalanceHeader = observer(() => {
         )}
       </AnimatePresence>
     </div>
-  )
-})
+  );
+});

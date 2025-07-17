@@ -1,24 +1,16 @@
-import {
-  useActiveChain,
-  useActiveStakingDenom,
-  useSelectedNetwork,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { Button } from 'components/ui/button'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import React from 'react'
-import { Link } from 'react-router-dom'
-import { rootDenomsStore } from 'stores/denoms-store-instance'
+import { useActiveChain, useActiveStakingDenom, useSelectedNetwork } from '@leapwallet/cosmos-wallet-hooks';
+import { Button } from 'components/ui/button';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { rootDenomsStore } from 'stores/denoms-store-instance';
 
 const NotStakedCard = observer(() => {
-  const activeChain = useActiveChain()
-  const activeNetwork = useSelectedNetwork()
+  const activeChain = useActiveChain();
+  const activeNetwork = useSelectedNetwork();
 
-  const [activeStakingDenom] = useActiveStakingDenom(
-    rootDenomsStore.allDenoms,
-    activeChain,
-    activeNetwork,
-  )
+  const [activeStakingDenom] = useActiveStakingDenom(rootDenomsStore.allDenoms, activeChain, activeNetwork);
 
   return (
     <div className='flex flex-col gap-4 group'>
@@ -36,15 +28,12 @@ const NotStakedCard = observer(() => {
       </div>
 
       <Button asChild size='md' className='w-full'>
-        <Link
-          to='/stake/input'
-          state={{ mode: 'DELEGATE', forceChain: activeChain, forceNetwork: activeNetwork }}
-        >
+        <Link to='/stake/input' state={{ mode: 'DELEGATE', forceChain: activeChain, forceNetwork: activeNetwork }}>
           Stake
         </Link>
       </Button>
     </div>
-  )
-})
+  );
+});
 
-export default NotStakedCard
+export default NotStakedCard;

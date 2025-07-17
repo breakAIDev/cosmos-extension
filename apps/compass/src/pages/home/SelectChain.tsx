@@ -1,31 +1,31 @@
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import BottomModal from 'components/bottom-modal'
-import { EmptyCard } from 'components/empty-card'
-import { PriorityChains } from 'config/constants'
-import useActiveWallet from 'hooks/settings/useActiveWallet'
-import { useChainInfos } from 'hooks/useChainInfos'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import React, { useCallback, useMemo, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { ManageChainSettings, manageChainsStore } from 'stores/manage-chains-store'
-import { starredChainsStore } from 'stores/starred-chains-store'
-import { AggregatedSupportedChain } from 'types/utility'
-import { isCompassWallet } from 'utils/isCompassWallet'
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import BottomModal from 'components/bottom-modal';
+import { EmptyCard } from 'components/empty-card';
+import { PriorityChains } from 'config/constants';
+import useActiveWallet from 'hooks/settings/useActiveWallet';
+import { useChainInfos } from 'hooks/useChainInfos';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { ManageChainSettings, manageChainsStore } from 'stores/manage-chains-store';
+import { starredChainsStore } from 'stores/starred-chains-store';
+import { AggregatedSupportedChain } from 'types/utility';
+import { isCompassWallet } from 'utils/isCompassWallet';
 
-import { useActiveChain, useSetActiveChain } from '../../hooks/settings/useActiveChain'
-import { ChainCardWrapper } from './ChainCardWrapper'
+import { useActiveChain, useSetActiveChain } from '../../hooks/settings/useActiveChain';
+import { ChainCardWrapper } from './ChainCardWrapper';
 
 export type ListChainsProps = {
-  onChainSelect: (chainName: SupportedChain) => void
-  selectedChain: SupportedChain
-  onPage?: 'AddCollection'
-  chainsToShow?: string[]
-  searchedChain?: string
-  setSearchedChain?: (val: string) => void
-  showAggregatedOption?: boolean
-  handleAddNewChainClick?: VoidFunction | null
-}
+  onChainSelect: (chainName: SupportedChain) => void;
+  selectedChain: SupportedChain;
+  onPage?: 'AddCollection';
+  chainsToShow?: string[];
+  searchedChain?: string;
+  setSearchedChain?: (val: string) => void;
+  showAggregatedOption?: boolean;
+  handleAddNewChainClick?: VoidFunction | null;
+};
 
 export const ListChains = observer(
   ({
@@ -38,13 +38,13 @@ export const ListChains = observer(
     showAggregatedOption = false,
     handleAddNewChainClick,
   }: ListChainsProps) => {
-    const { activeWallet } = useActiveWallet()
+    const { activeWallet } = useActiveWallet();
 
-    const searchedChain = paramsSearchedChain ?? ''
+    const searchedChain = paramsSearchedChain ?? '';
 
-    const chainInfos = useChainInfos()
+    const chainInfos = useChainInfos();
 
-    const showChains = manageChainsStore.chains
+    const showChains = manageChainsStore.chains;
 
     const _filteredChains = useMemo(() => {
       return showChains.filter(function (chain) {
@@ -52,18 +52,11 @@ export const ListChains = observer(
           (isCompassWallet() && chain.chainName === 'cosmos') ||
           !chain.active ||
           (onPage === 'AddCollection' &&
-            [
-              'omniflix',
-              'stargaze',
-              'forma',
-              'manta',
-              'aura',
-              'mainCoreum',
-              'coreum',
-              'lightlink',
-            ].includes(chain.chainName))
+            ['omniflix', 'stargaze', 'forma', 'manta', 'aura', 'mainCoreum', 'coreum', 'lightlink'].includes(
+              chain.chainName,
+            ))
         ) {
-          return false
+          return false;
         }
 
         if (
@@ -71,58 +64,47 @@ export const ListChains = observer(
           chainsToShow.length &&
           !chainsToShow.includes(chainInfos[chain.chainName]?.chainRegistryPath)
         ) {
-          return false
+          return false;
         }
 
-        const chainName = chainInfos[chain.chainName]?.chainName ?? chain.chainName
-        return chainName.toLowerCase().includes(searchedChain.toLowerCase())
-      })
-    }, [chainInfos, showChains, chainsToShow, onPage, searchedChain])
+        const chainName = chainInfos[chain.chainName]?.chainName ?? chain.chainName;
+        return chainName.toLowerCase().includes(searchedChain.toLowerCase());
+      });
+    }, [chainInfos, showChains, chainsToShow, onPage, searchedChain]);
 
     const filteredChains = useMemo(() => {
-      const chains = _filteredChains
+      const chains = _filteredChains;
 
       const favouriteChains = chains
         .filter((chain) => starredChainsStore.chains.includes(chain.chainName))
-        .sort((chainA, chainB) => chainA.chainName.localeCompare(chainB.chainName))
+        .sort((chainA, chainB) => chainA.chainName.localeCompare(chainB.chainName));
 
       const priorityChains = chains
         .filter(
-          (chain) =>
-            PriorityChains.includes(chain.chainName) &&
-            !starredChainsStore.chains.includes(chain.chainName),
+          (chain) => PriorityChains.includes(chain.chainName) && !starredChainsStore.chains.includes(chain.chainName),
         )
-        .sort(
-          (chainA, chainB) =>
-            PriorityChains.indexOf(chainA.chainName) - PriorityChains.indexOf(chainB.chainName),
-        )
+        .sort((chainA, chainB) => PriorityChains.indexOf(chainA.chainName) - PriorityChains.indexOf(chainB.chainName));
 
       const otherChains = chains
         .filter(
-          (chain) =>
-            !starredChainsStore.chains.includes(chain.chainName) &&
-            !PriorityChains.includes(chain.chainName),
+          (chain) => !starredChainsStore.chains.includes(chain.chainName) && !PriorityChains.includes(chain.chainName),
         )
-        .sort((chainA, chainB) => chainA.chainName.localeCompare(chainB.chainName))
+        .sort((chainA, chainB) => chainA.chainName.localeCompare(chainB.chainName));
 
-      const chainsList = [...favouriteChains, ...priorityChains, ...otherChains]
+      const chainsList = [...favouriteChains, ...priorityChains, ...otherChains];
       if (activeWallet?.watchWallet) {
-        const walletChains = new Set(Object.keys(activeWallet.addresses))
+        const walletChains = new Set(Object.keys(activeWallet.addresses));
         return chainsList.sort((a, b) =>
-          walletChains.has(a.chainName) === walletChains.has(b.chainName)
-            ? 0
-            : walletChains.has(a.chainName)
-            ? -1
-            : 1,
-        )
+          walletChains.has(a.chainName) === walletChains.has(b.chainName) ? 0 : walletChains.has(a.chainName) ? -1 : 1,
+        );
       }
 
-      return chainsList
-    }, [_filteredChains, activeWallet?.addresses, activeWallet?.watchWallet])
+      return chainsList;
+    }, [_filteredChains, activeWallet?.addresses, activeWallet?.watchWallet]);
 
     const handleClick = (chainName: AggregatedSupportedChain) => {
-      onChainSelect(chainName as SupportedChain)
-    }
+      onChainSelect(chainName as SupportedChain);
+    };
 
     return (
       <>
@@ -148,33 +130,33 @@ export const ListChains = observer(
           ))
         )}
       </>
-    )
+    );
   },
-)
+);
 
 type ChainSelectorProps = {
-  readonly isVisible: boolean
-  readonly onClose: VoidFunction
-}
+  readonly isVisible: boolean;
+  readonly onClose: VoidFunction;
+};
 
 const SelectChain = observer(({ isVisible, onClose }: ChainSelectorProps) => {
-  const navigate = useNavigate()
-  const { pathname } = useLocation()
-  const selectedChain = useActiveChain()
-  const setActiveChain = useSetActiveChain()
-  const [searchedChain, setSearchedChain] = useState('')
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const selectedChain = useActiveChain();
+  const setActiveChain = useSetActiveChain();
+  const [searchedChain, setSearchedChain] = useState('');
 
   const onChainSelect = (chainName: AggregatedSupportedChain) => {
-    setActiveChain(chainName)
+    setActiveChain(chainName);
     if (pathname !== '/home') {
-      navigate('/home')
+      navigate('/home');
     }
-    onClose()
-  }
+    onClose();
+  };
 
   const handleAddNewChainClick = useCallback(() => {
-    navigate('/add-chain', { replace: true })
-  }, [navigate])
+    navigate('/add-chain', { replace: true });
+  }, [navigate]);
 
   return (
     <BottomModal
@@ -193,7 +175,7 @@ const SelectChain = observer(({ isVisible, onClose }: ChainSelectorProps) => {
         handleAddNewChainClick={isCompassWallet() ? null : handleAddNewChainClick}
       />
     </BottomModal>
-  )
-})
+  );
+});
 
-export default SelectChain
+export default SelectChain;

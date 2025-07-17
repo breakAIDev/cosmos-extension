@@ -1,5 +1,5 @@
-import { CaretRight } from '@phosphor-icons/react'
-import React from 'react'
+import { CaretRight } from '@phosphor-icons/react';
+import React from 'react';
 
 export const CheckMoreLink = (props: { href: string }) => {
   return (
@@ -12,5 +12,5 @@ export const CheckMoreLink = (props: { href: string }) => {
       Check more on Explorer
       <CaretRight size={14} />
     </a>
-  )
-}
+  );
+};

@@ -1,13 +1,13 @@
-import { AnimatePresence } from 'framer-motion'
-import { motion } from 'framer-motion'
-import React from 'react'
+import { AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+import React from 'react';
 
-const transition = { duration: 0.2 }
+const transition = { duration: 0.2 };
 
 const passwordStrengthVariants = {
   hidden: { opacity: 0, transition },
   animate: { opacity: 1, transition },
-}
+};
 
 export const PasswordStrengthIndicator = ({ score }: { score: number | null }) => {
   return (
@@ -57,5 +57,5 @@ export const PasswordStrengthIndicator = ({ score }: { score: number | null }) =
         )}
       </motion.div>
     </AnimatePresence>
-  )
-}
+  );
+};

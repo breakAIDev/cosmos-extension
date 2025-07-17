@@ -1,69 +1,64 @@
-import {
-  SelectedNetworkType,
-  useActiveChain,
-  useSendNft,
-  UseSendNftReturnType,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { RootBalanceStore, RootDenomsStore } from '@leapwallet/cosmos-wallet-store'
-import { Buttons } from '@leapwallet/leap-ui'
-import assert from 'assert'
-import { useGetWalletAddresses } from 'hooks/useGetWalletAddresses'
-import { useThemeColor } from 'hooks/utility/useThemeColor'
-import { Wallet } from 'hooks/wallet/useWallet'
-import { observer } from 'mobx-react-lite'
-import { SelectedAddress } from 'pages/send-v2/types'
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import { nftStore } from 'stores/nft-store'
-import { useTxCallBack } from 'utils/txCallback'
+import { SelectedNetworkType, useActiveChain, useSendNft, UseSendNftReturnType } from '@leapwallet/cosmos-wallet-hooks';
+import { RootBalanceStore, RootDenomsStore } from '@leapwallet/cosmos-wallet-store';
+import { Buttons } from '@leapwallet/leap-ui';
+import assert from 'assert';
+import { useGetWalletAddresses } from 'hooks/useGetWalletAddresses';
+import { useThemeColor } from 'hooks/utility/useThemeColor';
+import { Wallet } from 'hooks/wallet/useWallet';
+import { observer } from 'mobx-react-lite';
+import { SelectedAddress } from 'pages/send-v2/types';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { nftStore } from 'stores/nft-store';
+import { useTxCallBack } from 'utils/txCallback';
 
-import { NftDetailsType } from '../../context'
-import { FeesView } from '../fees-view'
-import { RecipientCard } from '../recipient-card'
-import { ReviewNFTTransferSheet } from './review-transfer-sheet'
+import { NftDetailsType } from '../../context';
+import { FeesView } from '../fees-view';
+import { RecipientCard } from '../recipient-card';
+import { ReviewNFTTransferSheet } from './review-transfer-sheet';
 
-const SendNftCardContext = createContext<UseSendNftReturnType | null>(null)
+const SendNftCardContext = createContext<UseSendNftReturnType | null>(null);
 
 export function useSendNftCardContext() {
-  const context = useContext(SendNftCardContext)
-  assert(context !== null, 'SendNftCardContext must be used within SendNftCard')
-  return context
+  const context = useContext(SendNftCardContext);
+  assert(context !== null, 'SendNftCardContext must be used within SendNftCard');
+  return context;
 }
 
 type SendNftCardProps = {
-  nftDetails: NftDetailsType
-  rootDenomsStore: RootDenomsStore
-  rootBalanceStore: RootBalanceStore
-  forceNetwork?: SelectedNetworkType
-}
+  nftDetails: NftDetailsType;
+  rootDenomsStore: RootDenomsStore;
+  rootBalanceStore: RootBalanceStore;
+  forceNetwork?: SelectedNetworkType;
+};
 
 export const SendNftCard = observer(
   ({ nftDetails, rootDenomsStore, rootBalanceStore, forceNetwork }: SendNftCardProps) => {
-    const themeColor = useThemeColor()
-    const [showReviewSheet, setShowReviewSheet] = useState(false)
-    const [addressError, setAddressError] = useState<string>()
+    const themeColor = useThemeColor();
+    const [showReviewSheet, setShowReviewSheet] = useState(false);
+    const [addressError, setAddressError] = useState<string>();
 
-    const _activeChain = useActiveChain()
+    const _activeChain = useActiveChain();
     const activeChain = useMemo(() => {
-      return nftDetails?.chain ?? _activeChain
-    }, [_activeChain, nftDetails?.chain])
-    const walletAddresses = useGetWalletAddresses(activeChain)
-    const [selectedAddress, setSelectedAddress] = useState<SelectedAddress | null>(null)
-    const [associatedSeiAddress, setAssociatedSeiAddress] = useState<string>('')
-    const [isProcessing, setIsProcessing] = useState(false)
+      return nftDetails?.chain ?? _activeChain;
+    }, [_activeChain, nftDetails?.chain]);
+    const walletAddresses = useGetWalletAddresses(activeChain);
+    const [selectedAddress, setSelectedAddress] = useState<SelectedAddress | null>(null);
+    const [associatedSeiAddress, setAssociatedSeiAddress] = useState<string>('');
+    const [isProcessing, setIsProcessing] = useState(false);
 
-    const [txError, setTxError] = useState('')
-    const [memo, setMemo] = useState('')
-    const txCallback = useTxCallBack()
-    const getWallet = Wallet.useGetWallet(activeChain)
+    const [txError, setTxError] = useState('');
+    const [memo, setMemo] = useState('');
+    const txCallback = useTxCallBack();
+    const getWallet = Wallet.useGetWallet(activeChain);
 
     const collectionAddress = useMemo(() => {
-      return nftDetails?.collection.address ?? ''
-    }, [nftDetails?.collection.address])
+      return nftDetails?.collection.address ?? '';
+    }, [nftDetails?.collection.address]);
 
-    const fromAddress = walletAddresses[0]
-    const denoms = rootDenomsStore.allDenoms
+    const fromAddress = walletAddresses[0];
+    const denoms = rootDenomsStore.allDenoms;
 
-    const sendNftReturn = useSendNft(denoms, collectionAddress, activeChain, forceNetwork)
+    const sendNftReturn = useSendNft(denoms, collectionAddress, activeChain, forceNetwork);
     const {
       isSending,
       fee,
@@ -71,10 +66,10 @@ export const SendNftCard = observer(
       showLedgerPopup,
       simulateTransferNFTContract,
       fetchAccountDetailsStatus,
-    } = sendNftReturn
+    } = sendNftReturn;
 
     useEffect(() => {
-      ;(async function () {
+      (async function () {
         if (
           isSending ||
           isProcessing ||
@@ -83,12 +78,12 @@ export const SendNftCard = observer(
           !selectedAddress?.address ||
           !walletAddresses.length
         ) {
-          return
+          return;
         }
 
-        const toAddress = selectedAddress?.address
+        const toAddress = selectedAddress?.address;
 
-        const wallet = await getWallet(activeChain)
+        const wallet = await getWallet(activeChain);
 
         await simulateTransferNFTContract({
           wallet: wallet,
@@ -97,8 +92,8 @@ export const SendNftCard = observer(
           toAddress: toAddress,
           tokenId: nftDetails?.tokenId ?? '',
           memo: memo,
-        })
-      })()
+        });
+      })();
 
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
@@ -110,15 +105,15 @@ export const SendNftCard = observer(
       nftDetails,
       selectedAddress,
       walletAddresses.length,
-    ])
+    ]);
 
     const handleSendNft = async () => {
       if (!nftDetails || !collectionAddress || !selectedAddress?.address || !fromAddress || !fee) {
-        return
+        return;
       }
 
-      const toAddress = selectedAddress?.address
-      const wallet = await getWallet(activeChain)
+      const toAddress = selectedAddress?.address;
+      const wallet = await getWallet(activeChain);
       const res = await transferNFTContract({
         wallet: wallet,
         collectionId: collectionAddress,
@@ -127,26 +122,26 @@ export const SendNftCard = observer(
         tokenId: nftDetails?.tokenId ?? '',
         memo: memo,
         fees: fee,
-      })
+      });
 
-      nftStore.loadNfts()
+      nftStore.loadNfts();
 
       if (res?.success) {
-        txCallback(res.success ? 'success' : 'txDeclined')
+        txCallback(res.success ? 'success' : 'txDeclined');
       } else {
-        setIsProcessing(false)
+        setIsProcessing(false);
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        setTxError(res?.errors?.[0])
+        setTxError(res?.errors?.[0]);
       }
-    }
+    };
 
     const isReviewDisabled =
-      !selectedAddress || !!addressError || ['loading', 'error'].includes(fetchAccountDetailsStatus)
+      !selectedAddress || !!addressError || ['loading', 'error'].includes(fetchAccountDetailsStatus);
 
     const handleReviewTransferClick = () => {
-      setShowReviewSheet(true)
-    }
+      setShowReviewSheet(true);
+    };
 
     return (
       <SendNftCardContext.Provider value={sendNftReturn}>
@@ -199,13 +194,13 @@ export const SendNftCard = observer(
             onConfirm={handleSendNft}
             showLedgerPopup={showLedgerPopup}
             onClose={() => {
-              setShowReviewSheet(false)
+              setShowReviewSheet(false);
             }}
             showMemo={!collectionAddress.toLowerCase().startsWith('0x')}
             txError={txError}
           />
         )}
       </SendNftCardContext.Provider>
-    )
+    );
   },
-)
+);

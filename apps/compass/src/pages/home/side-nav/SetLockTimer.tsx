@@ -1,23 +1,23 @@
-import { useActiveChain } from '@leapwallet/cosmos-wallet-hooks'
-import { CardDivider } from '@leapwallet/leap-ui'
-import { CheckCircle } from '@phosphor-icons/react'
-import BottomModal from 'components/bottom-modal'
-import { EmptyCard } from 'components/empty-card'
-import Text from 'components/text'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import React from 'react'
-import { autoLockTimeStore, TimerLockPeriod, TimerLockPeriodKey } from 'stores/password-store'
-import { Colors } from 'theme/colors'
+import { useActiveChain } from '@leapwallet/cosmos-wallet-hooks';
+import { CardDivider } from '@leapwallet/leap-ui';
+import { CheckCircle } from '@phosphor-icons/react';
+import BottomModal from 'components/bottom-modal';
+import { EmptyCard } from 'components/empty-card';
+import Text from 'components/text';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import React from 'react';
+import { autoLockTimeStore, TimerLockPeriod, TimerLockPeriodKey } from 'stores/password-store';
+import { Colors } from 'theme/colors';
 
 export default observer(function SetLockTimerDropUp({
   onCloseHandler,
   isVisible,
 }: {
-  isVisible: boolean
-  onCloseHandler: () => void
+  isVisible: boolean;
+  onCloseHandler: () => void;
 }) {
-  const activeChain = useActiveChain()
+  const activeChain = useActiveChain();
 
   return (
     <BottomModal isOpen={isVisible} onClose={onCloseHandler} title={'Set Timer'}>
@@ -34,19 +34,15 @@ export default observer(function SetLockTimerDropUp({
                 <div
                   className='flex py-2 px-4 hover:cursor-pointer justify-between'
                   onClick={() => {
-                    autoLockTimeStore.setLockTime(time[0] as TimerLockPeriodKey)
-                    onCloseHandler()
+                    autoLockTimeStore.setLockTime(time[0] as TimerLockPeriodKey);
+                    onCloseHandler();
                   }}
                 >
                   <Text size='md' className='font-bold'>
                     {time[0]}
                   </Text>
                   {autoLockTimeStore.time === time[1] && (
-                    <CheckCircle
-                      weight='fill'
-                      size={24}
-                      style={{ color: Colors.getChainColor(activeChain) }}
-                    />
+                    <CheckCircle weight='fill' size={24} style={{ color: Colors.getChainColor(activeChain) }} />
                   )}
                 </div>
                 {/* <Card
@@ -63,10 +59,10 @@ export default observer(function SetLockTimerDropUp({
                   }}
                 /> */}
               </React.Fragment>
-            )
+            );
           })}
         </div>
       </div>
     </BottomModal>
-  )
-})
+  );
+});

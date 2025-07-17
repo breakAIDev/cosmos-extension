@@ -1,1 +1,1 @@
-export * from './ChainDiv'
+export * from './ChainDiv';

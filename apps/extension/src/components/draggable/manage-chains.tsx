@@ -1,30 +1,30 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { CardDivider, ToggleCard } from '@leapwallet/leap-ui'
-import Text from 'components/text'
-import Fuse from 'fuse.js'
-import { useActiveChain } from 'hooks/settings/useActiveChain'
-import { useChainInfos } from 'hooks/useChainInfos'
-import { GenericLight } from 'images/logos'
-import { observer } from 'mobx-react-lite'
-import React, { useMemo, useState } from 'react'
-import { Draggable } from '@hello-pangea/dnd'
-import { deleteChainStore } from 'stores/delete-chain-store'
-import type { ManageChainSettings } from 'stores/manage-chains-store'
-import { imgOnError } from 'utils/imgOnError'
-import { capitalize } from 'utils/strings'
+import { Draggable } from '@hello-pangea/dnd';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { CardDivider, ToggleCard } from '@leapwallet/leap-ui';
+import Text from 'components/text';
+import Fuse from 'fuse.js';
+import { useActiveChain } from 'hooks/settings/useActiveChain';
+import { useChainInfos } from 'hooks/useChainInfos';
+import { GenericLight } from 'images/logos';
+import { observer } from 'mobx-react-lite';
+import React, { useMemo, useState } from 'react';
+import { deleteChainStore } from 'stores/delete-chain-store';
+import type { ManageChainSettings } from 'stores/manage-chains-store';
+import { imgOnError } from 'utils/imgOnError';
+import { capitalize } from 'utils/strings';
 
 interface PropTypes {
-  chains: ManageChainSettings[]
-  searchQuery: string
+  chains: ManageChainSettings[];
+  searchQuery: string;
   // eslint-disable-next-line no-unused-vars
-  updateChainFunction: (chainName: SupportedChain) => void
-  title?: string
+  updateChainFunction: (chainName: SupportedChain) => void;
+  title?: string;
 }
 
 const BetaCard = observer(({ chain }: { chain: ManageChainSettings }) => {
-  const chainInfos = useChainInfos()
-  const img = chainInfos[chain.chainName]?.chainSymbolImageUrl
+  const chainInfos = useChainInfos();
+  const img = chainInfos[chain.chainName]?.chainSymbolImageUrl;
 
   return (
     <>
@@ -59,51 +59,43 @@ const BetaCard = observer(({ chain }: { chain: ManageChainSettings }) => {
         </div>
       </div>
     </>
-  )
-})
+  );
+});
 
 const ManageChainDraggables = ({ chains, searchQuery, updateChainFunction }: PropTypes) => {
-  const [errorSwitch, setErrorSwitch] = useState(false)
+  const [errorSwitch, setErrorSwitch] = useState(false);
 
-  const activeChain = useActiveChain()
-  const chainInfos = useChainInfos()
+  const activeChain = useActiveChain();
+  const chainInfos = useChainInfos();
 
   const chainsFuse = useMemo(() => {
     return new Fuse(chains, {
       threshold: 0.3,
       keys: ['chainName'],
-    })
-  }, [chains])
+    });
+  }, [chains]);
 
   const filteredChains = useMemo(() => {
-    const clearSearchQuery = searchQuery.trim()
+    const clearSearchQuery = searchQuery.trim();
     if (!searchQuery) {
-      return chains
+      return chains;
     }
-    return chainsFuse.search(clearSearchQuery).map((chain) => chain.item)
-  }, [searchQuery, chains, chainsFuse])
+    return chainsFuse.search(clearSearchQuery).map((chain) => chain.item);
+  }, [searchQuery, chains, chainsFuse]);
 
   return (
     <div className='rounded-2xl dark:bg-gray-900 bg-white-100'>
       {chains
         ? filteredChains.map((chain, index) => {
-            const isFirst = index === 0
-            const isLast = index === chains.length - 1
+            const isFirst = index === 0;
+            const isLast = index === chains.length - 1;
 
-            const img = chainInfos[chain.chainName].chainSymbolImageUrl
+            const img = chainInfos[chain.chainName].chainSymbolImageUrl;
 
             return (
-              <Draggable
-                key={chain.id ?? index}
-                draggableId={chain?.id?.toString() ?? index.toString()}
-                index={index}
-              >
+              <Draggable key={chain.id ?? index} draggableId={chain?.id?.toString() ?? index.toString()} index={index}>
                 {(provided) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                  >
+                  <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
                     <ToggleCard
                       imgSrc={img}
                       isRounded={isLast || isFirst}
@@ -118,10 +110,10 @@ const ManageChainDraggables = ({ chains, searchQuery, updateChainFunction }: Pro
                       title={capitalize(chain.chainName) as string}
                       onClick={() => {
                         if (activeChain === chain.chainName) {
-                          setErrorSwitch(true)
+                          setErrorSwitch(true);
                         } else {
-                          setErrorSwitch(false)
-                          updateChainFunction(chain.chainName)
+                          setErrorSwitch(false);
+                          updateChainFunction(chain.chainName);
                         }
                       }}
                       isEnabled={chain.active}
@@ -130,38 +122,33 @@ const ManageChainDraggables = ({ chains, searchQuery, updateChainFunction }: Pro
                   </div>
                 )}
               </Draggable>
-            )
+            );
           })
         : null}
     </div>
-  )
-}
+  );
+};
 
-const ManageChainNonDraggables = ({
-  chains,
-  searchQuery,
-  updateChainFunction,
-  title,
-}: PropTypes) => {
-  const [errorSwitch, setErrorSwitch] = useState(false)
+const ManageChainNonDraggables = ({ chains, searchQuery, updateChainFunction, title }: PropTypes) => {
+  const [errorSwitch, setErrorSwitch] = useState(false);
 
-  const activeChain = useActiveChain()
-  const chainInfos = useChainInfos()
+  const activeChain = useActiveChain();
+  const chainInfos = useChainInfos();
 
   const chainsFuse = useMemo(() => {
     return new Fuse(chains, {
       threshold: 0.3,
       keys: ['chainName'],
-    })
-  }, [chains])
+    });
+  }, [chains]);
 
   const filteredChains = useMemo(() => {
-    const clearSearchQuery = searchQuery.trim()
+    const clearSearchQuery = searchQuery.trim();
     if (!searchQuery) {
-      return chains
+      return chains;
     }
-    return chainsFuse.search(clearSearchQuery).map((chain) => chain.item)
-  }, [searchQuery, chains, chainsFuse])
+    return chainsFuse.search(clearSearchQuery).map((chain) => chain.item);
+  }, [searchQuery, chains, chainsFuse]);
 
   return (
     <div className='rounded-2xl dark:bg-gray-900 bg-white-100'>
@@ -173,13 +160,13 @@ const ManageChainNonDraggables = ({
       {chains
         ? filteredChains.map((chain, index) => {
             if (chain.beta) {
-              return <BetaCard chain={chain} />
+              return <BetaCard chain={chain} />;
             }
 
-            const img = chainInfos[chain.chainName].chainSymbolImageUrl
+            const img = chainInfos[chain.chainName].chainSymbolImageUrl;
 
-            const isFirst = index === 0
-            const isLast = index === filteredChains.length - 1
+            const isFirst = index === 0;
+            const isLast = index === filteredChains.length - 1;
             return (
               <ToggleCard
                 key={index}
@@ -196,19 +183,19 @@ const ManageChainNonDraggables = ({
                 title={capitalize(chain.chainName) as string}
                 onClick={() => {
                   if (activeChain === chain.chainName) {
-                    setErrorSwitch(true)
+                    setErrorSwitch(true);
                   } else {
-                    setErrorSwitch(false)
-                    updateChainFunction(chain.chainName)
+                    setErrorSwitch(false);
+                    updateChainFunction(chain.chainName);
                   }
                 }}
                 isEnabled={chain.active}
               />
-            )
+            );
           })
         : null}
     </div>
-  )
-}
+  );
+};
 
-export { ManageChainDraggables, ManageChainNonDraggables }
+export { ManageChainDraggables, ManageChainNonDraggables };

@@ -1,27 +1,27 @@
-import { ChainTagsStore } from '@leapwallet/cosmos-wallet-store'
-import { Header, HeaderActionType } from '@leapwallet/leap-ui'
-import BottomNav, { BottomNavLabel } from 'components/bottom-nav/BottomNav'
-import PopupLayout from 'components/layout/popup-layout'
-import { useChainPageInfo } from 'hooks'
-import { useDontShowSelectChain } from 'hooks/useDontShowSelectChain'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import { ActivityHeader } from 'pages/activity/components/activity-header'
-import SelectChain from 'pages/home/SelectChain'
-import React, { useState } from 'react'
-import { globalSheetsStore } from 'stores/global-sheets-store'
-import { manageChainsStore } from 'stores/manage-chains-store'
+import { ChainTagsStore } from '@leapwallet/cosmos-wallet-store';
+import { Header, HeaderActionType } from '@leapwallet/leap-ui';
+import BottomNav, { BottomNavLabel } from 'components/bottom-nav/BottomNav';
+import PopupLayout from 'components/layout/popup-layout';
+import { useChainPageInfo } from 'hooks';
+import { useDontShowSelectChain } from 'hooks/useDontShowSelectChain';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import { ActivityHeader } from 'pages/activity/components/activity-header';
+import SelectChain from 'pages/home/SelectChain';
+import React, { useState } from 'react';
+import { globalSheetsStore } from 'stores/global-sheets-store';
+import { manageChainsStore } from 'stores/manage-chains-store';
 
 type ComingSoonProps = {
-  title: string
-  chainTagsStore: ChainTagsStore
-  bottomNavLabel: BottomNavLabel
-}
+  title: string;
+  chainTagsStore: ChainTagsStore;
+  bottomNavLabel: BottomNavLabel;
+};
 
 export const ComingSoon = observer(({ chainTagsStore, title, bottomNavLabel }: ComingSoonProps) => {
-  const [showChainSelector, setShowChainSelector] = useState(false)
-  const { headerChainImgSrc } = useChainPageInfo()
-  const dontShowSelectChain = useDontShowSelectChain(manageChainsStore)
+  const [showChainSelector, setShowChainSelector] = useState(false);
+  const { headerChainImgSrc } = useChainPageInfo();
+  const dontShowSelectChain = useDontShowSelectChain(manageChainsStore);
 
   return (
     <>
@@ -44,5 +44,5 @@ export const ComingSoon = observer(({ chainTagsStore, title, bottomNavLabel }: C
         chainTagsStore={chainTagsStore}
       />
     </>
-  )
-})
+  );
+});

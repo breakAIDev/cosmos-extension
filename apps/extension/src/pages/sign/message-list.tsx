@@ -1,29 +1,26 @@
-import { ParsedMessage, ParsedMessageType } from '@leapwallet/parser-parfait'
-import classNames from 'classnames'
-import { RightArrow } from 'images/misc'
-import React from 'react'
+import { ParsedMessage, ParsedMessageType } from '@leapwallet/parser-parfait';
+import classNames from 'classnames';
+import { RightArrow } from 'images/misc';
+import React from 'react';
 
-import { getMessageTitle, getSimpleType } from './message-details'
+import { getMessageTitle, getSimpleType } from './message-details';
 
 type MessageItemProps = {
-  message: ParsedMessage
-  messageNumber: number
-  isLast: boolean
-  onClick: () => void
-}
+  message: ParsedMessage;
+  messageNumber: number;
+  isLast: boolean;
+  onClick: () => void;
+};
 
 const MessageItem: React.FC<MessageItemProps> = ({ message, isLast, onClick }) => {
-  const _title = getMessageTitle(message)
+  const _title = getMessageTitle(message);
 
   const title =
     message.__type === ParsedMessageType.Unimplemented
       ? getSimpleType(
-          message.message['@type'] ??
-            message.message.type ??
-            message.message.type_url ??
-            message.message.typeUrl,
+          message.message['@type'] ?? message.message.type ?? message.message.type_url ?? message.message.typeUrl,
         )
-      : _title
+      : _title;
 
   return (
     <button
@@ -37,21 +34,17 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, isLast, onClick }) =
       </div>
       <img src={RightArrow} alt='View Details' className='block flex-shrink-0 mr-2' />
     </button>
-  )
-}
+  );
+};
 
 type MessageListProps = {
-  parsedMessages: ParsedMessage[]
+  parsedMessages: ParsedMessage[];
   // eslint-disable-next-line no-unused-vars
-  onMessageSelect: (message: ParsedMessage, index: number) => void
-  className?: string
-}
+  onMessageSelect: (message: ParsedMessage, index: number) => void;
+  className?: string;
+};
 
-const MessageList: React.FC<MessageListProps> = ({
-  parsedMessages,
-  onMessageSelect,
-  className,
-}) => {
+const MessageList: React.FC<MessageListProps> = ({ parsedMessages, onMessageSelect, className }) => {
   return (
     <div className={classNames('', className)}>
       {parsedMessages.map((message, index) => {
@@ -62,13 +55,13 @@ const MessageList: React.FC<MessageListProps> = ({
             message={message}
             messageNumber={index + 1}
             onClick={() => {
-              onMessageSelect(message, index)
+              onMessageSelect(message, index);
             }}
           />
-        )
+        );
       })}
     </div>
-  )
-}
+  );
+};
 
-export default MessageList
+export default MessageList;

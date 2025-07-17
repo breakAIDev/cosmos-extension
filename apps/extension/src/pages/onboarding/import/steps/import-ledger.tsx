@@ -1,13 +1,13 @@
-import { CheckCircle } from '@phosphor-icons/react/dist/ssr'
-import { Button } from 'components/ui/button'
-import { AnimatePresence, motion, Variants } from 'framer-motion'
-import { LedgerDriveIcon } from 'icons/ledger-drive-icon'
-import { Images } from 'images'
-import React from 'react'
+import { CheckCircle } from '@phosphor-icons/react/dist/ssr';
+import { Button } from 'components/ui/button';
+import { AnimatePresence, motion, Variants } from 'framer-motion';
+import { LedgerDriveIcon } from 'icons/ledger-drive-icon';
+import { Images } from 'images';
+import React from 'react';
 
-import { OnboardingWrapper } from '../../wrapper'
-import { useImportWalletContext } from '../import-wallet-context'
-import { LEDGER_CONNECTION_STEP } from '../types'
+import { OnboardingWrapper } from '../../wrapper';
+import { useImportWalletContext } from '../import-wallet-context';
+import { LEDGER_CONNECTION_STEP } from '../types';
 
 const stepsData = [
   {
@@ -16,38 +16,29 @@ const stepsData = [
   {
     description: 'Select networks & choose wallets to import',
   },
-]
+];
 
 export const ledgerImgTransition = {
   duration: 0.75,
   ease: 'easeInOut',
-}
+};
 
 export const walletCableVariants: Variants = {
   hidden: { opacity: 0, x: -100 },
   visible: { opacity: 1, x: 0 },
-}
+};
 
 export const walletUsbVariants: Variants = {
   hidden: { opacity: 0, x: 100 },
   visible: { opacity: 1, x: 0 },
-}
+};
 
 export const ImportLedger = () => {
-  const {
-    prevStep,
-    currentStep,
-    ledgerConnectionStatus: status,
-    moveToNextStep,
-  } = useImportWalletContext()
-  const entry = prevStep <= currentStep ? 'right' : 'left'
+  const { prevStep, currentStep, ledgerConnectionStatus: status, moveToNextStep } = useImportWalletContext();
+  const entry = prevStep <= currentStep ? 'right' : 'left';
 
   return (
-    <OnboardingWrapper
-      headerIcon={<LedgerDriveIcon className='size-6' />}
-      heading='Connect your Ledger'
-      entry={entry}
-    >
+    <OnboardingWrapper headerIcon={<LedgerDriveIcon className='size-6' />} heading='Connect your Ledger' entry={entry}>
       {/* fixed height is hardcoded to avoid layout shift from transitions */}
       <div className='flex flex-col gap-4 w-full relative h-[301px]'>
         {stepsData.map((d, index) => (
@@ -87,13 +78,9 @@ export const ImportLedger = () => {
         </div>
       </div>
 
-      <Button
-        className={'w-full mt-auto'}
-        disabled={status === LEDGER_CONNECTION_STEP.step2}
-        onClick={moveToNextStep}
-      >
+      <Button className={'w-full mt-auto'} disabled={status === LEDGER_CONNECTION_STEP.step2} onClick={moveToNextStep}>
         {status === LEDGER_CONNECTION_STEP.step2 ? 'Looking for device...' : 'Continue'}
       </Button>
     </OnboardingWrapper>
-  )
-}
+  );
+};

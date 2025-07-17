@@ -1,3 +1,3 @@
 export function getChainName(chainName: string) {
-  return chainName
+  return chainName;
 }

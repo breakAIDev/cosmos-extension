@@ -1,38 +1,38 @@
-import { StdFee } from '@cosmjs/stargate'
-import { sliceAddress } from '@leapwallet/cosmos-wallet-hooks'
-import { Avatar, Buttons, Card, CardDivider, Memo } from '@leapwallet/leap-ui'
-import BottomModal from 'components/bottom-modal'
-import { ErrorCard } from 'components/ErrorCard'
-import LedgerConfirmationPopup from 'components/ledger-confirmation/LedgerConfirmationPopup'
-import { LoaderAnimation } from 'components/loader/Loader'
-import Text from 'components/text'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import { SelectedAddress } from 'pages/send-v2/types'
-import React from 'react'
-import { rootDenomsStore } from 'stores/denoms-store-instance'
-import { rootBalanceStore } from 'stores/root-store'
-import { Colors } from 'theme/colors'
-import { imgOnError } from 'utils/imgOnError'
-import { normalizeImageSrc } from 'utils/normalizeImageSrc'
+import { StdFee } from '@cosmjs/stargate';
+import { sliceAddress } from '@leapwallet/cosmos-wallet-hooks';
+import { Avatar, Buttons, Card, CardDivider, Memo } from '@leapwallet/leap-ui';
+import BottomModal from 'components/bottom-modal';
+import { ErrorCard } from 'components/ErrorCard';
+import LedgerConfirmationPopup from 'components/ledger-confirmation/LedgerConfirmationPopup';
+import { LoaderAnimation } from 'components/loader/Loader';
+import Text from 'components/text';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { SelectedAddress } from 'pages/send-v2/types';
+import React from 'react';
+import { rootDenomsStore } from 'stores/denoms-store-instance';
+import { rootBalanceStore } from 'stores/root-store';
+import { Colors } from 'theme/colors';
+import { imgOnError } from 'utils/imgOnError';
+import { normalizeImageSrc } from 'utils/normalizeImageSrc';
 
-import { NftDetailsType } from '../../context'
-import { FeesView } from '../fees-view'
+import { NftDetailsType } from '../../context';
+import { FeesView } from '../fees-view';
 
 type ReviewNFTTransactionSheetProps = {
-  isOpen: boolean
-  onClose: () => void
-  onConfirm: () => void
-  themeColor: string
-  selectedAddress: SelectedAddress
-  nftDetails: NftDetailsType
-  fee?: StdFee
-  showLedgerPopup: boolean
-  loading: boolean
-  memo: string
-  setMemo: (s: string) => void
-  showMemo: boolean
-  txError: string
-}
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  themeColor: string;
+  selectedAddress: SelectedAddress;
+  nftDetails: NftDetailsType;
+  fee?: StdFee;
+  showLedgerPopup: boolean;
+  loading: boolean;
+  memo: string;
+  setMemo: (s: string) => void;
+  showMemo: boolean;
+  txError: string;
+};
 
 export const ReviewNFTTransferSheet: React.FC<ReviewNFTTransactionSheetProps> = ({
   isOpen,
@@ -49,10 +49,10 @@ export const ReviewNFTTransferSheet: React.FC<ReviewNFTTransactionSheetProps> = 
   showMemo,
   txError,
 }) => {
-  const defaultTokenLogo = useDefaultTokenLogo()
+  const defaultTokenLogo = useDefaultTokenLogo();
 
   if (showLedgerPopup && !txError) {
-    return <LedgerConfirmationPopup showLedgerPopup={showLedgerPopup} />
+    return <LedgerConfirmationPopup showLedgerPopup={showLedgerPopup} />;
   }
 
   return (
@@ -72,19 +72,15 @@ export const ReviewNFTTransferSheet: React.FC<ReviewNFTTransactionSheetProps> = 
             <div className='relative'>
               {
                 <div className='absolute flex top-4 left-[68px] items-center'>
-                  <p className='mr-1 invisible font-bold'>
-                    {`${nftDetails?.name ?? nftDetails?.domain ?? 'NFT'}`}
-                  </p>
+                  <p className='mr-1 invisible font-bold'>{`${nftDetails?.name ?? nftDetails?.domain ?? 'NFT'}`}</p>
                 </div>
               }
               <Card
                 avatar={
                   <Avatar
                     avatarImage={
-                      normalizeImageSrc(
-                        nftDetails?.image ?? '',
-                        nftDetails?.collection?.address ?? '',
-                      ) ?? defaultTokenLogo
+                      normalizeImageSrc(nftDetails?.image ?? '', nftDetails?.collection?.address ?? '') ??
+                      defaultTokenLogo
                     }
                     size='sm'
                     avatarOnError={imgOnError(defaultTokenLogo)}
@@ -95,9 +91,7 @@ export const ReviewNFTTransferSheet: React.FC<ReviewNFTTransactionSheetProps> = 
                 subtitle={<p className='break-all'>{nftDetails?.tokenId}</p>}
                 title={
                   <p data-testing-id='send-review-sheet-inputAmount-ele'>
-                    {`${
-                      nftDetails?.name ?? nftDetails?.domain ?? nftDetails?.collection?.name + 'NFT'
-                    }`}
+                    {`${nftDetails?.name ?? nftDetails?.domain ?? nftDetails?.collection?.name + 'NFT'}`}
                   </p>
                 }
               />
@@ -122,9 +116,7 @@ export const ReviewNFTTransferSheet: React.FC<ReviewNFTTransactionSheetProps> = 
                   ) : null}
                 </>
               }
-              title={
-                <p data-testing-id='send-review-sheet-to-ele'>{'To ' + selectedAddress?.name}</p>
-              }
+              title={<p data-testing-id='send-review-sheet-to-ele'>{'To ' + selectedAddress?.name}</p>}
             />
           </div>
 
@@ -132,7 +124,7 @@ export const ReviewNFTTransferSheet: React.FC<ReviewNFTTransactionSheetProps> = 
             <Memo
               value={memo}
               onChange={(e) => {
-                setMemo(e.target.value)
+                setMemo(e.target.value);
               }}
             />
           ) : null}
@@ -160,5 +152,5 @@ export const ReviewNFTTransferSheet: React.FC<ReviewNFTTransactionSheetProps> = 
         </div>
       </>
     </BottomModal>
-  )
-}
+  );
+};

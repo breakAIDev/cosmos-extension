@@ -1,27 +1,27 @@
-import { ChainInfo } from '@leapwallet/cosmos-wallet-sdk'
-import { MagnifyingGlassMinus } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import Text from 'components/text'
-import { SearchInput } from 'components/ui/input/search-input'
-import Fuse from 'fuse.js'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import { CheckIcon } from 'icons/check-icon'
-import { GenericLight } from 'images/logos'
-import { observer } from 'mobx-react-lite'
-import React, { useMemo } from 'react'
-import Skeleton from 'react-loading-skeleton'
-import { Virtuoso } from 'react-virtuoso'
-import { imgOnError } from 'utils/imgOnError'
-import { isSidePanel } from 'utils/isSidePanel'
+import { ChainInfo } from '@leapwallet/cosmos-wallet-sdk';
+import { MagnifyingGlassMinus } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import Text from 'components/text';
+import { SearchInput } from 'components/ui/input/search-input';
+import Fuse from 'fuse.js';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { CheckIcon } from 'icons/check-icon';
+import { GenericLight } from 'images/logos';
+import { observer } from 'mobx-react-lite';
+import React, { useMemo } from 'react';
+import Skeleton from 'react-loading-skeleton';
+import { Virtuoso } from 'react-virtuoso';
+import { imgOnError } from 'utils/imgOnError';
+import { isSidePanel } from 'utils/isSidePanel';
 
 export type ListChainsProps = {
-  onChainSelect: (props: ChainInfo) => void
-  selectedChain?: ChainInfo
-  chainsToShow?: ChainInfo[]
-  setSearchedChain: (chain: string) => void
-  searchedChain: string
-  loadingChains: boolean
-}
+  onChainSelect: (props: ChainInfo) => void;
+  selectedChain?: ChainInfo;
+  chainsToShow?: ChainInfo[];
+  setSearchedChain: (chain: string) => void;
+  searchedChain: string;
+  loadingChains: boolean;
+};
 
 export function ChainsListSkeleton({ index, isLast }: { index: number; isLast: boolean }) {
   return (
@@ -43,7 +43,7 @@ export function ChainsListSkeleton({ index, isLast }: { index: number; isLast: b
       </div>
       {!isLast && <div className='border-b border-gray-100 dark:border-gray-850 mx-6' />}
     </React.Fragment>
-  )
+  );
 }
 
 export function ChainCard({
@@ -54,26 +54,26 @@ export function ChainCard({
   onChainSelect,
   selectedChain,
 }: {
-  tokenAssociatedChain: ChainInfo
-  index: number
-  itemsLength: number
-  setSearchedChain: (chain: string) => void
-  onChainSelect: (props: ChainInfo) => void
-  selectedChain?: ChainInfo
+  tokenAssociatedChain: ChainInfo;
+  index: number;
+  itemsLength: number;
+  setSearchedChain: (chain: string) => void;
+  onChainSelect: (props: ChainInfo) => void;
+  selectedChain?: ChainInfo;
 }) {
-  const img = tokenAssociatedChain.chainSymbolImageUrl ?? GenericLight
-  const chainName = tokenAssociatedChain.chainName
-  const isLast = index === itemsLength - 1
-  const defaultTokenLogo = useDefaultTokenLogo()
+  const img = tokenAssociatedChain.chainSymbolImageUrl ?? GenericLight;
+  const chainName = tokenAssociatedChain.chainName;
+  const isLast = index === itemsLength - 1;
+  const defaultTokenLogo = useDefaultTokenLogo();
 
-  const isSelected = !!selectedChain && selectedChain.key === tokenAssociatedChain.key
+  const isSelected = !!selectedChain && selectedChain.key === tokenAssociatedChain.key;
 
   return (
     <React.Fragment key={`${tokenAssociatedChain.chainName}-${index}`}>
       <div
         onClick={() => {
-          setSearchedChain('')
-          onChainSelect(tokenAssociatedChain)
+          setSearchedChain('');
+          onChainSelect(tokenAssociatedChain);
         }}
         className={classNames('flex flex-1 items-center cursor-pointer px-6 mb-3')}
       >
@@ -95,7 +95,7 @@ export function ChainCard({
         </div>
       </div>
     </React.Fragment>
-  )
+  );
 }
 
 const ChainsListView = ({
@@ -111,15 +111,15 @@ const ChainsListView = ({
       threshold: 0.3,
       keys: ['chainName'],
       shouldSort: false,
-    })
-  }, [chainsToShow])
+    });
+  }, [chainsToShow]);
 
   const filteredChains = useMemo(() => {
     if (!searchedChain) {
-      return chainsToShow ?? []
+      return chainsToShow ?? [];
     }
-    return chainsFuse?.search(searchedChain).map((chain) => chain.item) ?? []
-  }, [chainsFuse, searchedChain, chainsToShow])
+    return chainsFuse?.search(searchedChain).map((chain) => chain.item) ?? [];
+  }, [chainsFuse, searchedChain, chainsToShow]);
 
   return (
     <>
@@ -153,9 +153,7 @@ const ChainsListView = ({
                 />
               </div>
               <div className='flex flex-col justify-start items-center w-full gap-3'>
-                <div className='text-[18px] !leading-[24px] text-center font-bold text-foreground'>
-                  No chains found
-                </div>
+                <div className='text-[18px] !leading-[24px] text-center font-bold text-foreground'>No chains found</div>
                 <div className='text-xs !leading-[16px] text-secondary-800 text-center'>
                   We couldn&apos;t find a match. Try searching again or use a different keyword.
                 </div>
@@ -184,7 +182,7 @@ const ChainsListView = ({
         )}
       </div>
     </>
-  )
-}
+  );
+};
 
-export const ChainsList = observer(ChainsListView)
+export const ChainsList = observer(ChainsListView);

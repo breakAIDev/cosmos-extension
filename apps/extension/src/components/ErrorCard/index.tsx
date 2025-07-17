@@ -1,22 +1,22 @@
-import { Info } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import { useCaptureUIException } from 'hooks/perf-monitoring/useCaptureUIException'
-import React, { useEffect, useRef } from 'react'
+import { Info } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import { useCaptureUIException } from 'hooks/perf-monitoring/useCaptureUIException';
+import React, { useEffect, useRef } from 'react';
 
 type ErrorCardProps = React.ComponentPropsWithoutRef<'div'> & {
-  text?: string
-  className?: string
-  'data-testing-id'?: string
-}
+  text?: string;
+  className?: string;
+  'data-testing-id'?: string;
+};
 
 export function ErrorCard({ text, className, ...props }: ErrorCardProps) {
-  const ref = useRef<HTMLDivElement | null>(null)
+  const ref = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    ref.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [])
+    ref.current?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
 
-  useCaptureUIException(text)
+  useCaptureUIException(text);
 
   return (
     <div
@@ -34,5 +34,5 @@ export function ErrorCard({ text, className, ...props }: ErrorCardProps) {
         {text}
       </p>
     </div>
-  )
+  );
 }

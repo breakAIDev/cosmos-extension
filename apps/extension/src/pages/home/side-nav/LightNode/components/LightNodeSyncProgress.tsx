@@ -1,12 +1,12 @@
-import { ProgressBar } from '@leapwallet/leap-ui'
-import BigNumber from 'bignumber.js'
-import classNames from 'classnames'
-import { Button } from 'components/ui/button'
-import { Images } from 'images'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { isSidePanel } from 'utils/isSidePanel'
+import { ProgressBar } from '@leapwallet/leap-ui';
+import BigNumber from 'bignumber.js';
+import classNames from 'classnames';
+import { Button } from 'components/ui/button';
+import { Images } from 'images';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { isSidePanel } from 'utils/isSidePanel';
 
-import CustomDivider from './CustomDivider'
+import CustomDivider from './CustomDivider';
 
 function LightNodeSyncProgress({
   syncedPercentage,
@@ -16,66 +16,64 @@ function LightNodeSyncProgress({
   onShareClick,
   latestHeader,
 }: {
-  syncedPercentage: number | null
-  network: string
-  blockTime: number
-  latestHeader?: string
-  isLightNodeRunning: boolean
-  onShareClick: () => void
+  syncedPercentage: number | null;
+  network: string;
+  blockTime: number;
+  latestHeader?: string;
+  isLightNodeRunning: boolean;
+  onShareClick: () => void;
 }) {
-  const intervalId = useRef<any>(null)
-  const blockTimerIntervalId = useRef<any>(null)
-  const [timer, setTimer] = useState(blockTime)
-  const [blockProgressPercentage, setBlockProgressPercentage] = useState(5)
-  const formattedSyncedPercentage = new BigNumber(syncedPercentage ?? '0')
-    .decimalPlaces(2)
-    .toNumber()
+  const intervalId = useRef<any>(null);
+  const blockTimerIntervalId = useRef<any>(null);
+  const [timer, setTimer] = useState(blockTime);
+  const [blockProgressPercentage, setBlockProgressPercentage] = useState(5);
+  const formattedSyncedPercentage = new BigNumber(syncedPercentage ?? '0').decimalPlaces(2).toNumber();
 
   useEffect(() => {
     if (latestHeader) {
-      setBlockProgressPercentage(5)
+      setBlockProgressPercentage(5);
       intervalId.current = setInterval(() => {
         setBlockProgressPercentage((prev) => {
           // Cap the progress at 100%
-          const nextProgress = prev + 95 / (blockTime * 20)
-          return nextProgress > 100 ? 100 : nextProgress
-        })
-      }, 50)
+          const nextProgress = prev + 95 / (blockTime * 20);
+          return nextProgress > 100 ? 100 : nextProgress;
+        });
+      }, 50);
     }
     return () => {
       if (intervalId.current) {
-        clearInterval(intervalId.current)
+        clearInterval(intervalId.current);
       }
-    }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [latestHeader, blockTime])
+  }, [latestHeader, blockTime]);
 
   useEffect(() => {
     if (latestHeader) {
-      setTimer(blockTime)
+      setTimer(blockTime);
       blockTimerIntervalId.current = setInterval(() => {
         setTimer((prev) => {
           if (prev === 1) {
-            setTimer(blockTime)
-            clearInterval(blockTimerIntervalId.current)
+            setTimer(blockTime);
+            clearInterval(blockTimerIntervalId.current);
           }
-          return prev - 1
-        })
-      }, 1000)
+          return prev - 1;
+        });
+      }, 1000);
     }
     return () => {
       if (blockTimerIntervalId.current) {
-        clearInterval(blockTimerIntervalId.current)
+        clearInterval(blockTimerIntervalId.current);
       }
-    }
-  }, [latestHeader, blockTime])
+    };
+  }, [latestHeader, blockTime]);
 
   const progressToShow = useMemo(() => {
     if (isLightNodeRunning) {
-      return blockProgressPercentage
+      return blockProgressPercentage;
     }
-    return formattedSyncedPercentage
-  }, [blockProgressPercentage, formattedSyncedPercentage, isLightNodeRunning])
+    return formattedSyncedPercentage;
+  }, [blockProgressPercentage, formattedSyncedPercentage, isLightNodeRunning]);
 
   return (
     <section
@@ -125,25 +123,18 @@ function LightNodeSyncProgress({
 
       <div className='flex justify-between items-center'>
         <span className='text-xs text-black-300 dark:text-gray-200'>
-          Network:{' '}
-          <span className='text-xs font-bold dark:text-white-100 text-black-100'>
-            Celestia {network}
-          </span>
+          Network: <span className='text-xs font-bold dark:text-white-100 text-black-100'>Celestia {network}</span>
         </span>
 
         {isLightNodeRunning && (
           <div className='flex justify-end'>
-            <span className='text-xs font-bold dark:text-white-100 text-black-100 mr-1'>
-              ~{timer}s
-            </span>{' '}
-            <span className='text-xs text-black-300 dark:text-gray-400 font-bold'>
-              for next block
-            </span>
+            <span className='text-xs font-bold dark:text-white-100 text-black-100 mr-1'>~{timer}s</span>{' '}
+            <span className='text-xs text-black-300 dark:text-gray-400 font-bold'>for next block</span>
           </div>
         )}
       </div>
     </section>
-  )
+  );
 }
 
-export default LightNodeSyncProgress
+export default LightNodeSyncProgress;

@@ -5,53 +5,52 @@ import {
   useGetChains,
   useSelectedNetwork,
   WALLETTYPE,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { isAptosChain, isSolanaChain } from '@leapwallet/cosmos-wallet-sdk'
-import { isBitcoinChain } from '@leapwallet/cosmos-wallet-store/dist/utils'
-import { ArrowDown, Parachute } from '@phosphor-icons/react'
-import ClickableIcon from 'components/clickable-icons'
-import { useHardCodedActions } from 'components/search-modal'
-import useActiveWallet from 'hooks/settings/useActiveWallet'
-import { useQueryParams } from 'hooks/useQuery'
-import { BuyIcon } from 'icons/buy-icon'
-import { EarnIcon } from 'icons/earn-icon'
-import { SendIcon } from 'icons/send-icon'
-import { StakeIcon } from 'icons/stake-icon'
-import { SwapIcon } from 'icons/swap-icon'
-import Vote from 'icons/vote'
-import { observer } from 'mobx-react-lite'
-import React from 'react'
-import { useNavigate } from 'react-router-dom'
-import { AggregatedSupportedChain } from 'types/utility'
-import { isLedgerEnabled } from 'utils/isLedgerEnabled'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { isAptosChain, isSolanaChain } from '@leapwallet/cosmos-wallet-sdk';
+import { isBitcoinChain } from '@leapwallet/cosmos-wallet-store/dist/utils';
+import { ArrowDown, Parachute } from '@phosphor-icons/react';
+import ClickableIcon from 'components/clickable-icons';
+import { useHardCodedActions } from 'components/search-modal';
+import useActiveWallet from 'hooks/settings/useActiveWallet';
+import { useQueryParams } from 'hooks/useQuery';
+import { BuyIcon } from 'icons/buy-icon';
+import { EarnIcon } from 'icons/earn-icon';
+import { SendIcon } from 'icons/send-icon';
+import { StakeIcon } from 'icons/stake-icon';
+import { SwapIcon } from 'icons/swap-icon';
+import Vote from 'icons/vote';
+import { observer } from 'mobx-react-lite';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { AggregatedSupportedChain } from 'types/utility';
+import { isLedgerEnabled } from 'utils/isLedgerEnabled';
 
 export const HomeButtons = observer(({ skipVote = false }: { skipVote?: boolean }) => {
-  const query = useQueryParams()
+  const query = useQueryParams();
 
-  const isTestnet = useSelectedNetwork() === 'testnet'
-  const activeChain = useActiveChain()
-  const { activeWallet } = useActiveWallet()
-  const navigate = useNavigate()
-  const { data: featureFlags } = useFeatureFlags()
+  const isTestnet = useSelectedNetwork() === 'testnet';
+  const activeChain = useActiveChain();
+  const { activeWallet } = useActiveWallet();
+  const navigate = useNavigate();
+  const { data: featureFlags } = useFeatureFlags();
 
-  const chains = useGetChains()
-  const chain = useChainInfo()
-  const { handleVoteClick, onSendClick, handleBuyClick, handleNobleEarnClick, handleSwapClick } =
-    useHardCodedActions()
+  const chains = useGetChains();
+  const chain = useChainInfo();
+  const { handleVoteClick, onSendClick, handleBuyClick, handleNobleEarnClick, handleSwapClick } = useHardCodedActions();
 
   const disabled =
     activeWallet?.walletType === WALLETTYPE.LEDGER &&
-    !isLedgerEnabled(activeChain, chain?.bip44?.coinType, Object.values(chains))
+    !isLedgerEnabled(activeChain, chain?.bip44?.coinType, Object.values(chains));
 
-  const isNomicChain = activeChain === 'nomic'
-  const walletCtaDisabled = isNomicChain || disabled
+  const isNomicChain = activeChain === 'nomic';
+  const walletCtaDisabled = isNomicChain || disabled;
 
   const isStakeHidden =
     chain?.disableStaking ||
     !!chain?.evmOnlyChain ||
     isAptosChain(chain?.key) ||
     isBitcoinChain(chain?.key) ||
-    isSolanaChain(chain?.key)
+    isSolanaChain(chain?.key);
 
   const isVoteHidden =
     ['aggregated', 'noble'].includes(activeChain as AggregatedSupportedChain) ||
@@ -59,7 +58,7 @@ export const HomeButtons = observer(({ skipVote = false }: { skipVote?: boolean 
     isAptosChain(chain?.key) ||
     isBitcoinChain(chain?.key) ||
     isSolanaChain(chain?.key) ||
-    skipVote
+    skipVote;
 
   if (activeChain === 'initia') {
     return (
@@ -73,12 +72,7 @@ export const HomeButtons = observer(({ skipVote = false }: { skipVote?: boolean 
         />
 
         {/* Send Button */}
-        <ClickableIcon
-          label='Send'
-          icon={SendIcon}
-          onClick={() => onSendClick()}
-          disabled={walletCtaDisabled}
-        />
+        <ClickableIcon label='Send' icon={SendIcon} onClick={() => onSendClick()} disabled={walletCtaDisabled} />
 
         {/* Vote Button */}
         <ClickableIcon label='Vote' icon={Vote} onClick={() => handleVoteClick()} />
@@ -88,7 +82,7 @@ export const HomeButtons = observer(({ skipVote = false }: { skipVote?: boolean 
           <ClickableIcon label='Airdrops' icon={Parachute} onClick={() => navigate('/airdrops')} />
         )}
       </div>
-    )
+    );
   }
 
   if (isTestnet) {
@@ -116,26 +110,16 @@ export const HomeButtons = observer(({ skipVote = false }: { skipVote?: boolean 
           <ClickableIcon label='Airdrops' icon={Parachute} onClick={() => navigate('/airdrops')} />
         ) : null}
       </div>
-    )
+    );
   }
 
   return (
     <div className='flex flex-row justify-evenly mb-8 px-7 w-full'>
       {/* Buy Button */}
-      <ClickableIcon
-        label='Buy'
-        icon={BuyIcon}
-        onClick={() => handleBuyClick()}
-        disabled={walletCtaDisabled}
-      />
+      <ClickableIcon label='Buy' icon={BuyIcon} onClick={() => handleBuyClick()} disabled={walletCtaDisabled} />
 
       {/* Send Button */}
-      <ClickableIcon
-        label='Send'
-        icon={SendIcon}
-        onClick={() => onSendClick()}
-        disabled={walletCtaDisabled}
-      />
+      <ClickableIcon label='Send' icon={SendIcon} onClick={() => onSendClick()} disabled={walletCtaDisabled} />
 
       <ClickableIcon
         label='Swap'
@@ -145,26 +129,14 @@ export const HomeButtons = observer(({ skipVote = false }: { skipVote?: boolean 
       />
 
       {!isStakeHidden && (
-        <ClickableIcon
-          label='Stake'
-          icon={StakeIcon}
-          onClick={() => navigate('/stake')}
-          disabled={walletCtaDisabled}
-        />
+        <ClickableIcon label='Stake' icon={StakeIcon} onClick={() => navigate('/stake')} disabled={walletCtaDisabled} />
       )}
 
       {!isVoteHidden ? (
-        <ClickableIcon
-          label='Vote'
-          icon={Vote}
-          onClick={() => handleVoteClick()}
-          disabled={walletCtaDisabled}
-        />
+        <ClickableIcon label='Vote' icon={Vote} onClick={() => handleVoteClick()} disabled={walletCtaDisabled} />
       ) : null}
 
-      {activeChain === 'noble' && (
-        <ClickableIcon label='Earn' icon={EarnIcon} onClick={handleNobleEarnClick} />
-      )}
+      {activeChain === 'noble' && <ClickableIcon label='Earn' icon={EarnIcon} onClick={handleNobleEarnClick} />}
     </div>
-  )
-})
+  );
+});

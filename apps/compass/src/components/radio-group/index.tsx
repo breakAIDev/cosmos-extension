@@ -1,26 +1,20 @@
-import classNames from 'classnames'
-import React, { CSSProperties } from 'react'
+import classNames from 'classnames';
+import React, { CSSProperties } from 'react';
 
 type RadioGroupProps = {
-  options: { title: string; subTitle?: string; value: string }[]
-  selectedOption: string
+  options: { title: string; subTitle?: string; value: string }[];
+  selectedOption: string;
   // eslint-disable-next-line no-unused-vars
-  onChange: (value: string) => void
-  className?: string
-  themeColor?: CSSProperties['color']
-}
+  onChange: (value: string) => void;
+  className?: string;
+  themeColor?: CSSProperties['color'];
+};
 
-const RadioGroup: React.FC<RadioGroupProps> = ({
-  options,
-  selectedOption,
-  onChange,
-  className,
-  themeColor,
-}) => {
+const RadioGroup: React.FC<RadioGroupProps> = ({ options, selectedOption, onChange, className, themeColor }) => {
   return (
     <fieldset className={classNames('flex flex-col', className)}>
       {options.map((option) => {
-        const isSelected = selectedOption === option.value
+        const isSelected = selectedOption === option.value;
 
         return (
           <label
@@ -29,13 +23,7 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
               option.subTitle ? 'py-2 last-of-type:pb-0' : 'py-3 last-of-type:pb-0'
             }`}
           >
-            <input
-              type='radio'
-              value={option.value}
-              checked={isSelected}
-              readOnly
-              className='hidden'
-            />
+            <input type='radio' value={option.value} checked={isSelected} readOnly className='hidden' />
             <div
               aria-label='radio-button'
               className={classNames(
@@ -51,7 +39,7 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
               onClick={() => onChange(option.value)}
               onKeyDown={(e) => {
                 if ((e.key === 'Enter' || e.key === ' ') && !isSelected) {
-                  onChange(option.value)
+                  onChange(option.value);
                 }
               }}
             >
@@ -68,10 +56,10 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
               {option.subTitle ? <p className='text-gray-500 text-xs'>{option.subTitle}</p> : null}
             </div>
           </label>
-        )
+        );
       })}
     </fieldset>
-  )
-}
+  );
+};
 
-export default RadioGroup
+export default RadioGroup;

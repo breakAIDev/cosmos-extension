@@ -1,23 +1,21 @@
-import BigNumber from 'bignumber.js'
-import { Separator } from 'components/ui/separator'
-import { ExternalLinkIcon } from 'icons/external-link'
-import React, { useMemo } from 'react'
+import BigNumber from 'bignumber.js';
+import { Separator } from 'components/ui/separator';
+import { ExternalLinkIcon } from 'icons/external-link';
+import React, { useMemo } from 'react';
 
-import SquareVisualization from './SquareVisualization'
+import SquareVisualization from './SquareVisualization';
 
 function LightNodeInfo({
   latestHeader,
   events,
   syncedPercentage,
 }: {
-  latestHeader: string | null
-  events: any | null
-  syncedPercentage: number | null
+  latestHeader: string | null;
+  events: any | null;
+  syncedPercentage: number | null;
 }) {
   const infoItems = useMemo(() => {
-    const formattedSyncedPercentage = new BigNumber(syncedPercentage ?? '0')
-      .decimalPlaces(2)
-      .toNumber()
+    const formattedSyncedPercentage = new BigNumber(syncedPercentage ?? '0').decimalPlaces(2).toNumber();
 
     return [
       {
@@ -28,8 +26,8 @@ function LightNodeInfo({
         label: 'Latest Celestia Block',
         value: latestHeader ?? '-',
       },
-    ]
-  }, [latestHeader, syncedPercentage])
+    ];
+  }, [latestHeader, syncedPercentage]);
 
   return (
     <>
@@ -63,7 +61,7 @@ function LightNodeInfo({
         </a>
       </section>
     </>
-  )
+  );
 }
 
-export default LightNodeInfo
+export default LightNodeInfo;

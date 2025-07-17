@@ -1,61 +1,55 @@
-import { BookmarkSimple, SealCheck } from '@phosphor-icons/react'
-import { Button } from 'components/ui/button'
-import { EventName, PageName } from 'config/analytics'
-import dayjs from 'dayjs'
-import { motion } from 'framer-motion'
-import { Raffle as RaffleType, RaffleStatus } from 'hooks/useAlphaOpportunities'
-import { useQueryParams } from 'hooks/useQuery'
-import { ExternalLinkIcon } from 'icons/external-link'
-import React, { useCallback, useEffect, useMemo, useRef } from 'react'
-import { cn } from 'utils/cn'
-import { queryParams } from 'utils/query-params'
-import { mixpanelTrack } from 'utils/tracking'
+import { BookmarkSimple, SealCheck } from '@phosphor-icons/react';
+import { Button } from 'components/ui/button';
+import { EventName, PageName } from 'config/analytics';
+import dayjs from 'dayjs';
+import { motion } from 'framer-motion';
+import { Raffle as RaffleType, RaffleStatus } from 'hooks/useAlphaOpportunities';
+import { useQueryParams } from 'hooks/useQuery';
+import { ExternalLinkIcon } from 'icons/external-link';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { cn } from 'utils/cn';
+import { queryParams } from 'utils/query-params';
+import { mixpanelTrack } from 'utils/tracking';
 
-import Tags from '../components/Tags'
-import { useChadBookmarks } from '../context/bookmark-context'
-import { useChadProvider } from '../context/chad-exclusives-context'
-import { useFilters } from '../context/filter-context'
-import { endsInUTC, startsInUTC } from '../utils'
-import { ALPHA_BOOKMARK_CLONE_ID, ALPHA_BOOKMARK_ID } from '../utils/constants'
-import ChadListingImage from './ChadListingImage'
-import { StatusFilter } from './ChadTimeline/filters'
+import Tags from '../components/Tags';
+import { useChadBookmarks } from '../context/bookmark-context';
+import { useChadProvider } from '../context/chad-exclusives-context';
+import { useFilters } from '../context/filter-context';
+import { endsInUTC, startsInUTC } from '../utils';
+import { ALPHA_BOOKMARK_CLONE_ID, ALPHA_BOOKMARK_ID } from '../utils/constants';
+import ChadListingImage from './ChadListingImage';
+import { StatusFilter } from './ChadTimeline/filters';
 
 export type RaffleListingProps = RaffleType & {
-  isBookmarked: boolean
-  pageName: PageName
-  isSearched?: boolean
-  highlight?: boolean
-  userWon?: boolean
-  bannerImage?: string
-}
+  isBookmarked: boolean;
+  pageName: PageName;
+  isSearched?: boolean;
+  highlight?: boolean;
+  userWon?: boolean;
+  bannerImage?: string;
+};
 
-export const getBookMarkCloneId = (id: string) => `cloned-bookmark-icon-${id}`
+export const getBookMarkCloneId = (id: string) => `cloned-bookmark-icon-${id}`;
 
-export const animateBookMark = (
-  id: string,
-  headerBookMarkIcon: HTMLElement,
-  bookMarkIcon: SVGElement,
-) => {
+export const animateBookMark = (id: string, headerBookMarkIcon: HTMLElement, bookMarkIcon: SVGElement) => {
   // first clone the bookmark icon
-  const clonedBookMarkIcon = document
-    .getElementById(ALPHA_BOOKMARK_CLONE_ID)
-    ?.cloneNode(true) as HTMLElement
-  clonedBookMarkIcon.id = getBookMarkCloneId(id)
-  clonedBookMarkIcon.style.zIndex = '999'
-  clonedBookMarkIcon.style.display = 'block'
+  const clonedBookMarkIcon = document.getElementById(ALPHA_BOOKMARK_CLONE_ID)?.cloneNode(true) as HTMLElement;
+  clonedBookMarkIcon.id = getBookMarkCloneId(id);
+  clonedBookMarkIcon.style.zIndex = '999';
+  clonedBookMarkIcon.style.display = 'block';
 
   // add the cloned bookmark icon to body
-  document.body.appendChild(clonedBookMarkIcon)
+  document.body.appendChild(clonedBookMarkIcon);
 
-  const clickedIconClientRect = bookMarkIcon.getBoundingClientRect()
+  const clickedIconClientRect = bookMarkIcon.getBoundingClientRect();
 
   // place the cloned bookmark icon at the original position of current bookmark icon
-  clonedBookMarkIcon.style.position = 'fixed'
-  clonedBookMarkIcon.style.left = `${clickedIconClientRect.left}px`
-  clonedBookMarkIcon.style.top = `${clickedIconClientRect.top}px`
+  clonedBookMarkIcon.style.position = 'fixed';
+  clonedBookMarkIcon.style.left = `${clickedIconClientRect.left}px`;
+  clonedBookMarkIcon.style.top = `${clickedIconClientRect.top}px`;
 
   // find the destination (headerBookMarkIcon) element position
-  const destinationElementClientRect = headerBookMarkIcon.getBoundingClientRect()
+  const destinationElementClientRect = headerBookMarkIcon.getBoundingClientRect();
 
   // animate the cloned bookmark icon to the destination element
   const animation = clonedBookMarkIcon.animate(
@@ -73,24 +67,24 @@ export const animateBookMark = (
       duration: 750,
       easing: 'ease-in-out',
     },
-  )
+  );
 
   animation.finished.then(() => {
-    clonedBookMarkIcon.remove()
-  })
+    clonedBookMarkIcon.remove();
+  });
 
-  return animation
-}
+  return animation;
+};
 
 export const alphaCardVariants = {
   initial: { opacity: 0, y: 10 },
   animate: { opacity: 1, y: 0 },
-}
+};
 
 export const alphaCardTransition = {
   duration: 0.3,
   ease: 'easeOut',
-}
+};
 
 export default function RaffleListing(props: RaffleListingProps) {
   const {
@@ -106,50 +100,40 @@ export default function RaffleListing(props: RaffleListingProps) {
     highlight,
     userWon,
     redirectUrl,
-  } = props
-  const params = useQueryParams()
-  const { toggleBookmark, isBookmarked } = useChadBookmarks()
-  const {
-    setOpportunities,
-    setEcosystems,
-    selectedOpportunities,
-    selectedEcosystems,
-    openDetails,
-    alphaUser,
-  } = useChadProvider()
+  } = props;
+  const params = useQueryParams();
+  const { toggleBookmark, isBookmarked } = useChadBookmarks();
+  const { setOpportunities, setEcosystems, selectedOpportunities, selectedEcosystems, openDetails, alphaUser } =
+    useChadProvider();
 
   const {
     setOpportunities: setAllOpportunities,
     setEcosystems: setAllEcosystems,
     selectedOpportunities: selectedAllOpportunities,
     selectedEcosystems: selectedAllEcosystems,
-  } = useFilters()
+  } = useFilters();
 
-  const bookMarkIconRef = useRef<SVGSVGElement>(null)
-  const bookMarkAnimationRef = useRef<Animation | null>(null)
+  const bookMarkIconRef = useRef<SVGSVGElement>(null);
+  const bookMarkAnimationRef = useRef<Animation | null>(null);
 
   const handleBookmarkClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
+    e.stopPropagation();
 
-    const prevBookMarked = isBookmarked(id)
-    const headerBookMarkIcon = document.getElementById(ALPHA_BOOKMARK_ID)
+    const prevBookMarked = isBookmarked(id);
+    const headerBookMarkIcon = document.getElementById(ALPHA_BOOKMARK_ID);
 
     if (!prevBookMarked && headerBookMarkIcon && bookMarkIconRef.current) {
-      bookMarkAnimationRef.current = animateBookMark(
-        id,
-        headerBookMarkIcon,
-        bookMarkIconRef.current,
-      )
+      bookMarkAnimationRef.current = animateBookMark(id, headerBookMarkIcon, bookMarkIconRef.current);
     }
 
-    toggleBookmark(id)
+    toggleBookmark(id);
     mixpanelTrack(EventName.Bookmark, {
       [!prevBookMarked ? 'bookmarkAdded' : 'bookmarkRemoved']: id,
       name: title,
       page: highlight ? PageName.Alpha : PageName.ChadExclusives,
       isChad: alphaUser?.isChad ?? false,
-    })
-  }
+    });
+  };
 
   const handleClick = () => {
     if (redirectUrl) {
@@ -162,13 +146,13 @@ export default function RaffleListing(props: RaffleListingProps) {
         categories: [...(categories ?? [])],
         raffleExternalURL: redirectUrl,
         isChad: alphaUser?.isChad ?? false,
-      })
+      });
 
-      window.open(redirectUrl, '_blank')
-      return
+      window.open(redirectUrl, '_blank');
+      return;
     }
 
-    openDetails(props)
+    openDetails(props);
     mixpanelTrack(EventName.PageView, {
       pageName: highlight ? PageName.Alpha : PageName.ChadExclusives,
       RaffleSelectSource: isSearched ? 'Search Results' : 'Default List',
@@ -177,86 +161,74 @@ export default function RaffleListing(props: RaffleListingProps) {
       ecosystem: [...(ecosystem ?? [])],
       categories: [...(categories ?? [])],
       isChad: alphaUser?.isChad ?? false,
-    })
-  }
+    });
+  };
 
   const handleEcosystemClick = useCallback(
     (ecosystem: string) => {
       if (highlight) {
-        setAllEcosystems([...(selectedAllEcosystems || []), ecosystem])
+        setAllEcosystems([...(selectedAllEcosystems || []), ecosystem]);
       } else {
-        setEcosystems([...(selectedEcosystems || []), ecosystem])
+        setEcosystems([...(selectedEcosystems || []), ecosystem]);
       }
     },
     [selectedEcosystems, setEcosystems, selectedAllEcosystems, setAllEcosystems, highlight],
-  )
+  );
 
   const handleCategoryClick = useCallback(
     (category: string) => {
       if (highlight) {
-        setAllOpportunities([...(selectedAllOpportunities || []), category])
+        setAllOpportunities([...(selectedAllOpportunities || []), category]);
       } else {
-        setOpportunities([...(selectedOpportunities || []), category])
+        setOpportunities([...(selectedOpportunities || []), category]);
       }
     },
-    [
-      selectedOpportunities,
-      setOpportunities,
-      selectedAllOpportunities,
-      setAllOpportunities,
-      highlight,
-    ],
-  )
+    [selectedOpportunities, setOpportunities, selectedAllOpportunities, setAllOpportunities, highlight],
+  );
 
   const handleLiveClick = useCallback(() => {
-    const status = params.get(queryParams.alphaDateStatus) as StatusFilter | null
+    const status = params.get(queryParams.alphaDateStatus) as StatusFilter | null;
     if (status === StatusFilter.Live) {
-      params.remove(queryParams.alphaDateStatus)
+      params.remove(queryParams.alphaDateStatus);
     } else {
-      params.set(queryParams.alphaDateStatus, StatusFilter.Live)
+      params.set(queryParams.alphaDateStatus, StatusFilter.Live);
     }
-  }, [params])
+  }, [params]);
 
   useEffect(() => {
     return () => {
       if (bookMarkAnimationRef.current) {
-        bookMarkAnimationRef.current.cancel()
-        document.getElementById(getBookMarkCloneId(id))?.remove()
+        bookMarkAnimationRef.current.cancel();
+        document.getElementById(getBookMarkCloneId(id))?.remove();
       }
-    }
-  }, [id])
+    };
+  }, [id]);
 
   const diff = useMemo(() => {
-    const daysjsStart = dayjs(startsAt)
-    const now = dayjs()
-    return now.diff(daysjsStart, 'second')
-  }, [startsAt])
+    const daysjsStart = dayjs(startsAt);
+    const now = dayjs();
+    return now.diff(daysjsStart, 'second');
+  }, [startsAt]);
 
   const dateLabel = useMemo(() => {
     if (diff < 0) {
-      return `Starts in ${startsInUTC(startsAt)}`
+      return `Starts in ${startsInUTC(startsAt)}`;
     }
 
-    const endIn = endsInUTC(endsAt)
+    const endIn = endsInUTC(endsAt);
     if (status === RaffleStatus.COMPLETED || endIn === 'Ended') {
-      return `Ended on ${dayjs(endsAt).format('MMM D, YYYY')}`
+      return `Ended on ${dayjs(endsAt).format('MMM D, YYYY')}`;
     }
 
-    return endIn
-  }, [diff, endsAt, status, startsAt])
+    return endIn;
+  }, [diff, endsAt, status, startsAt]);
 
   const isLive = useMemo(
-    () =>
-      Boolean(
-        endsAt && diff >= 0 && status !== RaffleStatus.COMPLETED && endsInUTC(endsAt) !== 'Ended',
-      ),
+    () => Boolean(endsAt && diff >= 0 && status !== RaffleStatus.COMPLETED && endsInUTC(endsAt) !== 'Ended'),
     [diff, endsAt, status],
-  )
+  );
 
-  const isEnded = useMemo(
-    () => status === RaffleStatus.COMPLETED || endsInUTC(endsAt) === 'Ended',
-    [endsAt, status],
-  )
+  const isEnded = useMemo(() => status === RaffleStatus.COMPLETED || endsInUTC(endsAt) === 'Ended', [endsAt, status]);
 
   return (
     <motion.div
@@ -306,14 +278,11 @@ export default function RaffleListing(props: RaffleListingProps) {
             <BookmarkSimple
               ref={bookMarkIconRef}
               weight={isBookmarked(id) ? 'fill' : 'regular'}
-              className={cn(
-                'size-6',
-                isBookmarked(id) ? 'text-primary' : 'text- dark:text-gray-400',
-              )}
+              className={cn('size-6', isBookmarked(id) ? 'text-primary' : 'text- dark:text-gray-400')}
             />
           </button>
         )}
       </div>
     </motion.div>
-  )
+  );
 }

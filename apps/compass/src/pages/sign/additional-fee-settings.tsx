@@ -1,17 +1,17 @@
-import Tooltip from 'components/better-tooltip'
-import GasPriceOptions from 'components/gas-price-options'
-import { GasPriceOptionValue, useGasPriceContext } from 'components/gas-price-options/context'
-import { Images } from 'images'
-import React from 'react'
+import Tooltip from 'components/better-tooltip';
+import GasPriceOptions from 'components/gas-price-options';
+import { GasPriceOptionValue, useGasPriceContext } from 'components/gas-price-options/context';
+import { Images } from 'images';
+import React from 'react';
 
 export const NotAllowSignTxGasOptions = ({
   gasPriceOption,
   gasPriceError,
 }: {
-  gasPriceOption: GasPriceOptionValue
-  gasPriceError: string | null
+  gasPriceOption: GasPriceOptionValue;
+  gasPriceError: string | null;
 }) => {
-  const { viewAdditionalOptions } = useGasPriceContext()
+  const { viewAdditionalOptions } = useGasPriceContext();
   return viewAdditionalOptions ? (
     <div className='rounded-2xl p-4 mt-3 dark:bg-[#141414] bg-white-100'>
       <div className='flex items-center'>
@@ -32,9 +32,7 @@ export const NotAllowSignTxGasOptions = ({
       </div>
       <GasPriceOptions.Selector className='mt-2' preSelected={false} />
       <GasPriceOptions.AdditionalSettings className='mt-5 p-0' showGasLimitWarning={true} />
-      {gasPriceError ? (
-        <p className='text-red-300 text-sm font-medium mt-2 px-1'>{gasPriceError}</p>
-      ) : null}
+      {gasPriceError ? <p className='text-red-300 text-sm font-medium mt-2 px-1'>{gasPriceError}</p> : null}
     </div>
-  ) : null
-}
+  ) : null;
+};

@@ -1,34 +1,28 @@
-import { FeeTokenData, Grant, useActiveChain } from '@leapwallet/cosmos-wallet-hooks'
-import { RootBalanceStore, RootDenomsStore } from '@leapwallet/cosmos-wallet-store'
-import { Buttons, Header, HeaderActionType } from '@leapwallet/leap-ui'
-import BigNumber from 'bignumber.js'
-import classNames from 'classnames'
-import { ErrorCard } from 'components/ErrorCard'
-import GasPriceOptions, { useDefaultGasPrice } from 'components/gas-price-options'
-import { GasPriceOptionValue } from 'components/gas-price-options/context'
-import { DisplayFee } from 'components/gas-price-options/display-fee'
-import { FeesSettingsSheet } from 'components/gas-price-options/fees-settings-sheet'
-import { LoaderAnimation } from 'components/loader/Loader'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { rootDenomsStore } from 'stores/denoms-store-instance'
-import { rootBalanceStore } from 'stores/root-store'
-import { Colors } from 'theme/colors'
-import { UserClipboard } from 'utils/clipboard'
-import { formatAuthzDate } from 'utils/formatAuthzDate'
+import { FeeTokenData, Grant, useActiveChain } from '@leapwallet/cosmos-wallet-hooks';
+import { RootBalanceStore, RootDenomsStore } from '@leapwallet/cosmos-wallet-store';
+import { Buttons, Header, HeaderActionType } from '@leapwallet/leap-ui';
+import BigNumber from 'bignumber.js';
+import classNames from 'classnames';
+import { ErrorCard } from 'components/ErrorCard';
+import GasPriceOptions, { useDefaultGasPrice } from 'components/gas-price-options';
+import { GasPriceOptionValue } from 'components/gas-price-options/context';
+import { DisplayFee } from 'components/gas-price-options/display-fee';
+import { FeesSettingsSheet } from 'components/gas-price-options/fees-settings-sheet';
+import { LoaderAnimation } from 'components/loader/Loader';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { rootDenomsStore } from 'stores/denoms-store-instance';
+import { rootBalanceStore } from 'stores/root-store';
+import { Colors } from 'theme/colors';
+import { UserClipboard } from 'utils/clipboard';
+import { formatAuthzDate } from 'utils/formatAuthzDate';
 
-import { useAuthZContext } from './ManageAuthZ'
+import { useAuthZContext } from './ManageAuthZ';
 
 const FeesView = observer(
-  ({
-    rootDenomsStore,
-    rootBalanceStore,
-  }: {
-    rootDenomsStore: RootDenomsStore
-    rootBalanceStore: RootBalanceStore
-  }) => {
-    const [showFeesSettingSheet, setShowFeesSettingSheet] = useState(false)
+  ({ rootDenomsStore, rootBalanceStore }: { rootDenomsStore: RootDenomsStore; rootBalanceStore: RootBalanceStore }) => {
+    const [showFeesSettingSheet, setShowFeesSettingSheet] = useState(false);
     const {
       selectedChain,
       setFeeDenom,
@@ -43,58 +37,56 @@ const FeesView = observer(
       gasError,
       setGasError,
       selectedChainHasMainnetOnly,
-    } = useAuthZContext()
-    const denoms = rootDenomsStore.allDenoms
+    } = useAuthZContext();
+    const denoms = rootDenomsStore.allDenoms;
 
     const defaultGasPrice = useDefaultGasPrice(denoms, {
       activeChain: selectedChain,
       selectedNetwork: selectedChainHasMainnetOnly ? 'mainnet' : undefined,
       feeDenom,
-    })
+    });
 
     const [gasPriceOption, setGasPriceOption] = useState<GasPriceOptionValue>({
       option: gasOption,
       gasPrice: userPreferredGasPrice ?? defaultGasPrice.gasPrice,
-    })
+    });
 
     const onClose = useCallback(() => {
-      setShowFeesSettingSheet(false)
-    }, [])
+      setShowFeesSettingSheet(false);
+    }, []);
 
     const handleGasPriceOptionChange = useCallback(
       (value: GasPriceOptionValue, feeTokenData: FeeTokenData) => {
-        setGasPriceOption(value)
-        setFeeDenom({ ...feeTokenData.denom, ibcDenom: feeTokenData.ibcDenom })
+        setGasPriceOption(value);
+        setFeeDenom({ ...feeTokenData.denom, ibcDenom: feeTokenData.ibcDenom });
       },
 
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [],
-    )
+    );
 
     useEffect(() => {
       setGasPriceOption({
         option: gasOption,
         gasPrice: defaultGasPrice.gasPrice,
-      })
+      });
 
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedChain])
+    }, [selectedChain]);
 
     useEffect(() => {
-      setGasOption(gasPriceOption.option)
-      setUserPreferredGasPrice(gasPriceOption.gasPrice)
+      setGasOption(gasPriceOption.option);
+      setUserPreferredGasPrice(gasPriceOption.gasPrice);
 
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [gasPriceOption])
+    }, [gasPriceOption]);
 
     return (
       <div>
         <GasPriceOptions
           recommendedGasLimit={gasEstimate.toString()}
           gasLimit={userPreferredGasLimit?.toString() ?? gasEstimate.toString()}
-          setGasLimit={(value: number | BigNumber | string) =>
-            setUserPreferredGasLimit(Number(value.toString()))
-          }
+          setGasLimit={(value: number | BigNumber | string) => setUserPreferredGasLimit(Number(value.toString()))}
           gasPriceOption={gasPriceOption}
           onGasPriceOptionChange={handleGasPriceOptionChange}
           error={gasError}
@@ -110,39 +102,35 @@ const FeesView = observer(
             <p className='text-red-300 text-sm font-medium text-center'>{gasError}</p>
           ) : null}
 
-          <FeesSettingsSheet
-            showFeesSettingSheet={showFeesSettingSheet}
-            onClose={onClose}
-            gasError={gasError}
-          />
+          <FeesSettingsSheet showFeesSettingSheet={showFeesSettingSheet} onClose={onClose} gasError={gasError} />
         </GasPriceOptions>
       </div>
-    )
+    );
   },
-)
+);
 
 export function AuthzDetails({ grant }: { grant: Grant }) {
-  const activeChain = useActiveChain()
-  const [isGranteeAddressCopied, setIsGranteeAddressCopied] = useState(false)
-  const { onReviewRevokeTx, isLoading, error, gasError } = useAuthZContext()
+  const activeChain = useActiveChain();
+  const [isGranteeAddressCopied, setIsGranteeAddressCopied] = useState(false);
+  const { onReviewRevokeTx, isLoading, error, gasError } = useAuthZContext();
 
   const date = useMemo(() => {
-    let _date = ''
+    let _date = '';
     if (grant.expiration) {
-      _date = formatAuthzDate(grant.expiration)
+      _date = formatAuthzDate(grant.expiration);
     }
 
-    return _date
-  }, [grant.expiration])
+    return _date;
+  }, [grant.expiration]);
 
   const handleCopyGranteeAddress = () => {
-    setIsGranteeAddressCopied(true)
-    UserClipboard.copyText(grant.grantee)
+    setIsGranteeAddressCopied(true);
+    UserClipboard.copyText(grant.grantee);
 
     setTimeout(() => {
-      setIsGranteeAddressCopied(false)
-    }, 500)
-  }
+      setIsGranteeAddressCopied(false);
+    }, 500);
+  };
 
   return (
     <div className='flex overflow-y-auto w-full flex-col items-center gap-4 p-[28px] h-[calc(100%-70px)] relative'>
@@ -164,9 +152,7 @@ export function AuthzDetails({ grant }: { grant: Grant }) {
       </div>
       {grant.expiration && (
         <div className='overflow-auto shrink-0 min-h-[30px] rounded-2xl w-full p-4 bg-white-100 dark:bg-gray-900'>
-          <h2 className='w-full pb-1 font-bold text-xs text-gray-600 dark:text-gray-400'>
-            Expiration Date
-          </h2>
+          <h2 className='w-full pb-1 font-bold text-xs text-gray-600 dark:text-gray-400'>Expiration Date</h2>
           <p className='dark:text-white-100 text-base font-bold'>{date}</p>
         </div>
       )}
@@ -191,5 +177,5 @@ export function AuthzDetails({ grant }: { grant: Grant }) {
         </Buttons.Generic>
       </div>
     </div>
-  )
+  );
 }

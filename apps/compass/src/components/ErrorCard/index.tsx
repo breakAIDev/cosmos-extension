@@ -1,24 +1,24 @@
-import { Info } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import { motion } from 'framer-motion'
-import { useCaptureUIException } from 'hooks/perf-monitoring/useCaptureUIException'
-import React, { useEffect, useRef } from 'react'
-import { opacityFadeInOut, transition150 } from 'utils/motion-variants'
+import { Info } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import { motion } from 'framer-motion';
+import { useCaptureUIException } from 'hooks/perf-monitoring/useCaptureUIException';
+import React, { useEffect, useRef } from 'react';
+import { opacityFadeInOut, transition150 } from 'utils/motion-variants';
 
 type ErrorCardProps = React.ComponentPropsWithoutRef<'div'> & {
-  text?: string
-  className?: string
-  'data-testing-id'?: string
-}
+  text?: string;
+  className?: string;
+  'data-testing-id'?: string;
+};
 
 export function ErrorCard({ text, className, ...props }: ErrorCardProps) {
-  const ref = useRef<HTMLDivElement | null>(null)
+  const ref = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    ref.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [])
+    ref.current?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
 
-  useCaptureUIException(text)
+  useCaptureUIException(text);
 
   return (
     <motion.div
@@ -41,5 +41,5 @@ export function ErrorCard({ text, className, ...props }: ErrorCardProps) {
         {text}
       </p>
     </motion.div>
-  )
+  );
 }

@@ -1,11 +1,11 @@
-import React, { ComponentPropsWithoutRef, forwardRef } from 'react'
-import { cn } from 'utils/cn'
+import React, { ComponentPropsWithoutRef, forwardRef } from 'react';
+import { cn } from 'utils/cn';
 
 interface ClickableIconProps extends ComponentPropsWithoutRef<'button'> {
-  darker?: boolean
-  disabled?: boolean
-  label: string
-  icon: React.ElementType
+  darker?: boolean;
+  disabled?: boolean;
+  label: string;
+  icon: React.ElementType;
 }
 
 const ClickableIcon = forwardRef<HTMLButtonElement, ClickableIconProps>(
@@ -26,10 +26,10 @@ const ClickableIcon = forwardRef<HTMLButtonElement, ClickableIconProps>(
 
         {!!label && <p className='text-sm mt-2 tracking-wide font-bold'>{label}</p>}
       </div>
-    )
+    );
   },
-)
+);
 
-ClickableIcon.displayName = 'ClickableIcon'
+ClickableIcon.displayName = 'ClickableIcon';
 
-export default ClickableIcon
+export default ClickableIcon;

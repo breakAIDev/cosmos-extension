@@ -1,25 +1,23 @@
-import { formatTokenAmount, sliceWord } from '@leapwallet/cosmos-wallet-hooks'
-import classNames from 'classnames'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import { observer } from 'mobx-react-lite'
-import React, { useMemo } from 'react'
-import { hideAssetsStore } from 'stores/hide-assets-store'
-import { imgOnError } from 'utils/imgOnError'
+import { formatTokenAmount, sliceWord } from '@leapwallet/cosmos-wallet-hooks';
+import classNames from 'classnames';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { observer } from 'mobx-react-lite';
+import React, { useMemo } from 'react';
+import { hideAssetsStore } from 'stores/hide-assets-store';
+import { imgOnError } from 'utils/imgOnError';
 
-import { TxReviewTokenInfoProps } from './index'
+import { TxReviewTokenInfoProps } from './index';
 
-type TxPageAmountProps = TxReviewTokenInfoProps & { isFirst?: boolean }
+type TxPageAmountProps = TxReviewTokenInfoProps & { isFirst?: boolean };
 
 function TxPageAmountView({ amount, token, chain, isFirst }: TxPageAmountProps) {
-  const defaultTokenLogo = useDefaultTokenLogo()
+  const defaultTokenLogo = useDefaultTokenLogo();
 
   const balanceAmount = useMemo(() => {
-    return hideAssetsStore.formatHideBalance(
-      formatTokenAmount(amount ?? '0', sliceWord(token?.symbol ?? '', 4, 4), 3),
-    )
+    return hideAssetsStore.formatHideBalance(formatTokenAmount(amount ?? '0', sliceWord(token?.symbol ?? '', 4, 4), 3));
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [amount, token?.symbol])
+  }, [amount, token?.symbol]);
 
   return (
     <div
@@ -42,7 +40,7 @@ function TxPageAmountView({ amount, token, chain, isFirst }: TxPageAmountProps) 
         <p className='text-gray-300 text-sm'>On {chain?.chainName ?? ''}</p>
       </div>
     </div>
-  )
+  );
 }
 
-export const TxPageAmount = observer(TxPageAmountView)
+export const TxPageAmount = observer(TxPageAmountView);

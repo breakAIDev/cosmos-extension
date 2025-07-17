@@ -1,29 +1,29 @@
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import classNames from 'classnames'
-import Text from 'components/text'
-import { useChainInfos } from 'hooks/useChainInfos'
-import { Images } from 'images'
-import React, { useState } from 'react'
-import { Colors } from 'theme/colors'
-import { getChainName } from 'utils/getChainName'
-import { imgOnError } from 'utils/imgOnError'
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import classNames from 'classnames';
+import Text from 'components/text';
+import { useChainInfos } from 'hooks/useChainInfos';
+import { Images } from 'images';
+import React, { useState } from 'react';
+import { Colors } from 'theme/colors';
+import { getChainName } from 'utils/getChainName';
+import { imgOnError } from 'utils/imgOnError';
 
-import { Chip } from './index'
+import { Chip } from './index';
 
 export type NftCardProps = {
-  chain: SupportedChain
-  imgSrc?: string
+  chain: SupportedChain;
+  imgSrc?: string;
   textNft?: {
-    name: string
-    description: string
-  }
-  chainName?: string
-  chainLogo?: string
-  mediaType?: string
-  imgClassName?: string
-  handleExpandClick?: VoidFunction
-  showExpand?: boolean
-}
+    name: string;
+    description: string;
+  };
+  chainName?: string;
+  chainLogo?: string;
+  mediaType?: string;
+  imgClassName?: string;
+  handleExpandClick?: VoidFunction;
+  showExpand?: boolean;
+};
 
 export function NftCard({
   chain,
@@ -36,9 +36,9 @@ export function NftCard({
   handleExpandClick,
   showExpand,
 }: NftCardProps) {
-  const [imageIsLoading, setImageIsLoading] = useState(imgSrc ? true : false)
-  const [errorInLoadingMP4NFT, setErrorInLoadingMP4NFT] = useState(false)
-  const chainInfos = useChainInfos()
+  const [imageIsLoading, setImageIsLoading] = useState(imgSrc ? true : false);
+  const [errorInLoadingMP4NFT, setErrorInLoadingMP4NFT] = useState(false);
+  const chainInfos = useChainInfos();
 
   return (
     <div className='rounded relative'>
@@ -53,8 +53,7 @@ export function NftCard({
         </div>
       </div>
       <div style={{ display: imageIsLoading ? 'none' : 'block' }}>
-        {(imgSrc?.includes('mp4') || ['video/mp4', 'image/gif'].includes(mediaType ?? '')) &&
-        !errorInLoadingMP4NFT ? (
+        {(imgSrc?.includes('mp4') || ['video/mp4', 'image/gif'].includes(mediaType ?? '')) && !errorInLoadingMP4NFT ? (
           <video
             autoPlay
             loop
@@ -83,11 +82,7 @@ export function NftCard({
             )}
             style={{ backgroundColor: Colors.getChainColor(chain, chainInfos[chain]) }}
           >
-            <Text
-              size='md'
-              className='font-bold overflow-x-auto'
-              style={{ textOverflow: 'ellipsis' }}
-            >
+            <Text size='md' className='font-bold overflow-x-auto' style={{ textOverflow: 'ellipsis' }}>
               {textNft?.name}
             </Text>
           </div>
@@ -105,11 +100,7 @@ export function NftCard({
 
       {chainName && chainLogo && (
         <Chip className='bg-[#ffffff8c] dark:bg-[#00000096] py-[3px] px-[7px] absolute bottom-2 left-2 backdrop-blur-sm'>
-          <Chip.Image
-            className='w-[10px] h-[10px]'
-            src={chainLogo}
-            alt={`${chainName?.toLowerCase()} logo`}
-          />
+          <Chip.Image className='w-[10px] h-[10px]' src={chainLogo} alt={`${chainName?.toLowerCase()} logo`} />
           <Chip.Text
             className='text-gray-800 dark:text-gray-100 text-[10px] max-w-[90px] truncate'
             title={getChainName(chainName)}
@@ -119,5 +110,5 @@ export function NftCard({
         </Chip>
       )}
     </div>
-  )
+  );
 }

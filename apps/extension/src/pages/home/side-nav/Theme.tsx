@@ -1,27 +1,21 @@
-import { Avatar, Card, CardDivider, ThemeName, useTheme } from '@leapwallet/leap-ui'
-import { CheckCircle } from '@phosphor-icons/react'
-import BottomModal from 'components/new-bottom-modal'
-import { useActiveChain } from 'hooks/settings/useActiveChain'
-import { Images } from 'images'
-import React from 'react'
+import { Avatar, Card, CardDivider, ThemeName, useTheme } from '@leapwallet/leap-ui';
+import { CheckCircle } from '@phosphor-icons/react';
+import BottomModal from 'components/new-bottom-modal';
+import { useActiveChain } from 'hooks/settings/useActiveChain';
+import { Images } from 'images';
+import React from 'react';
 
-export default function ThemeDropUp({
-  isVisible,
-  onCloseHandler,
-}: {
-  isVisible: boolean
-  onCloseHandler: () => void
-}) {
-  const activeChain = useActiveChain()
-  const { theme, setTheme } = useTheme()
+export default function ThemeDropUp({ isVisible, onCloseHandler }: { isVisible: boolean; onCloseHandler: () => void }) {
+  const activeChain = useActiveChain();
+  const { theme, setTheme } = useTheme();
   const themes = [
     {
       title: 'Light',
       isSelected: theme === ThemeName.LIGHT,
       icon: Images.Nav.LightIcon,
       onClick: () => {
-        setTheme(ThemeName.LIGHT)
-        onCloseHandler()
+        setTheme(ThemeName.LIGHT);
+        onCloseHandler();
       },
     },
     {
@@ -29,19 +23,14 @@ export default function ThemeDropUp({
       isSelected: theme === ThemeName.DARK,
       icon: Images.Nav.DarkIcon,
       onClick: () => {
-        setTheme(ThemeName.DARK)
-        onCloseHandler()
+        setTheme(ThemeName.DARK);
+        onCloseHandler();
       },
     },
-  ]
+  ];
 
   return (
-    <BottomModal
-      isOpen={isVisible}
-      onClose={onCloseHandler}
-      title={'Select Theme'}
-      className='flex flex-col gap-4'
-    >
+    <BottomModal isOpen={isVisible} onClose={onCloseHandler} title={'Select Theme'} className='flex flex-col gap-4'>
       {themes.map((item) => {
         return (
           <button
@@ -59,8 +48,8 @@ export default function ThemeDropUp({
               className={item.isSelected ? 'text-accent-foreground' : 'text-transparent'}
             />
           </button>
-        )
+        );
       })}
     </BottomModal>
-  )
+  );
 }

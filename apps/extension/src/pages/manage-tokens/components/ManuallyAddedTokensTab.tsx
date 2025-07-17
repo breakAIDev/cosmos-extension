@@ -1,16 +1,16 @@
-import { NativeDenom } from '@leapwallet/cosmos-wallet-sdk'
-import { LoaderAnimation } from 'components/loader/Loader'
-import React from 'react'
-import { Virtuoso } from 'react-virtuoso'
+import { NativeDenom } from '@leapwallet/cosmos-wallet-sdk';
+import { LoaderAnimation } from 'components/loader/Loader';
+import React from 'react';
+import { Virtuoso } from 'react-virtuoso';
 import {
   betaCW20DenomsStore,
   betaERC20DenomsStore,
   disabledCW20DenomsStore,
   enabledCW20DenomsStore,
-} from 'stores/denoms-store-instance'
+} from 'stores/denoms-store-instance';
 
-import { ManageTokensEmptyCard } from '.'
-import { ManuallyAddedTokenCard } from './ManuallyAddedTokenCard'
+import { ManageTokensEmptyCard } from '.';
+import { ManuallyAddedTokenCard } from './ManuallyAddedTokenCard';
 
 export const ManuallyAddedTokensTab = ({
   filteredManuallyAddedTokens,
@@ -21,26 +21,24 @@ export const ManuallyAddedTokensTab = ({
   handleAddNewTokenClick,
   searchedText,
 }: {
-  filteredManuallyAddedTokens: NativeDenom[]
-  handleToggleChange: (isEnabled: boolean, coinMinimalDenom: string) => Promise<void>
-  fetchedTokens: string[]
-  onDeleteClick: (token: NativeDenom) => void
-  fetchingContract: boolean
-  handleAddNewTokenClick: () => void
-  searchedText: string
+  filteredManuallyAddedTokens: NativeDenom[];
+  handleToggleChange: (isEnabled: boolean, coinMinimalDenom: string) => Promise<void>;
+  fetchedTokens: string[];
+  onDeleteClick: (token: NativeDenom) => void;
+  fetchingContract: boolean;
+  handleAddNewTokenClick: () => void;
+  searchedText: string;
 }) => {
   if (fetchingContract === true) {
     return (
       <div className='flex items-center justify-center flex-1'>
         <LoaderAnimation color='#29a874' />
       </div>
-    )
+    );
   }
 
   if (fetchingContract === false && filteredManuallyAddedTokens.length === 0) {
-    return (
-      <ManageTokensEmptyCard onAddTokenClick={handleAddNewTokenClick} searchedText={searchedText} />
-    )
+    return <ManageTokensEmptyCard onAddTokenClick={handleAddNewTokenClick} searchedText={searchedText} />;
   }
 
   return (
@@ -63,9 +61,9 @@ export const ManuallyAddedTokensTab = ({
               enabledCW20DenomsStore={enabledCW20DenomsStore}
               betaERC20DenomsStore={betaERC20DenomsStore}
             />
-          )
+          );
         }}
       />
     </div>
-  )
-}
+  );
+};

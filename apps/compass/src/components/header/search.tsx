@@ -1,7 +1,7 @@
-import { Button } from 'components/ui/button'
-import { LensIcon } from 'icons/lens-icon'
-import React from 'react'
-import { Link } from 'react-router-dom'
+import { Button } from 'components/ui/button';
+import { LensIcon } from 'icons/lens-icon';
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 export const HeaderSearch = (props: { className?: string }) => {
   return (
@@ -10,5 +10,5 @@ export const HeaderSearch = (props: { className?: string }) => {
         <LensIcon size={22} />
       </Link>
     </Button>
-  )
-}
+  );
+};

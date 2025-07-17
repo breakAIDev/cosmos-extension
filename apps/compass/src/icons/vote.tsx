@@ -1,5 +1,5 @@
-import { Icon, IconBase, IconWeight } from '@phosphor-icons/react'
-import React, { forwardRef, ReactElement } from 'react'
+import { Icon, IconBase, IconWeight } from '@phosphor-icons/react';
+import React, { forwardRef, ReactElement } from 'react';
 
 const weights = new Map<IconWeight, ReactElement>([
   [
@@ -26,12 +26,10 @@ const weights = new Map<IconWeight, ReactElement>([
       fill='currentColor'
     />,
   ],
-])
+]);
 
-const Vote: Icon = forwardRef((props, ref) => (
-  <IconBase viewBox='0 0 24 24' ref={ref} {...props} weights={weights} />
-))
+const Vote: Icon = forwardRef((props, ref) => <IconBase viewBox='0 0 24 24' ref={ref} {...props} weights={weights} />);
 
-Vote.displayName = 'Vote'
+Vote.displayName = 'Vote';
 
-export default Vote
+export default Vote;

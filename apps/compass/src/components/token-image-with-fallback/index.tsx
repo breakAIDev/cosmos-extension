@@ -1,5 +1,5 @@
-import { FallbackTokenImage } from 'components/fallback-token-image'
-import React, { useState } from 'react'
+import { FallbackTokenImage } from 'components/fallback-token-image';
+import React, { useState } from 'react';
 
 export function TokenImageWithFallback({
   containerClassName = '',
@@ -9,14 +9,14 @@ export function TokenImageWithFallback({
   assetImg,
   imageClassName = '',
 }: {
-  assetImg?: string
-  text: string
-  containerClassName?: string
-  textClassName?: string
-  altText?: string
-  imageClassName?: string
+  assetImg?: string;
+  text: string;
+  containerClassName?: string;
+  textClassName?: string;
+  altText?: string;
+  imageClassName?: string;
 }) {
-  const [useImgFallback, setUseImgFallback] = useState<boolean>(false)
+  const [useImgFallback, setUseImgFallback] = useState<boolean>(false);
 
   return assetImg && !useImgFallback ? (
     <img
@@ -24,15 +24,10 @@ export function TokenImageWithFallback({
       src={assetImg}
       alt={altText}
       onError={() => {
-        setUseImgFallback(true)
+        setUseImgFallback(true);
       }}
     />
   ) : (
-    <FallbackTokenImage
-      containerClassName={containerClassName}
-      textClassName={textClassName}
-      text={text}
-      key={text}
-    />
-  )
+    <FallbackTokenImage containerClassName={containerClassName} textClassName={textClassName} text={text} key={text} />
+  );
 }

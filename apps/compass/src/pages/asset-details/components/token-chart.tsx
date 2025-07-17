@@ -1,7 +1,7 @@
-import { useformatCurrency } from '@leapwallet/cosmos-wallet-hooks'
-import { MarketChartPrice } from '@leapwallet/leap-api-js'
-import { BigNumber } from 'bignumber.js'
-import React, { useEffect, useMemo, useState } from 'react'
+import { useformatCurrency } from '@leapwallet/cosmos-wallet-hooks';
+import { MarketChartPrice } from '@leapwallet/leap-api-js';
+import { BigNumber } from 'bignumber.js';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Area,
   AreaChart,
@@ -19,15 +19,15 @@ import {
   LinearYAxis,
   LinearYAxisTickSeries,
   TooltipArea,
-} from 'reaviz'
-import { Colors } from 'theme/colors'
+} from 'reaviz';
+import { Colors } from 'theme/colors';
 
 const HoverSpaceTooltip = ({
   data,
   maxAndLastDiff,
 }: {
-  data: { price: string; formattedDate: string }
-  maxAndLastDiff: number
+  data: { price: string; formattedDate: string };
+  maxAndLastDiff: number;
 }) => {
   return (
     <div className={`flex h-full absolute right-10`}>
@@ -40,9 +40,7 @@ const HoverSpaceTooltip = ({
           }}
         >
           <div className='flex flex-col gap-1 mr-1 items-start'>
-            <p className='bg-blue-600 rounded text-monochrome text-xs font-bold !leading-4 px-1'>
-              {data.price}
-            </p>
+            <p className='bg-blue-600 rounded text-monochrome text-xs font-bold !leading-4 px-1'>{data.price}</p>
             <p className='bg-secondary-200 rounded text-muted-foreground text-[10px] font-bold !leading-3 py-0.5 px-1 min-w-20'>
               {data.formattedDate}
             </p>
@@ -51,8 +49,8 @@ const HoverSpaceTooltip = ({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 export function TokensChart({
   chartData,
@@ -62,22 +60,22 @@ export function TokensChart({
   chainColor,
   selectedDays,
 }: {
-  chartData: MarketChartPrice[]
-  loadingCharts: boolean
-  price: number
-  chainColor: string
-  minMax: MarketChartPrice[]
-  selectedDays: string
+  chartData: MarketChartPrice[];
+  loadingCharts: boolean;
+  price: number;
+  chainColor: string;
+  minMax: MarketChartPrice[];
+  selectedDays: string;
 }) {
-  const [formatCurrency] = useformatCurrency()
-  const [isHovered, setIsHovered] = useState(false)
-  const [hoveredData, setHoveredData] = useState<ChartDataShape | undefined>()
-  const [formattedChartData, setFormattedChartData] = useState<ChartDataShape[] | undefined>()
+  const [formatCurrency] = useformatCurrency();
+  const [isHovered, setIsHovered] = useState(false);
+  const [hoveredData, setHoveredData] = useState<ChartDataShape | undefined>();
+  const [formattedChartData, setFormattedChartData] = useState<ChartDataShape[] | undefined>();
   const maxPrice = useMemo(() => {
-    return Math.max(...chartData.map((item) => item.price))
-  }, [chartData])
+    return Math.max(...chartData.map((item) => item.price));
+  }, [chartData]);
 
-  const chartColor = isHovered ? '#292929' : chainColor
+  const chartColor = isHovered ? '#292929' : chainColor;
 
   useEffect(
     () =>
@@ -89,44 +87,44 @@ export function TokensChart({
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             key: new Date((val as any).timestamp),
             metadata: val.date,
-          }
+          };
         }),
       ),
     [chartData],
-  )
+  );
   const getDateAndPrice = (data: any) => {
-    const price = (data?.value ?? data?.data) + minMax[0].price
+    const price = (data?.value ?? data?.data) + minMax[0].price;
 
-    const date = new Date(data.key)
-    let formattedDate
+    const date = new Date(data.key);
+    let formattedDate;
 
     if (selectedDays === '1Y' || selectedDays === 'YTD' || selectedDays === 'All') {
       formattedDate = date.toLocaleString('en-US', {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
-      })
+      });
     } else {
       formattedDate = date.toLocaleString('en-US', {
         month: 'short',
         day: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
-      })
+      });
     }
     return {
       price: formatCurrency(new BigNumber(price)),
       formattedDate,
-    }
-  }
+    };
+  };
 
   const onMouseEnter = () => {
-    setIsHovered(true)
-  }
+    setIsHovered(true);
+  };
 
   const onMouseLeave = () => {
-    setIsHovered(false)
-  }
+    setIsHovered(false);
+  };
 
   return chartData && !loadingCharts && price ? (
     <div className='flex w-full h-[184px] relative'>
@@ -135,18 +133,14 @@ export function TokensChart({
         containerClassName='!w-[calc(100%-40px)]'
         xAxis={
           <LinearXAxis
-            tickSeries={
-              <LinearXAxisTickSeries tickSize={0} interval={5} label={null} line={null} />
-            }
+            tickSeries={<LinearXAxisTickSeries tickSize={0} interval={5} label={null} line={null} />}
             axisLine={<LinearAxisLine strokeWidth={0} strokeColor={Colors.gray900} />}
             type={'time'}
           />
         }
         yAxis={
           <LinearYAxis
-            tickSeries={
-              <LinearYAxisTickSeries tickSize={0} width={0} interval={5} label={null} line={null} />
-            }
+            tickSeries={<LinearYAxisTickSeries tickSize={0} width={0} interval={5} label={null} line={null} />}
             axisLine={<LinearAxisLine strokeWidth={0} />}
           />
         }
@@ -167,8 +161,8 @@ export function TokensChart({
                     }}
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     content={(data: any) => {
-                      const { price, formattedDate } = getDateAndPrice(data)
-                      const distFromTop = Math.ceil((184 / maxPrice) * data.value) - 184
+                      const { price, formattedDate } = getDateAndPrice(data);
+                      const distFromTop = Math.ceil((184 / maxPrice) * data.value) - 184;
 
                       return (
                         <div className='relative flex h-[184px]'>
@@ -188,7 +182,7 @@ export function TokensChart({
                             </p>
                           </div>
                         </div>
-                      )
+                      );
                     }}
                   />
                 }
@@ -217,18 +211,14 @@ export function TokensChart({
       {hoveredData ? (
         <HoverSpaceTooltip
           data={getDateAndPrice({ ...hoveredData, value: hoveredData.data })}
-          maxAndLastDiff={
-            chartData
-              ? 184 - Math.ceil((184 / maxPrice) * chartData[chartData.length - 1].price)
-              : 0
-          }
+          maxAndLastDiff={chartData ? 184 - Math.ceil((184 / maxPrice) * chartData[chartData.length - 1].price) : 0}
         />
       ) : null}
       <div
         className='w-[40px] h-full cursor-pointer z-1'
         onMouseOver={() => {
           if (formattedChartData) {
-            setHoveredData(formattedChartData[formattedChartData.length - 1])
+            setHoveredData(formattedChartData[formattedChartData.length - 1]);
           }
         }}
         onMouseLeave={() => setHoveredData(undefined)}
@@ -236,5 +226,5 @@ export function TokensChart({
     </div>
   ) : (
     <>{price && <div className='h-auto' />}</>
-  )
+  );
 }

@@ -1,28 +1,22 @@
-import { WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks'
-import { CardDivider, NavCard, ThemeName, useTheme } from '@leapwallet/leap-ui'
-import { useAuth } from 'context/auth-context'
-import useActiveWallet from 'hooks/settings/useActiveWallet'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import React, { useMemo } from 'react'
-import { globalSheetsStore } from 'stores/ui/global-sheets-store'
-import { DEBUG } from 'utils/debug'
+import { WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks';
+import { CardDivider, NavCard, ThemeName, useTheme } from '@leapwallet/leap-ui';
+import { useAuth } from 'context/auth-context';
+import useActiveWallet from 'hooks/settings/useActiveWallet';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import React, { useMemo } from 'react';
+import { globalSheetsStore } from 'stores/ui/global-sheets-store';
+import { DEBUG } from 'utils/debug';
 
-import { NavPages, SideNavSection, SideNavSectionHeader } from '.'
+import { NavPages, SideNavSection, SideNavSectionHeader } from '.';
 
 export const Security = observer(
-  ({
-    setShowNavPage,
-    openGSDropUp,
-  }: {
-    setShowNavPage: (page: NavPages) => void
-    openGSDropUp: () => void
-  }) => {
-    const auth = useAuth()
-    const { theme } = useTheme()
-    const isDark = theme === ThemeName.DARK
+  ({ setShowNavPage, openGSDropUp }: { setShowNavPage: (page: NavPages) => void; openGSDropUp: () => void }) => {
+    const auth = useAuth();
+    const { theme } = useTheme();
+    const isDark = theme === ThemeName.DARK;
 
-    const { activeWallet } = useActiveWallet()
+    const { activeWallet } = useActiveWallet();
 
     const Privacy = useMemo(
       () => [
@@ -53,16 +47,16 @@ export const Security = observer(
           titleIcon: Images.Nav.Lock,
           onClick: () => {
             auth?.signout(() => {
-              DEBUG('SideNav', 'SignOut', 'success')
-            })
-            globalSheetsStore.setSideNavOpen(false)
+              DEBUG('SideNav', 'SignOut', 'success');
+            });
+            globalSheetsStore.setSideNavOpen(false);
           },
           enabled: true,
           'data-testing-id': 'sidenav-lock-wallet-card',
         },
       ],
       [activeWallet, auth, isDark, openGSDropUp, setShowNavPage],
-    )
+    );
 
     return (
       <SideNavSection>
@@ -78,9 +72,9 @@ export const Security = observer(
                 data-testing-id={item['data-testing-id'] ?? ''}
               />
             </React.Fragment>
-          )
+          );
         })}
       </SideNavSection>
-    )
+    );
   },
-)
+);

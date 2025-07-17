@@ -1,4 +1,4 @@
-import { DeliverTxResponse, isDeliverTxSuccess } from '@cosmjs/stargate'
+import { DeliverTxResponse, isDeliverTxSuccess } from '@cosmjs/stargate';
 import {
   CosmosTxType,
   getMetaDataForSendTx,
@@ -10,19 +10,19 @@ import {
   useInvalidateActivity,
   usePendingTxState,
   useSelectedNetwork,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { CaretRight } from '@phosphor-icons/react'
-import BigNumber from 'bignumber.js'
-import classNames from 'classnames'
-import BottomModal from 'components/new-bottom-modal'
-import Text from 'components/text'
-import { Button } from 'components/ui/button'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { rootBalanceStore } from 'stores/root-store'
-import { formatTokenAmount, sliceWord } from 'utils/strings'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { CaretRight } from '@phosphor-icons/react';
+import BigNumber from 'bignumber.js';
+import classNames from 'classnames';
+import BottomModal from 'components/new-bottom-modal';
+import Text from 'components/text';
+import { Button } from 'components/ui/button';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { rootBalanceStore } from 'stores/root-store';
+import { formatTokenAmount, sliceWord } from 'utils/strings';
 
 export enum TxType {
   SEND = 'Send',
@@ -30,19 +30,11 @@ export enum TxType {
 }
 
 const TxPage = observer(
-  ({
-    isOpen,
-    onClose,
-    txType,
-  }: {
-    isOpen: boolean
-    onClose: (clear?: boolean) => void
-    txType: TxType
-  }) => {
-    const navigate = useNavigate()
-    const [txHash, setTxHash] = useState('')
-    const { pendingTx, setPendingTx } = usePendingTxState()
-    const txPostToDB = LeapWalletApi.useOperateCosmosTx()
+  ({ isOpen, onClose, txType }: { isOpen: boolean; onClose: (clear?: boolean) => void; txType: TxType }) => {
+    const navigate = useNavigate();
+    const [txHash, setTxHash] = useState('');
+    const { pendingTx, setPendingTx } = usePendingTxState();
+    const txPostToDB = LeapWalletApi.useOperateCosmosTx();
 
     const {
       txStatus,
@@ -53,28 +45,25 @@ const TxPage = observer(
       toChain,
       sentAmount,
       sentTokenInfo,
-    } = pendingTx ?? {}
+    } = pendingTx ?? {};
 
-    const _activeChain = useActiveChain()
-    const activeChain = useMemo(() => sourceChain || _activeChain, [_activeChain, sourceChain])
+    const _activeChain = useActiveChain();
+    const activeChain = useMemo(() => sourceChain || _activeChain, [_activeChain, sourceChain]);
 
-    const _selectedNetwork = useSelectedNetwork()
-    const selectedNetwork = useMemo(
-      () => sourceNetwork || _selectedNetwork,
-      [_selectedNetwork, sourceNetwork],
-    )
+    const _selectedNetwork = useSelectedNetwork();
+    const selectedNetwork = useMemo(() => sourceNetwork || _selectedNetwork, [_selectedNetwork, sourceNetwork]);
 
-    const activeChainId = useChainId(activeChain, selectedNetwork)
-    const address = useAddress(activeChain)
+    const activeChainId = useChainId(activeChain, selectedNetwork);
+    const address = useAddress(activeChain);
 
     const invalidateBalances = useCallback(() => {
-      rootBalanceStore.refetchBalances(activeChain, selectedNetwork)
+      rootBalanceStore.refetchBalances(activeChain, selectedNetwork);
       if (toAddress) {
-        rootBalanceStore.refetchBalances(toChain ?? activeChain, selectedNetwork, toAddress)
+        rootBalanceStore.refetchBalances(toChain ?? activeChain, selectedNetwork, toAddress);
       }
-    }, [activeChain, selectedNetwork, toAddress, toChain])
+    }, [activeChain, selectedNetwork, toAddress, toChain]);
 
-    const invalidateActivity = useInvalidateActivity()
+    const invalidateActivity = useInvalidateActivity();
 
     const copies = useMemo(() => {
       switch (txType) {
@@ -90,12 +79,13 @@ const TxPage = observer(
               txStatus === 'loading'
                 ? 'Tokens will be deposited in recipient’s account once the transaction is complete'
                 : txStatus === 'success' || txStatus === 'submitted'
-                ? `You sent ${formatTokenAmount(
-                    sentAmount ?? '',
-                    sentTokenInfo?.coinDenom,
-                  )} to ${sliceWord(toAddress ?? '', 7, 3)}`
+                ? `You sent ${formatTokenAmount(sentAmount ?? '', sentTokenInfo?.coinDenom)} to ${sliceWord(
+                    toAddress ?? '',
+                    7,
+                    3,
+                  )}`
                 : '',
-          }
+          };
         case TxType.NFTSEND:
           return {
             title:
@@ -110,32 +100,32 @@ const TxPage = observer(
                 : txStatus === 'success' || txStatus === 'submitted'
                 ? 'NFT has been deposited in recipient’s account'
                 : '',
-          }
+          };
       }
-    }, [sentAmount, toAddress, txStatus, txType])
+    }, [sentAmount, toAddress, txStatus, txType]);
 
     useEffect(() => {
       const invalidateQueries = () => {
-        invalidateBalances()
-        invalidateActivity(activeChain)
-      }
+        invalidateBalances();
+        invalidateActivity(activeChain);
+      };
 
       if (pendingTx && pendingTx.promise) {
         pendingTx.promise
           .then(async (result) => {
             if ('code' in result) {
               if (result && isDeliverTxSuccess(result as DeliverTxResponse)) {
-                setPendingTx({ ...pendingTx, txStatus: 'success' })
+                setPendingTx({ ...pendingTx, txStatus: 'success' });
               } else {
-                setPendingTx({ ...pendingTx, txStatus: 'failed' })
+                setPendingTx({ ...pendingTx, txStatus: 'failed' });
               }
             } else if (pendingTx.txType === 'cw20TokenTransfer') {
-              setPendingTx({ ...pendingTx, txStatus: 'success' })
+              setPendingTx({ ...pendingTx, txStatus: 'success' });
             } else if ('status' in result) {
-              setPendingTx({ ...pendingTx, txStatus: 'submitted' })
+              setPendingTx({ ...pendingTx, txStatus: 'submitted' });
             }
             if (pendingTx.txType === 'cw20TokenTransfer') {
-              setTxHash(result.transactionHash)
+              setTxHash(result.transactionHash);
 
               txPostToDB({
                 txHash: result.transactionHash,
@@ -153,31 +143,31 @@ const TxPage = observer(
                 forceNetwork: selectedNetwork,
                 forceWalletAddress: address,
                 chainId: activeChainId,
-              })
+              });
             }
 
-            invalidateQueries()
+            invalidateQueries();
           })
           .catch(() => {
             if (pendingTx.txType === 'cw20TokenTransfer') {
-              setPendingTx({ ...pendingTx, txStatus: 'failed' })
+              setPendingTx({ ...pendingTx, txStatus: 'failed' });
             }
 
-            invalidateQueries()
-          })
+            invalidateQueries();
+          });
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [activeChain, address, selectedNetwork, activeChainId])
+    }, [activeChain, address, selectedNetwork, activeChainId]);
 
     useEffect(() => {
-      if (_txHash) setTxHash(_txHash)
-    }, [_txHash])
+      if (_txHash) setTxHash(_txHash);
+    }, [_txHash]);
 
     const { explorerTxnUrl: txnUrl } = useGetExplorerTxnUrl({
       forceTxHash: txHash,
       forceChain: activeChain,
       forceNetwork: selectedNetwork,
-    })
+    });
 
     return (
       <BottomModal
@@ -238,7 +228,7 @@ const TxPage = observer(
             variant='mono'
             style={{ boxShadow: 'none' }}
             onClick={() => {
-              navigate('/home')
+              navigate('/home');
             }}
           >
             Home
@@ -249,7 +239,7 @@ const TxPage = observer(
             })}
             style={{ boxShadow: 'none' }}
             onClick={() => {
-              onClose(txStatus !== 'failed')
+              onClose(txStatus !== 'failed');
             }}
             disabled={txStatus !== 'success' && txStatus !== 'submitted'}
           >
@@ -257,8 +247,8 @@ const TxPage = observer(
           </Button>
         </div>
       </BottomModal>
-    )
+    );
   },
-)
+);
 
-export default TxPage
+export default TxPage;

@@ -5,5 +5,5 @@
  * This will be imported on the first line of the background.js file.
  *
  * */
-export const originalFetch = fetch
-global.window = self
+export const originalFetch = fetch;
+global.window = self;

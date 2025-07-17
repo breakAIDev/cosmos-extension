@@ -1,3 +1,3 @@
-export * from './useGetSeedPhraseViewImgSrc'
-export * from './useGetSeedPhraseViewSubtitle'
-export * from './useGetSeedPhraseViewTitle'
+export * from './useGetSeedPhraseViewImgSrc';
+export * from './useGetSeedPhraseViewSubtitle';
+export * from './useGetSeedPhraseViewTitle';

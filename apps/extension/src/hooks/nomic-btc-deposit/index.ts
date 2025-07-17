@@ -1,1 +1,1 @@
-export * from './useGetBTCDepositInfo'
+export * from './useGetBTCDepositInfo';

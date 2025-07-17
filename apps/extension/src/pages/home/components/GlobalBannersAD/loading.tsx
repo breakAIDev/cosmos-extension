@@ -1,12 +1,12 @@
-import { Skeleton } from 'components/ui/skeleton'
-import React from 'react'
-import { cn } from 'utils/cn'
+import { Skeleton } from 'components/ui/skeleton';
+import React from 'react';
+import { cn } from 'utils/cn';
 
-import { BannerControls } from './controls'
-import { useCarousel } from './use-carousel'
+import { BannerControls } from './controls';
+import { useCarousel } from './use-carousel';
 
-const BANNER_LOADING_COUNT = 4
-const loadingBanners = new Array(BANNER_LOADING_COUNT).fill(null)
+const BANNER_LOADING_COUNT = 4;
+const loadingBanners = new Array(BANNER_LOADING_COUNT).fill(null);
 
 export const BannersLoading = () => {
   const {
@@ -16,7 +16,7 @@ export const BannersLoading = () => {
     handleMouseEnter,
     handleMouseLeave,
     scrollableContainerRef,
-  } = useCarousel(BANNER_LOADING_COUNT)
+  } = useCarousel(BANNER_LOADING_COUNT);
 
   return (
     <>
@@ -30,9 +30,7 @@ export const BannersLoading = () => {
         {loadingBanners.map((_, index) => (
           <div
             key={index}
-            className={
-              'relative shrink-0 inline-block overflow-hidden w-full snap-center h-16 aspect-[11/2]'
-            }
+            className={'relative shrink-0 inline-block overflow-hidden w-full snap-center h-16 aspect-[11/2]'}
           >
             <div
               className={cn(
@@ -56,5 +54,5 @@ export const BannersLoading = () => {
         handleMouseLeave={handleMouseLeave}
       />
     </>
-  )
-}
+  );
+};

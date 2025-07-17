@@ -1,44 +1,40 @@
-import { capitalize, sliceAddress, useActiveChain } from '@leapwallet/cosmos-wallet-hooks'
-import { PencilSimple } from '@phosphor-icons/react'
-import { ArrowLeft } from '@phosphor-icons/react/dist/ssr'
-import { WalletButton } from 'components/button'
-import { PageHeader } from 'components/header'
-import { LoaderAnimation } from 'components/loader/Loader'
-import { useWalletInfo } from 'hooks'
-import { usePerformanceMonitor } from 'hooks/perf-monitoring/usePerformanceMonitor'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import SelectWallet from 'pages/home/SelectWallet'
-import TxPage, { TxType } from 'pages/nfts-v2/send-nft/TxPage'
-import React, { useCallback, useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { evmBalanceStore } from 'stores/balance-store'
-import { compassTokensAssociationsStore } from 'stores/chain-infos-store'
-import {
-  rootCW20DenomsStore,
-  rootDenomsStore,
-  rootERC20DenomsStore,
-} from 'stores/denoms-store-instance'
-import { rootBalanceStore } from 'stores/root-store'
-import { Colors } from 'theme/colors'
-import { AddressBook } from 'utils/addressbook'
+import { capitalize, sliceAddress, useActiveChain } from '@leapwallet/cosmos-wallet-hooks';
+import { PencilSimple } from '@phosphor-icons/react';
+import { ArrowLeft } from '@phosphor-icons/react/dist/ssr';
+import { WalletButton } from 'components/button';
+import { PageHeader } from 'components/header';
+import { LoaderAnimation } from 'components/loader/Loader';
+import { useWalletInfo } from 'hooks';
+import { usePerformanceMonitor } from 'hooks/perf-monitoring/usePerformanceMonitor';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import SelectWallet from 'pages/home/SelectWallet';
+import TxPage, { TxType } from 'pages/nfts-v2/send-nft/TxPage';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { evmBalanceStore } from 'stores/balance-store';
+import { compassTokensAssociationsStore } from 'stores/chain-infos-store';
+import { rootCW20DenomsStore, rootDenomsStore, rootERC20DenomsStore } from 'stores/denoms-store-instance';
+import { rootBalanceStore } from 'stores/root-store';
+import { Colors } from 'theme/colors';
+import { AddressBook } from 'utils/addressbook';
 
-import { AmountCard } from './components/amount-card'
-import ErrorWarning from './components/error-warning'
-import { Memo } from './components/memo'
-import SaveAddressSheet from './components/recipient-card/save-address-sheet'
-import { ReviewTransfer } from './components/review-transfer'
-import { SendContextProvider, useSendContext } from './context'
-import { useCheckAddressError } from './hooks/useCheckAddressError'
-import { useFillAddressWarning } from './hooks/useFillAddressWarning'
-import { SelectRecipientSheet } from './SelectRecipientSheet'
+import { AmountCard } from './components/amount-card';
+import ErrorWarning from './components/error-warning';
+import { Memo } from './components/memo';
+import SaveAddressSheet from './components/recipient-card/save-address-sheet';
+import { ReviewTransfer } from './components/review-transfer';
+import { SendContextProvider, useSendContext } from './context';
+import { useCheckAddressError } from './hooks/useCheckAddressError';
+import { useFillAddressWarning } from './hooks/useFillAddressWarning';
+import { SelectRecipientSheet } from './SelectRecipientSheet';
 
 const Send = observer(() => {
-  const navigate = useNavigate()
-  const isAllAssetsLoading = rootBalanceStore.loading
-  const [showSelectWallet, setShowSelectWallet] = useState(false)
-  const [showSelectRecipient, setShowSelectRecipient] = useState(false)
-  const { walletAvatar, walletName } = useWalletInfo()
+  const navigate = useNavigate();
+  const isAllAssetsLoading = rootBalanceStore.loading;
+  const [showSelectWallet, setShowSelectWallet] = useState(false);
+  const [showSelectRecipient, setShowSelectRecipient] = useState(false);
+  const { walletAvatar, walletName } = useWalletInfo();
   const {
     selectedAddress,
     setSelectedAddress,
@@ -58,14 +54,14 @@ const Send = observer(() => {
     setHasToUseCw20PointerLogic,
     setSelectedToken,
     sendActiveChain,
-  } = useSendContext()
-  const [showTxPage, setShowTxPage] = useState(false)
-  const [isAddContactSheetVisible, setIsAddContactSheetVisible] = useState(false)
-  const [selectedContact, setSelectedContact] = useState<AddressBook.SavedAddress | undefined>()
-  const [resetForm, setResetForm] = useState(false)
-  const activeChain = useActiveChain()
-  const allERC20Denoms = rootERC20DenomsStore.allERC20Denoms
-  const allCW20Denoms = rootCW20DenomsStore.allCW20Denoms
+  } = useSendContext();
+  const [showTxPage, setShowTxPage] = useState(false);
+  const [isAddContactSheetVisible, setIsAddContactSheetVisible] = useState(false);
+  const [selectedContact, setSelectedContact] = useState<AddressBook.SavedAddress | undefined>();
+  const [resetForm, setResetForm] = useState(false);
+  const activeChain = useActiveChain();
+  const allERC20Denoms = rootERC20DenomsStore.allERC20Denoms;
+  const allCW20Denoms = rootCW20DenomsStore.allCW20Denoms;
 
   useFillAddressWarning({
     fetchAccountDetailsData,
@@ -78,7 +74,7 @@ const Send = observer(() => {
       </>
     ),
     setAddressWarning,
-  })
+  });
 
   useCheckAddressError({
     setAssociatedSeiAddress,
@@ -109,48 +105,44 @@ const Send = observer(() => {
     setPointerAddress,
     setHasToUseCw20PointerLogic,
     setSelectedToken,
-  })
+  });
 
   usePerformanceMonitor({
     page: 'send',
     queryStatus: isAllAssetsLoading ? 'loading' : 'success',
     op: 'sendPageLoad',
     description: 'loading state on send page',
-  })
+  });
 
-  const handleOpenWalletSheet = useCallback(() => setShowSelectWallet(true), [])
+  const handleOpenWalletSheet = useCallback(() => setShowSelectWallet(true), []);
 
   const handleCloseRecipientSheet = useCallback(() => {
     if (!selectedAddress) {
-      navigate(-1)
+      navigate(-1);
     } else {
-      setShowSelectRecipient(false)
+      setShowSelectRecipient(false);
     }
-  }, [navigate, selectedAddress])
+  }, [navigate, selectedAddress]);
 
   useEffect(() => {
     if (!selectedAddress) {
-      setShowSelectRecipient(true)
+      setShowSelectRecipient(true);
     }
-  }, [selectedAddress])
+  }, [selectedAddress]);
 
   const editContact = (savedAddress?: AddressBook.SavedAddress) => {
     if (savedAddress) {
-      setSelectedContact(savedAddress)
+      setSelectedContact(savedAddress);
     }
-    setIsAddContactSheetVisible(true)
-  }
+    setIsAddContactSheetVisible(true);
+  };
 
   return (
     <>
       {selectedAddress ? (
         <>
           <PageHeader>
-            <ArrowLeft
-              size={48}
-              className='text-monochrome cursor-pointer p-3'
-              onClick={() => navigate(-1)}
-            />
+            <ArrowLeft size={48} className='text-monochrome cursor-pointer p-3' onClick={() => navigate(-1)} />
 
             <WalletButton
               className='absolute top-1/2 right-1/2 translate-x-1/2 -translate-y-1/2'
@@ -175,9 +167,7 @@ const Send = observer(() => {
               />
               <div className='w-full bg-secondary-100 rounded-xl overflow-hidden'>
                 <div className='w-full p-5 flex flex-col gap-4'>
-                  <p className='text-muted-foreground text-sm font-medium !leading-[22.4px]'>
-                    Recipient
-                  </p>
+                  <p className='text-muted-foreground text-sm font-medium !leading-[22.4px]'>Recipient</p>
                   <div className='flex justify-between items-center w-full'>
                     <div className='flex gap-4 items-center'>
                       <img className='h-11 w-11' src={Images.Misc.getWalletIconAtIndex(1)} />
@@ -187,17 +177,13 @@ const Send = observer(() => {
                           {selectedAddress?.name
                             ? capitalize(selectedAddress.name)
                             : sliceAddress(
-                                selectedAddress?.ethAddress
-                                  ? selectedAddress.ethAddress
-                                  : selectedAddress?.address,
+                                selectedAddress?.ethAddress ? selectedAddress.ethAddress : selectedAddress?.address,
                               )}
                         </p>
                         {selectedAddress?.name ? (
                           <p className='text-sm text-muted-foreground'>
                             {sliceAddress(
-                              selectedAddress?.ethAddress
-                                ? selectedAddress.ethAddress
-                                : selectedAddress?.address,
+                              selectedAddress?.ethAddress ? selectedAddress.ethAddress : selectedAddress?.address,
                             )}
                           </p>
                         ) : (
@@ -205,14 +191,13 @@ const Send = observer(() => {
                             className='bg-secondary-200 hover:bg-secondary-300 text-xs text-muted-foreground hover:text-monochrome rounded-full py-0.5 pl-1.5 pr-2 cursor-pointer'
                             onClick={() => {
                               setSelectedContact({
-                                address:
-                                  selectedAddress?.ethAddress || selectedAddress?.address || '',
+                                address: selectedAddress?.ethAddress || selectedAddress?.address || '',
                                 name: '',
                                 emoji: 0,
                                 blockchain: activeChain,
                                 ethAddress: selectedAddress?.ethAddress || '',
-                              })
-                              setIsAddContactSheetVisible(true)
+                              });
+                              setIsAddContactSheetVisible(true);
                             }}
                           >
                             + Add to contacts
@@ -226,8 +211,8 @@ const Send = observer(() => {
                       weight='fill'
                       className='bg-secondary-300 rounded-full p-2 text-monochrome cursor-pointer'
                       onClick={() => {
-                        setSelectedAddress(null)
-                        setShowSelectRecipient(true)
+                        setSelectedAddress(null);
+                        setShowSelectRecipient(true);
                       }}
                     />
                   </div>
@@ -252,10 +237,10 @@ const Send = observer(() => {
         <TxPage
           isOpen={showTxPage}
           onClose={() => {
-            setShowTxPage(false)
-            setInputAmount('')
-            setResetForm(true)
-            setTimeout(() => setResetForm(false), 2000)
+            setShowTxPage(false);
+            setInputAmount('');
+            setResetForm(true);
+            setTimeout(() => setResetForm(false), 2000);
           }}
           txType={TxType.SEND}
         />
@@ -263,8 +248,8 @@ const Send = observer(() => {
       <SelectWallet
         isVisible={showSelectWallet}
         onClose={() => {
-          setShowSelectWallet(false)
-          navigate('/home')
+          setShowSelectWallet(false);
+          navigate('/home');
         }}
         title='Wallets'
       />
@@ -272,8 +257,8 @@ const Send = observer(() => {
         isOpen={isAddContactSheetVisible}
         onSave={setSelectedAddress}
         onClose={() => {
-          setIsAddContactSheetVisible(false)
-          setSelectedContact(undefined)
+          setIsAddContactSheetVisible(false);
+          setSelectedContact(undefined);
         }}
         address={selectedContact?.address ?? ''}
         ethAddress={selectedContact?.ethAddress ?? ''}
@@ -282,11 +267,11 @@ const Send = observer(() => {
         showDeleteBtn={!!selectedContact}
       />
     </>
-  )
-})
+  );
+});
 
 const SendPage = observer(() => {
-  const activeChain = useActiveChain()
+  const activeChain = useActiveChain();
   return (
     <SendContextProvider
       activeChain={activeChain}
@@ -296,7 +281,7 @@ const SendPage = observer(() => {
     >
       <Send />
     </SendContextProvider>
-  )
-})
+  );
+});
 
-export default SendPage
+export default SendPage;

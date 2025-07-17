@@ -7,27 +7,22 @@ import {
   useFeatureFlags,
   useSelectedNetwork,
   useStaking,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { AnimatePresence, motion } from 'framer-motion'
-import { observer } from 'mobx-react-lite'
-import ProviderList from 'pages/stake-v2/restaking/ProviderList'
-import React, { useMemo, useState } from 'react'
-import { rootDenomsStore } from 'stores/denoms-store-instance'
-import { stakeEpochStore } from 'stores/epoch-store'
-import { rootBalanceStore } from 'stores/root-store'
-import {
-  claimRewardsStore,
-  delegationsStore,
-  unDelegationsStore,
-  validatorsStore,
-} from 'stores/stake-store'
-import { transition150 } from 'utils/motion-variants'
-import { slideVariants } from 'utils/motion-variants/global-layout-motions'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { AnimatePresence, motion } from 'framer-motion';
+import { observer } from 'mobx-react-lite';
+import ProviderList from 'pages/stake-v2/restaking/ProviderList';
+import React, { useMemo, useState } from 'react';
+import { rootDenomsStore } from 'stores/denoms-store-instance';
+import { stakeEpochStore } from 'stores/epoch-store';
+import { rootBalanceStore } from 'stores/root-store';
+import { claimRewardsStore, delegationsStore, unDelegationsStore, validatorsStore } from 'stores/stake-store';
+import { transition150 } from 'utils/motion-variants';
+import { slideVariants } from 'utils/motion-variants/global-layout-motions';
 
-import PendingUnstakeList from '../PendingUnstakeList'
-import ValidatorList from '../ValidatorList'
-import { TabSelectors } from './tab-list-selector'
+import PendingUnstakeList from '../PendingUnstakeList';
+import ValidatorList from '../ValidatorList';
+import { TabSelectors } from './tab-list-selector';
 
 export enum TabElements {
   YOUR_DELEGATIONS = 'Your delegations',
@@ -41,27 +36,22 @@ const TabList = observer(
     forceNetwork,
     setClaimTxMode,
   }: {
-    forceChain?: SupportedChain
-    forceNetwork?: SelectedNetwork
-    setClaimTxMode: (mode: STAKE_MODE | 'CLAIM_AND_DELEGATE' | null) => void
+    forceChain?: SupportedChain;
+    forceNetwork?: SelectedNetwork;
+    setClaimTxMode: (mode: STAKE_MODE | 'CLAIM_AND_DELEGATE' | null) => void;
   }) => {
-    const _activeChain = useActiveChain()
-    const _activeNetwork = useSelectedNetwork()
-    const activeChain = forceChain ?? _activeChain
-    const activeNetwork = forceNetwork ?? _activeNetwork
+    const _activeChain = useActiveChain();
+    const _activeNetwork = useSelectedNetwork();
+    const activeChain = forceChain ?? _activeChain;
+    const activeNetwork = forceNetwork ?? _activeNetwork;
 
-    const denoms = rootDenomsStore.allDenoms
-    const chainDelegations = delegationsStore.delegationsForChain(activeChain)
-    const chainValidators = validatorsStore.validatorsForChain(activeChain)
-    const chainUnDelegations = unDelegationsStore.unDelegationsForChain(activeChain)
-    const chainClaimRewards = claimRewardsStore.claimRewardsForChain(activeChain)
+    const denoms = rootDenomsStore.allDenoms;
+    const chainDelegations = delegationsStore.delegationsForChain(activeChain);
+    const chainValidators = validatorsStore.validatorsForChain(activeChain);
+    const chainUnDelegations = unDelegationsStore.unDelegationsForChain(activeChain);
+    const chainClaimRewards = claimRewardsStore.claimRewardsForChain(activeChain);
 
-    const {
-      delegations,
-      unboundingDelegationsInfo,
-      loadingDelegations,
-      loadingUnboundingDelegations,
-    } = useStaking(
+    const { delegations, unboundingDelegationsInfo, loadingDelegations, loadingUnboundingDelegations } = useStaking(
       denoms,
       chainDelegations,
       chainValidators,
@@ -69,40 +59,37 @@ const TabList = observer(
       chainClaimRewards,
       activeChain,
       activeNetwork,
-    )
-    const { delegations: providerDelegations } = useDualStaking()
-    const [activeStakingDenom] = useActiveStakingDenom(denoms, activeChain, activeNetwork)
+    );
+    const { delegations: providerDelegations } = useDualStaking();
+    const [activeStakingDenom] = useActiveStakingDenom(denoms, activeChain, activeNetwork);
 
-    const [selectedTab, setSelectedTab] = useState<{ label: TabElements }>()
-    const isLoading = loadingDelegations || loadingUnboundingDelegations
+    const [selectedTab, setSelectedTab] = useState<{ label: TabElements }>();
+    const isLoading = loadingDelegations || loadingUnboundingDelegations;
 
-    const { data: featureFlags } = useFeatureFlags()
+    const { data: featureFlags } = useFeatureFlags();
 
     const tabs = useMemo(() => {
-      const pendingDelegations = stakeEpochStore.getDelegationEpochMessages(activeStakingDenom)
-      const pendingUnDelegations = stakeEpochStore.getUnDelegationEpochMessages(activeStakingDenom)
+      const pendingDelegations = stakeEpochStore.getDelegationEpochMessages(activeStakingDenom);
+      const pendingUnDelegations = stakeEpochStore.getUnDelegationEpochMessages(activeStakingDenom);
 
-      const _tabs = []
+      const _tabs = [];
       if (Object.values(delegations ?? {}).length > 0 || pendingDelegations.length > 0) {
-        _tabs.push({ label: TabElements.YOUR_DELEGATIONS })
+        _tabs.push({ label: TabElements.YOUR_DELEGATIONS });
       }
       if (
         Object.values(providerDelegations ?? {}).length > 0 &&
         featureFlags?.restaking?.extension === 'active' &&
         activeChain === 'lava'
       ) {
-        _tabs.push({ label: TabElements.YOUR_PROVIDERS })
+        _tabs.push({ label: TabElements.YOUR_PROVIDERS });
       }
-      if (
-        Object.values(unboundingDelegationsInfo ?? {}).length > 0 ||
-        pendingUnDelegations.length > 0
-      ) {
-        _tabs.push({ label: TabElements.PENDING_UNSTAKE })
+      if (Object.values(unboundingDelegationsInfo ?? {}).length > 0 || pendingUnDelegations.length > 0) {
+        _tabs.push({ label: TabElements.PENDING_UNSTAKE });
       }
       if (_tabs.length > 0) {
-        setSelectedTab(_tabs[0])
+        setSelectedTab(_tabs[0]);
       }
-      return _tabs
+      return _tabs;
     }, [
       activeChain,
       activeStakingDenom,
@@ -110,10 +97,10 @@ const TabList = observer(
       featureFlags?.restaking?.extension,
       providerDelegations,
       unboundingDelegationsInfo,
-    ])
+    ]);
 
     if (isLoading) {
-      return <></>
+      return <></>;
     }
 
     return (
@@ -179,8 +166,8 @@ const TabList = observer(
           )}
         </AnimatePresence>
       </div>
-    )
+    );
   },
-)
+);
 
-export default TabList
+export default TabList;

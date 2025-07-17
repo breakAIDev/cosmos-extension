@@ -1,20 +1,20 @@
-import { sliceWord } from '@leapwallet/cosmos-wallet-hooks'
-import { ThemeName, useTheme } from '@leapwallet/leap-ui'
-import Text from 'components/text'
-import { ImgNotAvailableDark, ImgNotAvailableLight } from 'images/logos'
-import React, { useCallback } from 'react'
-import { cn } from 'utils/cn'
-import { imgOnError } from 'utils/imgOnError'
+import { sliceWord } from '@leapwallet/cosmos-wallet-hooks';
+import { ThemeName, useTheme } from '@leapwallet/leap-ui';
+import Text from 'components/text';
+import { ImgNotAvailableDark, ImgNotAvailableLight } from 'images/logos';
+import React, { useCallback } from 'react';
+import { cn } from 'utils/cn';
+import { imgOnError } from 'utils/imgOnError';
 
 export type AssetCardProps = {
-  id?: string
-  symbol: string
-  chainName: string
-  assetImg?: string
-  chainSymbolImageUrl?: string
-  onClick: () => void
-  isSelected: boolean
-}
+  id?: string;
+  symbol: string;
+  chainName: string;
+  assetImg?: string;
+  chainSymbolImageUrl?: string;
+  onClick: () => void;
+  isSelected: boolean;
+};
 
 export default function AssetCard({
   symbol,
@@ -24,12 +24,12 @@ export default function AssetCard({
   chainName,
   isSelected,
 }: AssetCardProps) {
-  const { theme } = useTheme()
+  const { theme } = useTheme();
 
   const handleAssetSelect = useCallback(() => {
-    if (isSelected) return
-    onClick()
-  }, [isSelected, onClick])
+    if (isSelected) return;
+    onClick();
+  }, [isSelected, onClick]);
   return (
     <div
       className={cn(
@@ -43,9 +43,7 @@ export default function AssetCard({
       <div className='relative'>
         <img
           src={assetImg ?? (theme === ThemeName.DARK ? ImgNotAvailableDark : ImgNotAvailableLight)}
-          onError={imgOnError(
-            theme === ThemeName.DARK ? ImgNotAvailableDark : ImgNotAvailableLight,
-          )}
+          onError={imgOnError(theme === ThemeName.DARK ? ImgNotAvailableDark : ImgNotAvailableLight)}
           className='rounded-full'
           width={36}
           height={36}
@@ -64,5 +62,5 @@ export default function AssetCard({
         </Text>
       </div>
     </div>
-  )
+  );
 }

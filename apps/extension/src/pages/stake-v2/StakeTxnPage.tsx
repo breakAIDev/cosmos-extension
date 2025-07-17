@@ -1,4 +1,4 @@
-import { isDeliverTxSuccess } from '@cosmjs/stargate'
+import { isDeliverTxSuccess } from '@cosmjs/stargate';
 import {
   SelectedNetwork,
   sliceAddress,
@@ -8,38 +8,38 @@ import {
   useGetExplorerTxnUrl,
   usePendingTxState,
   useSelectedNetwork,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { sliceWord } from '@leapwallet/cosmos-wallet-hooks/dist/utils/strings'
-import { isBabylon, Provider, SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { Validator } from '@leapwallet/cosmos-wallet-sdk/dist/browser/types/validators'
-import { RootBalanceStore, RootStakeStore } from '@leapwallet/cosmos-wallet-store'
-import { Buttons, GenericCard, Header, ThemeName, useTheme } from '@leapwallet/leap-ui'
-import { ArrowSquareOut, CopySimple } from '@phosphor-icons/react'
-import { CheckCircle } from '@phosphor-icons/react/dist/ssr'
-import PopupLayout from 'components/layout/popup-layout'
-import { LoaderAnimation } from 'components/loader/Loader'
-import Text from 'components/text'
-import { PageName } from 'config/analytics'
-import { useActiveChain } from 'hooks/settings/useActiveChain'
-import { Images } from 'images'
-import { GenericLight } from 'images/logos'
-import { observer } from 'mobx-react-lite'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { Colors } from 'theme/colors'
-import { UserClipboard } from 'utils/clipboard'
-import { imgOnError } from 'utils/imgOnError'
-import { isSidePanel } from 'utils/isSidePanel'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { sliceWord } from '@leapwallet/cosmos-wallet-hooks/dist/utils/strings';
+import { isBabylon, Provider, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { Validator } from '@leapwallet/cosmos-wallet-sdk/dist/browser/types/validators';
+import { RootBalanceStore, RootStakeStore } from '@leapwallet/cosmos-wallet-store';
+import { Buttons, GenericCard, Header, ThemeName, useTheme } from '@leapwallet/leap-ui';
+import { ArrowSquareOut, CopySimple } from '@phosphor-icons/react';
+import { CheckCircle } from '@phosphor-icons/react/dist/ssr';
+import PopupLayout from 'components/layout/popup-layout';
+import { LoaderAnimation } from 'components/loader/Loader';
+import Text from 'components/text';
+import { PageName } from 'config/analytics';
+import { useActiveChain } from 'hooks/settings/useActiveChain';
+import { Images } from 'images';
+import { GenericLight } from 'images/logos';
+import { observer } from 'mobx-react-lite';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Colors } from 'theme/colors';
+import { UserClipboard } from 'utils/clipboard';
+import { imgOnError } from 'utils/imgOnError';
+import { isSidePanel } from 'utils/isSidePanel';
 
-import { TxSuccessEpochDurationMessage } from './components/TxSuccessEpochDurationMessage'
+import { TxSuccessEpochDurationMessage } from './components/TxSuccessEpochDurationMessage';
 
 export type StakeTxnPageState = {
-  validator: Validator
-  provider: Provider
-  mode: STAKE_MODE | 'CLAIM_AND_DELEGATE'
-  forceChain?: SupportedChain
-  forceNetwork?: SelectedNetwork
-}
+  validator: Validator;
+  provider: Provider;
+  mode: STAKE_MODE | 'CLAIM_AND_DELEGATE';
+  forceChain?: SupportedChain;
+  forceNetwork?: SelectedNetwork;
+};
 
 const txStatusStyles = {
   loading: {
@@ -54,54 +54,51 @@ const txStatusStyles = {
   failed: {
     title: 'Failed',
   },
-}
+};
 
 type StakeTxnPageProps = {
-  rootBalanceStore: RootBalanceStore
-  rootStakeStore: RootStakeStore
-}
+  rootBalanceStore: RootBalanceStore;
+  rootStakeStore: RootStakeStore;
+};
 
 const StakeTxnPage = observer(({ rootBalanceStore, rootStakeStore }: StakeTxnPageProps) => {
-  const location = useLocation()
+  const location = useLocation();
   const { validator, mode, forceChain, forceNetwork, provider } = useMemo(() => {
     const navigateStakePendingTxnState = JSON.parse(
       sessionStorage.getItem('navigate-stake-pending-txn-state') ?? 'null',
-    )
+    );
 
-    return (location?.state ?? navigateStakePendingTxnState) as StakeTxnPageState
-  }, [location?.state])
+    return (location?.state ?? navigateStakePendingTxnState) as StakeTxnPageState;
+  }, [location?.state]);
 
-  const _activeChain = useActiveChain()
-  const activeChain = useMemo(() => forceChain || _activeChain, [_activeChain, forceChain])
+  const _activeChain = useActiveChain();
+  const activeChain = useMemo(() => forceChain || _activeChain, [_activeChain, forceChain]);
 
-  const _selectedNetwork = useSelectedNetwork()
-  const selectedNetwork = useMemo(
-    () => forceNetwork || _selectedNetwork,
-    [_selectedNetwork, forceNetwork],
-  )
+  const _selectedNetwork = useSelectedNetwork();
+  const selectedNetwork = useMemo(() => forceNetwork || _selectedNetwork, [_selectedNetwork, forceNetwork]);
 
-  const { pendingTx, setPendingTx } = usePendingTxState()
-  const navigate = useNavigate()
-  const [txHash, setTxHash] = useState<string | undefined>('')
-  const [amount, setAmount] = useState<string | number | undefined>('')
-  const [copied, setCopied] = useState(false)
-  const imageUrl = validator?.image
+  const { pendingTx, setPendingTx } = usePendingTxState();
+  const navigate = useNavigate();
+  const [txHash, setTxHash] = useState<string | undefined>('');
+  const [amount, setAmount] = useState<string | number | undefined>('');
+  const [copied, setCopied] = useState(false);
+  const imageUrl = validator?.image;
 
-  const { data: featureFlags } = useFeatureFlags()
-  const { refetchDelegations: refetchProviderDelegations } = useDualStaking()
+  const { data: featureFlags } = useFeatureFlags();
+  const { refetchDelegations: refetchProviderDelegations } = useDualStaking();
 
   const invalidateBalances = useCallback(() => {
-    rootBalanceStore.refetchBalances(activeChain, selectedNetwork)
-  }, [activeChain, rootBalanceStore, selectedNetwork])
+    rootBalanceStore.refetchBalances(activeChain, selectedNetwork);
+  }, [activeChain, rootBalanceStore, selectedNetwork]);
 
   const invalidateDelegations = useCallback(() => {
-    rootStakeStore.updateStake(activeChain, selectedNetwork, true)
-  }, [activeChain, rootStakeStore, selectedNetwork])
+    rootStakeStore.updateStake(activeChain, selectedNetwork, true);
+  }, [activeChain, rootStakeStore, selectedNetwork]);
 
-  const { theme } = useTheme()
+  const { theme } = useTheme();
   useEffect(() => {
-    setTxHash(pendingTx?.txHash)
-  }, [pendingTx?.txHash])
+    setTxHash(pendingTx?.txHash);
+  }, [pendingTx?.txHash]);
 
   useEffect(() => {
     if (pendingTx && pendingTx.promise) {
@@ -111,26 +108,26 @@ const StakeTxnPage = observer(({ rootBalanceStore, rootStakeStore }: StakeTxnPag
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             if (result && isDeliverTxSuccess(result)) {
-              setPendingTx({ ...pendingTx, txStatus: 'success' })
+              setPendingTx({ ...pendingTx, txStatus: 'success' });
             } else {
-              setPendingTx({ ...pendingTx, txStatus: 'failed' })
+              setPendingTx({ ...pendingTx, txStatus: 'failed' });
             }
           },
           () => setPendingTx({ ...pendingTx, txStatus: 'failed' }),
         )
         .catch(() => {
-          setPendingTx({ ...pendingTx, txStatus: 'failed' })
+          setPendingTx({ ...pendingTx, txStatus: 'failed' });
         })
         .finally(() => {
-          invalidateBalances()
-          invalidateDelegations()
+          invalidateBalances();
+          invalidateDelegations();
           if (activeChain === 'lava' && featureFlags?.restaking.extension === 'active') {
-            refetchProviderDelegations()
+            refetchProviderDelegations();
           }
-        })
+        });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, []);
 
   const txStatusText = useMemo(() => {
     return {
@@ -170,43 +167,32 @@ const StakeTxnPage = observer(({ rootBalanceStore, rootStakeStore }: StakeTxnPag
         failed: 'failed claiming and staking',
         submitted: 'claim and delegate submitted',
       },
-    }
-  }, [provider])
+    };
+  }, [provider]);
 
   const { explorerTxnUrl: txnUrl } = useGetExplorerTxnUrl({
     forceChain: activeChain,
     forceNetwork: selectedNetwork,
     forceTxHash: txHash,
-  })
+  });
 
   useEffect(() => {
     let _amount =
-      mode === 'CLAIM_REWARDS' || mode === 'UNDELEGATE'
-        ? pendingTx?.receivedUsdValue
-        : pendingTx?.sentUsdValue
+      mode === 'CLAIM_REWARDS' || mode === 'UNDELEGATE' ? pendingTx?.receivedUsdValue : pendingTx?.sentUsdValue;
     if (_amount === '-') {
-      _amount =
-        mode === 'CLAIM_REWARDS' || mode === 'UNDELEGATE'
-          ? pendingTx?.receivedAmount
-          : pendingTx?.sentAmount
+      _amount = mode === 'CLAIM_REWARDS' || mode === 'UNDELEGATE' ? pendingTx?.receivedAmount : pendingTx?.sentAmount;
     }
-    setAmount(_amount)
-  }, [
-    mode,
-    pendingTx?.receivedAmount,
-    pendingTx?.receivedUsdValue,
-    pendingTx?.sentAmount,
-    pendingTx?.sentUsdValue,
-  ])
+    setAmount(_amount);
+  }, [mode, pendingTx?.receivedAmount, pendingTx?.receivedUsdValue, pendingTx?.sentAmount, pendingTx?.sentUsdValue]);
 
   const handleCopyClick = () => {
-    UserClipboard.copyText(txHash ?? '')
-    setCopied(true)
+    UserClipboard.copyText(txHash ?? '');
+    setCopied(true);
 
     setTimeout(() => {
-      setCopied(false)
-    }, 2000)
-  }
+      setCopied(false);
+    }, 2000);
+  };
 
   return (
     <PopupLayout>
@@ -215,26 +201,16 @@ const StakeTxnPage = observer(({ rootBalanceStore, rootStakeStore }: StakeTxnPag
         <div className='flex flex-col gap-y-4'>
           <div className='bg-white-100 dark:bg-gray-950 rounded-2xl w-full flex flex-col gap-y-2 items-center p-4'>
             <div className='flex items-center justify-center h-[100px] w-[100px]'>
-              {pendingTx?.txStatus === 'loading' && (
-                <LoaderAnimation color='#29a874' className='w-full h-full' />
-              )}
-              {pendingTx?.txStatus === 'success' && (
-                <img src={Images.Activity.TxSwapSuccess} width={75} height={75} />
-              )}
-              {pendingTx?.txStatus === 'failed' && (
-                <img src={Images.Activity.TxSwapFailure} width={75} height={75} />
-              )}
+              {pendingTx?.txStatus === 'loading' && <LoaderAnimation color='#29a874' className='w-full h-full' />}
+              {pendingTx?.txStatus === 'success' && <img src={Images.Activity.TxSwapSuccess} width={75} height={75} />}
+              {pendingTx?.txStatus === 'failed' && <img src={Images.Activity.TxSwapFailure} width={75} height={75} />}
             </div>
 
             <div className='flex flex-col gap-y-1 items-center'>
               <Text size='lg' className='font-bold' color='text-black-100 dark:text-white-100'>
                 {amount}
               </Text>
-              <Text
-                size='sm'
-                color='text-black-100 dark:text-white-100'
-                className='font-medium text-center'
-              >
+              <Text size='sm' color='text-black-100 dark:text-white-100' className='font-medium text-center'>
                 {txStatusText[mode]?.[pendingTx?.txStatus ?? 'loading']}
               </Text>
             </div>
@@ -251,9 +227,7 @@ const StakeTxnPage = observer(({ rootBalanceStore, rootStakeStore }: StakeTxnPag
                   <span className='text-sm font-bold text-black-100 dark:text-white-100 text-center'>
                     {sliceWord(
                       validator?.moniker,
-                      isSidePanel()
-                        ? 6 + Math.floor(((Math.min(window.innerWidth, 400) - 320) / 81) * 7)
-                        : 10,
+                      isSidePanel() ? 6 + Math.floor(((Math.min(window.innerWidth, 400) - 320) / 81) * 7) : 10,
                       0,
                     )}
                   </span>
@@ -271,9 +245,7 @@ const StakeTxnPage = observer(({ rootBalanceStore, rootStakeStore }: StakeTxnPag
                   <span className='text-sm font-bold text-black-100 dark:text-white-100 text-center'>
                     {sliceWord(
                       provider.moniker,
-                      isSidePanel()
-                        ? 6 + Math.floor(((Math.min(window.innerWidth, 400) - 320) / 81) * 7)
-                        : 10,
+                      isSidePanel() ? 6 + Math.floor(((Math.min(window.innerWidth, 400) - 320) / 81) * 7) : 10,
                       0,
                     )}
                   </span>
@@ -286,11 +258,7 @@ const StakeTxnPage = observer(({ rootBalanceStore, rootStakeStore }: StakeTxnPag
             <GenericCard
               isRounded
               title={
-                <Text
-                  size='sm'
-                  color='text-black-100 dark:text-white-100'
-                  className='font-bold mb-1'
-                >
+                <Text size='sm' color='text-black-100 dark:text-white-100' className='font-bold mb-1'>
                   Transaction ID
                 </Text>
               }
@@ -319,8 +287,8 @@ const StakeTxnPage = observer(({ rootBalanceStore, rootStakeStore }: StakeTxnPag
                     <button
                       className='h-8 w-8 rounded-full bg-gray-50 dark:bg-gray-900 flex items-center justify-center'
                       onClick={(event) => {
-                        event.stopPropagation()
-                        window.open(txnUrl, '_blank')
+                        event.stopPropagation();
+                        window.open(txnUrl, '_blank');
                       }}
                     >
                       <ArrowSquareOut size={16} className='text-black-100 dark:text-white-100' />
@@ -348,9 +316,9 @@ const StakeTxnPage = observer(({ rootBalanceStore, rootStakeStore }: StakeTxnPag
           <Buttons.Generic
             onClick={() => {
               if (mode === 'DELEGATE') {
-                navigate(-1)
+                navigate(-1);
               } else {
-                navigate(`/stake?pageSource=${PageName.StakeTxnPage}`)
+                navigate(`/stake?pageSource=${PageName.StakeTxnPage}`);
               }
             }}
             color={
@@ -371,17 +339,13 @@ const StakeTxnPage = observer(({ rootBalanceStore, rootStakeStore }: StakeTxnPag
                   : 'text-white-100 dark:text-black-100'
               }`}
             >
-              {pendingTx?.txStatus === 'failed'
-                ? 'Retry'
-                : mode === 'DELEGATE'
-                ? 'Stake Again'
-                : 'Done'}
+              {pendingTx?.txStatus === 'failed' ? 'Retry' : mode === 'DELEGATE' ? 'Stake Again' : 'Done'}
             </Text>
           </Buttons.Generic>
         </div>
       </div>
     </PopupLayout>
-  )
-})
+  );
+});
 
-export default StakeTxnPage
+export default StakeTxnPage;

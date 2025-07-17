@@ -1,14 +1,6 @@
-import * as React from 'react'
+import * as React from 'react';
 
-const BottomNav = ({
-  fill,
-  stroke,
-  className,
-}: {
-  fill: string
-  stroke: string
-  className: string
-}) => (
+const BottomNav = ({ fill, stroke, className }: { fill: string; stroke: string; className: string }) => (
   <svg
     xmlns='http://www.w3.org/2000/svg'
     width='400'
@@ -26,6 +18,6 @@ const BottomNav = ({
       stroke={stroke}
     />
   </svg>
-)
+);
 
-export default BottomNav
+export default BottomNav;

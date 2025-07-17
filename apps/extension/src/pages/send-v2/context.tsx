@@ -1,9 +1,4 @@
-import {
-  SendTokenEthParamOptions,
-  sendTokensParams,
-  useAddress,
-  useSendModule,
-} from '@leapwallet/cosmos-wallet-hooks'
+import { SendTokenEthParamOptions, sendTokensParams, useAddress, useSendModule } from '@leapwallet/cosmos-wallet-hooks';
 import {
   getBlockChainFromAddress,
   isAptosChain,
@@ -11,41 +6,37 @@ import {
   isSuiChain,
   isValidAddressWithPrefix,
   SupportedChain,
-} from '@leapwallet/cosmos-wallet-sdk'
-import {
-  RootCW20DenomsStore,
-  RootDenomsStore,
-  RootERC20DenomsStore,
-} from '@leapwallet/cosmos-wallet-store'
-import { useTransferReturnType } from '@leapwallet/elements-hooks/dist/use-transfer'
-import { EthWallet } from '@leapwallet/leap-keychain'
-import { useSecretWallet } from 'hooks/wallet/useScrtWallet'
-import { Wallet } from 'hooks/wallet/useWallet'
-import { observer } from 'mobx-react-lite'
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { assert } from 'utils/assert'
-import { useTxCallBack } from 'utils/txCallback'
+} from '@leapwallet/cosmos-wallet-sdk';
+import { RootCW20DenomsStore, RootDenomsStore, RootERC20DenomsStore } from '@leapwallet/cosmos-wallet-store';
+import { useTransferReturnType } from '@leapwallet/elements-hooks/dist/use-transfer';
+import { EthWallet } from '@leapwallet/leap-keychain';
+import { useSecretWallet } from 'hooks/wallet/useScrtWallet';
+import { Wallet } from 'hooks/wallet/useWallet';
+import { observer } from 'mobx-react-lite';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { assert } from 'utils/assert';
+import { useTxCallBack } from 'utils/txCallback';
 
-const useGetWallet = Wallet.useGetWallet
-const useAptosSigner = Wallet.useAptosSigner
-const useSolanaSigner = Wallet.useSolanaSigner
-const useSuiSigner = Wallet.useSuiSigner
+const useGetWallet = Wallet.useGetWallet;
+const useAptosSigner = Wallet.useAptosSigner;
+const useSolanaSigner = Wallet.useSolanaSigner;
+const useSuiSigner = Wallet.useSuiSigner;
 
 export type SendContextType = ReturnType<typeof useSendModule> &
   Readonly<{
     confirmSend: (
       // eslint-disable-next-line no-unused-vars
       args: Omit<sendTokensParams, 'gasEstimate' | 'getWallet'>,
-    ) => Promise<void>
-    sameChain: boolean
-    transferData: useTransferReturnType | null
-    setTransferData: (val: useTransferReturnType) => void
-    isIbcUnwindingDisabled: boolean
-    setIsIbcUnwindingDisabled: (val: boolean) => void
-    pfmEnabled: boolean
-    setPfmEnabled: (val: boolean) => void
-    ethAddress: string
-    setEthAddress: React.Dispatch<React.SetStateAction<string>>
+    ) => Promise<void>;
+    sameChain: boolean;
+    transferData: useTransferReturnType | null;
+    setTransferData: (val: useTransferReturnType) => void;
+    isIbcUnwindingDisabled: boolean;
+    setIsIbcUnwindingDisabled: (val: boolean) => void;
+    pfmEnabled: boolean;
+    setPfmEnabled: (val: boolean) => void;
+    ethAddress: string;
+    setEthAddress: React.Dispatch<React.SetStateAction<string>>;
     confirmSendEth: (
       toAddress: string,
       value: string,
@@ -53,22 +44,22 @@ export type SendContextType = ReturnType<typeof useSendModule> &
       wallet: EthWallet,
       gasPrice?: number,
       options?: SendTokenEthParamOptions,
-    ) => void
-  }>
+    ) => void;
+  }>;
 
-export const SendContext = createContext<SendContextType | null>(null)
+export const SendContext = createContext<SendContextType | null>(null);
 
 type SendContextProviderProps = React.PropsWithChildren<{
-  activeChain: SupportedChain
-  rootDenomsStore: RootDenomsStore
-  rootCW20DenomsStore: RootCW20DenomsStore
-  rootERC20DenomsStore: RootERC20DenomsStore
-}>
+  activeChain: SupportedChain;
+  rootDenomsStore: RootDenomsStore;
+  rootCW20DenomsStore: RootCW20DenomsStore;
+  rootERC20DenomsStore: RootERC20DenomsStore;
+}>;
 
 export const SendContextProvider: React.FC<SendContextProviderProps> = observer(
   ({ children, rootCW20DenomsStore, rootERC20DenomsStore, rootDenomsStore }) => {
-    const allCW20Denoms = rootCW20DenomsStore.allCW20Denoms
-    const allERC20Denoms = rootERC20DenomsStore.allERC20Denoms
+    const allCW20Denoms = rootCW20DenomsStore.allCW20Denoms;
+    const allERC20Denoms = rootERC20DenomsStore.allERC20Denoms;
     const {
       tokenFiatValue,
       feeTokenFiatValue,
@@ -82,18 +73,18 @@ export const SendContextProvider: React.FC<SendContextProviderProps> = observer(
       denoms: rootDenomsStore.allDenoms,
       cw20Denoms: allCW20Denoms,
       erc20Denoms: allERC20Denoms,
-    })
-    const txCallback = useTxCallBack()
-    const getWallet = useGetWallet(sendActiveChain)
-    const getAptosSigner = useAptosSigner()
-    const getSolanaSigner = useSolanaSigner()
-    const getSuiSigner = useSuiSigner()
-    const currentWalletAddress = useAddress()
-    const getSscrtWallet = useSecretWallet()
-    const [transferData, setTransferData] = useState<useTransferReturnType | null>(null)
-    const [isIbcUnwindingDisabled, setIsIbcUnwindingDisabled] = useState<boolean>(false)
-    const [pfmEnabled, setPfmEnabled] = useState<boolean>(true)
-    const [ethAddress, setEthAddress] = useState('')
+    });
+    const txCallback = useTxCallBack();
+    const getWallet = useGetWallet(sendActiveChain);
+    const getAptosSigner = useAptosSigner();
+    const getSolanaSigner = useSolanaSigner();
+    const getSuiSigner = useSuiSigner();
+    const currentWalletAddress = useAddress();
+    const getSscrtWallet = useSecretWallet();
+    const [transferData, setTransferData] = useState<useTransferReturnType | null>(null);
+    const [isIbcUnwindingDisabled, setIsIbcUnwindingDisabled] = useState<boolean>(false);
+    const [pfmEnabled, setPfmEnabled] = useState<boolean>(true);
+    const [ethAddress, setEthAddress] = useState('');
 
     const confirmSendTx = useCallback(
       async (args: Omit<sendTokensParams, 'gasEstimate' | 'getWallet'>) => {
@@ -101,27 +92,24 @@ export const SendContextProvider: React.FC<SendContextProviderProps> = observer(
           {
             ...args,
             getWallet: () => {
-              const isSnip20 = isValidAddressWithPrefix(
-                selectedToken?.coinMinimalDenom ?? '',
-                'secret',
-              )
+              const isSnip20 = isValidAddressWithPrefix(selectedToken?.coinMinimalDenom ?? '', 'secret');
               if (isSnip20) {
-                return getSscrtWallet()
+                return getSscrtWallet();
               }
               if (isAptosChain(sendActiveChain)) {
-                return getAptosSigner(sendActiveChain).then((aptos) => aptos.signer)
+                return getAptosSigner(sendActiveChain).then((aptos) => aptos.signer);
               }
               if (isSolanaChain(sendActiveChain)) {
-                return getSolanaSigner(sendActiveChain).then((solana) => solana)
+                return getSolanaSigner(sendActiveChain).then((solana) => solana);
               }
               if (isSuiChain(sendActiveChain)) {
-                return getSuiSigner(sendActiveChain).then((sui) => sui)
+                return getSuiSigner(sendActiveChain).then((sui) => sui);
               }
-              return getWallet()
+              return getWallet();
             },
           },
           txCallback,
-        )
+        );
       },
       [
         confirmSend,
@@ -134,7 +122,7 @@ export const SendContextProvider: React.FC<SendContextProviderProps> = observer(
         sendActiveChain,
         txCallback,
       ],
-    )
+    );
     const confirmSendTxEth = useCallback(
       async (
         toAddress: string,
@@ -144,22 +132,22 @@ export const SendContextProvider: React.FC<SendContextProviderProps> = observer(
         gasPrice?: number,
         options?: SendTokenEthParamOptions,
       ) => {
-        await confirmSendEth(toAddress, value, gas, wallet, txCallback, gasPrice, options)
+        await confirmSendEth(toAddress, value, gas, wallet, txCallback, gasPrice, options);
       },
       [confirmSendEth, txCallback],
-    )
+    );
 
     useEffect(() => {
-      setIsIbcUnwindingDisabled(false)
-      setCustomIbcChannelId(undefined)
-    }, [selectedToken, rest?.selectedAddress])
+      setIsIbcUnwindingDisabled(false);
+      setCustomIbcChannelId(undefined);
+    }, [selectedToken, rest?.selectedAddress]);
 
     const value = useMemo(() => {
-      const fromChain = getBlockChainFromAddress(currentWalletAddress) || sendActiveChain
-      const { selectedAddress } = rest
-      const toChain = getBlockChainFromAddress(selectedAddress ? selectedAddress.address ?? '' : '')
+      const fromChain = getBlockChainFromAddress(currentWalletAddress) || sendActiveChain;
+      const { selectedAddress } = rest;
+      const toChain = getBlockChainFromAddress(selectedAddress ? selectedAddress.address ?? '' : '');
 
-      const sameChain = fromChain === toChain
+      const sameChain = fromChain === toChain;
 
       return {
         ethAddress,
@@ -180,7 +168,7 @@ export const SendContextProvider: React.FC<SendContextProviderProps> = observer(
         sendActiveChain,
         rootDenomsStore,
         ...rest,
-      } as const
+      } as const;
     }, [
       currentWalletAddress,
       rest,
@@ -198,18 +186,18 @@ export const SendContextProvider: React.FC<SendContextProviderProps> = observer(
       setPfmEnabled,
       rootDenomsStore,
       sendActiveChain,
-    ])
+    ]);
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    return <SendContext.Provider value={value}>{children}</SendContext.Provider>
+    return <SendContext.Provider value={value}>{children}</SendContext.Provider>;
   },
-)
+);
 
 export const useSendContext = () => {
-  const context = useContext(SendContext)
+  const context = useContext(SendContext);
 
-  assert(context !== null, 'useSendContext must be used within SendContextProvider')
+  assert(context !== null, 'useSendContext must be used within SendContextProvider');
 
-  return context
-}
+  return context;
+};

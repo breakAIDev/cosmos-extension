@@ -1,25 +1,25 @@
-import { useActiveWallet } from '@leapwallet/cosmos-wallet-hooks'
-import { Header, HeaderActionType } from '@leapwallet/leap-ui'
-import { Lock } from '@phosphor-icons/react'
-import Resize from 'components/resize'
-import Text from 'components/text'
-import { Button } from 'components/ui/button'
-import { Input } from 'components/ui/input'
-import { useChainPageInfo } from 'hooks'
-import { SeedPhrase } from 'hooks/wallet/seed-phrase/useSeedPhrase'
-import React, { Dispatch, ReactElement, SetStateAction } from 'react'
-import { useForm } from 'react-hook-form'
+import { useActiveWallet } from '@leapwallet/cosmos-wallet-hooks';
+import { Header, HeaderActionType } from '@leapwallet/leap-ui';
+import { Lock } from '@phosphor-icons/react';
+import Resize from 'components/resize';
+import Text from 'components/text';
+import { Button } from 'components/ui/button';
+import { Input } from 'components/ui/input';
+import { useChainPageInfo } from 'hooks';
+import { SeedPhrase } from 'hooks/wallet/seed-phrase/useSeedPhrase';
+import React, { Dispatch, ReactElement, SetStateAction } from 'react';
+import { useForm } from 'react-hook-form';
 
 type FormData = {
-  readonly rawPassword: string
-}
+  readonly rawPassword: string;
+};
 
 type EnterPasswordViewProps = {
-  readonly passwordTo: string
-  readonly setRevealed: Dispatch<SetStateAction<boolean>>
-  readonly setPassword: Dispatch<SetStateAction<Uint8Array | undefined>>
-  readonly goBack: () => void
-}
+  readonly passwordTo: string;
+  readonly setRevealed: Dispatch<SetStateAction<boolean>>;
+  readonly setPassword: Dispatch<SetStateAction<Uint8Array | undefined>>;
+  readonly goBack: () => void;
+};
 
 export function EnterPasswordView({
   setRevealed,
@@ -27,9 +27,9 @@ export function EnterPasswordView({
   passwordTo,
   goBack,
 }: EnterPasswordViewProps): ReactElement {
-  const testPassword = SeedPhrase.useTestPassword()
-  const activeWallet = useActiveWallet()
-  const { topChainColor } = useChainPageInfo()
+  const testPassword = SeedPhrase.useTestPassword();
+  const activeWallet = useActiveWallet();
+  const { topChainColor } = useChainPageInfo();
 
   const {
     register,
@@ -37,30 +37,30 @@ export function EnterPasswordView({
     setError,
     formState: { errors },
     setValue,
-  } = useForm<FormData>({ mode: 'onChange' })
+  } = useForm<FormData>({ mode: 'onChange' });
 
   const onSubmit = (e?: React.BaseSyntheticEvent) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     handleSubmit(async (values: FormData) => {
       try {
-        const cipher = activeWallet?.cipher
-        if (!cipher) throw new Error('No cipher')
-        const password = new TextEncoder().encode(values.rawPassword)
-        await testPassword(password, cipher)
-        setPassword(password)
-        setRevealed(true)
+        const cipher = activeWallet?.cipher;
+        if (!cipher) throw new Error('No cipher');
+        const password = new TextEncoder().encode(values.rawPassword);
+        await testPassword(password, cipher);
+        setPassword(password);
+        setRevealed(true);
       } catch (err) {
         setError('rawPassword', {
           type: 'validate',
           message: 'Incorrect Password',
-        })
+        });
       } finally {
         // to clear password from heap
-        setValue('rawPassword', '__')
-        setValue('rawPassword', '')
+        setValue('rawPassword', '__');
+        setValue('rawPassword', '');
       }
-    })(e)
-  }
+    })(e);
+  };
 
   return (
     <div className='panel-height flex flex-col'>
@@ -71,10 +71,7 @@ export function EnterPasswordView({
             <Lock size={48} />
           </div>
         </div>
-        <span
-          data-testing-id='password-verify-you-text'
-          className='text-lg font-bold mt-4 text-center'
-        >
+        <span data-testing-id='password-verify-you-text' className='text-lg font-bold mt-4 text-center'>
           Verify it&apos;s you
         </span>
         <span className='text-muted-foreground mt-2 text-center font-medium'>
@@ -92,12 +89,7 @@ export function EnterPasswordView({
               status={errors.rawPassword ? 'error' : 'default'}
             />
           </Resize>
-          <Text
-            size='sm'
-            data-testing-id='error-text'
-            color='text-red-300'
-            className='justify-center text-center pt-2'
-          >
+          <Text size='sm' data-testing-id='error-text' color='text-red-300' className='justify-center text-center pt-2'>
             {!!errors.rawPassword && errors?.rawPassword?.message}
           </Text>
 
@@ -107,5 +99,5 @@ export function EnterPasswordView({
         </form>
       </div>
     </div>
-  )
+  );
 }

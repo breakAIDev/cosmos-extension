@@ -1,40 +1,40 @@
-import { formatTokenAmount, useAddress, useDebounce } from '@leapwallet/cosmos-wallet-hooks'
-import { pubKeyToEvmAddressToShow, SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { ThemeName, useTheme } from '@leapwallet/leap-ui'
-import { ArrowLeft, ArrowSquareOut, CaretDown } from '@phosphor-icons/react'
-import { captureException } from '@sentry/react'
-import BigNumber from 'bignumber.js'
-import { WalletButtonV2 } from 'components/button/WalletButtonV2'
-import { PageHeader } from 'components/header/PageHeaderV2'
-import Text from 'components/text'
-import { Button } from 'components/ui/button'
-import { PageName } from 'config/analytics'
-import useActiveWallet from 'hooks/settings/useActiveWallet'
-import { AssetProps } from 'hooks/swapped/useGetSupportedAssets'
-import { useChainInfos } from 'hooks/useChainInfos'
-import { getConversionRateKado, getQuoteSwapped } from 'hooks/useGetSwappedDetails'
-import useQuery from 'hooks/useQuery'
-import { useWalletInfo } from 'hooks/useWalletInfo'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import { useThemeColor } from 'hooks/utility/useThemeColor'
-import { Wallet } from 'hooks/wallet/useWallet'
-import { Images } from 'images'
-import { isString } from 'markdown-it/lib/common/utils'
-import SelectWallet from 'pages/home/SelectWallet/v2'
-import { convertObjInQueryParams } from 'pages/home/utils'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import Skeleton from 'react-loading-skeleton'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { cn } from 'utils/cn'
-import { getCountryLogo } from 'utils/getCountryLogo'
-import { imgOnError } from 'utils/imgOnError'
-import { uiErrorTags } from 'utils/sentry'
-import { removeLeadingZeroes } from 'utils/strings'
+import { formatTokenAmount, useAddress, useDebounce } from '@leapwallet/cosmos-wallet-hooks';
+import { pubKeyToEvmAddressToShow, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { ThemeName, useTheme } from '@leapwallet/leap-ui';
+import { ArrowLeft, ArrowSquareOut, CaretDown } from '@phosphor-icons/react';
+import { captureException } from '@sentry/react';
+import BigNumber from 'bignumber.js';
+import { WalletButtonV2 } from 'components/button/WalletButtonV2';
+import { PageHeader } from 'components/header/PageHeaderV2';
+import Text from 'components/text';
+import { Button } from 'components/ui/button';
+import { PageName } from 'config/analytics';
+import useActiveWallet from 'hooks/settings/useActiveWallet';
+import { AssetProps } from 'hooks/swapped/useGetSupportedAssets';
+import { useChainInfos } from 'hooks/useChainInfos';
+import { getConversionRateKado, getQuoteSwapped } from 'hooks/useGetSwappedDetails';
+import useQuery from 'hooks/useQuery';
+import { useWalletInfo } from 'hooks/useWalletInfo';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { useThemeColor } from 'hooks/utility/useThemeColor';
+import { Wallet } from 'hooks/wallet/useWallet';
+import { Images } from 'images';
+import { isString } from 'markdown-it/lib/common/utils';
+import SelectWallet from 'pages/home/SelectWallet/v2';
+import { convertObjInQueryParams } from 'pages/home/utils';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Skeleton from 'react-loading-skeleton';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { cn } from 'utils/cn';
+import { getCountryLogo } from 'utils/getCountryLogo';
+import { imgOnError } from 'utils/imgOnError';
+import { uiErrorTags } from 'utils/sentry';
+import { removeLeadingZeroes } from 'utils/strings';
 
-import SelectAssetSheet from './components/SelectAssetSheet'
-import SelectCurrencySheet from './components/SelectCurrencySheet'
+import SelectAssetSheet from './components/SelectAssetSheet';
+import SelectCurrencySheet from './components/SelectCurrencySheet';
 
-import useWallets = Wallet.useWallets
+import useWallets = Wallet.useWallets;
 
 export enum ServiceProviderEnum {
   SWAPPED = 'swapped',
@@ -45,89 +45,89 @@ export enum ServiceProviderBaseUrlEnum {
 }
 
 const Buy = () => {
-  const { walletAvatar, walletName } = useWalletInfo()
-  const [showSelectWallet, setShowSelectWallet] = useState(false)
-  const pageViewSource = useQuery().get('pageSource') ?? undefined
+  const { walletAvatar, walletName } = useWalletInfo();
+  const [showSelectWallet, setShowSelectWallet] = useState(false);
+  const pageViewSource = useQuery().get('pageSource') ?? undefined;
   const pageViewAdditionalProperties = useMemo(
     () => ({
       pageViewSource,
     }),
     [pageViewSource],
-  )
+  );
   // usePageView(PageName.OnRampQuotePreview, true, pageViewAdditionalProperties)
-  const themeColor = useThemeColor()
-  const { theme } = useTheme()
-  const defaultTokenLogo = useDefaultTokenLogo()
+  const themeColor = useThemeColor();
+  const { theme } = useTheme();
+  const defaultTokenLogo = useDefaultTokenLogo();
 
-  const navigate = useNavigate()
-  const location = useLocation()
+  const navigate = useNavigate();
+  const location = useLocation();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const asset: any = location.state
+  const asset: any = location.state;
 
-  const [showSelectCurrencySheet, setShowSelectCurrencySheet] = useState(false)
-  const [showSelectTokenSheet, setShowSelectTokenSheet] = useState(false)
+  const [showSelectCurrencySheet, setShowSelectCurrencySheet] = useState(false);
+  const [showSelectTokenSheet, setShowSelectTokenSheet] = useState(false);
 
-  const [selectedCurrency, setSelectedCurrency] = useState('USD')
-  const [selectedAsset, setSelectedAsset] = useState<AssetProps | undefined>(undefined)
-  const selectedAddress = useAddress(selectedAsset?.chainKey)
+  const [selectedCurrency, setSelectedCurrency] = useState('USD');
+  const [selectedAsset, setSelectedAsset] = useState<AssetProps | undefined>(undefined);
+  const selectedAddress = useAddress(selectedAsset?.chainKey);
 
-  const [payFiatAmount, setPayFiatAmount] = useState<string>('0')
-  const debouncedPayAmount = useDebounce<string>(payFiatAmount, 500)
-  const [fiatAmountInUsd, setFiatAmountInUsd] = useState('0')
-  const [getAssetAmount, setGetAssetAmount] = useState<string>('0')
-  const [loadingQuote, setLoadingQuote] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const inputAmountRef = useRef(null)
-  const chains = useChainInfos()
+  const [payFiatAmount, setPayFiatAmount] = useState<string>('0');
+  const debouncedPayAmount = useDebounce<string>(payFiatAmount, 500);
+  const [fiatAmountInUsd, setFiatAmountInUsd] = useState('0');
+  const [getAssetAmount, setGetAssetAmount] = useState<string>('0');
+  const [loadingQuote, setLoadingQuote] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const inputAmountRef = useRef(null);
+  const chains = useChainInfos();
 
-  const handleOpenWalletSheet = useCallback(() => setShowSelectWallet(true), [])
+  const handleOpenWalletSheet = useCallback(() => setShowSelectWallet(true), []);
 
   useEffect(() => {
     async function getQuote() {
       try {
-        setLoadingQuote(true)
+        setLoadingQuote(true);
         const quote = await getQuoteSwapped({
           payment_method: 'credit-card',
           fiat_amount: new BigNumber(debouncedPayAmount).toNumber(),
           fiat_currency: selectedCurrency,
           crypto_currency: selectedAsset?.symbol ?? 'ATOM',
-        })
+        });
         if (quote.success) {
-          setGetAssetAmount(quote?.data?.crypto_amount ?? '0')
+          setGetAssetAmount(quote?.data?.crypto_amount ?? '0');
         } else {
-          setGetAssetAmount('0')
+          setGetAssetAmount('0');
         }
       } catch (error) {
         captureException(error, {
           tags: uiErrorTags,
-        })
+        });
 
-        const message = error instanceof Error ? error.message : 'An error occurred'
+        const message = error instanceof Error ? error.message : 'An error occurred';
         if (message.toLowerCase().includes('timeout')) {
-          setError('Request timed out. Unable to fetch quote.')
+          setError('Request timed out. Unable to fetch quote.');
         } else {
-          setError(message)
+          setError(message);
         }
       } finally {
-        setLoadingQuote(false)
+        setLoadingQuote(false);
       }
     }
     if (debouncedPayAmount && new BigNumber(debouncedPayAmount).isGreaterThan('0')) {
-      getQuote()
+      getQuote();
     } else {
-      setGetAssetAmount('0')
+      setGetAssetAmount('0');
     }
-  }, [debouncedPayAmount, selectedAsset, selectedCurrency])
+  }, [debouncedPayAmount, selectedAsset, selectedCurrency]);
 
   useEffect(() => {
     if (inputAmountRef.current) {
-      ;(inputAmountRef.current as HTMLElement)?.focus()
+      (inputAmountRef.current as HTMLElement)?.focus();
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
     if (pageViewSource === PageName.AssetDetails) {
-      const chain = chains[asset.chain as SupportedChain]
+      const chain = chains[asset.chain as SupportedChain];
       setSelectedAsset({
         symbol: asset.symbol,
         chainName: chain.chainName,
@@ -137,15 +137,15 @@ const Buy = () => {
         origin: chain.chainName,
         chainKey: chain.key,
         tags: asset?.tags,
-      })
+      });
     }
-  }, [asset, chains, pageViewSource])
+  }, [asset, chains, pageViewSource]);
 
   useEffect(() => {
     if (!selectedAsset) {
-      setShowSelectTokenSheet(true)
+      setShowSelectTokenSheet(true);
     }
-  }, [selectedAsset])
+  }, [selectedAsset]);
 
   useEffect(() => {
     async function currencyToUsd(amount: string, currency: string) {
@@ -153,39 +153,33 @@ const Buy = () => {
         const conversionRateToUsd = await getConversionRateKado({
           from: currency,
           to: 'USD',
-        })
-        const usdAmount = new BigNumber(amount).multipliedBy(conversionRateToUsd)
-        setFiatAmountInUsd(usdAmount.toString())
+        });
+        const usdAmount = new BigNumber(amount).multipliedBy(conversionRateToUsd);
+        setFiatAmountInUsd(usdAmount.toString());
       } else {
-        setFiatAmountInUsd(amount)
+        setFiatAmountInUsd(amount);
       }
     }
-    currencyToUsd(debouncedPayAmount, selectedCurrency)
-  }, [debouncedPayAmount, selectedCurrency])
+    currencyToUsd(debouncedPayAmount, selectedCurrency);
+  }, [debouncedPayAmount, selectedCurrency]);
 
   useEffect(() => {
     async function setLimitError() {
-      setError(null)
+      setError(null);
       if (parseFloat(fiatAmountInUsd) > 0) {
         const conversionRate = await getConversionRateKado({
           from: 'USD',
           to: selectedCurrency,
-        })
+        });
         if (parseFloat(fiatAmountInUsd) < 10) {
-          setError(
-            `Amount should be at least ${(10 * conversionRate).toFixed(2)} ${selectedCurrency}`,
-          )
+          setError(`Amount should be at least ${(10 * conversionRate).toFixed(2)} ${selectedCurrency}`);
         } else if (parseFloat(fiatAmountInUsd) > 10000) {
-          setError(
-            `Amount exceeds your daily limit of ${(10000 * conversionRate).toFixed(
-              2,
-            )} ${selectedCurrency}`,
-          )
+          setError(`Amount exceeds your daily limit of ${(10000 * conversionRate).toFixed(2)} ${selectedCurrency}`);
         }
       }
     }
-    setLimitError()
-  }, [fiatAmountInUsd, selectedCurrency])
+    setLimitError();
+  }, [fiatAmountInUsd, selectedCurrency]);
 
   const handleBuyClick = useCallback(() => {
     const params = {
@@ -193,24 +187,20 @@ const Buy = () => {
       baseCurrencyCode: selectedCurrency,
       currencyCode: selectedAsset?.tags?.[0] ?? selectedAsset?.symbol,
       walletAddress: selectedAddress,
-    }
+    };
 
-    const queryParams = convertObjInQueryParams(params)
-    const url = `${ServiceProviderBaseUrlEnum.SWAPPED}?${queryParams}`
-    window.open(url, '_blank')
+    const queryParams = convertObjInQueryParams(params);
+    const url = `${ServiceProviderBaseUrlEnum.SWAPPED}?${queryParams}`;
+    window.open(url, '_blank');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fiatAmountInUsd, payFiatAmount, selectedAddress, selectedAsset, selectedCurrency])
+  }, [fiatAmountInUsd, payFiatAmount, selectedAddress, selectedAsset, selectedCurrency]);
 
   return (
     <>
       {selectedAsset ? (
         <>
           <PageHeader>
-            <ArrowLeft
-              size={36}
-              className='text-monochrome cursor-pointer p-2'
-              onClick={() => navigate(-1)}
-            />
+            <ArrowLeft size={36} className='text-monochrome cursor-pointer p-2' onClick={() => navigate(-1)} />
 
             <WalletButtonV2
               className='absolute top-1/2 right-1/2 translate-x-1/2 -translate-y-1/2'
@@ -224,22 +214,20 @@ const Buy = () => {
           <div className='flex flex-col gap-3 p-6'>
             <div className='w-full bg-secondary-100 rounded-2xl p-5 flex flex-col gap-3'>
               <div className='flex justify-between items-center'>
-                <p className='text-muted-foreground text-sm font-medium !leading-[22.4px]'>
-                  You pay
-                </p>
+                <p className='text-muted-foreground text-sm font-medium !leading-[22.4px]'>You pay</p>
               </div>
 
               <div className='flex rounded-2xl justify-between w-full items-center gap-2 h-[34px] p-[2px]'>
                 <input
                   value={payFiatAmount}
                   onChange={(e) => {
-                    setError(null)
-                    const val = e.target.value
-                    const amount = removeLeadingZeroes(val)
+                    setError(null);
+                    const val = e.target.value;
+                    const amount = removeLeadingZeroes(val);
                     if (parseFloat(amount) < 0) {
-                      setError('Please enter a valid positive number.')
+                      setError('Please enter a valid positive number.');
                     } else {
-                      setPayFiatAmount(amount)
+                      setPayFiatAmount(amount);
                     }
                   }}
                   type='number'
@@ -263,14 +251,9 @@ const Buy = () => {
                   )}
                   onClick={() => setShowSelectCurrencySheet(true)}
                 >
-                  <img
-                    src={getCountryLogo(selectedCurrency)}
-                    className='w-[24px] h-[24px] rounded-full'
-                  />
+                  <img src={getCountryLogo(selectedCurrency)} className='w-[24px] h-[24px] rounded-full' />
 
-                  <p className={cn('dark:text-white-100 text-sm font-medium')}>
-                    {selectedCurrency}
-                  </p>
+                  <p className={cn('dark:text-white-100 text-sm font-medium')}>{selectedCurrency}</p>
                   <CaretDown size={14} className='dark:text-white-100' />
                 </button>
               </div>
@@ -289,16 +272,14 @@ const Buy = () => {
                     >
                       {element}
                     </button>
-                  )
+                  );
                 })}
               </div>
             </div>
 
             <div className='w-full bg-secondary-100 rounded-2xl p-5 flex flex-col gap-3'>
               <div className='flex justify-between items-center'>
-                <p className='text-muted-foreground text-sm font-medium !leading-[22.4px]'>
-                  You get
-                </p>
+                <p className='text-muted-foreground text-sm font-medium !leading-[22.4px]'>You get</p>
               </div>
 
               <div className='flex rounded-2xl justify-between w-full items-center gap-2 h-[34px] p-[2px]'>
@@ -332,9 +313,7 @@ const Buy = () => {
                     className='w-[24px] h-[24px] rounded-full'
                   />
 
-                  <p className={cn('dark:text-white-100 text-sm font-medium')}>
-                    {selectedAsset?.symbol}
-                  </p>
+                  <p className={cn('dark:text-white-100 text-sm font-medium')}>{selectedAsset?.symbol}</p>
                   <CaretDown size={14} className='dark:text-white-100' />
                 </button>
               </div>
@@ -346,9 +325,7 @@ const Buy = () => {
               </Text>
               <div className={cn('flex items-center gap-1')}>
                 <img
-                  src={
-                    theme === ThemeName.DARK ? Images.Logos.SwappedDark : Images.Logos.SwappedLight
-                  }
+                  src={theme === ThemeName.DARK ? Images.Logos.SwappedDark : Images.Logos.SwappedLight}
                   className='w-5 h-5'
                 />
                 <Text size='sm' color='text-monochrome' className='font-medium'>
@@ -363,9 +340,7 @@ const Buy = () => {
                 '!bg-red-300 text-white-100': error,
               })}
               onClick={handleBuyClick}
-              disabled={
-                !new BigNumber(getAssetAmount).isGreaterThan(0) || loadingQuote || isString(error)
-              }
+              disabled={!new BigNumber(getAssetAmount).isGreaterThan(0) || loadingQuote || isString(error)}
             >
               {!new BigNumber(getAssetAmount).isGreaterThan(0) ? (
                 'Enter amount'
@@ -385,18 +360,18 @@ const Buy = () => {
         selectedCurrency={selectedCurrency}
         onClose={() => setShowSelectCurrencySheet(false)}
         onCurrencySelect={(currency) => {
-          setSelectedCurrency(currency)
-          setShowSelectCurrencySheet(false)
+          setSelectedCurrency(currency);
+          setShowSelectCurrencySheet(false);
           if (inputAmountRef.current) {
-            ;(inputAmountRef.current as HTMLElement).focus()
+            (inputAmountRef.current as HTMLElement).focus();
           }
         }}
       />
       <SelectWallet
         isVisible={showSelectWallet}
         onClose={() => {
-          setShowSelectWallet(false)
-          navigate('/home')
+          setShowSelectWallet(false);
+          navigate('/home');
         }}
         title='Your Wallets'
       />
@@ -405,21 +380,21 @@ const Buy = () => {
         selectedAsset={selectedAsset}
         onClose={() => {
           if (!selectedAsset) {
-            navigate(-1)
+            navigate(-1);
           } else {
-            setShowSelectTokenSheet(false)
+            setShowSelectTokenSheet(false);
           }
         }}
         onAssetSelect={(asset) => {
-          setSelectedAsset(asset)
-          setShowSelectTokenSheet(false)
+          setSelectedAsset(asset);
+          setShowSelectTokenSheet(false);
           if (inputAmountRef.current) {
-            ;(inputAmountRef.current as HTMLElement).focus()
+            (inputAmountRef.current as HTMLElement).focus();
           }
         }}
       />
     </>
-  )
-}
+  );
+};
 
-export default Buy
+export default Buy;

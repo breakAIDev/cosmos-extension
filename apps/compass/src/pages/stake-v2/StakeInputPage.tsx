@@ -8,114 +8,107 @@ import {
   useSelectedNetwork,
   useStakeTx,
   useStaking,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { isBabylon, SupportedChain, Validator } from '@leapwallet/cosmos-wallet-sdk'
-import { Delegation } from '@leapwallet/cosmos-wallet-sdk/dist/browser/types/staking'
-import { CaretDown, GasPump } from '@phosphor-icons/react'
-import BigNumber from 'bignumber.js'
-import GasPriceOptions, { useDefaultGasPrice } from 'components/gas-price-options'
-import { DisplayFeeValue, GasPriceOptionValue } from 'components/gas-price-options/context'
-import { DisplayFee } from 'components/gas-price-options/display-fee'
-import { FeesSettingsSheet } from 'components/gas-price-options/fees-settings-sheet'
-import { addSeconds } from 'date-fns'
-import useActiveWallet from 'hooks/settings/useActiveWallet'
-import { Wallet } from 'hooks/wallet/useWallet'
-import { observer } from 'mobx-react-lite'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { timeLeft } from 'utils/timeLeft'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { isBabylon, SupportedChain, Validator } from '@leapwallet/cosmos-wallet-sdk';
+import { Delegation } from '@leapwallet/cosmos-wallet-sdk/dist/browser/types/staking';
+import { CaretDown, GasPump } from '@phosphor-icons/react';
+import BigNumber from 'bignumber.js';
+import GasPriceOptions, { useDefaultGasPrice } from 'components/gas-price-options';
+import { DisplayFeeValue, GasPriceOptionValue } from 'components/gas-price-options/context';
+import { DisplayFee } from 'components/gas-price-options/display-fee';
+import { FeesSettingsSheet } from 'components/gas-price-options/fees-settings-sheet';
+import { addSeconds } from 'date-fns';
+import useActiveWallet from 'hooks/settings/useActiveWallet';
+import { Wallet } from 'hooks/wallet/useWallet';
+import { observer } from 'mobx-react-lite';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { timeLeft } from 'utils/timeLeft';
 
-import InsufficientBalanceCard from './components/InsufficientBalanceCard'
-import ReviewStakeTx from './components/ReviewStakeTx'
-import SelectValidatorCard from './components/SelectValidatorCard'
-import SelectValidatorSheet from './components/SelectValidatorSheet'
-import YouStake from './components/YouStake'
-import useGetWallet = Wallet.useGetWallet
+import InsufficientBalanceCard from './components/InsufficientBalanceCard';
+import ReviewStakeTx from './components/ReviewStakeTx';
+import SelectValidatorCard from './components/SelectValidatorCard';
+import SelectValidatorSheet from './components/SelectValidatorSheet';
+import YouStake from './components/YouStake';
+import useGetWallet = Wallet.useGetWallet;
 
-import { Button } from 'components/ui/button'
-import { useCaptureUIException } from 'hooks/perf-monitoring/useCaptureUIException'
-import { nmsStore } from 'stores/balance-store'
-import { rootDenomsStore } from 'stores/denoms-store-instance'
-import { rootBalanceStore } from 'stores/root-store'
-import {
-  claimRewardsStore,
-  delegationsStore,
-  unDelegationsStore,
-  validatorsStore,
-} from 'stores/stake-store'
-import { globalSheetsStore } from 'stores/ui/global-sheets-store'
+import { Button } from 'components/ui/button';
+import { useCaptureUIException } from 'hooks/perf-monitoring/useCaptureUIException';
+import { nmsStore } from 'stores/balance-store';
+import { rootDenomsStore } from 'stores/denoms-store-instance';
+import { rootBalanceStore } from 'stores/root-store';
+import { claimRewardsStore, delegationsStore, unDelegationsStore, validatorsStore } from 'stores/stake-store';
+import { globalSheetsStore } from 'stores/ui/global-sheets-store';
 
-import AutoAdjustAmountSheet from './components/AutoAdjustModal'
-import { StakeHeader } from './stake-header'
-import { StakeTxnSheet } from './StakeTxnSheet'
-import { stakeButtonTitleMap } from './utils/stake-text'
+import AutoAdjustAmountSheet from './components/AutoAdjustModal';
+import { StakeHeader } from './stake-header';
+import { StakeTxnSheet } from './StakeTxnSheet';
+import { stakeButtonTitleMap } from './utils/stake-text';
 
 export type StakeInputPageState = {
-  mode: STAKE_MODE
-  toValidator?: Validator
-  fromValidator?: Validator
-  delegation?: Delegation
-  forceChain?: SupportedChain
-  forceNetwork?: SelectedNetwork
-}
+  mode: STAKE_MODE;
+  toValidator?: Validator;
+  fromValidator?: Validator;
+  delegation?: Delegation;
+  forceChain?: SupportedChain;
+  forceNetwork?: SelectedNetwork;
+};
 
 const getTransactionType = (mode: STAKE_MODE) => {
   switch (mode) {
     case 'DELEGATE':
-      return 'stake_delegate'
+      return 'stake_delegate';
     case 'REDELEGATE':
-      return 'stake_redelegate'
+      return 'stake_redelegate';
     case 'UNDELEGATE':
-      return 'stake_undelegate'
+      return 'stake_undelegate';
     case 'CANCEL_UNDELEGATION':
-      return 'stake_cancel_undelegate'
+      return 'stake_cancel_undelegate';
     case 'CLAIM_REWARDS':
-      return 'stake_claim'
+      return 'stake_claim';
     default:
-      return 'stake_delegate'
+      return 'stake_delegate';
   }
-}
+};
 
 const StakeInputPage = observer(() => {
-  const [selectedValidator, setSelectedValidator] = useState<Validator | undefined>()
-  const [showFeesSettingSheet, setShowFeesSettingSheet] = useState(false)
-  const [showReviewStakeTx, setShowReviewStakeTx] = useState(false)
-  const [hasError, setHasError] = useState(false)
-  const [loadingSelectedValidator, setLoadingSelectedValidator] = useState(false)
-  const [showAdjustAmountSheet, setShowAdjustAmountSheet] = useState(false)
-  const [adjustAmount, setAdjustAmount] = useState(false)
-  const [claimTxMode, setClaimTxMode] = useState<STAKE_MODE | 'CLAIM_AND_DELEGATE' | null>(null)
+  const [selectedValidator, setSelectedValidator] = useState<Validator | undefined>();
+  const [showFeesSettingSheet, setShowFeesSettingSheet] = useState(false);
+  const [showReviewStakeTx, setShowReviewStakeTx] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [loadingSelectedValidator, setLoadingSelectedValidator] = useState(false);
+  const [showAdjustAmountSheet, setShowAdjustAmountSheet] = useState(false);
+  const [adjustAmount, setAdjustAmount] = useState(false);
+  const [claimTxMode, setClaimTxMode] = useState<STAKE_MODE | 'CLAIM_AND_DELEGATE' | null>(null);
 
-  const location = useLocation()
+  const location = useLocation();
   const {
     toValidator,
     fromValidator,
     mode = 'DELEGATE',
     delegation,
   } = useMemo(() => {
-    const navigateStakeInputState = JSON.parse(
-      sessionStorage.getItem('navigate-stake-input-state') ?? 'null',
-    )
+    const navigateStakeInputState = JSON.parse(sessionStorage.getItem('navigate-stake-input-state') ?? 'null');
 
-    return (location?.state || navigateStakeInputState || {}) as StakeInputPageState
-  }, [location?.state])
+    return (location?.state || navigateStakeInputState || {}) as StakeInputPageState;
+  }, [location?.state]);
 
   const [showSelectValidatorSheet, setShowSelectValidatorSheet] = useState(
     mode === 'DELEGATE' || mode === 'REDELEGATE',
-  )
+  );
 
-  const activeChain = useActiveChain()
-  const activeNetwork = useSelectedNetwork()
-  const navigate = useNavigate()
+  const activeChain = useActiveChain();
+  const activeNetwork = useSelectedNetwork();
+  const navigate = useNavigate();
 
-  const denoms = rootDenomsStore.allDenoms
+  const denoms = rootDenomsStore.allDenoms;
 
-  const chainDelegations = delegationsStore.delegationsForChain(activeChain)
-  const chainValidators = validatorsStore.validatorsForChain(activeChain)
-  const chainUnDelegations = unDelegationsStore.unDelegationsForChain(activeChain)
-  const chainClaimRewards = claimRewardsStore.claimRewardsForChain(activeChain)
+  const chainDelegations = delegationsStore.delegationsForChain(activeChain);
+  const chainValidators = validatorsStore.validatorsForChain(activeChain);
+  const chainUnDelegations = unDelegationsStore.unDelegationsForChain(activeChain);
+  const chainClaimRewards = claimRewardsStore.claimRewardsForChain(activeChain);
 
-  const [activeStakingDenom] = useActiveStakingDenom(denoms, activeChain, activeNetwork)
+  const [activeStakingDenom] = useActiveStakingDenom(denoms, activeChain, activeNetwork);
   const { network } = useStaking(
     denoms,
     chainDelegations,
@@ -124,28 +117,22 @@ const StakeInputPage = observer(() => {
     chainClaimRewards,
     activeChain,
     activeNetwork,
-  )
+  );
 
   const unstakingPeriod = useMemo(
     () =>
-      timeLeft(
-        addSeconds(
-          new Date(),
-          network?.chain?.params?.unbonding_time ?? 24 * 60 * 60 + 10,
-        ).toISOString(),
-        '',
-      ),
+      timeLeft(addSeconds(new Date(), network?.chain?.params?.unbonding_time ?? 24 * 60 * 60 + 10).toISOString(), ''),
     [network],
-  )
+  );
   const validators = useMemo(
     () =>
       chainValidators.validatorData.validators?.reduce((acc, validator) => {
-        acc[validator.address] = validator
-        return acc
+        acc[validator.address] = validator;
+        return acc;
       }, {} as Record<string, Validator>),
     [chainValidators.validatorData.validators],
-  )
-  const apr = network?.validatorAprs
+  );
+  const apr = network?.validatorAprs;
   const {
     amount,
     setAmount,
@@ -174,119 +161,107 @@ const StakeInputPage = observer(() => {
     [delegation as Delegation],
     activeChain,
     activeNetwork,
-  )
+  );
 
   const defaultGasPrice = useDefaultGasPrice(denoms, {
     activeChain,
     selectedNetwork: activeNetwork,
-  })
-  const getWallet = useGetWallet(activeChain)
-  const { activeWallet } = useActiveWallet()
+  });
+  const getWallet = useGetWallet(activeChain);
+  const { activeWallet } = useActiveWallet();
 
-  const [gasError, setGasError] = useState<string | null>(null)
+  const [gasError, setGasError] = useState<string | null>(null);
   const [gasPriceOption, setGasPriceOption] = useState<GasPriceOptionValue>({
     option: gasOption,
     gasPrice: userPreferredGasPrice ?? defaultGasPrice.gasPrice,
-  })
-  const [displayFeeValue, setDisplayFeeValue] = useState<DisplayFeeValue>()
+  });
+  const [displayFeeValue, setDisplayFeeValue] = useState<DisplayFeeValue>();
 
   const token = useMemo(() => {
-    return rootBalanceStore.allSpendableTokens?.find(
-      (e) => e.symbol === activeStakingDenom?.coinDenom,
-    )
-  }, [activeStakingDenom?.coinDenom, rootBalanceStore.allSpendableTokens])
+    return rootBalanceStore.allSpendableTokens?.find((e) => e.symbol === activeStakingDenom?.coinDenom);
+  }, [activeStakingDenom?.coinDenom, rootBalanceStore.allSpendableTokens]);
 
-  const consensusValidators = useConsensusValidators(
-    validators,
-    nmsStore,
-    activeChain,
-    activeNetwork,
-  )
+  const consensusValidators = useConsensusValidators(validators, nmsStore, activeChain, activeNetwork);
   const activeValidators = useMemo(
-    () =>
-      consensusValidators
-        .filter((v) => !v.jailed)
-        .filter((v) => v.address !== fromValidator?.address),
+    () => consensusValidators.filter((v) => !v.jailed).filter((v) => v.address !== fromValidator?.address),
     [consensusValidators, fromValidator?.address],
-  )
+  );
 
   useEffect(() => {
     setGasPriceOption({
       option: gasOption,
       gasPrice: defaultGasPrice.gasPrice,
-    })
+    });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultGasPrice.gasPrice.amount.toString(), defaultGasPrice.gasPrice.denom])
+  }, [defaultGasPrice.gasPrice.amount.toString(), defaultGasPrice.gasPrice.denom]);
 
   useEffect(() => {
     if (selectedValidator) {
-      return
+      return;
     }
 
-    setLoadingSelectedValidator(true)
+    setLoadingSelectedValidator(true);
     if (toValidator) {
-      setSelectedValidator(toValidator)
-      return
+      setSelectedValidator(toValidator);
+      return;
     }
 
     if (mode === 'DELEGATE') {
-      const validator = Object.values(validators ?? {}).find(
-        (v: Validator) => v.custom_attributes?.priority === 0,
-      )
+      const validator = Object.values(validators ?? {}).find((v: Validator) => v.custom_attributes?.priority === 0);
       if (validator) {
-        setSelectedValidator(validator)
+        setSelectedValidator(validator);
       }
     }
-    setLoadingSelectedValidator(false)
-  }, [mode, selectedValidator, toValidator, validators])
+    setLoadingSelectedValidator(false);
+  }, [mode, selectedValidator, toValidator, validators]);
 
   useEffect(() => {
     if (gasPriceOption.option) {
-      setGasOption(gasPriceOption.option)
+      setGasOption(gasPriceOption.option);
     }
     if (gasPriceOption.gasPrice) {
-      setUserPreferredGasPrice(gasPriceOption.gasPrice)
+      setUserPreferredGasPrice(gasPriceOption.gasPrice);
     }
-  }, [gasPriceOption, setGasOption, setUserPreferredGasPrice])
+  }, [gasPriceOption, setGasOption, setUserPreferredGasPrice]);
 
   const onGasPriceOptionChange = useCallback(
     (value: GasPriceOptionValue, feeBaseDenom: FeeTokenData) => {
-      setGasPriceOption(value)
-      setFeeDenom(feeBaseDenom.denom)
+      setGasPriceOption(value);
+      setFeeDenom(feeBaseDenom.denom);
     },
     [setFeeDenom],
-  )
+  );
 
   const txCallback = useCallback(() => {
-    setClaimTxMode(mode)
-    setShowReviewStakeTx(false)
-  }, [mode])
+    setClaimTxMode(mode);
+    setShowReviewStakeTx(false);
+  }, [mode]);
 
   const onSubmit = useCallback(async () => {
     try {
-      const wallet = await getWallet(activeChain)
+      const wallet = await getWallet(activeChain);
       await onReviewTransaction(wallet, txCallback, false, {
         stdFee: customFee,
         feeDenom: feeDenom,
-      })
+      });
     } catch (error) {
-      const _error = error as Error
-      setLedgerError(_error.message)
+      const _error = error as Error;
+      setLedgerError(_error.message);
 
       setTimeout(() => {
-        setLedgerError('')
-      }, 6000)
+        setLedgerError('');
+      }, 6000);
     }
-  }, [activeChain, customFee, feeDenom, getWallet, onReviewTransaction, setLedgerError, txCallback])
+  }, [activeChain, customFee, feeDenom, getWallet, onReviewTransaction, setLedgerError, txCallback]);
 
   useEffect(() => {
     if (adjustAmount) {
       if (new BigNumber(amount).gt(0)) {
-        setShowReviewStakeTx(true)
+        setShowReviewStakeTx(true);
       }
     }
-  }, [adjustAmount, amount])
+  }, [adjustAmount, amount]);
 
   useEffect(() => {
     if (
@@ -294,29 +269,28 @@ const StakeInputPage = observer(() => {
       selectedValidator?.custom_attributes?.priority &&
       selectedValidator?.custom_attributes?.priority > 0
     ) {
-      setMemo('Staked with Leap Wallet')
+      setMemo('Staked with Leap Wallet');
     } else {
-      setMemo('')
+      setMemo('');
     }
-  }, [mode, selectedValidator?.custom_attributes?.priority, setMemo])
+  }, [mode, selectedValidator?.custom_attributes?.priority, setMemo]);
 
-  const delegationBalance = delegation?.balance
+  const delegationBalance = delegation?.balance;
 
   const handleValidatorSelect = useCallback((validator: Validator) => {
-    setSelectedValidator(validator)
-    setShowSelectValidatorSheet(false)
-  }, [])
+    setSelectedValidator(validator);
+    setShowSelectValidatorSheet(false);
+  }, []);
 
   useCaptureUIException(ledgerError || error, {
     activeChain,
     activeNetwork,
     mode,
-  })
+  });
 
-  const tokenLoading = rootBalanceStore.getLoadingStatusForChain(activeChain, activeNetwork)
+  const tokenLoading = rootBalanceStore.getLoadingStatusForChain(activeChain, activeNetwork);
 
-  const delegationBalanceLoading =
-    delegationsStore.delegationsForChain(activeChain)?.loadingDelegations
+  const delegationBalanceLoading = delegationsStore.delegationsForChain(activeChain)?.loadingDelegations;
 
   return (
     <>
@@ -403,19 +377,18 @@ const StakeInputPage = observer(() => {
                 onClick={() => {
                   if (
                     mode === 'DELEGATE' &&
-                    parseFloat(amount) + (displayFeeValue?.value ?? 0) >
-                      parseFloat(token?.amount ?? '')
+                    parseFloat(amount) + (displayFeeValue?.value ?? 0) > parseFloat(token?.amount ?? '')
                   ) {
-                    setShowAdjustAmountSheet(true)
-                    return
+                    setShowAdjustAmountSheet(true);
+                    return;
                   }
 
                   if (activeWallet?.watchWallet) {
-                    globalSheetsStore.setImportWatchWalletSeedPopupOpen(true)
-                    return
+                    globalSheetsStore.setImportWatchWalletSeedPopupOpen(true);
+                    return;
                   }
 
-                  setShowReviewStakeTx(true)
+                  setShowReviewStakeTx(true);
                 }}
               >
                 {hasError ? 'Insufficient Balance' : `Review ${stakeButtonTitleMap[mode]}`}
@@ -429,8 +402,8 @@ const StakeInputPage = observer(() => {
         mode={claimTxMode}
         isOpen={!!claimTxMode}
         onClose={() => {
-          setAmount('')
-          setClaimTxMode(null)
+          setAmount('');
+          setClaimTxMode(null);
         }}
       />
 
@@ -439,9 +412,9 @@ const StakeInputPage = observer(() => {
         selectedValidator={selectedValidator}
         onClose={() => {
           if (!selectedValidator) {
-            navigate(-1)
+            navigate(-1);
           } else {
-            setShowSelectValidatorSheet(false)
+            setShowSelectValidatorSheet(false);
           }
         }}
         onValidatorSelect={handleValidatorSelect}
@@ -473,12 +446,12 @@ const StakeInputPage = observer(() => {
           token={token}
           fee={customFee.amount[0]}
           onAdjust={() => {
-            setShowAdjustAmountSheet(false)
-            setAdjustAmount(true)
-            setShowReviewStakeTx(true)
+            setShowAdjustAmountSheet(false);
+            setAdjustAmount(true);
+            setShowReviewStakeTx(true);
           }}
           onCancel={() => {
-            setShowAdjustAmountSheet(false)
+            setShowAdjustAmountSheet(false);
           }}
           isOpen={showAdjustAmountSheet}
         />
@@ -487,9 +460,7 @@ const StakeInputPage = observer(() => {
       <GasPriceOptions
         recommendedGasLimit={recommendedGasLimit}
         gasLimit={userPreferredGasLimit?.toString() ?? recommendedGasLimit}
-        setGasLimit={(value: number | string | BigNumber) =>
-          setUserPreferredGasLimit(Number(value.toString()))
-        }
+        setGasLimit={(value: number | string | BigNumber) => setUserPreferredGasLimit(Number(value.toString()))}
         gasPriceOption={gasPriceOption}
         onGasPriceOptionChange={onGasPriceOptionChange}
         error={gasError}
@@ -509,7 +480,7 @@ const StakeInputPage = observer(() => {
         />
       </GasPriceOptions>
     </>
-  )
-})
+  );
+});
 
-export default StakeInputPage
+export default StakeInputPage;

@@ -1,37 +1,37 @@
-import { Key, sliceAddress, useActiveWallet, useChainsStore } from '@leapwallet/cosmos-wallet-hooks'
-import { LineType } from '@leapwallet/cosmos-wallet-provider/dist/provider/types'
-import { ChainInfo, pubKeyToEvmAddressToShow, SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { Buttons } from '@leapwallet/leap-ui'
-import { CaretUp } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import { Divider } from 'components/dapp'
-import { Header } from 'components/header'
-import Loader from 'components/loader/Loader'
-import Text from 'components/text'
-import { ACTIVE_WALLET, BG_RESPONSE, CONNECTIONS } from 'config/storage-keys'
-import { checkChainConnections, decodeChainIdToChain } from 'extension-scripts/utils'
-import { usePerformanceMonitor } from 'hooks/perf-monitoring/usePerformanceMonitor'
-import { useUpdateKeyStore } from 'hooks/settings/useActiveWallet'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import { useWindowSize } from 'hooks/utility/useWindowSize'
-import { Images } from 'images'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Colors } from 'theme/colors'
-import { formatWalletName } from 'utils/formatWalletName'
-import { isSidePanel } from 'utils/isSidePanel'
-import browser from 'webextension-polyfill'
+import { Key, sliceAddress, useActiveWallet, useChainsStore } from '@leapwallet/cosmos-wallet-hooks';
+import { LineType } from '@leapwallet/cosmos-wallet-provider/dist/provider/types';
+import { ChainInfo, pubKeyToEvmAddressToShow, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { Buttons } from '@leapwallet/leap-ui';
+import { CaretUp } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import { Divider } from 'components/dapp';
+import { Header } from 'components/header';
+import Loader from 'components/loader/Loader';
+import Text from 'components/text';
+import { ACTIVE_WALLET, BG_RESPONSE, CONNECTIONS } from 'config/storage-keys';
+import { checkChainConnections, decodeChainIdToChain } from 'extension-scripts/utils';
+import { usePerformanceMonitor } from 'hooks/perf-monitoring/usePerformanceMonitor';
+import { useUpdateKeyStore } from 'hooks/settings/useActiveWallet';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { useWindowSize } from 'hooks/utility/useWindowSize';
+import { Images } from 'images';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Colors } from 'theme/colors';
+import { formatWalletName } from 'utils/formatWalletName';
+import { isSidePanel } from 'utils/isSidePanel';
+import browser from 'webextension-polyfill';
 
-import { addToConnections } from './utils'
-import WatchWalletPopup from './WatchWalletPopup'
+import { addToConnections } from './utils';
+import WatchWalletPopup from './WatchWalletPopup';
 
 type WebsiteProps = {
-  name: string
-}
+  name: string;
+};
 
 type HeadingProps = {
-  name: string
-}
+  name: string;
+};
 
 const Heading = ({ name }: HeadingProps) => {
   return (
@@ -39,16 +39,12 @@ const Heading = ({ name }: HeadingProps) => {
       <Text size='lg' className='font-bold mt-3 mx-2 justify-center align-middle truncate'>
         {name}
       </Text>
-      <Text
-        size='md'
-        className='justify-center align-middle mb-2'
-        color='text-gray-800 dark:text-gray-200'
-      >
+      <Text size='md' className='justify-center align-middle mb-2' color='text-gray-800 dark:text-gray-200'>
         wants to connect to your wallet
       </Text>
     </div>
-  )
-}
+  );
+};
 
 const Website = ({ name }: WebsiteProps) => {
   return (
@@ -58,23 +54,23 @@ const Website = ({ name }: WebsiteProps) => {
         {name}
       </Text>
     </div>
-  )
-}
+  );
+};
 
 /**
  * @desc Call this function to notify the background script that the popup has been closed. So it can clean up the state.
  */
 function closeWindow() {
-  browser.runtime.sendMessage({ type: 'popup-closed' })
+  browser.runtime.sendMessage({ type: 'popup-closed' });
   setTimeout(() => {
-    window.close()
-  }, 50)
+    window.close();
+  }, 50);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function sendMessage(message: { type: string; payload: any; status: 'success' | 'failed' }) {
   try {
-    await browser.runtime.sendMessage(message)
+    await browser.runtime.sendMessage(message);
   } catch (e) {
     //
   }
@@ -82,157 +78,145 @@ async function sendMessage(message: { type: string; payload: any; status: 'succe
 
 type DisplayRequestChains =
   | {
-      type: 'address'
-      address: string
-      chains: { chain: SupportedChain; payloadId: string }[]
+      type: 'address';
+      address: string;
+      chains: { chain: SupportedChain; payloadId: string }[];
     }
   | {
-      type: 'chains'
-      address: undefined
-      chains: { chain: SupportedChain; payloadId: string }[]
-    }
+      type: 'chains';
+      address: undefined;
+      chains: { chain: SupportedChain; payloadId: string }[];
+    };
 
 const ApproveConnection = () => {
-  const [selectedWallets, setSelectedWallets] = useState<[Key] | [] | Key[]>([])
-  const navigate = useNavigate()
-  const { width } = useWindowSize()
+  const [selectedWallets, setSelectedWallets] = useState<[Key] | [] | Key[]>([]);
+  const navigate = useNavigate();
+  const { width } = useWindowSize();
 
-  const [requestedChains, setRequestedChains] = useState<
-    Array<{ chain: SupportedChain; payloadId: string }>
-  >([])
+  const [requestedChains, setRequestedChains] = useState<Array<{ chain: SupportedChain; payloadId: string }>>([]);
 
-  const [readMoreEnabled, setReadMoreEnabled] = useState(false)
+  const [readMoreEnabled, setReadMoreEnabled] = useState(false);
 
-  const [showApprovalUi, setShowApprovalUi] = useState(false)
+  const [showApprovalUi, setShowApprovalUi] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [approvalRequests, setApprovalRequests] = useState<Array<any>>([])
-  const activeWallet = useActiveWallet()
-  const { chains } = useChainsStore()
-  const defaultTokenLogo = useDefaultTokenLogo()
-  const updateKeyStore = useUpdateKeyStore()
-  const addressGenerationDone = useRef<boolean>(false)
+  const [approvalRequests, setApprovalRequests] = useState<Array<any>>([]);
+  const activeWallet = useActiveWallet();
+  const { chains } = useChainsStore();
+  const defaultTokenLogo = useDefaultTokenLogo();
+  const updateKeyStore = useUpdateKeyStore();
+  const addressGenerationDone = useRef<boolean>(false);
 
   const displayedRequestedChains: DisplayRequestChains = useMemo(() => {
-    const isMoveConnection = requestedChains.every((chain) =>
-      ['movement', 'aptos'].includes(chain.chain),
-    )
+    const isMoveConnection = requestedChains.every((chain) => ['movement', 'aptos'].includes(chain.chain));
     if (isMoveConnection) {
       return {
         type: 'address',
         chains: requestedChains,
         address: selectedWallets?.[0]?.addresses?.[requestedChains[0]?.chain] || '',
-      }
+      };
     }
 
-    const isEvmConnection = requestedChains.every((chain) => chains[chain.chain]?.evmOnlyChain)
+    const isEvmConnection = requestedChains.every((chain) => chains[chain.chain]?.evmOnlyChain);
     if (isEvmConnection && selectedWallets?.[0]?.pubKeys) {
       const address = pubKeyToEvmAddressToShow(
         selectedWallets[0].pubKeys[requestedChains[0]?.chain] || selectedWallets[0].pubKeys.evmos,
-      )
+      );
 
       return {
         type: 'address',
         chains: requestedChains,
         address,
-      }
+      };
     }
 
-    const isSolanaConnection = requestedChains.every((chain) => ['solana'].includes(chain.chain))
+    const isSolanaConnection = requestedChains.every((chain) => ['solana'].includes(chain.chain));
     if (isSolanaConnection) {
       return {
         type: 'address',
         chains: requestedChains,
         address: selectedWallets?.[0]?.addresses?.[requestedChains[0]?.chain] || '',
-      }
+      };
     }
 
-    const isSuiConnection = requestedChains.every((chain) => ['sui'].includes(chain.chain))
+    const isSuiConnection = requestedChains.every((chain) => ['sui'].includes(chain.chain));
     if (isSuiConnection) {
       return {
         type: 'address',
         chains: requestedChains,
         address: selectedWallets?.[0]?.addresses?.[requestedChains[0]?.chain] || '',
-      }
+      };
     }
 
     const uniqueChainRequests = requestedChains.reduce(
       (acc: Array<{ chain: SupportedChain; payloadId: string }>, element) => {
-        const existingRequest = acc.find((request) => request.chain === element.chain)
+        const existingRequest = acc.find((request) => request.chain === element.chain);
         if (!existingRequest) {
-          acc.push(element)
-          return acc
+          acc.push(element);
+          return acc;
         }
-        return acc
+        return acc;
       },
       [],
-    )
+    );
     return {
       type: 'chains',
       chains: uniqueChainRequests,
-    }
-  }, [chains, requestedChains, selectedWallets])
+    };
+  }, [chains, requestedChains, selectedWallets]);
 
   useEffect(() => {
     async function generateAddresses() {
-      const wallet = selectedWallets[0]
-      if (!wallet || !displayedRequestedChains?.chains || addressGenerationDone.current) return
+      const wallet = selectedWallets[0];
+      if (!wallet || !displayedRequestedChains?.chains || addressGenerationDone.current) return;
 
       const chainsToGenerateAddresses =
         displayedRequestedChains.chains
           .filter((chain) => {
-            const hasAddress = selectedWallets?.[0]?.addresses?.[chain.chain]
-            const hasPubKey = selectedWallets?.[0]?.pubKeys?.[chain.chain]
-            return (chains[chain.chain] && !hasAddress) || !hasPubKey
+            const hasAddress = selectedWallets?.[0]?.addresses?.[chain.chain];
+            const hasPubKey = selectedWallets?.[0]?.pubKeys?.[chain.chain];
+            return (chains[chain.chain] && !hasAddress) || !hasPubKey;
           })
-          ?.map((chain) => chain.chain) ?? []
+          ?.map((chain) => chain.chain) ?? [];
 
       if (!chainsToGenerateAddresses?.length) {
-        return
+        return;
       }
 
-      const _chainInfos: Partial<Record<SupportedChain, ChainInfo>> = {}
+      const _chainInfos: Partial<Record<SupportedChain, ChainInfo>> = {};
 
       for await (const chain of chainsToGenerateAddresses) {
-        _chainInfos[chain] = chains[chain]
+        _chainInfos[chain] = chains[chain];
       }
-      const keyStore = await updateKeyStore(
-        wallet,
-        chainsToGenerateAddresses,
-        'UPDATE',
-        undefined,
-        _chainInfos,
-      )
-      addressGenerationDone.current = true
+      const keyStore = await updateKeyStore(wallet, chainsToGenerateAddresses, 'UPDATE', undefined, _chainInfos);
+      addressGenerationDone.current = true;
       const newSelectedWallets = selectedWallets.map((wallet) => {
-        if (!keyStore) return wallet
-        const newWallet = keyStore[wallet.id]
+        if (!keyStore) return wallet;
+        const newWallet = keyStore[wallet.id];
         if (!newWallet) {
-          return wallet
+          return wallet;
         }
-        return newWallet
-      })
-      setSelectedWallets(newSelectedWallets)
+        return newWallet;
+      });
+      setSelectedWallets(newSelectedWallets);
     }
 
-    generateAddresses()
+    generateAddresses();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [displayedRequestedChains, selectedWallets])
+  }, [displayedRequestedChains, selectedWallets]);
 
   const handleCancel = useCallback(async () => {
     if (!approvalRequests[0]) {
       if (isSidePanel()) {
-        navigate('/home')
+        navigate('/home');
       } else {
-        closeWindow()
+        closeWindow();
       }
-      return
+      return;
     }
 
     for (const currentApprovalRequest of approvalRequests) {
-      const chainsIds = currentApprovalRequest?.validChainIds ?? [
-        currentApprovalRequest?.[0]?.chainId,
-      ]
+      const chainsIds = currentApprovalRequest?.validChainIds ?? [currentApprovalRequest?.[0]?.chainId];
       await sendMessage({
         type: 'chain-approval-rejected',
         payload: {
@@ -242,74 +226,74 @@ const ApproveConnection = () => {
           ecosystem: currentApprovalRequest.ecosystem,
         },
         status: 'failed',
-      })
+      });
     }
-    window.removeEventListener('beforeunload', handleCancel)
+    window.removeEventListener('beforeunload', handleCancel);
     if (isSidePanel()) {
-      navigate('/home')
+      navigate('/home');
     } else {
-      closeWindow()
+      closeWindow();
     }
-  }, [navigate, approvalRequests])
+  }, [navigate, approvalRequests]);
 
   useEffect(() => {
     if (activeWallet) {
-      setSelectedWallets([activeWallet])
+      setSelectedWallets([activeWallet]);
     }
-  }, [activeWallet])
+  }, [activeWallet]);
 
   useEffect(() => {
-    window.addEventListener('beforeunload', handleCancel)
-    browser.storage.local.remove(BG_RESPONSE)
+    window.addEventListener('beforeunload', handleCancel);
+    browser.storage.local.remove(BG_RESPONSE);
     return () => {
-      window.removeEventListener('beforeunload', handleCancel)
-    }
+      window.removeEventListener('beforeunload', handleCancel);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [approvalRequests])
+  }, [approvalRequests]);
 
   async function enableAccessEventHandler(
     message: {
-      type: string
+      type: string;
       payload: {
-        origin: string
-        chainId?: string
-        validChainIds?: string[]
-        payloadId: string
-        ecosystem: LineType
-        ethMethod: string
-        isLeap?: boolean
-      }
+        origin: string;
+        chainId?: string;
+        validChainIds?: string[];
+        payloadId: string;
+        ecosystem: LineType;
+        ethMethod: string;
+        isLeap?: boolean;
+      };
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     sender: any,
   ) {
-    if (sender.id !== browser.runtime.id) return
+    if (sender.id !== browser.runtime.id) return;
     if (message.type === 'enable-access') {
-      const storage = await browser.storage.local.get([CONNECTIONS, ACTIVE_WALLET])
-      const connections = storage[CONNECTIONS] || []
-      const storedActiveWallet = storage[ACTIVE_WALLET]
-      const chainIds = message.payload.validChainIds ?? [message.payload.chainId ?? '']
+      const storage = await browser.storage.local.get([CONNECTIONS, ACTIVE_WALLET]);
+      const connections = storage[CONNECTIONS] || [];
+      const storedActiveWallet = storage[ACTIVE_WALLET];
+      const chainIds = message.payload.validChainIds ?? [message.payload.chainId ?? ''];
       const { isNewChainPresent } = await checkChainConnections(
         chainIds,
         connections,
         { origin: message.payload.origin },
         storedActiveWallet.id,
-      )
+      );
 
       if (isNewChainPresent) {
-        setApprovalRequests((prev) => [...prev, message.payload])
-        const _chainIdToChain = await decodeChainIdToChain()
+        setApprovalRequests((prev) => [...prev, message.payload]);
+        const _chainIdToChain = await decodeChainIdToChain();
         setRequestedChains((prev) => [
           ...prev,
           ...chainIds.map((chainId) => {
-            const chain = _chainIdToChain[chainId]
+            const chain = _chainIdToChain[chainId];
             return {
               chain: chain as unknown as SupportedChain,
               payloadId: message.payload.payloadId,
-            }
+            };
           }),
-        ])
-        setShowApprovalUi(true)
+        ]);
+        setShowApprovalUi(true);
       } else {
         await browser.runtime.sendMessage({
           type: 'chain-enabled',
@@ -322,33 +306,33 @@ const ApproveConnection = () => {
             isLeap: message.payload.isLeap,
           },
           status: 'success',
-        })
+        });
         if (isSidePanel()) {
-          navigate('/home')
+          navigate('/home');
         } else {
-          closeWindow()
+          closeWindow();
         }
       }
     }
   }
 
   useEffect(() => {
-    browser.runtime.sendMessage({ type: 'approval-popup-open' })
-    browser.runtime.onMessage.addListener(enableAccessEventHandler)
+    browser.runtime.sendMessage({ type: 'approval-popup-open' });
+    browser.runtime.onMessage.addListener(enableAccessEventHandler);
     return () => {
-      browser.runtime.onMessage.removeListener(enableAccessEventHandler)
-    }
-  }, [])
+      browser.runtime.onMessage.removeListener(enableAccessEventHandler);
+    };
+  }, []);
 
   const handleApproveConnection = async () => {
     for await (const currentApprovalRequest of approvalRequests) {
       const chainsIds: string[] | undefined = currentApprovalRequest
         ? currentApprovalRequest?.validChainIds ?? [currentApprovalRequest[0]?.chainId]
-        : undefined
-      if (!chainsIds) return
-      const selectedWalletIds = selectedWallets.map((wallet) => wallet.id)
+        : undefined;
+      if (!chainsIds) return;
+      const selectedWalletIds = selectedWallets.map((wallet) => wallet.id);
 
-      await addToConnections(chainsIds, selectedWalletIds, currentApprovalRequest.origin)
+      await addToConnections(chainsIds, selectedWalletIds, currentApprovalRequest.origin);
       await sendMessage({
         type: 'chain-enabled',
         payload: {
@@ -360,27 +344,27 @@ const ApproveConnection = () => {
           isLeap: currentApprovalRequest.isLeap,
         },
         status: 'success',
-      })
+      });
     }
-    window.removeEventListener('beforeunload', handleCancel)
+    window.removeEventListener('beforeunload', handleCancel);
     if (isSidePanel()) {
-      navigate('/home')
+      navigate('/home');
     } else {
-      closeWindow()
+      closeWindow();
     }
-  }
+  };
 
   usePerformanceMonitor({
     page: 'approve-connection',
     queryStatus: showApprovalUi ? 'success' : 'loading',
     op: 'approveConnectionPageLoad',
     description: 'Load time for approve connection page',
-  })
+  });
 
-  const isFullScreen = width && width > 800
+  const isFullScreen = width && width > 800;
 
   if (activeWallet?.watchWallet) {
-    return <WatchWalletPopup origin={approvalRequests?.[0]?.origin} handleCancel={handleCancel} />
+    return <WatchWalletPopup origin={approvalRequests?.[0]?.origin} handleCancel={handleCancel} />;
   }
 
   if (!showApprovalUi) {
@@ -390,7 +374,7 @@ const ApproveConnection = () => {
           <Loader />
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -426,9 +410,9 @@ const ApproveConnection = () => {
             <div className='flex items-center'>
               <img src={Images.Misc.WalletIconTeal} className='h-[20px] w-[20px] mr-3' />
               <Text size='md' className='text-black-100 dark:text-white-100 font-bold'>
-                {`${
-                  displayedRequestedChains.type === 'chains' ? 'Connecting ' : ''
-                }${formatWalletName(activeWallet?.name ?? '')}`}
+                {`${displayedRequestedChains.type === 'chains' ? 'Connecting ' : ''}${formatWalletName(
+                  activeWallet?.name ?? '',
+                )}`}
               </Text>
               {displayedRequestedChains.type === 'chains' &&
                 displayedRequestedChains.chains &&
@@ -437,11 +421,7 @@ const ApproveConnection = () => {
             </div>
 
             {displayedRequestedChains.type === 'address' ? (
-              <Text
-                className='ml-auto font-bold'
-                size='sm'
-                color='text-black-100 dark:text-white-100'
-              >
+              <Text className='ml-auto font-bold' size='sm' color='text-black-100 dark:text-white-100'>
                 {sliceAddress(displayedRequestedChains.address)}
               </Text>
             ) : null}
@@ -458,21 +438,18 @@ const ApproveConnection = () => {
                 })}
               >
                 {displayedRequestedChains.chains.map((requestedChain, index: number) => {
-                  const isLast = index === displayedRequestedChains.chains.length - 1
-                  const hasAddress = selectedWallets?.[0]?.addresses?.[requestedChain.chain]
-                  let address
+                  const isLast = index === displayedRequestedChains.chains.length - 1;
+                  const hasAddress = selectedWallets?.[0]?.addresses?.[requestedChain.chain];
+                  let address;
                   if (hasAddress) {
                     address = chains[requestedChain.chain]?.evmOnlyChain
-                      ? pubKeyToEvmAddressToShow(
-                          selectedWallets?.[0]?.pubKeys?.[requestedChain.chain],
-                        )
-                      : selectedWallets?.[0]?.addresses?.[requestedChain.chain]
+                      ? pubKeyToEvmAddressToShow(selectedWallets?.[0]?.pubKeys?.[requestedChain.chain])
+                      : selectedWallets?.[0]?.addresses?.[requestedChain.chain];
                   } else {
                     // If the address does not exist in keystore we generate addresses for cointype 60. For other chains it would be an empty string
-                    const evmosPubkey = selectedWallets?.[0]?.pubKeys?.['evmos']
-                    const canGenerateEvmAddress =
-                      chains[requestedChain.chain]?.evmOnlyChain && evmosPubkey
-                    address = canGenerateEvmAddress ? pubKeyToEvmAddressToShow(evmosPubkey) : ''
+                    const evmosPubkey = selectedWallets?.[0]?.pubKeys?.['evmos'];
+                    const canGenerateEvmAddress = chains[requestedChain.chain]?.evmOnlyChain && evmosPubkey;
+                    address = canGenerateEvmAddress ? pubKeyToEvmAddressToShow(evmosPubkey) : '';
                   }
 
                   return (
@@ -486,9 +463,7 @@ const ApproveConnection = () => {
                         }}
                       >
                         <img
-                          src={
-                            chains[requestedChain.chain]?.chainSymbolImageUrl ?? defaultTokenLogo
-                          }
+                          src={chains[requestedChain.chain]?.chainSymbolImageUrl ?? defaultTokenLogo}
                           className='h-[16px] w-[16px] mr-2'
                         />
                         <Text size='xs' color='text-gray-400'>
@@ -507,7 +482,7 @@ const ApproveConnection = () => {
                         {!isLast ? Divider : null}
                       </div>
                     </React.Fragment>
-                  )
+                  );
                 })}
               </div>
 
@@ -570,7 +545,7 @@ const ApproveConnection = () => {
         </Buttons.Generic>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ApproveConnection
+export default ApproveConnection;

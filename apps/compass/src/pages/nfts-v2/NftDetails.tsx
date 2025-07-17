@@ -4,8 +4,8 @@ import {
   useDisabledNFTsCollections,
   useEnabledNftsCollectionsStore,
   useSetDisabledNFTsInStorage,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import {
   ArrowFatLineUp,
   ArrowLeft,
@@ -16,83 +16,77 @@ import {
   Heart,
   Smiley,
   X,
-} from '@phosphor-icons/react'
-import classNames from 'classnames'
-import Text from 'components/text'
-import { Button } from 'components/ui/button'
-import { useActiveChain } from 'hooks/settings/useActiveChain'
-import useActiveWallet from 'hooks/settings/useActiveWallet'
-import { Wallet } from 'hooks/wallet/useWallet'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
-import { favNftStore } from 'stores/manage-nft-store'
-import { AddressBook } from 'utils/addressbook'
-import { imgOnError } from 'utils/imgOnError'
-import { isCompassWallet } from 'utils/isCompassWallet'
-import { normalizeImageSrc } from 'utils/normalizeImageSrc'
-import { sliceWord } from 'utils/strings'
-import Browser from 'webextension-polyfill'
+} from '@phosphor-icons/react';
+import classNames from 'classnames';
+import Text from 'components/text';
+import { Button } from 'components/ui/button';
+import { useActiveChain } from 'hooks/settings/useActiveChain';
+import useActiveWallet from 'hooks/settings/useActiveWallet';
+import { Wallet } from 'hooks/wallet/useWallet';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { favNftStore } from 'stores/manage-nft-store';
+import { AddressBook } from 'utils/addressbook';
+import { imgOnError } from 'utils/imgOnError';
+import { isCompassWallet } from 'utils/isCompassWallet';
+import { normalizeImageSrc } from 'utils/normalizeImageSrc';
+import { sliceWord } from 'utils/strings';
+import Browser from 'webextension-polyfill';
 
-import SaveAddressSheet from './components/recipient-card/save-address-sheet'
-import { useNftContext } from './context'
-import { SelectNFTRecipient } from './SelectNFTRecipient'
-import { useNFTSendContext } from './send-nft/context'
-import { ReviewNFTTransferSheet } from './send-nft/review-transfer-sheet'
+import SaveAddressSheet from './components/recipient-card/save-address-sheet';
+import { useNftContext } from './context';
+import { SelectNFTRecipient } from './SelectNFTRecipient';
+import { useNFTSendContext } from './send-nft/context';
+import { ReviewNFTTransferSheet } from './send-nft/review-transfer-sheet';
 
 export const NftDetails = observer(() => {
-  const [showSelectRecipient, setShowSelectRecipient] = useState(false)
-  const [selectedContact, setSelectedContact] = useState<AddressBook.SavedAddress | undefined>()
-  const [isAddContactSheetVisible, setIsAddContactSheetVisible] = useState(false)
-  const [showReviewSheet, setShowReviewSheet] = useState(false)
-  const { activeWallet, setActiveWallet } = useActiveWallet()
-  const [toast, setToast] = useState('')
-  const [showImage, setShowImage] = useState(false)
-  const { nftDetails, setNftDetails } = useNftContext()
-  const { setReceiverAddress } = useNFTSendContext()
-  const activeChain = useActiveChain()
-  const containerRef = useRef<HTMLDivElement | null>(null)
+  const [showSelectRecipient, setShowSelectRecipient] = useState(false);
+  const [selectedContact, setSelectedContact] = useState<AddressBook.SavedAddress | undefined>();
+  const [isAddContactSheetVisible, setIsAddContactSheetVisible] = useState(false);
+  const [showReviewSheet, setShowReviewSheet] = useState(false);
+  const { activeWallet, setActiveWallet } = useActiveWallet();
+  const [toast, setToast] = useState('');
+  const [showImage, setShowImage] = useState(false);
+  const { nftDetails, setNftDetails } = useNftContext();
+  const { setReceiverAddress } = useNFTSendContext();
+  const activeChain = useActiveChain();
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const { enabledNftsCollections, setEnabledNftsCollections } = useEnabledNftsCollectionsStore()
-  const disabledNFTsCollections = useDisabledNFTsCollections()
-  const setDisabledNFTsCollections = useSetDisabledNFTsInStorage()
+  const { enabledNftsCollections, setEnabledNftsCollections } = useEnabledNftsCollectionsStore();
+  const disabledNFTsCollections = useDisabledNFTsCollections();
+  const setDisabledNFTsCollections = useSetDisabledNFTsInStorage();
 
   const nftIndex = useMemo(() => {
-    return `${nftDetails?.collection.address ?? ''}-:-${
-      nftDetails?.tokenId ?? nftDetails?.domain ?? ''
-    }`
-  }, [nftDetails?.collection.address, nftDetails?.domain, nftDetails?.tokenId])
+    return `${nftDetails?.collection.address ?? ''}-:-${nftDetails?.tokenId ?? nftDetails?.domain ?? ''}`;
+  }, [nftDetails?.collection.address, nftDetails?.domain, nftDetails?.tokenId]);
 
-  const isInFavNfts = favNftStore.favNfts.includes(nftIndex)
+  const isInFavNfts = favNftStore.favNfts.includes(nftIndex);
 
   const isInProfile = useMemo(() => {
-    return activeWallet?.avatarIndex === nftIndex
-  }, [activeWallet?.avatarIndex, nftIndex])
+    return activeWallet?.avatarIndex === nftIndex;
+  }, [activeWallet?.avatarIndex, nftIndex]);
 
-  const isInHiddenNfts = disabledNFTsCollections.includes(nftDetails?.collection.address ?? '')
+  const isInHiddenNfts = disabledNFTsCollections.includes(nftDetails?.collection.address ?? '');
 
   const showProfileOption = useMemo(() => {
-    return (
-      !!nftDetails?.image &&
-      !nftDetails.image.includes('mp4') &&
-      !nftDetails.media_type?.includes('mp4')
-    )
-  }, [nftDetails?.image, nftDetails?.media_type])
+    return !!nftDetails?.image && !nftDetails.image.includes('mp4') && !nftDetails.media_type?.includes('mp4');
+  }, [nftDetails?.image, nftDetails?.media_type]);
 
   const handleFavNftClick = async () => {
     if (!activeWallet) {
-      return
+      return;
     }
 
     if (isInFavNfts) {
-      await favNftStore.removeFavNFT(nftIndex, activeWallet.id)
-      setToast('Removed from favourites')
+      await favNftStore.removeFavNFT(nftIndex, activeWallet.id);
+      setToast('Removed from favourites');
     } else {
-      await favNftStore.addFavNFT(nftIndex, activeWallet.id)
-      setToast('Added to favourites')
+      await favNftStore.addFavNFT(nftIndex, activeWallet.id);
+      setToast('Added to favourites');
     }
-  }
+  };
 
   const handleProfileClick = async () => {
     if (activeWallet && showProfileOption) {
@@ -100,87 +94,81 @@ export const NftDetails = observer(() => {
         ...activeWallet,
         avatar: normalizeImageSrc(nftDetails?.image ?? '', nftDetails?.collection.address ?? ''),
         avatarIndex: nftIndex,
-      }
+      };
       if (isInProfile) {
         newWallet = {
           ...activeWallet,
           avatar: undefined,
           avatarIndex: undefined,
-        }
+        };
       }
 
-      setActiveWallet(newWallet)
-      await Wallet.storeWallets({ [newWallet.id]: newWallet })
-      setToast('Profile picture updated!')
+      setActiveWallet(newWallet);
+      await Wallet.storeWallets({ [newWallet.id]: newWallet });
+      setToast('Profile picture updated!');
     }
-  }
+  };
 
-  const handleToggleClick = async (
-    isEnabled: boolean,
-    collectionAddress: string,
-    chain: SupportedChain,
-  ) => {
-    let _disabledNFTsCollections: string[] = []
-    let _enabledNftsCollections: string[] = []
-    const existingEnabledNftsCollections = enabledNftsCollections?.[chain] ?? []
+  const handleToggleClick = async (isEnabled: boolean, collectionAddress: string, chain: SupportedChain) => {
+    let _disabledNFTsCollections: string[] = [];
+    let _enabledNftsCollections: string[] = [];
+    const existingEnabledNftsCollections = enabledNftsCollections?.[chain] ?? [];
 
     if (isEnabled) {
-      _disabledNFTsCollections = disabledNFTsCollections.filter(
-        (collection) => collection !== collectionAddress,
-      )
+      _disabledNFTsCollections = disabledNFTsCollections.filter((collection) => collection !== collectionAddress);
 
       if (isCompassWallet() && !existingEnabledNftsCollections.includes(collectionAddress)) {
-        _enabledNftsCollections = [...existingEnabledNftsCollections, collectionAddress]
+        _enabledNftsCollections = [...existingEnabledNftsCollections, collectionAddress];
       }
-      setToast('Removed from hidden')
+      setToast('Removed from hidden');
     } else {
       if (!_disabledNFTsCollections.includes(collectionAddress)) {
-        _disabledNFTsCollections = [...disabledNFTsCollections, collectionAddress]
+        _disabledNFTsCollections = [...disabledNFTsCollections, collectionAddress];
       }
 
       if (isCompassWallet()) {
         _enabledNftsCollections = existingEnabledNftsCollections.filter(
           (collection) => collection !== collectionAddress,
-        )
+        );
       }
-      setToast('Added to hidden')
+      setToast('Added to hidden');
     }
 
-    await setDisabledNFTsCollections(_disabledNFTsCollections)
+    await setDisabledNFTsCollections(_disabledNFTsCollections);
 
     if (isCompassWallet()) {
       setEnabledNftsCollections({
         ...enabledNftsCollections,
         [chain]: _enabledNftsCollections,
-      })
+      });
       await Browser.storage.local.set({
         [ENABLED_NFTS_COLLECTIONS]: JSON.stringify({
           ...enabledNftsCollections,
           [chain]: _enabledNftsCollections,
         }),
-      })
+      });
     }
-  }
+  };
 
   const editContact = (savedAddress?: AddressBook.SavedAddress) => {
     if (savedAddress) {
-      setSelectedContact(savedAddress)
+      setSelectedContact(savedAddress);
     }
-    setIsAddContactSheetVisible(true)
-    setShowSelectRecipient(false)
-  }
+    setIsAddContactSheetVisible(true);
+    setShowSelectRecipient(false);
+  };
 
   useEffect(() => {
     if (toast) {
-      setTimeout(() => setToast(''), 3000)
+      setTimeout(() => setToast(''), 3000);
     }
-  }, [toast])
+  }, [toast]);
 
   useEffect(() => {
     if (containerRef && containerRef.current) {
-      document.getElementById('popup-layout')?.scroll({ top: 0 })
+      document.getElementById('popup-layout')?.scroll({ top: 0 });
     }
-  }, [])
+  }, []);
 
   if (showImage) {
     return createPortal(
@@ -196,14 +184,14 @@ export const NftDetails = observer(() => {
         <img
           src={nftDetails?.image ?? Images.Logos.GenericNFT}
           onClick={(e) => {
-            e.stopPropagation()
+            e.stopPropagation();
           }}
           onError={imgOnError(Images.Logos.GenericNFT)}
           className='w-[352px] h-[352px] overflow-hidden object-contain'
         />
       </div>,
       document.getElementById('popup-layout')?.parentNode as HTMLElement,
-    )
+    );
   }
 
   return (
@@ -243,13 +231,10 @@ export const NftDetails = observer(() => {
               <Heart
                 size={62}
                 weight='fill'
-                className={classNames(
-                  'p-5 rounded-full bg-secondary-200 hover:bg-secondary-400 cursor-pointer',
-                  {
-                    'text-monochrome': !isInFavNfts,
-                    'text-[#D0414F]': isInFavNfts,
-                  },
-                )}
+                className={classNames('p-5 rounded-full bg-secondary-200 hover:bg-secondary-400 cursor-pointer', {
+                  'text-monochrome': !isInFavNfts,
+                  'text-[#D0414F]': isInFavNfts,
+                })}
                 onClick={handleFavNftClick}
               />
               <Text size='sm' className='font-medium text-monochrome'>
@@ -270,13 +255,10 @@ export const NftDetails = observer(() => {
             <div className='flex flex-col gap-y-2.5 items-center'>
               <Smiley
                 size={62}
-                className={classNames(
-                  'p-5 rounded-full bg-secondary-200 hover:bg-secondary-400 cursor-pointer',
-                  {
-                    'text-monochrome': !isInProfile,
-                    'text-[#D0414F]': isInProfile,
-                  },
-                )}
+                className={classNames('p-5 rounded-full bg-secondary-200 hover:bg-secondary-400 cursor-pointer', {
+                  'text-monochrome': !isInProfile,
+                  'text-[#D0414F]': isInProfile,
+                })}
                 onClick={handleProfileClick}
               />
               <Text size='sm' className='font-medium text-monochrome'>
@@ -291,7 +273,7 @@ export const NftDetails = observer(() => {
                   className='text-monochrome p-5 rounded-full bg-secondary-200 hover:bg-secondary-400 cursor-pointer'
                   onClick={() => {
                     if (nftDetails) {
-                      handleToggleClick(true, nftDetails.collection.address, nftDetails.chain)
+                      handleToggleClick(true, nftDetails.collection.address, nftDetails.chain);
                     }
                   }}
                 />
@@ -302,7 +284,7 @@ export const NftDetails = observer(() => {
                   className='text-monochrome p-5 rounded-full bg-secondary-200 hover:bg-secondary-400 cursor-pointer'
                   onClick={() => {
                     if (nftDetails) {
-                      handleToggleClick(false, nftDetails.collection.address, nftDetails.chain)
+                      handleToggleClick(false, nftDetails.collection.address, nftDetails.chain);
                     }
                   }}
                 />
@@ -316,10 +298,7 @@ export const NftDetails = observer(() => {
             className='w-full'
             onClick={() =>
               window.open(
-                normalizeImageSrc(
-                  nftDetails?.tokenUri ?? '',
-                  nftDetails?.collection?.address ?? '',
-                ),
+                normalizeImageSrc(nftDetails?.tokenUri ?? '', nftDetails?.collection?.address ?? ''),
                 '_blank',
               )
             }
@@ -340,12 +319,7 @@ export const NftDetails = observer(() => {
                 <Text size='sm' className='font-medium' color='text-muted-foreground'>
                   Description
                 </Text>
-                <Text
-                  size='sm'
-                  color='text-monochrome'
-                  className='break-words'
-                  style={{ wordBreak: 'break-word' }}
-                >
+                <Text size='sm' color='text-monochrome' className='break-words' style={{ wordBreak: 'break-word' }}>
                   {nftDetails?.description}
                 </Text>
               </div>
@@ -405,12 +379,12 @@ export const NftDetails = observer(() => {
       <SaveAddressSheet
         isOpen={isAddContactSheetVisible}
         onSave={(s) => {
-          setReceiverAddress(s)
-          setShowReviewSheet(true)
+          setReceiverAddress(s);
+          setShowReviewSheet(true);
         }}
         onClose={() => {
-          setIsAddContactSheetVisible(false)
-          setSelectedContact(undefined)
+          setIsAddContactSheetVisible(false);
+          setSelectedContact(undefined);
         }}
         address={selectedContact?.address ?? ''}
         ethAddress={selectedContact?.ethAddress ?? ''}
@@ -419,5 +393,5 @@ export const NftDetails = observer(() => {
         showDeleteBtn={!!selectedContact}
       />
     </div>
-  )
-})
+  );
+});

@@ -1,8 +1,8 @@
-import React from 'react'
+import React from 'react';
 
-import { Images } from '../../images'
-import { LoaderAnimation } from '../loader/Loader'
-import Text from '../text'
+import { Images } from '../../images';
+import { LoaderAnimation } from '../loader/Loader';
+import Text from '../text';
 
 export default function LedgerConfirmationCard() {
   return (
@@ -13,5 +13,5 @@ export default function LedgerConfirmationCard() {
       </Text>
       <LoaderAnimation color='#E18881' className='h-5 w-5 bg-[#5A3634] rounded-2xl ml-auto' />
     </div>
-  )
+  );
 }

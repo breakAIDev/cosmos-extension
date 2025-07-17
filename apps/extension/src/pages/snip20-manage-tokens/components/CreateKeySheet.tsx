@@ -1,70 +1,63 @@
-import {
-  SecretToken,
-  useAddress,
-  useChainApis,
-  useChainId,
-  useGetChains,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { Buttons, GenericCard } from '@leapwallet/leap-ui'
-import BottomModal from 'components/bottom-modal'
-import { ErrorCard } from 'components/ErrorCard'
-import { LoaderAnimation } from 'components/loader/Loader'
-import Text from 'components/text'
-import { useCreateQueryPermit } from 'hooks/secret/useCreateQueryPermit'
-import { useCreateViewingKey } from 'hooks/secret/useCreateViewingKey'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import React, { useCallback, useEffect, useState } from 'react'
-import { rootDenomsStore } from 'stores/denoms-store-instance'
-import { rootBalanceStore } from 'stores/root-store'
-import { Colors } from 'theme/colors'
-import { UserClipboard } from 'utils/clipboard'
+import { SecretToken, useAddress, useChainApis, useChainId, useGetChains } from '@leapwallet/cosmos-wallet-hooks';
+import { Buttons, GenericCard } from '@leapwallet/leap-ui';
+import BottomModal from 'components/bottom-modal';
+import { ErrorCard } from 'components/ErrorCard';
+import { LoaderAnimation } from 'components/loader/Loader';
+import Text from 'components/text';
+import { useCreateQueryPermit } from 'hooks/secret/useCreateQueryPermit';
+import { useCreateViewingKey } from 'hooks/secret/useCreateViewingKey';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import React, { useCallback, useEffect, useState } from 'react';
+import { rootDenomsStore } from 'stores/denoms-store-instance';
+import { rootBalanceStore } from 'stores/root-store';
+import { Colors } from 'theme/colors';
+import { UserClipboard } from 'utils/clipboard';
 
-import { useSnip20ManageTokens } from '../context'
-import { CopyViewingKey, Fee } from './index'
+import { useSnip20ManageTokens } from '../context';
+import { CopyViewingKey, Fee } from './index';
 
 type Props = {
-  isVisible: boolean
-  onClose: VoidFunction
-  token?: SecretToken & { contractAddr: string }
-  onSuccess: VoidFunction
-}
+  isVisible: boolean;
+  onClose: VoidFunction;
+  token?: SecretToken & { contractAddr: string };
+  onSuccess: VoidFunction;
+};
 
 export function CreateKeySheet({ isVisible, onClose, token, onSuccess }: Props) {
-  const defaultLogo = useDefaultTokenLogo()
-  const [generatedViewingKey, setGeneratedViewingKey] = useState<string | undefined | null>(null)
-  const [viewingKeyLoader, setViewingKeyLoader] = useState(false)
+  const defaultLogo = useDefaultTokenLogo();
+  const [generatedViewingKey, setGeneratedViewingKey] = useState<string | undefined | null>(null);
+  const [viewingKeyLoader, setViewingKeyLoader] = useState(false);
 
-  const createViewingKey = useCreateViewingKey()
-  const createQueryPermit = useCreateQueryPermit()
-  const [error, setError] = useState<string | null>(null)
-  const address = useAddress()
-  const { lcdUrl } = useChainApis('secret')
-  const chainId = useChainId()
-  const chains = useGetChains()
+  const createViewingKey = useCreateViewingKey();
+  const createQueryPermit = useCreateQueryPermit();
+  const [error, setError] = useState<string | null>(null);
+  const address = useAddress();
+  const { lcdUrl } = useChainApis('secret');
+  const chainId = useChainId();
+  const chains = useGetChains();
 
-  const { setContractAddress, userPreferredGasLimit, userPreferredGasPrice } =
-    useSnip20ManageTokens()
+  const { setContractAddress, userPreferredGasLimit, userPreferredGasPrice } = useSnip20ManageTokens();
   useEffect(() => {
     if (token?.contractAddr) {
-      setContractAddress(token.contractAddr)
+      setContractAddress(token.contractAddr);
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token?.contractAddr])
+  }, [token?.contractAddr]);
 
   const clearState = useCallback(() => {
-    setGeneratedViewingKey(null)
-    setViewingKeyLoader(false)
-    onClose()
-  }, [onClose])
+    setGeneratedViewingKey(null);
+    setViewingKeyLoader(false);
+    onClose();
+  }, [onClose]);
 
   const handleConfirmClick = useCallback(async () => {
-    setViewingKeyLoader(true)
+    setViewingKeyLoader(true);
 
     if (token?.snip24Enabled) {
-      createQueryPermit(address, token.contractAddr)
-      clearState()
-      onSuccess()
+      createQueryPermit(address, token.contractAddr);
+      clearState();
+      onSuccess();
     } else {
       if (!generatedViewingKey) {
         const { error, key } = await createViewingKey(
@@ -78,18 +71,18 @@ export function CreateKeySheet({ isVisible, onClose, token, onSuccess }: Props) 
             feeDenom: userPreferredGasPrice?.denom,
             gasPriceStep: Number(userPreferredGasPrice?.amount ?? 0),
           },
-        )
+        );
 
         if (error) {
-          setError(error)
-          setViewingKeyLoader(false)
+          setError(error);
+          setViewingKeyLoader(false);
         } else {
-          setViewingKeyLoader(false)
-          setGeneratedViewingKey(key)
+          setViewingKeyLoader(false);
+          setGeneratedViewingKey(key);
         }
       } else {
-        clearState()
-        onSuccess()
+        clearState();
+        onSuccess();
       }
     }
   }, [
@@ -107,7 +100,7 @@ export function CreateKeySheet({ isVisible, onClose, token, onSuccess }: Props) 
     userPreferredGasLimit,
     userPreferredGasPrice?.amount,
     userPreferredGasPrice?.denom,
-  ])
+  ]);
 
   return (
     <BottomModal
@@ -124,12 +117,7 @@ export function CreateKeySheet({ isVisible, onClose, token, onSuccess }: Props) 
             className='w-[300px] px-0'
             title={token?.symbol}
             subtitle={token?.name}
-            img={
-              <img
-                src={token?.icon === '' ? defaultLogo : token?.icon}
-                className='w-[40px] h-[40px] mr-3'
-              />
-            }
+            img={<img src={token?.icon === '' ? defaultLogo : token?.icon} className='w-[40px] h-[40px] mr-3' />}
           />
         </div>
 
@@ -141,7 +129,7 @@ export function CreateKeySheet({ isVisible, onClose, token, onSuccess }: Props) 
           <CopyViewingKey
             generatedViewingKey={generatedViewingKey}
             onCopy={async () => {
-              await UserClipboard.copyText(generatedViewingKey)
+              await UserClipboard.copyText(generatedViewingKey);
             }}
           />
         ) : null}
@@ -153,12 +141,7 @@ export function CreateKeySheet({ isVisible, onClose, token, onSuccess }: Props) 
         ) : null}
 
         {!viewingKeyLoader ? (
-          <Buttons.Generic
-            size='normal'
-            color='#E18881'
-            className='w-[344px]'
-            onClick={handleConfirmClick}
-          >
+          <Buttons.Generic size='normal' color='#E18881' className='w-[344px]' onClick={handleConfirmClick}>
             {generatedViewingKey ? 'Done' : 'Confirm'}
           </Buttons.Generic>
         ) : (
@@ -168,5 +151,5 @@ export function CreateKeySheet({ isVisible, onClose, token, onSuccess }: Props) 
         )}
       </div>
     </BottomModal>
-  )
+  );
 }

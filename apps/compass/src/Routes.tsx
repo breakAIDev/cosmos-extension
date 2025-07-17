@@ -5,94 +5,94 @@ import {
   useFetchDualStakeProviders,
   useInitCustomChains,
   useSelectedNetwork,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { useChains, useSkipSupportedChains } from '@leapwallet/elements-hooks'
-import * as Sentry from '@sentry/react'
-import { AppInitLoader } from 'components/loader/AppInitLoader'
-import { SidePanelNavigation } from 'components/side-panel-navigation'
-import { useActiveInfoEventDispatcher } from 'hooks/settings/useActiveInfoEventDispatcher'
-import useActiveWallet from 'hooks/settings/useActiveWallet'
-import { useChainAbstractionView } from 'hooks/settings/useChainAbstractionView'
-import { InitHooks } from 'init-hooks'
-import { GlobalLayout } from 'layout'
-import Login from 'pages/auth/login'
-import Home from 'pages/home/Home'
-import { AddEvmLedger } from 'pages/onboarding/import/AddEvmLedger'
-import { OnboardingSuspenseLoader } from 'pages/onboarding/suspense-loader'
-import useAssets from 'pages/swaps-v2/hooks/useAssets'
-import React, { lazy, Suspense, useEffect } from 'react'
-import { HashRouter, Route, Routes, useLocation } from 'react-router-dom'
-import { compassSeiEvmConfigStore, marketDataStore } from 'stores/balance-store'
-import { compassTokensAssociationsStore } from 'stores/chain-infos-store'
-import { compassTokenTagsStore, denomsStore, rootDenomsStore } from 'stores/denoms-store-instance'
-import { nftStore } from 'stores/nft-store'
-import { rootBalanceStore, rootStakeStore } from 'stores/root-store'
-import { isCompassWallet } from 'utils/isCompassWallet'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { useChains, useSkipSupportedChains } from '@leapwallet/elements-hooks';
+import * as Sentry from '@sentry/react';
+import { AppInitLoader } from 'components/loader/AppInitLoader';
+import { SidePanelNavigation } from 'components/side-panel-navigation';
+import { useActiveInfoEventDispatcher } from 'hooks/settings/useActiveInfoEventDispatcher';
+import useActiveWallet from 'hooks/settings/useActiveWallet';
+import { useChainAbstractionView } from 'hooks/settings/useChainAbstractionView';
+import { InitHooks } from 'init-hooks';
+import { GlobalLayout } from 'layout';
+import Login from 'pages/auth/login';
+import Home from 'pages/home/Home';
+import { AddEvmLedger } from 'pages/onboarding/import/AddEvmLedger';
+import { OnboardingSuspenseLoader } from 'pages/onboarding/suspense-loader';
+import useAssets from 'pages/swaps-v2/hooks/useAssets';
+import React, { lazy, Suspense, useEffect } from 'react';
+import { HashRouter, Route, Routes, useLocation } from 'react-router-dom';
+import { compassSeiEvmConfigStore, marketDataStore } from 'stores/balance-store';
+import { compassTokensAssociationsStore } from 'stores/chain-infos-store';
+import { compassTokenTagsStore, denomsStore, rootDenomsStore } from 'stores/denoms-store-instance';
+import { nftStore } from 'stores/nft-store';
+import { rootBalanceStore, rootStakeStore } from 'stores/root-store';
+import { isCompassWallet } from 'utils/isCompassWallet';
 
-import { AuthProvider, RequireAuth, RequireAuthOnboarding } from './context/auth-context'
+import { AuthProvider, RequireAuth, RequireAuthOnboarding } from './context/auth-context';
 
-const Activity = lazy(() => import('pages/activity/Activity'))
-const Swap = lazy(() => import('pages/swaps-v2'))
-const ApproveConnection = React.lazy(() => import('pages/ApproveConnection/ApproveConnection'))
-const TokensDetails = React.lazy(() => import('pages/asset-details'))
-const Earn = React.lazy(() => import('pages/earn'))
-const ForgotPassword = React.lazy(() => import('pages/forgot-password'))
+const Activity = lazy(() => import('pages/activity/Activity'));
+const Swap = lazy(() => import('pages/swaps-v2'));
+const ApproveConnection = React.lazy(() => import('pages/ApproveConnection/ApproveConnection'));
+const TokensDetails = React.lazy(() => import('pages/asset-details'));
+const Earn = React.lazy(() => import('pages/earn'));
+const ForgotPassword = React.lazy(() => import('pages/forgot-password'));
 
-const Onboarding = React.lazy(async () => import('pages/onboarding'))
+const Onboarding = React.lazy(async () => import('pages/onboarding'));
 
-const OnboardingCreateWallet = React.lazy(() => import('pages/onboarding/create'))
-const OnboardingImportWallet = React.lazy(() => import('pages/onboarding/import'))
-const OnboardingSuccess = React.lazy(() => import('pages/onboarding/success'))
-const Send = React.lazy(() => import('pages/send'))
-const Buy = React.lazy(() => import('pages/buy'))
-const Sign = React.lazy(() => import('pages/sign/sign-transaction'))
-const SignSeiEvm = React.lazy(() => import('pages/sign-sei-evm/SignSeiEvmTransaction'))
-const Stake = React.lazy(() => import('pages/stake-v2'))
-const StakeInputPage = React.lazy(() => import('pages/stake-v2/StakeInputPage'))
-const StakeTxnPage = React.lazy(() => import('pages/stake-v2/StakeTxnPage'))
+const OnboardingCreateWallet = React.lazy(() => import('pages/onboarding/create'));
+const OnboardingImportWallet = React.lazy(() => import('pages/onboarding/import'));
+const OnboardingSuccess = React.lazy(() => import('pages/onboarding/success'));
+const Send = React.lazy(() => import('pages/send'));
+const Buy = React.lazy(() => import('pages/buy'));
+const Sign = React.lazy(() => import('pages/sign/sign-transaction'));
+const SignSeiEvm = React.lazy(() => import('pages/sign-sei-evm/SignSeiEvmTransaction'));
+const Stake = React.lazy(() => import('pages/stake-v2'));
+const StakeInputPage = React.lazy(() => import('pages/stake-v2/StakeInputPage'));
+const StakeTxnPage = React.lazy(() => import('pages/stake-v2/StakeTxnPage'));
 
-const Discover = React.lazy(() => import('pages/discover'))
-const SuggestErc20 = React.lazy(() => import('pages/suggest/SuggestErc20'))
-const PendingTx = React.lazy(() => import('pages/activity/PendingTx'))
-const NFTs = React.lazy(() => import('pages/nfts-v2/NFTPage'))
-const AddToken = React.lazy(() => import('pages/add-token/AddToken'))
-const ManageTokens = React.lazy(() => import('pages/manage-tokens'))
+const Discover = React.lazy(() => import('pages/discover'));
+const SuggestErc20 = React.lazy(() => import('pages/suggest/SuggestErc20'));
+const PendingTx = React.lazy(() => import('pages/activity/PendingTx'));
+const NFTs = React.lazy(() => import('pages/nfts-v2/NFTPage'));
+const AddToken = React.lazy(() => import('pages/add-token/AddToken'));
+const ManageTokens = React.lazy(() => import('pages/manage-tokens'));
 
-const RoutesMatch = Sentry.withSentryReactRouterV6Routing(Routes)
+const RoutesMatch = Sentry.withSentryReactRouterV6Routing(Routes);
 
 export default function AppRoutes(): JSX.Element {
-  const { activeWallet } = useActiveWallet()
+  const { activeWallet } = useActiveWallet();
 
-  useInitCustomChains()
-  useChainAbstractionView()
-  useFetchDualStakeDelegations(rootDenomsStore.allDenoms)
-  useFetchDualStakeProviders(rootDenomsStore.allDenoms)
-  useFetchDualStakeProviderRewards(rootDenomsStore.allDenoms)
+  useInitCustomChains();
+  useChainAbstractionView();
+  useFetchDualStakeDelegations(rootDenomsStore.allDenoms);
+  useFetchDualStakeProviders(rootDenomsStore.allDenoms);
+  useFetchDualStakeProviderRewards(rootDenomsStore.allDenoms);
 
-  useActiveInfoEventDispatcher()
+  useActiveInfoEventDispatcher();
 
-  useChains()
-  useSkipSupportedChains()
-  useAssets()
+  useChains();
+  useSkipSupportedChains();
+  useAssets();
 
-  const activeChain = useActiveChain()
-  const activeNetwork = useSelectedNetwork()
+  const activeChain = useActiveChain();
+  const activeNetwork = useSelectedNetwork();
 
   useEffect(() => {
-    ;(function () {
+    (function () {
       if (nftStore.haveToFetchNfts === false) {
-        nftStore.haveToFetchNfts = true
+        nftStore.haveToFetchNfts = true;
       }
-    })()
-  }, [activeWallet?.addresses])
+    })();
+  }, [activeWallet?.addresses]);
 
   useEffect(() => {
-    ;(function () {
+    (function () {
       if (isCompassWallet() && nftStore.haveToFetchNfts === false) {
-        nftStore.haveToFetchNfts = true
+        nftStore.haveToFetchNfts = true;
       }
-    })()
-  }, [activeChain, activeNetwork])
+    })();
+  }, [activeChain, activeNetwork]);
 
   return (
     <AuthProvider>
@@ -102,11 +102,11 @@ export default function AppRoutes(): JSX.Element {
         <AnimatedRoutes />
       </HashRouter>
     </AuthProvider>
-  )
+  );
 }
 
 const AnimatedRoutes = () => {
-  const location = useLocation()
+  const location = useLocation();
 
   return (
     <GlobalLayout location={location}>
@@ -379,5 +379,5 @@ const AnimatedRoutes = () => {
         />
       </RoutesMatch>
     </GlobalLayout>
-  )
-}
+  );
+};

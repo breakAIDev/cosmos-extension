@@ -5,43 +5,43 @@ import {
   sliceAddress,
   useGetChains,
   WALLETTYPE,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { ChainInfo, pubKeyToEvmAddressToShow } from '@leapwallet/cosmos-wallet-sdk'
-import classNames from 'classnames'
-import useActiveWallet from 'hooks/settings/useActiveWallet'
-import { Wallet } from 'hooks/wallet/useWallet'
-import { Images } from 'images'
-import React, { useMemo } from 'react'
-import { getLedgerEnabledEvmChainsKey } from 'utils/getLedgerEnabledEvmChains'
-import { isLedgerEnabled } from 'utils/isLedgerEnabled'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { ChainInfo, pubKeyToEvmAddressToShow } from '@leapwallet/cosmos-wallet-sdk';
+import classNames from 'classnames';
+import useActiveWallet from 'hooks/settings/useActiveWallet';
+import { Wallet } from 'hooks/wallet/useWallet';
+import { Images } from 'images';
+import React, { useMemo } from 'react';
+import { getLedgerEnabledEvmChainsKey } from 'utils/getLedgerEnabledEvmChains';
+import { isLedgerEnabled } from 'utils/isLedgerEnabled';
 
 type WalletCardProps = {
-  chainInfo: ChainInfo
-  wallet: Key
-  onClick: (params: { address: string; name: string; chainName: string }) => void
-}
+  chainInfo: ChainInfo;
+  wallet: Key;
+  onClick: (params: { address: string; name: string; chainName: string }) => void;
+};
 
 const WalletCard = ({ wallet, onClick, chainInfo }: WalletCardProps) => {
-  const chains = useGetChains()
+  const chains = useGetChains();
 
   const walletAddress = chainInfo?.evmOnlyChain
     ? pubKeyToEvmAddressToShow(wallet.pubKeys?.[chainInfo?.key], true)
-    : wallet.addresses[chainInfo?.key]
+    : wallet.addresses[chainInfo?.key];
 
   const ledgerEnabledEvmChainsKeys = useMemo(() => {
-    return getLedgerEnabledEvmChainsKey(Object.values(chains))
-  }, [chains])
+    return getLedgerEnabledEvmChainsKey(Object.values(chains));
+  }, [chains]);
 
   const ledgerApp = useMemo(() => {
-    return ledgerEnabledEvmChainsKeys.includes(chainInfo?.key) ? 'EVM' : 'Cosmos'
-  }, [chainInfo?.key, ledgerEnabledEvmChainsKeys])
+    return ledgerEnabledEvmChainsKeys.includes(chainInfo?.key) ? 'EVM' : 'Cosmos';
+  }, [chainInfo?.key, ledgerEnabledEvmChainsKeys]);
 
   const addressText = useMemo(() => {
     if (
       wallet.walletType === WALLETTYPE.LEDGER &&
       !isLedgerEnabled(chainInfo.key, chainInfo.bip44.coinType, Object.values(chains))
     ) {
-      return `Ledger not supported on ${chainInfo.chainName}`
+      return `Ledger not supported on ${chainInfo.chainName}`;
     }
 
     if (
@@ -49,18 +49,17 @@ const WalletCard = ({ wallet, onClick, chainInfo }: WalletCardProps) => {
       isLedgerEnabled(chainInfo.key, chainInfo.bip44.coinType, Object.values(chains)) &&
       !wallet.addresses[chainInfo.key]
     ) {
-      return `Please import ${ledgerApp} wallet`
+      return `Please import ${ledgerApp} wallet`;
     }
 
     const walletLabel =
       wallet.walletType === WALLETTYPE.LEDGER
         ? ` · /0'/0/${wallet.addressIndex}`
-        : wallet.walletType === WALLETTYPE.PRIVATE_KEY ||
-          wallet.walletType === WALLETTYPE.SEED_PHRASE_IMPORTED
+        : wallet.walletType === WALLETTYPE.PRIVATE_KEY || wallet.walletType === WALLETTYPE.SEED_PHRASE_IMPORTED
         ? ` · Imported`
-        : ''
+        : '';
 
-    return `${sliceAddress(walletAddress)}${walletLabel}`
+    return `${sliceAddress(walletAddress)}${walletLabel}`;
   }, [
     wallet.walletType,
     wallet.addresses,
@@ -71,7 +70,7 @@ const WalletCard = ({ wallet, onClick, chainInfo }: WalletCardProps) => {
     chains,
     walletAddress,
     ledgerApp,
-  ])
+  ]);
 
   return (
     <button
@@ -84,14 +83,14 @@ const WalletCard = ({ wallet, onClick, chainInfo }: WalletCardProps) => {
       )}
       disabled={!walletAddress}
       onClick={() => {
-        const name = `${
-          wallet.name.length > 12 ? `${wallet.name.slice(0, 12)}...` : wallet.name
-        } - ${capitalize(chainInfo.chainName === 'seiTestnet2' ? 'sei' : chainInfo.chainName)}`
+        const name = `${wallet.name.length > 12 ? `${wallet.name.slice(0, 12)}...` : wallet.name} - ${capitalize(
+          chainInfo.chainName === 'seiTestnet2' ? 'sei' : chainInfo.chainName,
+        )}`;
         onClick({
           address: walletAddress,
           chainName: chainInfo.chainName,
           name,
-        })
+        });
       }}
     >
       <img
@@ -109,27 +108,24 @@ const WalletCard = ({ wallet, onClick, chainInfo }: WalletCardProps) => {
         <span className='text-gray-600 dark:text-gray-400 text-xs'>{addressText}</span>
       </div>
     </button>
-  )
-}
+  );
+};
 
 type MyEvmWalletAddressesProps = {
-  chainInfo: ChainInfo
-  setSelectedAddress: (address: SelectedAddress) => void
-}
+  chainInfo: ChainInfo;
+  setSelectedAddress: (address: SelectedAddress) => void;
+};
 
-export const MyEvmWalletAddresses = ({
-  chainInfo,
-  setSelectedAddress,
-}: MyEvmWalletAddressesProps) => {
-  const wallets = Wallet.useWallets()
-  const { activeWallet } = useActiveWallet()
-  const walletList = Object.values(wallets || {})
+export const MyEvmWalletAddresses = ({ chainInfo, setSelectedAddress }: MyEvmWalletAddressesProps) => {
+  const wallets = Wallet.useWallets();
+  const { activeWallet } = useActiveWallet();
+  const walletList = Object.values(wallets || {});
 
   return (
     <div className='flex flex-col gap-3'>
       {walletList.map((wallet) => {
         if (activeWallet?.id === wallet.id) {
-          return null
+          return null;
         }
 
         return (
@@ -138,7 +134,7 @@ export const MyEvmWalletAddresses = ({
             chainInfo={chainInfo}
             wallet={wallet}
             onClick={({ address, name, chainName }) => {
-              const img = wallet?.avatar ?? Images.Misc.getWalletIconAtIndex(wallet.colorIndex)
+              const img = wallet?.avatar ?? Images.Misc.getWalletIconAtIndex(wallet.colorIndex);
 
               setSelectedAddress({
                 address,
@@ -148,11 +144,11 @@ export const MyEvmWalletAddresses = ({
                 chainIcon: img,
                 emoji: undefined,
                 selectionType: 'saved',
-              })
+              });
             }}
           />
-        )
+        );
       })}
     </div>
-  )
-}
+  );
+};

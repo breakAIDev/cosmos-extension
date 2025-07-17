@@ -1,12 +1,12 @@
-import React from 'react'
-import { cn } from 'utils/cn'
+import React from 'react';
+import { cn } from 'utils/cn';
 
-import { RaffleVisibilityStatus } from './alpha-timeline/use-raffle-status-map'
+import { RaffleVisibilityStatus } from './alpha-timeline/use-raffle-status-map';
 
 const Tag = (
   props: React.PropsWithChildren<{
-    onClick?: () => void
-    className?: string
+    onClick?: () => void;
+    className?: string;
   }>,
 ) => {
   return (
@@ -16,15 +16,15 @@ const Tag = (
         props.className,
       )}
       onClick={(e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        props.onClick?.()
+        e.preventDefault();
+        e.stopPropagation();
+        props.onClick?.();
       }}
     >
       {props.children}
     </span>
-  )
-}
+  );
+};
 
 export default function Tags({
   isLive,
@@ -36,14 +36,14 @@ export default function Tags({
   handleCategoryClick,
   handleLiveClick,
 }: {
-  isLive?: boolean
-  visibilityStatus?: RaffleVisibilityStatus
-  ecosystemFilter: string[]
-  categoryFilter: string[]
-  className?: string
-  handleEcosystemClick?: (ecosystem: string) => void
-  handleCategoryClick?: (category: string) => void
-  handleLiveClick?: () => void
+  isLive?: boolean;
+  visibilityStatus?: RaffleVisibilityStatus;
+  ecosystemFilter: string[];
+  categoryFilter: string[];
+  className?: string;
+  handleEcosystemClick?: (ecosystem: string) => void;
+  handleCategoryClick?: (category: string) => void;
+  handleLiveClick?: () => void;
 }) {
   return (
     <div className={cn('flex items-center justify-between w-full gap-2', className)}>
@@ -85,5 +85,5 @@ export default function Tags({
         </Tag>
       )}
     </div>
-  )
+  );
 }

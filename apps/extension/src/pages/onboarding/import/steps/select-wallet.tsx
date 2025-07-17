@@ -1,10 +1,10 @@
-import { KeyChain } from '@leapwallet/leap-keychain'
-import { Button } from 'components/ui/button'
-import WalletInfoCard, { SelectWalletsLabel } from 'components/wallet-info-card'
-import { OnboardingWrapper } from 'pages/onboarding/wrapper'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { KeyChain } from '@leapwallet/leap-keychain';
+import { Button } from 'components/ui/button';
+import WalletInfoCard, { SelectWalletsLabel } from 'components/wallet-info-card';
+import { OnboardingWrapper } from 'pages/onboarding/wrapper';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { useImportWalletContext } from '../import-wallet-context'
+import { useImportWalletContext } from '../import-wallet-context';
 
 export const SelectWallet = () => {
   const {
@@ -14,51 +14,51 @@ export const SelectWallet = () => {
     walletAccounts = [],
     prevStep,
     currentStep,
-  } = useImportWalletContext()
-  const [isLoading, setIsLoading] = useState(false)
-  const [existingAddresses, setExistingAddresses] = useState<string[]>([])
+  } = useImportWalletContext();
+  const [isLoading, setIsLoading] = useState(false);
+  const [existingAddresses, setExistingAddresses] = useState<string[]>([]);
 
   useEffect(() => {
     const fn = async () => {
-      const allWallets = await KeyChain.getAllWallets()
-      const addresses = []
+      const allWallets = await KeyChain.getAllWallets();
+      const addresses = [];
 
       for (const wallet of Object.values(allWallets ?? {})) {
-        const address = wallet.addresses.cosmos
-        if ((wallet as any)?.watchWallet) continue
-        addresses.push(address)
+        const address = wallet.addresses.cosmos;
+        if ((wallet as any)?.watchWallet) continue;
+        addresses.push(address);
       }
 
-      setExistingAddresses(addresses)
-    }
-    fn()
-  }, [])
+      setExistingAddresses(addresses);
+    };
+    fn();
+  }, []);
 
   const handleProceedClick = () => {
-    setIsLoading(true)
-    moveToNextStep()
-  }
+    setIsLoading(true);
+    moveToNextStep();
+  };
 
   const selectedCount = useMemo(() => {
-    return Object.values(selectedIds).filter((val) => val).length
-  }, [selectedIds])
+    return Object.values(selectedIds).filter((val) => val).length;
+  }, [selectedIds]);
 
   const handleSelectChange = useCallback(
     (id: number, flag: boolean) => {
-      setSelectedIds({ ...selectedIds, [id]: flag })
+      setSelectedIds({ ...selectedIds, [id]: flag });
     },
     [selectedIds, setSelectedIds],
-  )
+  );
 
   const filteredWalletAccounts = useMemo(() => {
     return walletAccounts.filter(({ address }) => {
-      const isExistingAddress = !!address && existingAddresses.indexOf(address) > -1
+      const isExistingAddress = !!address && existingAddresses.indexOf(address) > -1;
       if (isExistingAddress) {
-        return false
+        return false;
       }
-      return true
-    })
-  }, [walletAccounts, existingAddresses])
+      return true;
+    });
+  }, [walletAccounts, existingAddresses]);
 
   return (
     <OnboardingWrapper
@@ -77,22 +77,14 @@ export const SelectWallet = () => {
                 flag
                   ? Object.fromEntries(filteredWalletAccounts.map(({ index: id }) => [id, true]))
                   : Object.fromEntries(filteredWalletAccounts.map(({ index: id }) => [id, false])),
-              )
+              );
             }}
           />
 
           {walletAccounts.map(
-            ({
-              address,
-              index: id,
-              evmAddress,
-              bitcoinAddress,
-              moveAddress,
-              solanaAddress,
-              suiAddress,
-            }) => {
-              const isExistingAddress = !!address && existingAddresses.indexOf(address) > -1
-              const isChosen = selectedIds[id]
+            ({ address, index: id, evmAddress, bitcoinAddress, moveAddress, solanaAddress, suiAddress }) => {
+              const isExistingAddress = !!address && existingAddresses.indexOf(address) > -1;
+              const isChosen = selectedIds[id];
 
               return (
                 <WalletInfoCard
@@ -110,7 +102,7 @@ export const SelectWallet = () => {
                   isExistingAddress={isExistingAddress}
                   onSelectChange={handleSelectChange}
                 />
-              )
+              );
             },
           )}
         </div>
@@ -125,5 +117,5 @@ export const SelectWallet = () => {
         Proceed
       </Button>
     </OnboardingWrapper>
-  )
-}
+  );
+};

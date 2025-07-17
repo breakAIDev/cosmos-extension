@@ -1,10 +1,10 @@
-import { CardDivider, NavCard } from '@leapwallet/leap-ui'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import React from 'react'
-import { isCompassWallet } from 'utils/isCompassWallet'
+import { CardDivider, NavCard } from '@leapwallet/leap-ui';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import React from 'react';
+import { isCompassWallet } from 'utils/isCompassWallet';
 
-import { SideNavSection, SideNavSectionHeader } from '.'
+import { SideNavSection, SideNavSectionHeader } from '.';
 
 const resources = [
   // {
@@ -16,9 +16,7 @@ const resources = [
     title: 'Support',
     titleIcon: Images.Nav.Support,
     onclick: () => {
-      window.open(
-        'https://leapwallet.notion.site/Leap-Wallet-Help-Center-Cosmos-ba1da3c05d3341eaa44a1850ed3260ee',
-      )
+      window.open('https://leapwallet.notion.site/Leap-Wallet-Help-Center-Cosmos-ba1da3c05d3341eaa44a1850ed3260ee');
     },
     enabled: !isCompassWallet(),
   },
@@ -26,15 +24,11 @@ const resources = [
     title: 'Twitter',
     titleIcon: Images.Nav.Twitter,
     onclick: () => {
-      window.open(
-        isCompassWallet()
-          ? 'https://twitter.com/compass_wallet'
-          : 'https://twitter.com/leap_wallet',
-      )
+      window.open(isCompassWallet() ? 'https://twitter.com/compass_wallet' : 'https://twitter.com/leap_wallet');
     },
     enabled: true,
   },
-]
+];
 
 export const Resources = observer(() => {
   return (
@@ -48,8 +42,8 @@ export const Resources = observer(() => {
               {index !== 0 && <CardDivider />}
               <NavCard property={item.title} imgSrc={item.titleIcon} onClick={item.onclick} />
             </React.Fragment>
-          )
+          );
         })}
     </SideNavSection>
-  )
-})
+  );
+});

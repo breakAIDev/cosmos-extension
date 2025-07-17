@@ -1,43 +1,43 @@
-import { useDisabledNFTsCollections } from '@leapwallet/cosmos-wallet-hooks'
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { NftStore } from '@leapwallet/cosmos-wallet-store'
-import { Card } from '@leapwallet/leap-ui'
-import BottomModal from 'components/bottom-modal'
-import { CustomCardDivider } from 'components/custom-card-divider'
-import { useChainInfos } from 'hooks/useChainInfos'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import { Images } from 'images'
-import { observer } from 'mobx-react-lite'
-import React from 'react'
-import { hiddenNftStore } from 'stores/manage-nft-store'
-import { getChainName } from 'utils/getChainName'
-import { imgOnError } from 'utils/imgOnError'
+import { useDisabledNFTsCollections } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { NftStore } from '@leapwallet/cosmos-wallet-store';
+import { Card } from '@leapwallet/leap-ui';
+import BottomModal from 'components/bottom-modal';
+import { CustomCardDivider } from 'components/custom-card-divider';
+import { useChainInfos } from 'hooks/useChainInfos';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { Images } from 'images';
+import { observer } from 'mobx-react-lite';
+import React from 'react';
+import { hiddenNftStore } from 'stores/manage-nft-store';
+import { getChainName } from 'utils/getChainName';
+import { imgOnError } from 'utils/imgOnError';
 
 type SelectSortByProps = {
-  readonly isVisible: boolean
-  readonly onClose: VoidFunction
-  readonly selectedSortsBy: SupportedChain[]
-  readonly setSelectedSortsBy: React.Dispatch<React.SetStateAction<SupportedChain[]>>
-  readonly nftStore: NftStore
-}
+  readonly isVisible: boolean;
+  readonly onClose: VoidFunction;
+  readonly selectedSortsBy: SupportedChain[];
+  readonly setSelectedSortsBy: React.Dispatch<React.SetStateAction<SupportedChain[]>>;
+  readonly nftStore: NftStore;
+};
 
 export const SelectSortBy = observer(
   ({ isVisible, onClose, selectedSortsBy, setSelectedSortsBy, nftStore }: SelectSortByProps) => {
-    const disabledNFTsCollections = useDisabledNFTsCollections()
+    const disabledNFTsCollections = useDisabledNFTsCollections();
     const sortedCollectionChains = nftStore.getSortedCollectionChains(
       disabledNFTsCollections,
       hiddenNftStore.hiddenNfts,
-    )
+    );
 
-    const defaultTokenLogo = useDefaultTokenLogo()
-    const chainInfos = useChainInfos()
+    const defaultTokenLogo = useDefaultTokenLogo();
+    const chainInfos = useChainInfos();
 
     return (
       <BottomModal isOpen={isVisible} onClose={onClose} title={'Filter by Chain'}>
         <div className='flex flex-col gap-y-1'>
           <div className='dark:bg-gray-950 overflow-clip bg-white-100 rounded-2xl max-h-[300px] overflow-y-scroll'>
             {sortedCollectionChains.map((chain, index) => {
-              const chainInfo = chainInfos[chain as SupportedChain]
+              const chainInfo = chainInfos[chain as SupportedChain];
 
               return (
                 <React.Fragment key={`${chain}-${index}`}>
@@ -63,11 +63,11 @@ export const SelectSortBy = observer(
                     }
                   />
                 </React.Fragment>
-              )
+              );
             })}
           </div>
         </div>
       </BottomModal>
-    )
+    );
   },
-)
+);

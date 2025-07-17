@@ -1,13 +1,13 @@
-import { Warning, X } from '@phosphor-icons/react'
-import React, { useState } from 'react'
+import { Warning, X } from '@phosphor-icons/react';
+import React, { useState } from 'react';
 
-import { AlertStrip } from './AlertStrip'
+import { AlertStrip } from './AlertStrip';
 
 export const ApiStatusWarningStrip = () => {
-  const [show, setShow] = useState(true)
+  const [show, setShow] = useState(true);
 
   if (!show) {
-    return null
+    return null;
   }
 
   return (
@@ -28,5 +28,5 @@ export const ApiStatusWarningStrip = () => {
         </span>
       }
     />
-  )
-}
+  );
+};

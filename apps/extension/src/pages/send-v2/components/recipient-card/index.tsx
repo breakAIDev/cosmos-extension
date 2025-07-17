@@ -6,7 +6,7 @@ import {
   useChainsStore,
   useFeatureFlags,
   WALLETTYPE,
-} from '@leapwallet/cosmos-wallet-hooks'
+} from '@leapwallet/cosmos-wallet-hooks';
 import {
   BTC_CHAINS,
   ChainInfo,
@@ -17,86 +17,75 @@ import {
   isSuiChain,
   isValidBtcAddress,
   SupportedChain,
-} from '@leapwallet/cosmos-wallet-sdk'
+} from '@leapwallet/cosmos-wallet-sdk';
 import {
   ChainFeatureFlagsStore,
   ChainTagsStore,
   RootCW20DenomsStore,
   RootERC20DenomsStore,
-} from '@leapwallet/cosmos-wallet-store'
+} from '@leapwallet/cosmos-wallet-store';
 import {
   Asset,
   SkipDestinationChain,
   useSkipDestinationChains,
   useSkipSupportedChains,
-} from '@leapwallet/elements-hooks'
-import { ThemeName, useTheme } from '@leapwallet/leap-ui'
-import {
-  AddressBook as AddressBookIcon,
-  CaretDown,
-  UserPlus,
-  Wallet as WalletIcon,
-} from '@phosphor-icons/react'
-import { bech32 } from 'bech32'
-import { ActionInputWithPreview } from 'components/action-input-with-preview'
-import { LoaderAnimation } from 'components/loader/Loader'
-import Text from 'components/text'
-import { motion } from 'framer-motion'
-import { useContactsSearch } from 'hooks/useContacts'
-import useQuery from 'hooks/useQuery'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import { Images } from 'images'
-import * as sol from 'micro-sol-signer'
-import { observer } from 'mobx-react-lite'
-import { useSendContext } from 'pages/send-v2/context'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { chainInfoStore } from 'stores/chain-infos-store'
-import { manageChainsStore } from 'stores/manage-chains-store'
-import { Colors } from 'theme/colors'
-import { AddressBook } from 'utils/addressbook'
-import { UserClipboard } from 'utils/clipboard'
-import { isLedgerEnabled } from 'utils/isLedgerEnabled'
-import { sliceAddress } from 'utils/strings'
+} from '@leapwallet/elements-hooks';
+import { ThemeName, useTheme } from '@leapwallet/leap-ui';
+import { AddressBook as AddressBookIcon, CaretDown, UserPlus, Wallet as WalletIcon } from '@phosphor-icons/react';
+import { bech32 } from 'bech32';
+import { ActionInputWithPreview } from 'components/action-input-with-preview';
+import { LoaderAnimation } from 'components/loader/Loader';
+import Text from 'components/text';
+import { motion } from 'framer-motion';
+import { useContactsSearch } from 'hooks/useContacts';
+import useQuery from 'hooks/useQuery';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { Images } from 'images';
+import * as sol from 'micro-sol-signer';
+import { observer } from 'mobx-react-lite';
+import { useSendContext } from 'pages/send-v2/context';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { chainInfoStore } from 'stores/chain-infos-store';
+import { manageChainsStore } from 'stores/manage-chains-store';
+import { Colors } from 'theme/colors';
+import { AddressBook } from 'utils/addressbook';
+import { UserClipboard } from 'utils/clipboard';
+import { isLedgerEnabled } from 'utils/isLedgerEnabled';
+import { sliceAddress } from 'utils/strings';
 
-import { useCheckAddressError } from '../../hooks/useCheckAddressError'
-import { useCheckIbcTransfer } from '../../hooks/useCheckIbcTransfer'
-import { useFillAddressWarning } from '../../hooks/useFillAddressWarning'
-import { NameServiceMatchList } from './match-lists'
-import SaveAddressSheet from './save-address-sheet'
-import { SecondaryActionButton } from './secondary-action-button'
-import { DestinationType, SelectDestinationSheet } from './select-destination-sheet'
-import { SelectedAddressPreview } from './selected-address-preview'
-import { SelectInitiaChainSheet } from './SelectInitiaChainSheet'
+import { useCheckAddressError } from '../../hooks/useCheckAddressError';
+import { useCheckIbcTransfer } from '../../hooks/useCheckIbcTransfer';
+import { useFillAddressWarning } from '../../hooks/useFillAddressWarning';
+import { NameServiceMatchList } from './match-lists';
+import SaveAddressSheet from './save-address-sheet';
+import { SecondaryActionButton } from './secondary-action-button';
+import { DestinationType, SelectDestinationSheet } from './select-destination-sheet';
+import { SelectedAddressPreview } from './selected-address-preview';
+import { SelectInitiaChainSheet } from './SelectInitiaChainSheet';
 
 type RecipientCardProps = {
-  themeColor: string
-  rootERC20DenomsStore: RootERC20DenomsStore
-  rootCW20DenomsStore: RootCW20DenomsStore
-  chainTagsStore: ChainTagsStore
-  chainFeatureFlagsStore: ChainFeatureFlagsStore
-}
+  themeColor: string;
+  rootERC20DenomsStore: RootERC20DenomsStore;
+  rootCW20DenomsStore: RootCW20DenomsStore;
+  chainTagsStore: ChainTagsStore;
+  chainFeatureFlagsStore: ChainFeatureFlagsStore;
+};
 
-const nameServiceMatcher = /^[a-zA-Z0-9_-]+\.[a-z]+$/
+const nameServiceMatcher = /^[a-zA-Z0-9_-]+\.[a-z]+$/;
 
 export const RecipientCard = observer(
-  ({
-    rootERC20DenomsStore,
-    rootCW20DenomsStore,
-    chainTagsStore,
-    chainFeatureFlagsStore,
-  }: RecipientCardProps) => {
+  ({ rootERC20DenomsStore, rootCW20DenomsStore, chainTagsStore, chainFeatureFlagsStore }: RecipientCardProps) => {
     /**
      * Local States
      */
-    const recipient = useQuery().get('recipient') ?? undefined
-    const [isAddContactSheetVisible, setIsAddContactSheetVisible] = useState<boolean>(false)
-    const [recipientInputValue, setRecipientInputValue] = useState<string>(recipient ?? '')
+    const recipient = useQuery().get('recipient') ?? undefined;
+    const [isAddContactSheetVisible, setIsAddContactSheetVisible] = useState<boolean>(false);
+    const [recipientInputValue, setRecipientInputValue] = useState<string>(recipient ?? '');
 
-    const [isSelectInitiaChainSheetVisible, setIsSelectInitiaChainSheetVisible] = useState(false)
-    const [selectedInitiaChain, setSelectedInitiaChain] = useState<SupportedChain | null>(null)
+    const [isSelectInitiaChainSheetVisible, setIsSelectInitiaChainSheetVisible] = useState(false);
+    const [selectedInitiaChain, setSelectedInitiaChain] = useState<SupportedChain | null>(null);
 
-    const [isDestinationSheetVisible, setIsDestinationSheetVisible] =
-      useState<DestinationType | null>(null)
+    const [isDestinationSheetVisible, setIsDestinationSheetVisible] = useState<DestinationType | null>(null);
 
     /**
      * Global Hooks
@@ -126,52 +115,50 @@ export const RecipientCard = observer(
       associatedSeiAddress,
       setAssociated0xAddress,
       setHasToUsePointerLogic,
-    } = useSendContext()
+    } = useSendContext();
 
-    const { chains } = useChainsStore()
-    const { theme } = useTheme()
-    const currentWalletAddress = useAddress()
-    const addressPrefixes = useAddressPrefixes()
+    const { chains } = useChainsStore();
+    const { theme } = useTheme();
+    const currentWalletAddress = useAddress();
+    const addressPrefixes = useAddressPrefixes();
 
-    const defaultTokenLogo = useDefaultTokenLogo()
-    const activeWallet = useActiveWallet()
+    const defaultTokenLogo = useDefaultTokenLogo();
+    const activeWallet = useActiveWallet();
 
-    const { data: elementsChains } = useSkipSupportedChains({ chainTypes: ['cosmos'] })
-    const { data: featureFlags } = useFeatureFlags()
+    const { data: elementsChains } = useSkipSupportedChains({ chainTypes: ['cosmos'] });
+    const { data: featureFlags } = useFeatureFlags();
 
     /**
      * Local Variables
      */
 
-    const allERC20Denoms = rootERC20DenomsStore.allERC20Denoms
-    const allCW20Denoms = rootCW20DenomsStore.allCW20Denoms
+    const allERC20Denoms = rootERC20DenomsStore.allERC20Denoms;
+    const allCW20Denoms = rootCW20DenomsStore.allCW20Denoms;
 
-    const activeChainInfo = chains[sendActiveChain]
-    const isDark = theme === ThemeName.DARK
-    const ownWalletMatch = selectedAddress?.selectionType === 'currentWallet'
-    const isBtcTx = BTC_CHAINS.includes(sendActiveChain)
-    const isAptosTx = isAptosChain(sendActiveChain)
-    const isSolanaTx = isSolanaChain(sendActiveChain)
-    const isSuiTx = isSuiChain(sendActiveChain)
+    const activeChainInfo = chains[sendActiveChain];
+    const isDark = theme === ThemeName.DARK;
+    const ownWalletMatch = selectedAddress?.selectionType === 'currentWallet';
+    const isBtcTx = BTC_CHAINS.includes(sendActiveChain);
+    const isAptosTx = isAptosChain(sendActiveChain);
+    const isSolanaTx = isSolanaChain(sendActiveChain);
+    const isSuiTx = isSuiChain(sendActiveChain);
     const asset: Asset = {
       denom: selectedToken?.ibcDenom || selectedToken?.coinMinimalDenom || '',
       symbol: selectedToken?.symbol || '',
       logoUri: selectedToken?.img || '',
       decimals: selectedToken?.coinDecimals || 0,
       originDenom: selectedToken?.coinMinimalDenom || '',
-      denomTracePath: selectedToken?.ibcChainInfo
-        ? `transfer/${selectedToken.ibcChainInfo?.channelId}`
-        : '',
-    }
+      denomTracePath: selectedToken?.ibcChainInfo ? `transfer/${selectedToken.ibcChainInfo?.channelId}` : '',
+    };
 
-    const sourceChain = elementsChains?.find((chain) => chain.chainId === activeChainInfo.chainId)
+    const sourceChain = elementsChains?.find((chain) => chain.chainId === activeChainInfo.chainId);
     const { data: skipSupportedDestinationChains } =
       featureFlags?.ibc?.extension !== 'disabled'
         ? useSkipDestinationChains(asset, sourceChain, sendSelectedNetwork === 'mainnet')
-        : { data: null }
+        : { data: null };
 
     const isSavedContactSelected =
-      selectedAddress?.address === recipientInputValue && selectedAddress?.selectionType === 'saved'
+      selectedAddress?.address === recipientInputValue && selectedAddress?.selectionType === 'saved';
 
     /**
      * Memoized Values
@@ -179,23 +166,23 @@ export const RecipientCard = observer(
 
     const recipientValueToShow = useMemo(() => {
       if (ethAddress) {
-        return ethAddress
+        return ethAddress;
       }
 
-      return recipientInputValue
-    }, [ethAddress, recipientInputValue])
+      return recipientInputValue;
+    }, [ethAddress, recipientInputValue]);
 
-    const contactsToShow = useContactsSearch(recipientValueToShow)
-    const existingContactMatch = AddressBook.useGetContact(recipientValueToShow)
+    const contactsToShow = useContactsSearch(recipientValueToShow);
+    const existingContactMatch = AddressBook.useGetContact(recipientValueToShow);
 
-    const action = recipientInputValue.length > 0 ? 'clear' : 'paste'
+    const action = recipientInputValue.length > 0 ? 'clear' : 'paste';
 
     const inputButtonIcon = useMemo(() => {
       if (recipientInputValue.length > 0) {
-        return Images.Misc.CrossFilled
+        return Images.Misc.CrossFilled;
       }
-      return undefined
-    }, [recipientInputValue])
+      return undefined;
+    }, [recipientInputValue]);
 
     const showNameServiceResults = useMemo(() => {
       const allowedTopLevelDomains = [
@@ -205,12 +192,12 @@ export const RecipientCard = observer(
         ...['sei', 'pp'], // for degeNS
         'core', // for bdd
         'i', //for celestials.id
-      ]
+      ];
       // ex: leap.arch --> name = leap, domain = arch
-      const [, domain] = recipientInputValue.split('.')
-      const isValidDomain = allowedTopLevelDomains.indexOf(domain) !== -1
-      return nameServiceMatcher.test(recipientInputValue) && isValidDomain
-    }, [recipientInputValue, addressPrefixes])
+      const [, domain] = recipientInputValue.split('.');
+      const isValidDomain = allowedTopLevelDomains.indexOf(domain) !== -1;
+      return nameServiceMatcher.test(recipientInputValue) && isValidDomain;
+    }, [recipientInputValue, addressPrefixes]);
 
     const preview = useMemo(() => {
       if (selectedAddress) {
@@ -222,28 +209,28 @@ export const RecipientCard = observer(
               selectedAddress.ethAddress === existingContactMatch?.ethAddress
             }
             onDelete={() => {
-              setSelectedAddress(null)
-              setRecipientInputValue('')
-              setEthAddress('')
+              setSelectedAddress(null);
+              setRecipientInputValue('');
+              setEthAddress('');
             }}
           />
-        )
+        );
       }
 
       if (recipientValueToShow.length > 0) {
         try {
-          bech32.decode(recipientValueToShow)
+          bech32.decode(recipientValueToShow);
           return (
             <Text size='md' className='text-gray-800 dark:text-gray-200'>
               {sliceAddress(recipientValueToShow)}
             </Text>
-          )
+          );
         } catch (err) {
-          return undefined
+          return undefined;
         }
       }
 
-      return undefined
+      return undefined;
     }, [
       existingContactMatch?.address,
       existingContactMatch?.ethAddress,
@@ -251,91 +238,81 @@ export const RecipientCard = observer(
       selectedAddress,
       setEthAddress,
       setSelectedAddress,
-    ])
+    ]);
 
     const skipSupportedDestinationChainsIDs: string[] = useMemo(() => {
       return (
-        (
-          skipSupportedDestinationChains as Array<
-            Extract<SkipDestinationChain, { chainType: 'cosmos' }>
-          >
-        )
+        (skipSupportedDestinationChains as Array<Extract<SkipDestinationChain, { chainType: 'cosmos' }>>)
           ?.filter((chain) => {
             if (chain.chainType !== 'cosmos') {
-              return false
+              return false;
             }
             if (
               (activeWallet?.walletType === WALLETTYPE.LEDGER &&
-                !isLedgerEnabled(
-                  chain.key as SupportedChain,
-                  chain.coinType,
-                  Object.values(chains),
-                )) ||
+                !isLedgerEnabled(chain.key as SupportedChain, chain.coinType, Object.values(chains))) ||
               !activeWallet?.addresses[chain.key as SupportedChain]
             ) {
-              return false
+              return false;
             } else {
-              return true
+              return true;
             }
           })
           .map((chain) => {
-            return chain.chainId
+            return chain.chainId;
           }) || []
-      )
-    }, [skipSupportedDestinationChains, activeWallet?.walletType, activeWallet?.addresses, chains])
+      );
+    }, [skipSupportedDestinationChains, activeWallet?.walletType, activeWallet?.addresses, chains]);
 
     const destChainInfo = useMemo(() => {
       if (!selectedAddress?.address) {
-        return null
+        return null;
       }
 
-      const destChainAddrPrefix = getBlockChainFromAddress(selectedAddress.address)
+      const destChainAddrPrefix = getBlockChainFromAddress(selectedAddress.address);
       if (!destChainAddrPrefix) {
-        return null
+        return null;
       }
 
-      const destinationChainKey = addressPrefixes[destChainAddrPrefix] as SupportedChain | undefined
+      const destinationChainKey = addressPrefixes[destChainAddrPrefix] as SupportedChain | undefined;
       if (!destinationChainKey) {
-        return null
+        return null;
       }
 
       if (destinationChainKey === 'initiaEvm') {
         if (selectedInitiaChain) {
-          return chains[selectedInitiaChain]
+          return chains[selectedInitiaChain];
         }
       }
 
       // we are sure that the key is there in the chains object due to previous checks
-      return chains[destinationChainKey]
-    }, [addressPrefixes, chains, selectedAddress?.address, selectedInitiaChain])
+      return chains[destinationChainKey];
+    }, [addressPrefixes, chains, selectedAddress?.address, selectedInitiaChain]);
 
-    const chainFeatureFlags = chainFeatureFlagsStore.chainFeatureFlagsData
+    const chainFeatureFlags = chainFeatureFlagsStore.chainFeatureFlagsData;
 
     const minitiaChains = useMemo(() => {
-      const _minitiaChains: string[] = []
+      const _minitiaChains: string[] = [];
       Object.keys(chainFeatureFlags)
         .filter((chain) => chainFeatureFlags[chain].chainType === 'minitia')
         .forEach((c) => {
           if (chains[c as SupportedChain]) {
-            _minitiaChains.push(c)
+            _minitiaChains.push(c);
           }
           const _chain = Object.values(chains).find((chainInfo) =>
-            sendSelectedNetwork === 'testnet'
-              ? chainInfo?.testnetChainId === c
-              : chainInfo?.chainId === c,
-          )
+            sendSelectedNetwork === 'testnet' ? chainInfo?.testnetChainId === c : chainInfo?.chainId === c,
+          );
           if (_chain) {
-            _minitiaChains.push(_chain.key)
+            _minitiaChains.push(_chain.key);
           }
-        })
-      return _minitiaChains
-    }, [chainFeatureFlags, chains, sendSelectedNetwork])
+        });
+      return _minitiaChains;
+    }, [chainFeatureFlags, chains, sendSelectedNetwork]);
 
     /**
      * --------
      */
 
-    const showContactsList = recipientInputValue.trim().length > 0 && contactsToShow.length > 0
+    const showContactsList = recipientInputValue.trim().length > 0 && contactsToShow.length > 0;
 
     const showAddToContacts =
       !showContactsList &&
@@ -345,14 +322,14 @@ export const RecipientCard = observer(
       recipientInputValue !== currentWalletAddress &&
       !ownWalletMatch &&
       !showNameServiceResults &&
-      !addressError?.includes('The entered address is invalid')
+      !addressError?.includes('The entered address is invalid');
 
     const showContactsButton =
       !isSavedContactSelected &&
       !showAddToContacts &&
       !existingContactMatch &&
       !selectedAddress &&
-      !showNameServiceResults
+      !showNameServiceResults;
 
     const showMyWalletButton =
       !isSavedContactSelected &&
@@ -360,9 +337,9 @@ export const RecipientCard = observer(
       !existingContactMatch &&
       !selectedAddress &&
       !showNameServiceResults &&
-      sendSelectedNetwork === 'mainnet'
+      sendSelectedNetwork === 'mainnet';
 
-    const showSecondaryActions = showContactsButton || showMyWalletButton || showAddToContacts
+    const showSecondaryActions = showContactsButton || showMyWalletButton || showAddToContacts;
 
     /**
      * Memoized Callbacks
@@ -371,27 +348,27 @@ export const RecipientCard = observer(
     const fillRecipientInputValue = useCallback(
       (value: string) => {
         if (chains[sendActiveChain]?.evmOnlyChain && value.toLowerCase().startsWith('0x')) {
-          setAddressError(undefined)
-          setEthAddress(value)
-          setRecipientInputValue(value)
+          setAddressError(undefined);
+          setEthAddress(value);
+          setRecipientInputValue(value);
         } else if (
           Number(activeChainInfo.bip44.coinType) === 60 &&
           value.toLowerCase().startsWith('0x') &&
           activeChainInfo.key !== 'injective'
         ) {
           try {
-            setAddressError(undefined)
-            const bech32Address = getBech32Address(activeChainInfo.addressPrefix, value)
-            setEthAddress(value)
-            setRecipientInputValue(bech32Address)
-            return
+            setAddressError(undefined);
+            const bech32Address = getBech32Address(activeChainInfo.addressPrefix, value);
+            setEthAddress(value);
+            setRecipientInputValue(bech32Address);
+            return;
           } catch (e) {
-            setAddressError('The entered address is invalid')
+            setAddressError('The entered address is invalid');
           }
         }
 
-        setEthAddress('')
-        setRecipientInputValue(value)
+        setEthAddress('');
+        setRecipientInputValue(value);
       },
       [
         activeChainInfo.addressPrefix,
@@ -402,61 +379,61 @@ export const RecipientCard = observer(
         setAddressError,
         setEthAddress,
       ],
-    )
+    );
 
     const handleOnChange = useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value.trim()
-        fillRecipientInputValue(value)
+        const value = e.target.value.trim();
+        fillRecipientInputValue(value);
       },
       [fillRecipientInputValue],
-    )
+    );
 
     const actionHandler = useCallback(
       (e: React.MouseEvent, _action: string) => {
         switch (_action) {
           case 'paste':
             UserClipboard.pasteText().then((text) => {
-              if (!text) return
-              setRecipientInputValue(text.trim())
-            })
-            break
+              if (!text) return;
+              setRecipientInputValue(text.trim());
+            });
+            break;
           case 'clear':
-            setEthAddress('')
-            setRecipientInputValue('')
-            setSelectedAddress(null)
-            setMemo('')
-            break
+            setEthAddress('');
+            setRecipientInputValue('');
+            setSelectedAddress(null);
+            setMemo('');
+            break;
           default:
-            break
+            break;
         }
       },
 
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [fillRecipientInputValue, setEthAddress, setMemo, setSelectedAddress],
-    )
+    );
 
     const handleContactSelect = useCallback(
       (s: SelectedAddress) => {
-        setSelectedAddress(s)
-        setEthAddress(s.ethAddress ?? '')
-        setRecipientInputValue(s.address ?? '')
+        setSelectedAddress(s);
+        setEthAddress(s.ethAddress ?? '');
+        setRecipientInputValue(s.address ?? '');
         if (isDestinationSheetVisible) {
-          setIsDestinationSheetVisible(null)
+          setIsDestinationSheetVisible(null);
         }
       },
       [isDestinationSheetVisible, setEthAddress, setSelectedAddress],
-    )
+    );
 
     const handleWalletSelect = useCallback(
       (s: SelectedAddress) => {
-        setAddressError(undefined)
-        setRecipientInputValue(s.address ?? '')
-        setSelectedAddress(s)
-        setIsDestinationSheetVisible(null)
+        setAddressError(undefined);
+        setRecipientInputValue(s.address ?? '');
+        setSelectedAddress(s);
+        setIsDestinationSheetVisible(null);
       },
       [setAddressError, setSelectedAddress],
-    )
+    );
 
     const handleAddContact = useCallback(() => {
       try {
@@ -464,22 +441,21 @@ export const RecipientCard = observer(
           isAptosTx ||
           isSolanaTx ||
           isSuiTx ||
-          (chains[sendActiveChain]?.evmOnlyChain &&
-            recipientInputValue.toLowerCase().startsWith('0x'))
+          (chains[sendActiveChain]?.evmOnlyChain && recipientInputValue.toLowerCase().startsWith('0x'))
         ) {
-          setIsAddContactSheetVisible(true)
-          return
+          setIsAddContactSheetVisible(true);
+          return;
         }
 
-        const prefix = getBlockChainFromAddress(recipientInputValue)
-        const chainName = addressPrefixes[prefix ?? '']
+        const prefix = getBlockChainFromAddress(recipientInputValue);
+        const chainName = addressPrefixes[prefix ?? ''];
         if (!chainName) {
-          setAddressError('Unsupported Chain')
-          return
+          setAddressError('Unsupported Chain');
+          return;
         }
-        setIsAddContactSheetVisible(true)
+        setIsAddContactSheetVisible(true);
       } catch (err) {
-        setAddressError('The entered address is invalid')
+        setAddressError('The entered address is invalid');
       }
     }, [
       addressPrefixes,
@@ -490,11 +466,11 @@ export const RecipientCard = observer(
       recipientInputValue,
       sendActiveChain,
       setAddressError,
-    ])
+    ]);
 
     const handleSelectInitiaClick = useCallback(() => {
-      setIsSelectInitiaChainSheetVisible(true)
-    }, [])
+      setIsSelectInitiaChainSheetVisible(true);
+    }, []);
 
     /**
      * Effect Hooks
@@ -511,7 +487,7 @@ export const RecipientCard = observer(
         </>
       ),
       setAddressWarning,
-    })
+    });
 
     useCheckAddressError({
       setAssociatedSeiAddress,
@@ -537,48 +513,48 @@ export const RecipientCard = observer(
       sendActiveChain,
       sendSelectedNetwork,
       setHasToUsePointerLogic,
-    })
+    });
 
     useEffect(() => {
       // Autofill of recipientInputValue if passed in information
       if (showNameServiceResults) {
-        setAddressError(undefined)
-        return
+        setAddressError(undefined);
+        return;
       }
       if (selectedAddress?.information?.autofill) {
-        setRecipientInputValue(selectedAddress?.address || '')
-        return
+        setRecipientInputValue(selectedAddress?.address || '');
+        return;
       }
-      const cleanInputValue = recipientInputValue?.trim()
+      const cleanInputValue = recipientInputValue?.trim();
 
       if (recipientInputValue === selectedAddress?.address) {
-        const isEvmChain = chains[sendActiveChain]?.evmOnlyChain
-        const isEvmAddress = cleanInputValue?.toLowerCase()?.startsWith('0x')
-        const isSameChain = sendActiveChain === selectedAddress?.chainName
+        const isEvmChain = chains[sendActiveChain]?.evmOnlyChain;
+        const isEvmAddress = cleanInputValue?.toLowerCase()?.startsWith('0x');
+        const isSameChain = sendActiveChain === selectedAddress?.chainName;
 
         if (isEvmChain && isEvmAddress) {
           if (isSameChain || selectedAddress?.selectionType === 'saved') {
-            return
+            return;
           }
         } else {
-          if (!selectedInitiaChain) return
-          if (selectedInitiaChain === selectedAddress?.chainName) return
+          if (!selectedInitiaChain) return;
+          if (selectedInitiaChain === selectedAddress?.chainName) return;
         }
       }
 
       if (selectedAddress && cleanInputValue !== selectedAddress.address) {
-        setSelectedAddress(null)
-        return
+        setSelectedAddress(null);
+        return;
       }
 
       try {
         if (cleanInputValue.length === 0) {
-          setAddressError(undefined)
-          return
+          setAddressError(undefined);
+          return;
         }
 
         if (isSuiTx) {
-          const img = activeChainInfo.chainSymbolImageUrl ?? ''
+          const img = activeChainInfo.chainSymbolImageUrl ?? '';
 
           setSelectedAddress({
             ethAddress: cleanInputValue,
@@ -589,16 +565,13 @@ export const RecipientCard = observer(
             chainIcon: img ?? '',
             chainName: activeChainInfo.key,
             selectionType: 'notSaved',
-          })
+          });
 
-          return
+          return;
         }
 
-        if (
-          isAptosTx ||
-          (chains[sendActiveChain]?.evmOnlyChain && cleanInputValue.toLowerCase().startsWith('0x'))
-        ) {
-          const img = activeChainInfo.chainSymbolImageUrl ?? ''
+        if (isAptosTx || (chains[sendActiveChain]?.evmOnlyChain && cleanInputValue.toLowerCase().startsWith('0x'))) {
+          const img = activeChainInfo.chainSymbolImageUrl ?? '';
 
           setSelectedAddress({
             ethAddress: cleanInputValue,
@@ -609,14 +582,14 @@ export const RecipientCard = observer(
             chainIcon: img ?? '',
             chainName: activeChainInfo.key,
             selectionType: 'notSaved',
-          })
+          });
 
-          return
+          return;
         }
 
         if (isSolanaTx) {
           if (sol.isOnCurve(recipientInputValue)) {
-            const img = chains[sendActiveChain]?.chainSymbolImageUrl ?? defaultTokenLogo
+            const img = chains[sendActiveChain]?.chainSymbolImageUrl ?? defaultTokenLogo;
 
             setSelectedAddress({
               ethAddress: cleanInputValue,
@@ -627,45 +600,42 @@ export const RecipientCard = observer(
               chainIcon: img ?? '',
               chainName: sendActiveChain,
               selectionType: 'notSaved',
-            })
-            return
+            });
+            return;
           } else {
-            return
+            return;
           }
         }
 
         if (isSuiTx) {
-          return
+          return;
         }
 
-        if (
-          isBtcTx &&
-          !isValidBtcAddress(cleanInputValue, sendActiveChain === 'bitcoin' ? 'mainnet' : 'testnet')
-        ) {
-          return
+        if (isBtcTx && !isValidBtcAddress(cleanInputValue, sendActiveChain === 'bitcoin' ? 'mainnet' : 'testnet')) {
+          return;
         }
 
-        const { prefix } = isBtcTx ? { prefix: '' } : bech32.decode(cleanInputValue)
-        let _chain = addressPrefixes[prefix] as SupportedChain
+        const { prefix } = isBtcTx ? { prefix: '' } : bech32.decode(cleanInputValue);
+        let _chain = addressPrefixes[prefix] as SupportedChain;
 
         if (_chain !== 'noble' && selectedToken?.coinMinimalDenom === 'uusdn') {
-          setAddressError('IBC transfer is not supported for USDN')
-          return
+          setAddressError('IBC transfer is not supported for USDN');
+          return;
         }
 
         if (prefix === 'init' && selectedInitiaChain) {
-          _chain = selectedInitiaChain
+          _chain = selectedInitiaChain;
         }
 
         if (sendActiveChain === 'bitcoin') {
-          _chain = 'bitcoin'
+          _chain = 'bitcoin';
         }
 
         if (sendActiveChain === 'bitcoinSignet') {
-          _chain = 'bitcoinSignet'
+          _chain = 'bitcoinSignet';
         }
 
-        const img = chains[_chain]?.chainSymbolImageUrl ?? defaultTokenLogo
+        const img = chains[_chain]?.chainSymbolImageUrl ?? defaultTokenLogo;
 
         setSelectedAddress({
           ethAddress,
@@ -676,10 +646,10 @@ export const RecipientCard = observer(
           chainIcon: img ?? '',
           chainName: _chain,
           selectionType: 'notSaved',
-        })
+        });
       } catch (err) {
         if (!(err as Error)?.message?.includes('too short')) {
-          setAddressError('Invalid Address')
+          setAddressError('Invalid Address');
         }
       }
 
@@ -695,7 +665,7 @@ export const RecipientCard = observer(
       sendActiveChain,
       selectedInitiaChain,
       selectedToken,
-    ])
+    ]);
 
     useEffect(() => {
       if (existingContactMatch && selectedAddress && !selectedInitiaChain) {
@@ -704,12 +674,11 @@ export const RecipientCard = observer(
           existingContactMatch.address !== selectedAddress?.address ||
           existingContactMatch.name !== selectedAddress?.name ||
           existingContactMatch.emoji !== selectedAddress?.emoji ||
-          existingContactMatch.blockchain !== selectedAddress?.chainName
+          existingContactMatch.blockchain !== selectedAddress?.chainName;
 
         if (shouldUpdate) {
-          const img =
-            chains[existingContactMatch.blockchain]?.chainSymbolImageUrl ?? defaultTokenLogo
-          setMemo(existingContactMatch.memo ?? '')
+          const img = chains[existingContactMatch.blockchain]?.chainSymbolImageUrl ?? defaultTokenLogo;
+          setMemo(existingContactMatch.memo ?? '');
 
           setSelectedAddress({
             ethAddress: existingContactMatch?.ethAddress,
@@ -720,7 +689,7 @@ export const RecipientCard = observer(
             chainIcon: img ?? '',
             chainName: existingContactMatch.blockchain,
             selectionType: 'saved',
-          })
+          });
         }
       }
 
@@ -733,7 +702,7 @@ export const RecipientCard = observer(
       setMemo,
       setSelectedAddress,
       selectedInitiaChain,
-    ])
+    ]);
 
     useCheckIbcTransfer({
       sendActiveChain,
@@ -747,23 +716,21 @@ export const RecipientCard = observer(
 
       setAddressError,
       manageChainsStore,
-    })
+    });
 
     useEffect(() => {
       if (selectedAddress?.chainName) {
-        setCustomIbcChannelId(undefined)
+        setCustomIbcChannelId(undefined);
       }
-    }, [selectedAddress?.chainName, setCustomIbcChannelId])
+    }, [selectedAddress?.chainName, setCustomIbcChannelId]);
 
     useEffect(() => {
       if (minitiaChains.includes(sendActiveChain)) {
-        setSelectedInitiaChain(sendActiveChain)
+        setSelectedInitiaChain(sendActiveChain);
       }
-    }, [minitiaChains, sendActiveChain])
+    }, [minitiaChains, sendActiveChain]);
 
-    const isNotIBCError = addressError
-      ? !addressError.includes('IBC transfers are not supported')
-      : false
+    const isNotIBCError = addressError ? !addressError.includes('IBC transfers are not supported') : false;
     /**
      * Return Component
      */
@@ -818,16 +785,11 @@ export const RecipientCard = observer(
                 <>
                   {showContactsButton ? (
                     <SecondaryActionButton
-                      leftIcon={
-                        <AddressBookIcon size={12} className='text-gray-800 dark:text-gray-200' />
-                      }
+                      leftIcon={<AddressBookIcon size={12} className='text-gray-800 dark:text-gray-200' />}
                       onClick={() => setIsDestinationSheetVisible('My Contacts')}
                       actionLabel='Open Contacts Sheet'
                     >
-                      <Text
-                        size='xs'
-                        className='text-gray-800 dark:text-gray-200 whitespace-nowrap font-medium'
-                      >
+                      <Text size='xs' className='text-gray-800 dark:text-gray-200 whitespace-nowrap font-medium'>
                         Contacts
                       </Text>
                     </SecondaryActionButton>
@@ -835,17 +797,12 @@ export const RecipientCard = observer(
 
                   {showMyWalletButton ? (
                     <SecondaryActionButton
-                      leftIcon={
-                        <WalletIcon size={12} className='text-gray-800 dark:text-gray-200' />
-                      }
+                      leftIcon={<WalletIcon size={12} className='text-gray-800 dark:text-gray-200' />}
                       onClick={() => setIsDestinationSheetVisible('My Wallets')}
                       actionLabel='Show My Wallets on Other Chains'
                       iconClassName='!text-sm !text-gray-800 dark:!text-gray-200'
                     >
-                      <Text
-                        size='xs'
-                        className='text-gray-800 dark:text-gray-200 whitespace-nowrap font-medium'
-                      >
+                      <Text size='xs' className='text-gray-800 dark:text-gray-200 whitespace-nowrap font-medium'>
                         My Wallets
                       </Text>
                     </SecondaryActionButton>
@@ -857,10 +814,7 @@ export const RecipientCard = observer(
                       onClick={handleAddContact}
                       actionLabel='Add Contact to Address Book'
                     >
-                      <Text
-                        size='xs'
-                        className='text-gray-800 dark:text-gray-200 whitespace-nowrap font-medium'
-                      >
+                      <Text size='xs' className='text-gray-800 dark:text-gray-200 whitespace-nowrap font-medium'>
                         Add Contact
                       </Text>
                     </SecondaryActionButton>
@@ -883,19 +837,10 @@ export const RecipientCard = observer(
                 </div>
               ) : null}
 
-              {destChainInfo &&
-              minitiaChains.includes(destChainInfo.key) &&
-              minitiaChains.includes(sendActiveChain) ? (
-                <div
-                  onClick={handleSelectInitiaClick}
-                  className='flex ml-auto justify-end cursor-pointer'
-                >
+              {destChainInfo && minitiaChains.includes(destChainInfo.key) && minitiaChains.includes(sendActiveChain) ? (
+                <div onClick={handleSelectInitiaClick} className='flex ml-auto justify-end cursor-pointer'>
                   <div className='flex w-fit gap-x-1.5 py-1.5 px-3 bg-gray-100 dark:bg-gray-800 rounded-3xl items-center'>
-                    <Text
-                      size='xs'
-                      color='text-gray-800 dark:text-white-100'
-                      className='whitespace-nowrap font-medium'
-                    >
+                    <Text size='xs' color='text-gray-800 dark:text-white-100' className='whitespace-nowrap font-medium'>
                       {destChainInfo.chainName}
                     </Text>
                     <CaretDown size={10} className='text-gray-800 dark:text-white-100' />
@@ -906,10 +851,7 @@ export const RecipientCard = observer(
           </div>
 
           {showNameServiceResults ? (
-            <NameServiceMatchList
-              address={recipientInputValue}
-              handleContactSelect={handleContactSelect}
-            />
+            <NameServiceMatchList address={recipientInputValue} handleContactSelect={handleContactSelect} />
           ) : null}
 
           <SelectDestinationSheet
@@ -918,9 +860,7 @@ export const RecipientCard = observer(
             handleContactSelect={handleContactSelect}
             onClose={() => setIsDestinationSheetVisible(null)}
             skipSupportedDestinationChainsIDs={skipSupportedDestinationChainsIDs}
-            showOnlyMyWallets={
-              selectedToken?.coinMinimalDenom === 'uusdn' && selectedToken?.chain === 'noble'
-            }
+            showOnlyMyWallets={selectedToken?.coinMinimalDenom === 'uusdn' && selectedToken?.chain === 'noble'}
           />
 
           <SelectInitiaChainSheet
@@ -942,6 +882,6 @@ export const RecipientCard = observer(
           />
         </motion.div>
       </div>
-    )
+    );
   },
-)
+);

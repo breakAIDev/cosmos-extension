@@ -1,38 +1,38 @@
-import { formatTokenAmount, sliceWord } from '@leapwallet/cosmos-wallet-hooks'
-import { ArrowRight } from '@phosphor-icons/react'
-import classNames from 'classnames'
-import { TokenImageWithFallback } from 'components/token-image-with-fallback'
-import { observer } from 'mobx-react-lite'
-import React, { useMemo } from 'react'
-import { hideAssetsStore } from 'stores/hide-assets-store'
-import { SourceToken } from 'types/swap'
-import { isSidePanel } from 'utils/isSidePanel'
+import { formatTokenAmount, sliceWord } from '@leapwallet/cosmos-wallet-hooks';
+import { ArrowRight } from '@phosphor-icons/react';
+import classNames from 'classnames';
+import { TokenImageWithFallback } from 'components/token-image-with-fallback';
+import { observer } from 'mobx-react-lite';
+import React, { useMemo } from 'react';
+import { hideAssetsStore } from 'stores/hide-assets-store';
+import { SourceToken } from 'types/swap';
+import { isSidePanel } from 'utils/isSidePanel';
 
 type Props = {
-  inAmount: string
-  sourceToken: SourceToken | null
-  amountOut: string
-  destinationToken: SourceToken | null
-}
+  inAmount: string;
+  sourceToken: SourceToken | null;
+  amountOut: string;
+  destinationToken: SourceToken | null;
+};
 
 function TxTokensSummaryMini({ inAmount, sourceToken, amountOut, destinationToken }: Props) {
   const sourceBalance = useMemo(() => {
     return hideAssetsStore.formatHideBalance(
       formatTokenAmount(inAmount ?? '0', sliceWord(sourceToken?.symbol ?? '', 4, 4), 3),
-    )
+    );
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inAmount, sourceToken?.symbol])
+  }, [inAmount, sourceToken?.symbol]);
 
   const destinationBalance = useMemo(() => {
     return hideAssetsStore.formatHideBalance(
       formatTokenAmount(amountOut ?? '0', sliceWord(destinationToken?.symbol ?? '', 4, 4), 3),
-    )
+    );
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [amountOut, destinationToken?.symbol])
+  }, [amountOut, destinationToken?.symbol]);
 
-  const _isSidePanel = isSidePanel()
+  const _isSidePanel = isSidePanel();
 
   return (
     <div className='w-full bg-white-100 dark:bg-gray-950 flex items-center justify-between p-4 gap-2 rounded-2xl'>
@@ -56,13 +56,10 @@ function TxTokensSummaryMini({ inAmount, sourceToken, amountOut, destinationToke
       </div>
 
       <div
-        className={classNames(
-          'bg-gray-100 dark:bg-gray-850 shrink-0 flex justify-center items-center rounded-full',
-          {
-            'w-[24px] h-[24px]': !_isSidePanel,
-            'w-[20px] h-[20px]': _isSidePanel,
-          },
-        )}
+        className={classNames('bg-gray-100 dark:bg-gray-850 shrink-0 flex justify-center items-center rounded-full', {
+          'w-[24px] h-[24px]': !_isSidePanel,
+          'w-[20px] h-[20px]': _isSidePanel,
+        })}
       >
         <ArrowRight
           size={16}
@@ -92,7 +89,7 @@ function TxTokensSummaryMini({ inAmount, sourceToken, amountOut, destinationToke
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default observer(TxTokensSummaryMini)
+export default observer(TxTokensSummaryMini);

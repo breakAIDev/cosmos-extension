@@ -1,16 +1,16 @@
-import { NftStore } from '@leapwallet/cosmos-wallet-store'
-import { useChainPageInfo } from 'hooks'
-import React from 'react'
+import { NftStore } from '@leapwallet/cosmos-wallet-store';
+import { useChainPageInfo } from 'hooks';
+import React from 'react';
 
-import { CantSeeNfts, NoCollectionCard } from './index'
+import { CantSeeNfts, NoCollectionCard } from './index';
 
 type NoNftProps = {
-  title?: string
-  description?: string
-  openManageCollectionsSheet: () => void
-  openAddCollectionSheet: () => void
-  nftStore: NftStore
-}
+  title?: string;
+  description?: string;
+  openManageCollectionsSheet: () => void;
+  openAddCollectionSheet: () => void;
+  nftStore: NftStore;
+};
 
 export function NoNft({
   title,
@@ -19,7 +19,7 @@ export function NoNft({
   openAddCollectionSheet,
   nftStore,
 }: NoNftProps) {
-  const { topChainColor } = useChainPageInfo()
+  const { topChainColor } = useChainPageInfo();
 
   return (
     <>
@@ -40,5 +40,5 @@ export function NoNft({
         <CantSeeNfts openAddCollectionSheet={openAddCollectionSheet} nftStore={nftStore} />
       </div>
     </>
-  )
+  );
 }

@@ -1,17 +1,14 @@
-import { Buttons } from '@leapwallet/leap-ui'
-import { EmptyCard } from 'components/empty-card'
-import { Images } from 'images'
-import React from 'react'
+import { Buttons } from '@leapwallet/leap-ui';
+import { EmptyCard } from 'components/empty-card';
+import { Images } from 'images';
+import React from 'react';
 
 type ManageTokensEmptyCardProps = {
-  onAddTokenClick: (passState?: boolean) => void
-  searchedText: string
-}
+  onAddTokenClick: (passState?: boolean) => void;
+  searchedText: string;
+};
 
-export function ManageTokensEmptyCard({
-  onAddTokenClick,
-  searchedText,
-}: ManageTokensEmptyCardProps) {
+export function ManageTokensEmptyCard({ onAddTokenClick, searchedText }: ManageTokensEmptyCardProps) {
   let subHeading = (
     <p className='text-[13px]'>
       Or manually add token data{' '}
@@ -23,7 +20,7 @@ export function ManageTokensEmptyCard({
         here
       </button>
     </p>
-  )
+  );
 
   if (searchedText) {
     subHeading = (
@@ -37,17 +34,15 @@ export function ManageTokensEmptyCard({
           Add Tokens Manually
         </Buttons.Generic>
       </p>
-    )
+    );
   }
 
   return (
     <EmptyCard
       isRounded
       subHeading={subHeading}
-      heading={
-        <p className='text-[15px]'>{searchedText ? 'No results found' : 'Search for any token'}</p>
-      }
+      heading={<p className='text-[15px]'>{searchedText ? 'No results found' : 'Search for any token'}</p>}
       src={Images.Misc.Explore}
     />
-  )
+  );
 }

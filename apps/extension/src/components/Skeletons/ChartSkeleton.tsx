@@ -1,6 +1,6 @@
-import { LineDivider } from '@leapwallet/leap-ui'
-import React from 'react'
-import Skeleton from 'react-loading-skeleton'
+import { LineDivider } from '@leapwallet/leap-ui';
+import React from 'react';
+import Skeleton from 'react-loading-skeleton';
 
 export default function ChartSkeleton() {
   return (
@@ -22,5 +22,5 @@ export default function ChartSkeleton() {
         <Skeleton count={1} />
       </div>
     </div>
-  )
+  );
 }

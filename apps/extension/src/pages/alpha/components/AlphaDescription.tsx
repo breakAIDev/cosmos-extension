@@ -1,15 +1,15 @@
-import { Separator } from 'components/ui/separator'
-import { EventName, PageName } from 'config/analytics'
-import mixpanel from 'mixpanel-browser'
-import React from 'react'
-import Markdown from 'react-markdown'
-import gfm from 'remark-gfm'
+import { Separator } from 'components/ui/separator';
+import { EventName, PageName } from 'config/analytics';
+import mixpanel from 'mixpanel-browser';
+import React from 'react';
+import Markdown from 'react-markdown';
+import gfm from 'remark-gfm';
 
-import { RaffleListingProps } from '../chad-components/RaffleListing'
-import { getHostname } from '../utils'
-import { AlphaOpportunityProps } from './AlphaOpportunity'
+import { RaffleListingProps } from '../chad-components/RaffleListing';
+import { getHostname } from '../utils';
+import { AlphaOpportunityProps } from './AlphaOpportunity';
 
-const remarkPlugins = [gfm]
+const remarkPlugins = [gfm];
 
 /**
  * renders the description for a Alpha listing using markdown
@@ -40,7 +40,7 @@ export default function AlphaDescription(opportunity: AlphaOpportunityProps) {
       />
     ),
     hr: () => <Separator className='my-6' />,
-  }
+  };
 
   return (
     <div className='rounded-xl prose-neutral prose prose-sm dark:prose-invert'>
@@ -48,7 +48,7 @@ export default function AlphaDescription(opportunity: AlphaOpportunityProps) {
         {opportunity.descriptionActions}
       </Markdown>
     </div>
-  )
+  );
 }
 
 /**
@@ -68,7 +68,7 @@ export function ChadDescription(raffle: RaffleListingProps) {
               ecosystem: [...(raffle?.categories ?? [])],
               categories: [...(raffle?.ecosystem ?? [])],
               isChad: true,
-            })
+            });
           } catch (err) {
             // ignore
           }
@@ -80,10 +80,10 @@ export function ChadDescription(raffle: RaffleListingProps) {
         style={{ wordBreak: 'break-all' }}
       />
     ),
-  }
+  };
 
   if (!raffle.description) {
-    return null
+    return null;
   }
 
   return (
@@ -94,5 +94,5 @@ export function ChadDescription(raffle: RaffleListingProps) {
         {raffle.description || ''}
       </Markdown>
     </section>
-  )
+  );
 }

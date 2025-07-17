@@ -1,5 +1,5 @@
-import React from 'react'
-import Skeleton from 'react-loading-skeleton'
+import React from 'react';
+import Skeleton from 'react-loading-skeleton';
 
 export const RollupSkeleton = () => {
   return (
@@ -13,5 +13,5 @@ export const RollupSkeleton = () => {
         <Skeleton width={150} height={12} />
       </div>
     </div>
-  )
-}
+  );
+};

@@ -1,10 +1,10 @@
-import { Tag } from '@phosphor-icons/react'
-import React, { ReactNode } from 'react'
+import { Tag } from '@phosphor-icons/react';
+import React, { ReactNode } from 'react';
 
 type NoCollectionCardProps = {
-  title: string
-  subTitle?: ReactNode
-}
+  title: string;
+  subTitle?: ReactNode;
+};
 
 export function NoCollectionCard({ title, subTitle }: NoCollectionCardProps) {
   return (
@@ -15,5 +15,5 @@ export function NoCollectionCard({ title, subTitle }: NoCollectionCardProps) {
       <div className='font-bold text-gray-800 dark:text-white-100 text-base mt-3'>{title}</div>
       {subTitle && <div className='text-gray-400 font-medium text-sm'>{subTitle}</div>}
     </div>
-  )
+  );
 }

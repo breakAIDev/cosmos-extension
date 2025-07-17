@@ -1,10 +1,5 @@
-import { AccountData, DirectSecp256k1HdWallet, OfflineSigner } from '@cosmjs/proto-signing'
-import {
-  FEATURE_FLAG_STORAGE_KEY,
-  Key,
-  useChainsStore,
-  WALLETTYPE,
-} from '@leapwallet/cosmos-wallet-hooks'
+import { AccountData, DirectSecp256k1HdWallet, OfflineSigner } from '@cosmjs/proto-signing';
+import { FEATURE_FLAG_STORAGE_KEY, Key, useChainsStore, WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks';
 import {
   ChainInfos,
   CompassSeiLedgerSigner,
@@ -15,8 +10,8 @@ import {
   LeapLedgerSignerEth,
   pubKeyToEvmAddressToShow,
   SupportedChain,
-} from '@leapwallet/cosmos-wallet-sdk'
-import getHDPath from '@leapwallet/cosmos-wallet-sdk/dist/browser/utils/get-hdpath'
+} from '@leapwallet/cosmos-wallet-sdk';
+import getHDPath from '@leapwallet/cosmos-wallet-sdk/dist/browser/utils/get-hdpath';
 import {
   decrypt,
   encrypt,
@@ -25,8 +20,8 @@ import {
   getFullHDPath,
   KeyChain,
   pubkeyToAddress,
-} from '@leapwallet/leap-keychain'
-import { COMPASS_CHAINS } from 'config/config'
+} from '@leapwallet/leap-keychain';
+import { COMPASS_CHAINS } from 'config/config';
 import {
   ACTIVE_CHAIN,
   ACTIVE_WALLET,
@@ -39,122 +34,117 @@ import {
   PRIMARY_WALLET_ADDRESS,
   SELECTED_NETWORK,
   SOCIAL_WALLETS_IDS,
-} from 'config/storage-keys'
-import { useAuth } from 'context/auth-context'
-import { Address } from 'hooks/onboarding/types'
-import { useChainInfos } from 'hooks/useChainInfos'
-import { getWalletName } from 'pages/home/utils/wallet-names'
-import { useWeb3Login } from 'pages/onboarding/use-social-login'
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { passwordStore } from 'stores/password-store'
-import { getDerivationPathToShow } from 'utils'
-import { closeSidePanel } from 'utils/closeSidePanel'
-import correctMnemonic from 'utils/correct-mnemonic'
-import { generateAddresses } from 'utils/generateAddresses'
-import { customKeygenfnMove, getChainInfosList } from 'utils/getChainInfosList'
-import { isLedgerEnabled } from 'utils/isLedgerEnabled'
-import { default as browser, default as extension } from 'webextension-polyfill'
+} from 'config/storage-keys';
+import { useAuth } from 'context/auth-context';
+import { Address } from 'hooks/onboarding/types';
+import { useChainInfos } from 'hooks/useChainInfos';
+import { getWalletName } from 'pages/home/utils/wallet-names';
+import { useWeb3Login } from 'pages/onboarding/use-social-login';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { passwordStore } from 'stores/password-store';
+import { getDerivationPathToShow } from 'utils';
+import { closeSidePanel } from 'utils/closeSidePanel';
+import correctMnemonic from 'utils/correct-mnemonic';
+import { generateAddresses } from 'utils/generateAddresses';
+import { customKeygenfnMove, getChainInfosList } from 'utils/getChainInfosList';
+import { isLedgerEnabled } from 'utils/isLedgerEnabled';
+import { default as browser, default as extension } from 'webextension-polyfill';
 
-import { useActiveChain } from '../settings/useActiveChain'
-import useActiveWallet from '../settings/useActiveWallet'
-import { SeedPhrase } from './seed-phrase/useSeedPhrase'
+import { useActiveChain } from '../settings/useActiveChain';
+import useActiveWallet from '../settings/useActiveWallet';
+import { SeedPhrase } from './seed-phrase/useSeedPhrase';
 
-export type LedgerAppId = 'cosmos' | 'sei'
+export type LedgerAppId = 'cosmos' | 'sei';
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace Wallet {
-  export type Keystore = Record<string, Key>
+  export type Keystore = Record<string, Key>;
 
-  type SaveLedgerWalletPubKeys = Record<
-    string,
-    { path?: string; pubkey: Uint8Array; name?: string }
-  >
+  type SaveLedgerWalletPubKeys = Record<string, { path?: string; pubkey: Uint8Array; name?: string }>;
   type SaveLedgerWalletAddress = {
-    chainAddresses: Record<string, Address>
-    name?: string
-    colorIndex?: number
-  }
+    chainAddresses: Record<string, Address>;
+    name?: string;
+    colorIndex?: number;
+  };
 
   export async function storeWallets(newWallets: Record<string, Key>): Promise<void> {
-    const featureFlagKey = `compass-${FEATURE_FLAG_STORAGE_KEY}`
-    const data = await browser.storage.local.get([KEYSTORE, featureFlagKey])
-    const keystore: Keystore[] = data[KEYSTORE] ?? {}
-    const newKeystore = { ...keystore, ...newWallets }
-    const newWalletEntries = Object.keys(newWallets)
-    const lastEntry = newWalletEntries[0]
+    const featureFlagKey = `compass-${FEATURE_FLAG_STORAGE_KEY}`;
+    const data = await browser.storage.local.get([KEYSTORE, featureFlagKey]);
+    const keystore: Keystore[] = data[KEYSTORE] ?? {};
+    const newKeystore = { ...keystore, ...newWallets };
+    const newWalletEntries = Object.keys(newWallets);
+    const lastEntry = newWalletEntries[0];
 
     return await browser.storage.local.set({
       [KEYSTORE]: newKeystore,
       [ACTIVE_WALLET]: newWallets[lastEntry],
       [ACTIVE_CHAIN]: ChainInfos.seiTestnet2.key,
       [SELECTED_NETWORK]: 'mainnet',
-    })
+    });
   }
 
   type StoredSocialWallet = {
-    id: string
-    address: string
-    evmAddress: string
-    walletType: WALLETTYPE.PRIVATE_KEY
-    email: string
-  }
+    id: string;
+    address: string;
+    evmAddress: string;
+    walletType: WALLETTYPE.PRIVATE_KEY;
+    email: string;
+  };
 
   export async function getSocialWallet(): Promise<Record<string, StoredSocialWallet> | undefined> {
-    const data = await browser.storage.local.get([SOCIAL_WALLETS_IDS])
-    return data[SOCIAL_WALLETS_IDS]
+    const data = await browser.storage.local.get([SOCIAL_WALLETS_IDS]);
+    return data[SOCIAL_WALLETS_IDS];
   }
 
-  export async function storeSocialWallet(
-    sWallet: Omit<StoredSocialWallet, 'walletType'>,
-  ): Promise<void> {
-    const prev = await getSocialWallet()
+  export async function storeSocialWallet(sWallet: Omit<StoredSocialWallet, 'walletType'>): Promise<void> {
+    const prev = await getSocialWallet();
     const newWallets = {
       ...prev,
       [sWallet.id]: {
         ...sWallet,
         walletType: WALLETTYPE.PRIVATE_KEY,
       },
-    }
+    };
     return browser.storage.local.set({
       [SOCIAL_WALLETS_IDS]: newWallets,
-    })
+    });
   }
 
   export const useSocialWallet = () => {
-    const [socialWallet, setSocialWallet] = useState<Record<string, StoredSocialWallet>>()
+    const [socialWallet, setSocialWallet] = useState<Record<string, StoredSocialWallet>>();
 
     useEffect(() => {
-      getSocialWallet().then(setSocialWallet)
-    }, [])
+      getSocialWallet().then(setSocialWallet);
+    }, []);
 
-    return socialWallet
-  }
+    return socialWallet;
+  };
 
   export async function getAccountDetails(
     mnemonic: string,
   ): Promise<{ accounts: readonly AccountData[]; mainWallet: DirectSecp256k1HdWallet }> {
-    const hdPath = getHDPath(ChainInfos.cosmos.bip44.coinType)
+    const hdPath = getHDPath(ChainInfos.cosmos.bip44.coinType);
     const mainWallet = generateWalletFromMnemonic(mnemonic, {
       hdPath,
       addressPrefix: ChainInfos.cosmos.addressPrefix,
       ethWallet: false,
-    })
-    const accounts = await mainWallet.getAccounts()
+    });
+    const accounts = await mainWallet.getAccounts();
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    return { accounts, mainWallet }
+    return { accounts, mainWallet };
   }
 
   export type WalletAccount = {
-    account: AccountData
-    wallet: OfflineSigner
-    index: number
-  }
+    account: AccountData;
+    wallet: OfflineSigner;
+    index: number;
+  };
 
   export function useRemoveWallet() {
-    const { activeWallet, setActiveWallet } = useActiveWallet()
-    const auth = useAuth()
-    const { logout } = useWeb3Login()
+    const { activeWallet, setActiveWallet } = useActiveWallet();
+    const auth = useAuth();
+    const { logout } = useWeb3Login();
 
     const removeAll = async (signout = true) => {
       await browser.storage.local.set({
@@ -168,202 +158,178 @@ export namespace Wallet {
         [NETWORK_MAP]: null,
         [SELECTED_NETWORK]: 'mainnet',
         [SOCIAL_WALLETS_IDS]: null,
-      })
+      });
 
-      await setActiveWallet(null)
+      await setActiveWallet(null);
 
-      if (signout) auth?.signout()
-    }
+      if (signout) auth?.signout();
+    };
 
     const removeWallets = async (keyIds: string[]) => {
-      const data = await browser.storage.local.get([KEYSTORE, SOCIAL_WALLETS_IDS])
+      const data = await browser.storage.local.get([KEYSTORE, SOCIAL_WALLETS_IDS]);
 
-      const storedWallets: Keystore = data[KEYSTORE]
-      const socialWallets: StoredSocialWallet | null = data[SOCIAL_WALLETS_IDS]
+      const storedWallets: Keystore = data[KEYSTORE];
+      const socialWallets: StoredSocialWallet | null = data[SOCIAL_WALLETS_IDS];
 
       keyIds.forEach((keyId) => {
-        delete storedWallets[keyId]
-      })
+        delete storedWallets[keyId];
+      });
 
       if (socialWallets && keyIds.includes(socialWallets.id)) {
-        await logout()
+        await logout();
         await browser.storage.local.set({
           [SOCIAL_WALLETS_IDS]: null,
-        })
+        });
       }
 
       // TODO: wallet type based updating
       if (Object.keys(storedWallets ?? {}).length === 0) {
-        removeAll()
-        return
+        removeAll();
+        return;
       }
 
       if (keyIds.includes(activeWallet?.id ?? '') && Object.values(storedWallets).length > 0) {
-        setActiveWallet(Object.values(storedWallets)[0])
+        setActiveWallet(Object.values(storedWallets)[0]);
       }
 
       await browser.storage.local.set({
         [KEYSTORE]: storedWallets,
-      })
-    }
+      });
+    };
 
-    return { removeAll, removeWallets }
+    return { removeAll, removeWallets };
   }
 
   export function getAllWallets() {
-    return KeyChain.getAllWallets()
+    return KeyChain.getAllWallets();
   }
 
   export function useWallets() {
-    const [wallets, setWallets] = useState<Keystore | undefined>(undefined)
+    const [wallets, setWallets] = useState<Keystore | undefined>(undefined);
     useEffect(() => {
-      KeyChain.getAllWallets().then((keystore) => setWallets(keystore))
-    }, [])
+      KeyChain.getAllWallets().then((keystore) => setWallets(keystore));
+    }, []);
 
     useEffect(() => {
       browser.storage.local.onChanged.addListener((changes) => {
-        const keystoreChanges = changes[
-          KEYSTORE
-        ] as unknown as browser.Storage.StorageAreaOnChangedChangesType
+        const keystoreChanges = changes[KEYSTORE] as unknown as browser.Storage.StorageAreaOnChangedChangesType;
         if (keystoreChanges) {
-          const newKeystore = keystoreChanges.newValue
-          setWallets(newKeystore)
+          const newKeystore = keystoreChanges.newValue;
+          setWallets(newKeystore);
         }
-      })
-    }, [])
-    return wallets
+      });
+    }, []);
+    return wallets;
   }
 
   export function useCreateNewWallet() {
-    const { chains } = useChainsStore()
-    const { setActiveWallet } = useActiveWallet()
+    const { chains } = useChainsStore();
+    const { setActiveWallet } = useActiveWallet();
 
     return useCallback(
-      async ({
-        name,
-        colorIndex,
-        forcePassword,
-      }: {
-        name: string
-        colorIndex: number
-        forcePassword?: string
-      }) => {
-        const wallets = await KeyChain.getAllWallets()
-        const hasPrimaryWallet = Object.values(wallets).find(
-          (wallet) => wallet.walletType === WALLETTYPE.SEED_PHRASE,
-        )
+      async ({ name, colorIndex, forcePassword }: { name: string; colorIndex: number; forcePassword?: string }) => {
+        const wallets = await KeyChain.getAllWallets();
+        const hasPrimaryWallet = Object.values(wallets).find((wallet) => wallet.walletType === WALLETTYPE.SEED_PHRASE);
         if (!hasPrimaryWallet) {
-          window.open(
-            extension.runtime.getURL(
-              `index.html#/onboarding?name=${name}&colorIndex=${colorIndex}`,
-            ),
-          )
-          closeSidePanel()
-          return ''
+          window.open(extension.runtime.getURL(`index.html#/onboarding?name=${name}&colorIndex=${colorIndex}`));
+          closeSidePanel();
+          return '';
         }
-        const otherWallet = Object.values(wallets).find(
-          (v) => v.name.toLowerCase() === name.toLowerCase(),
-        )
-        if (otherWallet) return 'Wallet name already exists'
-        const chainInfosList = getChainInfosList(chains)
+        const otherWallet = Object.values(wallets).find((v) => v.name.toLowerCase() === name.toLowerCase());
+        if (otherWallet) return 'Wallet name already exists';
+        const chainInfosList = getChainInfosList(chains);
         const newWallet = await KeyChain.createNewWalletAccount(
           name,
           (forcePassword ?? passwordStore.password) as string,
           colorIndex,
           chainInfosList,
-        )
-        if (newWallet) await setActiveWallet(newWallet)
-        else return 'Wallet already exists'
+        );
+        if (newWallet) await setActiveWallet(newWallet);
+        else return 'Wallet already exists';
       },
       [setActiveWallet, chains],
-    )
+    );
   }
 
   export function useFirstWalletCosmosAddress() {
-    const wallets = useWallets()
+    const wallets = useWallets();
 
     const firstWallet = useMemo(() => {
       if (!wallets) {
-        return undefined
+        return undefined;
       }
 
       const seedPhraseWallets = Object.values(wallets)
         .filter((wallet) => wallet.walletType === WALLETTYPE.SEED_PHRASE)
-        .sort((a, b) => a.addressIndex - b.addressIndex)
+        .sort((a, b) => a.addressIndex - b.addressIndex);
 
       if (seedPhraseWallets.length > 0) {
-        return seedPhraseWallets[0]
+        return seedPhraseWallets[0];
       }
 
       const otherWallets = Object.values(wallets).sort((a, b) => {
         // compare IDs as there is no address index for non-seed-phrase wallets
-        return a.id.localeCompare(b.id)
-      })
+        return a.id.localeCompare(b.id);
+      });
 
       if (otherWallets.length > 0) {
-        return otherWallets[0]
+        return otherWallets[0];
       }
 
-      return undefined
-    }, [wallets])
+      return undefined;
+    }, [wallets]);
 
-    return firstWallet ? firstWallet.addresses.cosmos : undefined
+    return firstWallet ? firstWallet.addresses.cosmos : undefined;
   }
 
   // eslint-disable-next-line no-inner-declarations
   function useLastWalletNumber() {
-    const wallets = useWallets()
+    const wallets = useWallets();
 
     const walletsList = useMemo(() => {
       return wallets
         ? Object.values(wallets)
             .filter((wallet) => wallet.walletType === WALLETTYPE.SEED_PHRASE)
             .sort((a, b) => a.addressIndex - b.addressIndex)
-        : []
-    }, [wallets])
+        : [];
+    }, [wallets]);
 
-    const lastWalletNumber: number | undefined = walletsList[walletsList.length - 1]?.addressIndex
+    const lastWalletNumber: number | undefined = walletsList[walletsList.length - 1]?.addressIndex;
 
-    return lastWalletNumber
+    return lastWalletNumber;
   }
 
   type importMultipleWalletAccountsParams = {
-    mnemonic: string
-    selectedAddressIndexes: number[]
-    password: Uint8Array
-    type: 'create' | 'import' | 'create-social' | 'import-social'
-    email?: string
-  }
+    mnemonic: string;
+    selectedAddressIndexes: number[];
+    password: Uint8Array;
+    type: 'create' | 'import' | 'create-social' | 'import-social';
+    email?: string;
+  };
 
   // Import multiple wallet accounts from the same seed phrase
   export function useImportMultipleWalletAccounts() {
-    const chainInfos = useChainInfos()
-    const { setActiveWallet } = useActiveWallet()
+    const chainInfos = useChainInfos();
+    const { setActiveWallet } = useActiveWallet();
 
     return useCallback(
-      async ({
-        mnemonic,
-        selectedAddressIndexes,
-        password,
-        type,
-        email,
-      }: importMultipleWalletAccountsParams) => {
-        const correctedMnemonic = correctMnemonic(mnemonic)
-        const chainInfosList = getChainInfosList(chainInfos)
+      async ({ mnemonic, selectedAddressIndexes, password, type, email }: importMultipleWalletAccountsParams) => {
+        const correctedMnemonic = correctMnemonic(mnemonic);
+        const chainInfosList = getChainInfosList(chainInfos);
 
-        const existingWallets = await KeyChain.getAllWallets()
-        const existingWalletsArray = Object.values(existingWallets || {})
+        const existingWallets = await KeyChain.getAllWallets();
+        const existingWalletsArray = Object.values(existingWallets || {});
 
-        const allWallets: Key[] = new Array(selectedAddressIndexes.length)
+        const allWallets: Key[] = new Array(selectedAddressIndexes.length);
         if (SeedPhrase.validateSeedPhrase(correctedMnemonic)) {
           // here assumption is there are no wallet-accounts currently in the wallet
           // when this changes - make sure the addressIndex is handled properly
-          let i = 0
-          const sortedAddressIndices = selectedAddressIndexes.sort()
+          let i = 0;
+          const sortedAddressIndices = selectedAddressIndexes.sort();
 
           for (const addressIndex of sortedAddressIndices) {
             // we want to consider the previously imported wallets
-            const walletIndex = addressIndex
+            const walletIndex = addressIndex;
             const wallet = await KeyChain.createWalletUsingMnemonic({
               name: getWalletName([...existingWalletsArray, ...allWallets].filter(Boolean)),
               // send in the address index specific to this seed phrase to generate the wallet at that index
@@ -373,104 +339,88 @@ export namespace Wallet {
               colorIndex: walletIndex,
               chainInfos: chainInfosList,
               type: 'create',
-            })
-            allWallets[i] = wallet
-            i++
+            });
+            allWallets[i] = wallet;
+            i++;
           }
         } else {
-          let i = 0
+          let i = 0;
           for (const addressIndex of selectedAddressIndexes) {
-            const walletName = getWalletName(
-              [...existingWalletsArray, ...allWallets].filter(Boolean),
-            )
+            const walletName = getWalletName([...existingWalletsArray, ...allWallets].filter(Boolean));
             const wallet = await KeyChain.importNewWallet(
               mnemonic.trim(),
               password,
               chainInfosList,
               Number(addressIndex),
               walletName,
-            ).catch(() => void 0)
+            ).catch(() => void 0);
 
             if (wallet) {
-              allWallets[i] = wallet
-              i++
+              allWallets[i] = wallet;
+              i++;
             }
           }
         }
         if (existingWallets) {
           const watchWalletsToRemove = Object.values(existingWallets).filter((wallet) => {
             if ((wallet as any)?.watchWallet) {
-              const chainKey = Object.keys(wallet.addresses)[0]
+              const chainKey = Object.keys(wallet.addresses)[0];
               const newWallet = allWallets.find(
-                (value) =>
-                  wallet.addresses?.[chainKey] === value.addresses?.[chainKey as SupportedChain],
-              )
-              return !!newWallet
+                (value) => wallet.addresses?.[chainKey] === value.addresses?.[chainKey as SupportedChain],
+              );
+              return !!newWallet;
             }
-            return false
-          })
+            return false;
+          });
           if (watchWalletsToRemove.length > 0) {
-            await KeyChain.removeWallets(watchWalletsToRemove.map((v) => v.id))
+            await KeyChain.removeWallets(watchWalletsToRemove.map((v) => v.id));
           }
         }
 
-        const firstWallet = allWallets[0]
-        if (
-          (type === 'create-social' || type === 'import-social') &&
-          firstWallet?.pubKeys?.cosmos
-        ) {
-          const seiAddress = pubkeyToAddress(
-            'sei',
-            Buffer.from(firstWallet.pubKeys.cosmos, 'base64'),
-          )
-          const evmAddress = pubKeyToEvmAddressToShow(firstWallet.pubKeys.cosmos, true)
+        const firstWallet = allWallets[0];
+        if ((type === 'create-social' || type === 'import-social') && firstWallet?.pubKeys?.cosmos) {
+          const seiAddress = pubkeyToAddress('sei', Buffer.from(firstWallet.pubKeys.cosmos, 'base64'));
+          const evmAddress = pubKeyToEvmAddressToShow(firstWallet.pubKeys.cosmos, true);
 
           await storeSocialWallet({
             id: firstWallet.id,
             address: seiAddress,
             evmAddress,
             email: email || '',
-          })
+          });
         }
 
-        setActiveWallet(firstWallet)
+        setActiveWallet(firstWallet);
       },
       [chainInfos, setActiveWallet],
-    )
+    );
   }
 
   type importWalletArgs = {
-    privateKey: string
-    addressIndex: string
-    forcePassword?: string
-    type?: 'create' | 'import'
-    name?: string
-    colorIndex?: number
-    password: Uint8Array
-  }
+    privateKey: string;
+    addressIndex: string;
+    forcePassword?: string;
+    type?: 'create' | 'import';
+    name?: string;
+    colorIndex?: number;
+    password: Uint8Array;
+  };
 
   export function useImportWallet() {
-    const chainInfos = useChainInfos()
+    const chainInfos = useChainInfos();
 
-    const { setActiveWallet } = useActiveWallet()
-    const walletIndex = (useLastWalletNumber() ?? 0) + 2
+    const { setActiveWallet } = useActiveWallet();
+    const walletIndex = (useLastWalletNumber() ?? 0) + 2;
 
     return useCallback(
-      async ({
-        privateKey,
-        addressIndex,
-        forcePassword,
-        name,
-        colorIndex,
-        password,
-      }: importWalletArgs) => {
-        let newWallet: Key
-        const correctedMnemonic = correctMnemonic(privateKey)
-        const chainInfosList = getChainInfosList(chainInfos)
+      async ({ privateKey, addressIndex, forcePassword, name, colorIndex, password }: importWalletArgs) => {
+        let newWallet: Key;
+        const correctedMnemonic = correctMnemonic(privateKey);
+        const chainInfosList = getChainInfosList(chainInfos);
 
-        const existingWallets = await KeyChain.getAllWallets()
-        const existingWalletsArray = Object.values(existingWallets || {})
-        const walletName = name ?? getWalletName(existingWalletsArray)
+        const existingWallets = await KeyChain.getAllWallets();
+        const existingWalletsArray = Object.values(existingWallets || {});
+        const walletName = name ?? getWalletName(existingWalletsArray);
 
         if (SeedPhrase.validateSeedPhrase(correctedMnemonic)) {
           newWallet = await KeyChain.createWalletUsingMnemonic({
@@ -481,7 +431,7 @@ export namespace Wallet {
             colorIndex: colorIndex ?? walletIndex,
             chainInfos: chainInfosList,
             type: 'import',
-          })
+          });
         } else {
           newWallet = await KeyChain.importNewWallet(
             privateKey.trim(),
@@ -489,13 +439,13 @@ export namespace Wallet {
             chainInfosList,
             Number(addressIndex),
             walletName,
-          )
+          );
         }
-        if (newWallet) setActiveWallet(newWallet)
-        else throw new Error('Wallet already exists')
+        if (newWallet) setActiveWallet(newWallet);
+        else throw new Error('Wallet already exists');
       },
       [setActiveWallet, walletIndex, chainInfos],
-    )
+    );
   }
 
   // eslint-disable-next-line no-inner-declarations
@@ -505,66 +455,60 @@ export namespace Wallet {
     pubKeys,
     app,
   }: {
-    addresses: Record<number, SaveLedgerWalletAddress>
-    password: Uint8Array
-    pubKeys: SaveLedgerWalletPubKeys
-    app: LedgerAppId
+    addresses: Record<number, SaveLedgerWalletAddress>;
+    password: Uint8Array;
+    pubKeys: SaveLedgerWalletPubKeys;
+    app: LedgerAppId;
   }) {
-    const allWallets = await KeyChain.getAllWallets()
-    const storage = await browser.storage.local.get([PRIMARY_WALLET_ADDRESS])
-    const hasPrimaryWallet = storage[PRIMARY_WALLET_ADDRESS]
+    const allWallets = await KeyChain.getAllWallets();
+    const storage = await browser.storage.local.get([PRIMARY_WALLET_ADDRESS]);
+    const hasPrimaryWallet = storage[PRIMARY_WALLET_ADDRESS];
 
-    const allWalletsWithNew: Key[] = [...Object.values(allWallets ?? {})]
+    const allWalletsWithNew: Key[] = [...Object.values(allWallets ?? {})];
 
-    const newWallets = Object.entries(addresses).reduce(
-      (acc: Record<string, Key>, addressEntries, currentIndex) => {
-        const [addressIndex, addressInfo] = addressEntries
-        const { name, chainAddresses, colorIndex } = addressInfo
-        const walletId = crypto.randomUUID()
-        if (currentIndex === 0 && !hasPrimaryWallet) {
-          browser.storage.local.set({ [PRIMARY_WALLET_ADDRESS]: chainAddresses.cosmos })
-        }
-        const { addresses, chainPubKeys } = Object.entries(chainAddresses).reduce(
-          (
-            acc: { addresses: Record<string, string>; chainPubKeys: Record<string, string> },
-            [chain, { address, pubKey }],
-          ) => {
-            acc.addresses[chain] = address
-            acc.chainPubKeys[chain] = Buffer.from(pubKey).toString('base64')
-            return acc
-          },
-          { addresses: {}, chainPubKeys: {} },
-        )
+    const newWallets = Object.entries(addresses).reduce((acc: Record<string, Key>, addressEntries, currentIndex) => {
+      const [addressIndex, addressInfo] = addressEntries;
+      const { name, chainAddresses, colorIndex } = addressInfo;
+      const walletId = crypto.randomUUID();
+      if (currentIndex === 0 && !hasPrimaryWallet) {
+        browser.storage.local.set({ [PRIMARY_WALLET_ADDRESS]: chainAddresses.cosmos });
+      }
+      const { addresses, chainPubKeys } = Object.entries(chainAddresses).reduce(
+        (
+          acc: { addresses: Record<string, string>; chainPubKeys: Record<string, string> },
+          [chain, { address, pubKey }],
+        ) => {
+          acc.addresses[chain] = address;
+          acc.chainPubKeys[chain] = Buffer.from(pubKey).toString('base64');
+          return acc;
+        },
+        { addresses: {}, chainPubKeys: {} },
+      );
 
-        const newWallet: Key & { app: LedgerAppId } = {
-          walletType: WALLETTYPE.LEDGER,
-          name:
-            name ??
-            pubKeys[addressIndex]?.name ??
-            getWalletName(allWalletsWithNew, 'Ledger Wallet'),
-          addresses,
-          addressIndex: addressIndex as any,
-          cipher: encrypt(Buffer.from(pubKeys[addressIndex]?.pubkey).toString('hex'), password),
-          id: walletId,
-          colorIndex: colorIndex ?? currentIndex,
-          pubKeys: chainPubKeys,
-          path: pubKeys[addressIndex]?.path,
-          createdAt: Date.now(),
-          app,
-        }
-        allWalletsWithNew.push(newWallet)
+      const newWallet: Key & { app: LedgerAppId } = {
+        walletType: WALLETTYPE.LEDGER,
+        name: name ?? pubKeys[addressIndex]?.name ?? getWalletName(allWalletsWithNew, 'Ledger Wallet'),
+        addresses,
+        addressIndex: addressIndex as any,
+        cipher: encrypt(Buffer.from(pubKeys[addressIndex]?.pubkey).toString('hex'), password),
+        id: walletId,
+        colorIndex: colorIndex ?? currentIndex,
+        pubKeys: chainPubKeys,
+        path: pubKeys[addressIndex]?.path,
+        createdAt: Date.now(),
+        app,
+      };
+      allWalletsWithNew.push(newWallet);
 
-        acc[walletId] = newWallet
-        return acc
-      },
-      {},
-    )
-    await storeWallets(newWallets)
-    return newWallets
+      acc[walletId] = newWallet;
+      return acc;
+    }, {});
+    await storeWallets(newWallets);
+    return newWallets;
   }
 
   export function useSaveLedgerWallet() {
-    const { setActiveWallet } = useActiveWallet()
+    const { setActiveWallet } = useActiveWallet();
 
     return useCallback(
       async ({
@@ -573,45 +517,45 @@ export namespace Wallet {
         pubKeys,
         app,
       }: {
-        addresses: Record<number, SaveLedgerWalletAddress>
-        password: Uint8Array
-        pubKeys: SaveLedgerWalletPubKeys
-        app: LedgerAppId
+        addresses: Record<number, SaveLedgerWalletAddress>;
+        password: Uint8Array;
+        pubKeys: SaveLedgerWalletPubKeys;
+        app: LedgerAppId;
       }) => {
         const wallets = await saveLedgerWallet({
           addresses,
           password: password,
           pubKeys,
           app,
-        })
-        setActiveWallet(Object.values(wallets)[0])
+        });
+        setActiveWallet(Object.values(wallets)[0]);
 
-        return wallets
+        return wallets;
       },
 
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [],
-    )
+    );
   }
 
   export function useGetWallet(forceChain?: SupportedChain) {
-    const chainInfos = useChainInfos()
-    const _activeChain = useActiveChain()
-    const activeChain = forceChain || _activeChain
-    const { activeWallet } = useActiveWallet()
-    const password = passwordStore.password
+    const chainInfos = useChainInfos();
+    const _activeChain = useActiveChain();
+    const activeChain = forceChain || _activeChain;
+    const { activeWallet } = useActiveWallet();
+    const password = passwordStore.password;
 
     return useCallback(
       async <T extends boolean>(
         chain?: SupportedChain,
         ethWallet?: T,
       ): Promise<LeapLedgerSignerEth | OfflineSigner> => {
-        let _chain = activeChain
+        let _chain = activeChain;
         if (chain && chainInfos[chain]) {
-          _chain = chain
+          _chain = chain;
         }
-        const prefix = chainInfos[_chain].addressPrefix
-        const coinType = chainInfos[_chain]?.bip44?.coinType
+        const prefix = chainInfos[_chain].addressPrefix;
+        const coinType = chainInfos[_chain]?.bip44?.coinType;
 
         if (
           activeWallet?.walletType === WALLETTYPE.LEDGER &&
@@ -619,92 +563,87 @@ export namespace Wallet {
         ) {
           const derivationPath = activeWallet.path
             ? getDerivationPathToShow(activeWallet.path ?? '')
-            : `0'/0/${activeWallet.addressIndex}`
+            : `0'/0/${activeWallet.addressIndex}`;
 
           //@ts-ignore
-          const app = activeWallet.app
-          const coinType = app === 'sei' ? '60' : '118'
+          const app = activeWallet.app;
+          const coinType = app === 'sei' ? '60' : '118';
 
-          const hdPaths = [activeWallet.path ?? `m/44'/${coinType}'/${derivationPath}`]
-          const ledgerTransport = await getLedgerTransport()
+          const hdPaths = [activeWallet.path ?? `m/44'/${coinType}'/${derivationPath}`];
+          const ledgerTransport = await getLedgerTransport();
           if (app === 'sei') {
-            return new CompassSeiLedgerSigner(ledgerTransport, { hdPaths, prefix })
+            return new CompassSeiLedgerSigner(ledgerTransport, { hdPaths, prefix });
           } else {
             return new LeapLedgerSigner(ledgerTransport, {
               hdPaths,
               prefix,
-            }) as unknown as OfflineSigner
+            }) as unknown as OfflineSigner;
           }
         }
 
         if (activeWallet?.walletType !== WALLETTYPE.LEDGER) {
-          if (!password) throw new Error('Invalid Password')
+          if (!password) throw new Error('Invalid Password');
           if (activeWallet?.watchWallet) {
-            throw new Error('Seed phrase not available')
+            throw new Error('Seed phrase not available');
           }
-          const coinType = chainInfos[_chain]?.bip44?.coinType
-          const walletId = activeWallet?.id
+          const coinType = chainInfos[_chain]?.bip44?.coinType;
+          const walletId = activeWallet?.id;
           const signer = await KeyChain.getSigner(walletId as string, password, {
             addressPrefix: chainInfos[_chain].addressPrefix,
             coinType: chainInfos[_chain]?.bip44?.coinType,
             ethWallet,
             pubKeyBech32Address: ethWallet && coinType !== '60',
             btcNetwork: chainInfos[_chain]?.btcNetwork,
-          })
-          return signer as unknown as OfflineSigner
+          });
+          return signer as unknown as OfflineSigner;
         }
 
-        throw new Error('Unable to get signer')
+        throw new Error('Unable to get signer');
       },
       [activeChain, activeWallet, chainInfos, password],
-    )
+    );
   }
 
   export function useSaveWatchWallet() {
-    const { setActiveWallet } = useActiveWallet()
-    const chainInfos = useChainInfos()
-    const savedpassword = passwordStore.password
+    const { setActiveWallet } = useActiveWallet();
+    const chainInfos = useChainInfos();
+    const savedpassword = passwordStore.password;
 
     return useCallback(
-      async (config: {
-        address: string
-        walletName: string
-        colorIndex?: number
-        password?: Uint8Array
-      }) => {
-        const { address: _address, walletName, colorIndex, password: _password } = config
+      async (config: { address: string; walletName: string; colorIndex?: number; password?: Uint8Array }) => {
+        const { address: _address, walletName, colorIndex, password: _password } = config;
 
         try {
-          const password = _password ?? savedpassword
-          const allWallets = await KeyChain.getAllWallets()
-          const lastIndex = Object.keys(allWallets ?? {}).length
-          const walletId = crypto.randomUUID()
-          let address = _address.toLowerCase()
+          const password = _password ?? savedpassword;
+          const allWallets = await KeyChain.getAllWallets();
+          const lastIndex = Object.keys(allWallets ?? {}).length;
+          const walletId = crypto.randomUUID();
+          let address = _address.toLowerCase();
 
           if (isEthAddress(address)) {
             const res = await fetch(
               chainInfos?.seiTestnet2.apis.evmJsonRpc ?? '',
               getFetchParams([address], 'sei_getSeiAddress'),
-            )
-            const response = await res.json()
-            address = response.result ?? address
+            );
+            const response = await res.json();
+            address = response.result ?? address;
           }
 
-          const addresses = generateAddresses(address)
-          const invalidPubkeys = {} as Record<SupportedChain, string>
+          const addresses = generateAddresses(address);
+          const invalidPubkeys = {} as Record<SupportedChain, string>;
           for (const [chain, address] of Object.entries(addresses)) {
-            invalidPubkeys[chain as SupportedChain] = 'PLACEHOLDER ' + address
+            invalidPubkeys[chain as SupportedChain] = 'PLACEHOLDER ' + address;
             if (COMPASS_CHAINS.includes(chain)) {
               const res = await fetch(
                 chainInfos?.seiTestnet2.apis.evmJsonRpc ?? '',
                 getFetchParams([address], 'sei_getEVMAddress'),
-              )
-              const response = await res.json()
-              invalidPubkeys[chain as SupportedChain] = 'PLACEHOLDER ' + response.result
+              );
+              const response = await res.json();
+              invalidPubkeys[chain as SupportedChain] = 'PLACEHOLDER ' + response.result;
             }
           }
 
-          if (!password) throw new Error('Invalid Password')
+          if (!password) throw new Error('Invalid Password');
 
           const newWallet: Key = {
             walletType: WALLETTYPE.WATCH_WALLET,
@@ -717,130 +656,123 @@ export namespace Wallet {
             pubKeys: invalidPubkeys,
             watchWallet: true,
             createdAt: Date.now(),
-          }
+          };
 
-          await Wallet.storeWallets({ [walletId]: newWallet })
-          setActiveWallet(newWallet)
+          await Wallet.storeWallets({ [walletId]: newWallet });
+          setActiveWallet(newWallet);
         } catch (error) {
-          throw new Error('Unable to save watch wallet')
+          throw new Error('Unable to save watch wallet');
         }
       },
       [chainInfos?.seiTestnet2.apis.evmJsonRpc, savedpassword, setActiveWallet],
-    )
+    );
   }
 
   export function useUpdateWatchWalletSeed() {
-    const { activeWallet } = useActiveWallet()
-    const importWallet = Wallet.useImportWallet()
-    const password = passwordStore.password
-    const chainInfos = useChainInfos()
+    const { activeWallet } = useActiveWallet();
+    const importWallet = Wallet.useImportWallet();
+    const password = passwordStore.password;
+    const chainInfos = useChainInfos();
     return useCallback(
       async (secret: string) => {
-        if (!activeWallet) throw new Error('No active wallet')
-        if (!password) throw new Error('Invalid password')
-        const [existingWalletChain, existingAddress] = Object.entries(
-          activeWallet?.addresses ?? {},
-        )[0]
-        const walletChainInfo = chainInfos[existingWalletChain as SupportedChain]
+        if (!activeWallet) throw new Error('No active wallet');
+        if (!password) throw new Error('Invalid password');
+        const [existingWalletChain, existingAddress] = Object.entries(activeWallet?.addresses ?? {})[0];
+        const walletChainInfo = chainInfos[existingWalletChain as SupportedChain];
         if (SeedPhrase.validateSeedPhrase(secret)) {
-          let walletAccount
-          let addressIndex = 0
+          let walletAccount;
+          let addressIndex = 0;
           for (let i = 0; i < 20; i++) {
             const wallet = generateWalletFromMnemonic(secret, {
               hdPath: getFullHDPath(
-                walletChainInfo.bip44.coinType === '1' || walletChainInfo.bip44.coinType === '0'
-                  ? '84'
-                  : '44',
+                walletChainInfo.bip44.coinType === '1' || walletChainInfo.bip44.coinType === '0' ? '84' : '44',
                 walletChainInfo.bip44.coinType,
                 i.toString(),
               ),
               addressPrefix: walletChainInfo.addressPrefix,
               ethWallet: false,
               btcNetwork: walletChainInfo.btcNetwork,
-            })
+            });
 
             if (wallet.getAccounts()[0].address === existingAddress) {
-              walletAccount = wallet
-              addressIndex = i
-              break
+              walletAccount = wallet;
+              addressIndex = i;
+              break;
             }
           }
 
           if (walletAccount) {
-            await KeyChain.removeWallets([activeWallet.id])
+            await KeyChain.removeWallets([activeWallet.id]);
             await importWallet({
               name: activeWallet.name,
               addressIndex: addressIndex.toString(),
               password,
               privateKey: secret,
               colorIndex: activeWallet.colorIndex,
-            })
+            });
           } else {
             await importWallet({
               privateKey: secret,
               addressIndex: '0',
               password,
-            })
+            });
           }
         } else {
           const pkWallet = generateWalletFromPrivateKey(
             secret,
             getFullHDPath(
-              walletChainInfo.bip44.coinType === '1' || walletChainInfo.bip44.coinType === '0'
-                ? '84'
-                : '44',
+              walletChainInfo.bip44.coinType === '1' || walletChainInfo.bip44.coinType === '0' ? '84' : '44',
               walletChainInfo.bip44.coinType,
             ),
             walletChainInfo.addressPrefix,
             walletChainInfo.btcNetwork,
-          )
+          );
 
-          const wallet =
-            pkWallet.getAccounts()[0].address === existingAddress ? pkWallet : undefined
+          const wallet = pkWallet.getAccounts()[0].address === existingAddress ? pkWallet : undefined;
           if (wallet) {
-            await KeyChain.removeWallets([activeWallet.id])
+            await KeyChain.removeWallets([activeWallet.id]);
             await importWallet({
               name: activeWallet.name,
               addressIndex: '0',
               password,
               privateKey: secret,
               colorIndex: activeWallet.colorIndex,
-            })
+            });
           } else {
             await importWallet({
               privateKey: secret,
               addressIndex: '0',
               password,
-            })
+            });
           }
         }
       },
       [activeWallet, chainInfos, importWallet, password],
-    )
+    );
   }
 
   export function useAptosSigner() {
-    const { activeWallet } = useActiveWallet()
-    const chainInfos = useChainInfos()
+    const { activeWallet } = useActiveWallet();
+    const chainInfos = useChainInfos();
     return async (chain: SupportedChain) => {
-      if (!activeWallet) throw new Error('No active wallet')
-      if (!passwordStore.password) throw new Error('Invalid Password')
+      if (!activeWallet) throw new Error('No active wallet');
+      if (!passwordStore.password) throw new Error('Invalid Password');
 
-      const coinType = chainInfos[chain]?.bip44?.coinType
-      const walletType = activeWallet.walletType
-      const addressIndex = activeWallet.addressIndex
-      const path = getFullHDPath('44', coinType, addressIndex.toString())
+      const coinType = chainInfos[chain]?.bip44?.coinType;
+      const walletType = activeWallet.walletType;
+      const addressIndex = activeWallet.addressIndex;
+      const path = getFullHDPath('44', coinType, addressIndex.toString());
       if (walletType === WALLETTYPE.SEED_PHRASE || walletType === WALLETTYPE.SEED_PHRASE_IMPORTED) {
-        const mnemonic = decrypt(activeWallet.cipher, passwordStore.password)
-        const account = await customKeygenfnMove(mnemonic, path, 'seedPhrase')
-        return account
+        const mnemonic = decrypt(activeWallet.cipher, passwordStore.password);
+        const account = await customKeygenfnMove(mnemonic, path, 'seedPhrase');
+        return account;
       } else if (walletType === WALLETTYPE.PRIVATE_KEY) {
-        const privateKey = decrypt(activeWallet.cipher, passwordStore.password)
-        const account = await customKeygenfnMove(privateKey, path, 'privateKey')
-        return account
+        const privateKey = decrypt(activeWallet.cipher, passwordStore.password);
+        const account = await customKeygenfnMove(privateKey, path, 'privateKey');
+        return account;
       } else {
-        throw new Error('Invalid wallet type')
+        throw new Error('Invalid wallet type');
       }
-    }
+    };
   }
 }

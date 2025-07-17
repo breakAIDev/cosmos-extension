@@ -1,15 +1,15 @@
-import classNames from 'classnames'
-import { Images } from 'images'
-import React from 'react'
-import { isSidePanel } from 'utils/isSidePanel'
+import classNames from 'classnames';
+import { Images } from 'images';
+import React from 'react';
+import { isSidePanel } from 'utils/isSidePanel';
 
 type NftDetailsMenuProps = {
-  handleProfileClick: VoidFunction
-  isInProfile: boolean
-  showProfileOption: boolean
-  handleHideNftClick: VoidFunction
-  isInHiddenNfts: boolean
-}
+  handleProfileClick: VoidFunction;
+  isInProfile: boolean;
+  showProfileOption: boolean;
+  handleHideNftClick: VoidFunction;
+  isInHiddenNfts: boolean;
+};
 
 export function NftDetailsMenu({
   handleProfileClick,
@@ -37,11 +37,7 @@ export function NftDetailsMenu({
       <div className='flex px-3 py-4 cursor-pointer' onClick={handleHideNftClick}>
         {isInHiddenNfts ? (
           <>
-            <img
-              className='mr-3 invert dark:invert-0'
-              src={Images.Misc.UnhideNft}
-              alt='unhide nft'
-            />
+            <img className='mr-3 invert dark:invert-0' src={Images.Misc.UnhideNft} alt='unhide nft' />
             Unhide NFT
           </>
         ) : (
@@ -52,5 +48,5 @@ export function NftDetailsMenu({
         )}
       </div>
     </div>
-  )
+  );
 }

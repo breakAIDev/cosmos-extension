@@ -6,89 +6,86 @@ import {
   useChainInfo,
   useGetProposal,
   useSelectedNetwork,
-} from '@leapwallet/cosmos-wallet-hooks'
-import { axiosWrapper, SupportedChain } from '@leapwallet/cosmos-wallet-sdk'
-import { GovStore, Proposal, ProposalApi } from '@leapwallet/cosmos-wallet-store'
-import { Header, HeaderActionType, LineDivider } from '@leapwallet/leap-ui'
-import { ArrowSquareOut } from '@phosphor-icons/react'
-import { captureException } from '@sentry/react'
-import { useQuery } from '@tanstack/react-query'
-import axios from 'axios'
-import PopupLayout from 'components/layout/popup-layout'
-import { ProposalDescription } from 'components/proposal-description'
-import Text from 'components/text'
-import { Button } from 'components/ui/button'
-import { useChainPageInfo } from 'hooks'
-import useActiveWallet from 'hooks/settings/useActiveWallet'
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo'
-import Vote from 'icons/vote'
-import { observer } from 'mobx-react-lite'
-import React, { useMemo, useState } from 'react'
-import Skeleton from 'react-loading-skeleton'
-import { PieChart } from 'react-minimal-pie-chart'
-import { importWatchWalletSeedPopupStore } from 'stores/import-watch-wallet-seed-popup-store'
-import { delegationsStore } from 'stores/stake-store'
-import { cn } from 'utils/cn'
-import { imgOnError } from 'utils/imgOnError'
-import { uiErrorTags } from 'utils/sentry'
+} from '@leapwallet/cosmos-wallet-hooks';
+import { axiosWrapper, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { GovStore, Proposal, ProposalApi } from '@leapwallet/cosmos-wallet-store';
+import { Header, HeaderActionType, LineDivider } from '@leapwallet/leap-ui';
+import { ArrowSquareOut } from '@phosphor-icons/react';
+import { captureException } from '@sentry/react';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
+import PopupLayout from 'components/layout/popup-layout';
+import { ProposalDescription } from 'components/proposal-description';
+import Text from 'components/text';
+import { Button } from 'components/ui/button';
+import { useChainPageInfo } from 'hooks';
+import useActiveWallet from 'hooks/settings/useActiveWallet';
+import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import Vote from 'icons/vote';
+import { observer } from 'mobx-react-lite';
+import React, { useMemo, useState } from 'react';
+import Skeleton from 'react-loading-skeleton';
+import { PieChart } from 'react-minimal-pie-chart';
+import { importWatchWalletSeedPopupStore } from 'stores/import-watch-wallet-seed-popup-store';
+import { delegationsStore } from 'stores/stake-store';
+import { cn } from 'utils/cn';
+import { imgOnError } from 'utils/imgOnError';
+import { uiErrorTags } from 'utils/sentry';
 
-import { getPercentage } from '../utils'
-import GovHeader from './GovHeader'
-import { CastVote, RequireMinStaking, ShowVotes, Turnout, VoteDetails } from './index'
-import { ProposalStatus, ProposalStatusEnum } from './ProposalStatus'
+import { getPercentage } from '../utils';
+import GovHeader from './GovHeader';
+import { CastVote, RequireMinStaking, ShowVotes, Turnout, VoteDetails } from './index';
+import { ProposalStatus, ProposalStatusEnum } from './ProposalStatus';
 
 export type ProposalDetailsProps = {
-  selectedProp: string | undefined
-  onBack: () => void
-  forceChain?: SupportedChain
-  forceNetwork?: 'mainnet' | 'testnet'
-  governanceStore: GovStore
-}
+  selectedProp: string | undefined;
+  onBack: () => void;
+  forceChain?: SupportedChain;
+  forceNetwork?: 'mainnet' | 'testnet';
+  governanceStore: GovStore;
+};
 
 const activeProposalStatusTypes = [
   ProposalStatusEnum.PROPOSAL_STATUS_VOTING_PERIOD,
   ProposalStatusEnum.PROPOSAL_STATUS_DEPOSIT_PERIOD,
-]
+];
 
 export const ProposalDetails = observer(
   ({ selectedProp, onBack, forceChain, forceNetwork, governanceStore }: ProposalDetailsProps) => {
-    const { data: proposalList, shouldUseFallback } = governanceStore.chainProposals
+    const { data: proposalList, shouldUseFallback } = governanceStore.chainProposals;
 
-    const _activeChain = useActiveChain()
-    const activeChain = useMemo(() => forceChain || _activeChain, [_activeChain, forceChain])
-    const _selectedNetwork = useSelectedNetwork()
-    const selectedNetwork = useMemo(
-      () => forceNetwork || _selectedNetwork,
-      [_selectedNetwork, forceNetwork],
-    )
-    const { activeWallet } = useActiveWallet()
-    const address = useAddress(activeChain)
-    const activeChainInfo = useChainInfo(activeChain)
-    const { lcdUrl, txUrl } = useChainApis(activeChain, selectedNetwork)
-    const [showCastVoteSheet, setShowCastVoteSheet] = useState<boolean>(false)
-    const defaultTokenLogo = useDefaultTokenLogo()
+    const _activeChain = useActiveChain();
+    const activeChain = useMemo(() => forceChain || _activeChain, [_activeChain, forceChain]);
+    const _selectedNetwork = useSelectedNetwork();
+    const selectedNetwork = useMemo(() => forceNetwork || _selectedNetwork, [_selectedNetwork, forceNetwork]);
+    const { activeWallet } = useActiveWallet();
+    const address = useAddress(activeChain);
+    const activeChainInfo = useChainInfo(activeChain);
+    const { lcdUrl, txUrl } = useChainApis(activeChain, selectedNetwork);
+    const [showCastVoteSheet, setShowCastVoteSheet] = useState<boolean>(false);
+    const defaultTokenLogo = useDefaultTokenLogo();
 
-    const { delegationInfo } = delegationsStore.delegationsForChain(activeChain)
+    const { delegationInfo } = delegationsStore.delegationsForChain(activeChain);
     const hasMinAmountStaked = useMemo(() => {
       if (activeChain === 'cosmos' || activeChainInfo.chainId === 'atomone-1') {
-        return delegationInfo?.totalDelegation?.gte(1)
+        return delegationInfo?.totalDelegation?.gte(1);
       }
 
-      return true
-    }, [activeChain, delegationInfo?.totalDelegation, activeChainInfo.chainId])
+      return true;
+    }, [activeChain, delegationInfo?.totalDelegation, activeChainInfo.chainId]);
 
-    const { topChainColor } = useChainPageInfo()
+    const { topChainColor } = useChainPageInfo();
     const proposal = useMemo(
       () => (proposalList as any[]).find((prop) => prop.proposal_id === selectedProp),
       [proposalList, selectedProp],
-    )
+    );
 
     const isProposalInVotingPeriod = useMemo(() => {
       return [
         ProposalStatusEnum.PROPOSAL_STATUS_VOTING_PERIOD,
         ProposalStatusEnum.PROPOSAL_STATUS_IN_PROGRESS,
-      ].includes(proposal.status)
-    }, [proposal.status])
+      ].includes(proposal.status);
+    }, [proposal.status]);
 
     const {
       data: currVote,
@@ -102,16 +99,16 @@ export const ProposalDetails = observer(
             const { data } = await axios.post(
               `${process.env.LEAP_WALLET_BACKEND_API_URL}/gov/vote/${activeChainInfo.chainId}/${selectedProp}`,
               { userAddress: address },
-            )
-            return data
+            );
+            return data;
           } catch (error: any) {
             try {
-              let prefix = '/cosmos'
+              let prefix = '/cosmos';
               if (activeChainInfo?.chainId === 'govgen-1') {
-                prefix = '/govgen'
+                prefix = '/govgen';
               }
               if (activeChainInfo?.chainId === 'atomone-1') {
-                prefix = '/atomone'
+                prefix = '/atomone';
               }
               const data = await axiosWrapper(
                 {
@@ -121,18 +118,18 @@ export const ProposalDetails = observer(
                 },
                 1,
                 'proposals-votes',
-              )
+              );
 
-              const voteOption = data.data.vote.options[0].option
-              return voteOption.replace('VOTE_OPTION_', '')
+              const voteOption = data.data.vote.options[0].option;
+              return voteOption.replace('VOTE_OPTION_', '');
             } catch (error: any) {
               if (error.response.data.code === 3 || error.response.data.error?.code === -32700) {
-                return 'NO_VOTE'
+                return 'NO_VOTE';
               } else {
                 captureException(error, {
                   tags: uiErrorTags,
-                })
-                throw new Error(error)
+                });
+                throw new Error(error);
               }
             }
           }
@@ -140,11 +137,11 @@ export const ProposalDetails = observer(
       },
       {
         retry: (failureCount) => {
-          return failureCount !== 2
+          return failureCount !== 2;
         },
         enabled: isProposalInVotingPeriod,
       },
-    )
+    );
 
     // eslint-disable-next-line prefer-const
     let { data: _proposalVotes, status } = useGetProposal(
@@ -152,18 +149,15 @@ export const ProposalDetails = observer(
       shouldUseFallback,
       activeChain,
       selectedNetwork,
-    )
+    );
 
-    status = shouldUseFallback ? status : 'success'
-    const { yes, no, abstain, no_with_veto } = (proposal.tally ||
-      _proposalVotes ||
-      proposal.final_tally_result) as any
-    const totalVotes =
-      [yes, no, abstain, no_with_veto].reduce((sum, val) => sum + Number(val ?? 0), 0) || 1
+    status = shouldUseFallback ? status : 'success';
+    const { yes, no, abstain, no_with_veto } = (proposal.tally || _proposalVotes || proposal.final_tally_result) as any;
+    const totalVotes = [yes, no, abstain, no_with_veto].reduce((sum, val) => sum + Number(val ?? 0), 0) || 1;
 
     const dataMock = useMemo(() => {
       if (!totalVotes) {
-        return [{ title: 'loading', value: 1, color: '#ccc', percent: '0%' }]
+        return [{ title: 'loading', value: 1, color: '#ccc', percent: '0%' }];
       }
       const data = [
         {
@@ -178,47 +172,45 @@ export const ProposalDetails = observer(
           color: '#FF707E',
           percent: getPercentage(+no, totalVotes),
         },
-      ]
+      ];
       if (activeChainInfo.chainId !== 'atomone-1') {
         data.push({
           title: 'No with Veto',
           value: +no_with_veto,
           color: '#8583EC',
           percent: getPercentage(+no_with_veto, totalVotes),
-        })
+        });
       }
       data.push({
         title: 'Abstain',
         value: +abstain,
         color: '#D1A700',
         percent: getPercentage(+abstain, totalVotes),
-      })
-      return data
-    }, [abstain, no, no_with_veto, totalVotes, yes, activeChainInfo.chainId])
+      });
+      return data;
+    }, [abstain, no, no_with_veto, totalVotes, yes, activeChainInfo.chainId]);
 
     const tallying = useMemo(() => {
-      let votingPower = (_proposalVotes as any)?.bonded_tokens
+      let votingPower = (_proposalVotes as any)?.bonded_tokens;
       if (
         ['initia', 'initiaEvm'].includes(activeChain) &&
         Array.isArray(votingPower) &&
         Array.isArray((_proposalVotes as any)?.voting_power_weights)
       ) {
-        const bondedTokens: { amount: string; denom: string }[] = (_proposalVotes as any)
-          ?.bonded_tokens
-        const votingPowerWeights = (_proposalVotes as any)?.voting_power_weights
+        const bondedTokens: { amount: string; denom: string }[] = (_proposalVotes as any)?.bonded_tokens;
+        const votingPowerWeights = (_proposalVotes as any)?.voting_power_weights;
         votingPower = bondedTokens
           .reduce((acc: bigint, val: { amount: string; denom: string }) => {
             const individualVotingPowerWeight = votingPowerWeights?.find(
-              (votingPowerWeight: { amount: string; denom: string }) =>
-                votingPowerWeight.denom === val.denom,
-            )?.amount
+              (votingPowerWeight: { amount: string; denom: string }) => votingPowerWeight.denom === val.denom,
+            )?.amount;
             if (!individualVotingPowerWeight) {
-              return acc
+              return acc;
             }
-            acc += BigInt(parseInt(val.amount)) * BigInt(parseInt(individualVotingPowerWeight))
-            return acc
+            acc += BigInt(parseInt(val.amount)) * BigInt(parseInt(individualVotingPowerWeight));
+            return acc;
           }, BigInt(0))
-          ?.toString()
+          ?.toString();
       }
 
       return [
@@ -230,33 +222,24 @@ export const ProposalDetails = observer(
           label: 'Quorum',
           value: !shouldUseFallback ? proposal.quorum : (_proposalVotes as any)?.quorum * 100,
         },
-      ]
-    }, [
-      _proposalVotes,
-      activeChain,
-      proposal.quorum,
-      proposal.turnout,
-      shouldUseFallback,
-      totalVotes,
-    ])
+      ];
+    }, [_proposalVotes, activeChain, proposal.quorum, proposal.turnout, shouldUseFallback, totalVotes]);
 
     const proposer = useMemo(() => {
       if (!shouldUseFallback) {
         return proposal?.proposer?.address
           ? {
               address: proposal?.proposer?.address,
-              url:
-                proposal?.proposer?.url ??
-                `${txUrl?.replace('txs', 'account')}/${proposal?.proposer?.address}`,
+              url: proposal?.proposer?.url ?? `${txUrl?.replace('txs', 'account')}/${proposal?.proposer?.address}`,
             }
-          : undefined
+          : undefined;
       }
       return _proposalVotes?.proposer?.depositor
         ? {
             address: _proposalVotes?.proposer?.depositor as string,
             url: _proposalVotes?.proposerTxUrl as string | undefined,
           }
-        : undefined
+        : undefined;
     }, [
       _proposalVotes?.proposer?.depositor,
       _proposalVotes?.proposerTxUrl,
@@ -264,33 +247,31 @@ export const ProposalDetails = observer(
       proposal?.proposer?.url,
       shouldUseFallback,
       txUrl,
-    ])
+    ]);
 
     return (
       <>
         <GovHeader onBack={onBack} title='Proposal' />
         <div className='flex flex-col p-6 overflow-y-scroll'>
           <div className='text-muted-foreground text-sm mb-2 font-medium'>
-            #{proposal.proposal_id} ·{' '}
-            <ProposalStatus status={proposal.status as ProposalStatusEnum} />
+            #{proposal.proposal_id} · <ProposalStatus status={proposal.status as ProposalStatusEnum} />
           </div>
           <div className='text-foreground font-bold text-lg break-words'>
             {proposal?.title ?? proposal?.content?.title}
           </div>
 
-          {proposal.status === ProposalStatusEnum.PROPOSAL_STATUS_VOTING_PERIOD &&
-            !hasMinAmountStaked && (
-              <RequireMinStaking forceChain={activeChain} forceNetwork={selectedNetwork} />
-            )}
+          {proposal.status === ProposalStatusEnum.PROPOSAL_STATUS_VOTING_PERIOD && !hasMinAmountStaked && (
+            <RequireMinStaking forceChain={activeChain} forceNetwork={selectedNetwork} />
+          )}
 
           <VoteDetails
             proposal={proposal}
             activeChain={activeChain}
             onVote={() => {
               if (activeWallet?.watchWallet) {
-                importWatchWalletSeedPopupStore.setShowPopup(true)
+                importWatchWalletSeedPopupStore.setShowPopup(true);
               } else {
-                setShowCastVoteSheet(true)
+                setShowCastVoteSheet(true);
               }
             }}
             currVote={currVote ?? ''}
@@ -310,9 +291,7 @@ export const ProposalDetails = observer(
                     <PieChart data={dataMock} lineWidth={20} />
                   )}
 
-                  <p className='text-md dark:text-white-100 text-dark-gray font-bold absolute'>
-                    Current Status
-                  </p>
+                  <p className='text-md dark:text-white-100 text-dark-gray font-bold absolute'>Current Status</p>
                 </div>
               </div>
 
@@ -380,16 +359,15 @@ export const ProposalDetails = observer(
           )}
         </div>
 
-        {(proposal as Proposal | ProposalApi).status ===
-          ProposalStatusEnum.PROPOSAL_STATUS_VOTING_PERIOD && (
+        {(proposal as Proposal | ProposalApi).status === ProposalStatusEnum.PROPOSAL_STATUS_VOTING_PERIOD && (
           <div className='w-full p-4 mt-auto sticky bottom-0 bg-secondary-100 '>
             <Button
               className={cn('w-full')}
               onClick={() => {
                 if (activeWallet?.watchWallet) {
-                  importWatchWalletSeedPopupStore.setShowPopup(true)
+                  importWatchWalletSeedPopupStore.setShowPopup(true);
                 } else {
-                  setShowCastVoteSheet(true)
+                  setShowCastVoteSheet(true);
                 }
               }}
               disabled={!hasMinAmountStaked}
@@ -412,6 +390,6 @@ export const ProposalDetails = observer(
           forceNetwork={selectedNetwork}
         />
       </>
-    )
+    );
   },
-)
+);

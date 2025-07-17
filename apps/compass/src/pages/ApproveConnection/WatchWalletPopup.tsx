@@ -1,10 +1,10 @@
-import { Button } from 'components/ui/button'
-import { EyeIcon } from 'icons/eye-icon'
-import React from 'react'
+import { Button } from 'components/ui/button';
+import { EyeIcon } from 'icons/eye-icon';
+import React from 'react';
 
 type WatchWalletPopupProps = {
-  handleCancel: () => void
-}
+  handleCancel: () => void;
+};
 
 export default function WatchWalletPopup({ handleCancel }: WatchWalletPopupProps) {
   return (
@@ -25,5 +25,5 @@ export default function WatchWalletPopup({ handleCancel }: WatchWalletPopupProps
         Cancel
       </Button>
     </>
-  )
+  );
 }

@@ -1,23 +1,23 @@
-import Text from 'components/text'
-import { AGGREGATED_CHAIN_KEY } from 'config/constants'
-import { useActiveChain } from 'hooks/settings/useActiveChain'
-import { useGetWalletAddresses } from 'hooks/useGetWalletAddresses'
-import { observer } from 'mobx-react-lite'
-import React, { useCallback } from 'react'
-import { AggregatedSupportedChain } from 'types/utility'
-import { closeSidePanel } from 'utils/closeSidePanel'
-import Browser from 'webextension-polyfill'
+import Text from 'components/text';
+import { AGGREGATED_CHAIN_KEY } from 'config/constants';
+import { useActiveChain } from 'hooks/settings/useActiveChain';
+import { useGetWalletAddresses } from 'hooks/useGetWalletAddresses';
+import { observer } from 'mobx-react-lite';
+import React, { useCallback } from 'react';
+import { AggregatedSupportedChain } from 'types/utility';
+import { closeSidePanel } from 'utils/closeSidePanel';
+import Browser from 'webextension-polyfill';
 
-import { BalanceHeader } from './balance-header'
+import { BalanceHeader } from './balance-header';
 
 export const HeroSection = observer(() => {
-  const activeChain = useActiveChain() as AggregatedSupportedChain
-  const walletAddresses = useGetWalletAddresses()
+  const activeChain = useActiveChain() as AggregatedSupportedChain;
+  const walletAddresses = useGetWalletAddresses();
 
   const handleConnectEvmWalletClick = useCallback(() => {
-    window.open(Browser.runtime.getURL('index.html#/onboardingImport?walletName=evm-ledger'))
-    closeSidePanel()
-  }, [])
+    window.open(Browser.runtime.getURL('index.html#/onboardingImport?walletName=evm-ledger'));
+    closeSidePanel();
+  }, []);
 
   return (
     <>
@@ -32,10 +32,7 @@ export const HeroSection = observer(() => {
             </Text>
 
             <div onClick={handleConnectEvmWalletClick}>
-              <Text
-                size='sm'
-                className='font-bold bg-gray-800 rounded-2xl py-1 px-3 w-fit mx-auto cursor-pointer'
-              >
+              <Text size='sm' className='font-bold bg-gray-800 rounded-2xl py-1 px-3 w-fit mx-auto cursor-pointer'>
                 Connect EVM wallet
               </Text>
             </div>
@@ -43,5 +40,5 @@ export const HeroSection = observer(() => {
         ) : null
       ) : null}
     </>
-  )
-})
+  );
+});
