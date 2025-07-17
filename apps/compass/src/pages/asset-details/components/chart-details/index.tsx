@@ -7,9 +7,9 @@ import {
   LeapWalletApi,
   Token,
   useActiveStakingDenom,
-  useAssetDetails,
   useAssetSocials,
   useChainInfo,
+  useCompassAssetDetails,
   useFeatureFlags,
   useformatCurrency,
   useIsFeatureExistForChain,
@@ -190,13 +190,13 @@ const TokensDetails = observer(
       setSelectedDays,
       selectedDays,
       denomInfo: _denomInfo,
-    } = useAssetDetails({
+    } = useCompassAssetDetails({
       denoms: Object.assign({}, rootDenomsStore.allDenoms, compassTokenTagsStore.compassTokenDenomInfo),
       denom: assetsId as unknown as SupportedDenoms,
       tokenChain: (tokenChain ?? 'cosmos') as unknown as SupportedChain,
       compassParams,
-      marketDataStore,
       coingeckoIdsStore,
+      marketDataStore,
     });
 
     const denomInfo: NativeDenom = _denomInfo ?? {

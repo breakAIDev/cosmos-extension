@@ -4,7 +4,7 @@ import {
   formatTokenAmount,
   Token,
   useActiveWallet,
-  useAssetDetails,
+  useCompassAssetDetails,
   useformatCurrency,
 } from '@leapwallet/cosmos-wallet-hooks';
 import { NativeDenom, SupportedDenoms } from '@leapwallet/cosmos-wallet-sdk';
@@ -51,6 +51,7 @@ type TokenDetailsProps = {
 
 const AssetDetails = observer(
   ({
+    denomsStore,
     rootDenomsStore,
     compassTokensAssociationsStore,
     compassSeiEvmConfigStore,
@@ -111,13 +112,13 @@ const AssetDetails = observer(
       setSelectedDays,
       selectedDays,
       denomInfo: _denomInfo,
-    } = useAssetDetails({
+    } = useCompassAssetDetails({
       denoms: Object.assign({}, rootDenomsStore.allDenoms, compassTokenTagsStore.compassTokenDenomInfo),
       denom: assetsId as unknown as SupportedDenoms,
       tokenChain: activeChain,
       compassParams,
-      marketDataStore,
       coingeckoIdsStore,
+      marketDataStore,
     });
 
     const denomInfo: NativeDenom = _denomInfo ?? {

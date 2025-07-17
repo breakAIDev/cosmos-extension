@@ -1,5 +1,10 @@
 import { DenomsRecord, isValidAddressWithPrefix, SupportedChain, SupportedDenoms } from '@leapwallet/cosmos-wallet-sdk';
-import { CoingeckoIdsStore, MarketData, PercentageChangeDataStore, PriceStore } from '@leapwallet/cosmos-wallet-store';
+import {
+  CoingeckoIdsStore,
+  MarketDataStore,
+  PercentageChangeDataStore,
+  PriceStore,
+} from '@leapwallet/cosmos-wallet-store';
 import { useQuery } from '@tanstack/react-query';
 import { differenceInDays } from 'date-fns';
 import { useMemo, useState } from 'react';
@@ -25,6 +30,15 @@ type UseAssetDetailsProps = {
   coingeckoIdsStore: CoingeckoIdsStore;
   percentageChangeDataStore: PercentageChangeDataStore;
   priceStore: PriceStore;
+};
+
+type UseCompassAssetDetailsProps = {
+  denoms: DenomsRecord;
+  denom: SupportedDenoms;
+  tokenChain: SupportedChain;
+  compassParams: CompassDenomInfoParams;
+  coingeckoIdsStore: CoingeckoIdsStore;
+  marketDataStore: MarketDataStore;
 };
 
 export function useAssetDetails({
@@ -212,6 +226,168 @@ export function useAssetDetails({
           price,
         };
       }
+    },
+    { enabled: !!denomInfo, retry: 2 },
+  );
+
+  return {
+    activeChain,
+    chartData,
+    ChartDays,
+    info,
+    loadingCharts,
+    errorCharts,
+    errorInfo,
+    setSelectedDays,
+    selectedDays,
+    loadingPrice,
+    denomInfo,
+  };
+}
+
+export function useCompassAssetDetails({
+  denoms,
+  denom,
+  tokenChain,
+  compassParams,
+  coingeckoIdsStore,
+  marketDataStore,
+}: UseCompassAssetDetailsProps) {
+  const activeChain = useActiveChain();
+  const [selectedDays, setSelectedDays] = useState<string>('1D');
+  const [preferredCurrency] = useUserPreferredCurrency();
+  const { secretTokens } = useSecretTokenStore();
+  const chainInfo = useChainInfo(tokenChain);
+  const selectedNetwork = useSelectedNetwork();
+  const chainId = selectedNetwork === 'mainnet' ? chainInfo?.chainId : chainInfo?.testnetChainId;
+  const isCompassWallet = useIsCompassWallet();
+  const autoFetchedCW20Tokens = useAutoFetchedCW20Tokens();
+  const coingeckoIds = coingeckoIdsStore.coingeckoIdsFromS3;
+
+  const combinedDenoms = useMemo(() => {
+    if (isCompassWallet) {
+      return Object.assign({}, denoms, autoFetchedCW20Tokens);
+    }
+    return Object.assign({}, denoms, autoFetchedCW20Tokens);
+  }, [denoms, autoFetchedCW20Tokens]);
+
+  const ChartDays: Record<string, number> = {
+    '1D': 1,
+    '7D': 7,
+    '1M': 30,
+    '1Y': 365,
+    YTD: 365,
+    All: 2000,
+  };
+
+  const denomInfoKey = useMemo(() => {
+    return ['denom-info', denom, tokenChain, Object.keys(combinedDenoms ?? {}).length, compassParams];
+  }, [Object.keys(combinedDenoms ?? {}).length]);
+
+  const { data: denomInfo } = useQuery(denomInfoKey, async () => {
+    if (isValidAddressWithPrefix(denom, 'secret') && secretTokens[denom]) {
+      const denomInfo = convertSecretDenom(secretTokens[denom], denom);
+      if (!denomInfo) {
+        return undefined;
+      }
+      return {
+        ...denomInfo,
+        coinGeckoId: denomInfo?.coinGeckoId || coingeckoIds[denomInfo?.coinMinimalDenom ?? ''] || '',
+      };
+    }
+
+    const denomInfo = await getDenomInfo(denom, tokenChain, combinedDenoms, compassParams);
+    if (!denomInfo) {
+      return undefined;
+    }
+    return {
+      ...denomInfo,
+      coinGeckoId: denomInfo?.coinGeckoId || coingeckoIds[denomInfo?.coinMinimalDenom ?? ''] || '',
+    };
+  });
+
+  const {
+    data: chartData,
+    isLoading: loadingCharts,
+    error: errorCharts,
+  } = useQuery(
+    ['chartData', denom, selectedDays],
+    async () => {
+      if (denom && selectedDays && (denomInfo?.coinGeckoId || denomInfo?.chain === 'osmosis')) {
+        try {
+          const date = new Date();
+          date.setDate(1);
+          date.setMonth(0);
+          date.setFullYear(date.getFullYear());
+
+          const YTD = differenceInDays(new Date(), date);
+
+          const response = await LeapWalletApi.getMarketChart(
+            denomInfo.coinGeckoId || denomInfo.coinDenom,
+            denomInfo?.chain as SupportedChain,
+            selectedDays === 'YTD' ? YTD : ChartDays[selectedDays],
+            currencyDetail[preferredCurrency].currencyPointer,
+          );
+
+          if (response) {
+            const { data, minMax } = response;
+            return { chartData: data, minMax };
+          }
+        } catch (_) {
+          //
+        }
+      }
+    },
+    { enabled: !!denomInfo, retry: 2 },
+  );
+
+  const marketDataForToken = useMemo(() => {
+    if (!denomInfo || !marketDataStore.data) return undefined;
+
+    // Key should match your backend's market data structure
+    let key = denomInfo.coinGeckoId ?? denomInfo.coinMinimalDenom;
+    let marketData = marketDataStore.data[key];
+
+    // Try minimal denom if coinGeckoId doesn't match
+    if (!marketData) {
+      key = denomInfo.coinMinimalDenom;
+      marketData = marketDataStore.data[key];
+    }
+
+    // Try key with network/denom if still missing
+    if (!marketData) {
+      key = `${chainId}-${denomInfo.coinMinimalDenom}-${marketDataStore.currencyStore.preferredCurrency}`;
+      marketData = marketDataStore.data[key] ?? marketDataStore.data[key?.toLowerCase()];
+    }
+
+    return marketData;
+  }, [marketDataStore.data, denomInfo]);
+
+  const {
+    data: info,
+    isLoading: loadingPrice,
+    error: errorInfo,
+  } = useQuery(
+    ['assetData', denom, chainId, marketDataForToken],
+    async () => {
+      if (!denom) return;
+      let details;
+      if (denomInfo?.coinGeckoId) {
+        try {
+          const response = await LeapWalletApi.getAssetDescription(
+            denomInfo?.coinGeckoId,
+            denomInfo?.chain as SupportedChain,
+          );
+          details = response ?? '';
+        } catch {
+          // ignore
+        }
+      }
+      return {
+        details,
+        price: marketDataForToken?.current_price,
+        priceChange: marketDataForToken?.price_change_percentage_24h,
+      };
     },
     { enabled: !!denomInfo, retry: 2 },
   );

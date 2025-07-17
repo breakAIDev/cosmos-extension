@@ -117,7 +117,7 @@ export default function ChoosePasswordView({ onProceed, entry }: ViewProps) {
         handleSubmit();
       }
       const form = target.form as HTMLFormElement;
-      const index = [...form].indexOf(target);
+      const index = Array.from(form.elements).indexOf(target);
       (form.elements[index + 1] as HTMLInputElement).focus();
       event.preventDefault();
     }

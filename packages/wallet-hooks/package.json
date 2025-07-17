@@ -1,6 +1,6 @@
 {
   "name": "@leapwallet/cosmos-wallet-hooks",
-  "version": "6.5.2",
+  "version": "6.5.3",
   "description": "Wallet hooks for cosmos mobile app and extension.",
   "main": "dist/index.js",
   "scripts": {
