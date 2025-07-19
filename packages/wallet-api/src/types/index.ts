@@ -398,7 +398,7 @@ export enum Platform {
   Kava = 'KAVA',
   Cronos = 'CRONOS',
   Evmos = 'EVMOS',
-  ThorChain = 'THORCHAIN',
+  ThorChain = 'THOR_CHAIN',
   Agoric = 'AGORIC',
   Akash = 'AKASH',
   Band = 'BAND',
