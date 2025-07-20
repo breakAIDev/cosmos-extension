@@ -30,6 +30,7 @@ export type CustomChainsType = CosmosCustomChainType | EVMCustomChainType;
 export type EVMCustomChainType = ChainInfo & {
   addressPrefix: string;
   evmOnlyChain: true;
+  features?: string[];
 };
 
 export type CosmosCustomChainType = {
@@ -100,14 +101,20 @@ export type EVMChainInfoWithoutEndpoints = BaseChainInfoWithoutEndpoints & {
 
 export type ChainInfosWithoutEndpoints = CosmosChainInfoWithoutEndpoints | EVMChainInfoWithoutEndpoints;
 
+// add "beta?: boolean" if you need it
+export type FormattedChainInfo = ChainInfo & {
+  beta?: boolean;
+  features: string[];
+};
+
 function removeTrailingSlash(url: string) {
   if (!url) return '';
   return url.replace(/\/$/, '');
 }
 
-export function formatNewChainInfo(chainInfo: CustomChainsType) {
+export function formatNewChainInfo(chainInfo: CustomChainsType): FormattedChainInfo {
   if ('evmOnlyChain' in chainInfo) {
-    return { ...chainInfo, beta: true };
+    return { ...chainInfo, beta: true, features: chainInfo.features ?? [] };
   }
   const apis = {
     rest: removeTrailingSlash(chainInfo.rest),
@@ -144,7 +151,7 @@ export function formatNewChainInfo(chainInfo: CustomChainsType) {
     },
     addressPrefix: addressPrefix as AddressPrefix,
     gasPriceStep: gasPriceStep,
-    ibcChannelIds: {},
+    ibcChannelIds: {} as Record<string, [string]>,
     nativeDenoms: {
       [rest.coinMinimalDenom as string]: {
         ...rest,
@@ -152,7 +159,7 @@ export function formatNewChainInfo(chainInfo: CustomChainsType) {
         chain: chainInfo.chainRegistryPath,
       } as NativeDenom,
     },
-    feeCurrencies: chainInfo.feeCurrencies?.map((c) => ({
+    feeCurrencies: chainInfo.feeCurrencies?.map((c: any) => ({
       ...c,
       coinGeckoId: c.coinGeckoId || '',
       icon: c?.coinImageUrl || '',
@@ -163,8 +170,8 @@ export function formatNewChainInfo(chainInfo: CustomChainsType) {
       gradient: 'linear-gradient(180deg, rgba(225, 136, 129, 0.32) 0%, rgba(225, 136, 129, 0) 100%)',
     },
     enabled: chainInfo.status === 'live',
+    features: chainInfo.features ?? [],
     beta: true,
-    features: chainInfo.features || [],
     apiStatus: chainInfo?.apiStatus,
     cosmosSDK: chainInfo?.cosmosSDK,
     ...testnetData,

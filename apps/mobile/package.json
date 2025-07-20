@@ -1,0 +1,93 @@
+{
+  "name": "mobile",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "start": "react-native start",
+    "test": "jest",
+    "format": "prettier --write 'src/**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc",
+    "prettier:check": "prettier -c .",
+    "prettier:write": "prettier -w .",
+    "eslint:lint": "eslint . ",
+    "check": "yarn prettier:check && yarn eslint:lint",
+    "eslint:fix": "eslint --fix ."
+  },
+  "dependencies": {
+    "@react-native/new-app-screen": "0.80.1",
+    "ethers": "^5.8.0",
+    "react": "19.1.0",
+    "react-native": "0.80.1"
+  },
+  "devDependencies": {
+    "@babel/core": "7.18.5",
+    "@babel/preset-env": "7.18.0",
+    "@babel/preset-react": "7.16.7",
+    "@jest/globals": "29.5.0",
+    "@react-native/eslint-config": "^0.80.1",
+    "@rsbuild/core": "1.2.19",
+    "@rsbuild/plugin-react": "1.1.1",
+    "@rspack/core": "1.2.8",
+    "@sentry/webpack-plugin": "2.22.7",
+    "@skip-go/client": "0.16.24",
+    "@tailwindcss/typography": "0.5.16",
+    "@types/chrome": "0.0.269",
+    "@types/crypto-js": "4.1.1",
+    "@types/dompurify": "3.0.5",
+    "@types/jest": "29.5.0",
+    "@types/post-message-stream": "3.0.1",
+    "@types/qs": "6.9.7",
+    "@types/react": "18.3.0",
+    "@types/react-dom": "18.0.5",
+    "@types/react-lottie": "1.2.6",
+    "@types/react-window": "1.8.8",
+    "@types/semver": "7.3.10",
+    "@types/webextension-polyfill": "0.9.0",
+    "autoprefixer": "10.4.4",
+    "babel-loader": "8.2.3",
+    "babel-plugin-istanbul": "6.1.1",
+    "buffer": "6.0.3",
+    "chokidar": "3.5.3",
+    "css-loader": "6.7.1",
+    "dotenv": "16.0.3",
+    "jest": "29.5.0",
+    "postcss": "^8.5.6",
+    "postcss-loader": "6.2.1",
+    "process": "0.11.10",
+    "stream-browserify": "3.0.0",
+    "style-loader": "3.3.1",
+    "svg-url-loader": "7.1.1",
+    "tailwindcss": "3.4.4",
+    "ts-jest": "29.0.5",
+    "typescript": "5.3.3",
+    "webextension-polyfill": "0.11.0",
+    "ws": "8.12.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "browser": {
+    "crypto": false
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testTimeout": 90000,
+    "moduleDirectories": [
+      "node_modules",
+      "src"
+    ],
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "src/pages/**/*"
+    ],
+    "reporters": [
+      "default",
+      "jest-puppeteer-istanbul/lib/reporter"
+    ],
+    "setupFilesAfterEnv": [
+      "jest-puppeteer-istanbul/lib/setup"
+    ],
+    "coverageDirectory": "coverage"
+  }
+}

@@ -16,6 +16,7 @@ import {
   CW20DenomBalanceStore,
   ERC20DenomBalanceStore,
   EvmBalanceStore,
+  MarketDataStore,
   PercentageChangeDataStore,
   PriceStore,
 } from '../bank';
@@ -679,6 +680,139 @@ export class RootStore {
     if (this.initializing !== 'done') return;
     await this.priceStore.getData();
     await this.percentageChangeDataStore.getData();
+    await Promise.all([
+      this.rootBalanceStore.refetchBalances(),
+      this.skipLoadingStake ? Promise.resolve() : this.rootStakeStore.updateStake(undefined, undefined, true),
+    ]);
+  }
+
+  async setChains(chainInfos: Record<SupportedChain, ChainInfo>) {
+    this.chainInfosStore.setChainInfos(chainInfos);
+    if (this.initializing !== 'done') return;
+    await Promise.all([
+      this.rootBalanceStore.loadBalances(),
+      this.skipLoadingStake ? Promise.resolve() : this.rootStakeStore.updateStake(),
+    ]);
+  }
+}
+
+export class CompassRootStore {
+  nmsStore: NmsStore;
+  addressStore: AddressStore;
+  activeChainStore: ActiveChainStore;
+  selectedNetworkStore: SelectedNetworkStore;
+  rootStakeStore: RootStakeStore;
+  rootBalanceStore: RootBalanceStore;
+  marketDataStore: MarketDataStore;
+  currencyStore: CurrencyStore;
+  chainInfosStore: ChainInfosStore;
+  evmBalanceStore: EvmBalanceStore;
+  initializing: 'pending' | 'inprogress' | 'done' = 'pending';
+  initPromise: Promise<[void, void]> | undefined = undefined;
+  skipLoadingStake: boolean = false;
+
+  constructor(
+    nmsStore: NmsStore,
+    addressStore: AddressStore,
+    activeChainStore: ActiveChainStore,
+    selectedNetworkStore: SelectedNetworkStore,
+    rootBalanceStore: RootBalanceStore,
+    rootStakeStore: RootStakeStore,
+    marketDataStore: MarketDataStore,
+    currencyStore: CurrencyStore,
+    chainInfosStore: ChainInfosStore,
+    evmBalanceStore: EvmBalanceStore,
+    skipLoadingStake?: boolean,
+  ) {
+    this.nmsStore = nmsStore;
+    this.addressStore = addressStore;
+    this.activeChainStore = activeChainStore;
+    this.selectedNetworkStore = selectedNetworkStore;
+    this.rootStakeStore = rootStakeStore;
+    this.rootBalanceStore = rootBalanceStore;
+    this.marketDataStore = marketDataStore;
+    this.currencyStore = currencyStore;
+    this.chainInfosStore = chainInfosStore;
+    this.evmBalanceStore = evmBalanceStore;
+    this.skipLoadingStake = skipLoadingStake ?? false;
+
+    makeObservable(this, {
+      initializing: observable,
+    });
+  }
+
+  async initStores() {
+    if (this.initializing !== 'pending') return;
+    runInAction(() => {
+      this.initializing = 'inprogress';
+    });
+    await Promise.allSettled([
+      this.nmsStore.readyPromise,
+      this.addressStore.loadAddresses(),
+      this.marketDataStore.readyPromise,
+    ]);
+
+    this.initPromise = Promise.all([
+      this.rootBalanceStore.loadBalances(),
+      this.skipLoadingStake ? Promise.resolve() : this.rootStakeStore.updateStake(),
+    ]);
+    await this.initPromise;
+    runInAction(() => {
+      this.initializing = 'done';
+    });
+  }
+
+  async reloadAddresses(chain?: AggregatedSupportedChainType) {
+    await this.addressStore.loadAddresses();
+    if (this.initializing !== 'done') {
+      this.initPromise && (await this.initPromise);
+    }
+    if (this.addressStore.addresses) {
+      await Promise.all([
+        this.rootBalanceStore.loadBalances(chain),
+        this.skipLoadingStake ? Promise.resolve() : this.rootStakeStore.updateStake(),
+      ]);
+    }
+  }
+
+  async setActiveChain(chain: AggregatedSupportedChainType) {
+    if (this.activeChainStore.activeChain === chain) return;
+    this.activeChainStore.setActiveChain(chain);
+
+    if (this.initializing !== 'done') {
+      const key = this.rootBalanceStore.getBalanceKey(chain);
+      runInAction(() => {
+        this.rootBalanceStore.forcedLoading[key] = true;
+      });
+      this.initPromise && (await this.initPromise);
+      runInAction(() => {
+        this.rootBalanceStore.forcedLoading[key] = false;
+      });
+    }
+    await Promise.all([
+      this.rootBalanceStore.loadBalances(chain, this.selectedNetworkStore.selectedNetwork),
+      this.skipLoadingStake
+        ? Promise.resolve()
+        : this.rootStakeStore.updateStake(chain, this.selectedNetworkStore.selectedNetwork),
+    ]);
+  }
+
+  async setSelectedNetwork(network: SelectedNetworkType) {
+    if (this.selectedNetworkStore.selectedNetwork === network) return;
+    this.selectedNetworkStore.setSelectedNetwork(network);
+    if (this.initializing !== 'done') return;
+    await Promise.all([
+      this.rootBalanceStore.loadBalances(this.activeChainStore.activeChain, this.selectedNetworkStore.selectedNetwork),
+      this.skipLoadingStake
+        ? Promise.resolve()
+        : this.rootStakeStore.updateStake(this.activeChainStore.activeChain, network),
+    ]);
+  }
+
+  async setPreferredCurrency(currency: SupportedCurrencies) {
+    this.currencyStore.updatePreferredCurrency(currency);
+    if (this.initializing !== 'done') return;
+    await this.marketDataStore.getData();
     await Promise.all([
       this.rootBalanceStore.refetchBalances(),
       this.skipLoadingStake ? Promise.resolve() : this.rootStakeStore.updateStake(undefined, undefined, true),

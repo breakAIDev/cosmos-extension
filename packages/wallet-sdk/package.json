@@ -26,7 +26,7 @@
     "registry": "https://npm.pkg.github.com"
   },
   "dependencies": {
-    "@aptos-labs/ts-sdk": "1.33.1",
+    "@aptos-labs/ts-sdk": "^1.39.0",
     "@babel/helper-string-parser": "7.22.5",
     "@cosmjs/amino": "0.29.5",
     "@cosmjs/cosmwasm-stargate": "0.29.5",
@@ -58,7 +58,9 @@
     "@metamask/eth-sig-util": "4.0.0",
     "@scure/base": "1.1.9",
     "@scure/btc-signer": "1.4.0",
-    "@zondax/ledger-cosmos-js": "3.0.3",
+    "@sentry/react": "7.120.3",
+    "@solana/web3.js": "1.98.2",
+    "@zondax/ledger-cosmos-js": "^4.0.1",
     "@zondax/ledger-sei": "1.0.2",
     "axios": "1.6.4",
     "bech32": "2.0.0",
@@ -69,17 +71,23 @@
     "crypto-js": "4.2.0",
     "dayjs": "1.11.5",
     "deepmerge": "4.2.2",
-    "elliptic": "6.5.4",
+    "dompurify": "3.2.6",
+    "elliptic": "^6.6.1",
     "eth-sig-util": "3.0.1",
     "ethereumjs-util": "7.1.5",
-    "ethers": "5.7.0",
+    "ethers": "^5.8.0",
     "futoin-hkdf": "1.5.1",
     "joi": "17.9.2",
+    "lerna": "8.2.3",
     "long": "5.2.1",
-    "parse-duration": "1.0.2",
+    "parse-duration": "^2.1.4",
+    "postcss": "8.5.6",
     "secretjs": "1.12.0",
     "secure-random": "1.1.2",
-    "viem": "2.5.0"
+    "viem": "^2.32.1",
+    "vitepress": "0.1.1",
+    "webpack": "5.100.2",
+    "webpack-dev-server": "5.2.2"
   },
   "devDependencies": {
     "@babel/node": "7.19.1",
@@ -95,7 +103,7 @@
     "cross-env": "7.0.3",
     "eslint-plugin-jsdoc": "39.3.0",
     "jest": "28.1.0",
-    "typescript": "5.2.2",
-    "tslib": "2.4.0"
+    "tslib": "2.4.0",
+    "typescript": "5.2.2"
   }
 }

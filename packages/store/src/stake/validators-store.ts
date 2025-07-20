@@ -43,7 +43,6 @@ export class ValidatorsStore {
   aggregatedChainsStore: AggregatedChainsStore;
   chainsAprStore: ChainsAprStore;
   stakingApiStore: StakingApiStore;
-
   chainWiseValidators: Record<string, ValidatorData | Record<string, never>> = {};
   chainWiseStatus: Record<string, LoadingStatusType> = {};
   chainWiseRefetchNetwork: Record<string, () => Promise<void>> = {};
