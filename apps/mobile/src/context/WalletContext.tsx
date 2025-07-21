@@ -1,36 +1,44 @@
-import React, { createContext, useState, ReactNode, useContext } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DirectSecp256k1HdWallet } from "@cosmjs/proto-signing";
-import { SigningStargateClient } from "@cosmjs/stargate";
+import { WalletInfo } from "../types/wallet";
+import { COSMOS_PREFIX } from "../utils/constants";
 
-type WalletInfo = {
-  address: string;
-  mnemonic: string;
-};
-
-type WalletContextProps = {
+type WalletContextType = {
   wallet: WalletInfo | null;
   createWallet: () => Promise<void>;
   importWallet: (mnemonic: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
+  refreshWallet: () => Promise<void>;
 };
 
-const WalletContext = createContext<WalletContextProps>({} as WalletContextProps);
+const WalletContext = createContext<WalletContextType>({} as WalletContextType);
 
-export const WalletProvider = ({ children }: { children: ReactNode }) => {
+export function WalletProvider({ children }: { children: ReactNode }) {
   const [wallet, setWallet] = useState<WalletInfo | null>(null);
 
+  useEffect(() => { refreshWallet(); }, []);
+
+  const refreshWallet = async () => {
+    const mnemonic = await AsyncStorage.getItem("WALLET_MNEMONIC");
+    if (mnemonic) {
+      const walletObj = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, { prefix: COSMOS_PREFIX });
+      const [account] = await walletObj.getAccounts();
+      setWallet({ address: account.address, mnemonic });
+    }
+  };
+
   const createWallet = async () => {
-    const wallet = await DirectSecp256k1HdWallet.generate(24, { prefix: "cosmos" });
-    const [account] = await wallet.getAccounts();
-    const mnemonic = (await wallet.mnemonic);
+    const walletObj = await DirectSecp256k1HdWallet.generate(24, { prefix: COSMOS_PREFIX });
+    const [account] = await walletObj.getAccounts();
+    const mnemonic = walletObj.mnemonic;
     setWallet({ address: account.address, mnemonic });
     await AsyncStorage.setItem("WALLET_MNEMONIC", mnemonic);
   };
 
   const importWallet = async (mnemonic: string) => {
-    const wallet = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, { prefix: "cosmos" });
-    const [account] = await wallet.getAccounts();
+    const walletObj = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, { prefix: COSMOS_PREFIX });
+    const [account] = await walletObj.getAccounts();
     setWallet({ address: account.address, mnemonic });
     await AsyncStorage.setItem("WALLET_MNEMONIC", mnemonic);
   };
@@ -41,10 +49,12 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <WalletContext.Provider value={{ wallet, createWallet, importWallet, logout }}>
+    <WalletContext.Provider value={{ wallet, createWallet, importWallet, logout, refreshWallet }}>
       {children}
     </WalletContext.Provider>
   );
-};
+}
 
-export const useWallet = () => useContext(WalletContext);
+export function useWallet() {
+  return useContext(WalletContext);
+}

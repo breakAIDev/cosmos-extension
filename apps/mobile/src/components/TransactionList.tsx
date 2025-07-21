@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, FlatList, ActivityIndicator } from "react-native";
-import { fetchTransactions } from "../utils/cosmos";
+import { fetchTransactions } from "../services/cosmos";
 
 const TransactionList = ({ address }: { address: string }) => {
   const [txs, setTxs] = useState<any[]>([]);

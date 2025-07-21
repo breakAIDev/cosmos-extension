@@ -1,4 +1,12 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Leap Wallet Mobile (React Native + TypeScript)
+
+A mobile Cosmos wallet app, migrated from a Chrome extension.  
+Features onboarding, wallet create/import, balance, send/receive, transaction history, and more.
+
+## Setup
+
+1. Install dependencies:
+
 
 # Getting Started
 

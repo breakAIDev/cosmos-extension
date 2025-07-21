@@ -1,0 +1,22 @@
+{
+  "welcome": "Welcome to Leap Wallet",
+  "create_wallet": "Create New Wallet",
+  "import_wallet": "Import Existing Wallet",
+  "address": "Address",
+  "balance": "Balance",
+  "send": "Send",
+  "receive": "Receive",
+  "settings": "Settings",
+  "logout": "Logout",
+  "tokens": "Your Tokens",
+  "recent_transactions": "Recent Transactions",
+  "copy": "Copy",
+  "continue": "Continue",
+  "import": "Import",
+  "success": "Success",
+  "error": "Error",
+  "transaction_sent": "Transaction sent!",
+  "invalid_mnemonic": "Invalid mnemonic",
+  "secure_wallet": "Secure Your Wallet",
+  "write_down_mnemonic": "Please write down your mnemonic phrase and store it in a safe place. Never share it with anyone!"
+}
