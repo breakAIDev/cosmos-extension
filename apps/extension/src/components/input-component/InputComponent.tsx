@@ -5,12 +5,12 @@ import React, { ChangeEvent, forwardRef } from 'react';
 type InputProps = {
   placeholder: string;
   value: string;
-  // eslint-disable-next-line no-unused-vars
+  
   onChange: (event: ChangeEvent<HTMLInputElement>) => void;
   name: string;
   warning?: string;
   error?: string;
-  // eslint-disable-next-line no-unused-vars
+  
   onBlur?: (event: ChangeEvent<HTMLInputElement>) => void;
   className?: string;
 };

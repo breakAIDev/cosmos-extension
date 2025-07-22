@@ -3,7 +3,7 @@ import React from 'react';
 
 interface PropTypes {
   children?: React.ReactNode;
-  // eslint-disable-next-line no-unused-vars
+  
   onDragEnd: (result: DropResult) => void;
 }
 

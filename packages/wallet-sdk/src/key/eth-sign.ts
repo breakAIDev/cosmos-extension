@@ -249,11 +249,11 @@ async function signEip712Tx(
     Buffer.concat([
       Buffer.from('19', 'hex'),
       Buffer.from('01', 'hex'),
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+      
+      
       Buffer.from(domainHash(data).replace('0x', ''), 'hex'),
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+      
+      
       Buffer.from(messageHash(data).replace('0x', ''), 'hex'),
     ]),
   );

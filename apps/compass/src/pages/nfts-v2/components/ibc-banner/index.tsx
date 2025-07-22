@@ -20,7 +20,7 @@ import { Colors } from 'theme/colors';
 
 type AddIBCChannelProps = {
   targetChain: string;
-  // eslint-disable-next-line no-unused-vars
+  
   onAddComplete: (value: string) => void;
 };
 
@@ -107,7 +107,7 @@ const AddIBCChannel: React.FC<AddIBCChannelProps> = ({ targetChain, onAddComplet
 type IBCSettingsProps = {
   className?: string;
   targetChain: SupportedChain;
-  // eslint-disable-next-line no-unused-vars
+  
   onSelectChannel: (channelId: string | undefined) => void;
 };
 

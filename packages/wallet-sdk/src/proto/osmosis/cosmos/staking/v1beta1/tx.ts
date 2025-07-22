@@ -1,4 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+
 //@ts-nocheck
 import { decodeBech32Pubkey, encodeBech32Pubkey } from '@cosmjs/amino';
 import { fromBase64, toBase64 } from '@cosmjs/encoding';

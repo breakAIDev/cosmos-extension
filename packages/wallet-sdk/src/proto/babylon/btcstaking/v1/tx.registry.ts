@@ -10,26 +10,26 @@ import {
   MsgUpdateParams,
 } from './tx';
 export const registry: ReadonlyArray<[string, GeneratedType]> = [
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+  
+  
   ['/babylon.btcstaking.v1.MsgCreateFinalityProvider', MsgCreateFinalityProvider],
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+  
+  
   ['/babylon.btcstaking.v1.MsgEditFinalityProvider', MsgEditFinalityProvider],
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+  
+  
   ['/babylon.btcstaking.v1.MsgCreateBTCDelegation', MsgCreateBTCDelegation],
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+  
+  
   ['/babylon.btcstaking.v1.MsgAddCovenantSigs', MsgAddCovenantSigs],
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+  
+  
   ['/babylon.btcstaking.v1.MsgBTCUndelegate', MsgBTCUndelegate],
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+  
+  
   ['/babylon.btcstaking.v1.MsgSelectiveSlashingEvidence', MsgSelectiveSlashingEvidence],
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+  
+  
   ['/babylon.btcstaking.v1.MsgUpdateParams', MsgUpdateParams],
 ];
 export const load = (protoRegistry: Registry) => {

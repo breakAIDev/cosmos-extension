@@ -1,4 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+
 //@ts-nocheck
 import { GeneratedType } from '@cosmjs/proto-signing';
 

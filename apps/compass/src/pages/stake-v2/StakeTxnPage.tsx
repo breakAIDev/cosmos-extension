@@ -105,8 +105,8 @@ const StakeTxnPage = observer(({ rootBalanceStore, rootStakeStore }: StakeTxnPag
       pendingTx.promise
         .then(
           (result) => {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
+            
+            
             if (result && isDeliverTxSuccess(result)) {
               setPendingTx({ ...pendingTx, txStatus: 'success' });
             } else {

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { BITCOIN_METHOD_TYPE, Network } from '@leapwallet/cosmos-wallet-provider/dist/provider/types';
 import { formatEtherUnits, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { isBitcoinChain } from '@leapwallet/cosmos-wallet-store/dist/utils';

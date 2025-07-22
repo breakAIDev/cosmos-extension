@@ -2,8 +2,8 @@ import { GeneratedType, Registry } from '@cosmjs/proto-signing';
 
 import { MsgWrappedCreateValidator } from './tx';
 export const registry: ReadonlyArray<[string, GeneratedType]> = [
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+  
+  
   ['/babylon.checkpointing.v1.MsgWrappedCreateValidator', MsgWrappedCreateValidator],
 ];
 export const load = (protoRegistry: Registry) => {

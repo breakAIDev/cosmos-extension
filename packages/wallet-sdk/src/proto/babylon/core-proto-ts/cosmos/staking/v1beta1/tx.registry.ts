@@ -2,20 +2,20 @@ import { GeneratedType, Registry } from '@cosmjs/proto-signing';
 
 import { MsgBeginRedelegate, MsgCreateValidator, MsgDelegate, MsgEditValidator, MsgUndelegate } from './tx';
 export const registry: ReadonlyArray<[string, GeneratedType]> = [
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+  
+  
   ['/cosmos.staking.v1beta1.MsgCreateValidator', MsgCreateValidator],
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+  
+  
   ['/cosmos.staking.v1beta1.MsgEditValidator', MsgEditValidator],
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+  
+  
   ['/cosmos.staking.v1beta1.MsgDelegate', MsgDelegate],
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+  
+  
   ['/cosmos.staking.v1beta1.MsgBeginRedelegate', MsgBeginRedelegate],
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+  
+  
   ['/cosmos.staking.v1beta1.MsgUndelegate', MsgUndelegate],
 ];
 export const load = (protoRegistry: Registry) => {

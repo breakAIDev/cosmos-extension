@@ -8,7 +8,7 @@ import { Colors } from 'theme/colors';
 
 export const MemoInput: React.FC<{
   memo: string;
-  // eslint-disable-next-line no-unused-vars
+  
   setMemo: (memo: string) => void;
   disabled: boolean;
   activeChain: SupportedChain;

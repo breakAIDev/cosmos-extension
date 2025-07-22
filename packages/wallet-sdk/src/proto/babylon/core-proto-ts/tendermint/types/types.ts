@@ -636,8 +636,8 @@ export const Part = {
     const message = createBasePart();
     message.index = object.index ?? 0;
     message.bytes = object.bytes ?? new Uint8Array();
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     message.proof = object.proof !== undefined && object.proof !== null ? Proof.fromPartial(object.proof) : undefined;
     return message;
   },
@@ -717,8 +717,8 @@ export const BlockID = {
   fromPartial(object: Partial<BlockID>): BlockID {
     const message = createBaseBlockID();
     message.hash = object.hash ?? new Uint8Array();
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     message.partSetHeader =
       object.partSetHeader !== undefined && object.partSetHeader !== null
         ? PartSetHeader.fromPartial(object.partSetHeader)
@@ -880,18 +880,18 @@ export const Header = {
   },
   fromPartial(object: Partial<Header>): Header {
     const message = createBaseHeader();
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     message.version =
       object.version !== undefined && object.version !== null ? Consensus.fromPartial(object.version) : undefined;
     message.chainId = object.chainId ?? '';
     message.height =
       object.height !== undefined && object.height !== null ? BigInt(object.height.toString()) : BigInt(0);
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     message.time = object.time ?? undefined;
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     message.lastBlockId =
       object.lastBlockId !== undefined && object.lastBlockId !== null
         ? BlockID.fromPartial(object.lastBlockId)
@@ -1137,12 +1137,12 @@ export const Vote = {
     message.height =
       object.height !== undefined && object.height !== null ? BigInt(object.height.toString()) : BigInt(0);
     message.round = object.round ?? 0;
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     message.blockId =
       object.blockId !== undefined && object.blockId !== null ? BlockID.fromPartial(object.blockId) : undefined;
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     message.timestamp = object.timestamp ?? undefined;
     message.validatorAddress = object.validatorAddress ?? new Uint8Array();
     message.validatorIndex = object.validatorIndex ?? 0;
@@ -1261,8 +1261,8 @@ export const Commit = {
     message.height =
       object.height !== undefined && object.height !== null ? BigInt(object.height.toString()) : BigInt(0);
     message.round = object.round ?? 0;
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     message.blockId =
       object.blockId !== undefined && object.blockId !== null ? BlockID.fromPartial(object.blockId) : undefined;
     message.signatures = object.signatures?.map((e) => CommitSig.fromPartial(e)) || [];
@@ -1365,8 +1365,8 @@ export const CommitSig = {
     const message = createBaseCommitSig();
     message.blockIdFlag = object.blockIdFlag ?? 0;
     message.validatorAddress = object.validatorAddress ?? new Uint8Array();
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     message.timestamp = object.timestamp ?? undefined;
     message.signature = object.signature ?? new Uint8Array();
     return message;
@@ -1490,12 +1490,12 @@ export const Proposal = {
       object.height !== undefined && object.height !== null ? BigInt(object.height.toString()) : BigInt(0);
     message.round = object.round ?? 0;
     message.polRound = object.polRound ?? 0;
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     message.blockId =
       object.blockId !== undefined && object.blockId !== null ? BlockID.fromPartial(object.blockId) : undefined;
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     message.timestamp = object.timestamp ?? undefined;
     message.signature = object.signature ?? new Uint8Array();
     return message;
@@ -1763,14 +1763,14 @@ export const BlockMeta = {
   },
   fromPartial(object: Partial<BlockMeta>): BlockMeta {
     const message = createBaseBlockMeta();
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     message.blockId =
       object.blockId !== undefined && object.blockId !== null ? BlockID.fromPartial(object.blockId) : undefined;
     message.blockSize =
       object.blockSize !== undefined && object.blockSize !== null ? BigInt(object.blockSize.toString()) : BigInt(0);
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     message.header =
       object.header !== undefined && object.header !== null ? Header.fromPartial(object.header) : undefined;
     message.numTxs =

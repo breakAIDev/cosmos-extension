@@ -18,7 +18,7 @@ dayjs.extend(utc);
 
 type RequestFaucetProps = {
   address: string;
-  // eslint-disable-next-line no-unused-vars
+  
   setShowFaucetResp: (data: { msg: string; status: 'success' | 'fail' | null }) => void;
   rootBalanceStore: RootBalanceStore;
 };

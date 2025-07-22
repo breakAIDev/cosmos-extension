@@ -1150,8 +1150,8 @@ export const QueryValidatorResponse = {
   },
   fromPartial(object: Partial<QueryValidatorResponse>): QueryValidatorResponse {
     const message = createBaseQueryValidatorResponse();
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     message.validator =
       object.validator !== undefined && object.validator !== null ? Validator.fromPartial(object.validator) : undefined;
     return message;
@@ -1808,8 +1808,8 @@ export const QueryUnbondingDelegationResponse = {
   },
   fromPartial(object: Partial<QueryUnbondingDelegationResponse>): QueryUnbondingDelegationResponse {
     const message = createBaseQueryUnbondingDelegationResponse();
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     message.unbond =
       object.unbond !== undefined && object.unbond !== null
         ? UnbondingDelegation.fromPartial(object.unbond)
@@ -2679,8 +2679,8 @@ export const QueryDelegatorValidatorResponse = {
   },
   fromPartial(object: Partial<QueryDelegatorValidatorResponse>): QueryDelegatorValidatorResponse {
     const message = createBaseQueryDelegatorValidatorResponse();
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     message.validator =
       object.validator !== undefined && object.validator !== null ? Validator.fromPartial(object.validator) : undefined;
     return message;
@@ -2947,8 +2947,8 @@ export const QueryPoolResponse = {
   },
   fromPartial(object: Partial<QueryPoolResponse>): QueryPoolResponse {
     const message = createBaseQueryPoolResponse();
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     message.pool = object.pool !== undefined && object.pool !== null ? Pool.fromPartial(object.pool) : undefined;
     return message;
   },
@@ -3074,8 +3074,8 @@ export const QueryParamsResponse = {
   },
   fromPartial(object: Partial<QueryParamsResponse>): QueryParamsResponse {
     const message = createBaseQueryParamsResponse();
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     message.params =
       object.params !== undefined && object.params !== null ? Params.fromPartial(object.params) : undefined;
     return message;

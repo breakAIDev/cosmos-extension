@@ -16,7 +16,7 @@ const passwordErrorVariants: Variants = {
 
 interface PropsType {
   loading: boolean;
-  // eslint-disable-next-line no-unused-vars
+  
   resetPassword: (password: Uint8Array) => void;
 }
 

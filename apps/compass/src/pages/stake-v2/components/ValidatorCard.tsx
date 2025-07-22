@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { useValidatorImage } from '@leapwallet/cosmos-wallet-hooks';
 import { UnbondingDelegation, Validator } from '@leapwallet/cosmos-wallet-sdk';
 import BigNumber from 'bignumber.js';

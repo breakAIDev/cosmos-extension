@@ -19,9 +19,9 @@ export const BannerAdCard = observer(
     bannerData: BannerADData;
     chain: ChainInfo;
     index: number;
-    // eslint-disable-next-line no-unused-vars
+    
     onClick: (bannerId: string, index: number) => void;
-    // eslint-disable-next-line no-unused-vars
+    
     onClose: (bannerId: string, index: number) => void;
     activeIndex: number;
   }) => {

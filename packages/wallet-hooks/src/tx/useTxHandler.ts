@@ -44,8 +44,8 @@ export function useTxHandler({
       if (chain === 'injective') {
         return new InjectiveTx(
           network === 'testnet',
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
+          
+          
           wallet,
           network === 'testnet' ? chainInfos.injective.apis.restTest : chainInfos.injective.apis.rest,
         );
@@ -58,8 +58,8 @@ export function useTxHandler({
           evmChainId = matches?.[1];
         }
         return new EthermintTxHandler(
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
+          
+          
           lcdUrl,
           wallet,
           chainId,

@@ -9,7 +9,7 @@ import { ForgotPasswordWrapper } from './wrapper';
 
 interface PropsType {
   incrementStep: () => void;
-  // eslint-disable-next-line no-unused-vars
+  
   setMnemonicAtRoot: (mneumonic: string) => void;
 }
 

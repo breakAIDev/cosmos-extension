@@ -51,7 +51,7 @@ const IBCSettings: React.FC<IBCSettingsProps> = ({ targetChain, sourceChain }) =
             messages: [],
             sourceAsset: { denom: null },
           },
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    
     //@ts-ignore
     [transferData?.isSkipTransfer, transferData?.messages, transferData?.routeResponse],
   );

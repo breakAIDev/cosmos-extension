@@ -9,7 +9,7 @@ interface ActionInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   buttonTextColor?: string;
   icon?: string;
   value: string;
-  // eslint-disable-next-line no-unused-vars
+  
   onAction: (e: React.MouseEvent, action: string, value: string) => void;
   onChange: React.ChangeEventHandler<HTMLInputElement>;
   placeholder?: string;
@@ -85,8 +85,8 @@ export const ActionInputWithPreview = React.forwardRef(
               {preview}
             </motion.div>
           ) : (
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
+            
+            
             <motion.input
               initial={{ opacity: 0.9 }}
               exit={{ opacity: 0.9 }}

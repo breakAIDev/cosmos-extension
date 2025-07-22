@@ -280,8 +280,8 @@ export class ValidatorsStore {
       runInAction(() => {
         this.chainWiseValidators[chainKey] = {
           chainData: {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
+            
+            
             params: Object.assign({}, { calculated_apr: calculatedApr, unbonding_time }),
           },
           validators,

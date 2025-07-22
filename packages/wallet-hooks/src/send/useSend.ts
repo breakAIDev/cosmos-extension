@@ -158,7 +158,7 @@ export function useSend(denoms: DenomsRecord, toAddress: string) {
           title1: `Sent ${selectedDenom?.symbol ?? ''}`,
           txStatus: 'loading',
           txType: 'secretTokenTransfer',
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          
           //@ts-ignore
           promise,
         });

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { captureException } from '@sentry/react';
 import BottomModal from 'components/bottom-modal';
 import { Button } from 'components/ui/button';

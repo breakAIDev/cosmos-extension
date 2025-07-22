@@ -66,8 +66,8 @@ export class ManageChainsStore {
             preferenceOrder: index,
             denom: chainInfos[chain].denom,
             id: index,
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
+            
+            
             beta: chainInfos[chain]?.beta ?? false,
             chainId: chainInfos[chain].chainId,
             testnetChainId: chainInfos[chain].testnetChainId,

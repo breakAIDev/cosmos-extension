@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { WindowPostMessageStream } from '@metamask/post-message-stream';
 import PortStream from 'extension-port-stream';
 import { DEBUG } from 'utils/debug';

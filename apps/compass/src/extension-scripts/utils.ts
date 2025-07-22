@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { getChains } from '@leapwallet/cosmos-wallet-hooks';
 import { LineType } from '@leapwallet/cosmos-wallet-provider/dist/provider/types';

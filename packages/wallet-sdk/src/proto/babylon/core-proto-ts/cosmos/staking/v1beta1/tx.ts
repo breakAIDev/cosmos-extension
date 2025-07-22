@@ -516,14 +516,14 @@ export const MsgCreateValidator = {
   },
   fromPartial(object: Partial<MsgCreateValidator>): MsgCreateValidator {
     const message = createBaseMsgCreateValidator();
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     message.description =
       object.description !== undefined && object.description !== null
         ? Description.fromPartial(object.description)
         : undefined;
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     message.commission =
       object.commission !== undefined && object.commission !== null
         ? CommissionRates.fromPartial(object.commission)
@@ -532,8 +532,8 @@ export const MsgCreateValidator = {
     message.delegatorAddress = object.delegatorAddress ?? '';
     message.validatorAddress = object.validatorAddress ?? '';
     message.pubkey = object.pubkey !== undefined && object.pubkey !== null ? Any.fromPartial(object.pubkey) : undefined;
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     message.value = object.value !== undefined && object.value !== null ? Coin.fromPartial(object.value) : undefined;
     return message;
   },
@@ -708,8 +708,8 @@ export const MsgEditValidator = {
   },
   fromPartial(object: Partial<MsgEditValidator>): MsgEditValidator {
     const message = createBaseMsgEditValidator();
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     message.description =
       object.description !== undefined && object.description !== null
         ? Description.fromPartial(object.description)
@@ -871,8 +871,8 @@ export const MsgDelegate = {
     const message = createBaseMsgDelegate();
     message.delegatorAddress = object.delegatorAddress ?? '';
     message.validatorAddress = object.validatorAddress ?? '';
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     message.amount =
       object.amount !== undefined && object.amount !== null ? Coin.fromPartial(object.amount) : undefined;
     return message;
@@ -1031,8 +1031,8 @@ export const MsgBeginRedelegate = {
     message.delegatorAddress = object.delegatorAddress ?? '';
     message.validatorSrcAddress = object.validatorSrcAddress ?? '';
     message.validatorDstAddress = object.validatorDstAddress ?? '';
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     message.amount =
       object.amount !== undefined && object.amount !== null ? Coin.fromPartial(object.amount) : undefined;
     return message;
@@ -1115,8 +1115,8 @@ export const MsgBeginRedelegateResponse = {
   },
   fromPartial(object: Partial<MsgBeginRedelegateResponse>): MsgBeginRedelegateResponse {
     const message = createBaseMsgBeginRedelegateResponse();
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     message.completionTime = object.completionTime ?? undefined;
     return message;
   },
@@ -1202,8 +1202,8 @@ export const MsgUndelegate = {
     const message = createBaseMsgUndelegate();
     message.delegatorAddress = object.delegatorAddress ?? '';
     message.validatorAddress = object.validatorAddress ?? '';
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     message.amount =
       object.amount !== undefined && object.amount !== null ? Coin.fromPartial(object.amount) : undefined;
     return message;
@@ -1289,11 +1289,11 @@ export const MsgUndelegateResponse = {
   },
   fromPartial(object: Partial<MsgUndelegateResponse>): MsgUndelegateResponse {
     const message = createBaseMsgUndelegateResponse();
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     message.completionTime = object.completionTime ?? undefined;
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     message.amount =
       object.amount !== undefined && object.amount !== null ? Coin.fromPartial(object.amount) : undefined;
     return message;
@@ -1391,8 +1391,8 @@ export const MsgCancelUnbondingDelegation = {
     const message = createBaseMsgCancelUnbondingDelegation();
     message.delegatorAddress = object.delegatorAddress ?? '';
     message.validatorAddress = object.validatorAddress ?? '';
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     message.amount =
       object.amount !== undefined && object.amount !== null ? Coin.fromPartial(object.amount) : undefined;
     message.creationHeight =
@@ -1543,8 +1543,8 @@ export const MsgUpdateParams = {
   fromPartial(object: Partial<MsgUpdateParams>): MsgUpdateParams {
     const message = createBaseMsgUpdateParams();
     message.authority = object.authority ?? '';
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     message.params =
       object.params !== undefined && object.params !== null ? Params.fromPartial(object.params) : undefined;
     return message;

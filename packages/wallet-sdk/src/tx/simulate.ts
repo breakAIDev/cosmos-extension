@@ -413,14 +413,14 @@ export async function simulateTx(
 
   if (
     result &&
-    // @ts-ignore
+    
     (result.code === 'ERR_BAD_RESPONSE' || result.code === 'ERR_BAD_REQUEST') &&
-    // @ts-ignore
+    
     result.response &&
-    // @ts-ignore
+    
     result.response.data
   ) {
-    // @ts-ignore
+    
     throw new Error(result.response.data.message);
   }
 

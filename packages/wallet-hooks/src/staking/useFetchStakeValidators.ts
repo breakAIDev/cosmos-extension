@@ -141,8 +141,8 @@ export function useFetchStakeValidators(forceChain?: SupportedChain, forceNetwor
           if (isCancelled) return;
           setStakeValidatorData({
             chainData: {
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
+              
+              
               params: { ...(_chainData?.params ?? {}), calculated_apr: calculatedApr, unbonding_time },
             },
             validators,

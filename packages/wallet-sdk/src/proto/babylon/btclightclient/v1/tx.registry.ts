@@ -2,11 +2,11 @@ import { GeneratedType, Registry } from '@cosmjs/proto-signing';
 
 import { MsgInsertHeaders, MsgUpdateParams } from './tx';
 export const registry: ReadonlyArray<[string, GeneratedType]> = [
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+  
+  
   ['/babylon.btclightclient.v1.MsgInsertHeaders', MsgInsertHeaders],
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+  
+  
   ['/babylon.btclightclient.v1.MsgUpdateParams', MsgUpdateParams],
 ];
 export const load = (protoRegistry: Registry) => {

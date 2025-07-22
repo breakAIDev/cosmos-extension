@@ -22,7 +22,7 @@ import { CopyButton } from './copy-address';
 type EditWalletFormProps = {
   wallet: Key;
   isVisible: boolean;
-  // eslint-disable-next-line no-unused-vars
+  
   onClose: (closeParent: boolean) => void;
   activeChainStore: ActiveChainStore;
 };

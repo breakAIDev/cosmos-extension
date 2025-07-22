@@ -155,8 +155,8 @@ export class TransferQueryClient {
   }
 
   static async getDenomTrace(hash: string, rpcUrl: string, chainInfos?: Record<SupportedChain, ChainInfo>) {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     if (!TransferQueryClient.queryClient || TransferQueryClient.queryClient.rpc.url !== rpcUrl) {
       TransferQueryClient.queryClient = await TransferQueryClient.getTransferQueryClient(rpcUrl, chainInfos);
     }

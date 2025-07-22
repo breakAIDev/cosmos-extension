@@ -130,8 +130,8 @@ export namespace Wallet {
       ethWallet: false,
     });
     const accounts = await mainWallet.getAccounts();
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     return { accounts, mainWallet };
   }
 

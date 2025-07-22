@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { convertObjInQueryParams } from 'pages/home/utils';

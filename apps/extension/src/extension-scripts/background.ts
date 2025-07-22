@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable no-use-before-define */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 
 /***
  * Do not remove this import and keep this on the first line.
@@ -1210,9 +1210,9 @@ const connectRemote = (remotePort: any) => {
 
         if (seiEvmAddress.startsWith('0x')) {
           if (payload.params) {
-            // @ts-ignore
+            
             let payloadAddress = payload.params[1];
-            // @ts-ignore
+            
             let data = payload.params[0];
 
             if ([ETHEREUM_METHOD_TYPE.ETH__SIGN, ETHEREUM_METHOD_TYPE.ETH__SIGN_TYPED_DATA_V4].includes(method)) {
@@ -1298,18 +1298,18 @@ const connectRemote = (remotePort: any) => {
         }
 
         if (payload.params) {
-          // @ts-ignore
+          
           const parsedData = parseStandardTokenTransactionData(payload.params[0].data);
           let signTxnData = {};
 
           if (!parsedData) {
-            // @ts-ignore
+            
             const value = payload.params[0].value;
-            // @ts-ignore
+            
             const to = payload.params[0].to;
-            // @ts-ignore
+            
             const data = payload.params[0].data;
-            // @ts-ignore
+            
             const gas = payload.params[0].gas;
 
             signTxnData = {
@@ -1326,11 +1326,11 @@ const connectRemote = (remotePort: any) => {
             };
           } else {
             const value = parsedData.value.toString();
-            // @ts-ignore
+            
             const to = payload.params[0].to;
-            // @ts-ignore
+            
             const data = payload.params[0].data;
-            // @ts-ignore
+            
             const gas = payload.params[0].gas;
 
             switch (parsedData.name) {
@@ -1413,7 +1413,7 @@ const connectRemote = (remotePort: any) => {
       case ETHEREUM_METHOD_TYPE.ETH__REQUEST_ACCOUNTS: {
         if (
           method === ETHEREUM_METHOD_TYPE.WALLET__REQUEST_PERMISSIONS &&
-          // @ts-ignore
+          
           !Object.keys(payload.params?.[0] ?? {}).includes(ETHEREUM_METHOD_TYPE.ETH__ACCOUNTS)
         ) {
           const errorMessage = !payload?.params

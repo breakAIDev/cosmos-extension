@@ -62,11 +62,11 @@ export const platforms: Record<string, Platform> = {
   provenance: Platform.Provenance,
   kichain: Platform.Ki,
 
-  // @ts-ignore
+  
   aura: 'AURA',
-  // @ts-ignore
+  
   seiTestnet2: 'SEI_TESTNET_2',
-  // @ts-ignore
+  
   impacthub: 'IMPACT_HUB',
 
   //@ts-ignore
@@ -80,33 +80,33 @@ export const platforms: Record<string, Platform> = {
   nibiru: 'NIBIRU',
   //@ts-ignore
   odin: 'ODIN_CHAIN',
-  // @ts-ignore
+  
   mayachain: 'MAYA_CHAIN',
-  // @ts-ignore
+  
   empowerchain: 'EMPOWER_CHAIN',
   //@ts-ignore
   dydx: 'DYDX',
-  // @ts-ignore
+  
   gitopia: 'GITOPIA',
-  // @ts-ignore
+  
   sge: 'SGE',
-  // @ts-ignore
+  
   celestia: 'CELESTIA',
-  // @ts-ignore
+  
   xpla: 'XPLA',
-  // @ts-ignore
+  
   composable: 'COMPOSABLE',
-  // @ts-ignore
+  
   dymension: 'DYMENSION',
-  // @ts-ignore
+  
   pryzmtestnet: 'PRYZM',
-  // @ts-ignore
+  
   thorchain: 'THOR_CHAIN',
-  // @ts-ignore
+  
   saga: 'SAGA',
-  // @ts-ignore
+  
   initia: 'INITIA',
-  // @ts-ignore
+  
   humans: 'HUMANS_AI',
 };
 
@@ -163,7 +163,7 @@ export const platformToChain: Record<Platform, string> = {
   [Platform.Sentinel]: 'sentinel',
   [Platform.Band]: 'bandchain',
 
-  // @ts-ignore
+  
   AURA: 'aura',
   SEI_TESTNET_2: 'seiTestnet2',
   IMPACT_HUB: 'impacthub',

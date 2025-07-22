@@ -95,9 +95,9 @@ function ErrorWarning() {
   }, [
     skipSupportedChains,
     transferData?.isSkipTransfer,
-    // @ts-ignore
+    
     transferData?.routeResponse,
-    // @ts-ignore
+    
     transferData?.messages,
   ]);
 

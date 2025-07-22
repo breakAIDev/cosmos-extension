@@ -97,8 +97,8 @@ export class BaseSwapTx {
 
   async broadcastTx(txRaw: TxRaw) {
     if (this.client instanceof SigningCosmWasmClient) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+      
+      
       const broadcasted = await this.client.forceGetTmClient().broadcastTxSync({ tx: TxRaw.encode(txRaw).finish() });
       if (broadcasted.code) {
         return Promise.reject(new Error(broadcasted.code.toString()));

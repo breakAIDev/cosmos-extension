@@ -21,7 +21,7 @@ export type SwapInputProps = Swap & {
   amount: string;
   targetAmount: string;
   feeInCurrency: string;
-  // eslint-disable-next-line no-unused-vars
+  
   setAmount: (amount: string) => void;
   onSwapClick: () => void;
   placeholder?: string;

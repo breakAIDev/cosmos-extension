@@ -355,8 +355,8 @@ export class Tx {
     if (this.client instanceof SigningStargateClient) {
       try {
         const broadcasted = await this.client
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
+          
+          
           .forceGetTmClient()
           .broadcastTxSync({ tx: TxRaw.encode(txRaw).finish() });
         if (broadcasted.code) {

@@ -1,4 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+
 //@ts-nocheck
 import { Pubkey } from '@cosmjs/amino';
 import { Decimal } from '@cosmjs/math';

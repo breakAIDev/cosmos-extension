@@ -19,10 +19,10 @@ export type GasPriceOptionsContextType = {
   setGasLimit: (gasLimit: number | string | BigNumber) => void;
   recommendedGasLimit: string;
   feeTokenData: FeeTokenData;
-  // eslint-disable-next-line no-unused-vars
+  
   setFeeTokenData: (feeDenom: FeeTokenData) => void;
   value: GasPriceOptionValue;
-  // eslint-disable-next-line no-unused-vars
+  
   onChange: (value: GasPriceOptionValue, feeDenom: FeeTokenData) => void;
   viewAdditionalOptions: boolean;
   setViewAdditionalOptions: React.Dispatch<React.SetStateAction<boolean>>;

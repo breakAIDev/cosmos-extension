@@ -49,9 +49,9 @@ export class SeiEvmTx {
 
     const latestBaseFeePerGas = parseInt(feeHistory?.baseFeePerGas?.pop() ?? '0');
     if (feeHistory && latestBaseFeePerGas) {
-      // @ts-ignore
+      
       const baseFeePerGases: Record<EvmFeeType, BigNumber> = {};
-      // @ts-ignore
+      
       const medianOfPriorityFeesPerGases: Record<EvmFeeType, string> = {};
 
       for (const key in EVM_FEE_SETTINGS) {

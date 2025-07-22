@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { Addresses } from './types';
 
 export function mergeAddresses(addressesNew: Addresses, addressesOriginal: Addresses) {

@@ -39,7 +39,7 @@ const NameServiceItemSkeleton = () => {
 
 type ContactsMatchListProps = {
   contacts: AddressBook.SavedAddress[];
-  // eslint-disable-next-line no-unused-vars
+  
   handleContactSelect: (contact: SelectedAddress) => void;
 };
 
@@ -61,7 +61,7 @@ export const ContactsMatchList: React.FC<ContactsMatchListProps> = ({ contacts, 
               className='flex items-center ml-0 py-1 cursor-pointer'
               onClick={() => {
                 handleContactSelect({
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                  
                   //@ts-ignore
                   avatarIcon: undefined,
                   chainIcon: chainImage ?? GenericLight,
@@ -92,7 +92,7 @@ export const ContactsMatchList: React.FC<ContactsMatchListProps> = ({ contacts, 
 
 type NameServiceMatchListProps = {
   address: string;
-  // eslint-disable-next-line no-unused-vars
+  
   handleContactSelect: (contact: SelectedAddress) => void;
 };
 

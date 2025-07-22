@@ -35,13 +35,13 @@ export function parseFormaTx(tx: any, nativeDenom?: string) {
   };
 
   if (tx.tx_types.includes('coin_transfer')) {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     parsedTx.types.push('cosmos.bank.send');
     parsedTx.messages[0].__type = 'cosmos.bank.send';
   } else {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     parsedTx.types.push(tx.tx_types[0]);
     parsedTx.messages[0].__type = tx.tx_types[0];
   }

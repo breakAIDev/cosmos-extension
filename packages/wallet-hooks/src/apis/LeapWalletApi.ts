@@ -432,14 +432,14 @@ export namespace LeapWalletApi {
         } as V2TxRequest;
 
         if (amount !== undefined) {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
+          
+          
           logReq.amount = amount;
         }
 
         if (blockchain !== undefined) {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
+          
+          
           logReq.blockchain = blockchain;
         }
 
@@ -539,8 +539,8 @@ export namespace LeapWalletApi {
           } as V2TxRequest;
 
           if (blockchain !== undefined) {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
+            
+            
             logReq.blockchain = blockchain;
           }
 

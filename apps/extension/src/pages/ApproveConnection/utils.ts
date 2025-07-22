@@ -25,7 +25,7 @@ export const addToConnections = async (chainIds: string[], walletIds: string[], 
 };
 
 export const getChainName = (chainId: string): SupportedChain => {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+  
+  
   return chainId?.split('-')?.slice(0, -1)?.join('-');
 };

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { SKIP_TXN_STATUS, TXN_STATUS } from '@leapwallet/elements-core';
 import { ArrowRight } from '@phosphor-icons/react';
 import classNames from 'classnames';

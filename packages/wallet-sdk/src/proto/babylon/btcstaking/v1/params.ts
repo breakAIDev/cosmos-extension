@@ -347,8 +347,8 @@ export const StoredParams = {
   fromPartial(object: Partial<StoredParams>): StoredParams {
     const message = createBaseStoredParams();
     message.version = object.version ?? 0;
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    
+    
     message.params =
       object.params !== undefined && object.params !== null ? Params.fromPartial(object.params) : undefined;
     return message;

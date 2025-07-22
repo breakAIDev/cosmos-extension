@@ -28,7 +28,7 @@ type SaveAddressSheetProps = {
   ethAddress?: string;
   sendActiveChain?: SupportedChain;
   onClose: () => void;
-  // eslint-disable-next-line no-unused-vars
+  
   onSave?: (s: SelectedAddress) => void;
   showDeleteBtn?: boolean;
 };

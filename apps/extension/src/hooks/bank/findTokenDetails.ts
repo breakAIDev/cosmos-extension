@@ -5,7 +5,7 @@ import { useChainInfos } from 'hooks/useChainInfos';
 import { useCallback } from 'react';
 
 /** @returns `undefined` if either the `token` doesn't exist or the dataset hasn't been successfully fetched yet. */
-// eslint-disable-next-line no-unused-vars
+
 export type FindTokenDetails = (denom: string) => NativeDenom | undefined;
 
 export function useFindTokenItemByToken(forcedChain?: SupportedChain): FindTokenDetails {

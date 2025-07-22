@@ -140,7 +140,7 @@ export function useLedgerOnboarding() {
         address: account.address,
         pubkey: account.pubkey,
         index: (prev ?? []).length + index,
-        // @ts-ignore
+        
         path: account.path,
         evmAddress: selectedApp === 'sei' ? pubKeyToEvmAddressToShow(account.pubkey, true) : null,
       })),
@@ -208,7 +208,7 @@ export function useLedgerOnboarding() {
         address: account.address,
         pubkey: account.pubkey,
         index: (prev ?? []).length + index,
-        // @ts-ignore
+        
         path: account.path,
         name,
         evmAddress: selectedApp === 'sei' ? pubKeyToEvmAddressToShow(account.pubkey, true) : null,
