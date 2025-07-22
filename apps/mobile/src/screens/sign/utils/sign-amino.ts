@@ -12,7 +12,7 @@ export function getAminoSignDoc({
   memo,
   isGasOptionSelected,
 }: {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  
   signRequestData: Record<string, any>;
   gasPrice: GasPrice;
   gasLimit: string;

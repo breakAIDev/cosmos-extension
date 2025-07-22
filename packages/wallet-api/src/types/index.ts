@@ -337,7 +337,7 @@ export function parseAssetPlatform(platform: string): AssetPlatform | undefined 
 }
 
 /** CG ID APIs for Terra native tokens. */
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace CgTerraNativeTokens {
   /** Type guard to check that the `token` can be indexed by {@link Ids}. */
   export function isKey(token: string): token is keyof typeof Ids {

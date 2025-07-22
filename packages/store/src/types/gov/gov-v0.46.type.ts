@@ -1,4 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace Proposal2 {
   export type Root = {
     proposals: Proposal[];

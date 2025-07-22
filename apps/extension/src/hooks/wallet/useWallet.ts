@@ -57,7 +57,7 @@ import { useActiveChain } from '../settings/useActiveChain';
 import useActiveWallet from '../settings/useActiveWallet';
 import { SeedPhrase } from './seed-phrase/useSeedPhrase';
 
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace Wallet {
   export type Keystore = Record<string, Key>;
 

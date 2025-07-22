@@ -71,7 +71,7 @@ export const SelectWallets = ({ selectedWallets, setSelectedWallets, forceChain 
     );
 
     const isPresent = index > -1;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     const temp: any = [];
 
     Object.assign(temp, selectedWallets);

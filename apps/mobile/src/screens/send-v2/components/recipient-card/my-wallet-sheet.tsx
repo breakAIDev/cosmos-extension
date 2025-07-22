@@ -45,7 +45,7 @@ export const MyWalletSheet: React.FC<MyWalletSheetProps> = ({
   const defaultTokenLogo = useDefaultTokenLogo();
   const activeWallet = useActiveWallet();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  
   const _displaySkipAccounts: any[][] = [];
   Object.keys(chainInfos).map((chain) => {
     if (skipSupportedDestinationChainsIDs?.includes(chainInfos[chain as SupportedChain]?.chainId)) {

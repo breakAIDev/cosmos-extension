@@ -10,7 +10,7 @@ import { AggregatedSupportedChain } from 'types/utility';
 /**
  * Track page view on mixpanel
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 export const usePageView = (pageName: PageName, enable = true, additionalProperties?: any, callback?: () => void) => {
   const chain = useChainInfo() as ChainInfo | undefined;
   const activeChain = useActiveChain() as AggregatedSupportedChain;

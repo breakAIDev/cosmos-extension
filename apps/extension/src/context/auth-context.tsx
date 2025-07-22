@@ -68,7 +68,7 @@ export const AuthProvider = observer(({ children }: { children: ReactNode }): Re
   const chains = useGetChains();
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     const listener = (message: any, sender: any) => {
       if (sender.id !== browser.runtime.id) return;
       if (message.type === 'auto-lock') {
@@ -287,7 +287,7 @@ export const AuthProvider = observer(({ children }: { children: ReactNode }): Re
   );
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     const listener = async (message: any, sender: any) => {
       if (sender.id !== browser.runtime.id) return;
       if (message.type === 'authentication') {

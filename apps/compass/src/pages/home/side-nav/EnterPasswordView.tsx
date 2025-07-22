@@ -40,7 +40,7 @@ export function EnterPasswordView({
   } = useForm<FormData>({ mode: 'onChange' });
 
   const onSubmit = (e?: React.BaseSyntheticEvent) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     handleSubmit(async (values: FormData) => {
       try {
         const cipher = activeWallet?.cipher;

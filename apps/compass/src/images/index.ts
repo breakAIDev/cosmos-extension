@@ -9,7 +9,7 @@ import * as nav from './nav';
 import * as stake from './stake';
 import * as swap from './swap';
 
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace Images {
   export const Activity = activity;
   export const Countries = countries;

@@ -14,7 +14,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import IBCSettings from '../IBCSettings';
 
 function ErrorWarning() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  
   const [assetChain, setAssetChain] = useState<any>(null);
 
   const {

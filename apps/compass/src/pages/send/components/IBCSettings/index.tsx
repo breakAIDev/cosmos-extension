@@ -61,9 +61,9 @@ const IBCSettings: React.FC<IBCSettingsProps> = ({ targetChain, sourceChain }) =
   );
 
   const path: string[] = [];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  
   Object.values(groupedTransactions)?.forEach((d: any[], index1: number) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     d.forEach((f: any, index2: number) => {
       if (index1 == 0 && index2 == 0) {
         path.push(f.sourceChain);

@@ -81,7 +81,7 @@ const Buy = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  
   const asset: any = location.state;
 
   const [showSelectCurrencySheet, setShowSelectCurrencySheet] = useState(false);

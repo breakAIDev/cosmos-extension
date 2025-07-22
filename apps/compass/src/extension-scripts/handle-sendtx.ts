@@ -6,7 +6,7 @@ import { BroadcastMode } from 'cosmjs-types/cosmos/tx/v1beta1/service';
 import { decodeChainIdToChain, getExperimentalChains } from './utils';
 const restUrlsApi = 'https://assets.leapwallet.io/cosmos-registry/v1/node-management-service/nms-REST.json';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 export async function handleSendTx(data: any) {
   const tx = data?.tx;
   const mode = data?.mode;

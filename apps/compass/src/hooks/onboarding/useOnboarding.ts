@@ -134,7 +134,7 @@ export function useLedgerOnboarding() {
 
     const prev = walletAccounts.default;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     updateWalletAccounts(
       primaryChainAccount.map((account, index) => ({
         address: account.address,

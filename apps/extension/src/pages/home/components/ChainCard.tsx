@@ -64,7 +64,7 @@ const ChainCardView = ({
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  
   const onStarToggle = (e: any) => {
     e.stopPropagation();
     if (isStarred) {

@@ -1,0 +1,29 @@
+// React Native compatible exports for this assets folder
+
+export const ARS = require('./ARS.png');
+export const AUD = require('./AUD.png');
+export const BRL = require('./BRL.png');
+export const CAD = require('./CAD.png');
+export const CHF = require('./CHF.png');
+export const CLP = require('./CLP.png');
+export const COP = require('./COP.png');
+export const CRC = require('./CRC.png');
+export const DKK = require('./DKK.png');
+export const EUR = require('./EUR.png');
+export const GBP = require('./GBP.png');
+export const INR = require('./INR.png');
+export const JPY = require('./JPY.png');
+export const KRW = require('./KRW.png');
+export const MXN = require('./MXN.png');
+export const NOK = require('./NOK.png');
+export const NZD = require('./NZD.png');
+export const PEN = require('./PEN.png');
+export const PHP = require('./PHP.png');
+export const PLN = require('./PLN.png');
+export const SEK = require('./SEK.png');
+export const SGD = require('./SGD.png');
+export const TRY = require('./TRY.png');
+export const TWD = require('./TWD.png');
+export const USD = require('./USD.png');
+export const UYU = require('./UYU.png');
+export const VND = require('./VND.png');

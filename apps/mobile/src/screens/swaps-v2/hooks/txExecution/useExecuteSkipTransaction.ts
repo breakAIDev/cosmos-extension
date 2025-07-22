@@ -563,7 +563,7 @@ export function useExecuteSkipTransaction({
           });
 
           return;
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          
         } catch (e: any) {
           if (e instanceof LedgerError) {
             setLedgerError && setLedgerError(e.message);
@@ -739,7 +739,7 @@ export function useExecuteSkipTransaction({
             txBytesString = Buffer.from(txBytes).toString('base64');
           }
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          
         } catch (err: any) {
           if (err instanceof LedgerError) {
             setLedgerError && setLedgerError(err.message);

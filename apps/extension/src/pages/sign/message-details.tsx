@@ -31,7 +31,7 @@ function getMessageType(type: string) {
   return parts[parts.length - 1] ?? '';
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 export const getSimpleType = (type: string | undefined, additionalInfo?: any) => {
   if (!type) {
     return 'unknown';

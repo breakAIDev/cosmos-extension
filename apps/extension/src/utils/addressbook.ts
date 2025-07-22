@@ -15,7 +15,7 @@ import extension from 'webextension-polyfill';
 
 import { DEBUG } from './debug';
 
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace AddressBook {
   const STORAGE_ID = 'all-saved-contacts';
 

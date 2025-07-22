@@ -7,7 +7,7 @@ import Long from 'long';
 import { getFee } from './get-fee';
 import { getMilkywayMemo } from './get-milkyway-memo';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 export function getProtoSignDocDecoder(signRequestData: Record<string, any>) {
   if (typeof signRequestData['sign-request'].signDoc.bodyBytes === 'string') {
     const bodyBytes = fromBase64(signRequestData['sign-request'].signDoc.bodyBytes);
@@ -39,7 +39,7 @@ export function getDirectSignDoc({
   memo,
   isGasOptionSelected,
 }: {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  
   signRequestData: Record<string, any>;
   gasPrice: GasPrice;
   gasLimit: string;

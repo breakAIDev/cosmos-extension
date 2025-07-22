@@ -49,7 +49,7 @@ export const ImportSeedPhrase = observer(({ isVisible, onClose }: ImportSeedPhra
         }
         setSecret('');
         onClose(true);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        
       } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Something went wrong';
         captureException(errorMessage);

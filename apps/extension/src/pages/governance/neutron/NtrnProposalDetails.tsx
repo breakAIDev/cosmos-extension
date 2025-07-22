@@ -47,7 +47,7 @@ import {
 } from './utils';
 
 type VoteDetailsProps = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  
   proposal: any;
   onVote: () => void;
   currVote: string;
@@ -182,7 +182,7 @@ function VoteDetails({ proposal, onVote, currVote, isLoading, shouldUseFallback,
 type NtrnProposalDetailsProps = {
   selectedProp: string | undefined;
   onBack: () => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  
   proposalList: any[];
   shouldUseFallback: boolean;
   forceChain?: SupportedChain;

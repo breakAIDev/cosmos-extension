@@ -45,11 +45,11 @@ export function TokensChart({
   useEffect(
     () =>
       setFormattedChartData(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        
         chartData?.map((val: { price: any; date: any }) => {
           return {
             data: val.price,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            
             key: new Date((val as any).timestamp),
             metadata: val.date,
           };
@@ -86,7 +86,7 @@ export function TokensChart({
                   modifiers={{
                     offset: '5px, 5px',
                   }}
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  
                   content={(data: any) => {
                     let price = data.value + minMax[0].price;
 

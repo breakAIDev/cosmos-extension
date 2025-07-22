@@ -368,7 +368,7 @@ export function useExecuteLifiTransaction({
         });
 
         return;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        
       } catch (e: any) {
         let errorMessage = '';
         if (e?.code === 'INSUFFICIENT_FUNDS') {

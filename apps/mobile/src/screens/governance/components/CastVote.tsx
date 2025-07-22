@@ -48,7 +48,7 @@ const useGetWallet = Wallet.useGetWallet;
 export type CastVoteProps = {
   className?: string;
   proposalId: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  
   refetchVote: () => Promise<any>;
   showCastVoteSheet: boolean;
   setShowCastVoteSheet: React.Dispatch<React.SetStateAction<boolean>>;

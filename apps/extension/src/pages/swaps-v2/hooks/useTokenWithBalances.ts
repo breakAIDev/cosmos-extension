@@ -27,7 +27,7 @@ export function useTokenWithBalances(
   enabledCW20DenomsStore: EnabledCW20DenomsStore,
   cw20DenomBalanceStore: CW20DenomBalanceStore,
   rootBalanceStore: RootBalanceStore,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  
 ): { data: any; status: any } {
   const disabledCW20Tokens = disabledCW20DenomsStore.getDisabledCW20DenomsForChain(
     (chain?.key ?? '') as SupportedChain,

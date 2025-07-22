@@ -92,9 +92,9 @@ export const validateChains = async (chainIds: Array<string>) => {
 
 export async function checkChainConnections(
   chainIds: string[],
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  
   connections: any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  
   msg: any,
   activeWalletId: string,
 ) {
@@ -138,7 +138,7 @@ const getActiveWalletId = async () => {
   return store[ACTIVE_WALLET_ID];
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 export async function checkConnection(chainIds: string[], msg: any) {
   const [activeWalletId, connections] = await Promise.all([getActiveWalletId(), getConnections()]);
   return await checkChainConnections(chainIds, connections, msg, activeWalletId);
@@ -504,7 +504,7 @@ export async function getSeed(password: Uint8Array) {
   return Buffer.from(seed.toString());
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 export function validateNewChainInfo(chainInfo: any) {
   const validUrl = new RegExp(/^(http|https):\/\/[^ "]+$/);
   const validBip44 = new RegExp(/^\d+$/);
@@ -531,7 +531,7 @@ export function requestEnableAccess(payload: {
   isLeap?: boolean;
 }) {
   // Store the listener function in a variable so we can remove it later
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  
   const listener = (message: any, sender: any) => {
     if (sender.id !== browser.runtime.id) throw new Error('Invalid sender');
 
@@ -548,7 +548,7 @@ export function requestEnableAccess(payload: {
 
 export async function awaitUIResponse(messageType: string) {
   return new Promise((resolve, reject) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     const listener = (message: any) => {
       if (message.type === messageType) {
         if (message.payload.status === 'success') {

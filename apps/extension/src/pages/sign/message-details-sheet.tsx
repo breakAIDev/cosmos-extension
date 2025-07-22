@@ -16,7 +16,7 @@ const MessageDetailsSheet: React.FC<{
   message: {
     index: number;
     parsed: ParsedMessage;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     raw: any;
   } | null;
   activeChain: SupportedChain;

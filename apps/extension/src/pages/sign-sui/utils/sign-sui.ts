@@ -2,7 +2,7 @@ import { calculateFee, StdFee } from '@cosmjs/stargate';
 import { GasPrice, NativeDenom } from '@leapwallet/cosmos-wallet-sdk';
 import BigNumber from 'bignumber.js';
 import { getStdFee } from 'pages/sign-aptos/utils/get-fee';
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 export function getOriginalSignDoc(signRequestData: any, isDisplay: boolean = false) {
   const transaction = new Uint8Array(Object.values(signRequestData));
   if (isDisplay) {
@@ -52,7 +52,7 @@ export function getSuiSignDoc({
   isGasOptionSelected,
   nativeFeeDenom,
 }: {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  
   signRequestData: Record<string, any>;
   gasPrice: GasPrice;
   gasLimit: string;

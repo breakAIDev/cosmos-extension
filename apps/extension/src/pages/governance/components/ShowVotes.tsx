@@ -20,7 +20,7 @@ export function ShowVotes({ dataMock, chain }: IShowVotes) {
   const { scrollRef, props } = useHorizontalScroll<HTMLDivElement>();
   const decimals =
     Object.values(chain.nativeDenoms)?.[0]?.coinDecimals ??
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     (chainDecimals as any)[chain?.bip44?.coinType];
 
   return (

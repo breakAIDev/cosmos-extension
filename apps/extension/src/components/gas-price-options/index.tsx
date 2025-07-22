@@ -302,7 +302,7 @@ const GasPriceOptions = observer(
         chainGasPriceOptionsStore
           .validateFees(
             {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              
               gaslimit: (fee as any).gasLimit ?? Long.fromString(fee.gas),
               feeAmount: fee.amount[0]?.amount,
               feeDenom: fee.amount[0]?.denom,

@@ -68,7 +68,7 @@ export const AddCollection = observer(({ isVisible, onClose, chainTagsStore }: A
   const [enteredTokenId, setEnteredTokenId] = useState('');
   const [selectedChain, setSelectedChain] = useState<SupportedChain>('' as SupportedChain);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  
   const [nftInfo, setNftInfo] = useState<{ [key: string]: any }>({});
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [fetchingCollectionInfo, setFetchingCollectionInfo] = useState(false);

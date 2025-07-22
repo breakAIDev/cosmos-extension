@@ -164,7 +164,7 @@ export async function logDirectTx(
   data: DirectSignResponse,
   messages: any[],
   origin: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  
   fee: any,
   chain: SupportedChain,
   address: string,

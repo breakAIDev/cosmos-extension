@@ -1,9 +1,11 @@
+import React, { useMemo } from 'react';
+import { View } from 'react-native';
+import { observer } from 'mobx-react-lite';
 
 import { useActiveWallet, useGetChains, WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { AggregatedChainsStore } from '@leapwallet/cosmos-wallet-store';
-import { observer } from 'mobx-react-lite';
-import React, { useMemo } from 'react';
+
 import { ManageChainSettings, manageChainsStore } from '../../context/manage-chains-store';
 import { isLedgerEnabled } from '../../utils/isLedgerEnabled';
 
@@ -46,12 +48,16 @@ export const AggregatedNullComponents = observer(function ({
       const chainInfo = chains[chain];
       const noAddress = !activeWallet?.addresses[chain];
 
-      // If no address, chain is testnet or apiStatus is false, then we will skip the chain
-      if (noAddress || chainInfo?.chainId === chainInfo?.testnetChainId || chainInfo?.apiStatus === false) {
+      // Skip chain if no address, or if testnet, or if API is down
+      if (
+        noAddress ||
+        chainInfo?.chainId === chainInfo?.testnetChainId ||
+        chainInfo?.apiStatus === false
+      ) {
         return acc;
       }
 
-      // If `disabled` check is true, then we will skip the chain
+      // If Ledger and chain is not supported, skip
       if (
         activeWallet?.walletType === WALLETTYPE.LEDGER &&
         !isLedgerEnabled(chain, chainInfo?.bip44?.coinType, Object.values(chains))
@@ -59,7 +65,7 @@ export const AggregatedNullComponents = observer(function ({
         return acc;
       }
 
-      // If managed chain is not active, skip fetching the chain
+      // Skip if chain not active
       const managedChain = managedChains.find((managedChain) => managedChain.chainName === chain);
       if (managedChain && managedChain.active) {
         return [...acc, managedChain];
@@ -81,23 +87,29 @@ export const AggregatedNullComponents = observer(function ({
   }, [aggregatedChains, chainsToFetch]);
 
   return (
-    <>
+    <View>
       {chainsToFetch.map((chain) =>
-        render({
-          key: chain.chainName,
-          chain: chain.chainName,
-          setAggregatedStore,
-        }),
-      )}
-      {reset &&
-        chainsToReset.map((chain) =>
-          reset({
+        React.cloneElement(
+          render({
             key: chain.chainName,
             chain: chain.chainName,
             setAggregatedStore,
           }),
+          { key: chain.chainName },
+        ),
+      )}
+      {reset &&
+        chainsToReset.map((chain) =>
+          React.cloneElement(
+            reset({
+              key: chain.chainName,
+              chain: chain.chainName,
+              setAggregatedStore,
+            }),
+            { key: chain.chainName },
+          ),
         )}
-    </>
+    </View>
   );
 });
 

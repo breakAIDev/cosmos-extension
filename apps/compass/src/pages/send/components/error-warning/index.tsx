@@ -13,7 +13,7 @@ import { useSendContext } from 'pages/send/context';
 import React, { useEffect, useMemo, useState } from 'react';
 
 function ErrorWarning() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  
   const [assetChain, setAssetChain] = useState<any>(null);
 
   const {

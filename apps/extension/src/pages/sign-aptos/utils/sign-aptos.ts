@@ -5,7 +5,7 @@ import BigNumber from 'bignumber.js';
 
 import { getStdFee } from './get-fee';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 function getOriginalSignDoc(signRequestData: Record<string, any>) {
   const _signDoc = Uint8Array.from(Buffer.from(signRequestData.signDoc, 'hex'));
   const signOptions = signRequestData?.signOptions;
@@ -68,7 +68,7 @@ export function getAptosSignDoc({
   isGasOptionSelected,
   nativeFeeDenom,
 }: {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  
   signRequestData: Record<string, any>;
   gasPrice: GasPrice;
   gasLimit: string;

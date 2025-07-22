@@ -2,7 +2,7 @@ import { CosmosBaseV1Beta1Coin, IbcApplicationsTransferV1Tx, IbcCoreClientV1Clie
 import { convertToSnakeCase } from '../../../../utils';
 import { MsgBase } from '../../MsgBase';
 
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export declare namespace MsgTransfer {
   export interface Params {
     amount: {
