@@ -1,18 +1,29 @@
-import { ClockIcon } from 'icons/clock-icon';
-import { CompassIcon2 } from 'icons/compass-icon';
-import { GalleryIcon } from 'icons/gallery-icon';
-import { HomeIcon } from 'icons/home-icon';
-import { SwapIconBottomNav } from 'icons/swap-icon';
-import activityOffOn from 'lottie-files/bottom-nav/activity-off-on.json';
-import activityOnOff from 'lottie-files/bottom-nav/activity-on-off.json';
-import compassOffOn from 'lottie-files/bottom-nav/compass-off-on.json';
-import compassOnOff from 'lottie-files/bottom-nav/compass-on-off.json';
-import homeOffOn from 'lottie-files/bottom-nav/home-off-on.json';
-import homeOnOff from 'lottie-files/bottom-nav/home-on-off.json';
-import nftOffOn from 'lottie-files/bottom-nav/nft-off-on.json';
-import nftOnOff from 'lottie-files/bottom-nav/nft-on-off.json';
-import swapOffOn from 'lottie-files/bottom-nav/swap-off-on.json';
-import swapOnOff from 'lottie-files/bottom-nav/swap-on-off.json';
+import { ClockIcon } from '../../../assets/icons/clock-icon';
+import { CompassIcon2 } from '../../../assets/icons/compass-icon';
+import { GalleryIcon } from '../../../assets/icons/gallery-icon';
+import { HomeIcon } from '../../../assets/icons/home-icon';
+import { SwapIconBottomNav } from '../../../assets/icons/swap-icon';
+
+// Lottie animation imports
+import activityOffOn from '../../../assets/lottie-files/bottom-nav/activity-off-on.json';
+import activityOnOff from '../../../assets/lottie-files/bottom-nav/activity-on-off.json';
+import compassOffOn from '../../../assets/lottie-files/bottom-nav/compass-off-on.json';
+import compassOnOff from '../../../assets/lottie-files/bottom-nav/compass-on-off.json';
+import homeOffOn from '../../../assets/lottie-files/bottom-nav/home-off-on.json';
+import homeOnOff from '../../../assets/lottie-files/bottom-nav/home-on-off.json';
+import nftOffOn from '../../../assets/lottie-files/bottom-nav/nft-off-on.json';
+import nftOnOff from '../../../assets/lottie-files/bottom-nav/nft-on-off.json';
+import swapOffOn from '../../../assets/lottie-files/bottom-nav/swap-off-on.json';
+import swapOnOff from '../../../assets/lottie-files/bottom-nav/swap-on-off.json';
+
+// Route names for React Navigation
+export enum BottomNavRoute {
+  Home = 'Home',
+  NFTs = 'NFTs',
+  Activity = 'Activity',
+  Swap = 'Swap',
+  Rewards = 'Rewards',
+}
 
 export enum BottomNavLabel {
   Home = 'Home',
@@ -21,6 +32,7 @@ export enum BottomNavLabel {
   Swap = 'Swap',
   Rewards = 'Rewards',
 }
+
 export const allBottomNavItems = [
   {
     label: BottomNavLabel.Home,
@@ -29,8 +41,8 @@ export const allBottomNavItems = [
       off: homeOnOff,
     },
     Icon: HomeIcon,
-    path: '/home',
-    visibleOn: new Set([]),
+    route: BottomNavRoute.Home, // React Navigation route name
+    visibleOn: new Set<string>(),
   },
   {
     label: BottomNavLabel.NFTs,
@@ -39,7 +51,7 @@ export const allBottomNavItems = [
       off: nftOnOff,
     },
     Icon: GalleryIcon,
-    path: '/nfts',
+    route: BottomNavRoute.NFTs,
   },
   {
     label: BottomNavLabel.Swap,
@@ -48,8 +60,8 @@ export const allBottomNavItems = [
       off: swapOnOff,
     },
     Icon: SwapIconBottomNav,
-    path: '/swap',
-    params: 'pageSource=bottomNav',
+    route: BottomNavRoute.Swap,
+    params: { pageSource: 'bottomNav' },
   },
   {
     label: BottomNavLabel.Rewards,
@@ -58,7 +70,7 @@ export const allBottomNavItems = [
       off: compassOnOff,
     },
     Icon: CompassIcon2,
-    path: '/alpha',
+    route: BottomNavRoute.Rewards,
   },
   {
     label: BottomNavLabel.Activity,
@@ -67,18 +79,25 @@ export const allBottomNavItems = [
       off: activityOnOff,
     },
     Icon: ClockIcon,
-    path: '/activity',
+    route: BottomNavRoute.Activity,
   },
 ];
 
-export const bottomNavItemsForWatchWallet = allBottomNavItems.filter((item) => item.label !== BottomNavLabel.Swap);
+// Items for watch-only wallets
+export const bottomNavItemsForWatchWallet = allBottomNavItems.filter(
+  (item) => item.label !== BottomNavLabel.Swap,
+);
 
-export const routeToLabelMap = allBottomNavItems.reduce((acc, item) => {
-  acc[item.path] = item.label;
+// Map routes to labels
+export const routeToLabelMap: Record<string, BottomNavLabel> = allBottomNavItems.reduce(
+  (acc, item) => {
+    acc[item.route] = item.label;
 
-  item.visibleOn?.forEach((path) => {
-    acc[path] = item.label;
-  });
+    item.visibleOn?.forEach?.((route) => {
+      acc[route] = item.label;
+    });
 
-  return acc;
-}, {} as Record<string, BottomNavLabel>);
+    return acc;
+  },
+  {} as Record<string, BottomNavLabel>,
+);

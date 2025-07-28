@@ -1,7 +1,7 @@
 import { useChainInfo } from '@leapwallet/cosmos-wallet-hooks';
 import { DenomsRecord } from '@leapwallet/cosmos-wallet-sdk';
 import { Token } from '@leapwallet/cosmos-wallet-store';
-import BottomModal from 'components/bottom-modal';
+import BottomModal from '../bottom-modal';
 import NoSearchResults from 'components/no-search-results';
 import { SearchInput } from 'components/ui/input/search-input';
 import { useSendContext } from 'pages/send-v2/context';

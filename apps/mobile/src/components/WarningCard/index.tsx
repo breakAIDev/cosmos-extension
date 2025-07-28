@@ -1,22 +1,54 @@
-import { Info } from '@phosphor-icons/react';
 import React from 'react';
-
-import Text from '../text';
+import { View, StyleSheet, Text } from 'react-native';
+import { Info } from 'phosphor-react-native';
 
 export default function WarningCard({ text, subText }: { text: string; subText?: string }) {
   return (
-    <div className='dark:bg-gray-950 p-[16px] pr-[21px] w-[344px] h-[86px] bg-white-100 rounded-2xl justify-center flex'>
-      <Info size={16} className='text-orange-500' />
-      <div className='flex flex-col gap-y-[2px]'>
-        <Text size='sm' className='text font-black ml-1'>
-          {text}
-        </Text>
+    <View style={styles.card}>
+      <Info size={20} color="#FB923C" style={styles.icon} weight="duotone" />
+      <View style={styles.textContainer}>
+        <Text style={styles.mainText}>{text}</Text>
         {subText ? (
-          <Text size='xs' color='text-gray-400 ml-[5px]'>
-            {subText}
-          </Text>
+          <Text style={styles.subText}>{subText}</Text>
         ) : null}
-      </div>
-    </div>
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    width: 344,
+    height: 86,
+    paddingVertical: 16,
+    paddingLeft: 16,
+    paddingRight: 21,
+    // If you have dark mode, you can add dynamic colors here
+    // backgroundColor: isDark ? '#111827' : '#fff',
+  },
+  icon: {
+    marginRight: 12,
+    alignSelf: 'center',
+  },
+  textContainer: {
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    gap: 2,
+  },
+  mainText: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#232323',
+    marginBottom: 2,
+  },
+  subText: {
+    fontSize: 12,
+    color: '#97A3B9',
+    marginLeft: 5,
+  },
+});

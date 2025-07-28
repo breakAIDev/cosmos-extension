@@ -1,70 +1,95 @@
-import { CheckCircle, Info, Warning, WarningCircle } from '@phosphor-icons/react';
-import { Variants } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
-import { cn } from 'utils/cn';
+import { View, Text, StyleSheet, ViewStyle, StyleProp } from 'react-native';
+import Icon from 'react-native-vector-icons/Feather';
 
 const alertStripV2Config = {
   info: {
-    className: 'bg-accent-blue-700 text-accent-blue-foreground',
-    Icon: Info,
-    weight: 'regular',
+    backgroundColor: '#2262c6',
+    textColor: '#fff',
+    icon: { name: 'info', color: '#fff' }
   },
   warning: {
-    className: 'bg-accent-warning-700 text-accent-warning-foreground',
-    Icon: Warning,
-    weight: 'fill',
+    backgroundColor: '#f9be18',
+    textColor: '#18181b',
+    icon: { name: 'alert-triangle', color: '#18181b' }
   },
   error: {
-    className: 'bg-destructive-700 text-destructive-foreground',
-    Icon: WarningCircle,
-    weight: 'fill',
+    backgroundColor: '#ef4444',
+    textColor: '#fff',
+    icon: { name: 'x-circle', color: '#fff' }
   },
   success: {
-    className: 'bg-accent-success text-accent-success-foreground',
-    Icon: CheckCircle,
-    weight: 'fill',
+    backgroundColor: '#0eb25d',
+    textColor: '#fff',
+    icon: { name: 'check-circle', color: '#fff' }
   },
 } as const;
 
-export const alertStripVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1 },
-};
+type AlertType = keyof typeof alertStripV2Config;
 
-export const AlertStrip = (props: {
-  type?: 'info' | 'warning' | 'error' | 'success';
-  className?: string;
+type AlertStripProps = {
+  type?: AlertType;
+  style?: StyleProp<ViewStyle>;
   timeOut?: number;
   onHide?: VoidFunction;
   children: React.ReactNode;
-}) => {
-  const { className, Icon, weight } = alertStripV2Config[props.type ?? 'info'] || alertStripV2Config.info;
+};
 
+export const AlertStrip: React.FC<AlertStripProps> = ({
+  type = 'info',
+  style,
+  timeOut,
+  onHide,
+  children,
+}) => {
+  const config = alertStripV2Config[type];
   const [show, setShow] = useState(true);
 
   useEffect(() => {
-    if (!props.timeOut) {
-      return;
+    if (timeOut) {
+      const timeout = setTimeout(() => {
+        setShow(false);
+        onHide?.();
+      }, timeOut);
+      return () => clearTimeout(timeout);
     }
+  }, [timeOut, onHide]);
 
-    const timeout = setTimeout(() => {
-      setShow(false);
-      props.onHide?.();
-    }, props.timeOut);
-
-    return () => clearTimeout(timeout);
-  }, [props]);
-
-  if (!show) {
-    return null;
-  }
+  if (!show) return null;
 
   return (
-    <div
-      className={cn('w-full flex justify-center items-center gap-2 p-2 text-xs font-bold', className, props.className)}
-    >
-      <Icon weight={weight} className='size-4' />
-      <p>{props.children}</p>
-    </div>
+    <View style={[
+      styles.container,
+      { backgroundColor: config.backgroundColor },
+      style,
+    ]}>
+      <Icon
+        name={config.icon.name}
+        size={16}
+        color={config.icon.color}
+        style={styles.icon}
+      />
+      <Text style={[styles.message, { color: config.textColor }]}>
+        {children}
+      </Text>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 8,
+    justifyContent: 'center',
+  },
+  icon: {
+    marginRight: 8,
+  },
+  message: {
+    fontWeight: 'bold',
+    fontSize: 13,
+    flex: 1,
+  },
+});

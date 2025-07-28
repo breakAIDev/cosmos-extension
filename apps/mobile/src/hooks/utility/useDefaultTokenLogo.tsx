@@ -1,16 +1,12 @@
-import { ThemeName, useTheme } from '@leapwallet/leap-ui';
+import { useColorScheme } from 'react-native';
 import { useMemo } from 'react';
+import { Images } from '../../../assets/images';
 
-import { Images } from '../../images';
-
-export function getDefaultTokenLogo(darkTheme: boolean) {
-  const defaultLogo = darkTheme ? Images.Logos.ImgNotAvailableDark : Images.Logos.ImgNotAvailableLight;
-  return defaultLogo;
+export function getDefaultTokenLogo(isDark: boolean) {
+  return isDark ? Images.Logos.img_not_available_dark : Images.Logos.img_not_available_light;
 }
 
 export function useDefaultTokenLogo() {
-  const darkTheme = useTheme().theme === ThemeName.DARK;
-  return useMemo(() => {
-    return getDefaultTokenLogo(darkTheme);
-  }, [darkTheme]);
+  const isDark = useColorScheme() === 'dark';
+  return useMemo(() => getDefaultTokenLogo(isDark), [isDark]);
 }

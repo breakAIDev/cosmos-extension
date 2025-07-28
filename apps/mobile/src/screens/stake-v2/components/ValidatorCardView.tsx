@@ -1,5 +1,4 @@
 import { sliceWord } from '@leapwallet/cosmos-wallet-hooks';
-import { buttonRingClass } from 'components/ui/button';
 import { Images } from 'images';
 import React from 'react';
 import { cn } from 'utils/cn';
@@ -25,7 +24,7 @@ export const ValidatorCardView = React.memo(
         onClick={onClick}
         className={cn(
           'flex justify-between items-center px-4 py-3 bg-secondary-100 disabled:hover:bg-secondary-100 hover:bg-secondary-200 disabled:cursor-auto rounded-xl',
-          buttonRingClass,
+          ' ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none focus-visible:ring-accent-success/50',
         )}
       >
         <img

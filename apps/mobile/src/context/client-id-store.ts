@@ -1,7 +1,7 @@
-import { CLIENT_ID } from 'config/storage-keys';
+import { CLIENT_ID } from '../services/config/storage-keys';
 import { makeAutoObservable } from 'mobx';
 import { v4 as uuidv4 } from 'uuid';
-import Browser from 'webextension-polyfill';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export class ClientIdStore {
   clientId: string | undefined = undefined;
@@ -11,20 +11,20 @@ export class ClientIdStore {
   }
 
   async initClientId() {
-    const storage = await Browser.storage.local.get(CLIENT_ID);
-    const clientId = storage[CLIENT_ID];
+    const clientId = await AsyncStorage.getItem(CLIENT_ID);
 
     if (clientId) {
       this.setClientId(clientId);
       return;
     }
 
-    this.setClientId(uuidv4());
+    const newClientId = uuidv4();
+    this.setClientId(newClientId);
   }
 
   setClientId(clientId: string) {
     this.clientId = clientId;
-    Browser.storage.local.set({ [CLIENT_ID]: clientId });
+    AsyncStorage.setItem(CLIENT_ID, clientId);
   }
 }
 

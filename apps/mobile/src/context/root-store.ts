@@ -1,5 +1,4 @@
 import { RootBalanceStore, RootStakeStore, RootStore } from '@leapwallet/cosmos-wallet-store';
-
 import { activeChainStore } from './active-chain-store';
 import { addressStore } from './address-store-instance';
 import {

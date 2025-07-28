@@ -2,7 +2,7 @@ import { SelectedAddress, useAddressPrefixes, useGetChains } from '@leapwallet/c
 import { getBlockChainFromAddress, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { Avatar, Buttons, Input } from '@leapwallet/leap-ui';
 import { CaretLeft, CaretRight } from '@phosphor-icons/react';
-import BottomModal from 'components/bottom-modal';
+import BottomModal from '../bottom-modal';
 import { CustomCheckbox } from 'components/custom-checkbox';
 import { LoaderAnimation } from 'components/loader/Loader';
 import Text from 'components/text';

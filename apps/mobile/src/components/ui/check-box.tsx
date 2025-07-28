@@ -1,27 +1,59 @@
-'use client';
+import React from 'react';
+import { Pressable, View, StyleSheet } from 'react-native';
+import { Check } from 'phosphor-react-native';
 
-import { Check } from '@phosphor-icons/react';
-import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
-import * as React from 'react';
-import { cn } from 'utils/cn';
+type CheckboxProps = {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  disabled?: boolean;
+  style?: any;
+};
 
-const Checkbox = React.forwardRef<
-  React.ElementRef<typeof CheckboxPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>
->(({ className, ...props }, ref) => (
-  <CheckboxPrimitive.Root
-    ref={ref}
-    className={cn(
-      'peer h-4 w-4 shrink-0 rounded-sm data-[state=checked]:border border-accent-green shadow focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:!bg-accent-green data-[state=checked]:text-accent-green !bg-secondary-300',
-      className,
-    )}
-    {...props}
-  >
-    <CheckboxPrimitive.Indicator className={'flex items-center justify-center text-current'}>
-      <Check className='h-4 w-4 text-secondary-300' />
-    </CheckboxPrimitive.Indicator>
-  </CheckboxPrimitive.Root>
-));
-Checkbox.displayName = CheckboxPrimitive.Root.displayName;
+export const Checkbox: React.FC<CheckboxProps> = ({
+  checked,
+  onChange,
+  disabled,
+  style,
+}) => {
+  return (
+    <Pressable
+      style={[
+        styles.box,
+        checked && styles.checkedBox,
+        disabled && styles.disabled,
+        style,
+      ]}
+      onPress={() => !disabled && onChange(!checked)}
+      disabled={disabled}
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked, disabled }}
+    >
+      {checked && (
+        <Check size={16} weight="bold" color="#F3F7F6" /> {/* White/secondary-300 */}
+      )}
+    </Pressable>
+  );
+};
 
-export { Checkbox };
+const styles = StyleSheet.create({
+  box: {
+    width: 20, // h-4 w-4
+    height: 20,
+    borderRadius: 4, // rounded-sm
+    borderWidth: 2,
+    borderColor: '#26c06f', // border-accent-green
+    backgroundColor: '#E6EAEF', // bg-secondary-300
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 2,
+  },
+  checkedBox: {
+    backgroundColor: '#26c06f', // bg-accent-green
+    borderColor: '#26c06f',
+  },
+  disabled: {
+    opacity: 0.5,
+  },
+});

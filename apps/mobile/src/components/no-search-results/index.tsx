@@ -1,21 +1,21 @@
-import { EmptyCard } from 'components/empty-card';
-import { Images } from 'images';
 import React from 'react';
+import { ViewStyle } from 'react-native';
+import { EmptyCard } from '../empty-card';
+import { Images } from '../../../assets/images';
 
 interface PropsType {
   searchQuery: string;
-  classname?: string;
+  style?: ViewStyle;
 }
 
-const NoSearchResults = (props: PropsType) => {
-  const { searchQuery, classname = undefined } = props;
+const NoSearchResults = ({ searchQuery, style }: PropsType) => {
   return (
     <EmptyCard
       isRounded
-      subHeading='Please try again with something else'
-      heading={'No results for “' + searchQuery + '”'}
+      subHeading="Please try again with something else"
+      heading={`No results for “${searchQuery}”`}
       src={Images.Misc.Explore}
-      classname={classname}
+      style={style}
     />
   );
 };

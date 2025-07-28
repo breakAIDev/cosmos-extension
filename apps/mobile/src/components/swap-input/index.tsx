@@ -1,13 +1,10 @@
-import { useformatCurrency } from '@leapwallet/cosmos-wallet-hooks';
-import { CardDivider } from '@leapwallet/leap-ui';
-import { Buttons } from '@leapwallet/leap-ui';
-import { CaretDoubleDown, CaretRight } from '@phosphor-icons/react';
+import React, { useEffect, useState, forwardRef } from 'react';
+import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Platform } from 'react-native';
 import BigNumber from 'bignumber.js';
-import classNames from 'classnames';
-import ClickableIcon from 'components/clickable-icons';
-import { DEFAULT_SWAP_FEE } from 'config/config';
-import { Images } from 'images';
-import React, { forwardRef, useEffect, useState } from 'react';
+import { useformatCurrency } from '@leapwallet/cosmos-wallet-hooks'; // Update as per mobile SDK
+import { CaretDoubleDown, CaretRight } from '@phosphor-icons/react';
+import { DEFAULT_SWAP_FEE } from '../../services/config/config'; // Update import path
+import {Images} from '../../../assets/images'; // Update with your assets
 
 type Swap = {
   name: string;
@@ -36,200 +33,352 @@ export type SwapInputProps = Swap & {
   junoDollarValue: number | undefined;
 };
 
-const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
-  ({
-    name,
-    balance,
-    amount,
-    targetAmount,
-    feeInCurrency,
-    setAmount,
-    onMaxClick,
-    onSwapClick,
-    onTokenClick,
-    onTargetTokenClick,
-    targetName,
-    targetTokenIcon,
-    targetUnitPrice,
-    icon,
-    onSlippageClick,
-    onReviewClick,
-    slippage,
-    isFeeAvailable,
-    junoDollarValue,
-  }) => {
-    const [isError, setIsError] = useState(false);
-    const [formatBalance] = useformatCurrency();
+const SwapInput = forwardRef(({
+  name,
+  icon,
+  balance,
+  amount,
+  targetAmount,
+  feeInCurrency,
+  setAmount,
+  onMaxClick,
+  onSwapClick,
+  onTokenClick,
+  onTargetTokenClick,
+  targetName,
+  targetTokenIcon,
+  targetUnitPrice,
+  onSlippageClick,
+  onReviewClick,
+  slippage,
+  isFeeAvailable,
+  junoDollarValue,
+  placeholder,
+} : SwapInputProps, ref) => {
+  const [isError, setIsError] = useState(false);
+  const [formatBalance] = useformatCurrency(); // Use your mobile implementation
 
-    useEffect(() => {
-      if (name === 'JUNO' && Number(amount) > Number(balance) - 0.004) {
-        setIsError(true);
-      } else if (name !== 'JUNO' && Number(amount) > Number(balance)) {
-        setIsError(true);
-      } else {
-        setIsError(false);
-      }
-    }, [amount, balance, name]);
+  useEffect(() => {
+    if (name === 'JUNO' && Number(amount) > Number(balance) - 0.004) {
+      setIsError(true);
+    } else if (name !== 'JUNO' && Number(amount) > Number(balance)) {
+      setIsError(true);
+    } else {
+      setIsError(false);
+    }
+  }, [amount, balance, name]);
 
-    const dollarValueDisplay =
-      junoDollarValue === undefined ? '-' : formatBalance(new BigNumber(junoDollarValue).multipliedBy(amount));
+  // Placeholder formatter, replace with the real one
+  const dollarValueDisplay = junoDollarValue === undefined ? '-' : formatBalance(new BigNumber(junoDollarValue).multipliedBy(amount));
 
-    return (
-      <div>
-        {/* Swap from section */}
-        <div className='bg-white-100 dark:bg-gray-900 flex flex-col p-4 w-[344px] rounded-t-2xl'>
-          <div className='flex h-10 w-full justify-between'>
-            <div
-              className='bg-gray-50 dark:bg-gray-800 rounded-full flex items-center py-2 pl-3 pr-2 cursor-pointer'
-              onClick={onTokenClick}
-            >
-              {icon && <img src={icon} className='h-6 w-6 mr-1' />}
-              <div className='text-black-100 dark:text-white-100 font-bold text-base pl-[4px] pr-[7px]'>{name}</div>
-              <img src={Images.Misc.ArrowDown} />
-            </div>
-            <input
-              placeholder='enter amount'
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              className='w-32 text-xl font-bold text-black-100 dark:text-white-100 dark:bg-gray-900 outline-none text-right'
-              type='number'
-            />
-          </div>
-          <div className='flex mt-2 w-full justify-between items-start'>
-            <div
-              className={classNames('text-sm font-bold', {
-                'text-red-300': isError,
-                'text-gray-400': !isError,
-              })}
-            >
-              {`${isError ? 'Insufficient Funds' : 'Balance'}: ${balance} ${name === 'Select token' ? '' : name}`}
-            </div>
-            <div className='flex flex-col self-end'>
-              <p className='font-medium text-sm text-gray-600 dark:text-gray-300 text-right w-full'>
-                {dollarValueDisplay}
-              </p>
-              {!isError && (
-                <>
-                  <button
-                    className='bg-green-600/10 text-green-600 text-sm font-bold px-4 h-7 rounded-full mt-2'
-                    onClick={onMaxClick}
-                  >
-                    Swap all
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-        {/* Swap interchange button section */}
-        <div className='flex justify-center items-center bg-white-100 dark:bg-gray-900 h-8 relative'>
-          <div className='absolute top-4 left-0'>
-            <CardDivider />
-          </div>
-          <ClickableIcon label='Swap' icon={CaretDoubleDown} onClick={onSwapClick} style={{ zIndex: 1 }} />
-        </div>
+  return (
+    <View style={styles.container}>
+      {/* From Section */}
+      <View style={styles.swapSectionTop}>
+        <View style={styles.tokenRow}>
+          <TouchableOpacity style={styles.tokenSelector} onPress={onTokenClick}>
+            {icon && <Image source={icon} style={styles.tokenIcon} />}
+            <Text style={styles.tokenName}>{name}</Text>
+            <Image source={Images.Misc.ArrowDown} style={styles.arrowIcon}/>
+          </TouchableOpacity>
+          <TextInput
+            ref={ref}
+            style={styles.input}
+            placeholder={placeholder || 'enter amount'}
+            value={amount}
+            onChangeText={setAmount}
+            keyboardType='decimal-pad'
+            textAlign='right'
+          />
+        </View>
+        <View style={styles.balanceRow}>
+          <Text style={[styles.balanceText, isError ? styles.errorText : styles.grayText]}>
+            {isError ? 'Insufficient Funds' : 'Balance'}: {balance} {name === 'Select token' ? '' : name}
+          </Text>
+          <View>
+            <Text style={styles.dollarValue}>{dollarValueDisplay}</Text>
+            {!isError && (
+              <TouchableOpacity style={styles.swapAllBtn} onPress={onMaxClick}>
+                <Text style={styles.swapAllBtnText}>Swap all</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+      </View>
+      
+      {/* Swap Button Section */}
+      <View style={styles.swapButtonSection}>
+        <View style={styles.divider} />
+        <TouchableOpacity onPress={onSwapClick} style={styles.swapIconContainer}>
+          <CaretDoubleDown />
+        </TouchableOpacity>
+        <View style={styles.divider} />
+      </View>
 
-        {/* Swap to section */}
-        <div className='mb-4 p-4 bg-white-100 dark:bg-gray-900 flex flex-col justify-center w-[344px] rounded-b-2xl'>
-          <div className='flex justify-between'>
-            <div
-              className='bg-gray-50 dark:bg-gray-800 rounded-full flex items-center py-2 pl-3 pr-2 cursor-pointer'
-              onClick={onTargetTokenClick}
-            >
-              {targetTokenIcon && <img src={targetTokenIcon} className='h-6 w-6 mr-1' />}
-              <div className='text-black-100 dark:text-white-100 font-bold text-base pl-[4px] pr-[7px]'>
-                {targetName}
-              </div>
-              <img src={Images.Misc.ArrowDown} />
-            </div>
-            <input
-              placeholder='0'
-              value={targetAmount}
-              disabled={true}
-              className='w-32 text-xl font-bold text-black-100 dark:text-white-100 dark:bg-gray-900 outline-none text-right'
-              type='number'
-            />
-          </div>
-          <p className='font-medium text-sm text-gray-600 dark:text-gray-300 text-right w-full'>{dollarValueDisplay}</p>
-        </div>
+      {/* To Section */}
+      <View style={styles.swapSectionBottom}>
+        <View style={styles.tokenRow}>
+          <TouchableOpacity style={styles.tokenSelector} onPress={onTargetTokenClick}>
+            {targetTokenIcon && <Image source={targetTokenIcon} style={styles.tokenIcon} />}
+            <Text style={styles.tokenName}>{targetName}</Text>
+            <Image source={Images.Misc.ArrowDown} style={styles.arrowIcon}/>
+          </TouchableOpacity>
+          <TextInput
+            style={styles.input}
+            placeholder='0'
+            value={targetAmount}
+            editable={false}
+            textAlign='right'
+            keyboardType='decimal-pad'
+          />
+        </View>
+        <Text style={styles.dollarValue}>{dollarValueDisplay}</Text>
+      </View>
 
-        {/* Slippage and per unit cost estimates */}
-        {amount &&
-          name !== 'Select token' &&
-          targetName !== 'Select token' &&
-          Number(amount) > 0 &&
-          Number(targetAmount) > 0 && (
-            <div className='flex flex-row'>
-              {/* amount per unit token indicator */}
-              <div className='bg-white-100 dark:bg-gray-900 flex flex-row w-[206px] h-[56px] rounded-[8px] mb-[8px] px-[12px] py-[8px]'>
-                <div className='flex flex-col justify-center'>
-                  <img src={Images.Logos.JunoSwap} className='h-6 w-6 mr-[10px]' />
-                </div>
-                <div className='flex flex-col justify-center text-[12px]'>
-                  <p>
-                    <span className='font-bold text-black-100 dark:text-white-100'>
-                      {targetUnitPrice} {targetName}
-                    </span>{' '}
-                    <span className='text-gray-400'>per {name}</span>
-                  </p>
-                  <p className='text-gray-400'>Juno Swap</p>
-                </div>
-              </div>
-              {/* max slippage selector */}
-              <div
-                className='bg-white-100 dark:bg-gray-900 flex flex-row justify-between cursor-pointer w-[130px] h-[56px] rounded-[8px] mb-[8px] px-[12px] py-[8px] ml-[8px]'
-                onClick={() => onSlippageClick()}
-              >
-                <div className='flex flex-col justify-center text-[12px]'>
-                  <p>
-                    <span className='text-gray-400'>Max slippage</span>
-                  </p>
-                  <p className='font-bold text-black-100 dark:text-white-100'>{slippage}%</p>
-                </div>
-                <div className='flex flex-col justify-center text-right text-gray-400'>
-                  <CaretRight size={16} className='text-gray-400' />
-                </div>
-              </div>
-            </div>
-          )}
+      {/* Slippage and per unit cost */}
+      {(!!amount && name !== 'Select token' && targetName !== 'Select token' && Number(amount) > 0 && Number(targetAmount) > 0) && (
+        <View style={styles.row}>
+          <View style={styles.unitBox}>
+            <Image source={Images.Logos.JunoSwap} />
+            <View>
+              <Text>
+                <Text style={{fontWeight: 'bold'}}>{targetUnitPrice} {targetName}</Text>
+                <Text style={styles.grayText}> per {name}</Text>
+              </Text>
+              <Text style={styles.grayText}>Juno Swap</Text>
+            </View>
+          </View>
+          <TouchableOpacity style={styles.slippageBox} onPress={onSlippageClick}>
+            <View>
+              <Text style={styles.grayText}>Max slippage</Text>
+              <Text style={{fontWeight: 'bold'}}>{slippage}%</Text>
+            </View>
+            <CaretRight size={16} style={styles.arrowRight}/>
+          </TouchableOpacity>
+        </View>
+      )}
 
-        {/* Swap review buttons section */}
-        <div className='text-center w-[344px]'>
-          <div className='flex w-full shrink'>
-            <Buttons.Generic
-              size='normal'
-              color={'#E18881'}
-              onClick={() => {
-                onReviewClick();
-              }}
-              disabled={
-                isError ||
-                !amount ||
-                (amount ? (Number(amount) > 0 ? false : true) : false) ||
-                targetName === name ||
-                targetName == 'Select token' ||
-                name == 'Select token' ||
-                !isFeeAvailable
-              }
-            >
-              Review Swap
-            </Buttons.Generic>
-          </div>
-        </div>
+      {/* Review Button */}
+      <View style={styles.reviewSection}>
+        <TouchableOpacity
+          style={[
+            styles.reviewButton,
+            (isError || !amount || Number(amount) <= 0 || targetName === name || targetName === 'Select token' || name === 'Select token' || !isFeeAvailable) && styles.reviewButtonDisabled
+          ]}
+          onPress={onReviewClick}
+          disabled={
+            isError ||
+            !amount ||
+            Number(amount) <= 0 ||
+            targetName === name ||
+            targetName === 'Select token' ||
+            name === 'Select token' ||
+            !isFeeAvailable
+          }
+        >
+          <Text style={styles.reviewButtonText}>Review Swap</Text>
+        </TouchableOpacity>
+      </View>
 
-        {/* Transaction fee information */}
-        {amount && name !== 'Select token' && targetAmount != '0' && targetName !== 'Select token' ? (
-          <div className='mt-[20px] text-center w-[344px]'>
-            <p className='font-bold text-black-100 dark:text-[#D6D6D6] text-sm'>
-              Transaction Fee: {DEFAULT_SWAP_FEE} JUNO (${feeInCurrency})
-            </p>
-          </div>
-        ) : null}
-      </div>
-    );
-  },
-);
+      {/* Transaction Fee */}
+      {(amount && name !== 'Select token' && targetAmount !== '0' && targetName !== 'Select token') && (
+        <View style={styles.feeSection}>
+          <Text style={styles.feeText}>
+            Transaction Fee: {DEFAULT_SWAP_FEE} JUNO (${feeInCurrency})
+          </Text>
+        </View>
+      )}
+    </View>
+  );
+});
 
 SwapInput.displayName = 'SwapInput';
 
 export default SwapInput;
+
+// --------- Styles ---------
+const styles = StyleSheet.create({
+  container: {
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+  },
+  swapSectionTop: {
+    backgroundColor: '#F3F3F3',
+    padding: 16,
+    width: 344,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+  },
+  swapSectionBottom: {
+    backgroundColor: '#F3F3F3',
+    padding: 16,
+    width: 344,
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
+    marginBottom: 16,
+  },
+  tokenRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    height: 40,
+    marginBottom: 8,
+  },
+  tokenSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E8E8E8',
+    borderRadius: 999,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+  },
+  tokenIcon: {
+    width: 24,
+    height: 24,
+    marginRight: 4,
+    resizeMode: 'contain',
+  },
+  arrowIcon: {
+    fontSize: 14,
+    color: '#888',
+    marginLeft: 8,
+  },
+  tokenName: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    color: '#222',
+    marginHorizontal: 8,
+  },
+  input: {
+    width: 110,
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#222',
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+    textAlign: 'right',
+    padding: 0,
+  },
+  balanceRow: {
+    flexDirection: 'row',
+    marginTop: 8,
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+  },
+  balanceText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  errorText: {
+    color: '#e27c7c',
+  },
+  grayText: {
+    color: '#aaa',
+  },
+  dollarValue: {
+    fontSize: 12,
+    color: '#444',
+    textAlign: 'right',
+    marginTop: 2,
+  },
+  swapAllBtn: {
+    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+    borderRadius: 999,
+    marginTop: 4,
+    paddingHorizontal: 16,
+    height: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  swapAllBtnText: {
+    color: '#10B981',
+    fontWeight: 'bold',
+    fontSize: 13,
+  },
+  swapButtonSection: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 32,
+    width: 344,
+    position: 'relative',
+    backgroundColor: '#F3F3F3',
+  },
+  swapIconContainer: {
+    zIndex: 2,
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 6,
+    elevation: Platform.OS === 'android' ? 2 : 0,
+  },
+  swapIcon: {
+    fontSize: 22,
+    color: '#222',
+  },
+  divider: {
+    flex: 1,
+    borderTopWidth: 1,
+    borderColor: '#ccc',
+    marginHorizontal: 16,
+  },
+  row: {
+    flexDirection: 'row',
+    marginBottom: 8,
+    marginTop: 2,
+  },
+  unitBox: {
+    backgroundColor: '#F3F3F3',
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: 206,
+    height: 56,
+    borderRadius: 8,
+    padding: 8,
+    marginRight: 8,
+  },
+  slippageBox: {
+    backgroundColor: '#F3F3F3',
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: 130,
+    height: 56,
+    borderRadius: 8,
+    padding: 8,
+    justifyContent: 'space-between',
+  },
+  arrowRight: {
+    fontSize: 18,
+    color: '#aaa',
+    marginLeft: 6,
+  },
+  reviewSection: {
+    width: 344,
+    alignItems: 'center',
+    marginVertical: 12,
+  },
+  reviewButton: {
+    backgroundColor: '#E18881',
+    borderRadius: 999,
+    paddingVertical: 12,
+    alignItems: 'center',
+    width: '100%',
+  },
+  reviewButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  reviewButtonDisabled: {
+    backgroundColor: '#F2C4C2',
+  },
+  feeSection: {
+    marginTop: 12,
+    alignItems: 'center',
+    width: 344,
+  },
+  feeText: {
+    fontWeight: 'bold',
+    color: '#222',
+    fontSize: 14,
+  },
+});

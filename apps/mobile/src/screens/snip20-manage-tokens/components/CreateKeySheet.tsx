@@ -1,6 +1,6 @@
 import { SecretToken, useAddress, useChainApis, useChainId, useGetChains } from '@leapwallet/cosmos-wallet-hooks';
 import { Buttons, GenericCard } from '@leapwallet/leap-ui';
-import BottomModal from 'components/bottom-modal';
+import BottomModal from '../bottom-modal';
 import { ErrorCard } from 'components/ErrorCard';
 import { LoaderAnimation } from 'components/loader/Loader';
 import Text from 'components/text';

@@ -1,5 +1,6 @@
 import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
 import { fromBase64, fromHex, toBech32 } from '@cosmjs/encoding';
+import { Buffer } from 'buffer'; // IMPORTANT for React Native: install 'buffer' and import it.
 import { Key, WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks';
 import {
   ChainInfo,
@@ -14,8 +15,9 @@ import {
   getFullHDPath,
   Secp256k1,
 } from '@leapwallet/leap-keychain';
-import { validateSolanaPrivateKey } from 'extension-scripts/utils';
-import { customKeygenfnMove, customKeygenfnSolana, customKeygenfnSui } from 'utils/getChainInfosList';
+
+import { validateSolanaPrivateKey } from '../../utils/utils';
+import { customKeygenfnMove, customKeygenfnSolana, customKeygenfnSui } from '../../utils/getChainInfosList';
 
 type ActionType = 'UPDATE' | 'DELETE';
 
@@ -55,7 +57,7 @@ export const getUpdatedKeyStore = async (
       const account = await customKeygenfnMove(secret, hdPath, 'seedPhrase');
       const pubKeys = existingWallet.pubKeys
         ? { ...existingWallet.pubKeys, [chain]: account.pubkey }
-        : ({ [chain]: account.pubkey } as unknown as Record<SupportedChain, string>);
+        : ({ [chain]: account.pubkey } as Record<SupportedChain, string>);
       return {
         ...existingWallet,
         addresses: {
@@ -68,7 +70,7 @@ export const getUpdatedKeyStore = async (
       const account = await customKeygenfnSolana(secret, hdPath, 'seedPhrase');
       const pubKeys = existingWallet.pubKeys
         ? { ...existingWallet.pubKeys, [chain]: account.pubkey }
-        : ({ [chain]: account.pubkey } as unknown as Record<SupportedChain, string>);
+        : ({ [chain]: account.pubkey } as Record<SupportedChain, string>);
       return {
         ...existingWallet,
         addresses: {
@@ -81,7 +83,7 @@ export const getUpdatedKeyStore = async (
       const account = await customKeygenfnSui(secret, hdPath, 'seedPhrase');
       const pubKeys = existingWallet.pubKeys
         ? { ...existingWallet.pubKeys, [chain]: account.pubkey }
-        : ({ [chain]: account.pubkey } as unknown as Record<SupportedChain, string>);
+        : ({ [chain]: account.pubkey } as Record<SupportedChain, string>);
       return {
         ...existingWallet,
         addresses: {
@@ -102,7 +104,7 @@ export const getUpdatedKeyStore = async (
       const cryptoPubKey = Secp256k1.publicKeyConvert(accounts[0].pubkey, true);
       const pubKeys = existingWallet.pubKeys
         ? { ...existingWallet.pubKeys, [chain]: Buffer.from(cryptoPubKey).toString('base64') }
-        : ({ [chain]: Buffer.from(cryptoPubKey).toString('base64') } as unknown as Record<SupportedChain, string>);
+        : ({ [chain]: Buffer.from(cryptoPubKey).toString('base64') } as Record<SupportedChain, string>);
       return {
         ...existingWallet,
         addresses: {
@@ -118,7 +120,7 @@ export const getUpdatedKeyStore = async (
         const account = await customKeygenfnSolana(secret, hdPath, 'privateKey');
         const pubKeys = existingWallet.pubKeys
           ? { ...existingWallet.pubKeys, [chain]: account.pubkey }
-          : ({ [chain]: account.pubkey } as unknown as Record<SupportedChain, string>);
+          : ({ [chain]: account.pubkey } as Record<SupportedChain, string>);
         return {
           ...existingWallet,
           addresses: {
@@ -138,7 +140,7 @@ export const getUpdatedKeyStore = async (
         const account = await customKeygenfnSui(secret, hdPath, 'privateKey');
         const pubKeys = existingWallet.pubKeys
           ? { ...existingWallet.pubKeys, [chain]: account.pubkey }
-          : ({ [chain]: account.pubkey } as unknown as Record<SupportedChain, string>);
+          : ({ [chain]: account.pubkey } as Record<SupportedChain, string>);
         return {
           ...existingWallet,
           addresses: {
@@ -159,7 +161,7 @@ export const getUpdatedKeyStore = async (
         const account = await customKeygenfnMove(secret, hdPath, 'privateKey');
         const pubKeys = existingWallet.pubKeys
           ? { ...existingWallet.pubKeys, [chain]: account.pubkey }
-          : ({ [chain]: account.pubkey } as unknown as Record<SupportedChain, string>);
+          : ({ [chain]: account.pubkey } as Record<SupportedChain, string>);
         return {
           ...existingWallet,
           addresses: {
@@ -177,7 +179,7 @@ export const getUpdatedKeyStore = async (
       const cryptoPubKey = Secp256k1.publicKeyConvert(accounts[0].pubkey, true);
       const pubKeys = existingWallet.pubKeys
         ? { ...existingWallet.pubKeys, [chain]: Buffer.from(cryptoPubKey).toString('base64') }
-        : ({ [chain]: Buffer.from(cryptoPubKey).toString('base64') } as unknown as Record<SupportedChain, string>);
+        : ({ [chain]: Buffer.from(cryptoPubKey).toString('base64') } as Record<SupportedChain, string>);
       return {
         ...existingWallet,
         addresses: {

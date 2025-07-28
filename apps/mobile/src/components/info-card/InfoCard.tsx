@@ -1,26 +1,39 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
+import { Info } from 'phosphor-react-native'; // React Native version of Phosphor Icons
 
-type CardProps = {
-  children: React.ReactNode;
-  style?: ViewStyle;
+type InfoCardProps = {
+  message: ReactNode;
+  style?: ViewStyle | ViewStyle[];
 };
 
-export const InfoCard: React.FC<CardProps> = ({ children, style }) => (
-  <View style={[styles.card, style]}>
-    {children}
-  </View>
-);
+export function InfoCard({ message, style }: InfoCardProps) {
+  return (
+    <View style={[styles.card, style]}>
+      <Info size={20} color="#ffffff" weight="regular" style={styles.icon} />
+      <Text style={styles.message}>{message}</Text>
+    </View>
+  );
+}
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 12,
-    backgroundColor: '#fff',
     padding: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
-    marginBottom: 12,
+    backgroundColor: '#002142',
+    borderRadius: 16,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8, // Requires React Native 0.71+. Otherwise use `marginRight`.
+  },
+  icon: {
+    marginRight: 8,
+    padding: 1,
+  },
+  message: {
+    fontSize: 14,
+    color: '#ffffff',
+    lineHeight: 22,
+    fontWeight: '500',
+    flexShrink: 1,
   },
 });

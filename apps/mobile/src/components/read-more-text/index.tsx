@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import { Text as RNText, StyleSheet, TouchableOpacity, View } from 'react-native';
 import Text, { TextProps } from '../text';
 
 type ReadMoreProps = {
@@ -8,25 +8,32 @@ type ReadMoreProps = {
   readMoreColor: string;
 };
 
-export default function ReadMoreText({ children, textProps, readMoreColor: color }: ReadMoreProps) {
-  const text = children;
+export default function ReadMoreText({ children, textProps, readMoreColor }: ReadMoreProps) {
   const [isReadMore, setIsReadMore] = useState(true);
-  const toggleReadMore = () => {
-    setIsReadMore(!isReadMore);
-  };
+  const toggleReadMore = () => setIsReadMore(!isReadMore);
 
-  const isPossible = text && text.length > 150;
+  const isTruncatable = children.length > 150;
+  const displayedText = isReadMore && isTruncatable ? children.slice(0, 150).trim() + '...' : children;
 
   return (
-    <div>
-      <Text size={textProps.size} className={textProps.className} color={textProps.color}>
-        <span>{isReadMore && isPossible ? text.slice(0, 150).trim() + '...' : text}</span>
+    <View>
+      <Text {...textProps}>
+        {displayedText}
       </Text>
-      {isPossible && (
-        <span onClick={toggleReadMore} className='hover:cursor-pointer font-bold' style={{ color: color }}>
-          {isReadMore ? 'Read more' : 'Show less'}
-        </span>
+      {isTruncatable && (
+        <TouchableOpacity onPress={toggleReadMore}>
+          <RNText style={[styles.readMoreText, { color: readMoreColor }]}>
+            {isReadMore ? 'Read more' : 'Show less'}
+          </RNText>
+        </TouchableOpacity>
       )}
-    </div>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  readMoreText: {
+    fontWeight: 'bold',
+    marginTop: 4,
+  },
+});

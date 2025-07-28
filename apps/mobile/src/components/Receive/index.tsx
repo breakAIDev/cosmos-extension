@@ -1,118 +1,90 @@
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
+import QRCode from 'react-native-qrcode-svg';
+import Clipboard from '@react-native-clipboard/clipboard';
+import Modal from 'react-native-modal'; // Replace with your BottomSheet component if you have a custom one
 import { useActiveChain, useChainInfo } from '@leapwallet/cosmos-wallet-hooks';
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { Buttons, OnboardCard, QrCode, ThemeName, useTheme } from '@leapwallet/leap-ui';
-import BottomModal from 'components/new-bottom-modal';
-import { ON_RAMP_SUPPORT_CHAINS } from 'config/config';
-import { AGGREGATED_CHAIN_KEY } from 'config/constants';
-import { useChainPageInfo } from 'hooks';
-import { useNomicBTCDepositConstants } from 'hooks/nomic-btc-deposit';
-import useActiveWallet from 'hooks/settings/useActiveWallet';
-import { useGetWalletAddresses } from 'hooks/useGetWalletAddresses';
-import { useQueryParams } from 'hooks/useQuery';
-import { Images } from 'images';
-import { nBtcSymbol } from 'images/misc';
-import rightArrow from 'images/misc/right-arrow.svg';
-import React, { ReactElement } from 'react';
-import { UserClipboard } from 'utils/clipboard';
-import { formatWalletName } from 'utils/formatWalletName';
-import { queryParams } from 'utils/query-params';
-import { sliceAddress } from 'utils/strings';
+import useActiveWallet from '../../hooks/settings/useActiveWallet';
+import { useGetWalletAddresses } from '../../hooks/useGetWalletAddresses';
+import { sliceAddress } from '../../utils/strings';
+import { Images } from '../../../assets/images';
 
-function BtcButton() {
-  const { data: nomicBtcDeposit } = useNomicBTCDepositConstants();
-  const activeChainInfo = useChainInfo();
-  const query = useQueryParams();
+type Props = {
+  visible: boolean;
+  onClose: () => void;
+  forceChain?: string;
+};
 
-  return nomicBtcDeposit && nomicBtcDeposit.ibcChains.includes(activeChainInfo?.key) ? (
-    <div
-      className='mt-2'
-      onClick={() => {
-        query.set('btcDeposit', 'true');
-      }}
-    >
-      <OnboardCard
-        imgSrc={nBtcSymbol}
-        iconSrc={rightArrow}
-        isFilled
-        isRounded
-        size='lg'
-        title='Depost BTC to get nBTC'
-      />
-    </div>
-  ) : null;
-}
-
-export default function ReceiveToken({ forceChain }: { forceChain?: SupportedChain }): ReactElement {
-  const query = useQueryParams();
-
-  const isVisible = query.get(queryParams.receive) === 'true';
+export default function ReceiveToken({ visible, onClose, forceChain }: Props) {
   const wallet = useActiveWallet().activeWallet;
   const _activeChain = useActiveChain();
   const activeChain = forceChain ?? _activeChain;
 
-  const { topChainColor } = useChainPageInfo();
   const activeChainInfo = useChainInfo(activeChain);
   const isEvmOnlyChain = activeChainInfo?.evmOnlyChain;
-  const { theme } = useTheme();
-  const isDark = theme === ThemeName.DARK;
   const walletAddress = useGetWalletAddresses(activeChain);
   const address = isEvmOnlyChain ? walletAddress[0] : wallet?.addresses[activeChain];
 
-  const QrCodeProps = {
-    height: 250,
-    width: 250,
-    data: address ?? '',
-  };
+  if (!wallet) return null;
 
   return (
-    <BottomModal isOpen={isVisible} onClose={() => query.remove('receive')} title={'Your QR code'}>
-      {wallet ? (
-        <div className='flex flex-col items-center'>
-          <div className='rounded-[48px] overflow-hidden bg-white-100 p-[8px] shadow-[0_4px_16px_8px_rgba(0,0,0,0.04)]'>
-            <QrCode {...QrCodeProps} />
-          </div>
-          <div className='inline-block mt-[16px] mb-[12px] text-black-100 dark:text-white-100 font-Satoshi24px text-[28px] leading-[36px] font-black'>
-            {formatWalletName(wallet.name)}
-          </div>
+    <Modal isVisible={visible} onBackdropPress={onClose} style={styles.modal}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Your QR code</Text>
+        <View style={styles.qrWrapper}>
+          <QRCode value={address ?? ''} size={200} />
+        </View>
 
-          {walletAddress.map((address, index) => (
-            <React.Fragment key={address}>
-              {index !== 0 && <div className='mt-2' />}
-              <Buttons.CopyWalletAddress
-                color={topChainColor}
-                walletAddress={sliceAddress(address)}
-                data-testing-id='copy-wallet-address'
-                onCopy={() => {
-                  if (!address) return;
-                  UserClipboard.copyText(address);
-                }}
-              />
-            </React.Fragment>
-          ))}
+        <Text style={styles.walletName}>{wallet.name}</Text>
 
-          {ON_RAMP_SUPPORT_CHAINS.includes(activeChain) && (
-            <div
-              className='mt-2'
-              onClick={() => {
-                window.open(`https://widget.swapped.com`);
-              }}
+        <ScrollView>
+          {walletAddress.map((addr, index) => (
+            <TouchableOpacity
+              key={addr}
+              style={styles.copyBtn}
+              onPress={() => Clipboard.setString(addr)}
             >
-              <OnboardCard
-                imgSrc={isDark ? Images.Logos.SwappedDark : Images.Logos.SwappedLight}
-                iconSrc={rightArrow}
-                isFilled
-                isRounded
-                size='lg'
-                title={`Buy ${activeChain === 'osmosis' ? 'AxlUSDC' : 'Crypto'} with Swapped Ramp`}
-              />
-            </div>
-          )}
+              <Text style={styles.copyText}>{sliceAddress(addr)}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
 
-          {(activeChain as string) !== AGGREGATED_CHAIN_KEY && <BtcButton />}
-        </div>
-      ) : (
-        <></>
-      )}
-    </BottomModal>
+        {/* Optional on-ramp (Swapped) */}
+        {/* Uncomment when Swapped is integrated */}
+        {/* <TouchableOpacity onPress={() => Linking.openURL('https://widget.swapped.com')}>
+          <Image source={Images.Logos.SwappedLight} style={styles.onRampLogo} />
+        </TouchableOpacity> */}
+      </View>
+    </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  modal: { justifyContent: 'flex-end', margin: 0 },
+  container: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 20,
+    alignItems: 'center',
+  },
+  title: { fontSize: 20, fontWeight: '700', marginBottom: 16 },
+  qrWrapper: {
+    padding: 10,
+    backgroundColor: '#fff',
+    borderRadius: 32,
+    elevation: 4,
+  },
+  walletName: { fontSize: 24, fontWeight: 'bold', marginVertical: 16 },
+  copyBtn: {
+    padding: 10,
+    marginVertical: 6,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    width: '100%',
+    alignItems: 'center',
+  },
+  copyText: { fontSize: 14, fontWeight: '600' },
+  onRampLogo: { width: 180, height: 40, marginTop: 16, resizeMode: 'contain' },
+});

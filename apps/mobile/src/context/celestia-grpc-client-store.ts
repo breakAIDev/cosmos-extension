@@ -28,7 +28,9 @@ export class CelestiaBalanceStore extends BaseQueryStore<IRawBalanceResponse> {
     publicKey: string,
   ) {
     super();
-    makeObservable(this);
+    makeObservable(this, {
+      override: true, // Mark observable property
+    });
     this.address = address;
     this.type = type;
     this.restUrl = restUrl;
@@ -37,32 +39,32 @@ export class CelestiaBalanceStore extends BaseQueryStore<IRawBalanceResponse> {
     this.paginationLimit = paginationLimit;
   }
 
-  async toggleOverride() {
+  toggleOverride = () => {
     runInAction(() => {
       this.override = !this.override;
     });
-  }
+  };
 
-  async fetchData() {
+  fetchData = async () => {
+    // Make sure base64.decode is available, or use Buffer if you have issues
     const pubkey = base64.decode(this.publicKey);
-    const dummySignerFn = (arg: SignDoc): Promise<Uint8Array> => {
-      return new Promise((resolve, reject) => {
-        resolve(new Uint8Array());
-      });
+    // Dummy signer
+    const dummySignerFn = async (_arg: SignDoc): Promise<Uint8Array> => {
+      return new Uint8Array();
     };
-    // we are using dummy values for public key and signer function as we don't need them for this use case
+
+    // Ensure TxClient works in React Native or wrap in try/catch with fallback
     const txClient = await new TxClient(
       this.restUrl,
       this.address,
       pubkey,
-      //@ts-expect-error - this is a dummy function
       dummySignerFn,
     );
 
     if (this.type === 'spendable_balances') {
       const spendableBalances = await txClient.getSpendableBalances(this.address);
       return {
-        balances: spendableBalances.map((balance) => ({
+        balances: spendableBalances.map((balance: any) => ({
           denom: balance.denom,
           amount: balance.amount.toString(),
         })),
@@ -71,11 +73,11 @@ export class CelestiaBalanceStore extends BaseQueryStore<IRawBalanceResponse> {
     }
     const balances = await txClient.getAllBalances(this.address);
     return {
-      balances: balances.map((balance) => ({
+      balances: balances.map((balance: any) => ({
         denom: balance.denom,
         amount: balance.amount.toString(),
       })),
       pagination,
     };
-  }
+  };
 }

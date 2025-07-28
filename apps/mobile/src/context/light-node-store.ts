@@ -1,15 +1,15 @@
 import { LeapWalletApi } from '@leapwallet/cosmos-wallet-hooks';
-import { LIGHT_NODE_SYNC_WINDOW_SECS, LIGHT_NODE_TIME_CAPTURE_INTERVAL } from 'config/constants';
+import { LIGHT_NODE_SYNC_WINDOW_SECS, LIGHT_NODE_TIME_CAPTURE_INTERVAL } from '../services/config/constants';
 import {
   CLIENT_ID,
   IS_LIGHT_NODE_RUNNING,
   LIGHT_NODE_LAST_SYNCED_DATA,
   LIGHT_NODE_RUNNING_STATS,
   PRIMARY_WALLET_ADDRESS,
-} from 'config/storage-keys';
+} from '../services/config/storage-keys';
 import { makeAutoObservable, runInAction } from 'mobx';
-import { getIsLightNodeRunning, getLightNodeEvents, init, startLightNode, stopLightNode } from 'utils/light-node';
-import browser from 'webextension-polyfill';
+import { getIsLightNodeRunning, getLightNodeEvents, init, startLightNode, stopLightNode } from '../utils/light-node';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { LightNodeBlockTimeStore } from './light-node-block-time-store';
 
@@ -38,12 +38,10 @@ export class LightNodeStore {
   };
   blockTimeStore: LightNodeBlockTimeStore;
   private networkHeight: number | undefined;
-
   private events: any | undefined;
 
   constructor(blockTimeStore: LightNodeBlockTimeStore) {
     makeAutoObservable(this);
-
     this.blockTimeStore = blockTimeStore;
     this.blockTimeStore.getData(); // load data in cache
   }
@@ -70,36 +68,33 @@ export class LightNodeStore {
 
   private calculateSyncingPercentage(normalizedRanges: Range) {
     return (
-      (normalizedRanges.reduce((acc, range) => acc + (range.end - range.start), 0) * 100) / this.approxHeadersToSync
+      (normalizedRanges.reduce((acc, range) => acc + (range.end - range.start), 0) * 100) /
+      this.approxHeadersToSync
     );
   }
 
   async setLightNodeRunning(val: boolean) {
     this.isLightNodeRunning = val;
-    return browser.storage.local.set({ [IS_LIGHT_NODE_RUNNING]: val });
+    await AsyncStorage.setItem(IS_LIGHT_NODE_RUNNING, val ? 'true' : 'false');
   }
 
-  setLastSyncedInfo(lastSyncedHeader: string | null, timeStamp: Date | null, syncedPercentage: number) {
+  async setLastSyncedInfo(lastSyncedHeader: string | null, timeStamp: Date | null, syncedPercentage: number) {
     const lastSyncedInfo = {
       lastSyncedHeader,
       timeStamp,
       syncedPercentage,
     };
-
     this.lastSyncedInfo = lastSyncedInfo;
-    return browser.storage.local.set({
-      [LIGHT_NODE_LAST_SYNCED_DATA]: JSON.stringify(lastSyncedInfo),
-    });
+    await AsyncStorage.setItem(LIGHT_NODE_LAST_SYNCED_DATA, JSON.stringify(lastSyncedInfo));
   }
 
-  setLightNodeStats(timestamp: string | null, totalTime = 0) {
+  async setLightNodeStats(timestamp: string | null, totalTime = 0) {
     const stats = {
       startTimestamp: timestamp,
       totalRunningTimeInMilliSeconds: totalTime,
     };
-
     this.lightNodeStats = stats;
-    return browser.storage.local.set({ [LIGHT_NODE_RUNNING_STATS]: JSON.stringify(stats) });
+    await AsyncStorage.setItem(LIGHT_NODE_RUNNING_STATS, JSON.stringify(stats));
   }
 
   async onAddedHeaders() {
@@ -114,9 +109,7 @@ export class LightNodeStore {
 
   async onNodeEvent(event: MessageEvent) {
     if (!event.data) return;
-
     const event_data = event.data.get('event');
-
     switch (event_data.type) {
       case 'sampling_started':
         if (this.networkHeight && event_data.height >= this.networkHeight) {
@@ -125,13 +118,11 @@ export class LightNodeStore {
           });
         }
         break;
-
       case 'fetching_head_header_finished':
       case 'added_header_from_header_sub':
         this.networkHeight = event_data.height;
         await this.onAddedHeaders();
         break;
-
       case 'fetching_headers_finished':
         if (this.networkHeight && event_data.to_height > this.networkHeight) {
           this.networkHeight = event_data.to_height;
@@ -143,12 +134,10 @@ export class LightNodeStore {
 
   async subscribeToEvents() {
     this.events = await getLightNodeEvents();
-
     if (!this.events) {
       await init();
-      this.events = (await getLightNodeEvents()) as MessageEvent;
+      this.events = await getLightNodeEvents();
     }
-
     this.events.onmessage = (event: MessageEvent) => this.onNodeEvent(event);
   }
 
@@ -157,8 +146,8 @@ export class LightNodeStore {
       await init();
       await startLightNode();
       const startTimestamp = new Date().toISOString();
-      const storage = await browser.storage.local.get([LIGHT_NODE_RUNNING_STATS]);
-      if (!storage[LIGHT_NODE_RUNNING_STATS] && clientId) {
+      const runningStats = await AsyncStorage.getItem(LIGHT_NODE_RUNNING_STATS);
+      if (!runningStats && clientId) {
         await LeapWalletApi.logLightNodeStats({
           userUUID: clientId,
           totalRunningTimeInMilliSeconds: 0,
@@ -168,27 +157,23 @@ export class LightNodeStore {
       }
       await this.setLightNodeStats(startTimestamp);
       await this.subscribeToEvents();
-    } catch (err: unknown) {
-      this.nodeStartError = (err as Error).message ?? 'Unknown error';
+    } catch (err: any) {
+      this.nodeStartError = err?.message ?? 'Unknown error';
     }
   }
 
   async stopNode(primaryWalletAddress: string, clientId?: string) {
     try {
       if (this.latestHeader) {
-        this.setLastSyncedInfo(this.latestHeader, new Date(), this.syncedPercentage);
+        await this.setLastSyncedInfo(this.latestHeader, new Date(), this.syncedPercentage);
       }
-
       await stopLightNode();
-
-      const storage = await browser.storage.local.get([LIGHT_NODE_RUNNING_STATS]);
-      const { startTimestamp, totalRunningTimeInMilliSeconds = 0 } = JSON.parse(
-        storage[LIGHT_NODE_RUNNING_STATS] || '{}',
-      );
+      const runningStatsRaw = await AsyncStorage.getItem(LIGHT_NODE_RUNNING_STATS);
+      const runningStats = runningStatsRaw ? JSON.parse(runningStatsRaw) : {};
+      const { startTimestamp, totalRunningTimeInMilliSeconds = 0 } = runningStats;
       const timeElapsed = Date.now() - new Date(startTimestamp || '').getTime();
       const totalRunningTime =
         timeElapsed < LIGHT_NODE_TIME_CAPTURE_INTERVAL ? timeElapsed : totalRunningTimeInMilliSeconds;
-
       if (clientId) {
         try {
           await LeapWalletApi.logLightNodeStats({
@@ -198,14 +183,14 @@ export class LightNodeStore {
             lastStoppedAt: new Date().toISOString(),
             walletAddress: primaryWalletAddress,
           });
-          this.setLightNodeStats(null);
-        } catch (e: unknown) {
-          this.setLightNodeStats(null, totalRunningTimeInMilliSeconds); // remove the start timestamp
+          await this.setLightNodeStats(null);
+        } catch (e) {
+          await this.setLightNodeStats(null, totalRunningTimeInMilliSeconds);
         }
       }
-    } catch (err: unknown) {
+    } catch (err: any) {
       runInAction(() => {
-        this.nodeStopError = (err as Error).message ?? 'Unknown error';
+        this.nodeStopError = err?.message ?? 'Unknown error';
       });
     }
   }
@@ -217,45 +202,40 @@ export class LightNodeStore {
     });
   }
 
+  // indexedDB is not available on React Native. This is a no-op or you can use a SQLite/realm solution
   async clearIndexedDB() {
-    const databases = await indexedDB.databases();
-    databases.forEach((element) => {
-      if (element.name?.includes('celestia')) {
-        indexedDB.deleteDatabase(element.name);
-      }
-    });
+    // NO-OP for RN, or implement your DB clear logic here
+    // Optionally: clear any local light-node cache if you implement one
+    return;
   }
 
   async clearLastSyncedInfo() {
     await this.setLastSyncedInfo(null, null, 0);
-    browser.storage.local.remove(LIGHT_NODE_LAST_SYNCED_DATA);
+    await AsyncStorage.removeItem(LIGHT_NODE_LAST_SYNCED_DATA);
     await this.clearIndexedDB();
   }
 
   async initLightNode() {
-    const storage = await browser.storage.local.get([
-      IS_LIGHT_NODE_RUNNING,
-      LIGHT_NODE_LAST_SYNCED_DATA,
-      LIGHT_NODE_RUNNING_STATS,
-      CLIENT_ID,
-      PRIMARY_WALLET_ADDRESS,
+    const [
+      isRunningRaw,
+      lastSyncedData,
+      runningStats,
+      clientId,
+      primaryWalletAddress,
+    ] = await Promise.all([
+      AsyncStorage.getItem(IS_LIGHT_NODE_RUNNING),
+      AsyncStorage.getItem(LIGHT_NODE_LAST_SYNCED_DATA),
+      AsyncStorage.getItem(LIGHT_NODE_RUNNING_STATS),
+      AsyncStorage.getItem(CLIENT_ID),
+      AsyncStorage.getItem(PRIMARY_WALLET_ADDRESS),
     ]);
-
-    const isRunning = storage[IS_LIGHT_NODE_RUNNING];
-    const lastSyncedData = storage[LIGHT_NODE_LAST_SYNCED_DATA];
-    const runningStats = storage[LIGHT_NODE_RUNNING_STATS];
-
+    const isRunning = isRunningRaw === 'true';
     await this.setLightNodeRunning(isRunning);
     const isLuminaClientRunningLightNode = await getIsLightNodeRunning();
 
     if (isRunning && !isLuminaClientRunningLightNode) {
       await init();
       await startLightNode();
-
-      browser.runtime.sendMessage({
-        type: 'capture-light-node-stats',
-        payload: {},
-      });
     }
 
     if (lastSyncedData) {
@@ -266,11 +246,9 @@ export class LightNodeStore {
     if (runningStats) {
       const { startTimestamp, totalRunningTimeInMilliSeconds = 0 } = JSON.parse(runningStats);
       if (totalRunningTimeInMilliSeconds > 5 * 60 * 1000) {
-        const clientId = storage[CLIENT_ID];
-        const primaryWalletAddress = storage[PRIMARY_WALLET_ADDRESS];
         await LeapWalletApi.logLightNodeStats({
-          userUUID: clientId,
-          walletAddress: primaryWalletAddress,
+          userUUID: clientId!,
+          walletAddress: primaryWalletAddress!,
           totalRunningTimeInMilliSeconds,
           lastStartedAt: startTimestamp,
         });

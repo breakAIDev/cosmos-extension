@@ -1,55 +1,215 @@
-// React Native compatible exports for this assets folder
+import { ChainInfos } from '@leapwallet/cosmos-wallet-sdk';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk/dist/browser/constants';
 
-export { default as Kado_dark } from './Kado-dark.svg';
-export { default as Kado_light } from './Kado-light.svg';
-export { default as X_logo } from './X_logo.svg';
-export { default as X_logo_dark } from './X_logo_dark.svg';
-export { default as akash } from './akash.svg';
-export { default as appstore } from './appstore.svg';
-export { default as archId } from './archId.svg';
-export { default as avalanche } from './avalanche.svg';
-export { default as axelar } from './axelar.svg';
-export { default as celestialsId } from './celestialsId.svg';
-export { default as compass_circle } from './compass-circle.svg';
-export { default as cosmo_station } from './cosmo-station.svg';
-export { default as cosmos } from './cosmos.svg';
-export { default as dashboard } from './dashboard.svg';
-export { default as degens } from './degens.svg';
-export { default as generic_dark } from './generic-dark.svg';
-export { default as generic_light } from './generic-light.svg';
-export { default as generic_nft } from './generic-nft.svg';
-export { default as ibc_domains } from './ibc-domains.svg';
-export { default as icns } from './icns.svg';
-export { default as img_not_available_dark } from './img-not-available-dark.svg';
-export { default as img_not_available_light } from './img-not-available-light.svg';
-export { default as juno_swap } from './juno-swap.svg';
-export { default as juno } from './juno.svg';
-export { default as keplr } from './keplr.svg';
-export { default as leap_cosmos } from './leap-cosmos.svg';
-export { default as leap_custom_dark_mode } from './leap-custom-dark-mode.svg';
-export { default as leap_custom_light_mode } from './leap-custom-light-mode.svg';
-export { default as leap_logo_28 } from './leap-logo-28.svg';
-export { default as leap_logo } from './leap-logo.svg';
-export { default as ledger_evm_chains } from './ledger-evm-chains.svg';
-export { default as metamask } from './metamask.svg';
-export { default as named_skip } from './named-skip.svg';
-export { default as nft_logo } from './nft-logo.svg';
-export { default as nomic_fullname_logo } from './nomic-fullname-logo.svg';
-export { default as osmo } from './osmo.svg';
-export { default as osmosis } from './osmosis.svg';
-export { default as pallet } from './pallet.svg';
-export { default as planq } from './planq.svg';
-export { default as playstore } from './playstore.svg';
-export { default as secret } from './secret.svg';
-export { default as sei_v2 } from './sei-v2.svg';
-export { default as sns } from './sns.svg';
-export { default as space_id } from './space-id.svg';
-export { default as stargaze_names } from './stargaze-names.svg';
-export { default as swappedDark } from './swappedDark.svg';
-export { default as swappedLight } from './swappedLight.svg';
-export { default as terra_station } from './terra-station.svg';
-export { default as usdc_logo } from './usdc-logo.svg';
-export const bidds = require('./bidds.png');
-export const ethereum = require('./ethereum.png');
-export const leap_o_logo = require('./leap-o-logo.png');
-export const stargaze = require('./stargaze.png');
+import Appstore from './appstore.svg';
+import ArchId from './archId.svg';
+import Bidds from './bidds.png';
+import CelestialsId from './celestialsId.svg';
+import CompassCircle from './compass-circle.svg';
+import CosmoStation from './cosmo-station.svg';
+import Cosmos from './cosmos.png';
+import Dashboard from './dashboard.svg';
+import DegeNS from './degens.svg';
+import Ethereum from './ethereum.png';
+import GenericDark from './generic-dark.svg';
+import GenericLight from './generic-light.svg';
+import GenericNFT from './generic-nft.svg';
+import IBCDomains from './ibc-domains.svg';
+import ICNS from './icns.svg';
+import ImgNotAvailableDark from './img-not-available-dark.svg';
+import ImgNotAvailableLight from './img-not-available-light.svg';
+import JunoSwap from './juno-swap.svg';
+import Keplr from './keplr.svg';
+import LeapCosmos from './leap-cosmos.svg';
+import LeapDarkMode from './leap-custom-dark-mode.svg';
+import LeapLightMode from './leap-custom-light-mode.svg';
+import LeapLogo from './leap-logo.svg';
+import LeapLogo28 from './leap-logo-28.svg';
+import LedgerEvmChains from './ledger-evm-chains.svg';
+import Metamask from './metamask.svg';
+import NamedSkip from './named-skip.svg';
+import NftLogo from './nft-logo.svg';
+import NomicFullnameLogo from './nomic-fullname-logo.svg';
+import Osmosis from './osmosis.svg';
+import Pallet from './pallet.svg';
+import Playstore from './playstore.svg';
+import SeiV2 from './sei-v2.svg';
+import SNS from './sns.svg';
+import SpaceId from './space-id.svg';
+import StargazeNames from './stargaze-names.svg';
+import SwappedDark from './swappedDark.svg';
+import SwappedLight from './swappedLight.svg';
+import TerraStation from './terra-station.svg';
+import USDCLogo from './usdc-logo.svg';
+import XLogo from './X_logo.svg';
+import XLogoDark from './X_logo_dark.svg';
+
+const ChainLogos: Record<string, string | undefined> = {
+  cosmos: ChainInfos.cosmos.chainSymbolImageUrl,
+  secret: ChainInfos.secret.chainSymbolImageUrl,
+  juno: ChainInfos.juno.chainSymbolImageUrl,
+  osmosis: ChainInfos.osmosis.chainSymbolImageUrl,
+  axelar: ChainInfos.axelar.chainSymbolImageUrl,
+  akash: ChainInfos.akash.chainSymbolImageUrl,
+  persistenceNew: ChainInfos.persistenceNew.chainSymbolImageUrl,
+  persistence: ChainInfos.persistence.chainSymbolImageUrl,
+  stargaze: ChainInfos.stargaze.chainSymbolImageUrl,
+  emoney: ChainInfos.emoney.chainSymbolImageUrl,
+  sifchain: ChainInfos.sifchain.chainSymbolImageUrl,
+  irisnet: ChainInfos.irisnet.chainSymbolImageUrl,
+  sommelier: ChainInfos.sommelier.chainSymbolImageUrl,
+  comdex: ChainInfos.comdex.chainSymbolImageUrl,
+  crescent: ChainInfos.crescent.chainSymbolImageUrl,
+  cryptoorg: ChainInfos.cryptoorg.chainSymbolImageUrl,
+  assetmantle: ChainInfos.assetmantle.chainSymbolImageUrl,
+  starname: ChainInfos.starname.chainSymbolImageUrl,
+  umee: ChainInfos.umee.chainSymbolImageUrl,
+  injective: ChainInfos.injective.chainSymbolImageUrl,
+  sei: ChainInfos.sei.chainSymbolImageUrl,
+  kujira: ChainInfos.kujira.chainSymbolImageUrl,
+  stride: ChainInfos.stride.chainSymbolImageUrl,
+  cheqd: ChainInfos.cheqd.chainSymbolImageUrl,
+  agoric: ChainInfos.agoric.chainSymbolImageUrl,
+  likecoin: ChainInfos.likecoin.chainSymbolImageUrl,
+  gravitybridge: ChainInfos.gravitybridge.chainSymbolImageUrl,
+  chihuahua: ChainInfos.chihuahua.chainSymbolImageUrl,
+  fetchhub: ChainInfos.fetchhub.chainSymbolImageUrl,
+  desmos: ChainInfos.desmos.chainSymbolImageUrl,
+  teritori: ChainInfos.teritori.chainSymbolImageUrl,
+  jackal: ChainInfos.jackal.chainSymbolImageUrl,
+  bitsong: ChainInfos.bitsong.chainSymbolImageUrl,
+  evmos: ChainInfos.evmos.chainSymbolImageUrl,
+  canto: ChainInfos.canto.chainSymbolImageUrl,
+  bitcanna: ChainInfos.bitcanna.chainSymbolImageUrl,
+  decentr: ChainInfos.decentr.chainSymbolImageUrl,
+  carbon: ChainInfos.carbon.chainSymbolImageUrl,
+  kava: ChainInfos.kava.chainSymbolImageUrl,
+  omniflix: ChainInfos.omniflix.chainSymbolImageUrl,
+  passage: ChainInfos.passage.chainSymbolImageUrl,
+  archway: ChainInfos.archway.chainSymbolImageUrl,
+  terra: ChainInfos.terra.chainSymbolImageUrl,
+  neutron: ChainInfos.neutron.chainSymbolImageUrl,
+  mainCoreum: ChainInfos.mainCoreum.chainSymbolImageUrl,
+  coreum: ChainInfos.coreum.chainSymbolImageUrl,
+  quicksilver: ChainInfos.quicksilver.chainSymbolImageUrl,
+  migaloo: ChainInfos.migaloo.chainSymbolImageUrl,
+  kyve: ChainInfos.kyve.chainSymbolImageUrl,
+  onomy: ChainInfos.onomy.chainSymbolImageUrl,
+  seiTestnet2: ChainInfos.seiTestnet2.chainSymbolImageUrl,
+  noble: ChainInfos.noble.chainSymbolImageUrl,
+  impacthub: ChainInfos.impacthub.chainSymbolImageUrl,
+  planq: ChainInfos.planq.chainSymbolImageUrl,
+  nibiru: ChainInfos.nibiru.chainSymbolImageUrl,
+  mayachain: ChainInfos.mayachain.chainSymbolImageUrl,
+  empowerchain: ChainInfos.empowerchain.chainSymbolImageUrl,
+  dydx: ChainInfos.dydx.chainSymbolImageUrl,
+  celestia: ChainInfos.celestia.chainSymbolImageUrl,
+  sge: ChainInfos.sge.chainSymbolImageUrl,
+  nomic: ChainInfos.nomic.chainSymbolImageUrl,
+  xpla: ChainInfos.xpla.chainSymbolImageUrl,
+  provenance: ChainInfos.provenance.chainSymbolImageUrl,
+  aura: ChainInfos.aura.chainSymbolImageUrl,
+  kichain: ChainInfos.kichain.chainSymbolImageUrl,
+  sentinel: ChainInfos.sentinel.chainSymbolImageUrl,
+  bandchain: ChainInfos.bandchain.chainSymbolImageUrl,
+  seiDevnet: ChainInfos.seiDevnet.chainSymbolImageUrl,
+  dymension: ChainInfos.dymension.chainSymbolImageUrl,
+  pryzmtestnet: ChainInfos.pryzmtestnet.chainSymbolImageUrl,
+  thorchain: ChainInfos.thorchain.chainSymbolImageUrl,
+  odin: ChainInfos.odin.chainSymbolImageUrl,
+  saga: ChainInfos.saga.chainSymbolImageUrl,
+  initia: ChainInfos.initia.chainSymbolImageUrl,
+  humans: ChainInfos.humans.chainSymbolImageUrl,
+  initiaEvm: ChainInfos.initiaEvm.chainSymbolImageUrl,
+  xrpl: ChainInfos.xrpl.chainSymbolImageUrl,
+};
+
+export const getChainImage = (name: string) => {
+  if (name in ChainLogos) {
+    return ChainLogos[name as SupportedChain];
+  }
+  const chainInfo = ChainInfos[name as SupportedChain];
+  if (chainInfo) {
+    return chainInfo.chainSymbolImageUrl;
+  }
+  return GenericLight;
+};
+
+export const getSwapProviderImage = (name: SupportedChain) => {
+  switch (name) {
+    case 'juno':
+      return JunoSwap;
+    case 'osmosis':
+      return Osmosis;
+    default:
+      return GenericLight;
+  }
+};
+
+export const getNameServiceLogo = (name: string) => {
+  switch (name) {
+    case 'icns':
+      return ICNS;
+    case 'ibcDomains':
+      return IBCDomains;
+    case 'stargazeNames':
+      return StargazeNames;
+    case 'archIds':
+      return ArchId;
+    case 'spaceIds':
+      return SpaceId;
+    case 'sns':
+      return SNS;
+    case 'degeNS':
+      return DegeNS;
+    case 'bdd':
+      return Bidds;
+    case 'celestialsId':
+      return CelestialsId;
+    default:
+      return GenericLight;
+  }
+};
+
+export {
+  Appstore,
+  ArchId,
+  Bidds,
+  ChainLogos,
+  CompassCircle,
+  Cosmos,
+  CosmoStation,
+  Dashboard,
+  DegeNS,
+  Ethereum,
+  GenericDark,
+  GenericLight,
+  GenericNFT,
+  IBCDomains,
+  ICNS,
+  ImgNotAvailableDark,
+  ImgNotAvailableLight,
+  JunoSwap,
+  Keplr,
+  LeapCosmos,
+  LeapDarkMode,
+  LeapLightMode,
+  LeapLogo,
+  LeapLogo28,
+  LedgerEvmChains,
+  Metamask,
+  NamedSkip,
+  NftLogo,
+  NomicFullnameLogo,
+  Pallet,
+  Playstore,
+  SeiV2,
+  SNS,
+  StargazeNames,
+  SwappedDark,
+  SwappedLight,
+  TerraStation,
+  USDCLogo,
+  XLogo,
+  XLogoDark,
+};

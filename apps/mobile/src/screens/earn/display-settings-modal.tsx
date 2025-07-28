@@ -1,7 +1,7 @@
 import { useActiveChain } from '@leapwallet/cosmos-wallet-hooks';
 import { CardDivider } from '@leapwallet/leap-ui';
 import { CheckCircle } from '@phosphor-icons/react';
-import BottomModal from 'components/bottom-modal';
+import BottomModal from '../bottom-modal';
 import React from 'react';
 import { Colors } from 'theme/colors';
 

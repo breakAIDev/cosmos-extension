@@ -1,18 +1,13 @@
-import { sliceAddress } from '@leapwallet/cosmos-wallet-hooks';
-import { CaretDown, CheckCircle } from '@phosphor-icons/react';
-import { Checkbox } from 'components/ui/check-box';
-import { Skeleton } from 'components/ui/skeleton';
-import { AnimatePresence, motion } from 'framer-motion';
-import { useDefaultTokenLogo } from 'hooks';
-import { useCopy } from 'hooks/useCopy';
-import { getChainImage } from 'images/logos';
-import React, { HTMLAttributes, PropsWithoutRef, useEffect, useMemo, useState } from 'react';
-import { getDerivationPathToShow } from 'utils';
-import { cn } from 'utils/cn';
-import { imgOnError } from 'utils/imgOnError';
-import { opacityFadeInOut, transition150, transition250 } from 'utils/motion-variants';
-
+import React, { useMemo, useEffect, useState } from 'react';
+import { View, Text, Image, TouchableOpacity, StyleSheet, LayoutAnimation, Animated } from 'react-native';
+import { CaretDown, CheckCircle } from 'phosphor-react-native';
+import { Checkbox } from '../ui/check-box';
+import { Skeleton } from '../ui/skeleton';
+import { getChainImage } from '../../../assets/images/logos';
 import { useBalances } from './use-balances';
+import { sliceAddress } from '@leapwallet/cosmos-wallet-hooks';
+import { getDerivationPathToShow } from '../../utils';
+import Clipboard from '@react-native-clipboard/clipboard';
 
 type WalletInfoCardPrps = {
   walletName: string;
@@ -31,21 +26,16 @@ type WalletInfoCardPrps = {
   solanaAddress?: string;
   suiAddress?: string;
   className?: string;
-} & HTMLAttributes<HTMLLabelElement>;
-
-const cardListVariants = {
-  hidden: { opacity: 0, height: 0 },
-  visible: { opacity: 1, height: 'auto' },
 };
 
 function WalletInfoCard({
   walletName,
   index,
+  onSelectChange,
   showDerivationPath = false,
   isExistingAddress,
   isLedger,
   isChosen,
-  onSelectChange,
   path,
   cosmosAddress,
   evmAddress,
@@ -53,9 +43,8 @@ function WalletInfoCard({
   moveAddress,
   solanaAddress,
   suiAddress,
-  className,
   ...props
-}: PropsWithoutRef<WalletInfoCardPrps>) {
+}: WalletInfoCardPrps) {
   const [isExpanded, setIsExpanded] = useState(true);
 
   const { data, nonZeroData, zeroBalance, isLoading } = useBalances({
@@ -69,243 +58,354 @@ function WalletInfoCard({
 
   const balances = zeroBalance ? data : nonZeroData;
 
-  const derivationPath = useMemo(() => {
-    return getDerivationPathToShow(path ?? '');
-  }, [path]);
+  const derivationPath = useMemo(() => getDerivationPathToShow(path ?? ''), [path]);
 
   useEffect(() => {
-    if (zeroBalance && !isLoading) {
-      setIsExpanded(false);
-    }
+    if (zeroBalance && !isLoading) setIsExpanded(false);
   }, [zeroBalance, isLoading]);
 
   useEffect(() => {
-    if (isLoading) {
-      return;
-    }
+    if (isLoading) return;
 
     if (isLedger && isExistingAddress) {
       onSelectChange((path || index) as any, true);
       return;
     }
-
     onSelectChange((path || index) as any, !zeroBalance);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [zeroBalance, isLoading, index, isLedger, isExistingAddress]);
+  }, [zeroBalance, isLoading, index, isLedger, isExistingAddress, onSelectChange, path]);
 
-  const addressesToShow = useMemo(() => {
-    return isLedger ? data : balances;
-  }, [isLedger, data, balances]);
+  const addressesToShow = useMemo(() => (isLedger ? data : balances), [isLedger, data, balances]);
 
   return (
-    <label
-      className={cn(
-        'rounded-xl w-full bg-secondary-200 shrink-0 cursor-pointer',
-        isExistingAddress && !isLedger && 'opacity-50',
-        className,
-      )}
+    <View
+      style={[
+        styles.card,
+        isExistingAddress && !isLedger && styles.cardExisting,
+      ]}
       {...props}
     >
-      <div className='flex items-center gap-2 px-5 pt-5 pb-4'>
-        <div
-          role='button'
-          className='flex items-center gap-2'
-          onClick={(e) => {
-            if (!addressesToShow || !addressesToShow.length) {
-              return;
-            }
-
-            e.preventDefault();
-            e.stopPropagation();
+      {/* Top Row */}
+      <View style={styles.row}>
+        <TouchableOpacity
+          style={styles.rowButton}
+          onPress={() => {
+            if (!addressesToShow || !addressesToShow.length) return;
+            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
             setIsExpanded((prev) => !prev);
           }}
+          activeOpacity={0.8}
         >
-          <span className='font-bold text-mdl select-none'>{walletName}</span>
+          <Text style={styles.walletName}>{walletName}</Text>
           {showDerivationPath && (
-            <span className='text-xs font-medium py-px px-[6px] rounded bg-secondary-300'>{derivationPath}</span>
+            <Text style={styles.derivationPath}>{derivationPath}</Text>
           )}
-
           {!isLoading && !!addressesToShow?.length && (
             <CaretDown
-              size={14}
-              className={cn('text-muted-foreground transition-transform', isExpanded && '-rotate-180')}
+              size={16}
+              color="#97A3B9"
+              style={[
+                styles.caret,
+                isExpanded && { transform: [{ rotate: '180deg' }] }
+              ]}
             />
           )}
           {isExistingAddress && !isLedger && (
-            <span className='text-xs font-medium py-px px-[6px] rounded bg-secondary-300'>Already exists</span>
+            <Text style={styles.existsText}>Already exists</Text>
           )}
-        </div>
-
+        </TouchableOpacity>
         <Checkbox
           disabled={isExistingAddress}
           checked={isChosen}
-          onCheckedChange={(flag) => onSelectChange((path || index) as any, flag !== 'indeterminate' && !!flag)}
-          className='ml-auto'
+          onChange={(flag) => onSelectChange((path || index) as any, !!flag)}
+          style={{ marginLeft: 'auto' }}
         />
-      </div>
+      </View>
 
-      <AnimatePresence mode='wait'>
-        {isLoading ? (
-          <motion.div
-            key='skeleton'
-            className='flex flex-col border-t border-secondary-600/50 overflow-hidden'
-            initial='hidden'
-            animate='visible'
-            exit='hidden'
-            variants={opacityFadeInOut}
-            transition={transition250}
-          >
-            <AddressAndBalanceSkeleton />
-          </motion.div>
-        ) : (
-          isExpanded &&
-          addressesToShow && (
-            <motion.div
-              key='data'
-              className='flex flex-col border-t border-secondary-600/50 overflow-hidden'
-              initial='hidden'
-              animate='visible'
-              exit='hidden'
-              variants={cardListVariants}
-              transition={transition250}
-            >
-              {addressesToShow.map((chain) => (
-                <AddressAndBalanceCard {...chain} chainKey={chain.key} name={chain.name} key={chain.key} />
-              ))}
-            </motion.div>
-          )
-        )}
-      </AnimatePresence>
-    </label>
+      {/* Balance list or skeleton */}
+      {isLoading ? (
+        <View style={styles.animatedContent}>
+          <AddressAndBalanceSkeleton />
+        </View>
+      ) : (
+        isExpanded &&
+        addressesToShow &&
+        <View style={styles.animatedContent}>
+          {addressesToShow.map((chain) => (
+            <AddressAndBalanceCard {...chain} chainKey={chain.key} name={chain.name} key={chain.key} />
+          ))}
+        </View>
+      )}
+    </View>
   );
 }
 
 export default WalletInfoCard;
 
+
+// ---- AddressText ----
 const AddressText = ({ address }: { address: string }) => {
-  const { copy, isCopied } = useCopy();
+  const [isCopied, setIsCopied] = useState(false);
+  const opacity = React.useRef(new Animated.Value(1)).current;
+
+  const handleCopy = () => {
+    Clipboard.setString(address);
+    setIsCopied(true);
+    Animated.sequence([
+      Animated.timing(opacity, { toValue: 0, duration: 100, useNativeDriver: true }),
+      Animated.timing(opacity, { toValue: 1, duration: 180, useNativeDriver: true }),
+    ]).start(() => {
+      setTimeout(() => setIsCopied(false), 1400);
+    });
+  };
 
   return (
-    <AnimatePresence mode='wait'>
+    <TouchableOpacity
+      onPress={handleCopy}
+      activeOpacity={0.7}
+      style={styles.addressContainer}
+      disabled={isCopied}
+    >
       {isCopied ? (
-        <motion.span
-          key='copied'
-          className='text-sm font-bold text-accent-success ml-auto flex items-center gap-1'
-          initial='hidden'
-          animate='visible'
-          exit='hidden'
-          variants={opacityFadeInOut}
-          transition={transition150}
-        >
-          <CheckCircle size={16} /> Copied
-        </motion.span>
+        <Animated.View style={[styles.addressRow, { opacity }]}>
+          <CheckCircle size={16} color="#26c06f" />
+          <Text style={styles.copiedText}>Copied</Text>
+        </Animated.View>
       ) : (
-        <motion.span
-          key='address'
-          className='text-sm font-bold text-muted-foreground ml-auto hover:text-foreground transition-colors'
-          initial='hidden'
-          animate='visible'
-          exit='hidden'
-          variants={opacityFadeInOut}
-          transition={transition150}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            copy(address);
-          }}
-        >
-          {sliceAddress(address)}
-        </motion.span>
+        <Text style={styles.addressText}>{sliceAddress(address)}</Text>
       )}
-    </AnimatePresence>
+    </TouchableOpacity>
   );
 };
 
-const AddressAndBalanceCard = (props: {
+// ---- AddressAndBalanceCard ----
+const AddressAndBalanceCard = ({
+  name,
+  chainKey,
+  denom,
+  address,
+  amount,
+}: {
   name: string;
   chainKey: string;
   denom: string;
   address?: string;
   amount: string;
-}) => {
-  const defaultTokenLogo = useDefaultTokenLogo();
-  return (
-    <motion.div
-      className='px-5 py-4 flex items-center gap-2.5 w-full border-b border-secondary-600/25 last:border-b-0 overflow-hidden shrink-0'
-      initial='hidden'
-      animate='visible'
-      exit='hidden'
-      variants={opacityFadeInOut}
-      transition={transition250}
-    >
-      <img
-        src={getChainImage(props.chainKey)}
-        onError={imgOnError(defaultTokenLogo)}
-        className='rounded-full overflow-hidden size-9'
-      />
+}) => (
+  <View style={styles.addrRow}>
+    <Image
+      source={getChainImage(chainKey)}
+      style={styles.tokenLogo}
+      resizeMode="contain"
+    />
+    <View style={styles.addrInfo}>
+      <Text style={styles.addrName}>{name}</Text>
+      <Text style={styles.addrAmount}>{amount} {denom}</Text>
+    </View>
+    {address && (
+      <View style={styles.copyBtn}>
+        <AddressText address={address} />
+      </View>
+    )}
+  </View>
+);
 
-      <div className='flex flex-col gap-0.5 capitalize'>
-        <span className='text-md font-bold'>{props.name}</span>
-        <span className='text-xs font-medium text-muted-foreground'>
-          {props.amount} {props.denom}
-        </span>
-      </div>
-
-      {props.address && <AddressText address={props.address} />}
-    </motion.div>
-  );
-};
-
-export const AddressAndBalanceSkeleton = () => {
-  return (
-    <div className='px-5 py-4 flex items-center gap-2.5 w-full border-b border-secondary-600/25 last:border-b-0'>
-      <Skeleton className='rounded-full size-9' />
-
-      <div className='flex flex-col gap-2 capitalize h-[42px] justify-center'>
-        <Skeleton className='w-16 h-2.5' />
-        <Skeleton className='w-10 h-2' />
-      </div>
-
-      <Skeleton className='w-20 h-3 ml-auto' />
-    </div>
-  );
-};
+// ---- AddressAndBalanceSkeleton ----
+const AddressAndBalanceSkeleton = () => (
+  <View style={styles.addrRow}>
+    <Skeleton width={36} height={36} borderRadius={18} style={{ marginRight: 8 }} />
+    <View style={styles.addrInfo}>
+      <Skeleton width={64} height={10} borderRadius={4} style={{ marginBottom: 6 }} />
+      <Skeleton width={50} height={8} borderRadius={4} />
+    </View>
+    <Skeleton width={80} height={12} borderRadius={4} style={{ marginLeft: 'auto' }} />
+  </View>
+);
 
 export const AddressAndBalanceCardSkeleton = ({ walletName }: { walletName: string }) => {
   return (
-    <div className='rounded-xl w-full bg-secondary-200 shrink-0'>
-      <div className='flex items-center gap-2 px-5 pt-5 pb-4'>
-        <span className='font-bold text-mdl'>{walletName}</span>
-
-        <Checkbox disabled className='ml-auto' />
-      </div>
-
-      <div className='h-[0.5px] w-full bg-secondary-600/50' />
-
+    <View style={styles.card}>
+      <View style={styles.topRow}>
+        <Text style={styles.walletName}>{walletName}</Text>
+        <Checkbox disabled style={styles.checkbox} checked={false} onChange={function (flag: boolean): void {   } } />
+      </View>
+      <View style={styles.divider} />
       <AddressAndBalanceSkeleton />
-    </div>
+    </View>
   );
 };
 
-export const SelectWalletsLabel = ({
-  count,
-  total,
-  onSelectAllToggle,
-}: {
+// ---- SelectWalletsLabel ----
+export const SelectWalletsLabel = ({ count, total, onSelectAllToggle }: {
   count: number;
   total: number;
   onSelectAllToggle: (flag: boolean) => void;
-}) => {
-  return (
-    <label className='bg-secondary-200 rounded-xl flex items-center justify-between p-5 select-none'>
-      <span className='font-bold'>
-        {count} {count === 1 ? 'wallet' : 'wallets'} selected
-      </span>
+}) => (
+  <View style={styles.labelContainer}>
+    <Text style={styles.selectedText}>
+      {count} {count === 1 ? 'wallet' : 'wallets'} selected
+    </Text>
+    <View style={styles.labelRight}>
+      <Text style={styles.selectAllText}>Select All</Text>
+      <Checkbox checked={count === total} onChange={onSelectAllToggle} />
+    </View>
+  </View>
+);
 
-      <div className='flex items-center gap-1.5'>
-        <span className='text-muted-foreground text-sm font-bold'>Select All</span>
-        <Checkbox checked={count === total} onCheckedChange={onSelectAllToggle} />
-      </div>
-    </label>
-  );
-};
+const styles = StyleSheet.create({
+  addressContainer: {
+    marginLeft: 'auto',
+    minWidth: 72,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  addressRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  addressText: {
+    color: '#97A3B9',
+    fontWeight: 'bold',
+    fontSize: 13,
+  },
+  card: {
+    borderRadius: 16,
+    backgroundColor: '#F3F7F6',
+    width: '100%',
+    marginBottom: 12,
+    overflow: 'hidden',
+  },
+  cardExisting: {
+    opacity: 0.5,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 14,
+  },
+  rowButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  topRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 14,
+  },
+  walletName: {
+    fontWeight: 'bold',
+    fontSize: 15,
+    color: '#232323',
+  },
+  checkbox: {
+    marginLeft: 'auto',
+  },
+  divider: {
+    height: 0.5,
+    width: '100%',
+    backgroundColor: '#B8C2CC80', // border-secondary-600/50
+  },
+  derivationPath: {
+    fontSize: 11,
+    fontWeight: '500',
+    backgroundColor: '#E6EAEF',
+    color: '#232323',
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 6,
+    marginLeft: 4,
+  },
+  caret: {
+    marginLeft: 6,
+  },
+  existsText: {
+    fontSize: 11,
+    fontWeight: '500',
+    backgroundColor: '#E6EAEF',
+    color: '#232323',
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 6,
+    marginLeft: 6,
+  },
+  animatedContent: {
+    borderTopWidth: 1,
+    borderColor: '#B8C2CC80',
+    overflow: 'hidden',
+  },
+  addrRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderColor: '#B8C2CC40',
+  },
+  tokenLogo: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#E6EAEF',
+    marginRight: 8,
+  },
+  addrInfo: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  addrName: {
+    fontWeight: 'bold',
+    fontSize: 14,
+    color: '#232323',
+    textTransform: 'capitalize',
+  },
+  addrAmount: {
+    fontSize: 12,
+    color: '#97A3B9',
+    fontWeight: '500',
+  },
+  copyBtn: {
+    marginLeft: 'auto',
+    flexDirection: 'row',
+    alignItems: 'center',
+    minWidth: 60,
+    paddingLeft: 6,
+  },
+  copied: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  copiedText: {
+    color: '#26c06f',
+    fontWeight: 'bold',
+    marginLeft: 4,
+    fontSize: 13,
+  },
+  labelContainer: {
+    backgroundColor: '#F3F7F6',
+    borderRadius: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 20,
+    marginBottom: 12,
+  },
+  selectedText: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    color: '#232323',
+  },
+  labelRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  selectAllText: {
+    color: '#97A3B9',
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginRight: 4,
+  },
+});

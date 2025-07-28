@@ -1,51 +1,54 @@
+import React, { useMemo, useState } from 'react';
+import {
+  View,
+  TextInput,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
+  StyleSheet,
+  Dimensions,
+} from 'react-native';
+import { observer } from 'mobx-react-lite';
+import { useNavigation } from '@react-navigation/native';
+import { useActiveChain } from '../../hooks/settings/useActiveChain';
 import {
   getFilteredDapps,
-  OptionPlatformConfig,
-  QuickSearchOption,
-  useActiveWallet,
-  useChainInfo,
   useFetchDappListForQuickSearch,
-  useGetChains,
   useGetQuickSearchOptions,
+  useChainInfo,
+  useGetChains,
+  useActiveWallet,
+  OptionPlatformConfig,
 } from '@leapwallet/cosmos-wallet-hooks';
 import { WALLETTYPE } from '@leapwallet/leap-keychain';
-import classNames from 'classnames';
-import { AlertStrip } from 'components/alert-strip';
-import { LoaderAnimation } from 'components/loader/Loader';
-import { PageName } from 'config/analytics';
-import { useActiveChain } from 'hooks/settings/useActiveChain';
-import { Images } from 'images';
-import { observer } from 'mobx-react-lite';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { globalSheetsStore } from 'stores/global-sheets-store';
-import { hideAssetsStore } from 'stores/hide-assets-store';
-import { searchModalStore } from 'stores/search-modal-store';
-import { Colors } from 'theme/colors';
-import { isLedgerEnabled } from 'utils/isLedgerEnabled';
-
+import { Colors } from '../../theme/colors';
+import { searchModalStore } from '../../context/search-modal-store';
+import { hideAssetsStore } from '../../context/hide-assets-store';
+import { globalSheetsStore } from '../../context/global-sheets-store';
+import { isLedgerEnabled } from '../../utils/isLedgerEnabled';
 import { QuickSearchOptions } from './QuickSearchOptions';
+import { LoaderAnimation } from '../loader/Loader';
+import { AlertStrip } from '../alert-strip';
 import { useHardCodedActions } from './useHardCodedActions';
 
-function openLink(url: string, target?: string) {
-  window.open(url, target);
-}
+const { width } = Dimensions.get('window');
 
 const SearchModalView = () => {
+  const navigation = useNavigation();
   const { data: dappsList } = useFetchDappListForQuickSearch();
   const activeChain = useActiveChain();
   const chain = useChainInfo();
   const chains = useGetChains();
-  const navigate = useNavigate();
   const activeWallet = useActiveWallet();
-  const [searchedText, setSearchedText] = useState('');
-  const searchInputRef = useRef<HTMLInputElement>(null);
   const { data: suggestions, status } = useGetQuickSearchOptions();
+  const [searchedText, setSearchedText] = useState('');
+  const [showModal, setShowModal] = useState(false);
+
   const {
+    alertMessage,
+    showAlert,
     setAlertMessage,
     setShowAlert,
-    showAlert,
-    alertMessage,
     handleConnectLedgerClick,
     handleCopyAddressClick,
     handleLockWalletClick,
@@ -54,206 +57,175 @@ const SearchModalView = () => {
   } = useHardCodedActions();
 
   const activeSuggestions = useMemo(() => {
-    const extensionSuggestions =
+    return (
       suggestions?.filter(({ visible_on }) => {
-        if (visible_on.platforms.includes('All') || visible_on.platforms.includes('Extension')) {
-          return true;
-        }
-
-        return false;
-      }) ?? [];
-
-    return extensionSuggestions.filter(({ visible_on }) => {
-      if (visible_on.chains.includes('All') || visible_on.chains.includes(activeChain)) {
-        return true;
-      }
-
-      return false;
-    });
+        return (
+          (visible_on.platforms.includes('All') || visible_on.platforms.includes('Extension')) &&
+          (visible_on.chains.includes('All') || visible_on.chains.includes(activeChain))
+        );
+      }) ?? []
+    );
   }, [activeChain, suggestions]);
 
   const filteredSuggestions = useMemo(() => {
     if (searchedText.trim()) {
       const _filteredSuggestions =
-        activeSuggestions.filter(({ action_name, show_in_search }) => {
-          return show_in_search && action_name.trim().toLowerCase().includes(searchedText.trim().toLowerCase());
-        }) ?? [];
+        activeSuggestions.filter(({ action_name, show_in_search }) =>
+          action_name.toLowerCase().includes(searchedText.trim().toLowerCase()) && show_in_search,
+        ) ?? [];
 
-      let _filteredDapps: QuickSearchOption[] = [];
+      let _filteredDapps = [];
 
-      if (dappsList && dappsList?.dapps?.length) {
+      if (dappsList?.dapps?.length) {
         _filteredDapps = getFilteredDapps(dappsList.dapps, dappsList.types, searchedText);
       }
 
       return [..._filteredSuggestions, ..._filteredDapps];
     }
 
-    return activeSuggestions.filter(({ show_in_list }) => {
-      return show_in_list;
-    });
+    return activeSuggestions.filter((s) => s.show_in_list);
   }, [activeSuggestions, dappsList, searchedText]);
-
-  useEffect(() => {
-    if (searchInputRef.current && searchModalStore.showModal) {
-      searchInputRef.current.focus();
-    }
-
-    return () => {
-      setSearchedText('');
-      searchModalStore.updateActiveOption({ active: 0 });
-      searchModalStore.setEnteredOption(null);
-    };
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchModalStore.showModal]);
-
-  useEffect(() => {
-    const newHighLimit = filteredSuggestions.length;
-
-    const newActive =
-      searchModalStore.activeOption.active >= newHighLimit ? newHighLimit - 1 : searchModalStore.activeOption.active;
-    searchModalStore.updateActiveOption({
-      active: newActive,
-      highLimit: newHighLimit,
-    });
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filteredSuggestions.length]);
-
-  const handleClose = useCallback(() => {
-    searchModalStore.setShowModal(false);
-  }, []);
 
   const handleNoRedirectActions = (actionName: string) => {
     switch (actionName) {
-      case 'Swap': {
-        handleSwapClick(undefined, `/swap?pageSource=quickSearch`);
+      case 'Swap':
+        handleSwapClick(undefined, '/swap?pageSource=quickSearch');
         break;
-      }
-
-      case 'Connect Ledger': {
+      case 'Connect Ledger':
         handleConnectLedgerClick();
         break;
-      }
-
-      case 'Copy Address': {
-        if (!activeWallet) return;
+      case 'Copy Address':
         if (
-          activeWallet.walletType === WALLETTYPE.LEDGER &&
-          isLedgerEnabled(chain?.key, chain?.bip44?.coinType, Object.values(chains))
+          activeWallet &&
+          !(activeWallet.walletType === WALLETTYPE.LEDGER &&
+            isLedgerEnabled(chain?.key, chain?.bip44?.coinType, Object.values(chains)))
         ) {
-          break;
+          handleCopyAddressClick();
         }
-        handleCopyAddressClick();
         break;
-      }
-
-      case 'Lock Wallet': {
+      case 'Lock Wallet':
         handleLockWalletClick();
         break;
-      }
-
-      case 'Hide Balances': {
+      case 'Hide Balances':
         hideAssetsStore.setHidden(!hideAssetsStore.isHidden);
         setAlertMessage(`Balances ${!hideAssetsStore.isHidden ? 'Hidden' : 'Visible'}`);
         setShowAlert(true);
         break;
-      }
-
-      case 'Settings': {
+      case 'Settings':
         globalSheetsStore.toggleSideNav();
         break;
-      }
     }
   };
 
-  const handleOptionClick = (config: OptionPlatformConfig, optionIndex: number, actionName: string) => {
-    searchModalStore.setShowModal(false);
+  const handleOptionClick = (config: OptionPlatformConfig, index: number, actionName: string) => {
+    setShowModal(false);
 
     switch (config.action_type) {
-      case 'no-redirect': {
+      case 'no-redirect':
         handleNoRedirectActions(actionName);
         break;
-      }
-
-      case 'redirect-external': {
-        openLink(config.redirect_url ?? '', '_blank');
+      case 'redirect-external':
+        config.redirect_url && Linking.openURL(config.redirect_url);
         break;
-      }
-
-      case 'redirect-internal': {
+      case 'redirect-internal':
         if (actionName === 'View NFTs') {
           handleNftsClick();
         } else {
-          navigate(`${config.redirect_url}?pageSource=${PageName.QuickSearch}`);
+          navigation.navigate('InternalWebview', {
+            uri: `${config.redirect_url}?pageSource=quickSearch`,
+          });
         }
-
         break;
-      }
     }
   };
 
   return (
-    <div
-      className='panel-width panel-height max-panel-height overflow-y-auto absolute top-0 inset-0 pointer-events-none'
-      style={{ zIndex: 9999999999 }}
-    >
+    <>
+      {showModal && (
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.overlay}>
+            <KeyboardAvoidingView behavior="padding" style={styles.modalWrapper}>
+              <View style={styles.modalBox}>
+                <TextInput
+                  placeholder="Search commands, pages, and dApps"
+                  placeholderTextColor="#aaa"
+                  value={searchedText}
+                  onChangeText={setSearchedText}
+                  style={styles.searchInput}
+                  autoFocus
+                />
+                <View style={{ flex: 1 }}>
+                  {status === 'loading' && (
+                    <View style={styles.loaderWrapper}>
+                      <LoaderAnimation color="" />
+                    </View>
+                  )}
+                  {status === 'success' && (
+                    <QuickSearchOptions
+                      suggestionsList={filteredSuggestions}
+                      activeSearchOption={searchModalStore.activeOption.active}
+                      handleOptionClick={handleOptionClick}
+                    />
+                  )}
+                </View>
+              </View>
+            </KeyboardAvoidingView>
+          </View>
+        </TouchableWithoutFeedback>
+      )}
+
       {showAlert && (
         <AlertStrip
           message={alertMessage}
           bgColor={Colors.green600}
-          alwaysShow={false}
           onHide={() => {
             setShowAlert(false);
             setAlertMessage('');
           }}
-          className='absolute top-[80px] left-[40px] rounded-2xl w-80 h-auto p-2'
-          timeOut={1000}
+          timeOut={1500}
         />
       )}
-
-      <div
-        className={classNames('w-full h-full flex items-center justify-center bg-[#f4f4f4bf] dark:bg-black-80', {
-          'opacity-0 pointer-events-none transition-opacity duration-75': !searchModalStore.showModal,
-          'opacity-100 pointer-events-auto transition-opacity duration-75': searchModalStore.showModal,
-        })}
-        onClick={handleClose}
-      >
-        <div
-          className='h-[488px] w-[349px] rounded-2xl bg-gray-100 dark:bg-gray-950 border dark:border-gray-900'
-          onClick={(event) => event.stopPropagation()}
-        >
-          <div className='w-full py-3 px-6 border-b dark:border-b-gray-900 flex items-center gap-3'>
-            <img className='invert dark:invert-0' src={Images.Misc.SearchModalGlass} alt='' />
-            <input
-              type='text'
-              placeholder='Search commands, pages, and dApps'
-              className='text-base dark:text-gray-200 outline-none bg-white-0 grow'
-              value={searchedText}
-              onChange={(event) => setSearchedText(event.target.value)}
-              ref={searchInputRef}
-            />
-          </div>
-
-          <div className='w-full py-3'>
-            {status === 'loading' ? (
-              <div className='w-full h-[380px] flex items-center justify-center'>
-                <LoaderAnimation color='' />
-              </div>
-            ) : null}
-
-            {status === 'success' ? (
-              <QuickSearchOptions
-                suggestionsList={filteredSuggestions}
-                activeSearchOption={searchModalStore.activeOption.active}
-                handleOptionClick={handleOptionClick}
-              />
-            ) : null}
-          </div>
-        </div>
-      </div>
-    </div>
+    </>
   );
 };
 
 export const SearchModal = observer(SearchModalView);
+
+const styles = StyleSheet.create({
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    height: '100%',
+    width: '100%',
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    zIndex: 9999,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalWrapper: {
+    width: width * 0.9,
+    maxHeight: 500,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  modalBox: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#f9f9f9',
+  },
+  searchInput: {
+    height: 44,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    backgroundColor: '#fff',
+    fontSize: 16,
+    marginBottom: 12,
+  },
+  loaderWrapper: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});

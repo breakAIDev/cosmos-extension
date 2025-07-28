@@ -1,38 +1,78 @@
-import classNames from 'classnames';
-import React from 'react';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+
+type Tab = {
+  id: string;
+  label: string;
+};
 
 type TabsProps = {
-  tabsList: {
-    id: string;
-    label: string;
-  }[];
-  tabsContent: {
-    [key: string]: React.ReactNode;
-  };
-  className?: string;
+  tabsList: Tab[];
+  tabsContent: { [key: string]: React.ReactNode };
+  className?: object;
 };
 
 export const Tabs: React.FC<TabsProps> = ({ tabsList, tabsContent, className }) => {
-  const [activeTab, setActiveTab] = React.useState(tabsList[0].id);
+  const [activeTab, setActiveTab] = useState(tabsList[0]?.id);
 
   return (
-    <div className={classNames('w-full', className)}>
-      <div className='w-full flex items-center justify-start border-b border-gray-900'>
+    <View style={[styles.container, className]}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabsRow}>
         {tabsList.map(({ id, label }) => (
-          <button
+          <TouchableOpacity
             key={id}
-            className={`px-4 py-2 cursor-pointer transition-colors border-b-2 ${
-              activeTab === id
-                ? 'dark:border-white-100 border-gray-900 font-bold text-gray-900 dark:text-white-100'
-                : 'border-transparent text-gray-700 dark:text-gray-400'
-            }`}
-            onClick={() => setActiveTab(id)}
+            style={[
+              styles.tabBtn,
+              activeTab === id ? styles.activeTab : styles.inactiveTab,
+            ]}
+            onPress={() => setActiveTab(id)}
           >
-            {label}
-          </button>
+            <Text style={[styles.tabLabel, activeTab === id ? styles.activeLabel : styles.inactiveLabel]}>
+              {label}
+            </Text>
+          </TouchableOpacity>
         ))}
-      </div>
-      <div className='w-full'>{tabsContent[activeTab]}</div>
-    </div>
+      </ScrollView>
+      <View style={styles.tabContent}>{tabsContent[activeTab]}</View>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    width: '100%',
+  },
+  tabsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderColor: '#222', // gray-900
+  },
+  tabBtn: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderBottomWidth: 2,
+    borderColor: 'transparent',
+    marginRight: 4,
+  },
+  activeTab: {
+    borderColor: '#222', // gray-900 or white in dark
+  },
+  inactiveTab: {
+    borderColor: 'transparent',
+  },
+  tabLabel: {
+    fontSize: 16,
+  },
+  activeLabel: {
+    fontWeight: 'bold',
+    color: '#222', // gray-900 or white in dark
+  },
+  inactiveLabel: {
+    color: '#888', // gray-400
+  },
+  tabContent: {
+    width: '100%',
+    marginTop: 12,
+  },
+});

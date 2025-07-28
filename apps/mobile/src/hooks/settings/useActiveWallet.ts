@@ -2,14 +2,14 @@ import { Key, useActiveWalletStore, useFeatureFlags } from '@leapwallet/cosmos-w
 import { ChainInfo, pubKeyToEvmAddressToShow, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { PasswordStore } from '@leapwallet/cosmos-wallet-store';
 import { KeyChain } from '@leapwallet/leap-keychain';
-import { AGGREGATED_CHAIN_KEY } from 'config/constants';
-import { useChainInfos } from 'hooks/useChainInfos';
-import { getUpdatedKeyStore } from 'hooks/wallet/getUpdatedKeyStore';
+import { AGGREGATED_CHAIN_KEY } from '../../services/config/constants';
+import { useChainInfos } from '../useChainInfos';
+import { getUpdatedKeyStore } from '../wallet/getUpdatedKeyStore';
 import { useCallback, useEffect } from 'react';
-import { passwordStore } from 'stores/password-store';
-import { rootStore } from 'stores/root-store';
-import { AggregatedSupportedChain } from 'types/utility';
-import { sendMessageToTab } from 'utils';
+import { passwordStore } from '../../context/password-store';
+import { rootStore } from '../../context/root-store';
+import { AggregatedSupportedChain } from '../../types/utility';
+import { sendMessageToTab } from '../../utils';
 import browser from 'webextension-polyfill';
 
 import {
@@ -19,7 +19,7 @@ import {
   KEYSTORE,
   LAST_EVM_ACTIVE_CHAIN,
   MANAGE_CHAIN_SETTINGS,
-} from '../../config/storage-keys';
+} from '../../services/config/storage-keys';
 
 type ActionType = 'UPDATE' | 'DELETE';
 

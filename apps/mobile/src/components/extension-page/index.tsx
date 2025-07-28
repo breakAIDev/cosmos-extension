@@ -1,85 +1,137 @@
+import React from 'react';
+import { View, Image, StyleSheet, ScrollView, TouchableOpacity, Linking } from 'react-native';
 import { Label, ThemeName, useTheme } from '@leapwallet/leap-ui';
-import classNames from 'classnames';
-import IconButton from 'components/icon-button';
-import { Images } from 'images';
-import { LeapLogo } from 'images/logos';
-import React, { PropsWithChildren, ReactNode } from 'react';
-import { isSidePanel } from 'utils/isSidePanel';
+import IconButton from '../icon-button';
+import { Images } from '../../../assets/images';
+import { LeapLogo } from '../../../assets/images/logos';
 
-// Page layout for full screen pages
 type ExtensionPageProps = {
-  readonly titleComponent?: ReactNode;
-  readonly children?: ReactNode;
-  readonly headerRightComponent?: ReactNode;
-  readonly childrenMargin?: boolean;
+  titleComponent?: React.ReactNode;
+  children?: React.ReactNode;
+  headerRightComponent?: React.ReactNode;
+  childrenMargin?: boolean;
 };
 
-export default function ExtensionPage(props: PropsWithChildren<ExtensionPageProps>) {
+const HELP_CENTER_URL = 'https://leapwallet.notion.site/Leap-Wallet-Help-Center-Cosmos-ba1da3c05d3341eaa44a1850ed3260ee';
+
+export default function ExtensionPage(props: ExtensionPageProps) {
   const { titleComponent, children, headerRightComponent, childrenMargin } = props;
   const { theme, setTheme } = useTheme();
-
   const isDark = theme === ThemeName.DARK;
 
   return (
-    <div
-      className={classNames('relative flex flex-col w-screen h-screen z-0', {
-        'p-[20px]': !isSidePanel(),
-      })}
-    >
-      <div className='w-screen absolute z-1 top-0 left-0 h-40' />
+    <View style={[
+      styles.root,
+      { backgroundColor: isDark ? '#18181B' : '#fff' }
+    ]}>
+      {/* Top absolute background bar */}
+      <View style={styles.topBg} />
 
-      <div
-        className={classNames('flex z-10 overflow-scroll items-start justify-center', {
-          'panel-height enclosing-panel': isSidePanel(),
-          'mt-16': !childrenMargin,
-          'mt-8': !!childrenMargin,
-        })}
-      >
-        {children}
-      </div>
-      {!isSidePanel() && window.innerWidth >= 450 && (
-        <>
-          {/* Header */}
-          <div className='absolute top-5 left-5 right-5 flex flex-row justify-between'>
-            <img src={LeapLogo} className='h-[36px] w-[36px] z-10' />
-            {!!headerRightComponent && headerRightComponent}
-            {!headerRightComponent && (
-              <div className='absolute right-0 flex flex-row gap-x-[8px] z-20'>
-                <IconButton
-                  isFilled={true}
-                  onClick={() => {
-                    setTheme(isDark ? ThemeName.LIGHT : ThemeName.DARK);
-                  }}
-                  image={{
-                    src: isDark ? Images.Misc.LightTheme : Images.Misc.DarkTheme,
-                    alt: 'Back',
-                  }}
-                />
+      <View style={[
+        styles.content,
+        !childrenMargin ? styles.contentNoMargin : styles.contentWithMargin,
+      ]}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+          {children}
+        </ScrollView>
+      </View>
 
-                {
-                  <Label
-                    imgSrc={Images.Misc.HelpIcon}
-                    title={'Visit Help Center'}
-                    type={'normal'}
-                    onClick={() =>
-                      window.open(
-                        'https://leapwallet.notion.site/Leap-Wallet-Help-Center-Cosmos-ba1da3c05d3341eaa44a1850ed3260ee',
-                      )
-                    }
-                    isRounded={true}
-                  />
-                }
-              </div>
-            )}
-          </div>
+      <View style={styles.headerRow}>
+        <Image source={LeapLogo} style={styles.logo} />
+        {headerRightComponent ? (
+          headerRightComponent
+        ) : (
+          <View style={styles.headerRightActions}>
+            <IconButton
+              isFilled={true}
+              onPress={() => setTheme(isDark ? ThemeName.LIGHT : ThemeName.DARK)}
+              image={{
+                src: isDark ? Images.Misc.LightTheme : Images.Misc.DarkTheme,
+                alt: 'Theme Switch',
+              }}
+            />
+            <Label
+              imgSrc={Images.Misc.HelpIcon}
+              title={'Visit Help Center'}
+              type={'normal'}
+              onClick={() => Linking.openURL(HELP_CENTER_URL)}
+              isRounded={true}
+            />
+          </View>
+        )}
+      </View>
 
-          {!!titleComponent && (
-            <div className='flex w-screen absolute left-0 right-0  z-10 item-center justify-center'>
-              {titleComponent}
-            </div>
-          )}
-        </>
+      {titleComponent && (
+        <View style={styles.titleBar}>
+          {titleComponent}
+        </View>
       )}
-    </div>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    position: 'relative',
+    width: '100%',
+    height: '100%',
+    padding: 20,
+  },
+  topBg: {
+    width: '100%',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    height: 40,
+    zIndex: 1,
+  },
+  content: {
+    flex: 1,
+    zIndex: 10,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    overflow: 'scroll',
+  },
+  contentNoMargin: {
+    marginTop: 64, // mt-16
+  },
+  contentWithMargin: {
+    marginTop: 32, // mt-8
+  },
+  scrollContent: {
+    flexGrow: 1,
+    width: '100%',
+  },
+  headerRow: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    right: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    zIndex: 20,
+  },
+  logo: {
+    width: 36,
+    height: 36,
+    resizeMode: 'contain',
+    zIndex: 10,
+  },
+  headerRightActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    zIndex: 20,
+  },
+  titleBar: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    zIndex: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    top: 70, // Below the header row
+  },
+});

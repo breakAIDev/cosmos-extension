@@ -1,5 +1,5 @@
 import { AvatarCard, Buttons, ThemeName, useTheme } from '@leapwallet/leap-ui';
-import BottomModal from 'components/bottom-modal';
+import BottomModal from '../bottom-modal';
 import { SelectedAddress } from 'pages/send/types';
 import React, { ReactElement, useCallback, useState } from 'react';
 import { Colors } from 'theme/colors';

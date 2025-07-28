@@ -1,7 +1,7 @@
 import { getLeapapiBaseUrl } from '@leapwallet/cosmos-wallet-hooks';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import { AlphaUser } from 'pages/alpha/types';
+import { AlphaUser } from '../screens/alpha/types';
 
 export async function getAlphaUserDetails(cosmosAddress: string) {
   const baseUrl = getLeapapiBaseUrl();

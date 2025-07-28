@@ -1,5 +1,5 @@
 import { useActiveWallet } from '@leapwallet/cosmos-wallet-hooks';
-import { LEAP_CHAD_FIRST_VISIT } from 'config/storage-keys';
+import { LEAP_CHAD_FIRST_VISIT } from '../services/config/storage-keys';
 import { useEffect, useState } from 'react';
 import browser from 'webextension-polyfill';
 

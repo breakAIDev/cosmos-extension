@@ -2,7 +2,7 @@ import { useDisabledNFTsCollections } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { NftStore } from '@leapwallet/cosmos-wallet-store';
 import { Card } from '@leapwallet/leap-ui';
-import BottomModal from 'components/bottom-modal';
+import BottomModal from '../bottom-modal';
 import { CustomCardDivider } from 'components/custom-card-divider';
 import { useChainInfos } from 'hooks/useChainInfos';
 import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';

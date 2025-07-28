@@ -1,5 +1,5 @@
 import type { CategoryId, InvestData } from '@leapwallet/cosmos-wallet-hooks';
-import BottomModal from 'components/bottom-modal';
+import BottomModal from '../bottom-modal';
 import { TxFee } from 'images/activity';
 import { HelpIcon } from 'images/misc';
 import React, { useMemo, useState } from 'react';

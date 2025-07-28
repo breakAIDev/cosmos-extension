@@ -1,33 +1,23 @@
-import { Key, WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks';
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk/dist/browser/constants';
-import { Avatar, Card, CardDivider } from '@leapwallet/leap-ui';
-import BottomModal from 'components/bottom-modal';
-import Text from 'components/text';
-import { LEDGER_NAME_EDITED_SUFFIX_REGEX } from 'config/config';
-import { walletLabels } from 'config/constants';
-import useActiveWallet from 'hooks/settings/useActiveWallet';
-import { useSiteLogo } from 'hooks/utility/useSiteLogo';
-import { Wallet } from 'hooks/wallet/useWallet';
-import { Images } from 'images';
-import { addToConnections } from 'pages/ApproveConnection/utils';
 import React, { useMemo } from 'react';
-import { formatWalletName } from 'utils/formatWalletName';
-import { imgOnError } from 'utils/imgOnError';
-import { sliceAddress } from 'utils/strings';
-
-import useWallets = Wallet.useWallets;
-
-type SelectWalletProps = {
-  readonly title: string;
-  readonly isOpen: boolean;
-  readonly onClose: () => void;
-  readonly currentWalletInfo?: {
-    wallets: [Key];
-    chainIds: [string];
-    origin: string;
-  } | null;
-  readonly activeChain: SupportedChain;
-};
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+} from 'react-native';
+import useActiveWallet from '../../hooks/settings/useActiveWallet';
+import { useSiteLogo } from '../../hooks/utility/useSiteLogo';
+import { useWallets } from '../../hooks/wallet/useWallet';
+import { sliceAddress } from '../../utils/strings';
+import { formatWalletName } from '../../utils/formatWalletName';
+import { addToConnections } from '../../screens/ApproveConnection/utils';
+import { Images } from '../../../assets/images';
+import { LEDGER_NAME_EDITED_SUFFIX_REGEX } from '../../services/config/config';
+import { walletLabels } from '../../services/config/constants';
+import { WALLETTYPE } from '@leapwallet/leap-keychain';
+import BottomModal from '../bottom-modal'; // You will need to create this component for mobile
 
 export default function SelectWalletSheet({
   isOpen,
@@ -35,111 +25,175 @@ export default function SelectWalletSheet({
   title,
   currentWalletInfo,
   activeChain,
-}: SelectWalletProps) {
+}) {
   const wallets = useWallets();
   const { activeWallet, setActiveWallet } = useActiveWallet();
 
   const walletsList = useMemo(() => {
     return wallets
-      ? Object.values(wallets)
-          .map((wallet) => wallet)
-          .sort((a, b) => a.name.localeCompare(b.name))
+      ? Object.values(wallets).sort((a, b) => a.name.localeCompare(b.name))
       : [];
   }, [wallets]);
 
   const walletName = currentWalletInfo?.wallets?.[0]?.name;
   const walletAddress = currentWalletInfo?.wallets?.[0]?.addresses?.[activeChain];
   const walletColorIndex = currentWalletInfo?.wallets?.[0]?.colorIndex;
-  const siteName =
-    currentWalletInfo?.origin?.split('//')?.at(-1)?.split('.')?.at(-2) ||
+  const siteName = currentWalletInfo?.origin?.split('//')?.at(-1)?.split('.')?.at(-2) ??
     currentWalletInfo?.origin?.split('//')?.at(-1);
-
   const siteLogo = useSiteLogo(currentWalletInfo?.origin);
 
   return (
-    <>
-      <BottomModal isOpen={isOpen} onClose={onClose} title={title} closeOnBackdropClick={true}>
-        <div>
-          {currentWalletInfo && (
-            <div className='flex flex-col p-4 mb-4 rounded-2xl bg-white-100 dark:bg-gray-900 min-h-[100px] justify-center items-center'>
-              <div className='mt-2 flex flex-row items-center'>
-                <img
-                  src={Images.Misc.getWalletIconAtIndex(
-                    walletColorIndex as number,
-                    currentWalletInfo?.wallets?.[0]?.watchWallet,
-                  )}
-                  className='z-10 border-2 border-gray-900 rounded-full relative left-2'
-                />
-                <Avatar
-                  avatarImage={siteLogo}
-                  avatarOnError={imgOnError(Images.Misc.DefaultWebsiteIcon)}
-                  size='sm'
-                  className='-left-2 z-0 rounded-full overflow-hidden'
-                />
-              </div>
-              <Text size='md' color='text-green-600' className='font-bold my-2'>
-                {siteName}
-              </Text>
-              <Text size='xl' className='my-0 font-extrabold'>
-                {walletName} Connected
-              </Text>
-              {walletAddress ? (
-                <p className='text-sm font-medium dark:text-gray-400 text-gray-700'>{sliceAddress(walletAddress)}</p>
-              ) : null}
-            </div>
-          )}
-          <div className='flex flex-col rounded-2xl bg-white-100 dark:bg-gray-900 h-fit max-h-[250px] overflow-y-auto'>
-            {walletsList.map((wallet, index, array) => {
-              const isLast = index === array.length - 1;
-              if (wallet.id === currentWalletInfo?.wallets?.[0]?.id) return null;
-              let walletLabel = '';
+    <BottomModal isVisible={isOpen} onClose={onClose} title={title}>
+      <View style={styles.container}>
+        {currentWalletInfo && (
+          <View style={styles.connectedCard}>
+            <View style={styles.rowCenter}>
+              <Image
+                source={Images.Misc.getWalletIconAtIndex(walletColorIndex, currentWalletInfo?.wallets?.[0]?.watchWallet)}
+                style={[styles.walletIcon, { zIndex: 10 }]}
+              />
+              <Image
+                source={{ uri: siteLogo }}
+                style={[styles.avatar, { zIndex: 0 }]}
+              />
+            </View>
+            <Text style={styles.siteName}>{siteName}</Text>
+            <Text style={styles.walletConnected}>{walletName} Connected</Text>
+            {walletAddress ? (
+              <Text style={styles.address}>{sliceAddress(walletAddress)}</Text>
+            ) : null}
+          </View>
+        )}
 
-              if (wallet.walletType === WALLETTYPE.LEDGER) {
-                walletLabel = ` · /0'/0/${wallet.addressIndex}`;
-              }
+        <ScrollView style={styles.walletsList}>
+          {walletsList.map((wallet, index) => {
+            if (wallet.id === currentWalletInfo?.wallets?.[0]?.id) return null;
 
-              if (
-                wallet.walletType === WALLETTYPE.PRIVATE_KEY ||
-                wallet.walletType === WALLETTYPE.SEED_PHRASE_IMPORTED
-              ) {
-                walletLabel = ` · Imported`;
-              }
+            let walletLabel = '';
+            if (wallet.walletType === WALLETTYPE.LEDGER) {
+              walletLabel = ` · /0'/0/${wallet.addressIndex}`;
+            } else if (
+              wallet.walletType === WALLETTYPE.PRIVATE_KEY ||
+              wallet.walletType === WALLETTYPE.SEED_PHRASE_IMPORTED
+            ) {
+              walletLabel = ' · Imported';
+            }
 
-              const walletName =
-                wallet.walletType == WALLETTYPE.LEDGER && !LEDGER_NAME_EDITED_SUFFIX_REGEX.test(wallet.name)
-                  ? `${walletLabels[wallet.walletType]} Wallet ${wallet.addressIndex + 1}`
-                  : formatWalletName(wallet.name);
-              const walletNameLength = walletName.length;
-              const shortenedWalletName = walletNameLength > 16 ? walletName.slice(0, 16) + '...' : walletName;
+            let walletNameStr =
+              wallet.walletType === WALLETTYPE.LEDGER && !LEDGER_NAME_EDITED_SUFFIX_REGEX.test(wallet.name)
+                ? `${walletLabels[wallet.walletType]} Wallet ${wallet.addressIndex + 1}`
+                : formatWalletName(wallet.name);
 
-              return (
-                <div className='relative min-h-[56px] w-full' key={wallet.id}>
-                  <Card
-                    onClick={async () => {
-                      const walletIds = currentWalletInfo?.wallets.map((wallet) => wallet.id);
-                      await addToConnections(
-                        currentWalletInfo?.chainIds as [string],
-                        walletIds ?? [],
-                        currentWalletInfo?.origin as string,
-                      );
-                      setActiveWallet(wallet);
-                      onClose();
-                    }}
-                    className='!w-full'
-                    key={wallet.name}
-                    title={shortenedWalletName}
-                    subtitle={`${sliceAddress(wallet.addresses[activeChain])}${walletLabel}`}
-                    iconSrc={activeWallet?.id === wallet.id ? Images.Misc.CheckCosmos : undefined}
-                    imgSrc={Images.Misc.getWalletIconAtIndex(wallet.colorIndex, wallet.watchWallet)}
-                    isRounded={true}
+            if (walletNameStr.length > 16) {
+              walletNameStr = walletNameStr.slice(0, 16) + '...';
+            }
+
+            return (
+              <TouchableOpacity
+                key={wallet.id}
+                style={styles.card}
+                onPress={async () => {
+                  const walletIds = currentWalletInfo?.wallets.map((wallet) => wallet.id);
+                  await addToConnections(currentWalletInfo?.chainIds, walletIds ?? [], currentWalletInfo?.origin);
+                  setActiveWallet(wallet);
+                  onClose();
+                }}
+              >
+                <View style={styles.rowBetween}>
+                  <Image
+                    source={Images.Misc.getWalletIconAtIndex(wallet.colorIndex, wallet.watchWallet)}
+                    style={styles.icon}
                   />
-                  {!isLast ? <CardDivider /> : null}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </BottomModal>
-    </>
+                  <View style={styles.walletTextBox}>
+                    <Text style={styles.walletName}>{walletNameStr}</Text>
+                    <Text style={styles.walletSub}>{sliceAddress(wallet.addresses[activeChain]) + walletLabel}</Text>
+                  </View>
+                  {activeWallet?.id === wallet.id && (
+                    <Image source={Images.Misc.CheckCosmos} style={styles.iconCheck} />
+                  )}
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      </View>
+    </BottomModal>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 16,
+  },
+  connectedCard: {
+    backgroundColor: '#F3F4F6',
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  rowCenter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  walletIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    marginRight: -16,
+    borderWidth: 2,
+    borderColor: '#111827',
+  },
+  avatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+  },
+  siteName: {
+    color: '#059669',
+    fontWeight: 'bold',
+    marginVertical: 4,
+  },
+  walletConnected: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  address: {
+    fontSize: 12,
+    color: '#4B5563',
+  },
+  walletsList: {
+    maxHeight: 250,
+  },
+  card: {
+    backgroundColor: '#FFFFFF',
+    padding: 12,
+    marginBottom: 8,
+    borderRadius: 10,
+  },
+  rowBetween: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  icon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    marginRight: 12,
+  },
+  walletTextBox: {
+    flex: 1,
+  },
+  walletName: {
+    fontWeight: '600',
+  },
+  walletSub: {
+    fontSize: 12,
+    color: '#6B7280',
+  },
+  iconCheck: {
+    width: 20,
+    height: 20,
+  },
+});

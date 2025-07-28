@@ -1,32 +1,65 @@
 import React from 'react';
-import { TouchableOpacity, View, StyleSheet } from 'react-native';
+import { View, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { Images } from '../../../assets/images';
 
-type Props = {
+type CustomCheckboxProps = {
   checked: boolean;
-  onPress: () => void;
+  onClick: () => void;
+  isWhite?: boolean;
 };
 
-export const CustomCheckbox: React.FC<Props> = ({ checked, onPress }) => (
-  <TouchableOpacity style={styles.checkbox} onPress={onPress}>
-    {checked && <View style={styles.inner} />}
-  </TouchableOpacity>
-);
+export function CustomCheckbox({ checked, onClick, isWhite }: CustomCheckboxProps) {
+  return (
+    <TouchableOpacity
+      onPress={onClick}
+      style={styles.wrapper}
+      activeOpacity={0.7}
+    >
+      {checked ? (
+        <View style={styles.innerBox}>
+          <Image
+            source={isWhite ? Images.Misc.FilledRoundedSquareWhite : Images.Misc.FilledRoundedSquareCheckMark}
+            style={styles.checkImage}
+            resizeMode="contain"
+          />
+        </View>
+      ) : (
+        <View
+          style={[
+            styles.innerBox,
+            styles.uncheckedBox,
+            { borderColor: isWhite ? '#F3F4F6' : '#059669' }, // white-100 / green-600
+          ]}
+        />
+      )}
+    </TouchableOpacity>
+  );
+}
 
 const styles = StyleSheet.create({
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderWidth: 2,
-    borderColor: '#224874',
+  wrapper: {
+    width: 20,
+    height: 20,
     borderRadius: 6,
-    alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fff',
+    alignItems: 'center',
   },
-  inner: {
-    width: 14,
-    height: 14,
-    backgroundColor: '#224874',
-    borderRadius: 3,
+  innerBox: {
+    width: 15,
+    height: 15,
+    position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  uncheckedBox: {
+    borderWidth: 2,
+    borderRadius: 2,
+    backgroundColor: 'transparent',
+  },
+  checkImage: {
+    position: 'absolute',
+    top: 0, left: 0, right: 0, bottom: 0,
+    width: '100%',
+    height: '100%',
   },
 });

@@ -1,20 +1,44 @@
-import { ThemeName, useTheme } from '@leapwallet/leap-ui';
-import classNames from 'classnames';
-import { Images } from 'images';
 import React from 'react';
+import { View, Image, StyleSheet, useColorScheme } from 'react-native';
+import { Images } from '../../../assets/images';
 
 type CustomCardDividerProps = {
-  className?: string;
+  style?: object;
 };
 
-export function CustomCardDivider({ className }: CustomCardDividerProps) {
-  const src = useTheme().theme === ThemeName.DARK ? Images.Misc.CardDividerDarkMode : Images.Misc.CardDividerLightMode;
+export function CustomCardDivider({ style }: CustomCardDividerProps) {
+  const colorScheme = useColorScheme(); // 'dark' or 'light'
+  const src = colorScheme === 'dark' ? Images.Misc.CardDividerDarkMode : Images.Misc.CardDividerLightMode;
 
   return (
-    <div
-      className={classNames('flex w-[344px] justify-center items-center bg-white-100 dark:bg-gray-950 px-4', className)}
+    <View
+      style={[
+        styles.container,
+        colorScheme === 'dark' ? styles.bgDark : styles.bgLight,
+        style,
+      ]}
     >
-      <img src={src} alt='CardDivider' className='block w-full' />
-    </div>
+      <Image source={src} style={styles.image} resizeMode="cover" accessibilityLabel="CardDivider" />
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    width: 344,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 16, // px-4 in Tailwind = 16
+    // height: ... // set if you need a fixed height
+  },
+  bgLight: {
+    backgroundColor: '#F3F4F6', // Example for white-100
+  },
+  bgDark: {
+    backgroundColor: '#0f172a', // Example for gray-950
+  },
+  image: {
+    width: '100%',
+    height: 8, // Or your preferred divider height
+  },
+});

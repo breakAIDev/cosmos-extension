@@ -1,9 +1,8 @@
-import { CheckCircle } from '@phosphor-icons/react';
-import classNames from 'classnames';
-import { motion } from 'framer-motion';
-import { CopySvg, FilledDownArrowSvg } from 'images/misc';
 import React from 'react';
-import { sliceWord } from 'utils/strings';
+import { View, Text, TouchableOpacity, Image, StyleSheet, Animated } from 'react-native';
+import { CheckCircle } from '@phosphor-icons/react'; // Or use a compatible RN icon
+import { CopySvg, FilledDownArrowSvg } from '../../../assets/images/misc'; // Use RN SVG or Image equivalents
+import { sliceWord } from '../../utils/strings';
 
 type WalletButtonProps = {
   showWalletAvatar?: boolean;
@@ -16,7 +15,7 @@ type WalletButtonProps = {
   isAddressCopied?: boolean;
 };
 
-const WalletButton = React.memo(
+export const WalletButton = React.memo(
   ({
     showWalletAvatar,
     giveCopyOption,
@@ -27,63 +26,150 @@ const WalletButton = React.memo(
     walletAvatar,
     isAddressCopied,
   }: WalletButtonProps) => {
+    // Animation for the Copied! overlay
+    const [copiedAnim] = React.useState(new Animated.Value(0));
+    React.useEffect(() => {
+      if (isAddressCopied) {
+        Animated.timing(copiedAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }).start();
+      } else {
+        copiedAnim.setValue(0);
+      }
+    }, [isAddressCopied]);
+
     return (
-      <div
-        className={classNames(
-          'relative bg-white-100 dark:bg-gray-950 border-[1px] border-solid flex rounded-3xl h-[36px] border-gray-100 dark:border-gray-850',
-        )}
-      >
-        <button
-          className={classNames('flex items-center justify-center gap-2 py-[6px] pl-[12px] pr-[2px]', {
-            'cursor-pointer': handleDropdownClick,
-            'border-r-[1px] border-solid border-gray-100 dark:border-gray-850': giveCopyOption,
-          })}
-          onClick={handleDropdownClick}
-        >
-          {showWalletAvatar ? <img className='w-[16px] h-[16px]' src={walletAvatar} alt='wallet avatar' /> : null}
-
-          <span
-            className='dark:text-white-100 text-black-100 truncate text-[14px] font-bold max-w-[96px] !leading-[19.6px]'
-            title={walletName}
+      <View style={styles.container}>
+        <View style={styles.innerRow}>
+          <TouchableOpacity
+            style={[
+              styles.walletBtn,
+              giveCopyOption && styles.withBorder,
+              handleDropdownClick ? styles.clickable : null,
+            ]}
+            onPress={handleDropdownClick}
+            activeOpacity={handleDropdownClick ? 0.7 : 1}
           >
-            {sliceWord(walletName, 8, 0)}
-          </span>
+            {showWalletAvatar && walletAvatar ? (
+              <Image source={{ uri: walletAvatar }} style={styles.avatar} />
+            ) : null}
 
-          {showDropdown ? <FilledDownArrowSvg className='fill-black-100 dark:fill-white-100 mr-[4px]' /> : null}
-        </button>
-
-        {giveCopyOption ? (
-          <button
-            className={classNames('flex items-center justify-center px-[10px] py-[8px]', {
-              'cursor-pointer': handleCopyClick && !isAddressCopied,
-            })}
-            onClick={isAddressCopied ? undefined : handleCopyClick}
-          >
-            <CopySvg className='fill-black-100 dark:fill-white-100 w-[16px] h-[16px]' />
-          </button>
-        ) : null}
-
-        {isAddressCopied && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.2, ease: 'easeIn' }}
-            className='absolute flex gap-1 items-center justify-center w-full h-full bg-green-600 rounded-3xl'
-          >
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.3, ease: 'easeIn', delay: 0.2 }}
+            <Text
+              numberOfLines={1}
+              style={styles.walletName}
+              // accessibilityLabel={walletName}
             >
-              <CheckCircle weight='fill' size={24} className='text-white-100' />
-            </motion.div>
-            <span className='text-white-100 text-[14px] font-bold'>Copied!</span>
-          </motion.div>
+              {sliceWord(walletName, 8, 0)}
+            </Text>
+
+            {showDropdown && (
+              <View style={{marginLeft: 4}}>
+                <FilledDownArrowSvg />
+              </View>
+            )}
+          </TouchableOpacity>
+
+          {giveCopyOption ? (
+            <TouchableOpacity
+              style={styles.copyBtn}
+              onPress={!isAddressCopied ? handleCopyClick : undefined}
+              activeOpacity={isAddressCopied ? 1 : 0.7}
+            >
+              <CopySvg />
+            </TouchableOpacity>
+          ) : null}
+        </View>
+
+        {/* Copied Overlay */}
+        {isAddressCopied && (
+          <Animated.View
+            style={[
+              styles.copiedOverlay,
+              { opacity: copiedAnim }
+            ]}
+            pointerEvents="none"
+          >
+            <CheckCircle weight="fill" size={24} color="#fff" style={{marginRight: 4}} />
+            <Text style={styles.copiedText}>Copied!</Text>
+          </Animated.View>
         )}
-      </div>
+      </View>
     );
-  },
+  }
 );
 
 WalletButton.displayName = 'WalletButton';
-export { WalletButton };
+
+const styles = StyleSheet.create({
+  container: {
+    position: 'relative',
+    backgroundColor: '#fff',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#F3F4F6', // gray-100
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 36,
+    overflow: 'hidden',
+  },
+  innerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  walletBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 6,
+    paddingLeft: 12,
+    paddingRight: 2,
+    flex: 1,
+  },
+  clickable: {
+    // Optional, for touch feedback
+  },
+  withBorder: {
+    borderRightWidth: 1,
+    borderColor: '#F3F4F6', // gray-100
+  },
+  avatar: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    marginRight: 6,
+  },
+  walletName: {
+    color: '#111827',
+    fontSize: 14,
+    fontWeight: 'bold',
+    maxWidth: 96,
+    lineHeight: 19.6,
+    flexShrink: 1,
+  },
+  copyBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  copiedOverlay: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#16A34A', // green-600
+    borderRadius: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 2,
+  },
+  copiedText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+});

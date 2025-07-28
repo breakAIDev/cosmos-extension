@@ -1,57 +1,90 @@
-import { Header, HeaderActionType } from '@leapwallet/leap-ui';
-import BottomNav, { BottomNavLabel } from 'components/bottom-nav/BottomNav';
-import PopupLayout from 'components/layout/popup-layout';
-import Text from 'components/text';
-import { useChainPageInfo } from 'hooks';
-import { useDontShowSelectChain } from 'hooks/useDontShowSelectChain';
-import { Images } from 'images';
-import { observer } from 'mobx-react-lite';
-import SelectChain from 'pages/home/SelectChain';
 import React, { useState } from 'react';
-import { chainTagsStore } from 'stores/chain-infos-store';
-import { globalSheetsStore } from 'stores/global-sheets-store';
-import { manageChainsStore } from 'stores/manage-chains-store';
+import { View, Image, StyleSheet } from 'react-native';
+import { observer } from 'mobx-react-lite';
+import { Header, HeaderActionType } from '@leapwallet/leap-ui'; // should be adapted for RN
+import Text from '../text';
+import PopupLayout from '../layout/popup-layout';
+import BottomNav from '../bottom-nav/BottomNav'; // assumed RN-compatible
+import { Images } from '../../../assets/images';
+import SelectChain from '../../screens/home/SelectChain';
+import { useChainPageInfo } from '../../hooks';
+import { useDontShowSelectChain } from '../../hooks/useDontShowSelectChain';
+import { globalSheetsStore } from '../../context/global-sheets-store';
+import { chainTagsStore } from '../../context/chain-infos-store';
+import { manageChainsStore } from '../../context/manage-chains-store';
 
 export const NoStake = observer(() => {
-  const [showSideNav, setShowSideNav] = useState(false);
   const [showChainSelector, setShowChainSelector] = useState(false);
   const { headerChainImgSrc } = useChainPageInfo();
   const dontShowSelectChain = useDontShowSelectChain(manageChainsStore);
 
   return (
-    <div className='relative w-full overflow-clip panel-height'>
+    <View style={styles.wrapper}>
       <PopupLayout
         header={
           <Header
-            action={{
-              onClick: () => globalSheetsStore.toggleSideNav(),
-              type: HeaderActionType.NAVIGATION,
-              
-              
-              className:
-                'min-w-[48px] h-[36px] px-2 bg-[#FFFFFF] dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full',
-            }}
+            title="Staking"
             imgSrc={headerChainImgSrc}
-            onImgClick={dontShowSelectChain ? undefined : () => setShowChainSelector(true)}
-            title={'Staking'}
+            onImgClick={
+              dontShowSelectChain ? undefined : () => setShowChainSelector(true)
+            }
+            action={{
+              type: HeaderActionType.NAVIGATION,
+              onClick: () => globalSheetsStore.toggleSideNav(),
+              className:
+                'min-w-[48px] h-[36px] px-2 bg-white dark:bg-gray-900 rounded-full', // optional, may be replaced with a `style` prop
+            }}
           />
         }
       >
-        <div className='flex flex-col items-center justify-center'>
-          <img src={Images.Stake.NoStakeSVG} className='h-[240px] w-[240px] mt-6 mb-4' />
-          <Text size='lg' className='font-bold text-center mb-0.5'>
+        <View style={styles.content}>
+          <Image
+            source={Images.Stake.NoStakeSVG}
+            style={styles.image}
+            resizeMode="contain"
+          />
+          <Text size="lg" style={styles.title}>
             Staking not available
           </Text>
-          <Text size='md' className='text-center max-w-[300px]' color='text-gray-300'>
+          <Text size="md" color="text-gray-300" style={styles.subtitle}>
             This chain does not support staking due to its underlying design
           </Text>
-        </div>
+        </View>
       </PopupLayout>
+
       <SelectChain
         isVisible={showChainSelector}
         chainTagsStore={chainTagsStore}
         onClose={() => setShowChainSelector(false)}
       />
-    </div>
+    </View>
   );
+});
+
+const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+    width: '100%',
+  },
+  content: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 20,
+  },
+  image: {
+    height: 240,
+    width: 240,
+    marginTop: 24,
+    marginBottom: 16,
+  },
+  title: {
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  subtitle: {
+    textAlign: 'center',
+    maxWidth: 300,
+    color: '#9ca3af', // fallback if `color` prop doesn't map to text-gray-300
+  },
 });

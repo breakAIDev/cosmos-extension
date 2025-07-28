@@ -3,7 +3,7 @@ import { Key } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { Buttons, Header, HeaderActionType } from '@leapwallet/leap-ui';
 import { MinusCircle } from '@phosphor-icons/react';
-import BottomModal from 'components/bottom-modal';
+import BottomModal from '../bottom-modal';
 import DraggableContainer from 'components/draggable';
 import { ManageChainDraggables, ManageChainNonDraggables } from 'components/draggable/manage-chains';
 import PopupLayout from 'components/layout/popup-layout';

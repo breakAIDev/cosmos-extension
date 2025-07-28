@@ -1,20 +1,24 @@
-import classNames from 'classnames';
-import { inputStatusOutlineClassMap } from 'components/ui/input';
-import { TabSelectors } from 'components/ui/tab-list-selectors';
-import { AnimatePresence, motion, Variants } from 'framer-motion';
-import React, { useState } from 'react';
-import { cn } from 'utils/cn';
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+  NativeSyntheticEvent,
+  TextInputFocusEventData,
+  Clipboard,
+  Platform,
+} from 'react-native';
 
 type SeedPhraseWordInputProps = {
-  
-  handlePaste: (wordIndex: number, value: string) => void;
   wordIndex: number;
   word: string;
-  
+  handlePaste: (wordIndex: number, value: string) => void;
   handleWordChange: (wordIndex: number, value: string) => void;
   isError: boolean;
   isFocused: boolean;
-  
   handleWordFocused: (wordIndex: number) => void;
   handleWordBlur: () => void;
 };
@@ -29,56 +33,58 @@ const SeedPhraseWordInput = ({
   handleWordFocused,
   handleWordBlur,
 }: SeedPhraseWordInputProps) => {
-  return (
-    <div
-      className={classNames(
-        'flex items-center gap-2 rounded-lg bg-secondary-200 h-9 w-28 py-2 px-3 text-xs font-medium overflow-hidden',
-        inputStatusOutlineClassMap[isError ? 'error' : 'default'],
-      )}
-      onFocus={() => handleWordFocused(wordIndex)}
-      onBlur={() => handleWordBlur()}
-      tabIndex={0}
-      onPaste={(event) => {
-        event.preventDefault();
-        handlePaste(wordIndex, event.clipboardData.getData('text'));
-      }}
-    >
-      <span className='text-muted-foreground shrink-0'>{wordIndex}</span>
+  const inputRef = useRef<TextInput>(null);
 
-      <input
-        ref={(node) => node && isFocused && node.focus()}
-        type={isFocused || isError ? 'text' : 'password'}
+  useEffect(() => {
+    if (isFocused) {
+      inputRef.current?.focus();
+    }
+  }, [isFocused]);
+
+  const handleInputFocus = () => handleWordFocused(wordIndex);
+  const handleInputBlur = () => handleWordBlur();
+
+  const handleInputPaste = async () => {
+    const text = await Clipboard.getString();
+    handlePaste(wordIndex, text);
+  };
+
+  return (
+    <TouchableOpacity
+      activeOpacity={1}
+      style={[styles.wordInputContainer, isError && styles.errorBorder]}
+      onPress={handleInputPaste}
+    >
+      <Text style={styles.wordIndex}>{wordIndex}</Text>
+      <TextInput
+        ref={inputRef}
+        style={styles.wordInput}
         value={word}
-        onChange={(event) => handleWordChange(wordIndex, event.target.value)}
-        className='flex-1 outline-none bg-transparent w-0 text-foreground font-bold'
+        secureTextEntry={!isFocused && !isError}
+        onFocus={handleInputFocus}
+        onBlur={handleInputBlur}
+        onChangeText={(value) => handleWordChange(wordIndex, value)}
+        placeholder=""
       />
-    </div>
+    </TouchableOpacity>
   );
 };
 
 type SeedPhraseInputProps = {
   onChangeHandler: (value: string) => void;
   isError: boolean;
-  onPage?: string;
-  className?: string;
 };
 
-const transition = { duration: 0.2, ease: 'easeInOut' };
+export const SeedPhraseInput = ({ onChangeHandler, isError }: SeedPhraseInputProps) => {
+  const [focusedWordIndex, setFocusedWordIndex] = useState<number>(-1);
+  const [seedPhraseWordCount, setSeedPhraseWordCount] = useState<number>(12);
+  const [seedPhraseWords, setSeedPhraseWords] = useState<string[]>(Array(12).fill(''));
 
-const variants: Variants = {
-  left: { opacity: 0, x: 10, transition },
-  right: { opacity: 0, x: -10, transition },
-  visible: { opacity: 1, x: 0, transition },
-};
-
-export const SeedPhraseInput = ({ onChangeHandler, isError, className }: SeedPhraseInputProps) => {
-  const [focusedWordIndex, setFocusedWordIndex] = useState(1);
-  const [seedPhraseWordCount, setSeedPhraseWordCount] = useState(12);
-  const [seedPhraseWords, setSeedPhraseWords] = useState(new Array(12).fill('') as string[]);
-
-  const handleSeedPhraseWordIndexChange = (newCount: number) => {
-    setSeedPhraseWordCount(newCount);
-    setSeedPhraseWords(new Array(newCount).fill(''));
+  const handleSeedPhraseWordIndexChange = (count: number) => {
+    setSeedPhraseWordCount(count);
+    const newWords = new Array(count).fill('');
+    setSeedPhraseWords(newWords);
+    onChangeHandler('');
   };
 
   const handlePaste = (wordIndex: number, clipboardText: string) => {
@@ -86,85 +92,122 @@ export const SeedPhraseInput = ({ onChangeHandler, isError, className }: SeedPhr
       .trim()
       .split(' ')
       .map((word) => word.trim())
-      .filter((word) => word.length);
+      .filter(Boolean);
 
-    if (words.length) {
-      if (words.length === 12 || words.length === 24) {
-        if (words.length === 24) setSeedPhraseWordCount(24);
-        else if (words.length === 12) setSeedPhraseWordCount(12);
-
-        setSeedPhraseWords(words);
-        onChangeHandler(words.join(' ').trim());
-        return;
-      }
-
-      for (let index = wordIndex; index < Math.min(seedPhraseWordCount, words.length + wordIndex); index++) {
-        seedPhraseWords[index - 1] = words[index - wordIndex];
-      }
-
-      setSeedPhraseWords(seedPhraseWords);
-      onChangeHandler(seedPhraseWords.join(' ').trim());
+    if (words.length === 12 || words.length === 24) {
+      handleSeedPhraseWordIndexChange(words.length);
+      setSeedPhraseWords(words);
+      onChangeHandler(words.join(' '));
+      return;
     }
+
+    const updated = [...seedPhraseWords];
+    for (let i = wordIndex; i < Math.min(seedPhraseWordCount, words.length + wordIndex); i++) {
+      updated[i - 1] = words[i - wordIndex];
+    }
+    setSeedPhraseWords(updated);
+    onChangeHandler(updated.join(' '));
   };
 
   const handleWordChange = (wordIndex: number, value: string) => {
-    seedPhraseWords[wordIndex - 1] = value;
-    setSeedPhraseWords(seedPhraseWords);
-    onChangeHandler(seedPhraseWords.join(' ').trim());
+    const updated = [...seedPhraseWords];
+    updated[wordIndex - 1] = value;
+    setSeedPhraseWords(updated);
+    onChangeHandler(updated.join(' '));
   };
 
-  const handleWordFocused = (wordIndex: number) => {
-    setFocusedWordIndex(wordIndex);
-  };
-
-  const handleWordBlur = () => {
-    setFocusedWordIndex(-1);
-  };
+  const handleWordFocused = (index: number) => setFocusedWordIndex(index);
+  const handleWordBlur = () => setFocusedWordIndex(-1);
 
   return (
-    <div
-      className={cn('flex flex-col items-center w-full gap-7', isError ? 'h-[17.15rem]' : 'h-[19.375rem]', className)}
-    >
-      <TabSelectors
-        selectedIndex={seedPhraseWordCount === 12 ? 0 : 1}
-        buttons={[
-          {
-            label: '12 words',
-            onClick: () => handleSeedPhraseWordIndexChange(12),
-          },
-          {
-            label: '24 words',
-            onClick: () => handleSeedPhraseWordIndexChange(24),
-          },
-        ]}
-      />
-
-      <AnimatePresence mode='wait'>
-        <motion.div
-          key={seedPhraseWordCount}
-          className={cn('w-full grid grid-cols-3 gap-4 content-baseline overflow-auto p-1 flex-1')}
-          variants={variants}
-          initial={seedPhraseWords.length === 12 ? 'left' : 'right'}
-          animate={'visible'}
-          exit={seedPhraseWords.length === 12 ? 'right' : 'left'}
+    <View style={styles.container}>
+      <View style={styles.tabRow}>
+        <TouchableOpacity
+          style={[styles.tabButton, seedPhraseWordCount === 12 && styles.activeTab]}
+          onPress={() => handleSeedPhraseWordIndexChange(12)}
         >
-          {seedPhraseWords.map((value, index) => {
-            return (
-              <SeedPhraseWordInput
-                wordIndex={index + 1}
-                key={`${value}-${index}`}
-                word={value}
-                handlePaste={handlePaste}
-                handleWordChange={handleWordChange}
-                isError={isError}
-                isFocused={index + 1 === focusedWordIndex}
-                handleWordFocused={handleWordFocused}
-                handleWordBlur={handleWordBlur}
-              />
-            );
-          })}
-        </motion.div>
-      </AnimatePresence>
-    </div>
+          <Text style={styles.tabText}>12 words</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tabButton, seedPhraseWordCount === 24 && styles.activeTab]}
+          onPress={() => handleSeedPhraseWordIndexChange(24)}
+        >
+          <Text style={styles.tabText}>24 words</Text>
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView contentContainerStyle={styles.wordsGrid}>
+        {seedPhraseWords.map((value, index) => (
+          <SeedPhraseWordInput
+            key={`${value}-${index}`}
+            wordIndex={index + 1}
+            word={value}
+            handlePaste={handlePaste}
+            handleWordChange={handleWordChange}
+            isError={isError}
+            isFocused={focusedWordIndex === index + 1}
+            handleWordFocused={handleWordFocused}
+            handleWordBlur={handleWordBlur}
+          />
+        ))}
+      </ScrollView>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 16,
+    width: '100%',
+  },
+  tabRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  tabButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    marginHorizontal: 6,
+    borderRadius: 20,
+    backgroundColor: '#ddd',
+  },
+  activeTab: {
+    backgroundColor: '#4f46e5',
+  },
+  tabText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  wordsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  wordInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#e2e8f0',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    height: 40,
+    width: '30%',
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  errorBorder: {
+    borderColor: 'red',
+  },
+  wordIndex: {
+    marginRight: 6,
+    color: '#6b7280',
+    fontSize: 12,
+  },
+  wordInput: {
+    flex: 1,
+    fontSize: 14,
+    color: '#111827',
+  },
+});

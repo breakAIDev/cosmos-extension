@@ -1,4 +1,3 @@
-import { buttonRingClass } from 'components/ui/button';
 import { useTabIndicatorPosition } from 'hooks/utility/useTabIndicatorPosition';
 import React, { forwardRef } from 'react';
 import { cn } from 'utils/cn';
@@ -12,7 +11,7 @@ const TabButton = forwardRef<
       ref={ref}
       className={cn(
         'text-sm font-medium text-foreground transition-colors capitalize pb-3.5 rounded-full',
-        buttonRingClass,
+        ' ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none focus-visible:ring-accent-success/50',
         props.active ? 'text-accent-green' : 'text-secondary-700 hover:text-foreground',
         props.className,
       )}

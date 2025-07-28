@@ -1,5 +1,5 @@
 import { addressPrefixes, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { bech32 } from 'bech32';
+import { decode, encode, toWords } from 'bech32';
 
 export class Bech32Address {
   
@@ -38,7 +38,7 @@ export class Bech32Address {
   }
 
   static fromBech32(bech32Address: string, prefix?: string): Bech32Address {
-    const decoded = bech32.decode(bech32Address);
+    const decoded = decode(bech32Address);
     if (prefix && decoded.prefix !== prefix) {
       throw new Error('Unmatched prefix');
     }
@@ -47,7 +47,7 @@ export class Bech32Address {
   }
 
   static validate(bech32Address: string, prefix?: string) {
-    const { prefix: decodedPrefix } = bech32.decode(bech32Address);
+    const { prefix: decodedPrefix } = decode(bech32Address);
     if (prefix && prefix !== decodedPrefix) {
       throw new Error(`Unexpected prefix (expected: ${prefix}, actual: ${decodedPrefix})`);
     }
@@ -55,7 +55,7 @@ export class Bech32Address {
 
   static getChainKey(bech32Address: string): SupportedChain | undefined {
     try {
-      const { prefix } = bech32.decode(bech32Address);
+      const { prefix } = decode(bech32Address);
       const _chain = addressPrefixes[prefix];
       if (_chain === 'cosmoshub') {
         return 'cosmos';
@@ -67,7 +67,7 @@ export class Bech32Address {
   }
 
   toBech32(prefix: string): string {
-    const words = bech32.toWords(this.address);
-    return bech32.encode(prefix, words);
+    const words = toWords(this.address);
+    return encode(prefix, words);
   }
 }

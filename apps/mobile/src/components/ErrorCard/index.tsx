@@ -1,38 +1,83 @@
-import { Info } from '@phosphor-icons/react';
-import classNames from 'classnames';
-import { useCaptureUIException } from 'hooks/perf-monitoring/useCaptureUIException';
 import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, useColorScheme, ScrollView } from 'react-native';
+import { Info } from 'phosphor-react-native';
+import { useCaptureUIException } from '../../hooks/perf-monitoring/useCaptureUIException';
 
-type ErrorCardProps = React.ComponentPropsWithoutRef<'div'> & {
+type ErrorCardProps = {
   text?: string;
-  className?: string;
-  'data-testing-id'?: string;
+  style?: object;
+  testID?: string;
 };
 
-export function ErrorCard({ text, className, ...props }: ErrorCardProps) {
-  const ref = useRef<HTMLDivElement | null>(null);
+export function ErrorCard({ text, style, testID }: ErrorCardProps) {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const scrollRef = useRef(null);
 
+  // Optionally scroll to this component on mount (rarely needed on mobile)
   useEffect(() => {
-    ref.current?.scrollIntoView({ behavior: 'smooth' });
+    if (scrollRef.current && typeof scrollRef.current.scrollTo === 'function') {
+      scrollRef.current.scrollTo({ y: 0, animated: true });
+    }
   }, []);
 
   useCaptureUIException(text);
 
   return (
-    <div
-      ref={ref}
-      className={classNames(
-        'flex p-4 w-[344px] border justify-start items-center dark:border-red-800 border-red-200 dark:bg-red-900 bg-red-100 overflow-clip rounded-xl',
-        className,
-      )}
+    <View
+      style={[
+        styles.card,
+        isDark ? styles.cardDark : styles.cardLight,
+        style,
+      ]}
+      ref={scrollRef}
+      testID={testID}
     >
-      <Info size={24} className='mr-2 dark:text-red-200 text-red-300' />
-      <p
-        className='dark:text-red-100 text-red-300 font-medium text-sm overflow-x-auto'
-        data-testing-id={props['data-testing-id']}
+      <Info
+        size={24}
+        color={isDark ? '#FCA5A5' : '#F87171'}
+        weight="regular"
+        style={styles.icon}
+      />
+      <Text
+        style={[
+          styles.text,
+          { color: isDark ? '#FECACA' : '#F87171' }, // text-red-100 (dark), text-red-300 (light)
+        ]}
+        numberOfLines={2}
+        ellipsizeMode="tail"
       >
         {text}
-      </p>
-    </div>
+      </Text>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    flexDirection: 'row',
+    padding: 16,
+    width: 344,
+    borderWidth: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  cardLight: {
+    borderColor: '#FECACA', // border-red-200
+    backgroundColor: '#FEE2E2', // bg-red-100
+  },
+  cardDark: {
+    borderColor: '#991B1B', // border-red-800
+    backgroundColor: '#7F1D1D', // bg-red-900
+  },
+  icon: {
+    marginRight: 8,
+  },
+  text: {
+    fontWeight: '500',
+    fontSize: 14,
+    flex: 1,
+  },
+});

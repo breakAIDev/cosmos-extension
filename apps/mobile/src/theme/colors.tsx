@@ -7,7 +7,6 @@ export const Colors = {
   compassPrimaryDark: '#0D233D',
   // For gradients, use react-native-linear-gradient
   compassGradient: ['rgba(34, 72, 116, 0.7)', 'rgba(34, 72, 116, 0)'],
-
   aggregatePrimary: '#fcb045eb',
   aggregateGradient: [
     'rgba(252, 176, 69, 0.28)',
@@ -23,6 +22,7 @@ export const Colors = {
   gray300: '#B8B8B8',
   gray200: '#D6D6D6',
   gray100: '#E8E8E8',
+  gray50: '#FAFAFA',
   gray800: '#383838',
   gray950: '#141414',
   green500: '#3ACF92',

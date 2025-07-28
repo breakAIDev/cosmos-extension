@@ -1,16 +1,26 @@
-import radar from 'lottie-files/radar.json';
-import Lottie from 'lottie-react';
 import React from 'react';
+import { StyleSheet } from 'react-native';
+import LottieView from 'lottie-react-native';
+import radar from '../../../assets/lottie-files/radar.json';
 
-const defaultOptions = {
-  loop: true,
-  autoplay: true,
-  animationData: radar,
-  rendererSettings: {
-    preserveAspectRatio: 'xMidYMid slice',
-  },
+type RadarAnimationProps = {
+  style?: object;
 };
 
-export default function RadarAnimation({ className }: { className?: string }) {
-  return <Lottie {...defaultOptions} className={className ?? 'w-[196px] h-[196px]'} />;
+export default function RadarAnimation({ style }: RadarAnimationProps) {
+  return (
+    <LottieView
+      source={radar}
+      autoPlay
+      loop
+      style={[styles.default, style]}
+    />
+  );
 }
+
+const styles = StyleSheet.create({
+  default: {
+    width: 196,
+    height: 196,
+  },
+});

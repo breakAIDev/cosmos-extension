@@ -1,8 +1,7 @@
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { AGGREGATED_CHAIN_KEY } from 'config/constants';
+import { AGGREGATED_CHAIN_KEY } from '../services/config/constants';
 
 export type Dict = {
-  
   [key: string | number | symbol]: any;
 };
 

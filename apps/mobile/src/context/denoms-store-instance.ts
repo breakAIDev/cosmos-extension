@@ -18,16 +18,18 @@ import {
   RootERC20DenomsStore,
   WhitelistedFactoryTokensStore,
 } from '@leapwallet/cosmos-wallet-store';
-import browser from 'webextension-polyfill';
 
 import { getStorageAdapter } from '../utils/storageAdapter';
 import { activeChainStore } from './active-chain-store';
 import { addressStore } from './address-store-instance';
 import { chainInfoStore } from './chain-infos-store';
+import DeviceInfo from 'react-native-device-info';
 
-const app = 'extension';
-const version = browser.runtime.getManifest().version;
+const app = 'mobile';
 const storageAdapter = getStorageAdapter();
+const version = DeviceInfo.getVersion();
+// const buildNumber = DeviceInfo.getBuildNumber();
+
 const cw20DenomChainsStore = new CW20DenomChainsStore(false, storageAdapter);
 const erc20DenomChainStore = new ERC20DenomsChainsStore(false, storageAdapter);
 

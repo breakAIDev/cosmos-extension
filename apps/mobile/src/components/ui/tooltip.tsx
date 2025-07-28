@@ -1,31 +1,78 @@
-'use client';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, Modal, StyleSheet, Pressable, GestureResponderEvent } from 'react-native';
 
-import * as TooltipPrimitive from '@radix-ui/react-tooltip';
-import * as React from 'react';
-import { cn } from 'utils/cn';
+type TooltipProps = {
+  content: React.ReactNode;
+  children: React.ReactNode;
+  placement?: 'top' | 'bottom' | 'left' | 'right';
+  trigger?: 'press' | 'longPress';
+  tooltipStyle?: any;
+  containerStyle?: any;
+};
 
-const TooltipProvider = TooltipPrimitive.Provider;
+export const Tooltip: React.FC<TooltipProps> = ({
+  content,
+  children,
+  placement = 'top',
+  trigger = 'longPress',
+  tooltipStyle,
+  containerStyle,
+}) => {
+  const [visible, setVisible] = useState(false);
 
-const Tooltip = TooltipPrimitive.Root;
+  const triggerProps =
+    trigger === 'longPress'
+      ? { onLongPress: () => setVisible(true) }
+      : { onPress: () => setVisible(true) };
 
-const TooltipTrigger = TooltipPrimitive.Trigger;
+  return (
+    <View style={containerStyle}>
+      <TouchableOpacity activeOpacity={0.7} {...triggerProps}>
+        {children}
+      </TouchableOpacity>
+      <Modal
+        visible={visible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setVisible(false)}
+      >
+        <Pressable style={styles.backdrop} onPress={() => setVisible(false)}>
+          <View style={[
+            styles.tooltip,
+            placement === 'bottom' && { top: '70%' },
+            tooltipStyle,
+          ]}>
+            <Text style={styles.text}>{content}</Text>
+          </View>
+        </Pressable>
+      </Modal>
+    </View>
+  );
+};
 
-const TooltipContent = React.forwardRef<
-  React.ElementRef<typeof TooltipPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>
->(({ className, sideOffset = 4, ...props }, ref) => (
-  <TooltipPrimitive.Portal>
-    <TooltipPrimitive.Content
-      ref={ref}
-      sideOffset={sideOffset}
-      className={cn(
-        'z-50 overflow-hidden rounded-md bg-background font-medium px-2 py-1 text-xs text-foreground animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-tooltip-content-transform-origin] border border-secondary-250',
-        className,
-      )}
-      {...props}
-    />
-  </TooltipPrimitive.Portal>
-));
-TooltipContent.displayName = TooltipPrimitive.Content.displayName;
-
-export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger };
+const styles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  tooltip: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderColor: '#E6EAEF',
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOpacity: 0.07,
+    shadowRadius: 7,
+    shadowOffset: { width: 0, height: 2 },
+    zIndex: 1000,
+    maxWidth: 240,
+  },
+  text: {
+    color: '#232323',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+});

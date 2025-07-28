@@ -1,7 +1,7 @@
 import { makeAutoObservable } from 'mobx';
-import Browser from 'webextension-polyfill';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { FAVOURITE_NFTS, HIDDEN_NFTS } from '../config/storage-keys';
+import { FAVOURITE_NFTS, HIDDEN_NFTS } from '../services/config/storage-keys';
 
 export class FavNftStore {
   favNfts: string[] = [];
@@ -15,38 +15,29 @@ export class FavNftStore {
   }
 
   async initFavNfts(walletId: string) {
-    const storage = await Browser.storage.local.get([FAVOURITE_NFTS]);
-    if (storage[FAVOURITE_NFTS]) {
-      const favNfts = JSON.parse(storage[FAVOURITE_NFTS]);
-      this.favNfts = favNfts[walletId ?? ''] ?? [];
+    const storageRaw = await AsyncStorage.getItem(FAVOURITE_NFTS);
+    if (storageRaw) {
+      const favNftsObj = JSON.parse(storageRaw);
+      this.favNfts = favNftsObj[walletId ?? ''] ?? [];
       return;
     }
-
     this.favNfts = [];
   }
 
   async addFavNFT(nft: string, walletId: string) {
     this.favNfts.push(nft);
-
-    const storage = await Browser.storage.local.get([FAVOURITE_NFTS]);
-    await Browser.storage.local.set({
-      [FAVOURITE_NFTS]: JSON.stringify({
-        ...JSON.parse(storage[FAVOURITE_NFTS] ?? '{}'),
-        [walletId ?? '']: this.favNfts,
-      }),
-    });
+    const storageRaw = await AsyncStorage.getItem(FAVOURITE_NFTS);
+    const allFavNfts = storageRaw ? JSON.parse(storageRaw) : {};
+    allFavNfts[walletId ?? ''] = this.favNfts;
+    await AsyncStorage.setItem(FAVOURITE_NFTS, JSON.stringify(allFavNfts));
   }
 
   async removeFavNFT(nft: string, walletId: string) {
     this.favNfts = this.favNfts.filter((f) => f !== nft);
-
-    const storage = await Browser.storage.local.get([FAVOURITE_NFTS]);
-    await Browser.storage.local.set({
-      [FAVOURITE_NFTS]: JSON.stringify({
-        ...JSON.parse(storage[FAVOURITE_NFTS] ?? '{}'),
-        [walletId ?? '']: this.favNfts,
-      }),
-    });
+    const storageRaw = await AsyncStorage.getItem(FAVOURITE_NFTS);
+    const allFavNfts = storageRaw ? JSON.parse(storageRaw) : {};
+    allFavNfts[walletId ?? ''] = this.favNfts;
+    await AsyncStorage.setItem(FAVOURITE_NFTS, JSON.stringify(allFavNfts));
   }
 }
 
@@ -64,38 +55,29 @@ export class HiddenNftStore {
   }
 
   async initHiddenNfts(walletId: string) {
-    const storage = await Browser.storage.local.get([HIDDEN_NFTS]);
-    if (storage[HIDDEN_NFTS]) {
-      const hiddenNfts = JSON.parse(storage[HIDDEN_NFTS]);
-      this.hiddenNfts = hiddenNfts[walletId ?? ''] ?? [];
+    const storageRaw = await AsyncStorage.getItem(HIDDEN_NFTS);
+    if (storageRaw) {
+      const hiddenNftsObj = JSON.parse(storageRaw);
+      this.hiddenNfts = hiddenNftsObj[walletId ?? ''] ?? [];
       return;
     }
-
     this.hiddenNfts = [];
   }
 
   async addHiddenNFT(nft: string, walletId: string) {
     this.hiddenNfts.push(nft);
-
-    const storage = await Browser.storage.local.get([HIDDEN_NFTS]);
-    await Browser.storage.local.set({
-      [HIDDEN_NFTS]: JSON.stringify({
-        ...JSON.parse(storage[HIDDEN_NFTS] ?? '{}'),
-        [walletId ?? '']: this.hiddenNfts,
-      }),
-    });
+    const storageRaw = await AsyncStorage.getItem(HIDDEN_NFTS);
+    const allHiddenNfts = storageRaw ? JSON.parse(storageRaw) : {};
+    allHiddenNfts[walletId ?? ''] = this.hiddenNfts;
+    await AsyncStorage.setItem(HIDDEN_NFTS, JSON.stringify(allHiddenNfts));
   }
 
   async removeHiddenNFT(nft: string, walletId: string) {
     this.hiddenNfts = this.hiddenNfts.filter((f) => f !== nft);
-
-    const storage = await Browser.storage.local.get([HIDDEN_NFTS]);
-    await Browser.storage.local.set({
-      [HIDDEN_NFTS]: JSON.stringify({
-        ...JSON.parse(storage[HIDDEN_NFTS] ?? '{}'),
-        [walletId ?? '']: this.hiddenNfts,
-      }),
-    });
+    const storageRaw = await AsyncStorage.getItem(HIDDEN_NFTS);
+    const allHiddenNfts = storageRaw ? JSON.parse(storageRaw) : {};
+    allHiddenNfts[walletId ?? ''] = this.hiddenNfts;
+    await AsyncStorage.setItem(HIDDEN_NFTS, JSON.stringify(allHiddenNfts));
   }
 }
 

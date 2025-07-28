@@ -1,6 +1,6 @@
-import { EARN_USDN_FEATURE_SHOW } from 'config/storage-keys';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { EARN_USDN_FEATURE_SHOW } from '../services/config/storage-keys';
 import { makeAutoObservable } from 'mobx';
-import Browser from 'webextension-polyfill';
 
 export class EarnFeatureShowStore {
   show = 'false';
@@ -11,9 +11,8 @@ export class EarnFeatureShowStore {
   }
 
   private async initEarnFeatureShow() {
-    const storage = await Browser.storage.local.get(EARN_USDN_FEATURE_SHOW);
+    const val = await AsyncStorage.getItem(EARN_USDN_FEATURE_SHOW);
 
-    const val = storage[EARN_USDN_FEATURE_SHOW];
     if (val !== 'false') {
       this.setShow('true');
     }
@@ -21,7 +20,7 @@ export class EarnFeatureShowStore {
 
   setShow(val: string) {
     this.show = val;
-    Browser.storage.local.set({ [EARN_USDN_FEATURE_SHOW]: val });
+    AsyncStorage.setItem(EARN_USDN_FEATURE_SHOW, val);
   }
 }
 

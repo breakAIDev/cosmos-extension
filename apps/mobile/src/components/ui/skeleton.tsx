@@ -1,41 +1,53 @@
-import React, { useEffect, useRef } from 'react';
-import { Animated, ViewStyle, StyleProp } from 'react-native';
+import React, { useRef, useEffect } from 'react';
+import { Animated, ViewProps, StyleSheet } from 'react-native';
 
-interface SkeletonProps {
-  style?: StyleProp<ViewStyle>;
-  asChild?: boolean; // Not really needed in RN, kept for compatibility
-}
+type SkeletonProps = ViewProps & {
+  width?: number | string;
+  height?: number | string;
+  borderRadius?: number;
+  style?: any;
+};
 
-export const Skeleton: React.FC<SkeletonProps> = ({ style }) => {
-  const opacity = useRef(new Animated.Value(0.6)).current;
+export const Skeleton = ({
+  width = '100%',
+  height = 16,
+  borderRadius = 8,
+  style,
+  ...props
+}: SkeletonProps) => {
+  const opacity = useRef(new Animated.Value(0.7)).current;
 
   useEffect(() => {
-    Animated.loop(
+    const loop = Animated.loop(
       Animated.sequence([
-        Animated.timing(opacity, {
-          toValue: 1,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacity, {
-          toValue: 0.6,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-      ]),
-    ).start();
+        Animated.timing(opacity, { toValue: 0.3, duration: 900, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 0.7, duration: 900, useNativeDriver: true }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
   }, [opacity]);
 
   return (
     <Animated.View
       style={[
         {
-          borderRadius: 8,
-          backgroundColor: '#D1D5DB', // fallback gray
+          width,
+          height,
+          borderRadius,
+          backgroundColor: 'rgba(35,35,35,0.18)', // bg-foreground/20 (dark gray with 20% opacity)
           opacity,
         },
+        styles.skeleton,
         style,
       ]}
+      {...props}
     />
   );
 };
+
+const styles = StyleSheet.create({
+  skeleton: {
+    overflow: 'hidden',
+  },
+});

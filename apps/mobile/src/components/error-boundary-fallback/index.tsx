@@ -1,55 +1,132 @@
+import React from 'react';
+import { View, Text, Image, StyleSheet, TouchableOpacity, Linking, useColorScheme } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native'; // <-- Make sure you use react-navigation!
 import { Header } from '@leapwallet/leap-ui';
-import PopupLayout from 'components/layout/popup-layout';
-import { ACTIVE_CHAIN, SELECTED_NETWORK } from 'config/storage-keys';
-import { Images } from 'images';
-import React, { useCallback } from 'react';
-import { isSidePanel } from 'utils/isSidePanel';
-import browser from 'webextension-polyfill';
+import PopupLayout from '../layout/popup-layout';
+import { Images } from '../../../assets/images';
 
 const ErrorBoundaryFallback = () => {
-  const reload = useCallback(() => {
-    //reset the active chain to cosmos or sei
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const navigation = useNavigation(); // <-- React Navigation hook
 
-    browser.storage.local.set({ [ACTIVE_CHAIN]: 'cosmos', [SELECTED_NETWORK]: 'mainnet' });
+  // Implement your own state reset logic here if needed
+  const resetState = () => {
+    // Example: dispatch({ type: 'RESET_APP' }); or whatever your state management uses.
+  };
 
-    const url = isSidePanel() ? `/sidepanel.html#/home` : `/index.html#/home`;
-    window.location.href = browser.runtime.getURL(url);
-    window.location.reload();
-  }, []);
+  const reload = async () => {
+    try {
+      await AsyncStorage.multiSet([
+        ['ACTIVE_CHAIN', 'cosmos'],
+        ['SELECTED_NETWORK', 'mainnet'],
+      ]);
+      resetState(); // <-- If you have app state to reset
+      navigation.navigate('Home'); // <-- Adjust route name as needed!
+    } catch (e) {
+      console.error('Error setting storage:', e);
+    }
+  };
 
   return (
-    <div className='relative w-full overflow-clip enclosing-panel panel-height'>
-      <PopupLayout header={<Header title='Leap Wallet' />} skipWatchingWalletHeader>
-        <div
-          className='flex flex-col items-center justify-center w-full'
-          style={{
-            height: 'calc(100% - 72px)',
-            background: 'linear-gradient(180deg, rgba(209, 80, 98, 0.32) 0%, rgba(209, 80, 98, 0) 100%)',
-          }}
-        >
-          <div className='flex justify-center space-x-2'>
-            <img src={Images.Logos.LeapLogo} height='150px' />
-            <h1 className='text-xxl font-bold' style={{ color: '#E54f47' }}>
-              Oops!
-            </h1>
-          </div>
-          <h2 className='mt-2 text-lg font-bold text-gray-800 dark:text-gray-100'>Something went wrong</h2>
-          <p className='mt-6 px-8 text-center text-gray-800 dark:text-gray-100'>You can try reloading the extension.</p>
-          <button className='font-medium bg-indigo-300 px-4 py-1 rounded-full text-white-100 mt-4' onClick={reload}>
-            Reload
-          </button>
-          <p className='mt-8 px-8 text-xs text-center text-gray-700 dark:text-gray-200'>
+    <View style={styles.root}>
+      <PopupLayout header={<Header title="Leap Wallet" />} skipWatchingWalletHeader>
+        <View style={[styles.content, { backgroundColor: isDark ? '#18181B' : '#fff' }]}>
+          <View style={styles.logoRow}>
+            <Image
+              source={Images.Logos.LeapLogo}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+            <Text style={styles.oops}>Oops!</Text>
+          </View>
+          <Text style={[styles.subtitle, { color: isDark ? '#F3F4F6' : '#1F2937' }]}>
+            Something went wrong
+          </Text>
+          <Text style={[styles.description, { color: isDark ? '#F3F4F6' : '#1F2937' }]}>
+            You can try reloading the app.
+          </Text>
+          <TouchableOpacity style={styles.reloadBtn} onPress={reload}>
+            <Text style={styles.reloadBtnText}>Reload</Text>
+          </TouchableOpacity>
+          <Text style={[styles.support, { color: isDark ? '#E5E7EB' : '#374151' }]}>
             Our systems will auto report this issue. If the issue persists you can contact us at{' '}
-            <a href='mailto:support@leapwallet.io' className='font-medium text-indigo-300 underline'>
+            <Text
+              style={styles.email}
+              onPress={() => Linking.openURL('mailto:support@leapwallet.io')}
+            >
               support@leapwallet.io
-            </a>{' '}
+            </Text>{' '}
             for any further assistance.
-          </p>
-          <div className='mt-12' />
-        </div>
+          </Text>
+          <View style={{ marginTop: 48 }} />
+        </View>
       </PopupLayout>
-    </div>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+  content: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+  },
+  logoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  logo: {
+    width: 70,
+    height: 70,
+    marginRight: 12,
+  },
+  oops: {
+    fontSize: 32, // 'xxl'
+    fontWeight: 'bold',
+    color: '#E54f47',
+  },
+  subtitle: {
+    marginTop: 8,
+    fontSize: 20, // 'lg'
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  description: {
+    marginTop: 24,
+    paddingHorizontal: 16,
+    textAlign: 'center',
+  },
+  reloadBtn: {
+    backgroundColor: '#818CF8', // indigo-300
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 999,
+    marginTop: 16,
+  },
+  reloadBtnText: {
+    color: '#fff',
+    fontWeight: '500',
+    fontSize: 16,
+  },
+  support: {
+    marginTop: 32,
+    paddingHorizontal: 16,
+    fontSize: 12,
+    textAlign: 'center',
+  },
+  email: {
+    color: '#818CF8',
+    textDecorationLine: 'underline',
+    fontWeight: '500',
+  },
+});
 
 export default ErrorBoundaryFallback;

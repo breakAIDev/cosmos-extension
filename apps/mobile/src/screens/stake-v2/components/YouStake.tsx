@@ -9,7 +9,6 @@ import { fromSmall, SupportedChain, toSmall } from '@leapwallet/cosmos-wallet-sd
 import { Amount } from '@leapwallet/cosmos-wallet-sdk/dist/browser/types/staking';
 import { RootDenomsStore } from '@leapwallet/cosmos-wallet-store';
 import BigNumber from 'bignumber.js';
-import { buttonRingClass } from 'components/ui/button';
 import { Skeleton } from 'components/ui/skeleton';
 import { AnimatePresence, motion } from 'framer-motion';
 import { SwapIcon } from 'icons/swap-icon';
@@ -218,7 +217,7 @@ const YouStake = observer(
               title={isDollarInput ? 'Switch to amount' : 'Switch to USD'}
               className={
                 'rounded-full size-5 bg-secondary-200 hover:bg-secondary-300 items-center flex gap-1 justify-center shrink-0 ' +
-                buttonRingClass
+                ' ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none focus-visible:ring-accent-success/50'
               }
             >
               <SwapIcon className='!leading-[12px] rotate-90 p-1 size-[18px]' />
@@ -260,7 +259,7 @@ const YouStake = observer(
             <button
               className={
                 'ml-0.5 text-muted-foreground text-sm font-medium bg-secondary-200 px-1.5 rounded-full hover:text-foreground hover:bg-secondary-300 transition-colors ' +
-                buttonRingClass
+                ' ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none focus-visible:ring-accent-success/50'
               }
               onClick={() => handleUpdateInputValue(maxValue.dividedBy(2).toFixed(6, 1).toString())}
             >
@@ -269,7 +268,7 @@ const YouStake = observer(
             <button
               className={
                 'text-muted-foreground text-sm font-medium bg-secondary-200 px-2 rounded-full hover:text-foreground hover:bg-secondary-300 transition-colors ' +
-                buttonRingClass
+                ' ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none focus-visible:ring-accent-success/50'
               }
               onClick={() => handleUpdateInputValue(maxValue.toFixed(6, 1).toString())}
             >

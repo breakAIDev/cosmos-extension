@@ -1,17 +1,44 @@
 import React from 'react';
-
-import { Images } from '../../images';
+import { View, Image, StyleSheet } from 'react-native';
+import { Images } from '../../../assets/images';
 import { LoaderAnimation } from '../loader/Loader';
-import Text from '../text';
+import Text from '../text'; // Assumed to be a styled RN Text wrapper
 
 export default function LedgerConfirmationCard() {
   return (
-    <div className='w-[344px] flex rounded-[8px] dark:bg-gray-900 bg-white-100 p-[12px] items-center'>
-      <img src={Images.Misc.HardwareWallet} className='mr-[8px]' />
-      <Text size='md' className='font-bold'>
+    <View style={styles.card}>
+      <Image source={Images.Misc.HardwareWallet} style={styles.icon} resizeMode="contain" />
+      <Text size="md" style={styles.label}>
         Approve transaction on Ledger
       </Text>
-      <LoaderAnimation color='#E18881' className='h-5 w-5 bg-[#5A3634] rounded-2xl ml-auto' />
-    </div>
+      <LoaderAnimation color="#E18881" style={styles.loader} />
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    width: 344,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: '#fff', // white-100
+  },
+  icon: {
+    width: 24,
+    height: 24,
+    marginRight: 8,
+  },
+  label: {
+    fontWeight: 'bold',
+    flexShrink: 1,
+  },
+  loader: {
+    height: 20,
+    width: 20,
+    backgroundColor: '#5A3634',
+    borderRadius: 999,
+    marginLeft: 'auto',
+  },
+});

@@ -1,7 +1,7 @@
 import { useActiveWallet } from '@leapwallet/cosmos-wallet-hooks';
-import { Images } from 'images';
+import { Images } from '../../assets/images';
 import { useMemo } from 'react';
-import { formatWalletName } from 'utils/formatWalletName';
+import { formatWalletName } from '../utils/formatWalletName';
 
 export function useWalletInfo() {
   const activeWallet = useActiveWallet();
@@ -10,8 +10,7 @@ export function useWalletInfo() {
     if (activeWallet?.avatar) {
       return activeWallet.avatar;
     }
-
-    return Images.Logos.LeapLogo28;
+    return Images.Logos.leap_logo_28;
   }, [activeWallet?.avatar]);
 
   const walletName = useMemo(() => {

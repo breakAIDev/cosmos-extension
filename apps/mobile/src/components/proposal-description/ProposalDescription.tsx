@@ -1,30 +1,36 @@
-import { useWhitelistedUrls } from '@leapwallet/cosmos-wallet-hooks';
-import classNames from 'classnames';
-import RedirectionConfirmationModal from 'components/redirect-confirmation';
-import { useActiveChain } from 'hooks/settings/useActiveChain';
 import React, { useCallback, useMemo, useState } from 'react';
-import ReactMarkdown from 'react-markdown';
-import gfm from 'remark-gfm';
+import { View, Text, StyleSheet, TouchableOpacity, Linking } from 'react-native';
+import Markdown from 'react-native-markdown-display';
+import { useWhitelistedUrls } from '@leapwallet/cosmos-wallet-hooks';
+import { useActiveChain } from '../../hooks/settings/useActiveChain';
+import RedirectionConfirmationModal from '../redirect-confirmation';
 
 type ProposalDescriptionProps = {
   title: string;
   description: string;
   btnColor: string;
-  className?: string;
+  style?: object;
   forceChain?: string;
 };
 
-export function ProposalDescription({ title, description, btnColor, className, forceChain }: ProposalDescriptionProps) {
+export function ProposalDescription({
+  title,
+  description,
+  btnColor,
+  style,
+  forceChain,
+}: ProposalDescriptionProps) {
   const [showAll, setShowAll] = useState(false);
   const [url, setUrl] = useState<string>('');
+  const [showRedirectConfirmation, setShowRedirectConfirmation] = useState(false);
+
   const formattedDescription = useMemo(() => {
     return description.replace(/\/n/g, '\n').split(/\\n/).join('\n');
   }, [description]);
-  const [showRedirectConfirmation, setShowRedirectConfirmation] = useState<boolean>(false);
 
   const { data: allWhitelistedUrls } = useWhitelistedUrls();
   const _activeChain = useActiveChain();
-  const activeChain = useMemo(() => forceChain || _activeChain, [_activeChain, forceChain]);
+  const activeChain = forceChain || _activeChain;
 
   const whiteListedUrls = useMemo(() => {
     if (!allWhitelistedUrls) return [];
@@ -32,73 +38,75 @@ export function ProposalDescription({ title, description, btnColor, className, f
   }, [allWhitelistedUrls, activeChain]);
 
   const isAllowedUrl = useCallback(
-    (url: string) => {
-      return whiteListedUrls.some((allowedUrl) => url.includes(allowedUrl));
-    },
-    [whiteListedUrls],
+    (url: string) => whiteListedUrls.some((allowedUrl) => url.includes(allowedUrl)),
+    [whiteListedUrls]
   );
 
-  const handleLinkClick = useCallback(
-    (e: React.MouseEvent<HTMLAnchorElement>) => {
-      e.preventDefault();
-      const url = e.currentTarget.href;
-      if (isAllowedUrl(url)) {
-        window.open(url, '_blank', 'noopener noreferrer');
+  const handleLinkPress = useCallback(
+    (href: string) => {
+      if (isAllowedUrl(href)) {
+        Linking.openURL(href);
       } else {
+        setUrl(href);
         setShowRedirectConfirmation(true);
-        setUrl(url);
       }
     },
-    [isAllowedUrl],
+    [isAllowedUrl]
   );
 
   if (!formattedDescription) return null;
 
+  const shortText = formattedDescription.length > 300 && !showAll
+    ? formattedDescription.slice(0, 300) + '...'
+    : formattedDescription;
+
   return (
-    <div className={className}>
-      <div className='text-sm text-muted-foreground font-medium mb-3'>{title}</div>
-      <div
-        className={classNames('text-foreground text-sm break-words overflow-hidden', {
-          'line-clamp-4': formattedDescription.length > 300,
-          reset: showAll,
-        })}
+    <View style={style}>
+      <Text style={styles.title}>{title}</Text>
+
+      <Markdown
+        style={markdownStyles}
+        onLinkPress={handleLinkPress}
       >
-        <ReactMarkdown
-          remarkPlugins={[gfm]}
-          components={{
-            a: ({ ...props }) => {
-              return (
-                <a {...props} target='_blank' rel='noreferrer noopener' onClick={handleLinkClick}>
-                  {/* eslint-disable-next-line react/prop-types */}
-                  {props.children}
-                </a>
-              );
-            },
-          }}
-          className='text-sm [&>h1]:font-bold [&>h1]:text-base [&>h2]:my-1 [&>h2]:text-gray-300 markdown'
-        >
-          {formattedDescription}
-        </ReactMarkdown>
-      </div>
+        {shortText}
+      </Markdown>
 
       {formattedDescription.length > 300 && (
-        <button
-          className='text-xs font-bold text-gray-400 h-6 w-full text-right'
-          style={{ color: btnColor }}
-          onClick={() => setShowAll(!showAll)}
-        >
-          {showAll ? 'Read less' : 'Read more'}
-        </button>
+        <TouchableOpacity onPress={() => setShowAll(!showAll)}>
+          <Text style={[styles.toggle, { color: btnColor }]}>
+            {showAll ? 'Read less' : 'Read more'}
+          </Text>
+        </TouchableOpacity>
       )}
 
       <RedirectionConfirmationModal
         isOpen={showRedirectConfirmation}
-        onClose={() => {
-          setShowRedirectConfirmation(false);
-        }}
+        onClose={() => setShowRedirectConfirmation(false)}
         url={url}
         setUrl={setUrl}
       />
-    </div>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  title: {
+    fontSize: 14,
+    color: '#6b7280', // Tailwind text-muted-foreground
+    fontWeight: '500',
+    marginBottom: 8,
+  },
+  toggle: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    textAlign: 'right',
+    marginTop: 4,
+  },
+});
+
+const markdownStyles = {
+  body: { color: '#111827', fontSize: 14 },
+  heading1: { fontSize: 16, fontWeight: 'bold' },
+  heading2: { fontSize: 15, marginVertical: 4, color: '#9ca3af' },
+  link: { color: '#2563eb' },
+};

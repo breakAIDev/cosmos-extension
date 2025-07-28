@@ -5,7 +5,7 @@ import { KeyChain } from '@leapwallet/leap-keychain';
 import { Buttons, Input, ThemeName, useTheme } from '@leapwallet/leap-ui';
 import { Check, Wallet } from '@phosphor-icons/react';
 import classNames from 'classnames';
-import BottomModal from 'components/bottom-modal';
+import BottomModal from '../bottom-modal';
 import { ErrorCard } from 'components/ErrorCard';
 import IconButton from 'components/icon-button';
 import { LEDGER_NAME_EDITED_SUFFIX, LEDGER_NAME_EDITED_SUFFIX_REGEX } from 'config/config';

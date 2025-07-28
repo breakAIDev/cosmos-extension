@@ -1,5 +1,6 @@
-import * as React from 'react';
-import { getTrackBackground, Range } from 'react-range';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import Slider from '@react-native-community/slider';
 
 type RangeInputProps = {
   initialValue: number;
@@ -10,62 +11,60 @@ type RangeInputProps = {
   step?: number;
 };
 
-const RangeInput = ({
+const RangeInput: React.FC<RangeInputProps> = ({
   initialValue,
   onChangeHandler,
   activeColor = '#FF958C',
   min = 1,
   max = 5,
   step = 1,
-}: RangeInputProps) => {
-  const [values, setValues] = React.useState([initialValue]);
+}) => {
+  const [value, setValue] = useState(initialValue);
+
+  const handleChange = (val: number) => {
+    setValue(val);
+    onChangeHandler(val);
+  };
 
   return (
-    <div className='flex justify-center flex-wrap'>
-      <Range
-        values={values}
+    <View style={styles.wrapper}>
+      <Text style={styles.label}>{`${value}%`}</Text>
+      <Slider
+        value={value}
+        onValueChange={handleChange}
+        minimumValue={min}
+        maximumValue={max}
         step={step}
-        min={min}
-        max={max}
-        onChange={(values) => {
-          setValues(values);
-          onChangeHandler(values[0]);
-        }}
-        renderTrack={({ props, children }) => (
-          <div onMouseDown={props.onMouseDown} onTouchStart={props.onTouchStart} className='h-9 w-full'>
-            <div
-              ref={props.ref}
-              style={{
-                background: getTrackBackground({
-                  values,
-                  colors: [activeColor, '#D6D6D6'],
-                  min,
-                  max,
-                }),
-              }}
-              className='h-3 w-full rounded-lg self-center cursor-pointer'
-            >
-              {children}
-            </div>
-          </div>
-        )}
-        renderThumb={({ props }) => (
-          <div
-            {...props}
-            style={{
-              backgroundColor: activeColor,
-              height: '0',
-              width: '0',
-            }}
-          >
-            <div className='block min-w-7 p-[6px] absolute top-[-38px] translate-x-[-50%] font-bold text-xs dark:bg-white-100 bg-black-100 text-white-100 dark:text-black-100 rounded-lg'>
-              {`${values[0]}%`}
-            </div>
-          </div>
-        )}
+        minimumTrackTintColor={activeColor}
+        maximumTrackTintColor="#D6D6D6"
+        thumbTintColor={activeColor}
+        style={styles.slider}
       />
-    </div>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  wrapper: {
+    width: '100%',
+    alignItems: 'center',
+    paddingVertical: 16,
+  },
+  label: {
+    marginBottom: 12,
+    fontSize: 12,
+    fontWeight: 'bold',
+    backgroundColor: '#000',
+    color: '#fff',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6,
+    overflow: 'hidden',
+  },
+  slider: {
+    width: '90%',
+    height: 40,
+  },
+});
 
 export default RangeInput;

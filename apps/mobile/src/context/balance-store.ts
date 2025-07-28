@@ -22,7 +22,6 @@ import {
 import { AptosCoinDataStore } from '@leapwallet/cosmos-wallet-store/dist/bank/aptos-balance-store';
 import { SolanaCoinDataStore } from '@leapwallet/cosmos-wallet-store/dist/bank/solana-balance-store';
 import { SuiCoinDataStore } from '@leapwallet/cosmos-wallet-store/dist/bank/sui-balance-store';
-import browser from 'webextension-polyfill';
 
 import { getStorageAdapter } from '../utils/storageAdapter';
 import { activeChainStore } from './active-chain-store';
@@ -44,10 +43,12 @@ import {
 } from './denoms-store-instance';
 import { stakeEpochStore } from './epoch-store';
 import { selectedNetworkStore } from './selected-network-store';
+import DeviceInfo from 'react-native-device-info';
 
-const app = 'extension';
-const version = browser.runtime.getManifest().version;
+const app = 'mobile';
 const storageAdapter = getStorageAdapter();
+const version = DeviceInfo.getVersion();
+// const buildNumber = DeviceInfo.getBuildNumber();
 
 export const chainFeatureFlagsStore = new ChainFeatureFlagsStore(app, version, storageAdapter);
 export const currencyStore = new CurrencyStore(storageAdapter);

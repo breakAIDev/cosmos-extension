@@ -1,53 +1,115 @@
 import React from 'react';
-import Skeleton from 'react-loading-skeleton';
+import { View, StyleSheet } from 'react-native';
+import SkeletonContent from 'react-native-skeleton-content';
 
 export function AmountCardSkeleton() {
   return (
-    <div className='flex rounded-2xl bg-white-100 dark:bg-gray-950 gap-y-4 flex-col p-4 w-full'>
-      <Skeleton count={1} width={100} height={16} />
-      <div>
-        <Skeleton count={1} width={50} height={30} />
-        <Skeleton count={1} width={75} height={20} />
-      </div>
-      <Skeleton count={1} borderRadius={16} height={70} />
-    </div>
+    <View style={styles.amountCard}>
+      <SkeletonContent
+        isLoading={true}
+        containerStyle={styles.fullWidth}
+        layout={[
+          { key: 'label', width: 100, height: 16, marginBottom: 8, borderRadius: 8 },
+          { key: 'amount', width: 50, height: 30, marginBottom: 6, borderRadius: 6 },
+          { key: 'subtitle', width: 75, height: 20, marginBottom: 14, borderRadius: 6 },
+          { key: 'chart', width: '100%', height: 70, borderRadius: 16 },
+        ]}
+      />
+    </View>
   );
 }
 
-export default function StakeCardSkeleton() {
+export function StakeCardSkeleton() {
   return (
-    <div className='flex-1 p-7 gap-y-4 min-w-[344px]'>
-      <Skeleton count={1} />
-      <Skeleton count={2} />
-      <Skeleton count={4} />
-    </div>
+    <View style={styles.stakeCard}>
+      <SkeletonContent isLoading={true} containerStyle={styles.fullWidth}
+        layout={[
+          { key: 'main', width: '100%', height: 16, marginBottom: 8 },
+          { key: 'sub1', width: '100%', height: 14, marginBottom: 8 },
+          { key: 'sub2', width: '100%', height: 14, marginBottom: 8 },
+          { key: 'extra1', width: '100%', height: 10, marginBottom: 4 },
+          { key: 'extra2', width: '100%', height: 10, marginBottom: 4 },
+          { key: 'extra3', width: '100%', height: 10, marginBottom: 4 },
+          { key: 'extra4', width: '100%', height: 10, marginBottom: 4 },
+        ]}
+      />
+    </View>
   );
 }
 
 export function YouStakeSkeleton() {
   return (
-    <div className='flex rounded-2xl bg-secondary gap-y-1.5 flex-col p-4 w-full'>
-      <Skeleton className='w-24 h-5' />
-      <Skeleton className='w-80 h-10' />
-      <Skeleton className='w-24 h-6' />
-    </div>
+    <View style={styles.youStakeCard}>
+      <SkeletonContent
+        isLoading={true}
+        containerStyle={styles.fullWidth}
+        layout={[
+          { key: 'line1', width: 96, height: 20, marginBottom: 8 },
+          { key: 'line2', width: 320, height: 40, marginBottom: 8 },
+          { key: 'line3', width: 96, height: 24 },
+        ]}
+      />
+    </View>
   );
 }
 
-export function ValidatorItemSkeleton(props: { count?: number }) {
+export function ValidatorItemSkeleton({ count = 1 }) {
   return (
-    <div className='flex flex-col gap-4 text-xs'>
-      {Array.from({ length: props.count ?? 1 }).map((_, index) => (
-        <div key={index} className='flex items-center px-4 py-3 bg-secondary-100 w-full rounded-xl gap-4'>
-          <Skeleton width={36} height={36} circle />
-          <Skeleton width={100} height={12} />
-
-          <div className='flex flex-col items-end ml-auto '>
-            <Skeleton width={40} height={8} />
-            <Skeleton width={48} height={6} />
-          </div>
-        </div>
+    <View style={{ gap: 16 }}>
+      {Array.from({ length: count }).map((_, index) => (
+        <View key={index} style={styles.validatorRow}>
+          <SkeletonContent
+            isLoading={true}
+            containerStyle={{ flexDirection: 'row', alignItems: 'center', width: '100%' }}
+            layout={[
+              { key: 'icon', width: 36, height: 36, borderRadius: 18, marginRight: 12 },
+              { key: 'label', width: 100, height: 12, borderRadius: 8, marginRight: 12 },
+              {
+                key: 'rightBlock',
+                flexDirection: 'column',
+                marginLeft: 'auto',
+                children: [
+                  { key: 'right1', width: 40, height: 8, borderRadius: 4, marginBottom: 6 },
+                  { key: 'right2', width: 48, height: 6, borderRadius: 3 },
+                ],
+              },
+            ]}
+          />
+        </View>
       ))}
-    </div>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  fullWidth: { width: '100%' },
+  amountCard: {
+    borderRadius: 16,
+    backgroundColor: '#fff',
+    padding: 16,
+    marginBottom: 16,
+    // Optionally add dark mode here
+  },
+  stakeCard: {
+    flex: 1,
+    padding: 28,
+    minWidth: 344,
+    gap: 16,
+  },
+  youStakeCard: {
+    borderRadius: 16,
+    backgroundColor: '#f1f1f1',
+    padding: 16,
+    marginBottom: 16,
+    // Add dark mode handling if needed
+  },
+  validatorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#f7f7f7',
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+});

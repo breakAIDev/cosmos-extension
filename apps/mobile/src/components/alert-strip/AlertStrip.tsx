@@ -1,26 +1,97 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { TouchableOpacity, StyleSheet } from 'react-native';
+import Text from '../text';
+import { X } from 'lucide-react-native'; // or use react-native-vector-icons
 
-export const AlertStrip: React.FC<{ children: React.ReactNode; type?: 'warning' | 'error' | 'info' }> = ({ children, type = 'info' }) => (
-  <View style={[styles.strip, type === 'warning' && styles.warning, type === 'error' && styles.error]}>
-    <Text style={styles.text}>{children}</Text>
-  </View>
-);
+type AlertStripProps = {
+  message: React.ReactNode;
+  bgColor?: string;
+  alwaysShow?: boolean;
+  onHide?: VoidFunction;
+  style?: any;
+  timeOut?: number;
+  textStyle?: any;
+  onPress?: VoidFunction;
+  showCloseButton?: boolean;
+  onClose?: VoidFunction;
+};
+
+export const AlertStrip: React.FC<AlertStripProps> = ({
+  message,
+  bgColor,
+  alwaysShow = false,
+  onHide,
+  style,
+  onPress,
+  timeOut = 8000,
+  textStyle,
+  showCloseButton = false,
+  onClose,
+}) => {
+  const [show, setShow] = useState(true);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    let timeout: any;
+    if (show && !alwaysShow) {
+      timeout = setTimeout(() => {
+        if (mountedRef.current) {
+          setShow(false);
+          onHide && onHide();
+        }
+      }, timeOut);
+    }
+    return () => {
+      mountedRef.current = false;
+      timeout && clearTimeout(timeout);
+    };
+  }, [show, alwaysShow, onHide, timeOut]);
+
+  const handleClose = () => {
+    setShow(false);
+    onClose?.();
+  };
+
+  if (!show) return null;
+
+  return (
+    <TouchableOpacity
+      style={[styles.container, { backgroundColor: bgColor }, style]}
+      onPress={onPress}
+      activeOpacity={onPress ? 0.7 : 1}
+    >
+      <Text size="sm" style={[styles.text, textStyle]}>
+        {message}
+      </Text>
+      {showCloseButton && (
+        <TouchableOpacity style={styles.closeBtn} onPress={handleClose}>
+          <X size={16} color="#fff" />
+        </TouchableOpacity>
+      )}
+    </TouchableOpacity>
+  );
+};
 
 const styles = StyleSheet.create({
-  strip: {
-    padding: 12,
-    borderRadius: 8,
-    backgroundColor: '#E8E8E8',
-    marginVertical: 8,
-  },
-  warning: {
-    backgroundColor: '#FFEDD1',
-  },
-  error: {
-    backgroundColor: '#FF707E',
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 36,
+    justifyContent: 'center',
+    width: '100%',
+    position: 'relative',
+    paddingHorizontal: 16,
   },
   text: {
-    color: '#383838',
+    flex: 1,
+    textAlign: 'center',
+    fontWeight: 'bold',
+    color: '#18181b',
+  },
+  closeBtn: {
+    position: 'absolute',
+    right: 16,
+    top: '50%',
+    marginTop: -8,
   },
 });

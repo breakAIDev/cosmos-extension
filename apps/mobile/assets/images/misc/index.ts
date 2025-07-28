@@ -1,182 +1,395 @@
-// React Native compatible exports for this assets folder
+import { Colors } from 'theme/colors';
 
-export { default as add_circle } from './add-circle.svg';
-export { default as add_contact } from './add-contact.svg';
-export { default as add } from './add.svg';
-export { default as aggregated_view_dark_mode } from './aggregated-view-dark-mode.svg';
-export { default as aggregated_view } from './aggregated-view.svg';
-export { default as arrow_back } from './arrow-back.svg';
-export { default as arrow_double_left } from './arrow-double-left.svg';
-export { default as arrow_double_right } from './arrow-double-right.svg';
-export { default as arrow_down } from './arrow-down.svg';
-export { default as arrow_single_left } from './arrow-single-left.svg';
-export { default as arrow_single_right } from './arrow-single-right.svg';
-export { default as blockchain } from './blockchain.svg';
-export { default as bridge_route } from './bridge-route.svg';
-export { default as card_divider_dark_mode } from './card-divider-dark-mode.svg';
-export { default as card_divider_light_mode } from './card-divider-light-mode.svg';
-export { default as check_compass } from './check-compass.svg';
-export { default as check_cosmos } from './check-cosmos.svg';
-export { default as check_green_new } from './check-green-new.svg';
-export { default as check_green_outline } from './check-green-outline.svg';
-export { default as check_green } from './check-green.svg';
-export { default as check_juno } from './check-juno.svg';
-export { default as check_osmosis } from './check-osmosis.svg';
-export { default as check_red } from './check-red.svg';
-export { default as check_secret } from './check-secret.svg';
-export { default as check_box } from './check_box.svg';
-export { default as check_box_outline_blank } from './check_box_outline_blank.svg';
-export { default as check_circle } from './check_circle.svg';
-export { default as child_friendly } from './child-friendly.svg';
-export { default as cmd_shift_l } from './cmd-shift-l.svg';
-export { default as compass_copied } from './compass-copied.svg';
-export { default as compass_nft_verified_collection } from './compass-nft-verified-collection.svg';
-export { default as compass_no_stake } from './compass-no-stake.svg';
-export { default as compass_reward } from './compass-reward.svg';
-export { default as connect_ledger_steps } from './connect-ledger-steps.svg';
-export { default as connect } from './connect.svg';
-export { default as connected_sites } from './connected-sites.svg';
-export { default as contacts } from './contacts.svg';
-export { default as copied } from './copied.svg';
-export { default as copy_gray_200 } from './copy-gray-200.svg';
-export { default as copy_gray_600 } from './copy-gray-600.svg';
-export { default as cross_filled } from './cross-filled.svg';
-export { default as cross } from './cross.svg';
-export { default as dark_theme } from './dark-theme.svg';
-export { default as data } from './data.svg';
-export { default as default_collection_logo } from './default-collection-logo.svg';
-export { default as default_dapp_logo } from './default-dapp-logo.svg';
-export { default as default_website_icon } from './default-website-icon.svg';
-export { default as delete_red } from './delete-red.svg';
-export { default as delete_token_sheet_bin } from './delete-token-sheet-bin.svg';
-export { default as delete } from './delete.svg';
-export { default as dish } from './dish.svg';
-export { default as down_arrow } from './down-arrow.svg';
-export { default as down_gray_200_arrow } from './down-gray-200-arrow.svg';
-export { default as drop_up_dark_mode } from './drop-up-dark-mode.svg';
-export { default as drop_up_light_mode } from './drop-up-light-mode.svg';
-export { default as earn_icon } from './earn-icon.svg';
-export { default as edit_items } from './edit-items.svg';
-export { default as evm_wallet } from './evm-wallet.svg';
-export { default as expand_content } from './expand-content.svg';
-export { default as explore_v2 } from './explore-v2.svg';
-export { default as explore } from './explore.svg';
-export { default as eye_dark } from './eye-dark.svg';
-export { default as eye_light } from './eye-light.svg';
-export { default as filled_arrow_down } from './filled-arrow-down.svg';
-export { default as filled_exclamation_mark } from './filled-exclamation-mark.svg';
-export { default as filled_fav_star } from './filled-fav-star.svg';
-export { default as filled_key } from './filled-key.svg';
-export { default as filled_pen } from './filled-pen.svg';
-export { default as filled_rounded_square_check_mark } from './filled-rounded-square-check-mark.svg';
-export { default as filled_rounded_square_white } from './filled-rounded-square-white.svg';
-export { default as flash_on } from './flash-on.svg';
-export { default as frog_happy_with_bg } from './frog-happy-with-bg.svg';
-export { default as frog_happy } from './frog-happy.svg';
-export { default as frog_panic } from './frog-panic.svg';
-export { default as frog_sad } from './frog-sad.svg';
-export { default as gear_white } from './gear-white.svg';
-export { default as gear } from './gear.svg';
-export { default as globe } from './globe.svg';
-export { default as green_eye } from './green-eye.svg';
-export { default as green_tick } from './green-tick.svg';
-export { default as grey_cross } from './grey-cross.svg';
-export { default as grey_eye } from './grey-eye.svg';
-export { default as hardware_wallet } from './hardware-wallet.svg';
-export { default as heart_outline } from './heart-outline.svg';
-export { default as heart } from './heart.svg';
-export { default as help_outline } from './help-outline.svg';
-export { default as help } from './help.svg';
-export { default as hide_nft } from './hide-nft.svg';
-export { default as ibc_union } from './ibc-union.svg';
-export { default as ibc } from './ibc.svg';
-export { default as icon_right_gray_400 } from './icon-right-gray-400.svg';
-export { default as info_circle } from './info-circle.svg';
-export { default as info_filled_exclamation_mark } from './info-filled-exclamation-mark.svg';
-export { default as info_filled_exclamation_red_mark } from './info-filled-exclamation-red-mark.svg';
-export { default as info } from './info.svg';
-export { default as key_dark } from './key-dark.svg';
-export { default as key_light } from './key-light.svg';
-export { default as key_vpn } from './key-vpn.svg';
-export { default as language } from './language.svg';
-export { default as leap_qr_icon } from './leap-qr-icon.svg';
-export { default as leap_reward } from './leap-reward.svg';
-export { default as ledger } from './ledger.svg';
-export { default as light_node_banner } from './light-node-banner.svg';
-export { default as light_theme } from './light-theme.svg';
-export { default as line_divider_dark_mode } from './line-divider-dark-mode.svg';
-export { default as line_divider_light_mode } from './line-divider-light-mode.svg';
-export { default as lock_dark } from './lock-dark.svg';
-export { default as lock_fill } from './lock-fill.svg';
-export { default as lock_green } from './lock-green.svg';
-export { default as menu } from './menu.svg';
-export { default as messages } from './messages.svg';
-export { default as nbtc_symbol } from './nbtc-symbol.svg';
-export { default as nft_fallback_image } from './nft-fallback-image.svg';
-export { default as nft_image_loading } from './nft-image-loading.svg';
-export { default as nft_profile } from './nft-profile.svg';
-export { default as nft_verified_collection } from './nft-verified-collection.svg';
-export { default as no_search_result } from './no-search-result.svg';
-export { default as not_allowed } from './not-allowed.svg';
-export { default as onboarding_frog } from './onboarding-frog.svg';
-export { default as open_link } from './open-link.svg';
-export { default as outlined_fav_start } from './outlined-fav-start.svg';
-export { default as parachute } from './parachute.svg';
-export { default as person_play } from './person-play.svg';
-export { default as pin_to_extension } from './pin-to-extension.svg';
-export { default as pin } from './pin.svg';
-export { default as pk_wallet } from './pk-wallet.svg';
-export { default as plus } from './plus.svg';
-export { default as radio_button_unchecked } from './radio-button-unchecked.svg';
-export { default as remove_circle } from './remove-circle.svg';
-export { default as right_arrow_collapsed } from './right-arrow-collapsed.svg';
-export { default as right_arrow } from './right-arrow.svg';
-export { default as sampling } from './sampling.svg';
-export { default as search_modal_glass } from './search-modal-glass.svg';
-export { default as search_white_icon } from './search-white-icon.svg';
-export { default as search } from './search.svg';
-export { default as sell } from './sell.svg';
-export { default as settings } from './settings.svg';
-export { default as side_nav_icon } from './side-nav-icon.svg';
-export { default as sort } from './sort.svg';
-export { default as suggest_chain_icon } from './suggest-chain-icon.svg';
-export { default as swap_vert } from './swap-vert.svg';
-export { default as sync_disabled } from './sync-disabled.svg';
-export { default as text_snippet } from './text-snippet.svg';
-export { default as tick } from './tick.svg';
-export { default as timer } from './timer.svg';
-export { default as toll } from './toll.svg';
-export { default as tune } from './tune.svg';
-export { default as unhide_nft } from './unhide-nft.svg';
-export { default as up_arrow } from './up-arrow.svg';
-export { default as usb_ledger } from './usb-ledger.svg';
-export { default as validator } from './validator.svg';
-export { default as verified } from './verified.svg';
-export { default as vertical_dots } from './vertical-dots.svg';
-export { default as visibility_off } from './visibility-off.svg';
-export { default as wallet_0 } from './wallet-0.svg';
-export { default as wallet_1 } from './wallet-1.svg';
-export { default as wallet_2 } from './wallet-2.svg';
-export { default as wallet_3 } from './wallet-3.svg';
-export { default as wallet_4 } from './wallet-4.svg';
-export { default as wallet_5 } from './wallet-5.svg';
-export { default as wallet_6 } from './wallet-6.svg';
-export { default as wallet_7 } from './wallet-7.svg';
-export { default as wallet_8 } from './wallet-8.svg';
-export { default as wallet_9 } from './wallet-9.svg';
-export { default as wallet_green } from './wallet-green.svg';
-export { default as wallet_icon } from './wallet-icon.svg';
-export { default as wallet_sample } from './wallet-sample.svg';
-export { default as wallet_teal } from './wallet-teal.svg';
-export { default as wallet_white } from './wallet-white.svg';
-export { default as warning } from './warning.svg';
-export const compass_pin_extension = require('./compass-pin-extension.png');
-export const cosmosEcosystem = require('./cosmosEcosystem.png');
-export const hardware_wallet_connect_cable = require('./hardware-wallet-connect-cable.png');
-export const hardware_wallet_connect_usb = require('./hardware-wallet-connect-usb.png');
-export const hardware_wallet_connect = require('./hardware-wallet-connect.png');
-export const lumi = require('./lumi.png');
-export const lumi_cover = require('./lumi_cover.png');
-export const onboarding_sucess = require('./onboarding-sucess.png');
-export const usdc_tilted = require('./usdc-tilted.png');
-export const verified_dark = require('./verified-dark.png');
+import Add from './add.svg';
+import AddCircle from './add-circle.svg';
+import AddContact from './add-contact.svg';
+import AggregatedViewSvg from './aggregated-view.svg';
+import AggregatedViewDarkSvg from './aggregated-view-dark-mode.svg';
+import ArrowBack from './arrow-back.svg';
+import ArrowDoubleLeft from './arrow-double-left.svg';
+import ArrowDoubleRight from './arrow-double-right.svg';
+import ArrowDown from './arrow-down.svg';
+import ArrowSingleLeft from './arrow-single-left.svg';
+import ArrowSingleRight from './arrow-single-right.svg';
+import Blockchain from './blockchain.svg';
+import BridgeRoute from './bridge-route.svg';
+import CardDividerDarkMode from './card-divider-dark-mode.svg';
+import CardDividerLightMode from './card-divider-light-mode.svg';
+import CheckBox from './check_box.svg';
+import CheckBoxOutlineBlank from './check_box_outline_blank.svg';
+import CheckCircle from './check_circle.svg';
+import CheckCompass from './check-compass.svg';
+import CheckCosmos from './check-cosmos.svg';
+import CheckGreen from './check-green.svg';
+import CheckGreenNew from './check-green-new.svg';
+import CheckGreenOutline from './check-green-outline.svg';
+import CheckJuno from './check-juno.svg';
+import CheckOsmosis from './check-osmosis.svg';
+import CheckRed from './check-red.svg';
+import CheckSecret from './check-secret.svg';
+import CMDShiftL from './cmd-shift-l.svg';
+import CompassCopied from './compass-copied.svg';
+import CompassNftVerifiedCollection from './compass-nft-verified-collection.svg';
+import CompassNoStake from './compass-no-stake.svg';
+import CompassPinExtension from './compass-pin-extension.png';
+import CompassReward from './compass-reward.svg';
+import Connect from './connect.svg';
+import ConnectLedgerSteps from './connect-ledger-steps.svg';
+import ConnectedSitesIcon from './connected-sites.svg';
+import Contacts from './contacts.svg';
+import CopiedSvg from './copied';
+import Copied from './copied.svg';
+import CopySvg from './copy';
+import CopyGray200 from './copy-gray-200.svg';
+import CopyGray600 from './copy-gray-600.svg';
+import CosmosEcosystem from './cosmosEcosystem.png';
+import Cross from './cross.svg';
+import CrossFilled from './cross-filled.svg';
+import DarkTheme from './dark-theme.svg';
+import Data from './data.svg';
+import DefaultCollectionLogo from './default-collection-logo.svg';
+import DefaultDappLogo from './default-dapp-logo.svg';
+import DefaultWebsiteIcon from './default-website-icon.svg';
+import Delete from './delete.svg';
+import DeleteRed from './delete-red.svg';
+import DeleteTokenSheetBin from './delete-token-sheet-bin.svg';
+import Dish from './dish.svg';
+import DownArrow from './down-arrow.svg';
+import DownGray200Arrow from './down-gray-200-arrow.svg';
+import dropUpDarkModeIcon from './drop-up-dark-mode.svg';
+import dropUpLightModeIcon from './drop-up-light-mode.svg';
+import EarnIcon from './earn-icon.svg';
+import EditItems from './edit-items.svg';
+import EvmWalletIcon from './evm-wallet.svg';
+import ExpandContent from './expand-content.svg';
+import Explore from './explore.svg';
+import EyeDark from './eye-dark.svg';
+import EyeLight from './eye-light.svg';
+import FilledArrowDown from './filled-arrow-down.svg';
+import FilledExclamationMark from './filled-exclamation-mark.svg';
+import FilledFavStar from './filled-fav-star.svg';
+import FilledKey from './filled-key.svg';
+import FilledPen from './filled-pen.svg';
+import FilledRoundedSquareCheckMark from './filled-rounded-square-check-mark.svg';
+import FilledRoundedSquareWhite from './filled-rounded-square-white.svg';
+import { FilledDownArrowSvg } from './FilledDownArrowSvg';
+import FlashOn from './flash-on.svg';
+import FrogHappy from './frog-happy.svg';
+import FrogHappyWithBg from './frog-happy-with-bg.svg';
+import FrogPanic from './frog-panic.svg';
+import FrogSad from './frog-sad.svg';
+import Gear from './gear.svg';
+import GearWhiteIcon from './gear-white.svg';
+import Globe from './globe.svg';
+import GreenEye from './green-eye.svg';
+import GreenTick from './green-tick.svg';
+import GreyCross from './grey-cross.svg';
+import GreyEye from './grey-eye.svg';
+import HardwareWallet from './hardware-wallet.svg';
+import HardwareWalletConnect from './hardware-wallet-connect.png';
+import HardwareWalletConnectCable from './hardware-wallet-connect-cable.png';
+import HardwareWalletConnectUsb from './hardware-wallet-connect-usb.png';
+import HeartIcon from './heart.svg';
+import HeartOutlineIcon from './heart-outline.svg';
+import HelpIcon from './help.svg';
+import HelpOutline from './help-outline.svg';
+import HideNft from './hide-nft.svg';
+import IBC from './ibc.svg';
+import IbcProtocol from './ibc-protocal';
+import IbcUnion from './ibc-union.svg';
+import IconRight from './icon-right-gray-400.svg';
+import Info from './info.svg';
+import InfoCircle from './info-circle.svg';
+import InfoFilledExclamationMark from './info-filled-exclamation-mark.svg';
+import InfoFilledExclamationRedMark from './info-filled-exclamation-red-mark.svg';
+import KeyDark from './key-dark.svg';
+import KeyLight from './key-light.svg';
+import KeyVpn from './key-vpn.svg';
+import Language from './language.svg';
+import LeapQrIcon from './leap-qr-icon.svg';
+import LeapReward from './leap-reward.svg';
+import Ledger from './ledger.svg';
+import LightNodeBanner from './light-node-banner.svg';
+import LightTheme from './light-theme.svg';
+import LineDividerDarkMode from './line-divider-dark-mode.svg';
+import LineDividerLightMode from './line-divider-light-mode.svg';
+import LockFilled from './lock-fill.svg';
+import LockGreen from './lock-green.svg';
+import Lumi from './lumi.png';
+import LumiCover from './lumi_cover.png';
+import Menu from './menu.svg';
+import Messages from './messages.svg';
+import nBtcSymbol from './nbtc-symbol.svg';
+import NFTFallBackImage from './nft-fallback-image.svg';
+import NFTImageLoading from './nft-image-loading.svg';
+import NftProfile from './nft-profile.svg';
+import NFTVerifiedCollection from './nft-verified-collection.svg';
+import NoSearchResult from './no-search-result.svg';
+import NotAllowed from './not-allowed.svg';
+import OnboardingFrog from './onboarding-frog.svg';
+import OnboardingSuccess from './onboarding-sucess.png';
+import OpenLink from './open-link.svg';
+import OutlinedFavStar from './outlined-fav-start.svg';
+import { OutlinRoundGreenCheckSvg } from './OutlineRoundGreenCheckSvg';
+import Parachute from './parachute.svg';
+import PersonPlay from './person-play.svg';
+import Pin from './pin.svg';
+import PinToExtension from './pin-to-extension.svg';
+import PkWallet from './pk-wallet.svg';
+import PlusIcon from './plus.svg';
+import RadioButtonUnchecked from './radio-button-unchecked.svg';
+import RemoveCircle from './remove-circle.svg';
+import RightArrow from './right-arrow.svg';
+import RightArrowCollapsed from './right-arrow-collapsed.svg';
+import { RightArrowSvg } from './RightArrowSvg';
+import Sampling from './sampling.svg';
+import Search from './search.svg';
+import SearchModalGlass from './search-modal-glass.svg';
+import SearchWhiteIcon from './search-white-icon.svg';
+import Sell from './sell.svg';
+import Settings from './settings.svg';
+import SideNavIcon from './side-nav-icon.svg';
+import SortIcon from './sort.svg';
+import SuggestChainIcon from './suggest-chain-icon.svg';
+import SwapVert from './swap-vert.svg';
+import SyncDisabled from './sync-disabled.svg';
+import TextSnippet from './text-snippet.svg';
+import Tick from './tick.svg';
+import Timer from './timer.svg';
+import Toll from './toll.svg';
+import TuneIcon from './tune.svg';
+import UnhideNft from './unhide-nft.svg';
+import UpArrow from './up-arrow.svg';
+import USDCTilted from './usdc-tilted.png';
+import Validator from './validator.svg';
+import VerifiedWithBgStar from './verified.png';
+import Verified from './verified.svg';
+import VerifiedWithBgStarDark from './verified-dark.png';
+import VerticalDots from './vertical-dots.svg';
+import { default as VisibilityOff, default as VisibilityOffIcon } from './visibility-off.svg';
+import Wallet0 from './wallet-0.svg';
+import Wallet1 from './wallet-1.svg';
+import Wallet2 from './wallet-2.svg';
+import Wallet3 from './wallet-3.svg';
+import Wallet4 from './wallet-4.svg';
+import Wallet5 from './wallet-5.svg';
+import Wallet6 from './wallet-6.svg';
+import Wallet7 from './wallet-7.svg';
+import Wallet8 from './wallet-8.svg';
+import Wallet9 from './wallet-9.svg';
+import WalletIconGreen from './wallet-green.svg';
+import WalletIcon2 from './wallet-icon.svg';
+import WalletIcon from './wallet-sample.svg';
+import WalletIconTeal from './wallet-teal.svg';
+import WalletIconWhite from './wallet-white.svg';
+import Warning from './warning.svg';
+
+export const ChainChecks: Record<string, string> = {
+  cosmos: CheckCosmos,
+  secret: CheckSecret,
+  juno: CheckJuno,
+  osmosis: CheckOsmosis,
+  akash: CheckCosmos,
+  axelar: CheckCosmos,
+  persistence: CheckCosmos,
+  stargaze: CheckCosmos,
+  emoney: CheckCosmos,
+  sifchain: CheckCosmos,
+  irisnet: CheckCosmos,
+  sommelier: CheckCosmos,
+  comdex: CheckCosmos,
+  crescent: CheckCosmos,
+  cryptoorg: CheckCosmos,
+  assetmantle: CheckCosmos,
+  starname: CheckCosmos,
+  umee: CheckCosmos,
+  injective: CheckCosmos,
+  mars: CheckCosmos,
+  sei: CheckCosmos,
+  likecoin: CheckCosmos,
+  agoric: CheckCosmos,
+  cheqd: CheckCosmos,
+  seiTestnet2: CheckCosmos,
+};
+
+export {
+  Add,
+  AddCircle,
+  AddContact,
+  AggregatedViewDarkSvg,
+  AggregatedViewSvg,
+  ArrowBack,
+  ArrowDoubleLeft,
+  ArrowDoubleRight,
+  ArrowDown,
+  ArrowSingleLeft,
+  ArrowSingleRight,
+  Blockchain,
+  BridgeRoute,
+  CardDividerDarkMode,
+  CardDividerLightMode,
+  CheckBox,
+  CheckBoxOutlineBlank,
+  CheckCircle,
+  CheckCompass,
+  CheckCosmos,
+  CheckGreen,
+  CheckGreenNew,
+  CheckGreenOutline,
+  CheckRed,
+  CMDShiftL,
+  CompassCopied,
+  CompassNftVerifiedCollection,
+  CompassNoStake,
+  CompassPinExtension,
+  CompassReward,
+  Connect,
+  ConnectedSitesIcon,
+  ConnectLedgerSteps,
+  Contacts,
+  Copied,
+  CopiedSvg,
+  CopyGray200,
+  CopyGray600,
+  CopySvg,
+  CosmosEcosystem,
+  Cross,
+  CrossFilled,
+  DarkTheme,
+  Data,
+  DefaultCollectionLogo,
+  DefaultDappLogo,
+  DefaultWebsiteIcon,
+  Delete,
+  DeleteRed,
+  DeleteTokenSheetBin,
+  Dish,
+  DownArrow,
+  DownGray200Arrow,
+  dropUpDarkModeIcon,
+  dropUpLightModeIcon,
+  EarnIcon,
+  EditItems,
+  EvmWalletIcon,
+  ExpandContent,
+  Explore,
+  EyeDark,
+  EyeLight,
+  FilledArrowDown,
+  FilledDownArrowSvg,
+  FilledExclamationMark,
+  FilledFavStar,
+  FilledKey,
+  FilledPen,
+  FilledRoundedSquareCheckMark,
+  FilledRoundedSquareWhite,
+  FlashOn,
+  FrogHappy,
+  FrogHappyWithBg,
+  FrogPanic,
+  FrogSad,
+  Gear,
+  GearWhiteIcon,
+  Globe,
+  GreenEye,
+  GreenTick,
+  GreyCross,
+  GreyEye,
+  HardwareWallet,
+  HardwareWalletConnect,
+  HardwareWalletConnectCable,
+  HardwareWalletConnectUsb,
+  HeartIcon,
+  HeartOutlineIcon,
+  HelpIcon,
+  HelpOutline,
+  HideNft,
+  IBC,
+  IbcProtocol,
+  IbcUnion,
+  IconRight,
+  Info,
+  InfoCircle,
+  InfoFilledExclamationMark,
+  InfoFilledExclamationRedMark,
+  KeyDark,
+  KeyLight,
+  KeyVpn,
+  Language,
+  LeapQrIcon,
+  LeapReward,
+  Ledger,
+  LightNodeBanner,
+  LightTheme,
+  LineDividerDarkMode,
+  LineDividerLightMode,
+  LockFilled,
+  LockGreen,
+  Lumi,
+  LumiCover,
+  Menu,
+  Messages,
+  nBtcSymbol,
+  NFTFallBackImage,
+  NFTImageLoading,
+  NftProfile,
+  NFTVerifiedCollection,
+  NoSearchResult,
+  NotAllowed,
+  OnboardingFrog,
+  OnboardingSuccess,
+  OpenLink,
+  OutlinedFavStar,
+  OutlinRoundGreenCheckSvg,
+  Parachute,
+  PersonPlay,
+  Pin,
+  PinToExtension,
+  PkWallet,
+  PlusIcon,
+  RadioButtonUnchecked,
+  RemoveCircle,
+  RightArrow,
+  RightArrowCollapsed,
+  RightArrowSvg,
+  Sampling,
+  Search,
+  SearchModalGlass,
+  SearchWhiteIcon,
+  Sell,
+  Settings,
+  SideNavIcon,
+  SortIcon,
+  SuggestChainIcon,
+  SwapVert,
+  SyncDisabled,
+  TextSnippet,
+  Tick,
+  Timer,
+  Toll,
+  TuneIcon,
+  UnhideNft,
+  UpArrow,
+  USDCTilted,
+  Validator,
+  Verified,
+  VerifiedWithBgStar,
+  VerifiedWithBgStarDark,
+  VerticalDots,
+  VisibilityOff,
+  VisibilityOffIcon,
+  WalletIcon,
+  WalletIcon2,
+  WalletIconGreen,
+  WalletIconTeal,
+  WalletIconWhite,
+  Warning,
+};
+
+export const getWalletIconAtIndex = (ind: number, isWatchWallet?: boolean) => {
+  if (isWatchWallet) {
+    return GreyEye;
+  }
+  const wallets = [Wallet0, Wallet1, Wallet2, Wallet3, Wallet4, Wallet5, Wallet6, Wallet7, Wallet8, Wallet9];
+  return wallets[ind % Colors.walletColors.length] ?? Wallet0;
+};

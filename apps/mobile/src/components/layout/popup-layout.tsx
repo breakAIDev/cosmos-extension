@@ -1,11 +1,11 @@
-import classNames from 'classnames';
-import { WatchingWalletStrip } from 'components/alert-strip/WatchingWalletStrip';
-import React, { ReactNode } from 'react';
+import React from 'react';
+import { View, StyleSheet, ScrollView } from 'react-native';
+import { WatchingWalletStrip } from '../alert-strip/WatchingWalletStrip';
 
 type PopupLayoutProps = {
-  children: ReactNode;
-  header?: ReactNode;
-  className?: string;
+  children: React.ReactNode;
+  header?: React.ReactNode;
+  style?: object;
   headerZIndex?: number;
   skipWatchingWalletHeader?: boolean;
 };
@@ -13,29 +13,61 @@ type PopupLayoutProps = {
 export default function PopupLayout({
   children,
   header,
-  className,
+  style,
   headerZIndex = 2,
   skipWatchingWalletHeader = false,
 }: PopupLayoutProps) {
   return (
-    <div
-      id='popup-layout'
-      className={classNames(
-        'panel-width enclosing-panel panel-height max-panel-height overflow-y-auto bg-gray-50 dark:bg-black-100 relative',
-        className,
-      )}
-    >
+    <View style={[styles.container, style]}>
       {header && (
-        <div
-          className='fixed dark:bg-black-100 bg-gray-50 z-5 panel-width enclosing-panel'
-          style={{ zIndex: headerZIndex }}
-        >
+        <View style={[styles.header, { zIndex: headerZIndex }]}>
           {header}
-        </div>
+        </View>
       )}
-      {header && <div className='mt-[72px]' />}
+      {/* Spacer to push content below fixed header */}
+      {header && <View style={styles.headerSpacer} />}
       {header && !skipWatchingWalletHeader && <WatchingWalletStrip />}
-      {children}
-    </div>
+      {/* Scrollable content */}
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+      >
+        {children}
+      </ScrollView>
+    </View>
   );
 }
+
+const HEADER_HEIGHT = 72;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F9FAFB', // gray-50
+    position: 'relative',
+    // Optionally set width/height for modal or panel effect
+    // width: 400,
+    // height: 600,
+  },
+  header: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#F9FAFB', // gray-50
+    // Dark mode support can be added if needed
+    // borderBottomWidth: StyleSheet.hairlineWidth,
+    // borderBottomColor: '#E5E7EB',
+    height: HEADER_HEIGHT,
+    justifyContent: 'center',
+  },
+  headerSpacer: {
+    height: HEADER_HEIGHT,
+    width: '100%',
+  },
+  content: {
+    paddingBottom: 24, // Adjust for bottom safe area or tab bar if needed
+    // You can add more padding as needed
+  },
+});
+

@@ -1,7 +1,6 @@
 import { PasswordStore } from '@leapwallet/cosmos-wallet-store';
-import { AUTO_LOCK_TIME } from 'config/storage-keys';
 import { makeAutoObservable } from 'mobx';
-import browser from 'webextension-polyfill';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const passwordStore = new PasswordStore();
 
@@ -26,7 +25,7 @@ export const TimerLockPeriodRev = {
 export type TimerLockPeriodRevKey = keyof typeof TimerLockPeriodRev;
 
 export class AutoLockTimeStore {
-  time: TimerLockPeriodRevKey = DEFAULT_AUTO_LOCK_TIME;
+  time: number = DEFAULT_AUTO_LOCK_TIME;
 
   constructor() {
     makeAutoObservable(this);
@@ -34,25 +33,21 @@ export class AutoLockTimeStore {
   }
 
   async init() {
-    const time = await browser.storage.local.get(AUTO_LOCK_TIME);
-    if (time) {
-      this.time = time[AUTO_LOCK_TIME];
+    const value = await AsyncStorage.getItem('AUTO_LOCK_TIME');
+    if (value != null) {
+      this.time = JSON.parse(value);
     }
   }
 
   setLockTime(time: TimerLockPeriodKey) {
     const newTime = TimerLockPeriod[time];
     this.time = newTime;
-    browser.storage.local.set({
-      [AUTO_LOCK_TIME]: newTime,
-    });
+    AsyncStorage.setItem('AUTO_LOCK_TIME', JSON.stringify(newTime));
   }
 
   setLastActiveTime = () => {
     const timestamp = Date.now();
-    return browser.storage.local.set({
-      lastActiveTime: timestamp,
-    });
+    return AsyncStorage.setItem('lastActiveTime', JSON.stringify(timestamp));
   };
 }
 

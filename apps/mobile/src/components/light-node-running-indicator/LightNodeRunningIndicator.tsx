@@ -1,29 +1,46 @@
-import { Images } from 'images';
-import { observer } from 'mobx-react-lite';
 import React from 'react';
-import { globalSheetsStore } from 'stores/global-sheets-store';
-import { lightNodeStore } from 'stores/light-node-store';
-import { cn } from 'utils/cn';
+import { TouchableOpacity, Image, StyleSheet, ViewStyle } from 'react-native';
+import { observer } from 'mobx-react-lite';
+import { Images } from '../../../assets/images';
+import { globalSheetsStore } from '../../context/global-sheets-store';
+import { lightNodeStore } from '../../context/light-node-store';
 
 type Props = {
-  className?: string;
+  style?: ViewStyle | ViewStyle[];
 };
 
-export const LightNodeRunningIndicator = observer(({ className }: Props) => {
+export const LightNodeRunningIndicator = observer(({ style }: Props) => {
   if (!lightNodeStore.isLightNodeRunning) {
     return null;
   }
 
   return (
-    <button
-      className={cn('py-2 pl-3 pr-2 rounded-l-[30px] cursor-pointer bg-gray-300/10 absolute top-12 right-0', className)}
-      onClick={() => {
-        globalSheetsStore.toggleSideNav({
-          openLightNodePage: true,
-        });
-      }}
+    <TouchableOpacity
+      onPress={() =>
+        globalSheetsStore.toggleSideNav({ openLightNodePage: true })
+      }
+      style={[styles.container, style]}
     >
-      <img className='w-4 h-4' src={Images.Misc.Sampling} alt='sampling-icon' />
-    </button>
+      <Image source={Images.Misc.Sampling} style={styles.icon} resizeMode="contain" />
+    </TouchableOpacity>
   );
+});
+
+const styles = StyleSheet.create({
+  container: {
+    position: 'absolute',
+    top: 48, // equivalent to top-12
+    right: 0,
+    backgroundColor: 'rgba(209,213,219,0.1)', // Tailwind's gray-300/10
+    paddingVertical: 8,
+    paddingLeft: 12,
+    paddingRight: 8,
+    borderTopLeftRadius: 30,
+    borderBottomLeftRadius: 30,
+    zIndex: 10,
+  },
+  icon: {
+    width: 16,
+    height: 16,
+  },
 });

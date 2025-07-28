@@ -1,11 +1,11 @@
-import classNames from 'classnames';
 import React, { ReactNode } from 'react';
+import { View, StyleProp, ViewStyle } from 'react-native';
 
 type ResizeProps = {
-  className?: string;
   children: ReactNode;
+  style?: StyleProp<ViewStyle>;
 };
 
-export default function Resize({ children, className }: ResizeProps) {
-  return <div className={classNames('flex shrink w-[344px]', className)}>{children}</div>;
+export default function Resize({ children, style }: ResizeProps) {
+  return <View style={[{ flexDirection: 'row', flexShrink: 1, width: 344 }, style]}>{children}</View>;
 }

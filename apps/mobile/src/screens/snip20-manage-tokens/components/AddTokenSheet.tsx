@@ -1,7 +1,7 @@
 import { SecretToken } from '@leapwallet/cosmos-wallet-hooks';
 import { CardDivider, GenericCard } from '@leapwallet/leap-ui';
 import { CaretRight, ClipboardText, PencilSimple, PlusCircle } from '@phosphor-icons/react';
-import BottomModal from 'components/bottom-modal';
+import BottomModal from '../bottom-modal';
 import Text from 'components/text';
 import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
 import React from 'react';

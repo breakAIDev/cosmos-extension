@@ -1,13 +1,21 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { IAsyncStorage } from '@leapwallet/elements-core';
+import * as idb from 'idb-keyval';
 
-export async function setItem(key: string, value: string) {
-  await AsyncStorage.setItem(key, value);
-}
-
-export async function getItem(key: string) {
-  return await AsyncStorage.getItem(key);
-}
-
-export async function removeItem(key: string) {
-  await AsyncStorage.removeItem(key);
-}
+export const AsyncIDBStorage: IAsyncStorage = {
+  getItem: async (key: string): Promise<string | null> => {
+    const value = await idb.get(key);
+    if (value) {
+      return value;
+    }
+    return null;
+  },
+  setItem: async (key: string, value: string): Promise<void> => {
+    await idb.set(key, value);
+  },
+  removeItem: async (key: string): Promise<void> => {
+    await idb.del(key);
+  },
+  clear: async (): Promise<void> => {
+    await idb.clear();
+  },
+};

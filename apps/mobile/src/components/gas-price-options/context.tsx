@@ -4,7 +4,7 @@ import { RootDenomsStore } from '@leapwallet/cosmos-wallet-store';
 import assert from 'assert';
 import BigNumber from 'bignumber.js';
 import { createContext, useContext } from 'react';
-import { Token } from 'types/bank';
+import { Token } from '../../types/bank';
 
 export type DisplayFeeValue = {
   value: number;

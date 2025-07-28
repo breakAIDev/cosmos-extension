@@ -2,7 +2,7 @@ import { SelectedAddress, useAddressPrefixes } from '@leapwallet/cosmos-wallet-h
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { Avatar, Buttons, Input, Memo } from '@leapwallet/leap-ui';
 import { bech32 } from 'bech32';
-import BottomModal from 'components/bottom-modal';
+import BottomModal from '../bottom-modal';
 import IconButton from 'components/icon-button';
 import { LoaderAnimation } from 'components/loader/Loader';
 import Text from 'components/text';

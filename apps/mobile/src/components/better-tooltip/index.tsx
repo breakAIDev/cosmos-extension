@@ -1,61 +1,78 @@
-import classNames from 'classnames';
-import React, { useRef, useState } from 'react';
+import React, { useState, useRef } from 'react';
+import { View, Modal, Text, Pressable, StyleSheet, TouchableWithoutFeedback, Dimensions } from 'react-native';
 
 type TooltipProps = {
   children: React.ReactElement;
   content: React.ReactNode;
-  className?: string;
+  style?: any;
 };
 
-const Tooltip: React.FC<TooltipProps> = ({ children, content, className }) => {
-  const [showContent, setShowContent] = useState(false);
-  
-  const timer = useRef<any>(null);
-  const tooltipRef = useRef<HTMLDivElement | null>(null);
+const Tooltip: React.FC<TooltipProps> = ({ children, content, style }) => {
+  const [visible, setVisible] = useState(false);
+  const timer = useRef<NodeJS.Timeout | null>(null);
 
-  const handleMouseIn = () => {
-    if (timer.current) {
-      clearTimeout(timer.current);
-    }
-    setShowContent(true);
+  const showTooltip = () => {
+    if (timer.current) clearTimeout(timer.current);
+    setVisible(true);
   };
 
-  const handleMouseOut = () => {
-    timer.current = setTimeout(() => {
-      setShowContent(false);
-    }, 250);
+  const hideTooltip = () => {
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => setVisible(false), 250); // mimic web delay
   };
 
   return (
     <>
-      {React.cloneElement(
-        children,
-        {
-          onMouseEnter: handleMouseIn,
-          onMouseLeave: handleMouseOut,
-          onTouchStart: handleMouseIn,
-          onTouchEnd: handleMouseOut,
-          onFocus: handleMouseIn,
-          onBlur: handleMouseOut,
-        },
-        <>
-          {children.props.children}
-          {showContent ? (
-            <div
-              ref={tooltipRef}
-              tabIndex={0}
-              className={classNames(
-                'absolute top-6 left-0 max-h-[40vh] overflow-y-auto rounded-lg shadow p-2 min-w-[200px] z-50 bg-opacity-90 bg-white-100 dark:bg-black-100 border dark-gray-300 dark:border-gray-500 cursor-default',
-                className,
-              )}
-            >
-              {content}
-            </div>
-          ) : null}
-        </>,
-      )}
+      <Pressable
+        onPressIn={showTooltip}
+        onPressOut={hideTooltip}
+        onLongPress={showTooltip}
+      >
+        {children}
+      </Pressable>
+      <Modal
+        visible={visible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setVisible(false)}>
+          <View style={styles.overlay}>
+            <View style={[styles.tooltip, style]}>
+              <Text style={styles.tooltipText}>{content}</Text>
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </>
   );
 };
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    // Center the tooltip for demo; for real, position relative to child.
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.05)', // subtle dim
+  },
+  tooltip: {
+    minWidth: 200,
+    maxHeight: Dimensions.get('window').height * 0.4,
+    backgroundColor: '#fff',
+    padding: 12,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 1, height: 2 },
+    shadowOpacity: 0.13,
+    shadowRadius: 4,
+    elevation: 5,
+    zIndex: 100,
+  },
+  tooltipText: {
+    color: '#222',
+    fontSize: 15,
+  },
+});
 
 export default Tooltip;

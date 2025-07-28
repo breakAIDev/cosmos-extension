@@ -3,7 +3,7 @@ import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { RootDenomsStore } from '@leapwallet/cosmos-wallet-store';
 import { GenericCard } from '@leapwallet/leap-ui';
 import { ArrowSquareOut } from '@phosphor-icons/react';
-import BottomModal from 'components/bottom-modal';
+import BottomModal from '../bottom-modal';
 import { ValidatorItemSkeleton } from 'components/Skeletons/StakeSkeleton';
 import Text from 'components/text';
 import { EventName } from 'config/analytics';

@@ -1,5 +1,5 @@
 import { Key } from '@leapwallet/cosmos-wallet-hooks';
-import BottomModal from 'components/bottom-modal';
+import BottomModal from '../bottom-modal';
 import { useSiteLogo } from 'hooks/utility/useSiteLogo';
 import { Images } from 'images';
 import { addToConnections } from 'pages/ApproveConnection/utils';

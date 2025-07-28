@@ -1,182 +1,187 @@
-import {
-  currencyDetail,
-  formatTokenAmount,
-  sliceWord,
-  sortTokens,
-  Token,
-  useUserPreferredCurrency,
-} from '@leapwallet/cosmos-wallet-hooks';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { View, FlatList, Image, TextInput, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import Modal from 'react-native-modal';
 import { BigNumber } from '@leapwallet/cosmos-wallet-sdk/dist/browser/proto/injective/utils/classes';
-import Badge from 'components/badge/Badge';
-import BottomModal from 'components/new-bottom-modal';
-import NoSearchResults from 'components/no-search-results';
-import Text from 'components/text';
-import { SearchInput } from 'components/ui/input/search-input';
-import { useFormatCurrency } from 'hooks/settings/useCurrency';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { hideAssetsStore } from 'stores/hide-assets-store';
-import { cn } from 'utils/cn';
+import { formatTokenAmount, sliceWord, sortTokens, Token, useUserPreferredCurrency, currencyDetail } from '@leapwallet/cosmos-wallet-hooks';
+import { useFormatCurrency } from '../../hooks/settings/useCurrency';
+import { hideAssetsStore } from '../../context/hide-assets-store';
 
-type SelectTokenSheetProps = {
-  assets: Token[];
+type Props = {
   isOpen: boolean;
   onClose: () => void;
+  assets: Token[];
   selectedToken?: Token;
-  
   onTokenSelect: (baseDenom: string, ibcDenom?: string) => void;
 };
 
 const TokenCard = ({
   asset,
   onSelect,
-  hasToShowIbcTag,
-  hasToShowEvmTag,
-  usdValue,
-  amount,
-  symbol,
   isSelected,
+  hasToShowIbcTag = true,
+  hasToShowEvmTag = true,
 }: {
   asset: Token;
   onSelect: (token: Token) => void;
+  isSelected: boolean;
   hasToShowIbcTag?: boolean;
   hasToShowEvmTag?: boolean;
-  usdValue?: string;
-  amount: string;
-  symbol: string;
-  isSelected: boolean;
 }) => {
   const [formatCurrency] = useFormatCurrency();
-
   const [preferredCurrency] = useUserPreferredCurrency();
-  const formattedFiatValue = usdValue ? formatCurrency(new BigNumber(usdValue)) : '-';
-  const ibcInfo = useMemo(() => {
-    if (!asset.ibcChainInfo) return '';
 
-    return `${asset.ibcChainInfo.pretty_name} / ${sliceWord(asset.ibcChainInfo?.channelId ?? '', 7, 5)}`;
-  }, [asset.ibcChainInfo]);
+  const formattedFiatValue = asset.usdValue ? formatCurrency(new BigNumber(asset.usdValue)) : '-';
 
-  const handleTokenSelect = useCallback(() => {
-    if (isSelected) return;
-    onSelect(asset);
-  }, [isSelected, onSelect, asset]);
+  const ibcInfo = asset.ibcChainInfo
+    ? `${asset.ibcChainInfo.pretty_name} / ${sliceWord(asset.ibcChainInfo.channelId || '', 7, 5)}`
+    : '';
+
+  const handlePress = () => {
+    if (!isSelected) onSelect(asset);
+  };
 
   return (
-    <div
-      className={cn(
-        'flex gap-3 items-center mt-4 rounded-xl px-4 py-3 border border-transparent',
-        isSelected
-          ? 'bg-secondary-200 hover:bg-secondary-200 cursor-not-allowed border-secondary-600'
-          : 'bg-secondary-100 hover:bg-secondary-200 cursor-pointer',
-      )}
-      onClick={handleTokenSelect}
+    <TouchableOpacity
+      style={[
+        styles.tokenCard,
+        isSelected ? styles.tokenCardSelected : styles.tokenCardDefault,
+      ]}
+      onPress={handlePress}
+      disabled={isSelected}
     >
-      <img src={asset.img} alt={asset.symbol} className='w-8 h-8 rounded-full' />
-      <Text className='font-bold flex-grow' color='text-foreground'>
-        {asset.symbol}
-        {asset.ibcChainInfo && hasToShowIbcTag ? <Badge text='IBC' title={ibcInfo} /> : null}
-        {asset.isEvm && hasToShowEvmTag ? <Badge text='EVM' /> : null}
-      </Text>
-      <div className='flex flex-col items-end'>
-        {formattedFiatValue && formattedFiatValue !== '-' && (
-          <Text size='sm' className='font-bold' color='text-foreground'>
-            {hideAssetsStore.formatHideBalance(formattedFiatValue)}
-          </Text>
-        )}
-        <Text size='xs' className='font-medium' color='text-secondary-800'>
+      <Image source={{ uri: asset.img }} style={styles.tokenImage} />
+      <View style={styles.tokenInfo}>
+        <Text style={styles.symbolText}>
+          {asset.symbol}
+          {asset.ibcChainInfo && hasToShowIbcTag ? '  [IBC]' : ''}
+          {asset.isEvm && hasToShowEvmTag ? '  [EVM]' : ''}
+        </Text>
+        <Text style={styles.amountText}>
           {hideAssetsStore.formatHideBalance(
-            formatTokenAmount(amount, sliceWord(symbol, 4, 4), 3, currencyDetail[preferredCurrency].locale),
+            formatTokenAmount(asset.amount, sliceWord(asset.symbol, 4, 4), 3, currencyDetail[preferredCurrency].locale)
           )}
         </Text>
-      </div>
-    </div>
+      </View>
+      <Text style={styles.fiatValue}>
+        {hideAssetsStore.formatHideBalance(formattedFiatValue)}
+      </Text>
+    </TouchableOpacity>
   );
 };
 
-export const SelectTokenModal: React.FC<SelectTokenSheetProps> = React.memo(
-  ({ assets, selectedToken, isOpen, onClose, onTokenSelect }: SelectTokenSheetProps) => {
-    const [searchQuery, setSearchQuery] = useState('');
-    const input = useMemo(() => searchQuery.trim(), [searchQuery]);
-    const searchInputRef = useRef<HTMLInputElement>(null);
-    const choiceOfTokens = useMemo(() => {
-      return (
-        assets
-          // filter by search query
-          .filter((asset) => asset.symbol.toLowerCase().includes(input.toLowerCase()))
-          // sort the tokens
-          .sort(sortTokens)
-      );
-    }, [assets, input]);
+export const SelectTokenModal: React.FC<Props> = ({ isOpen, onClose, assets, selectedToken, onTokenSelect }) => {
+  const [searchQuery, setSearchQuery] = useState('');
 
-    const handleSelectToken = useCallback(
-      (token: Token) => {
-        if (token) {
-          onTokenSelect(token.coinMinimalDenom, token.ibcDenom);
-          onClose();
-        }
-      },
-      [onClose, onTokenSelect],
-    );
+  const filteredTokens = useMemo(() => {
+    const input = searchQuery.trim().toLowerCase();
+    return assets
+      .filter((asset) => asset.symbol.toLowerCase().includes(input))
+      .sort(sortTokens);
+  }, [assets, searchQuery]);
 
-    useEffect(() => {
-      if (isOpen) {
-        setSearchQuery('');
-        setTimeout(() => {
-          searchInputRef.current?.focus();
-        }, 200);
-      }
-    }, [isOpen]);
+  const handleSelect = useCallback(
+    (token: Token) => {
+      onTokenSelect(token.coinMinimalDenom, token.ibcDenom);
+      onClose();
+    },
+    [onTokenSelect, onClose],
+  );
 
-    return (
-      <BottomModal isOpen={isOpen} onClose={onClose} title='Select fees token' fullScreen>
-        <div className='flex flex-col h-full w-full gap-7'>
-          <SearchInput
-            value={input}
-            ref={searchInputRef}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onClear={() => setSearchQuery('')}
-            placeholder='Search by token name'
-          />
-          <div className='flex flex-col w-full h-full overflow-y-auto'>
-            <Text size='xs' className='font-bold' color='text-muted-foreground'>
-              Select token
-            </Text>
-            <div className='w-full'>
-              {choiceOfTokens.length > 0 ? (
-                choiceOfTokens.map((asset, index) => {
-                  const isFirst = index === 0;
-                  const isLast = index === choiceOfTokens.length - 1;
+  useEffect(() => {
+    if (isOpen) setSearchQuery('');
+  }, [isOpen]);
 
-                  let isSelected = false;
-                  if (selectedToken) {
-                    isSelected = selectedToken?.ibcDenom
-                      ? selectedToken?.ibcDenom === asset.ibcDenom
-                      : selectedToken?.coinMinimalDenom === asset.coinMinimalDenom;
-                  }
+  return (
+    <Modal isVisible={isOpen} onBackdropPress={onClose}>
+      <View style={styles.modalContainer}>
+        <Text style={styles.title}>Select Fees Token</Text>
+        <TextInput
+          placeholder="Search by token name"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          style={styles.searchInput}
+        />
+        <FlatList
+          data={filteredTokens}
+          keyExtractor={(item, index) => `${item.symbol}-${item.coinMinimalDenom}-${index}`}
+          renderItem={({ item }) => {
+            const isSelected = selectedToken?.ibcDenom
+              ? item.ibcDenom === selectedToken.ibcDenom
+              : item.coinMinimalDenom === selectedToken?.coinMinimalDenom;
 
-                  return (
-                    <React.Fragment
-                      key={`${asset.symbol}-${asset?.coinMinimalDenom}-${asset?.ibcDenom}-${asset?.amount}-${index}`}
-                    >
-                      <TokenCard
-                        amount={asset.amount}
-                        symbol={asset.symbol}
-                        usdValue={asset.usdValue}
-                        asset={asset}
-                        onSelect={handleSelectToken}
-                        isSelected={isSelected}
-                      />
-                    </React.Fragment>
-                  );
-                })
-              ) : (
-                <NoSearchResults searchQuery={searchQuery} />
-              )}
-            </div>
-          </div>
-        </div>
-      </BottomModal>
-    );
+            return (
+              <TokenCard
+                asset={item}
+                onSelect={handleSelect}
+                isSelected={isSelected}
+              />
+            );
+          }}
+          ListEmptyComponent={<Text style={styles.noResults}>No results found.</Text>}
+        />
+      </View>
+    </Modal>
+  );
+};
+
+const styles = StyleSheet.create({
+  modalContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    maxHeight: '80%',
   },
-);
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 12,
+  },
+  searchInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    marginBottom: 10,
+  },
+  tokenCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    marginVertical: 4,
+    borderRadius: 10,
+  },
+  tokenCardSelected: {
+    backgroundColor: '#e6e6e6',
+  },
+  tokenCardDefault: {
+    backgroundColor: '#f9f9f9',
+  },
+  tokenImage: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    marginRight: 10,
+  },
+  tokenInfo: {
+    flex: 1,
+  },
+  symbolText: {
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  amountText: {
+    fontSize: 12,
+    color: '#666',
+  },
+  fiatValue: {
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  noResults: {
+    textAlign: 'center',
+    padding: 20,
+    color: '#999',
+  },
+});
 
-SelectTokenModal.displayName = 'SelectTokenModal';

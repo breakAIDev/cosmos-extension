@@ -1,11 +1,10 @@
 import { useActiveChain, useGetChains } from '@leapwallet/cosmos-wallet-hooks';
 import { ThemeName, useTheme } from '@leapwallet/leap-ui';
-import { AGGREGATED_CHAIN_KEY } from 'config/constants';
-import { Images } from 'images';
+import { AGGREGATED_CHAIN_KEY } from '../../services/config/constants';
+import { Images } from '../../../assets/images';
 import { useMemo } from 'react';
-import { Colors } from 'theme/colors';
-import { AggregatedSupportedChain } from 'types/utility';
-
+import { Colors, getChainColor } from '../../theme/colors';
+import { AggregatedSupportedChain } from '../../types/utility';
 import { useDefaultTokenLogo } from './useDefaultTokenLogo';
 
 export function useChainPageInfo() {
@@ -16,9 +15,8 @@ export function useChainPageInfo() {
 
   const headerChainImgSrc = useMemo(() => {
     if (activeChain === AGGREGATED_CHAIN_KEY) {
-      return theme === ThemeName.DARK ? Images.Misc.AggregatedViewDarkSvg : Images.Misc.AggregatedViewSvg;
+      return theme === ThemeName.DARK ? Images.Misc.aggregated_view_dark_mode : Images.Misc.aggregated_view;
     }
-
     return chains[activeChain]?.chainSymbolImageUrl || defaultTokenLogo;
   }, [activeChain, chains, defaultTokenLogo, theme]);
 
@@ -26,7 +24,6 @@ export function useChainPageInfo() {
     if (activeChain === AGGREGATED_CHAIN_KEY) {
       return Colors.aggregateGradient;
     }
-
     return chains[activeChain]?.theme?.gradient;
   }, [activeChain, chains]);
 
@@ -34,7 +31,7 @@ export function useChainPageInfo() {
     if (activeChain === AGGREGATED_CHAIN_KEY) {
       return Colors.aggregatePrimary;
     }
-    return Colors.getChainColor(activeChain, chains[activeChain]);
+    return getChainColor(activeChain, chains[activeChain]);
   }, [activeChain, chains]);
 
   return {

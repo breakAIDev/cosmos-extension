@@ -1,7 +1,7 @@
 import { Key, SelectedAddress, useActiveChain } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { InputWithButton } from '@leapwallet/leap-ui';
-import BottomModal from 'components/bottom-modal';
+import BottomModal from '../bottom-modal';
 import { EmptyCard } from 'components/empty-card';
 import Loader from 'components/loader/Loader';
 import Text from 'components/text';

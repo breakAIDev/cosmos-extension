@@ -1,48 +1,105 @@
-import classNames from 'classnames';
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
-import React, { PropsWithoutRef, ReactNode } from 'react';
-import { imgOnError } from 'utils/imgOnError';
+import React from 'react';
+import { View, Image, Text, StyleSheet, useColorScheme } from 'react-native';
+import { useDefaultTokenLogo } from '../../hooks/utility/useDefaultTokenLogo';
 
 export type EmptyCardProps = {
-  src: string;
-  heading?: ReactNode;
-  subHeading?: ReactNode;
-  classname?: string;
-  logoClassName?: string;
-  imgContainerClassname?: string;
+  src?: string;
+  heading?: React.ReactNode;
+  subHeading?: React.ReactNode;
   isRounded?: boolean;
-  'data-testing-id'?: string;
+  style?: object;
+  logoStyle?: object;
+  imgContainerStyle?: object;
+  testID?: string;
 };
 
-export function EmptyCard(props: PropsWithoutRef<EmptyCardProps>) {
+export function EmptyCard(props: EmptyCardProps) {
   const defaultTokenLogo = useDefaultTokenLogo();
-  const { src, heading, subHeading, isRounded = true, classname, imgContainerClassname } = props;
+  const {
+    src,
+    heading,
+    subHeading,
+    isRounded = true,
+    style,
+    logoStyle,
+    imgContainerStyle,
+    testID,
+  } = props;
+
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
 
   return (
-    <>
-      <div
-        className={classNames('flex flex-col items-center py-10 px-10', classname, {
-          'rounded-[16px]': isRounded,
-        })}
+    <View
+      style={[
+        styles.container,
+        isRounded && styles.rounded,
+        style,
+      ]}
+    >
+      <View
+        style={[
+          styles.imgContainer,
+          { backgroundColor: isDark ? '#111827' : '#F9FAFB' }, // gray-900 (dark) / gray-50 (light)
+          imgContainerStyle,
+        ]}
       >
-        <div
-          className={classNames(
-            'h-14 w-14 mb-3 flex justify-center rounded-full bg-gray-50 dark:bg-gray-900',
-            imgContainerClassname,
-          )}
+        <Image
+          source={src ? { uri: src } : defaultTokenLogo}
+          style={[styles.logo, logoStyle]}
+          resizeMode="contain"
+        />
+      </View>
+      {heading && (
+        <Text
+          style={[styles.heading, { color: isDark ? '#F3F4F6' : '#1F2937' }]} // gray-100 (dark) / gray-800 (light)
+          testID={testID}
         >
-          <img src={src ?? defaultTokenLogo} className={props.logoClassName} onError={imgOnError(defaultTokenLogo)} />
-        </div>
-        {heading && (
-          <div
-            className='text-base font-bold text-gray-800 text-center dark:text-gray-100'
-            data-testing-id={props['data-testing-id']}
-          >
-            {heading}
-          </div>
-        )}
-        {subHeading && <div className='text-sm text-gray-400 text-center font-medium'>{subHeading}</div>}
-      </div>
-    </>
+          {heading}
+        </Text>
+      )}
+      {subHeading && (
+        <Text style={styles.subHeading}>
+          {subHeading}
+        </Text>
+      )}
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    alignItems: 'center',
+    paddingVertical: 40,
+    paddingHorizontal: 40,
+    backgroundColor: 'transparent',
+  },
+  rounded: {
+    borderRadius: 16,
+  },
+  imgContainer: {
+    height: 56, // 14 * 4 px
+    width: 56,
+    marginBottom: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 28,
+  },
+  logo: {
+    height: 40,
+    width: 40,
+    borderRadius: 20,
+  },
+  heading: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  subHeading: {
+    fontSize: 14,
+    color: '#9CA3AF', // gray-400
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+});

@@ -4,7 +4,7 @@ import { CardDivider, Header, HeaderActionType } from '@leapwallet/leap-ui';
 import { CheckCircle } from '@phosphor-icons/react';
 import classNames from 'classnames';
 import { TestnetAlertStrip } from 'components/alert-strip';
-import BottomModal from 'components/bottom-modal';
+import BottomModal from '../bottom-modal';
 import { EmptyCard } from 'components/empty-card';
 import PopupLayout from 'components/layout/popup-layout';
 import { LoaderAnimation } from 'components/loader/Loader';

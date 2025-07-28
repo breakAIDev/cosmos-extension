@@ -2,7 +2,7 @@ import { getFeatureFlags } from '@leapwallet/cosmos-wallet-hooks';
 import { axiosWrapper } from '@leapwallet/cosmos-wallet-sdk';
 import { BaseQueryStore } from '@leapwallet/cosmos-wallet-store/dist/base/base-data-store';
 import { makeObservable } from 'mobx';
-import { getStorageAdapter } from 'utils/storageAdapter';
+import { getStorageAdapter } from '../utils/storageAdapter';
 
 type Proposer = {
   id: number;

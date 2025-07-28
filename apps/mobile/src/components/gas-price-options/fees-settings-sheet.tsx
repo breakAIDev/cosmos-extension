@@ -1,9 +1,9 @@
-import BottomModal from 'components/new-bottom-modal';
-import { Button } from 'components/ui/button';
 import React from 'react';
-import { rootDenomsStore } from 'stores/denoms-store-instance';
-import { rootBalanceStore } from 'stores/root-store';
-import { cn } from 'utils/cn';
+import { View, Text, StyleSheet } from 'react-native';
+import BottomModal from '../new-bottom-modal';   // Should be a React Native Modal
+import { Button } from '../ui/button';           // Should be a RN Button, TouchableOpacity, or custom
+import { rootDenomsStore } from '../../context/denoms-store-instance';
+import { rootBalanceStore } from '../../context/root-store';
 
 import { useGasPriceContext } from './context';
 import GasPriceOptions from './index';
@@ -26,46 +26,83 @@ export const FeesSettingsSheet: React.FC<FeesSettingsSheetProps> = ({
   return (
     <BottomModal
       isOpen={showFeesSettingSheet}
-      title='Transaction Fees'
+      title="Transaction Fees"
       onClose={() => {
         onClose();
         setViewAdditionalOptions(false);
       }}
     >
-      <div
-        className={cn('flex flex-col', {
-          'gap-y-8 mb-10': !viewAdditionalOptions,
-          'gap-y-5 mb-6': viewAdditionalOptions,
-        })}
+      <View
+        style={[
+          styles.column,
+          !viewAdditionalOptions ? styles.gap8 : styles.gap5,
+        ]}
       >
-        <p className='text-sm font-medium text-secondary-800'>
+        <Text style={styles.infoText}>
           Transaction fee is charged by the network. Higher the transaction fee, faster the transaction will go through.
-        </p>
+        </Text>
 
         <GasPriceOptions.Selector />
 
         {!hideAdditionalSettings && (
-          <div className='w-full flex-col border border-secondary-200 flex items-center justify-between rounded-2xl overflow-hidden'>
-            <div className='w-full'>
+          <View style={styles.additionalSettingsBox}>
+            <View style={styles.fullWidth}>
               <GasPriceOptions.AdditionalSettingsToggle />
-            </div>
+            </View>
             <GasPriceOptions.AdditionalSettings
               showGasLimitWarning={true}
               gasError={gasError}
               rootBalanceStore={rootBalanceStore}
               rootDenomsStore={rootDenomsStore}
             />
-          </div>
+          </View>
         )}
-      </div>
+      </View>
       <Button
-        onClick={onClose}
+        onPress={onClose}
         disabled={gasError !== null}
-        className='w-full'
-        data-testing-id='send-tx-fee-proceed-btn'
+        style={styles.fullWidth}
+        testID="send-tx-fee-proceed-btn"
       >
         Confirm and proceed
       </Button>
     </BottomModal>
   );
 };
+
+const styles = StyleSheet.create({
+  column: {
+    flexDirection: 'column',
+    width: '100%',
+  },
+  gap8: {
+    gap: 32,
+    marginBottom: 40,
+  },
+  gap5: {
+    gap: 20,
+    marginBottom: 24,
+  },
+  infoText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#26292E', // text-secondary-800
+    marginBottom: 0,
+  },
+  additionalSettingsBox: {
+    width: '100%',
+    flexDirection: 'column',
+    borderWidth: 1,
+    borderColor: '#F4F4F6', // border-secondary-200
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderRadius: 18,
+    overflow: 'hidden',
+    backgroundColor: '#fff',
+  },
+  fullWidth: {
+    width: '100%',
+  },
+});
+
+export default FeesSettingsSheet;

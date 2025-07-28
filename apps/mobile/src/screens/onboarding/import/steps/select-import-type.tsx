@@ -1,5 +1,4 @@
 import { IconProps } from '@phosphor-icons/react';
-import { buttonRingClass } from 'components/ui/button';
 import { EyeIcon } from 'icons/eye-icon';
 import { KeyIcon } from 'icons/key';
 import { LedgerDriveIcon } from 'icons/ledger-icon';
@@ -22,7 +21,7 @@ const ImportTypeButton = (props: {
       onClick={props.onClick}
       className={cn(
         'bg-secondary-200 hover:bg-secondary-400 transition-colors w-full p-5 text-start rounded-xl font-bold text-md flex items-center gap-4',
-        buttonRingClass,
+        ' ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none focus-visible:ring-accent-success/50',
         props.className,
       )}
     >

@@ -1,11 +1,25 @@
 import React from 'react';
-
-import Loader from '../loader/Loader';
+import { View, StyleSheet } from 'react-native';
+import Loader from '../loader/Loader'; // assumed to be RN-compatible
 
 export function AppInitLoader() {
   return (
-    <div className='absolute inset-0 z-10 bg-background flex flex-col items-center justify-center panel-height'>
+    <View style={styles.container}>
       <Loader />
-    </div>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 10,
+    backgroundColor: '#ffffff', // or use themed background if available
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});

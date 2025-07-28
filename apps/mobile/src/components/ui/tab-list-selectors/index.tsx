@@ -1,85 +1,138 @@
-import { motion } from 'framer-motion';
-import React, { forwardRef, useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, LayoutChangeEvent, Dimensions } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 
-const TabButton = forwardRef<HTMLButtonElement, { children: React.ReactNode; onClick: () => void; active?: boolean }>(
-  (props, ref) => {
-    return (
-      <button ref={ref} className={'text-xs font-bold text-foreground py-2 px-4 rounded-full'} onClick={props.onClick}>
-        {props.children}
-      </button>
-    );
-  },
+type TabButtonProps = {
+  children: React.ReactNode;
+  onPress: () => void;
+  active?: boolean;
+  style?: any;
+};
+
+const TabButton = ({ children, onPress, active, style }: TabButtonProps) => (
+  <TouchableOpacity
+    onPress={onPress}
+    style={[
+      styles.tabButton,
+      active && styles.tabButtonActive,
+      style,
+    ]}
+    activeOpacity={0.7}
+  >
+    <Text style={[styles.tabText, active && styles.tabTextActive]}>{children}</Text>
+  </TouchableOpacity>
 );
 
-TabButton.displayName = 'TabButton';
-
-const transition = { duration: 0.2, ease: 'easeInOut' };
-
-export const TabSelectors = ({
-  selectedIndex,
-  buttons,
-}: {
+type TabSelectorsProps = {
   selectedIndex: number;
-  buttons: {
-    label: string;
-    onClick: () => void;
-  }[];
-}) => {
-  const [slider, setSlider] = useState({ left: 0, right: 0, width: 0, height: 0, hasValue: false });
-  const containerRef = useRef<HTMLDivElement>(null);
-  const childRefs = useRef(new Map());
+  buttons: { label: string; onClick: () => void }[];
+};
 
-  useEffect(() => {
-    const target = childRefs.current.get(selectedIndex);
-    const container = containerRef.current;
-    if (!target || !container) {
-      return;
-    }
+export const TabSelectors = ({ selectedIndex, buttons }: TabSelectorsProps) => {
+  const [tabsLayout, setTabsLayout] = useState<{ x: number; width: number }[]>([]);
+  const highlightX = useSharedValue(0);
+  const highlightWidth = useSharedValue(0);
 
-    const cRect = container.getBoundingClientRect();
-
-    // when container is `display: none`, width === 0.
-    // ignore this case
-    if (cRect.width === 0) {
-      return;
-    }
-
-    const tRect = target.getBoundingClientRect();
-    const left = tRect.left - cRect.left;
-    const right = cRect.right - tRect.right;
-
-    setSlider({
-      hasValue: true,
-      left: left,
-      right: right,
-      width: tRect.width - 1,
-      height: tRect.height - 1,
+  // Set position/width on tab layout
+  const onTabLayout = (idx: number) => (e: LayoutChangeEvent) => {
+    const { x, width } = e.nativeEvent.layout;
+    setTabsLayout((prev) => {
+      const copy = [...prev];
+      copy[idx] = { x, width };
+      return copy;
     });
-  }, [childRefs, selectedIndex]);
+    // If it's the selected tab, animate the highlight
+    if (idx === selectedIndex) {
+      highlightX.value = withTiming(x, { duration: 200 });
+      highlightWidth.value = withTiming(width, { duration: 200 });
+    }
+  };
+
+  // Update highlight on selectedIndex change
+  React.useEffect(() => {
+    if (tabsLayout[selectedIndex]) {
+      highlightX.value = withTiming(tabsLayout[selectedIndex].x, { duration: 200 });
+      highlightWidth.value = withTiming(tabsLayout[selectedIndex].width, { duration: 200 });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedIndex, tabsLayout.length]);
+
+  const highlightStyle = useAnimatedStyle(() => ({
+    left: highlightX.value,
+    width: highlightWidth.value,
+  }));
 
   return (
-    <div ref={containerRef} className='relative flex items-center bg-secondary-300 rounded-full p-px isolate'>
-      {buttons.map((button, index) => (
-        <TabButton
-          ref={(ref) => childRefs.current.set(index, ref)}
-          key={button.label}
-          active={index === selectedIndex}
-          onClick={button.onClick}
-        >
-          {button.label}
-        </TabButton>
-      ))}
+    <View style={styles.container}>
+      <View style={styles.tabsRow}>
+        {/* Animated highlight */}
+        {tabsLayout[selectedIndex] && (
+          <Animated.View
+            style={[
+              styles.highlight,
+              highlightStyle,
+            ]}
+          />
+        )}
 
-      <motion.div
-        className='absolute bg-secondary rounded-full -z-10'
-        layoutId='tab-button-highlight'
-        hidden={!slider.hasValue}
-        initial={false}
-        animate={slider}
-        transition={transition}
-      />
-    </div>
+        {buttons.map((button, idx) => (
+          <View key={button.label} onLayout={onTabLayout(idx)} style={{ flex: 1 }}>
+            <TabButton
+              onPress={button.onClick}
+              active={idx === selectedIndex}
+            >
+              {button.label}
+            </TabButton>
+          </View>
+        ))}
+      </View>
+    </View>
   );
 };
 
-TabSelectors.displayName = 'TabSelectors';
+const styles = StyleSheet.create({
+  container: {
+    padding: 2,
+    borderRadius: 999,
+    backgroundColor: '#E6EAEF', // bg-secondary-300
+    position: 'relative',
+    overflow: 'visible',
+  },
+  tabsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 999,
+    position: 'relative',
+    minHeight: 36,
+  },
+  tabButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 999,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minWidth: 64,
+    zIndex: 1,
+  },
+  tabButtonActive: {
+    // Text color change only, highlight is animated View behind
+  },
+  tabText: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    color: '#232323',
+  },
+  tabTextActive: {
+    color: '#26c06f', // accent color for active tab
+  },
+  highlight: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    borderRadius: 999,
+    backgroundColor: '#F3F7F6', // bg-secondary
+    zIndex: 0,
+    marginVertical: 2,
+    // Will animate left/width
+  },
+});

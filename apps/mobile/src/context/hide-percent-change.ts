@@ -1,6 +1,6 @@
-import { PERCENT_CHANGE_24HR_HIDDEN } from 'config/storage-keys';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { PERCENT_CHANGE_24HR_HIDDEN } from '../services/config/storage-keys';
 import { makeAutoObservable } from 'mobx';
-import Browser from 'webextension-polyfill';
 
 export class HidePercentChangeStore {
   isHidden = false;
@@ -12,14 +12,21 @@ export class HidePercentChangeStore {
   }
 
   private async initHidePercentChange() {
-    const storage = await Browser.storage.local.get(PERCENT_CHANGE_24HR_HIDDEN);
-    const val = storage[PERCENT_CHANGE_24HR_HIDDEN];
-    this.setHidden(!!val);
+    try{
+      const val = await AsyncStorage.getItem(PERCENT_CHANGE_24HR_HIDDEN);
+      this.setHidden(val === 'true');
+    } catch (e) {
+      
+    }
   }
 
-  setHidden(val: boolean) {
+  setHidden = async (val: boolean) => {
     this.isHidden = val;
-    Browser.storage.local.set({ [PERCENT_CHANGE_24HR_HIDDEN]: val });
+    try {
+      await AsyncStorage.setItem(PERCENT_CHANGE_24HR_HIDDEN, val ? 'true' : 'false');
+    } catch (e) {
+      
+    }
   }
 }
 

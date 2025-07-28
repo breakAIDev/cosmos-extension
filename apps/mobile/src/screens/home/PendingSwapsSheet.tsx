@@ -1,6 +1,6 @@
 import { ActivityCardContent, ActivityType } from '@leapwallet/cosmos-wallet-hooks';
 import { SKIP_TXN_STATUS, TXN_STATUS } from '@leapwallet/elements-core';
-import BottomModal from 'components/bottom-modal';
+import BottomModal from '../bottom-modal';
 import { ActivityCard } from 'pages/activity/components/ActivityCard';
 import React, { Dispatch, SetStateAction } from 'react';
 import { TxStoreObject } from 'utils/pendingSwapsTxsStore';

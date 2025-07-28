@@ -1,3 +1,10 @@
+import React, { useCallback, useMemo } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { observer } from 'mobx-react-lite';
+
+import BottomModal from '../bottom-modal';
+import { Colors } from '../../theme/colors';
+
 import {
   AdjustmentType,
   formatTokenAmount,
@@ -9,15 +16,9 @@ import {
 } from '@leapwallet/cosmos-wallet-hooks';
 import { fromSmall, NativeDenom, SupportedChain, toSmall } from '@leapwallet/cosmos-wallet-sdk';
 import { RootDenomsStore } from '@leapwallet/cosmos-wallet-store';
-import { Buttons, ThemeName, useTheme } from '@leapwallet/leap-ui';
-import { ArrowRight } from '@phosphor-icons/react';
-import BottomModal from 'components/bottom-modal';
-import { observer } from 'mobx-react-lite';
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Colors } from 'theme/colors';
 
-type AutoAdjustAmountSheetProps = {
+// ---- Optional Sheet ----
+type OptionalAutoAdjustAmountSheetProps = {
   onCancel: () => void;
   onAdjust: () => void;
   isOpen: boolean;
@@ -26,14 +27,20 @@ type AutoAdjustAmountSheetProps = {
   setAmount: (amount: string) => void;
   nativeDenom: NativeDenom;
   decimalsToUse?: number;
+  onBack: () => void;
 };
 
-const OptionalAutoAdjustAmountSheet: React.FC<
-  AutoAdjustAmountSheetProps & {
-    onBack: () => void;
-  }
-> = ({ isOpen, tokenAmount, feeAmount, setAmount, nativeDenom, onAdjust, onCancel, onBack, decimalsToUse }) => {
-  const { theme } = useTheme();
+const OptionalAutoAdjustAmountSheet = ({
+  onCancel,
+  onAdjust,
+  isOpen,
+  tokenAmount,
+  feeAmount,
+  setAmount,
+  nativeDenom,
+  decimalsToUse,
+  onBack,
+}: OptionalAutoAdjustAmountSheetProps) => {
   const updatedAmount = useMemo(() => {
     return getAutoAdjustAmount({
       tokenAmount,
@@ -54,7 +61,6 @@ const OptionalAutoAdjustAmountSheet: React.FC<
 
   const displayTokenAmount = useMemo(() => {
     const displayString = fromSmall(tokenAmount, decimalsToUse ?? 6);
-
     return formatTokenAmount(displayString, nativeDenom?.coinDenom ?? '', Math.min(decimalsToUse ?? 6, 6));
   }, [decimalsToUse, nativeDenom?.coinDenom, tokenAmount]);
 
@@ -62,70 +68,73 @@ const OptionalAutoAdjustAmountSheet: React.FC<
     if (updatedAmount) {
       return formatTokenAmount(updatedAmount, nativeDenom?.coinDenom ?? '', Math.min(decimalsToUse ?? 6, 6));
     }
-
     return null;
   }, [decimalsToUse, nativeDenom?.coinDenom, updatedAmount]);
-
-  return null;
 
   return (
     <BottomModal
       isOpen={isOpen}
-      title='Adjust for Transaction Fees'
+      title="Adjust for Transaction Fees"
       closeOnBackdropClick={true}
       onClose={onCancel}
       onActionButtonClick={onBack}
-      containerClassName={'!max-panel-height'}
-      contentClassName='!bg-white-100 dark:!bg-gray-950'
-      className='p-6'
     >
-      <p className='text-gray-200 font-medium mb-6'>
+      <Text style={styles.grayText}>
         Confirming this transaction may leave you with insufficient {nativeDenom?.coinDenom ?? ''} balance for future
         transaction fees.
-      </p>
+      </Text>
 
-      <div className='rounded-2xl p-4 dark:bg-gray-900 bg-gray-50 mb-6'>
-        <p className='text-sm text-white-100 font-bold mb-4'>Should we auto-adjust the amount?</p>
+      <View style={styles.infoBox}>
+        <Text style={styles.infoBoxTitle}>Should we auto-adjust the amount?</Text>
+        <View style={styles.amountRow}>
+          <Text style={[styles.amount, { textAlign: 'right' }]}>{displayTokenAmount}</Text>
+          <Text style={styles.arrow}>{'→'}</Text>
+          <Text style={[styles.amount, { color: Colors.green600 || '#22C55E' }]}>{displayUpdatedAmount}</Text>
+        </View>
+      </View>
 
-        <div className='flex items-center rounded-xl p-4 dark:bg-gray-850 bg-gray-100 gap-4'>
-          <div className='flex-1 text-right text-sm text-white-100 font-bold'>{displayTokenAmount}</div>
-
-          <ArrowRight size={24} className='text-gray-400' />
-          <div className='flex-1 text-sm text-green-500 font-bold'>{displayUpdatedAmount}</div>
-        </div>
-      </div>
-
-      <div className='flex items-center gap-6 mt-auto'>
-        <Buttons.Generic
-          color={theme === ThemeName.DARK ? Colors.gray900 : Colors.gray300}
-          size='normal'
-          className='w-full'
-          title="Don't adjust"
-          onClick={onCancel}
+      <View style={styles.buttonRow}>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: Colors.gray300 || '#E5E7EB' }]}
+          onPress={onCancel}
         >
-          Cancel
-        </Buttons.Generic>
-
-        <Buttons.Generic
-          color={Colors.green600}
-          size='normal'
-          className='w-full'
-          title='Proceed'
-          onClick={handleAdjust}
+          <Text style={styles.buttonText}>Don't adjust</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: Colors.green600 || '#22C55E' }]}
+          onPress={handleAdjust}
         >
-          Proceed
-        </Buttons.Generic>
-      </div>
+          <Text style={[styles.buttonText, { color: '#fff' }]}>Proceed</Text>
+        </TouchableOpacity>
+      </View>
     </BottomModal>
   );
 };
 
-const CompulsoryAutoAdjustAmountSheet: React.FC<
-  AutoAdjustAmountSheetProps & {
-    tokenBalance: string;
-  }
-> = ({ isOpen, tokenAmount, tokenBalance, feeAmount, setAmount, nativeDenom, onAdjust, onCancel, decimalsToUse }) => {
-  const { theme } = useTheme();
+// ---- Compulsory Sheet ----
+type CompulsoryAutoAdjustAmountSheetProps = {
+  onCancel: () => void;
+  onAdjust: () => void;
+  isOpen: boolean;
+  tokenAmount: string;
+  tokenBalance: string;
+  feeAmount: string;
+  setAmount: (amount: string) => void;
+  nativeDenom: NativeDenom;
+  decimalsToUse?: number;
+};
+
+const CompulsoryAutoAdjustAmountSheet = ({
+  onCancel,
+  onAdjust,
+  isOpen,
+  tokenAmount,
+  tokenBalance,
+  feeAmount,
+  setAmount,
+  nativeDenom,
+  decimalsToUse,
+}: CompulsoryAutoAdjustAmountSheetProps) => {
   const updatedAmount = useMemo(() => {
     return getAutoAdjustAmount({
       tokenAmount: tokenBalance,
@@ -146,7 +155,6 @@ const CompulsoryAutoAdjustAmountSheet: React.FC<
 
   const displayTokenAmount = useMemo(() => {
     const displayString = fromSmall(tokenAmount, decimalsToUse ?? 6);
-
     return formatTokenAmount(displayString, nativeDenom?.coinDenom ?? '', Math.min(decimalsToUse ?? 6, 6));
   }, [decimalsToUse, nativeDenom?.coinDenom, tokenAmount]);
 
@@ -154,58 +162,43 @@ const CompulsoryAutoAdjustAmountSheet: React.FC<
     if (updatedAmount) {
       return formatTokenAmount(updatedAmount, nativeDenom?.coinDenom ?? '', Math.min(decimalsToUse ?? 6, 6));
     }
-
     return null;
   }, [decimalsToUse, nativeDenom?.coinDenom, updatedAmount]);
-
-  return null;
 
   return (
     <BottomModal
       isOpen={isOpen}
       onClose={onCancel}
       closeOnBackdropClick={false}
-      title='Adjust for Transaction Fees'
-      containerClassName={'!bg-white-100 dark:!bg-gray-950 !max-panel-height'}
-      contentClassName='!bg-white-100 dark:!bg-gray-950'
-      className='p-6'
+      title="Adjust for Transaction Fees"
     >
-      <p className='text-gray-200 font-medium mb-6'>
+      <Text style={styles.grayText}>
         You seem to have insufficient {nativeDenom?.coinDenom ?? ''} balance to pay transaction fees.
-      </p>
+      </Text>
 
-      <div className='rounded-2xl p-4 dark:bg-gray-900 bg-gray-50 mb-6'>
-        <p className='text-sm text-white-100 font-bold mb-4'>Should we auto-adjust the amount?</p>
+      <View style={styles.infoBox}>
+        <Text style={styles.infoBoxTitle}>Should we auto-adjust the amount?</Text>
+        <View style={styles.amountRow}>
+          <Text style={[styles.amount, { textAlign: 'right' }]}>{displayTokenAmount}</Text>
+          <Text style={styles.arrow}>{'→'}</Text>
+          <Text style={[styles.amount, { color: Colors.green600 || '#22C55E' }]}>{displayUpdatedAmount}</Text>
+        </View>
+      </View>
 
-        <div className='flex items-center rounded-xl p-4 dark:bg-gray-850 bg-gray-100 gap-4'>
-          <div className='flex-1 text-right text-sm text-white-100 font-bold'>{displayTokenAmount}</div>
-
-          <ArrowRight size={24} className='text-gray-400' />
-          <div className='flex-1 text-sm text-green-500 font-bold'>{displayUpdatedAmount}</div>
-        </div>
-      </div>
-
-      <div className='flex items-center gap-6 mt-auto'>
-        <Buttons.Generic
-          color={theme === ThemeName.DARK ? Colors.gray900 : Colors.gray300}
-          size='normal'
-          className='w-full'
-          title="Don't adjust"
-          onClick={onCancel}
+      <View style={styles.buttonRow}>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: Colors.gray300 || '#E5E7EB' }]}
+          onPress={onCancel}
         >
-          Cancel
-        </Buttons.Generic>
-
-        <Buttons.Generic
-          color={Colors.green600}
-          size='normal'
-          className='w-full'
-          title='Proceed'
-          onClick={handleAdjust}
+          <Text style={styles.buttonText}>Don't adjust</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: Colors.green600 || '#22C55E' }]}
+          onPress={handleAdjust}
         >
-          Proceed
-        </Buttons.Generic>
-      </div>
+          <Text style={[styles.buttonText, { color: '#fff' }]}>Proceed</Text>
+        </TouchableOpacity>
+      </View>
     </BottomModal>
   );
 };
@@ -226,112 +219,137 @@ type ObserverAutoAdjustAmountSheetProps = {
   forceNetwork?: 'mainnet' | 'testnet';
 };
 
-export const AutoAdjustAmountSheet = observer(
-  ({
-    amount,
-    setAmount,
-    selectedToken,
-    fee,
-    setShowReviewSheet,
-    closeAdjustmentSheet,
-    rootDenomsStore,
-    forceChain,
-    forceNetwork,
-  }: ObserverAutoAdjustAmountSheetProps) => {
-    const chainInfo = useChainInfo(forceChain);
-    const denoms = rootDenomsStore.allDenoms;
-    const shouldShowAutoAdjustSheet = useShouldShowAutoAdjustSheet(denoms, forceChain, forceNetwork);
-    const navigate = useNavigate();
+// ---- Main observer wrapper ----
+export const AutoAdjustAmountSheet = observer(({
+  amount,
+  setAmount,
+  selectedToken,
+  fee,
+  setShowReviewSheet,
+  closeAdjustmentSheet,
+  rootDenomsStore,
+  forceChain,
+  forceNetwork,
+}: ObserverAutoAdjustAmountSheetProps) => {
+  const chainInfo = useChainInfo(forceChain);
+  const denoms = rootDenomsStore.allDenoms;
+  const shouldShowAutoAdjustSheet = useShouldShowAutoAdjustSheet(denoms, forceChain, forceNetwork);
 
-    const nativeDenom = useMemo(() => {
-      if (chainInfo.beta) {
-        return Object.values(chainInfo.nativeDenoms)[0];
-      }
+  const nativeDenom = useMemo(() => {
+    if (chainInfo.beta) {
+      return Object.values(chainInfo.nativeDenoms)[0];
+    }
+    const key = getKeyToUseForDenoms(selectedToken.coinMinimalDenom, selectedToken.chain ?? '');
+    return denoms[key];
+  }, [chainInfo.beta, chainInfo.nativeDenoms, denoms, selectedToken.chain, selectedToken.coinMinimalDenom]);
 
-      const key = getKeyToUseForDenoms(selectedToken.coinMinimalDenom, selectedToken.chain ?? '');
-      return denoms[key];
-    }, [chainInfo.beta, chainInfo.nativeDenoms, denoms, selectedToken.chain, selectedToken.coinMinimalDenom]);
+  const allowReview = useCallback(() => {
+    closeAdjustmentSheet();
+    setShowReviewSheet(true);
+  }, [closeAdjustmentSheet, setShowReviewSheet]);
 
-    const allowReview = useCallback(() => {
-      closeAdjustmentSheet();
-      setShowReviewSheet(true);
-    }, [closeAdjustmentSheet, setShowReviewSheet]);
+  const decimalsToUse = useMemo(() => nativeDenom?.coinDecimals ?? 6, [nativeDenom?.coinDecimals]);
+  const tokenBalance = useMemo(
+    () => toSmall(selectedToken?.amount ?? '0', decimalsToUse),
+    [decimalsToUse, selectedToken?.amount]
+  );
+  const tokenAmount = useMemo(
+    () => toSmall(amount, decimalsToUse),
+    [amount, decimalsToUse]
+  );
 
-    const handleCompulsoryCancel = useCallback(() => {
-      closeAdjustmentSheet();
-      navigate('/home');
-    }, [closeAdjustmentSheet, navigate]);
+  const adjustmentType = useMemo(() => {
+    return shouldShowAutoAdjustSheet({
+      feeAmount: fee.amount,
+      feeDenom: fee.denom,
+      tokenAmount,
+      tokenDenom: selectedToken.coinMinimalDenom,
+      tokenBalance,
+    });
+  }, [fee.amount, fee.denom, selectedToken.coinMinimalDenom, shouldShowAutoAdjustSheet, tokenAmount, tokenBalance]);
 
-    const decimalsToUse = useMemo(() => {
-      return nativeDenom?.coinDecimals ?? 6;
-    }, [nativeDenom?.coinDecimals]);
+  return (
+    <>
+      <OptionalAutoAdjustAmountSheet
+        isOpen={adjustmentType === AdjustmentType.OPTIONAL}
+        nativeDenom={nativeDenom}
+        tokenAmount={tokenAmount}
+        feeAmount={fee.amount}
+        setAmount={setAmount}
+        onBack={closeAdjustmentSheet}
+        onAdjust={allowReview}
+        onCancel={allowReview}
+        decimalsToUse={decimalsToUse}
+      />
+      <CompulsoryAutoAdjustAmountSheet
+        isOpen={adjustmentType === AdjustmentType.COMPULSORY}
+        nativeDenom={nativeDenom}
+        tokenAmount={tokenAmount}
+        tokenBalance={tokenBalance}
+        feeAmount={fee.amount}
+        setAmount={setAmount}
+        onAdjust={allowReview}
+        onCancel={closeAdjustmentSheet}
+        decimalsToUse={decimalsToUse}
+      />
+    </>
+  );
+});
 
-    const tokenBalance = useMemo(
-      () => toSmall(selectedToken?.amount ?? '0', decimalsToUse),
-      [decimalsToUse, selectedToken?.amount],
-    );
-
-    const tokenAmount = useMemo(() => toSmall(amount, decimalsToUse), [amount, decimalsToUse]);
-
-    const adjustmentType = useMemo(() => {
-      return shouldShowAutoAdjustSheet({
-        feeAmount: fee.amount,
-        feeDenom: fee.denom,
-        tokenAmount: tokenAmount,
-        tokenDenom: selectedToken.coinMinimalDenom,
-        tokenBalance: tokenBalance,
-      });
-    }, [fee.amount, fee.denom, selectedToken.coinMinimalDenom, shouldShowAutoAdjustSheet, tokenAmount, tokenBalance]);
-
-    useEffect(() => {
-      let updatedAmount;
-      if (adjustmentType === AdjustmentType.OPTIONAL) {
-        updatedAmount = getAutoAdjustAmount({
-          tokenAmount,
-          feeAmount: fee.amount,
-          nativeDenom,
-          decimalsToUse,
-        });
-      } else if (adjustmentType === AdjustmentType.COMPULSORY) {
-        updatedAmount = getAutoAdjustAmount({
-          tokenAmount: tokenBalance,
-          feeAmount: fee.amount,
-          nativeDenom,
-          decimalsToUse,
-        });
-      }
-      if (updatedAmount) {
-        setAmount(updatedAmount);
-      }
-      allowReview();
-    }, [adjustmentType, allowReview, decimalsToUse, fee.amount, nativeDenom, setAmount, tokenAmount, tokenBalance]);
-
-    return (
-      <>
-        <OptionalAutoAdjustAmountSheet
-          isOpen={adjustmentType === AdjustmentType.OPTIONAL}
-          nativeDenom={nativeDenom}
-          tokenAmount={tokenAmount}
-          feeAmount={fee.amount}
-          setAmount={setAmount}
-          onBack={closeAdjustmentSheet}
-          onAdjust={allowReview}
-          onCancel={allowReview}
-          decimalsToUse={decimalsToUse}
-        />
-
-        <CompulsoryAutoAdjustAmountSheet
-          isOpen={adjustmentType === AdjustmentType.COMPULSORY}
-          nativeDenom={nativeDenom}
-          tokenAmount={tokenAmount}
-          tokenBalance={tokenBalance}
-          feeAmount={fee.amount}
-          setAmount={setAmount}
-          onAdjust={allowReview}
-          onCancel={handleCompulsoryCancel}
-          decimalsToUse={decimalsToUse}
-        />
-      </>
-    );
+// ---- Styles ----
+const styles = StyleSheet.create({
+  grayText: {
+    color: Colors.gray400 || '#9CA3AF',
+    fontSize: 16,
+    fontWeight: '500',
+    marginBottom: 16,
   },
-);
+  infoBox: {
+    borderRadius: 18,
+    padding: 16,
+    backgroundColor: Colors.gray50 || '#F9FAFB',
+    marginBottom: 16,
+  },
+  infoBoxTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: Colors.gray800 || '#1F2937',
+    marginBottom: 10,
+  },
+  amountRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.gray100 || '#F3F4F6',
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 0,
+  },
+  amount: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '700',
+    color: Colors.gray800 || '#1F2937',
+  },
+  arrow: {
+    fontSize: 24,
+    color: Colors.gray400 || '#9CA3AF',
+    marginHorizontal: 8,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 18,
+  },
+  button: {
+    flex: 1,
+    borderRadius: 8,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginHorizontal: 2,
+  },
+  buttonText: {
+    fontWeight: '600',
+    fontSize: 16,
+    color: Colors.gray800 || '#1F2937',
+  },
+});

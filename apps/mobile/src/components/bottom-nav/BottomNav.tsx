@@ -1,14 +1,12 @@
-import { useChainsStore, useFeatureFlags } from '@leapwallet/cosmos-wallet-hooks';
+import React, { useCallback, useMemo, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { ThemeName, useTheme } from '@leapwallet/leap-ui';
 import { ArrowsLeftRight, CurrencyDollar, Pulse, Wallet } from '@phosphor-icons/react';
-import classNames from 'classnames';
-import { LEAPBOARD_URL } from 'config/constants';
-import { useActiveChain } from 'hooks/settings/useActiveChain';
-import { Images } from 'images';
+import { useActiveChain } from '../../hooks/settings/useActiveChain';
 import { observer } from 'mobx-react-lite';
-import BottomNavIcon from 'pages/alpha/components/BottomNavIcon';
-import React, { useCallback, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import BottomNavIcon from '../../screens/alpha/components/BottomNavIcon';
+import { useChainsStore, useFeatureFlags } from '@leapwallet/cosmos-wallet-hooks';
 
 export enum BottomNavLabel {
   Home = 'Home',
@@ -17,8 +15,8 @@ export enum BottomNavLabel {
   Activity = 'Activity',
   Governance = 'Governance',
   Earn = 'Earn',
-  Airdrops = 'Airdrops', // temporary deprecated
-  Rewards = 'Rewards', // current successor to airdrops
+  Airdrops = 'Airdrops', // deprecated
+  Rewards = 'Rewards',   // current successor to airdrops
   Swap = 'Swap',
   Search = 'Search',
 }
@@ -30,7 +28,7 @@ type BottomNavProps = {
 
 const BottomNav = observer(({ label, disabled: disabledAll }: BottomNavProps) => {
   const [selected, setSelected] = useState(label);
-  const navigate = useNavigate();
+  const navigation = useNavigation();
   const activeChain = useActiveChain();
   const { chains } = useChainsStore();
   const activeChainInfo = chains[activeChain];
@@ -39,13 +37,22 @@ const BottomNav = observer(({ label, disabled: disabledAll }: BottomNavProps) =>
   const isDark = theme === ThemeName.DARK;
 
   const alphaRedirectHandler = useCallback(() => {
-    const redirectUrl = `${LEAPBOARD_URL}/airdrops`; // todo: change to alpha once added on leapboard
-    window.open(redirectUrl, '_blank');
+    const redirectUrl = 'https://leapboard.app/airdrops';
+    // On mobile, open in browser
+    if (Platform.OS === 'web') {
+      window.open(redirectUrl, '_blank');
+    } else {
+      // Use expo-linking or similar
+    }
   }, []);
 
   const stakeRedirectForInitiaHandler = useCallback(() => {
-    const redirectUrl = `https://app.testnet.initia.xyz/stake`;
-    window.open(redirectUrl, '_blank');
+    const redirectUrl = 'https://app.testnet.initia.xyz/stake';
+    if (Platform.OS === 'web') {
+      window.open(redirectUrl, '_blank');
+    } else {
+      // Use expo-linking or similar
+    }
   }, []);
 
   const bottomNavItems = useMemo(() => {
@@ -55,37 +62,37 @@ const BottomNav = observer(({ label, disabled: disabledAll }: BottomNavProps) =>
     return [
       {
         label: BottomNavLabel.Home,
-        icon: <Wallet size={22} weight='fill' />,
-        path: '/home',
+        icon: <Wallet size={22} weight="fill" />,
+        route: 'Home', // should match your navigator route name
         show: true,
       },
       {
         label: BottomNavLabel.Stake,
-        icon: <CurrencyDollar size={22} weight='fill' />,
-        path: '/stake?pageSource=bottomNav',
+        icon: <CurrencyDollar size={22} weight="fill" />,
+        route: 'Stake',
         show: true,
         disabled: activeChainInfo?.disableStaking || activeChainInfo?.evmOnlyChain,
         redirectHandler: stakeRedirectForInitiaHandler,
       },
       {
         label: BottomNavLabel.Swap,
-        icon: <ArrowsLeftRight size={22} weight='bold' />,
-        path: '/swap?pageSource=bottomNav',
+        icon: <ArrowsLeftRight size={22} weight="bold" />,
+        route: 'Swap',
         show: true,
         disabled: isSwapDisabled,
       },
       {
         label: BottomNavLabel.Rewards,
         icon: <BottomNavIcon />,
-        path: '/alpha',
+        route: 'Alpha',
         show: featureFlags?.airdrops?.extension !== 'disabled',
         shouldRedirect: featureFlags?.airdrops?.extension === 'redirect',
         redirectHandler: alphaRedirectHandler,
       },
       {
         label: BottomNavLabel.Activity,
-        icon: <Pulse size={22} weight='fill' />,
-        path: '/activity',
+        icon: <Pulse size={22} weight="fill" />,
+        route: 'Activity',
         show: true,
       },
     ];
@@ -100,70 +107,136 @@ const BottomNav = observer(({ label, disabled: disabledAll }: BottomNavProps) =>
   ]);
 
   return (
-    <div className='flex absolute justify-around bottom-0 h-[65px] w-full rounded-b-lg z-[0] bg-white-100 dark:bg-gray-950 shadow-[0_-8px_20px_0px_rgba(0,0,0,0.04)] dark:shadow-[0_-8px_20px_0px_rgba(0,0,0,0.26)]'>
-      <Images.Nav.BottomNav
-        fill={isDark ? '#141414' : '#FFF'}
-        stroke={isDark ? '#2C2C2C' : '#E8E8E8'}
-        className='absolute bottom-0'
-      />
-      {bottomNavItems
-        .filter(({ show }) => show)
-        .map(({ label, icon, path, shouldRedirect, redirectHandler, disabled }, idx) => {
-          const isDisabled = disabledAll || disabled;
-          return (
-            <div
-              key={`${label}_${idx}`}
-              onClick={() => {
-                if (isDisabled) return;
-                if (shouldRedirect === true && redirectHandler) {
-                  redirectHandler();
-                  return;
-                }
-                setSelected(label);
-                navigate(path);
-              }}
-              className={classNames('flex flex-1 justify-center items-center cursor-pointer relative', {
-                '!cursor-not-allowed': isDisabled,
-              })}
-            >
-              {selected === label ? <div className='w-full h-1 bg-green-600 rounded-b absolute top-0'></div> : null}
-              <div className='flex flex-col items-center justify-center'>
-                {label === BottomNavLabel.Swap ? (
-                  <div
-                    style={{ fontSize: 24 }}
-                    className={classNames('mt-[-20px] w-10 h-10 rounded-full flex items-center justify-center', {
-                      'bg-green-600 text-white-100': !isDisabled,
-                      'bg-gray-100 text-gray-400 dark:bg-gray-900 dark:text-gray-600': isDisabled,
-                    })}
-                  >
-                    {icon}
-                  </div>
-                ) : (
-                  <div
-                    style={{ fontSize: 20 }}
-                    className={classNames({
-                      'text-black-100 dark:text-white-100': selected === label,
-                      'text-gray-400 dark:text-gray-600': selected !== label,
-                    })}
-                  >
-                    {icon}
-                  </div>
-                )}
-                <div
-                  className={classNames('text-xs font-bold mt-1', {
-                    'text-black-100 dark:text-white-100': selected === label && !isDisabled,
-                    'text-gray-400 dark:text-gray-600': selected !== label && !isDisabled,
-                    'text-[#D3D3D3] dark:text-[#2C2C2C]': isDisabled,
-                  })}
-                >
-                  {label}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-    </div>
+    <View style={[
+      styles.navContainer,
+      { backgroundColor: isDark ? '#0A0A0A' : '#fff' }
+    ]}>
+      {/* {Images.Nav.BottomNav ...} // For background shape, adapt as RN SVG or Image if needed */}
+      <View style={styles.navRow}>
+        {bottomNavItems
+          .filter(({ show }) => show)
+          .map(({ label: navLabel, icon, route, shouldRedirect, redirectHandler, disabled }, idx) => {
+            const isDisabled = disabledAll || disabled;
+            const isSelected = selected === navLabel;
+            return (
+              <TouchableOpacity
+                key={`${navLabel}_${idx}`}
+                style={styles.navButton}
+                activeOpacity={isDisabled ? 1 : 0.7}
+                onPress={() => {
+                  if (isDisabled) return;
+                  if (shouldRedirect === true && redirectHandler) {
+                    redirectHandler();
+                    return;
+                  }
+                  setSelected(navLabel);
+                  // For navigation, adapt as needed for your stack/tab navigator
+                  // @ts-ignore
+                  navigation.navigate(route);
+                }}
+                disabled={isDisabled}
+              >
+                {isSelected ? <View style={styles.selectedIndicator} /> : null}
+                <View style={styles.iconLabelContainer}>
+                  {navLabel === BottomNavLabel.Swap ? (
+                    <View style={[
+                      styles.swapIcon,
+                      !isDisabled
+                        ? { backgroundColor: '#22C55E' } // green-600
+                        : { backgroundColor: isDark ? '#111827' : '#F3F4F6' }
+                    ]}>
+                      {icon}
+                    </View>
+                  ) : (
+                    <View>
+                      {React.cloneElement(
+                        icon as React.ReactElement<any>,
+                        {
+                          color: isSelected
+                            ? (isDark ? '#fff' : '#111827')
+                            : (isDark ? '#6B7280' : '#9CA3AF')
+                        }
+                      )}
+                    </View>
+                  )}
+                  <Text style={[
+                    styles.label,
+                    isDisabled
+                      ? { color: isDark ? '#2C2C2C' : '#D3D3D3' }
+                      : isSelected
+                        ? { color: isDark ? '#fff' : '#111827' }
+                        : { color: isDark ? '#6B7280' : '#9CA3AF' }
+                  ]}>
+                    {navLabel}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+      </View>
+    </View>
   );
+});
+
+const styles = StyleSheet.create({
+  navContainer: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    height: 65,
+    borderBottomLeftRadius: 14,
+    borderBottomRightRadius: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -8 },
+    shadowOpacity: 0.04,
+    shadowRadius: 20,
+    elevation: 8,
+    zIndex: 0,
+    // If you want darker shadow in dark mode, adjust in JS
+  },
+  navRow: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'flex-end',
+  },
+  navButton: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    position: 'relative',
+    paddingVertical: 7,
+  },
+  selectedIndicator: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 4,
+    backgroundColor: '#22C55E',
+    borderBottomLeftRadius: 4,
+    borderBottomRightRadius: 4,
+    zIndex: 2,
+  },
+  iconLabelContainer: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  swapIcon: {
+    fontSize: 24,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginTop: -20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  label: {
+    fontWeight: 'bold',
+    fontSize: 12,
+    marginTop: 4,
+  },
 });
 
 export default BottomNav;

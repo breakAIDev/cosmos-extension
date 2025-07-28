@@ -1,31 +1,86 @@
-import { CardDivider } from '@leapwallet/leap-ui';
-import { Images } from 'images';
 import React from 'react';
-import Skeleton from 'react-loading-skeleton';
+import { View, StyleSheet, Image } from 'react-native';
+import SkeletonContent from 'react-native-skeleton-content';
 
-export default function GovCardSkeleton({ isLast, aggregatedView }: { isLast: boolean; aggregatedView?: boolean }) {
+export default function GovCardSkeleton({ isLast, aggregatedView }) {
+  // Replace with your actual image asset
+  const rightArrow = require('../../../assets/images/right-arrow.png');
+
   if (aggregatedView) {
     return (
-      <div className='w-full p-3 min-w-[344px] flex flex-col items-start rounded-xl justify-start gap-1 bg-white-100 dark:bg-gray-950 !h-[112px]'>
-        <Skeleton count={1} height={12} width={70} containerClassName='!block !leading-none h-[14px]' />
-        <Skeleton count={1} height={20} containerClassName='!block !leading-none w-full' />
-        <Skeleton count={1} height={20} containerClassName='!block !leading-none w-full' />
-        <Skeleton count={1} height={14} width={100} containerClassName='!block !leading-none h-[16px]' />
-      </div>
+      <View style={styles.aggregatedContainer}>
+        <SkeletonContent
+          isLoading
+          layout={[
+            { key: 'line1', width: 70, height: 12, borderRadius: 4, marginBottom: 6 },
+            { key: 'line2', width: '100%', height: 20, borderRadius: 4, marginBottom: 6 },
+            { key: 'line3', width: '100%', height: 20, borderRadius: 4, marginBottom: 6 },
+            { key: 'line4', width: 100, height: 14, borderRadius: 4 },
+          ]}
+          containerStyle={{ width: '100%' }}
+        />
+      </View>
     );
   }
 
   return (
     <>
-      <div className='flex-1 p-4 min-w-[344px] flex flex-row items-center justify-between'>
-        <div className='flex flex-col items-start justify-center gap-[4px]'>
-          <Skeleton count={1} height={18} width={270} containerClassName='!block !leading-none' />
-          <Skeleton count={1} height={18} width={270} containerClassName='!block !leading-none' />
-          <Skeleton count={1} height={14} width={100} containerClassName='!block !leading-none h-[16px] mt-[4px]' />
-        </div>
-        <img className='ml-5' src={Images.Misc.RightArrow} />
-      </div>
-      {!isLast ? <CardDivider /> : null}
+      <View style={styles.rowContainer}>
+        <View style={styles.leftCol}>
+          <SkeletonContent
+            isLoading
+            layout={[
+              { key: 'row1', width: 270, height: 18, borderRadius: 4, marginBottom: 4 },
+              { key: 'row2', width: 270, height: 18, borderRadius: 4, marginBottom: 4 },
+              { key: 'row3', width: 100, height: 14, borderRadius: 4, marginTop: 4 },
+            ]}
+            containerStyle={{ width: 270 }}
+          />
+        </View>
+        <Image
+          source={rightArrow}
+          style={styles.arrow}
+          resizeMode="contain"
+        />
+      </View>
+      {!isLast && <View style={styles.divider} />}
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  aggregatedContainer: {
+    width: '100%',
+    minWidth: 344,
+    minHeight: 112,
+    padding: 12,
+    borderRadius: 16,
+    backgroundColor: '#fff', // You can use dark mode logic here if needed
+    marginBottom: 10,
+  },
+  rowContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minWidth: 344,
+    padding: 16,
+    justifyContent: 'space-between',
+    flex: 1,
+    backgroundColor: '#fff', // You can use dark mode logic here if needed
+  },
+  leftCol: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: 4,
+  },
+  arrow: {
+    marginLeft: 20,
+    width: 24,
+    height: 24,
+    tintColor: '#C5C5C5', // optional: adapt as you like
+  },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#e0e0e0',
+    marginHorizontal: 16,
+  },
+});

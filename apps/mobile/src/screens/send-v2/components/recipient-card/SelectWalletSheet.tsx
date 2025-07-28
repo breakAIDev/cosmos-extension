@@ -1,6 +1,6 @@
 import { Key, useChainInfo, useGetChains, WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks';
 import { CheckCircle } from '@phosphor-icons/react';
-import BottomModal from 'components/bottom-modal';
+import BottomModal from '../bottom-modal';
 import Text from 'components/text';
 import { WALLET_NAME_SLICE_LENGTH } from 'config/constants';
 import { useChainPageInfo } from 'hooks';

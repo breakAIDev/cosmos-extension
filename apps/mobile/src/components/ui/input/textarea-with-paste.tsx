@@ -1,43 +1,107 @@
 import React from 'react';
-import { UserClipboard } from 'utils/clipboard';
-import { cn } from 'utils/cn';
+import { View, TextInput, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import Clipboard from '@react-native-clipboard/clipboard'; // yarn add @react-native-clipboard/clipboard
 
-import { buttonRingClass } from '../button';
-import { Textarea } from './textarea';
-
-type TextareaWithPasteProps = Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, 'onChange'> & {
+type TextareaWithPasteProps = {
   value: string;
   onChange: (value: string) => void;
   error?: string;
+  placeholder?: string;
+  autoFocus?: boolean;
+  style?: any;
 };
 
-export const TextareaWithPaste = ({ error, onChange, ...props }: TextareaWithPasteProps) => {
+export const TextareaWithPaste = ({
+  error,
+  value,
+  onChange,
+  placeholder,
+  autoFocus,
+  style,
+}: TextareaWithPasteProps) => {
+  const handlePaste = async () => {
+    const text = await Clipboard.getString();
+    if (text) onChange(text);
+  };
+
   return (
-    <div className='relative'>
-      <Textarea
-        className='w-full h-[9.375rem] resize-none'
-        status={error ? 'error' : undefined}
-        onChange={(e) => onChange(e.target.value)}
-        {...props}
+    <View style={styles.container}>
+      <TextInput
+        style={[
+          styles.textarea,
+          error && styles.errorBorder,
+          style,
+        ]}
+        value={value}
+        onChangeText={onChange}
+        placeholder={placeholder}
+        autoFocus={autoFocus}
+        multiline
+        textAlignVertical="top"
+        placeholderTextColor="#97A3B9"
       />
 
-      <button
-        tabIndex={props.value ? -1 : 0}
-        className={cn(
-          'absolute bottom-4 right-3 bg-secondary text-sm font-medium px-[0.625rem] leading-6 text-muted-foreground rounded-lg hover:text-foreground transition-[color,opacity] h-[1.625rem]',
-          props.value ? 'opacity-0  pointer-events-none' : 'opacity-100',
-          buttonRingClass,
-        )}
-        onClick={async (e) => {
-          e.preventDefault();
-          const text = await UserClipboard.pasteText();
-          if (text) {
-            onChange?.(text);
-          }
-        }}
-      >
-        Paste
-      </button>
-    </div>
+      {value.length === 0 && (
+        <TouchableOpacity
+          style={styles.pasteButton}
+          onPress={handlePaste}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.pasteText}>Paste</Text>
+        </TouchableOpacity>
+      )}
+
+      {error && (
+        <Text style={styles.errorText}>{error}</Text>
+      )}
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    position: 'relative',
+    width: '100%',
+    marginBottom: 6,
+  },
+  textarea: {
+    width: '100%',
+    minHeight: 150,
+    borderRadius: 14,
+    padding: 14,
+    fontSize: 16,
+    backgroundColor: '#F3F7F6',
+    borderWidth: 1,
+    borderColor: '#E3F9EC',
+  },
+  errorBorder: {
+    borderColor: '#E2655A',
+  },
+  pasteButton: {
+    position: 'absolute',
+    bottom: 16,
+    right: 16,
+    backgroundColor: '#F7F9FA',
+    paddingHorizontal: 10,
+    paddingVertical: 2,
+    borderRadius: 8,
+    height: 26,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.03,
+    shadowRadius: 1,
+  },
+  pasteText: {
+    color: '#97A3B9',
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  errorText: {
+    color: '#E2655A',
+    fontSize: 13,
+    textAlign: 'center',
+    marginTop: 8,
+    fontWeight: '500',
+  },
+});

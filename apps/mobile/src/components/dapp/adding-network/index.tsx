@@ -1,35 +1,93 @@
-import Text from 'components/text';
+import Text from '../../text';
 import React from 'react';
-import { ReactNode } from 'react';
+import { View, StyleSheet, useColorScheme } from 'react-native';
 
 type KeyProps = {
-  readonly children: ReactNode;
+  readonly children: React.ReactNode;
 };
 
 export function Key({ children }: KeyProps) {
   return (
-    <Text size='sm' className='font-bold'>
+    <Text size="sm" style={styles.key}>
       {children}
     </Text>
   );
 }
 
 export function Value({ children }: KeyProps) {
+  const colorScheme = useColorScheme();
   return (
-    <Text size='xs' color='text-gray-700 dark:text-gray-300 -mt-1 break-all'>
+    <Text
+      size="xs"
+      style={[
+        styles.value,
+        { color: colorScheme === 'dark' ? '#D1D5DB' : '#374151' }, // gray-300 (dark) / gray-700 (light)
+      ]}
+    >
       {children}
     </Text>
   );
 }
 
 export function KeyNew({ children }: KeyProps) {
-  return <div className='text-sm font-medium !leading-[22px] text-muted-foreground'>{children}</div>;
+  return (
+    <Text
+      size="sm"
+      style={styles.keyNew}
+    >
+      {children}
+    </Text>
+  );
 }
 
 export function ValueNew({ children }: KeyProps) {
-  return <div className='text-md font-bold !leading-[22px] text-foreground break-all'>{children}</div>;
+  return (
+    <Text
+      size="md"
+      style={styles.valueNew}
+    >
+      {children}
+    </Text>
+  );
 }
 
-export const Divider = (
-  <div className='my-0.5 border-[0.05px] border-solid border-white-100 dark:border-gray-800 opacity-50' />
-);
+export function Divider() {
+  const colorScheme = useColorScheme();
+  return (
+    <View
+      style={[
+        styles.divider,
+        {
+          borderBottomColor: colorScheme === 'dark' ? '#1E293B' : '#F3F4F6', // gray-800 or white-100
+        },
+      ]}
+    />
+  );
+}
+
+const styles = StyleSheet.create({
+  key: {
+    fontWeight: 'bold',
+  },
+  value: {
+    marginTop: -4, // -mt-1 ~ -4px
+    flexWrap: 'wrap',
+  },
+  keyNew: {
+    fontWeight: '500',
+    lineHeight: 22,
+    color: '#6B7280', // muted-foreground (adjust as needed)
+  },
+  valueNew: {
+    fontWeight: 'bold',
+    fontSize: 16, // 'md'
+    lineHeight: 22,
+    color: '#111827', // foreground (adjust as needed)
+    flexWrap: 'wrap',
+  },
+  divider: {
+    marginVertical: 2, // my-0.5 ~ 2px
+    borderBottomWidth: 0.5,
+    opacity: 0.5,
+  },
+});

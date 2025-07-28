@@ -1,7 +1,7 @@
 import { StdFee } from '@cosmjs/stargate';
 import { sliceAddress } from '@leapwallet/cosmos-wallet-hooks';
 import { Avatar, Buttons, Card, CardDivider, Memo } from '@leapwallet/leap-ui';
-import BottomModal from 'components/bottom-modal';
+import BottomModal from '../bottom-modal';
 import { ErrorCard } from 'components/ErrorCard';
 import LedgerConfirmationPopup from 'components/ledger-confirmation/LedgerConfirmationPopup';
 import { LoaderAnimation } from 'components/loader/Loader';

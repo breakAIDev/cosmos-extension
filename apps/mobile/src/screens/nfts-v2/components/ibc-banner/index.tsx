@@ -9,7 +9,7 @@ import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import classNames from 'classnames';
 import { ActionInputWithPreview } from 'components/action-input-with-preview';
 import Tooltip from 'components/better-tooltip';
-import BottomModal from 'components/bottom-modal';
+import BottomModal from '../bottom-modal';
 import DisclosureContainer from 'components/disclosure-container';
 import { LoaderAnimation } from 'components/loader/Loader';
 import RadioGroup from 'components/radio-group';

@@ -1,127 +1,166 @@
-'use client';
+import React from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, GestureResponderEvent, ViewProps } from 'react-native';
+import Modal from 'react-native-modal';
 
-import * as React from 'react';
-import { cn } from 'utils/cn';
-import { Drawer as DrawerPrimitive } from 'vaul';
-
-type DrawerProps = React.ComponentProps<typeof DrawerPrimitive.Root> & {
-  shouldScaleBackground?: boolean;
-  container?: HTMLElement;
-};
-
-const Drawer = ({ shouldScaleBackground = false, container, ...props }: DrawerProps) => {
-  const containerEl = container ?? (document.getElementById('popup-layout')?.parentNode as HTMLElement);
-
-  return (
-    <DrawerPrimitive.Root
-      shouldScaleBackground={shouldScaleBackground}
-      container={containerEl}
-      handleOnly={true}
-      {...props}
-    />
-  );
-};
-Drawer.displayName = 'Drawer';
-
-const DrawerTrigger = DrawerPrimitive.Trigger;
-
-const DrawerPortal = DrawerPrimitive.Portal;
-
-const DrawerClose = DrawerPrimitive.Close;
-
-type DrawerOverlayProps = React.ComponentProps<typeof DrawerPrimitive.Overlay> & {
-  className?: string;
-};
-
-const DrawerOverlay = React.forwardRef<React.ElementRef<'div'>, DrawerOverlayProps>(({ className, ...props }, ref) => (
-  <DrawerPrimitive.Overlay ref={ref} className={cn('absolute inset-0 z-50 bg-background/90', className)} {...props} />
-));
-DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName;
-
-type DrawerContentProps = React.ComponentProps<typeof DrawerPrimitive.Content> & {
-  className?: string;
-  overlayClassName?: string;
+type DrawerProps = {
+  visible: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
   showHandle?: boolean;
+  overlayStyle?: object;
+  contentStyle?: object;
+  hideOverlay?: boolean;
 };
 
-const DrawerContent = React.forwardRef<React.ElementRef<'div'>, DrawerContentProps>(
-  ({ className, children, showHandle = true, overlayClassName, ...props }, ref) => (
-    <DrawerPortal>
-      <DrawerOverlay className={overlayClassName} />
-      <DrawerPrimitive.Content
-        ref={ref}
-        className={cn(
-          'overflow-hidden rounded-t-3xl absolute inset-x-0 bottom-0 z-50 flex h-auto flex-col outline-none border-none ring-0',
-          className,
-        )}
-        {...props}
-        /**
-         * Added below to avoid the console warnings in vaul 1.1.2:
-         * https://github.com/unovue/vaul-vue/issues/79
-         */
-        aria-describedby={undefined}
-      >
+export function Drawer({
+  visible,
+  onClose,
+  children,
+  showHandle = true,
+  overlayStyle,
+  contentStyle,
+  hideOverlay,
+}: DrawerProps) {
+  return (
+    <Modal
+      isVisible={visible}
+      onBackdropPress={onClose}
+      onSwipeComplete={onClose}
+      swipeDirection={['down']}
+      backdropTransitionOutTiming={0}
+      style={styles.modal}
+      backdropOpacity={hideOverlay ? 0 : 0.4}
+      backdropColor="#000"
+      animationIn="slideInUp"
+      animationOut="slideOutDown"
+      useNativeDriver
+      propagateSwipe
+      avoidKeyboard
+    >
+      <View style={[styles.drawerContent, contentStyle]}>
         {showHandle && (
-          <DrawerPrimitive.Handle className='mx-auto !mt-1 !bg-transparent !h-auto !opacity-100 [&>span]:h-1 [&>span]:!relative [&>span]:!inset-auto [&>span]:!transform-none [&>span]:!w-12 [&>span]:rounded-full [&>span]:bg-secondary-600 [&>span]:block hover:[&>span]:bg-secondary-800 [&>span]:!transition-colors [&>span]:!cursor-pointer' />
+          <View style={styles.handleContainer}>
+            <View style={styles.handleBar} />
+          </View>
         )}
         {children}
-      </DrawerPrimitive.Content>
-    </DrawerPortal>
-  ),
-);
-DrawerContent.displayName = 'DrawerContent';
+      </View>
+    </Modal>
+  );
+}
 
-type DrawerHeaderProps = React.HTMLAttributes<HTMLDivElement> & {
-  className?: string;
+type DrawerHeaderProps = {
+  children: React.ReactNode;
+  style?: object;
 };
+export function DrawerHeader({ children, style }: DrawerHeaderProps) {
+  return <View style={[styles.header, style]}>{children}</View>;
+}
 
-const DrawerHeader = ({ className, ...props }: DrawerHeaderProps) => (
-  <div className={cn('grid gap-1.5 py-[6px] px-3 text-center sm:text-left', className)} {...props} />
-);
-DrawerHeader.displayName = 'DrawerHeader';
-
-type DrawerFooterProps = React.HTMLAttributes<HTMLDivElement> & {
-  className?: string;
+type DrawerFooterProps = {
+  children: React.ReactNode;
+  style?: object;
 };
+export function DrawerFooter({ children, style }: DrawerFooterProps) {
+  return <View style={[styles.footer, style]}>{children}</View>;
+}
 
-const DrawerFooter = ({ className, ...props }: DrawerFooterProps) => (
-  <div className={cn('mt-auto flex flex-col gap-2 p-4', className)} {...props} />
-);
-DrawerFooter.displayName = 'DrawerFooter';
-
-type DrawerTitleProps = React.ComponentProps<typeof DrawerPrimitive.Title> & {
-  className?: string;
+type DrawerTitleProps = {
+  children: React.ReactNode;
+  style?: object;
 };
+export function DrawerTitle({ children, style }: DrawerTitleProps) {
+  return <Text style={[styles.title, style]}>{children}</Text>;
+}
 
-const DrawerTitle = React.forwardRef<React.ElementRef<'h3'>, DrawerTitleProps>(({ className, ...props }, ref) => (
-  <DrawerPrimitive.Title
-    ref={ref}
-    className={cn('text-lg font-semibold leading-none tracking-tight', className)}
-    {...props}
-  />
-));
-DrawerTitle.displayName = DrawerPrimitive.Title.displayName;
-
-type DrawerDescriptionProps = React.ComponentProps<typeof DrawerPrimitive.Description> & {
-  className?: string;
+type DrawerDescriptionProps = {
+  children: React.ReactNode;
+  style?: object;
 };
+export function DrawerDescription({ children, style }: DrawerDescriptionProps) {
+  return <Text style={[styles.description, style]}>{children}</Text>;
+}
 
-const DrawerDescription = React.forwardRef<React.ElementRef<'p'>, DrawerDescriptionProps>(
-  ({ className, ...props }, ref) => (
-    <DrawerPrimitive.Description ref={ref} className={cn('text-sm text-muted-foreground', className)} {...props} />
-  ),
-);
-DrawerDescription.displayName = DrawerPrimitive.Description.displayName;
-
-export {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerOverlay,
-  DrawerPortal,
-  DrawerTitle,
-  DrawerTrigger,
+type DrawerCloseProps = {
+  onPress: (e: GestureResponderEvent) => void;
+  children?: React.ReactNode;
+  style?: object;
 };
+export function DrawerClose({ onPress, children, style }: DrawerCloseProps) {
+  return (
+    <TouchableOpacity style={[styles.closeButton, style]} onPress={onPress}>
+      {children || <Text style={styles.closeButtonText}>Close</Text>}
+    </TouchableOpacity>
+  );
+}
+
+const styles = StyleSheet.create({
+  modal: {
+    justifyContent: 'flex-end',
+    margin: 0,
+  },
+  drawerContent: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingBottom: 24,
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    minHeight: 80,
+    maxHeight: '90%',
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 10,
+  },
+  handleContainer: {
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  handleBar: {
+    width: 48,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#e0e0e0',
+    marginTop: 4,
+    marginBottom: 10,
+  },
+  header: {
+    paddingVertical: 8,
+    paddingHorizontal: 2,
+    alignItems: 'center',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#eee',
+    marginBottom: 8,
+  },
+  footer: {
+    paddingTop: 12,
+    alignItems: 'center',
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#eee',
+    marginTop: 8,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginVertical: 6,
+  },
+  description: {
+    fontSize: 14,
+    color: '#888',
+    textAlign: 'center',
+    marginVertical: 2,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 14,
+    right: 20,
+    zIndex: 2,
+    padding: 6,
+  },
+  closeButtonText: {
+    color: '#3664F4',
+    fontSize: 15,
+  },
+});

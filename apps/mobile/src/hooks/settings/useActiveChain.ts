@@ -10,24 +10,33 @@ import {
 } from '@leapwallet/cosmos-wallet-hooks';
 import { ChainInfo, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { useQueryClient } from '@tanstack/react-query';
-import { AGGREGATED_CHAIN_KEY } from 'config/constants';
-import { ACTIVE_CHAIN, KEYSTORE, LAST_EVM_ACTIVE_CHAIN } from 'config/storage-keys';
-import { useSetNetwork } from 'hooks/settings/useNetwork';
-import { useChainInfos } from 'hooks/useChainInfos';
+import { AGGREGATED_CHAIN_KEY } from '../../services/config/constants';
+import {
+  ACTIVE_CHAIN,
+  KEYSTORE,
+  LAST_EVM_ACTIVE_CHAIN,
+} from '../../services/config/storage-keys';
+import { useSetNetwork } from './useNetwork';
+import { useChainInfos } from '../useChainInfos';
 import { useEffect, useState } from 'react';
-import { rootStore } from 'stores/root-store';
-import { AggregatedSupportedChain } from 'types/utility';
-import { sendMessageToTab } from 'utils';
-import browser from 'webextension-polyfill';
+import { rootStore } from '../../context/root-store';
+import { AggregatedSupportedChain } from '../../types/utility';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import useActiveWallet, { useUpdateKeyStore } from './useActiveWallet';
 import { useHandleWatchWalletChainSwitch } from './useHandleWWChainSwitch';
 import { useIsAllChainsEnabled } from './useIsAllChainsEnabled';
 
+/**
+ * Use the current active chain (from global wallet hooks).
+ */
 export function useActiveChain(): SupportedChain {
   return useActiveChainWalletHooks();
 }
 
+/**
+ * Returns a function that sets the active chain and does all needed updates.
+ */
 export function useSetActiveChain() {
   const chainInfos = useGetChains();
   const { setPendingTx } = usePendingTxState();
@@ -39,43 +48,54 @@ export function useSetActiveChain() {
   const setLastEvmActiveChain = useSetLastEvmActiveChain();
   const queryClient = useQueryClient();
 
-  return async (chain: AggregatedSupportedChain, chainInfo?: ChainInfo, forceNetwork?: 'mainnet' | 'testnet') => {
-    const storage = await browser.storage.local.get(['networkMap', KEYSTORE, ACTIVE_CHAIN]);
-    if (chain !== AGGREGATED_CHAIN_KEY) {
-      const keystore = storage[KEYSTORE];
-      if (keystore) {
-        const shouldUpdateKeystore = Object.keys(keystore).some((key) => {
-          const wallet = keystore[key];
-          return wallet && !wallet.watchWallet && (!wallet.addresses[chain] || !wallet.pubKeys?.[chain]);
-        });
-        if (activeWallet && shouldUpdateKeystore) {
-          const updatedKeystore = await updateKeyStore(activeWallet, chain);
-          await setActiveWallet(updatedKeystore[activeWallet.id] as Key);
-        }
+  return async (
+    chain: AggregatedSupportedChain,
+    chainInfo?: ChainInfo,
+    forceNetwork?: 'mainnet' | 'testnet',
+  ) => {
+    // Read from AsyncStorage in parallel
+    const [
+      networkMapRaw,
+      keystoreRaw,
+      activeChainRaw,
+    ] = await Promise.all([
+      AsyncStorage.getItem('networkMap'),
+      AsyncStorage.getItem(KEYSTORE),
+      AsyncStorage.getItem(ACTIVE_CHAIN),
+    ]);
+    const networkMap = networkMapRaw ? JSON.parse(networkMapRaw) : {};
+    const keystore = keystoreRaw ? JSON.parse(keystoreRaw) : {};
+
+    if (chain !== AGGREGATED_CHAIN_KEY && keystore) {
+      const shouldUpdateKeystore = Object.keys(keystore).some((key) => {
+        const wallet = keystore[key];
+        return wallet && !wallet.watchWallet && (!wallet.addresses[chain] || !wallet.pubKeys?.[chain]);
+      });
+      if (activeWallet && shouldUpdateKeystore) {
+        const updatedKeystore = await updateKeyStore(activeWallet, chain);
+        await setActiveWallet(updatedKeystore[activeWallet.id] as Key);
       }
     }
 
     await queryClient.cancelQueries();
     setActiveChain(chain as SupportedChain);
     rootStore.setActiveChain(chain);
-    await browser.storage.local.set({ [ACTIVE_CHAIN]: chain });
+    await AsyncStorage.setItem(ACTIVE_CHAIN, chain);
     setPendingTx(null);
 
+    // Handle network setting for EVM and special cases
     if (chain !== AGGREGATED_CHAIN_KEY) {
-      const networkMap = JSON.parse(storage.networkMap ?? '{}');
       const _chainInfo = chainInfos[chain] || chainInfo;
-      let _network: SelectedNetworkType = 'mainnet';
 
       if (chain === 'seiDevnet') {
         setNetwork('mainnet');
       } else {
         if (_chainInfo?.evmOnlyChain) {
           setLastEvmActiveChain(chain);
-          browser.storage.local.set({ [LAST_EVM_ACTIVE_CHAIN]: chain });
+          await AsyncStorage.setItem(LAST_EVM_ACTIVE_CHAIN, chain);
         }
 
         if (forceNetwork) {
-          _network = forceNetwork;
           setNetwork(forceNetwork);
         } else if (networkMap[chain]) {
           let network = networkMap[chain];
@@ -91,26 +111,23 @@ export function useSetActiveChain() {
 
           if (hasChainOnlyTestnet && network !== 'testnet') {
             network = 'testnet';
-            _network = 'testnet';
           }
-
           setNetwork(network);
         } else if (_chainInfo && _chainInfo?.apis?.rpc) {
           setNetwork('mainnet');
         } else if (_chainInfo && _chainInfo?.apis?.rpcTest) {
           setNetwork('testnet');
-          _network = 'testnet';
         }
       }
-
-      const chainId = (_network === 'testnet' ? _chainInfo?.evmChainIdTestnet : _chainInfo?.evmChainId) ?? '';
-      await sendMessageToTab({ event: 'chainChanged', data: chainId });
     } else {
       setNetwork('mainnet');
     }
   };
 }
 
+/**
+ * Initialize the active chain on app startup or when enabled.
+ */
 export function useInitActiveChain(enabled: boolean) {
   const chainInfos = useChainInfos();
   const chains = useGetChains();
@@ -118,19 +135,21 @@ export function useInitActiveChain(enabled: boolean) {
   const setLastEvmActiveChain = useSetLastEvmActiveChain();
   const isAllChainsEnabled = useIsAllChainsEnabled();
 
-  const [isActiveChainInitialized, setIsActiveChainInitialized] = useState<boolean>(false);
+  const [isActiveChainInitialized, setIsActiveChainInitialized] = useState(false);
 
   useEffect(() => {
-    browser.storage.local.get([ACTIVE_CHAIN, LAST_EVM_ACTIVE_CHAIN]).then((storage) => {
-      if (!enabled) {
-        return;
-      }
+    async function init() {
+      const [activeChainRaw, lastEvmActiveChainRaw] = await Promise.all([
+        AsyncStorage.getItem(ACTIVE_CHAIN),
+        AsyncStorage.getItem(LAST_EVM_ACTIVE_CHAIN),
+      ]);
+      if (!enabled) return;
 
-      let activeChain: SupportedChain = storage[ACTIVE_CHAIN];
+      let activeChain: SupportedChain = (activeChainRaw as SupportedChain) || undefined;
       const leapFallbackChain = AGGREGATED_CHAIN_KEY as SupportedChain;
-
       const defaultActiveChain = leapFallbackChain;
-      setLastEvmActiveChain(storage[LAST_EVM_ACTIVE_CHAIN] ?? 'ethereum');
+
+      setLastEvmActiveChain((lastEvmActiveChainRaw as SupportedChain) ?? 'ethereum');
 
       if ((activeChain as AggregatedSupportedChain) === AGGREGATED_CHAIN_KEY && isAllChainsEnabled) {
         setActiveChain(activeChain);
@@ -146,8 +165,8 @@ export function useInitActiveChain(enabled: boolean) {
       setActiveChain(activeChain);
       rootStore.setActiveChain(activeChain);
       setIsActiveChainInitialized(true);
-    });
-
+    }
+    init();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chainInfos, chains, isAllChainsEnabled, enabled]);
 

@@ -7,7 +7,7 @@ import {
 } from '@leapwallet/cosmos-wallet-hooks';
 import { getEthereumAddress, pubKeyToEvmAddressToShow, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { SHOW_ETH_ADDRESS_CHAINS } from 'config/constants';
-import useActiveWallet from './settings/useActiveWallet';
+import useActiveWallet from 'hooks/settings/useActiveWallet';
 import { useMemo } from 'react';
 
 export function useGetWalletAddresses(forceChain?: SupportedChain) {

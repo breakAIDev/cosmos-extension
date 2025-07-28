@@ -1,6 +1,6 @@
-import { STARRED_CHAINS } from 'config/storage-keys';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { STARRED_CHAINS } from '../services/config/storage-keys';
 import { makeAutoObservable } from 'mobx';
-import Browser from 'webextension-polyfill';
 
 export class StarredChainsStore {
   chains: string[] = [];
@@ -12,31 +12,26 @@ export class StarredChainsStore {
   }
 
   async initStarredChains() {
-    const storage = await Browser.storage.local.get([STARRED_CHAINS]);
-    const prevStarredChains = storage[STARRED_CHAINS];
-
-    if (prevStarredChains) {
-      this.chains = JSON.parse(prevStarredChains) ?? [];
-      return;
+    try {
+      const prevStarredChains = await AsyncStorage.getItem(STARRED_CHAINS);
+      if (prevStarredChains) {
+        this.chains = JSON.parse(prevStarredChains) ?? [];
+        return;
+      }
+      this.chains = [];
+    } catch (err) {
+      this.chains = [];
     }
-
-    this.chains = [];
   }
 
-  addStarredChain(chain: string) {
+  async addStarredChain(chain: string) {
     this.chains.push(chain);
-
-    return Browser.storage.local.set({
-      [STARRED_CHAINS]: JSON.stringify(this.chains),
-    });
+    await AsyncStorage.setItem(STARRED_CHAINS, JSON.stringify(this.chains));
   }
 
-  removeStarredChain(chain: string) {
+  async removeStarredChain(chain: string) {
     this.chains = this.chains.filter((f) => f !== chain);
-
-    return Browser.storage.local.set({
-      [STARRED_CHAINS]: JSON.stringify(this.chains),
-    });
+    await AsyncStorage.setItem(STARRED_CHAINS, JSON.stringify(this.chains));
   }
 }
 

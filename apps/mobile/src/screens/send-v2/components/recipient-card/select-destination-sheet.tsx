@@ -2,7 +2,7 @@ import { SelectedAddress, useChainsStore } from '@leapwallet/cosmos-wallet-hooks
 import { isAptosChain } from '@leapwallet/cosmos-wallet-sdk';
 import { isBitcoinChain } from '@leapwallet/cosmos-wallet-store/dist/utils';
 import classNames from 'classnames';
-import BottomModal from 'components/bottom-modal';
+import BottomModal from '../bottom-modal';
 import { useSendContext } from 'pages/send-v2/context';
 import React, { useEffect, useState } from 'react';
 

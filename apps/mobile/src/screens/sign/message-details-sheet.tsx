@@ -1,7 +1,7 @@
 import { useChainApis } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk/dist/browser/constants';
 import { ParsedMessage, ParsedMessageType } from '@leapwallet/parser-parfait';
-import BottomModal from 'components/bottom-modal';
+import BottomModal from '../bottom-modal';
 import DisclosureContainer from 'components/disclosure-container';
 import { LoaderAnimation } from 'components/loader/Loader';
 import React from 'react';

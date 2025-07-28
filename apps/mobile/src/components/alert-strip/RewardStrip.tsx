@@ -1,22 +1,25 @@
-import HCaptcha from '@hcaptcha/react-hcaptcha';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { View, Image, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import Text from '../../components/text';
 import { useAddress } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { ArrowRight, CheckCircle } from '@phosphor-icons/react';
-import { captureException } from '@sentry/react';
+import LottieView from 'lottie-react-native';
+import ArrowRight from 'react-native-vector-icons/Feather';
+import CheckCircle from 'react-native-vector-icons/Feather';
+import { useNavigation } from '@react-navigation/native';
+import { Images } from '../../../assets/images';
+import loadingAnimation from '../../../assets/lottie-files/swaps-btn-loading.json'; // adjust path if needed
 import axios from 'axios';
-import classNames from 'classnames';
-import Text from 'components/text';
-import useActiveWallet from 'hooks/settings/useActiveWallet';
-import { useQueryParams } from 'hooks/useQuery';
-import { Images } from 'images';
-import loadingImage from 'lottie-files/swaps-btn-loading.json';
-import Lottie from 'lottie-react';
+import { captureException } from '@sentry/react-native'; // or omit
 import { observer } from 'mobx-react-lite';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { activeChainStore } from 'stores/active-chain-store';
-import { chainInfoStore } from 'stores/chain-infos-store';
-import { rootBalanceStore } from 'stores/root-store';
-import { isSidePanel } from 'utils/isSidePanel';
+import useActiveWallet from '../../hooks/settings/useActiveWallet';
+import { useQueryParams } from '../../hooks/useQuery';
+import { activeChainStore } from '../../context/active-chain-store';
+import { chainInfoStore } from '../../context/chain-infos-store';
+import { rootBalanceStore } from '../../context/root-store';
+
+// You'd need to replace hCaptcha with a real React Native solution (e.g. WebView hack, or alternative)
+const HCaptcha = React.forwardRef((_props, ref) => null);
 
 const faucetsURL = `${process.env.LEAP_WALLET_BACKEND_API_URL}/faucets`;
 const showFaucetsForChain: string[] = [];
@@ -39,21 +42,22 @@ type EligibilityData = {
   eligible: boolean;
   code: 'ELIGIBLE' | 'ALREADY_CLAIMED' | 'CAPACITY_FULL' | 'IP_LIMIT_REACHED' | 'PENDING_CLAIM_EXISTS';
 };
+
 const MAX_TRIES = 20;
 
 const RewardStrip = observer(() => {
   const activeChain = activeChainStore.activeChain;
   const chainInfos = chainInfoStore.chainInfos;
-
   const { activeWallet } = useActiveWallet();
   const activeChainAddress = useAddress();
+  const navigation = useNavigation();
   const query = useQueryParams();
-
   const activeWalletId = activeWallet?.id;
   const chain = chainInfos[activeChain as SupportedChain];
   const faucetSupported = showFaucetsForChain.includes(chain?.chainId ?? '');
 
-  const hCaptchaRef = useRef<HCaptcha>(null);
+  // hCaptcha stub (see notes above)
+  const hCaptchaRef = useRef<any>(null);
 
   const [faucet, setFaucet] = useState<Faucet>();
   const [eligibility, setEligibility] = useState<EligibilityData>({
@@ -101,13 +105,13 @@ const RewardStrip = observer(() => {
   }, []);
 
   const claimRewards = useCallback(
-    async (captcha_token: string) => {
+    async (_captcha_token: string) => {
       try {
         const response = await axios.post(`${faucetsURL}/v2/claim`, {
           wallet: activeWalletId,
           wallet_address: activeChainAddress,
           faucet_id: faucet?.faucet_id,
-          captcha_token,
+          captcha_token: 'dummy', // Replace with real token if using WebView-based hCaptcha
         });
         if (response.status === 200) {
           setEligibility({
@@ -127,12 +131,8 @@ const RewardStrip = observer(() => {
                 code: 'ALREADY_CLAIMED',
               });
               setSuccessClaim(true);
-              setTimeout(() => {
-                setSuccessClaim(false);
-              }, 3000);
-              setTimeout(() => {
-                rootBalanceStore.refetchBalances();
-              }, 3000);
+              setTimeout(() => setSuccessClaim(false), 3000);
+              setTimeout(() => rootBalanceStore.refetchBalances(), 3000);
             }
           }, 2000);
         }
@@ -140,7 +140,7 @@ const RewardStrip = observer(() => {
         captureException(error);
       }
     },
-    [activeChainAddress, activeWalletId, checkClaimStatus, faucet?.faucet_id, rootBalanceStore],
+    [activeChainAddress, activeWalletId, checkClaimStatus, faucet?.faucet_id],
   );
 
   const handleSubmit = useCallback(async () => {
@@ -152,20 +152,12 @@ const RewardStrip = observer(() => {
       query.set('faucet-error', 'You have reached the maximum limit to claim tokens.');
       return;
     }
-    if (eligibility.eligible && !faucetInactive && !!hCaptchaRef.current) {
+    if (eligibility.eligible && !faucetInactive) {
       try {
-        const result = await hCaptchaRef.current?.execute({ async: true });
-        const token = hCaptchaRef.current.getResponse();
-        if (!result) {
-          throw new Error('could not get hCaptcha response');
-        }
-
-        claimRewards(token);
+        // This is a stub. Use a real hCaptcha RN solution in production!
+        claimRewards('dummy-captcha-token');
       } catch (error) {
-        const errMsg = error instanceof Error ? error.message : error;
-        if (!(errMsg as string)?.includes?.('challenge-')) {
-          captureException(error);
-        }
+        captureException(error);
       }
     }
   }, [claimRewards, eligibility.code, eligibility.eligible, faucetInactive, query]);
@@ -174,23 +166,19 @@ const RewardStrip = observer(() => {
     if (faucetSupported) {
       fetchData();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [faucetSupported]);
+  }, [faucetSupported, fetchData]);
 
   useEffect(() => {
     if (faucet?.chain_id) {
       checkEligibility();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [faucet?.chain_id, activeChainAddress]);
+  }, [faucet?.chain_id, activeChainAddress, checkEligibility]);
 
   const titleText = useMemo(() => {
     if (faucetInactive) {
       return (
         <>
-          Are you ready for more Mantra missions?
-          <br />
-          Stay tuned...
+          Are you ready for more Mantra missions?{'\n'}Stay tuned...
         </>
       );
     }
@@ -199,50 +187,45 @@ const RewardStrip = observer(() => {
     } else {
       return (
         <>
-          You’ve claimed your exclusive OMLY tokens.
-          {!isSidePanel() ? <br /> : ' '}
-          Stay tuned for more!
+          You’ve claimed your exclusive OMLY tokens.{'\n'}Stay tuned for more!
         </>
       );
     }
   }, [eligibility.code, faucetInactive, successClaim]);
 
-  if (!faucetSupported || !faucet) {
-    return null;
-  }
+  if (!faucetSupported || !faucet) return null;
 
   return (
     <>
-      <div onClick={handleSubmit} className='mb-4 cursor-pointer relative px-7'>
-        <img
-          src={Images.Banners.faucetBanner}
-          className={classNames({ '!h-[64px] rounded-lg object-cover': isSidePanel() })}
+      <TouchableOpacity onPress={handleSubmit} style={styles.stripContainer}>
+        <Image
+          source={Images.Banners.faucet}
+          style={styles.faucetBanner}
+          resizeMode="cover"
         />
-        <div className='flex flex-col justify-center absolute py-2.5 px-4 gap-y-[5px] top-0 h-[64px] w-[288px]'>
-          <Text
-            size='xs'
-            className={classNames('font-bold text-gray-800 dark:text-gray-200', {
-              'min-[350px]:!pr-5 pr-7': isSidePanel(),
-            })}
-          >
+        <View style={styles.textContainer}>
+          <Text size="xs" style={styles.titleText}>
             {titleText}
           </Text>
           {!faucetInactive && (eligibility.code !== 'ALREADY_CLAIMED' || successClaim) && (
-            <div
-              className={`flex ${
+            <View
+              style={[
+                styles.claimBox,
                 eligibility.code === 'PENDING_CLAIM_EXISTS'
-                  ? 'bg-orange-500'
+                  ? { backgroundColor: '#f59e42' }
                   : successClaim
-                  ? 'bg-green-600'
-                  : 'bg-white-100'
-              } py-1 px-2 rounded-lg w-2/3 items-center justify-between`}
+                  ? { backgroundColor: '#10B981' }
+                  : { backgroundColor: '#fff' },
+              ]}
             >
               <Text
-                size='xs'
-                className='font-bold'
-                color={`${
-                  eligibility.code === 'PENDING_CLAIM_EXISTS' || successClaim ? 'text-white-100' : 'text-black-100'
-                }`}
+                size="xs"
+                style={[
+                  styles.claimText,
+                  (eligibility.code === 'PENDING_CLAIM_EXISTS' || successClaim)
+                    ? { color: '#fff' }
+                    : { color: '#18181b' },
+                ]}
               >
                 {eligibility.code === 'PENDING_CLAIM_EXISTS'
                   ? 'Claiming'
@@ -251,31 +234,72 @@ const RewardStrip = observer(() => {
                   : 'Claim 0.88 OMLY'}
               </Text>
               {eligibility.code === 'PENDING_CLAIM_EXISTS' ? (
-                <Lottie
-                  loop={true}
-                  autoplay={true}
-                  animationData={loadingImage}
-                  rendererSettings={{
-                    preserveAspectRatio: 'xMidYMid slice',
-                  }}
-                  className={'h-[16px] w-[16px]'}
+                <LottieView
+                  loop
+                  autoPlay
+                  source={loadingAnimation}
+                  style={styles.lottie}
                 />
               ) : (
-                <>
-                  {successClaim ? (
-                    <CheckCircle weight='fill' size={20} className='text-black-100' />
-                  ) : (
-                    <ArrowRight size={20} className='text-black-100' />
-                  )}
-                </>
+                successClaim ? (
+                  <CheckCircle name="check-circle" size={20} color="#18181b" />
+                ) : (
+                  <ArrowRight name="arrow-right" size={20} color="#18181b" />
+                )
               )}
-            </div>
+            </View>
           )}
-        </div>
-      </div>
-      <HCaptcha ref={hCaptchaRef} sitekey='e16e9de4-5efc-4d4a-9c04-9dbe115e6274' size='invisible' theme='dark' />
+        </View>
+      </TouchableOpacity>
+      {/* HCaptcha stub: in production, implement WebView for hCaptcha */}
     </>
   );
 });
 
 export default RewardStrip;
+
+const styles = StyleSheet.create({
+  stripContainer: {
+    marginBottom: 16,
+    borderRadius: 12,
+    overflow: 'hidden',
+    position: 'relative',
+    paddingHorizontal: 12,
+  },
+  faucetBanner: {
+    width: '100%',
+    height: 64,
+    borderRadius: 12,
+  },
+  textContainer: {
+    position: 'absolute',
+    top: 0,
+    height: 64,
+    width: 288,
+    justifyContent: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    gap: 4,
+  },
+  titleText: {
+    fontWeight: 'bold',
+    color: '#27272a',
+  },
+  claimBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    marginTop: 8,
+    width: '66%',
+    justifyContent: 'space-between',
+  },
+  claimText: {
+    fontWeight: 'bold',
+  },
+  lottie: {
+    height: 16,
+    width: 16,
+  },
+});

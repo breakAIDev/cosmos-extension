@@ -8,7 +8,7 @@ import {
   MiscellaneousDataStore,
   PopularTokensStore,
 } from '@leapwallet/cosmos-wallet-store';
-import { getStorageAdapter } from 'utils/storageAdapter';
+import { getStorageAdapter } from '../utils/storageAdapter';
 
 const storageAdapter = getStorageAdapter();
 

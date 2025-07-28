@@ -1,9 +1,8 @@
-import { useActiveChain, useChainInfo, useSelectedNetwork } from '@leapwallet/cosmos-wallet-hooks';
-import { AGGREGATED_CHAIN_KEY } from 'config/constants';
-import { useChainPageInfo } from 'hooks';
 import React, { useMemo } from 'react';
-import { AggregatedSupportedChain } from 'types/utility';
-
+import { useActiveChain, useChainInfo, useSelectedNetwork } from '@leapwallet/cosmos-wallet-hooks';
+import { AGGREGATED_CHAIN_KEY } from '../../services/config/constants';
+import { useChainPageInfo } from '../../hooks/utility/useChainPageInfo';
+import { AggregatedSupportedChain } from '../../types/utility';
 import { AlertStrip } from './AlertStrip';
 
 const TestnetAlertStrip = React.memo(() => {
@@ -13,17 +12,11 @@ const TestnetAlertStrip = React.memo(() => {
   const { topChainColor } = useChainPageInfo();
 
   const chainName = useMemo(() => {
-    if (!activeChainInfo) {
-      return '';
-    }
-
-    if (activeChainInfo.chainName.includes('Testnet')) {
-      return activeChainInfo.chainName;
-    }
-
+    if (!activeChainInfo) return '';
+    if (activeChainInfo.chainName.includes('Testnet')) return activeChainInfo.chainName;
     return (
       activeChainInfo.chainName +
-      `${activeChainInfo.key === 'movement' && activeNetwork === 'testnet' ? ' Porto' : ''}` +
+      ((activeChainInfo.key === 'movement' && activeNetwork === 'testnet') ? ' Porto' : '') +
       ' Testnet'
     );
   }, [activeChainInfo, activeNetwork]);
@@ -32,9 +25,9 @@ const TestnetAlertStrip = React.memo(() => {
     return null;
   }
 
-  return <AlertStrip message={`You are on ${chainName}`} bgColor={topChainColor} alwaysShow={true} />;
+  // Use your AlertStrip RN version (see below).
+  return <AlertStrip message={`You are on ${chainName}`} bgColor={topChainColor} alwaysShow />;
 });
 
 TestnetAlertStrip.displayName = 'TestnetAlertStrip';
-
 export { TestnetAlertStrip };

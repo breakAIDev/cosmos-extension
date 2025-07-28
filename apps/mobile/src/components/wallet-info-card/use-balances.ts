@@ -1,10 +1,10 @@
-import { captureException } from '@sentry/react';
+import { captureException } from '@sentry/react-native'; // RN version of Sentry
 import { useQuery } from '@tanstack/react-query';
-import { bech32 } from 'bech32';
+import { decode, encode } from 'bech32';
 import { BigNumber } from 'bignumber.js';
-import { useChainInfos } from 'hooks/useChainInfos';
+import { useChainInfos } from '../../hooks/useChainInfos'; // This must be compatible with RN
 import { useMemo } from 'react';
-import { formatForSubstring } from 'utils/strings';
+import { formatForSubstring } from '../../utils/strings';
 
 import {
   getAptosBalance,
@@ -28,8 +28,8 @@ type UseBalancesOpts = {
 };
 
 const convertBech32Address = (address: string, prefix: string) => {
-  const { words } = bech32.decode(address);
-  return bech32.encode(prefix, words);
+  const { words } = decode(address);
+  return encode(prefix, words);
 };
 
 export const useBalances = ({
@@ -42,6 +42,7 @@ export const useBalances = ({
 }: UseBalancesOpts) => {
   const chainInfos = useChainInfos();
 
+  // Cosmos
   const cosmosQuery = useQuery({
     queryKey: ['cosmos-balance', cosmosAddress],
     queryFn: async () => {
@@ -55,9 +56,9 @@ export const useBalances = ({
     },
   });
 
+  // Celestia
   const celestiaAddress = useMemo(() => {
     if (!cosmosAddress) return undefined;
-
     return convertBech32Address(cosmosAddress, chainInfos.celestia.addressPrefix);
   }, [cosmosAddress, chainInfos.celestia.addressPrefix]);
 
@@ -67,8 +68,14 @@ export const useBalances = ({
       if (!celestiaAddress) return new BigNumber(0);
       return getCelestiaBalance(celestiaAddress);
     },
+    enabled: !!celestiaAddress,
+    retry: false,
+    onError: (error) => {
+      captureException(error);
+    },
   });
 
+  // Bitcoin
   const bitcoinQuery = useQuery({
     queryKey: ['bitcoin-balance', bitcoinAddress],
     queryFn: async () => {
@@ -82,6 +89,7 @@ export const useBalances = ({
     },
   });
 
+  // Movement (Aptos move chain)
   const movementQuery = useQuery({
     queryKey: ['movement-balance', moveAddress],
     queryFn: async () => {
@@ -95,6 +103,7 @@ export const useBalances = ({
     },
   });
 
+  // EVM (Ethereum)
   const evmQuery = useQuery({
     queryKey: ['evm-balance', evmAddress],
     queryFn: async () => {
@@ -108,6 +117,7 @@ export const useBalances = ({
     },
   });
 
+  // Aptos
   const aptosQuery = useQuery({
     queryKey: ['aptos-balance', moveAddress],
     queryFn: async () => {
@@ -121,6 +131,7 @@ export const useBalances = ({
     },
   });
 
+  // Solana
   const solanaQuery = useQuery({
     queryKey: ['solana-balance', solanaAddress],
     queryFn: async () => {
@@ -134,14 +145,21 @@ export const useBalances = ({
     },
   });
 
+  // Sui
   const suiQuery = useQuery({
     queryKey: ['sui-balance', suiAddress],
     queryFn: async () => {
       if (!suiAddress) return new BigNumber(0);
       return getSuiBalance(suiAddress);
     },
+    enabled: !!suiAddress,
+    retry: false,
+    onError: (error) => {
+      captureException(error);
+    },
   });
 
+  // Loading state
   const isLoading =
     (cosmosAddress && cosmosQuery.isLoading) ||
     (bitcoinAddress && bitcoinQuery.isLoading) ||
@@ -152,6 +170,7 @@ export const useBalances = ({
     (solanaAddress && solanaQuery.isLoading) ||
     (suiAddress && suiQuery.isLoading);
 
+  // Balances structure
   const data = useMemo(() => {
     const balances = [
       {
@@ -235,10 +254,12 @@ export const useBalances = ({
     chainInfos,
   ]);
 
+  // All zero check
   const zeroBalance = useMemo(() => {
     return data.every((balance) => balance.amount === '0');
   }, [data]);
 
+  // Filter non-zero balances
   const nonZeroData = useMemo(() => {
     return data.filter((balance) => balance.amount !== '0');
   }, [data]);

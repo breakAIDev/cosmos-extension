@@ -1,8 +1,25 @@
-import { useCallback } from 'react';
-import Clipboard from '@react-native-clipboard/clipboard';
+import { useEffect, useState } from 'react';
 
-export function useCopy() {
-  return useCallback((text: string) => {
-    Clipboard.setString(text);
-  }, []);
-}
+export const useCopy = () => {
+  const [isCopied, setIsCopied] = useState(false);
+
+  const copy = (text: string) => {
+    if (typeof navigator === 'undefined' || !navigator.clipboard) {
+      return;
+    }
+
+    navigator.clipboard.writeText(text);
+    setIsCopied(true);
+  };
+
+  useEffect(() => {
+    if (isCopied) {
+      setTimeout(() => setIsCopied(false), 1000);
+    }
+  }, [isCopied]);
+
+  return {
+    isCopied,
+    copy,
+  };
+};

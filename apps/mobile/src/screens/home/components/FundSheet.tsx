@@ -1,5 +1,5 @@
 import { CheckCircle } from '@phosphor-icons/react';
-import BottomModal from 'components/bottom-modal';
+import BottomModal from '../bottom-modal';
 import Text from 'components/text';
 import React from 'react';
 

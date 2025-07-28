@@ -18,7 +18,7 @@ import {
 import { ChainTagsStore } from '@leapwallet/cosmos-wallet-store';
 import { GenericCard } from '@leapwallet/leap-ui';
 import classNames from 'classnames';
-import BottomModal from 'components/bottom-modal';
+import BottomModal from '../bottom-modal';
 import { InputComponent } from 'components/input-component/InputComponent';
 import { LoaderAnimation } from 'components/loader/Loader';
 import Text from 'components/text';

@@ -1,7 +1,7 @@
 import { SelectedAddress, sliceAddress } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { AvatarCard, InputWithButton } from '@leapwallet/leap-ui';
-import BottomModal from 'components/bottom-modal';
+import BottomModal from '../bottom-modal';
 import { EmptyCard } from 'components/empty-card';
 import { useChainInfos } from 'hooks/useChainInfos';
 import { useContactsSearch } from 'hooks/useContacts';

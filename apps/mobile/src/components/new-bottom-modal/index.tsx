@@ -1,173 +1,161 @@
-import { X } from '@phosphor-icons/react/dist/ssr';
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
-import { Button } from 'components/ui/button';
-import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from 'components/ui/drawer';
+import React from 'react';
+import {
+  Modal,
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ViewStyle,
+  ScrollView,
+} from 'react-native';
 import { observer } from 'mobx-react-lite';
-import React, { useCallback } from 'react';
-import { cn } from 'utils/cn';
-import { sidePanel } from 'utils/isSidePanel';
+import { X } from 'phosphor-react-native'; // Use phosphor-react-native instead of /ssr
+import { Portal } from '@gorhom/portal'; // optional: ensures modal renders outside React tree
 
-export const BottomModalClose = () => {
-  return (
-    <DrawerClose asChild>
-      <Button variant={'ghost'} size={'icon'} className='size-12'>
-        <X weight='bold' size={18} />
-      </Button>
-    </DrawerClose>
-  );
+type BottomModalProps = {
+  isOpen: boolean;
+  onClose?: () => void;
+  title?: string | React.ReactNode;
+  children: React.ReactNode;
+  disableClose?: boolean;
+  hideActionButton?: boolean;
+  actionButton?: React.ReactNode;
+  secondaryActionButton?: React.ReactNode;
+  footerComponent?: React.ReactNode;
+  fullScreen?: boolean;
+  direction?: 'bottom' | 'top'; // not used directly here, just for parity
+  containerStyle?: ViewStyle;
+  contentStyle?: ViewStyle;
 };
 
-type BottomModalProps = React.PropsWithChildren<{
-  /*
-   * is the modal open
-   */
-  isOpen: boolean;
-  /*
-   * title of the modal
-   */
-  title?: string | React.ReactNode;
-  /*
-   * callback when the modal is closed
-   */
-  onClose?: () => void;
-  /*
-   * should the modal be prevented from closing
-   */
-  disableClose?: boolean;
-  /*
-   * custom class names for the modal
-   */
-  className?: string;
-  /*
-   * custom class names for the container
-   */
-  containerClassName?: string;
-  /*
-   * custom class names for the content
-   */
-  contentClassName?: string;
-  /*
-   * custom class names for the header
-   */
-  headerClassName?: string;
-  /*
-   * callback when the action button is clicked
-   */
-  onActionButtonClick?: () => void;
-  /*
-   * should the action button be hidden
-   */
-  hideActionButton?: boolean;
-  /*
-   * custom action button
-   */
-  actionButton?: React.ReactNode;
-  /*
-   * custom secondary action button
-   */
-  secondaryActionButton?: React.ReactNode;
-  /*
-   * custom footer component
-   */
-  footerComponent?: React.ReactNode;
-  /*
-   * should the modal be full screen
-   */
-  fullScreen?: boolean;
-  /*
-   * direction of the modal
-   */
-  direction?: 'top' | 'bottom' | 'left' | 'right';
-}>;
-
-const BottomModal: React.FC<BottomModalProps> = ({
+const BottomModal = ({
   isOpen,
-  title,
   onClose,
+  title,
   children,
-  className,
-  disableClose,
-  actionButton,
-  onActionButtonClick,
-  containerClassName,
-  headerClassName,
-  contentClassName,
-  hideActionButton,
+  disableClose = false,
+  hideActionButton = false,
   secondaryActionButton,
   footerComponent,
-  fullScreen,
-  direction = 'bottom',
-}) => {
-  const container = document.getElementById('popup-layout')?.parentNode as HTMLElement;
-
-  const handleCloseAction = useCallback(() => {
+  fullScreen = false,
+  containerStyle,
+  contentStyle,
+}: BottomModalProps) => {
+  const handleDismiss = () => {
     if (!disableClose) {
       onClose?.();
     }
-  }, [disableClose, onClose]);
-
-  if (!container) {
-    return null;
-  }
+  };
 
   return (
-    <Drawer
-      container={container}
-      open={isOpen}
-      direction={direction}
-      dismissible={!disableClose}
-      onOpenChange={(open) => {
-        if (!open) {
-          onActionButtonClick?.();
-          handleCloseAction();
-        }
-      }}
+    <Modal
+      visible={isOpen}
+      animationType="slide"
+      transparent
+      onRequestClose={handleDismiss}
     >
-      {/**
-       * This is added to avoid the console errors from vaul 1.1.2:
-       * https://github.com/emilkowalski/vaul/issues/523
-       */}
-      <VisuallyHidden>
-        <DrawerTitle></DrawerTitle>
-      </VisuallyHidden>
-
-      <DrawerContent
-        showHandle={!fullScreen}
-        className={cn(
-          'bg-secondary-50',
-          !sidePanel && 'max-panel-height',
-          fullScreen && 'h-screen rounded-none',
-          containerClassName,
-          contentClassName,
-        )}
-      >
-        <DrawerHeader
-          className={cn(
-            'flex items-center justify-between border-b border-border-bottom/50',
-            !title && !secondaryActionButton && 'border-none',
-            headerClassName,
+      <View style={styles.backdrop}>
+        <View style={[styles.modalContainer, fullScreen && styles.fullScreen, containerStyle]}>
+          {/* Header */}
+          {(title || !hideActionButton || secondaryActionButton) && (
+            <View style={styles.header}>
+              <View style={styles.sideAction}>{secondaryActionButton}</View>
+              {typeof title === 'string' ? (
+                <Text style={styles.title}>{title}</Text>
+              ) : (
+                title
+              )}
+              {!hideActionButton ? (
+                <TouchableOpacity
+                  onPress={handleDismiss}
+                  style={styles.closeButton}
+                  disabled={disableClose}
+                >
+                  <X size={20} weight="bold" />
+                </TouchableOpacity>
+              ) : (
+                <View style={styles.sideAction} />
+              )}
+            </View>
           )}
-        >
-          <div className='flex items-center justify-center size-12'>
-            {secondaryActionButton ? secondaryActionButton : null}
-          </div>
 
-          <h3 className='text-mdl font-bold'>{title}</h3>
+          {/* Body */}
+          <ScrollView
+            contentContainerStyle={[
+              styles.body,
+              fullScreen && styles.fullBody,
+              contentStyle,
+            ]}
+          >
+            {children}
+          </ScrollView>
 
-          {hideActionButton ? <div className='flex items-center size-12' /> : <BottomModalClose />}
-        </DrawerHeader>
-
-        <div className={cn('p-4 overflow-auto', fullScreen ? 'max-h-full' : 'max-h-[calc(100%-112px)]', className)}>
-          {children}
-        </div>
-        {footerComponent ? (
-          <div className='flex gap-x-2 p-4 border-t border-border-bottom/50 mt-auto bg-secondary'>
-            {footerComponent}
-          </div>
-        ) : null}
-      </DrawerContent>
-    </Drawer>
+          {/* Footer */}
+          {footerComponent && (
+            <View style={styles.footer}>{footerComponent}</View>
+          )}
+        </View>
+      </View>
+    </Modal>
   );
 };
+
+const styles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    justifyContent: 'flex-end',
+  },
+  modalContainer: {
+    backgroundColor: '#f8f9fa',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    maxHeight: '90%',
+    overflow: 'hidden',
+  },
+  fullScreen: {
+    borderRadius: 0,
+    height: '100%',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderColor: '#e5e7eb',
+    justifyContent: 'space-between',
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    flex: 1,
+    textAlign: 'center',
+  },
+  sideAction: {
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  closeButton: {
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  body: {
+    padding: 16,
+  },
+  fullBody: {
+    maxHeight: '100%',
+  },
+  footer: {
+    padding: 16,
+    borderTopWidth: 1,
+    borderColor: '#e5e7eb',
+    backgroundColor: '#f1f5f9',
+  },
+});
 
 export default observer(BottomModal);

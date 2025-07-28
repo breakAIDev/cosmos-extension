@@ -1,30 +1,58 @@
 import React, { useMemo } from 'react';
-import { cn } from 'utils/cn';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 
 type StepProgressProps = {
   currentStep: number;
   totalSteps: number;
-  className?: string;
+  style?: any;
   moveToStep?: (step: number) => void;
 };
 
-const StepProgress = ({ currentStep, totalSteps, className, moveToStep }: StepProgressProps) => {
-  const steps = useMemo(() => Array.from({ length: totalSteps }, (_, index) => index + 1), [totalSteps]);
+const StepProgress = ({
+  currentStep,
+  totalSteps,
+  style,
+  moveToStep,
+}: StepProgressProps) => {
+  const steps = useMemo(() => Array.from({ length: totalSteps }, (_, i) => i + 1), [totalSteps]);
 
   return (
-    <div className={cn('flex flex-row items-center justify-center align-center gap-3', className)}>
+    <View style={[styles.container, style]}>
       {steps.map((step) => (
-        <div
+        <TouchableOpacity
           key={step}
-          onClick={() => moveToStep?.(step)}
-          className={cn(
-            'h-1 w-[1.125rem] rounded-full transition-colors duration-500',
-            step === currentStep ? 'bg-accent-green' : 'bg-secondary-300',
-          )}
+          onPress={() => moveToStep?.(step)}
+          activeOpacity={moveToStep ? 0.7 : 1}
+          style={[
+            styles.step,
+            step === currentStep ? styles.stepActive : styles.stepInactive,
+          ]}
         />
       ))}
-    </div>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12, // Requires React Native >= 0.71.0; use margin if on lower version
+  },
+  step: {
+    height: 4, // h-1 (4px)
+    width: 18, // w-[1.125rem] (18px)
+    borderRadius: 8,
+    marginHorizontal: 6, // For gap between steps if "gap" is not supported
+    transitionDuration: '500ms', // No direct equivalent; can animate with Animated if you want
+  },
+  stepActive: {
+    backgroundColor: '#26c06f', // bg-accent-green
+  },
+  stepInactive: {
+    backgroundColor: '#E6EAEF', // bg-secondary-300
+  },
+});
 
 export default StepProgress;

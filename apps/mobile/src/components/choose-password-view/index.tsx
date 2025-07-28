@@ -1,15 +1,15 @@
-import { Button } from 'components/ui/button';
-import { Checkbox } from 'components/ui/check-box';
-import { Input } from 'components/ui/input';
-import { PasswordInput } from 'components/ui/input/password-input';
+import { Button } from '../ui/button';
+import { Checkbox } from '../ui/check-box';
+import { Input } from '../ui/input';
+import { PasswordInput } from '../ui/input/password-input';
 import { AnimatePresence, motion, Variants } from 'framer-motion';
-import { PasswordLockIcon } from 'icons/password-lock-icon';
-import { OnboardingWrapper } from 'pages/onboarding/wrapper';
+import { PasswordLockIcon } from '../../../assets/icons/password-lock-icon';
+import { OnboardingWrapper } from '../../screens/onboarding/wrapper';
 import React, { useCallback, useEffect, useState } from 'react';
-import { errorVariants } from 'utils/motion-variants';
-import { getPassScore } from 'utils/passChecker';
+import { errorVariants } from '../../utils/motion-variants';
+import { getPassScore } from '../../utils/passChecker';
 
-import { CreatingWalletLoader } from '../../pages/onboarding/create/creating-wallet-loader';
+import { CreatingWalletLoader } from '../../screens/onboarding/create/creating-wallet-loader';
 import { PasswordStrengthIndicator } from './password-strength';
 
 type ViewProps = {

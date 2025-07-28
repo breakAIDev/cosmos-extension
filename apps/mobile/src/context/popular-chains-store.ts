@@ -1,8 +1,8 @@
 import { PopularChainsStore } from '@leapwallet/cosmos-wallet-store';
-import browser from 'webextension-polyfill';
+import DeviceInfo from 'react-native-device-info';
 
 import { chainFeatureFlagsStore } from './balance-store';
 
-const app = 'extension';
-const version = browser.runtime.getManifest().version;
+const app = 'mobile'; // or 'react-native'
+const version = DeviceInfo.getVersion(); // returns version from package.json
 export const popularChainsStore = new PopularChainsStore(app, version, chainFeatureFlagsStore);

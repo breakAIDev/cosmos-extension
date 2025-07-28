@@ -2,10 +2,10 @@ import {
   useSelectedNetwork as useSelectedNetworkWalletHooks,
   useSetSelectedNetwork,
 } from '@leapwallet/cosmos-wallet-hooks';
-import { SELECTED_NETWORK } from 'config/storage-keys';
-import { useEffect } from 'react';
-import { rootStore } from 'stores/root-store';
-import browser from 'webextension-polyfill';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { SELECTED_NETWORK } from '../../services/config/storage-keys';
+import { useEffect, useCallback } from 'react';
+import { rootStore } from '../../context/root-store';
 
 export type SelectedNetwork = 'mainnet' | 'testnet';
 
@@ -16,22 +16,24 @@ export function useSelectedNetwork() {
 export function useSetNetwork() {
   const setSelectedNetwork = useSetSelectedNetwork();
 
-  return (chain: SelectedNetwork) => {
+  return useCallback((chain: SelectedNetwork) => {
     rootStore.setSelectedNetwork(chain);
     setSelectedNetwork(chain);
-    browser.storage.local.set({ [SELECTED_NETWORK]: chain });
-  };
+    AsyncStorage.setItem(SELECTED_NETWORK, chain); // Always a string
+  }, [setSelectedNetwork]);
 }
 
 export function useInitNetwork() {
   const setNetwork = useSetNetwork();
-  useEffect(() => {
-    browser.storage.local.get(SELECTED_NETWORK).then((storage) => {
-      const network = storage[SELECTED_NETWORK];
-      const defaultNetwork = 'mainnet';
-      setNetwork(network ?? defaultNetwork);
-    });
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useEffect(() => {
+    AsyncStorage.getItem(SELECTED_NETWORK).then((network) => {
+      const defaultNetwork: SelectedNetwork = 'mainnet';
+      if (network === 'mainnet' || network === 'testnet') {
+        setNetwork(network);
+      } else {
+        setNetwork(defaultNetwork);
+      }
+    });
+  }, [setNetwork]);
 }

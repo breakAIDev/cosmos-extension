@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-namespace */
-
 import { createMnemonic } from '@leapwallet/cosmos-wallet-sdk';
 import { ENCRYPTED_ACTIVE_WALLET } from '@leapwallet/leap-keychain';
 import { decrypt } from '@leapwallet/leap-keychain';
@@ -7,7 +5,7 @@ import * as bip39 from 'bip39';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import browser from 'webextension-polyfill';
 
-import { ACTIVE_WALLET, V80_KEYSTORE_MIGRATION_COMPLETE } from '../../../config/storage-keys';
+import { ACTIVE_WALLET, V80_KEYSTORE_MIGRATION_COMPLETE } from '../../../services/config/storage-keys';
 import useActiveWallet from '../../settings/useActiveWallet';
 
 export namespace SeedPhrase {

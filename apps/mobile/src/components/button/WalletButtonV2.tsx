@@ -1,7 +1,6 @@
-import { CaretDown } from '@phosphor-icons/react';
 import React from 'react';
-import { cn } from 'utils/cn';
-import { sliceWord } from 'utils/strings';
+import { TouchableOpacity, View, Text, Image, StyleSheet } from 'react-native';
+import { sliceWord } from '../../utils/strings';
 
 type WalletButtonProps = {
   showWalletAvatar?: boolean;
@@ -9,30 +8,81 @@ type WalletButtonProps = {
   showDropdown?: boolean;
   handleDropdownClick?: () => void;
   walletAvatar?: string;
-  className?: string;
+  style?: any; // Optional style prop for parent override
 };
 
 export const WalletButtonV2 = React.memo(
-  ({ showWalletAvatar, walletName, showDropdown, handleDropdownClick, walletAvatar, className }: WalletButtonProps) => {
+  ({
+    showWalletAvatar,
+    walletName,
+    showDropdown,
+    handleDropdownClick,
+    walletAvatar,
+    style,
+  }: WalletButtonProps) => {
     return (
-      <button
-        onClick={handleDropdownClick}
-        className={cn(
-          'flex items-center justify-center relative bg-secondary-200 hover:bg-secondary-300 border-solid rounded-full px-3.5 py-1.5 transition-colors',
-          handleDropdownClick && 'cursor-pointer',
-          className,
-        )}
+      <TouchableOpacity
+        onPress={handleDropdownClick}
+        activeOpacity={handleDropdownClick ? 0.7 : 1}
+        style={[styles.button, handleDropdownClick ? styles.clickable : null, style]}
       >
-        {showWalletAvatar ? <img className='size-6 mr-1 rounded-full' src={walletAvatar} alt='wallet avatar' /> : null}
+        {showWalletAvatar && walletAvatar ? (
+          <Image
+            source={{ uri: walletAvatar }}
+            style={styles.avatar}
+            resizeMode="cover"
+          />
+        ) : null}
 
-        <span className='truncate text-sm font-bold max-w-[96px]' title={walletName}>
+        <Text
+          numberOfLines={1}
+          style={styles.walletName}
+        >
           {sliceWord(walletName, 8, 0)}
-        </span>
+        </Text>
 
-        {showDropdown ? <CaretDown weight='fill' className='size-2.5 ml-1 fill-muted-foreground' /> : null}
-      </button>
+        {showDropdown ? (
+          <View style={styles.caretDown}>
+            <Text style={{ fontSize: 14, color: '#7A7A7A', marginLeft: 2 }}>▼</Text>
+          </View>
+        ) : null}
+      </TouchableOpacity>
     );
-  },
+  }
 );
 
 WalletButtonV2.displayName = 'WalletButtonV2';
+
+const styles = StyleSheet.create({
+  button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    position: 'relative',
+    backgroundColor: '#F5F7FB', // secondary-200
+    borderRadius: 999,
+    paddingHorizontal: 14, // px-3.5
+    paddingVertical: 6, // py-1.5
+    // Optional: add transition/animation for backgroundColor with TouchableOpacity feedback
+  },
+  clickable: {
+    // Optionally style if clickable
+  },
+  avatar: {
+    width: 24, // size-6
+    height: 24,
+    borderRadius: 12,
+    marginRight: 4,
+  },
+  walletName: {
+    flexShrink: 1,
+    fontSize: 14, // text-sm
+    fontWeight: 'bold',
+    maxWidth: 96,
+    color: '#111827',
+  },
+  caretDown: {
+    marginLeft: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});

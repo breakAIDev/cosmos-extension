@@ -1,33 +1,30 @@
-import { useActiveWallet } from '@leapwallet/cosmos-wallet-hooks';
-import { VIEWED_RAFFLE_WINS } from 'config/storage-keys';
-import { useRaffleWins } from 'hooks/useAlphaOpportunities';
-import { useAlphaUser } from 'hooks/useAlphaUser';
-import { useIsRewardsFirst } from 'hooks/useIsRewardsFirst';
-import { useQueryParams } from 'hooks/useQuery';
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { queryParams } from 'utils/query-params';
-import browser from 'webextension-polyfill';
-
 import { AlertStrip } from './AlertStrip';
 import { TestnetAlertStrip } from './TestnetAlertStrip';
-/**
- * shows the most recent raffle win alert in strip
- */
+import { useAlphaUser } from '../../hooks/useAlphaUser';
+import { useRaffleWins } from '../../hooks/useAlphaOpportunities';
+import { useIsRewardsFirst } from '../../hooks/useIsRewardsFirst';
+import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useActiveWallet } from '@leapwallet/cosmos-wallet-hooks';
+import { VIEWED_RAFFLE_WINS } from '../../services/config/storage-keys';
+
 const RaffleAndTestnetAlertStrip = React.memo(() => {
+  const navigation = useNavigation<any>();
   const activeWallet = useActiveWallet();
   const { alphaUser, isAlphaUserLoading } = useAlphaUser(activeWallet?.addresses?.cosmos ?? '');
-  const navigate = useNavigate();
   const { raffleWins } = useRaffleWins(alphaUser?.id ?? '');
   const { isRewardsFirst, markAsVisited } = useIsRewardsFirst();
-  const params = useQueryParams();
   const [isVisible, setIsVisible] = useState(false);
   const [viewedRaffles, setViewedRaffles] = useState<string[]>([]);
 
   useEffect(() => {
     const initializeViewedRaffles = async () => {
-      const result = await browser.storage.local.get(VIEWED_RAFFLE_WINS);
-      let viewed = result[VIEWED_RAFFLE_WINS] || [];
+      let viewed: string[] = [];
+      try {
+        const result = await AsyncStorage.getItem(VIEWED_RAFFLE_WINS);
+        viewed = result ? JSON.parse(result) : [];
+      } catch (err) {}
 
       if (raffleWins.length > 0) {
         const unviewedWins = raffleWins.filter((win) => !viewed.includes(win.id));
@@ -35,25 +32,20 @@ const RaffleAndTestnetAlertStrip = React.memo(() => {
           // Get all win IDs except the most recent one
           const olderWinIds = unviewedWins.slice(1).map((win) => win.id);
           viewed = [...viewed, ...olderWinIds];
-          await browser.storage.local.set({ [VIEWED_RAFFLE_WINS]: viewed });
+          await AsyncStorage.setItem(VIEWED_RAFFLE_WINS, JSON.stringify(viewed));
         }
         setIsVisible(unviewedWins.length > 0);
       }
-
       setViewedRaffles(viewed);
     };
     initializeViewedRaffles();
   }, [raffleWins]);
 
   useEffect(() => {
-    if (!alphaUser?.isChad || !isRewardsFirst) {
-      return;
+    if (alphaUser?.isChad && isRewardsFirst) {
+      // You could set some global param/context for eligibility here
+      markAsVisited();
     }
-
-    params.set(queryParams.chadEligibility, 'true');
-    markAsVisited();
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAlphaUserLoading, isRewardsFirst]);
 
   const latestWin = useMemo(() => {
@@ -67,14 +59,14 @@ const RaffleAndTestnetAlertStrip = React.memo(() => {
 
   const handleClick = async () => {
     const updatedViewedRaffles = [...viewedRaffles, latestWin.id];
-    await browser.storage.local.set({ [VIEWED_RAFFLE_WINS]: updatedViewedRaffles });
+    await AsyncStorage.setItem(VIEWED_RAFFLE_WINS, JSON.stringify(updatedViewedRaffles));
     setViewedRaffles(updatedViewedRaffles);
-    navigate(`/alpha?page=exclusive&listingId=${latestWin.id}`);
+    navigation.navigate('Alpha', { page: 'exclusive', listingId: latestWin.id });
   };
 
   const handleClose = async () => {
     const updatedViewedRaffles = [...viewedRaffles, latestWin.id];
-    await browser.storage.local.set({ [VIEWED_RAFFLE_WINS]: updatedViewedRaffles });
+    await AsyncStorage.setItem(VIEWED_RAFFLE_WINS, JSON.stringify(updatedViewedRaffles));
     setViewedRaffles(updatedViewedRaffles);
     setIsVisible(false);
   };

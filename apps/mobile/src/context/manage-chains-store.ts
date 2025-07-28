@@ -3,7 +3,7 @@ import { PopularChainsStore } from '@leapwallet/cosmos-wallet-store';
 import { DeprioritizedChains } from '../services/config/constants';
 import { MANAGE_CHAIN_SETTINGS } from '../services/config/storage-keys';
 import { makeAutoObservable } from 'mobx';
-import Browser from 'webextension-polyfill';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { popularChainsStore } from './popular-chains-store';
 
@@ -29,22 +29,20 @@ export class ManageChainsStore {
     makeAutoObservable(this);
   }
 
-  private setChainData(chains: ManageChainSettings[]) {
+  private async setChainData(chains: ManageChainSettings[]) {
     this.chains = chains;
-    return Browser.storage.local.set({ [MANAGE_CHAIN_SETTINGS]: chains });
+    await AsyncStorage.setItem(MANAGE_CHAIN_SETTINGS, JSON.stringify(chains));
   }
 
   async initManageChains(chainInfos: typeof ChainInfos) {
-    const data = await Browser.storage.local.get(MANAGE_CHAIN_SETTINGS);
+    const dataRaw = await AsyncStorage.getItem(MANAGE_CHAIN_SETTINGS);
     await this.popularChainsStore.readyPromise;
     const priorityChains = this.popularChainsStore.popularChains;
 
-    // if the object doesn't exists in the storage, then create a new object
-    const addedChains = data[MANAGE_CHAIN_SETTINGS];
+    const addedChains: ManageChainSettings[] = dataRaw ? JSON.parse(dataRaw) : [];
     let missingChains: string[] = [];
     if (addedChains && addedChains.length > 0) {
       const enabledChains = Object.keys(chainInfos).filter((chain) => chainInfos[chain as SupportedChain].enabled);
-
       missingChains = enabledChains.filter(
         (chain) => !addedChains.find((addedChain: ManageChainSettings) => addedChain.chainName === chain),
       );
@@ -56,41 +54,36 @@ export class ManageChainsStore {
       );
       const chains = [...priorityChains, ..._chains, ...DeprioritizedChains];
 
-      // create an object
       const manageChainObject = chains
         .filter((chain) => chainInfos[chain]?.enabled)
-        .map((chain, index) => {
-          return {
-            chainName: chain,
-            active: true,
-            preferenceOrder: index,
-            denom: chainInfos[chain].denom,
-            id: index,
-            
-            
-            beta: chainInfos[chain]?.beta ?? false,
-            chainId: chainInfos[chain].chainId,
-            testnetChainId: chainInfos[chain].testnetChainId,
-            evmChainId: chainInfos[chain].evmChainId,
-            evmChainIdTestnet: chainInfos[chain].evmChainIdTestnet,
-            formattedName: chainInfos[chain].chainName,
-          };
-        });
+        .map((chain, index) => ({
+          chainName: chain,
+          active: true,
+          preferenceOrder: index,
+          denom: chainInfos[chain].denom,
+          id: index,
+          beta: chainInfos[chain]?.beta ?? false,
+          chainId: chainInfos[chain].chainId,
+          testnetChainId: chainInfos[chain].testnetChainId,
+          evmChainId: chainInfos[chain].evmChainId,
+          evmChainIdTestnet: chainInfos[chain].evmChainIdTestnet,
+          formattedName: chainInfos[chain].chainName,
+        }));
 
-      this.setChainData(manageChainObject);
+      await this.setChainData(manageChainObject);
     } else {
-      const enabledChains = data[MANAGE_CHAIN_SETTINGS].filter(
-        (chainObject: ManageChainSettings) => chainInfos[chainObject.chainName]?.enabled,
-      ).map((item: ManageChainSettings) => ({
-        ...item,
-        beta: chainInfos[item.chainName].beta ?? false,
-      }));
+      const enabledChains = addedChains
+        .filter((chainObject: ManageChainSettings) => chainInfos[chainObject.chainName]?.enabled)
+        .map((item: ManageChainSettings) => ({
+          ...item,
+          beta: chainInfos[item.chainName].beta ?? false,
+        }));
 
-      this.setChainData(enabledChains);
+      await this.setChainData(enabledChains);
     }
   }
 
-  toggleChain(chainName: SupportedChain) {
+  async toggleChain(chainName: SupportedChain) {
     const newChainData = this.chains.map((chainObject) => {
       if (chainObject.chainName === chainName) {
         return {
@@ -98,35 +91,19 @@ export class ManageChainsStore {
           active: !chainObject.active,
         };
       }
-
       return chainObject;
     });
 
-    // sort the chain data object based on the preference order
-    const sortedChainData = newChainData.sort((a, b) => {
-      if (a.preferenceOrder < b.preferenceOrder) {
-        return -1;
-      }
-
-      if (a.preferenceOrder > b.preferenceOrder) {
-        return 1;
-      }
-
-      return 0;
-    });
-
-    return this.setChainData(sortedChainData);
+    const sortedChainData = newChainData.sort((a, b) => a.preferenceOrder - b.preferenceOrder);
+    await this.setChainData(sortedChainData);
   }
 
-  updatePreferenceOrder(chainData: ManageChainSettings[]) {
-    const newChainData = chainData.map((chainObject, index) => {
-      return {
-        ...chainObject,
-        preferenceOrder: index,
-      };
-    });
-
-    return this.setChainData(newChainData);
+  async updatePreferenceOrder(chainData: ManageChainSettings[]) {
+    const newChainData = chainData.map((chainObject, index) => ({
+      ...chainObject,
+      preferenceOrder: index,
+    }));
+    await this.setChainData(newChainData);
   }
 }
 

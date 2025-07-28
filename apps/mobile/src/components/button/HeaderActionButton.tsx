@@ -1,39 +1,48 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Buttons } from '@leapwallet/leap-ui'; // <-- must be React Native compatible!
+import { HeaderAction, HeaderActionType } from '../../types/components';
 
-type ButtonProps = {
-  title: string;
-  onPress: () => void;
-  disabled?: boolean;
-  style?: ViewStyle;
-  textStyle?: TextStyle;
-};
+const ActionButton = React.memo(({ type, onClick, style }: HeaderAction & { style?: any }) => {
+  switch (type) {
+    case HeaderActionType.CANCEL:
+      return <Buttons.Cancel onPress={onClick} style={style} />;
+    case HeaderActionType.BACK:
+      return <Buttons.Back onPress={onClick} style={style} />;
+    case HeaderActionType.NAVIGATION:
+      return (
+        <View style={[styles.row, style]}>
+          <View style={styles.navButtonContainer}>
+            <Buttons.Nav
+              onPress={onClick}
+              style={styles.navButton}
+            />
+          </View>
+        </View>
+      );
+  }
+});
 
-export const HeaderActionButton: React.FC<ButtonProps> = ({ title, onPress, disabled, style, textStyle }) => (
-  <TouchableOpacity
-    onPress={onPress}
-    disabled={disabled}
-    style={[styles.button, style, disabled && styles.disabled]}
-    activeOpacity={0.7}
-  >
-    <Text style={[styles.text, textStyle]}>{title}</Text>
-  </TouchableOpacity>
-);
+ActionButton.displayName = 'ActionButton';
+export { ActionButton };
 
 const styles = StyleSheet.create({
-  button: {
-    backgroundColor: '#224874',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
+    padding: 0,
   },
-  disabled: {
-    opacity: 0.5,
+  navButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100%',
   },
-  text: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
+  navButton: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

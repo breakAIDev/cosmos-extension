@@ -1,71 +1,61 @@
+import React, { useCallback, useState } from 'react';
+import { View, Text, StyleSheet, LayoutChangeEvent } from 'react-native';
 import { sliceWord } from '@leapwallet/cosmos-wallet-hooks';
-import classNames from 'classnames';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+
+type FallbackTokenImageProps = {
+  text: string;
+  containerStyle?: object;
+  textStyle?: object;
+};
 
 export function FallbackTokenImage({
-  containerClassName = '',
-  textClassName = '',
   text,
-}: {
-  containerClassName?: string;
-  textClassName?: string;
-  text: string;
-}) {
-  const [textWidth, setTextWidth] = useState<{ clientWidth: number; scrollWidth: number } | null>(null);
-  const [containerWidth, setContainerWidth] = useState<{
-    clientWidth: number;
-    scrollWidth: number;
-  } | null>(null);
+  containerStyle,
+  textStyle,
+}: FallbackTokenImageProps) {
+  const [containerWidth, setContainerWidth] = useState(0);
+  const [slicePrefixLength, setSlicePrefixLength] = useState(5);
 
-  const [slicePrefixLength, setSlicePrefixLength] = useState<number>(5);
-
-  const isOverflowing = useMemo(() => {
-    return (
-      textWidth &&
-      containerWidth &&
-      (textWidth?.clientWidth > containerWidth?.clientWidth ||
-        textWidth?.scrollWidth > textWidth?.clientWidth ||
-        containerWidth?.scrollWidth > containerWidth?.clientWidth)
-    );
-  }, [textWidth, containerWidth]);
-
-  useEffect(() => {
-    if (isOverflowing) {
-      setSlicePrefixLength((prevSlicePrefixLength) => prevSlicePrefixLength - 1);
-    }
-  }, [isOverflowing]);
-
-  const handleTextRef = useCallback((el: HTMLSpanElement) => {
-    if (el) {
-      setTextWidth({ clientWidth: el.clientWidth, scrollWidth: el.scrollWidth });
-    }
-  }, []);
-
-  const handleContainerRef = useCallback((el: HTMLDivElement) => {
-    if (el) {
-      setContainerWidth({ clientWidth: el.clientWidth, scrollWidth: el.scrollWidth });
-    }
-  }, []);
+  // Optional: Auto-shrink prefix length until text fits
+  const handleContainerLayout = (event: LayoutChangeEvent) => {
+    setContainerWidth(event.nativeEvent.layout.width);
+  };
 
   return (
-    <div
-      className={classNames(
-        'rounded-full bg-gray-100 dark:bg-gray-850 shrink-0 flex items-center justify-center',
-        containerClassName,
-      )}
-      ref={handleContainerRef}
+    <View
+      style={styles.container && containerStyle}
+      onLayout={handleContainerLayout}
       key={text}
     >
-      <span
-        className={classNames(
-          'text-black-100 dark:text-white-100 font-semibold px-[2px] overflow-hidden',
-          textClassName,
-        )}
-        ref={handleTextRef}
-        key={text}
+      <Text
+        style={[
+          styles.text,
+          textStyle,
+        ]}
+        numberOfLines={1}
+        ellipsizeMode="middle"
       >
         {sliceWord(text, slicePrefixLength, 0, '..')}
-      </span>
-    </div>
+      </Text>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    borderRadius: 999,
+    backgroundColor: '#F3F4F6', // bg-gray-100
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    minWidth: 36,
+    minHeight: 36,
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+  },
+  text: {
+    color: '#111827', // text-black-100
+    fontWeight: '600',
+    paddingHorizontal: 2,
+  },
+});

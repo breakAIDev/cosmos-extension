@@ -1,65 +1,105 @@
-import classNames from 'classnames';
-import React, { CSSProperties } from 'react';
+import React from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
+
+type OptionType = {
+  title: string;
+  subTitle?: string;
+  value: string;
+};
 
 type RadioGroupProps = {
-  options: { title: string; subTitle?: string; value: string }[];
+  options: OptionType[];
   selectedOption: string;
-  
   onChange: (value: string) => void;
-  className?: string;
-  themeColor?: CSSProperties['color'];
+  style?: ViewStyle;
+  themeColor?: string;
 };
 
-const RadioGroup: React.FC<RadioGroupProps> = ({ options, selectedOption, onChange, className, themeColor }) => {
+const RadioGroup: React.FC<RadioGroupProps> = ({ options, selectedOption, onChange, style, themeColor = '#2563eb' }) => {
   return (
-    <fieldset className={classNames('flex flex-col', className)}>
-      {options.map((option) => {
+    <View style={[styles.container, style]}>
+      {options.map((option, index) => {
         const isSelected = selectedOption === option.value;
+        const isLast = index === options.length - 1;
 
         return (
-          <label
+          <TouchableOpacity
             key={option.value}
-            className={`inline-flex items-center last-of-type:border-0 border-b dark:border-b-gray-800 border-b-gray-300 ${
-              option.subTitle ? 'py-2 last-of-type:pb-0' : 'py-3 last-of-type:pb-0'
-            }`}
+            onPress={() => onChange(option.value)}
+            activeOpacity={0.8}
+            style={[
+              styles.item,
+              !isLast && styles.itemBorder,
+              option.subTitle ? styles.itemWithSubtitle : styles.itemWithoutSubtitle,
+            ]}
           >
-            <input type='radio' value={option.value} checked={isSelected} readOnly className='hidden' />
-            <div
-              aria-label='radio-button'
-              className={classNames(
-                'w-5 h-5 rounded-full border-[2px] flex items-center justify-center cursor-pointer border-gray-300 transition-all',
-                {
-                  'shadow-sm': isSelected,
-                },
-              )}
-              style={{
-                borderColor: isSelected ? themeColor : undefined,
-              }}
-              tabIndex={0}
-              onClick={() => onChange(option.value)}
-              onKeyDown={(e) => {
-                if ((e.key === 'Enter' || e.key === ' ') && !isSelected) {
-                  onChange(option.value);
-                }
-              }}
-            >
-              <div
-                className='w-[10px] h-[10px] rounded-full bg-gray-300 transition-all'
-                style={{
-                  backgroundColor: isSelected ? themeColor : undefined,
-                  opacity: isSelected ? 1 : 0,
-                }}
+            <View style={[styles.radioOuter, { borderColor: isSelected ? themeColor : '#d1d5db' }]}>
+              <View
+                style={[
+                  styles.radioInner,
+                  {
+                    backgroundColor: isSelected ? themeColor : '#d1d5db',
+                    opacity: isSelected ? 1 : 0,
+                  },
+                ]}
               />
-            </div>
-            <div className='flex flex-col ml-3'>
-              <p className='dark:text-white-100 text-gray-900 font-medium'>{option.title}</p>
-              {option.subTitle ? <p className='text-gray-500 text-xs'>{option.subTitle}</p> : null}
-            </div>
-          </label>
+            </View>
+
+            <View style={styles.textContainer}>
+              <Text style={styles.title}>{option.title}</Text>
+              {option.subTitle && <Text style={styles.subTitle}>{option.subTitle}</Text>}
+            </View>
+          </TouchableOpacity>
         );
       })}
-    </fieldset>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'column',
+  },
+  item: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  itemBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#d1d5db',
+  },
+  itemWithSubtitle: {
+    paddingVertical: 8,
+  },
+  itemWithoutSubtitle: {
+    paddingVertical: 12,
+  },
+  radioOuter: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  radioInner: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  textContainer: {
+    marginLeft: 12,
+    flexShrink: 1,
+  },
+  title: {
+    fontSize: 16,
+    color: '#111827',
+    fontWeight: '500',
+  },
+  subTitle: {
+    fontSize: 12,
+    color: '#6b7280',
+  },
+});
 
 export default RadioGroup;

@@ -1,5 +1,6 @@
-import Text from 'components/text';
 import React from 'react';
+import { View, StyleSheet } from 'react-native';
+import Text from '../text'; // assuming this is a RN-compatible Text wrapper
 
 type Props = {
   heading?: string;
@@ -9,22 +10,50 @@ type Props = {
   headingSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'jumbo';
 };
 
-export const Header: React.FC<Props> = ({ heading, subtitle, SubTitleComponent, HeadingComponent }) => {
+export const Header: React.FC<Props> = ({
+  heading,
+  subtitle,
+  SubTitleComponent,
+  HeadingComponent,
+  headingSize = 'xxl',
+}) => {
   return (
-    <div className='flex flex-col justify-center items-center mb-3'>
+    <View style={styles.container}>
       {HeadingComponent ? (
         <HeadingComponent />
       ) : (
-        <Text size='xxl' className='font-black text-4xl my-3 mx-2 text-center'>
+        <Text size={headingSize} style={styles.headingText}>
           {heading}
         </Text>
       )}
-      {subtitle && (
-        <Text size='md' color='text-gray-400' className='justify-center'>
+
+      {subtitle ? (
+        <Text size="md" color="text-gray-400" style={styles.subtitle}>
           {subtitle}
         </Text>
-      )}
-      {SubTitleComponent && <SubTitleComponent />}
-    </div>
+      ) : null}
+
+      {SubTitleComponent ? <SubTitleComponent /> : null}
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  headingText: {
+    fontWeight: '900',
+    fontSize: 32, // equivalent to Tailwind's text-4xl
+    marginVertical: 12,
+    marginHorizontal: 8,
+    textAlign: 'center',
+  },
+  subtitle: {
+    textAlign: 'center',
+    justifyContent: 'center',
+    color: '#9ca3af', // Tailwind's text-gray-400
+  },
+});

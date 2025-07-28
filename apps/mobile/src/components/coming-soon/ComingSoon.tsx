@@ -1,48 +1,91 @@
-import { ChainTagsStore } from '@leapwallet/cosmos-wallet-store';
-import { Header, HeaderActionType } from '@leapwallet/leap-ui';
-import BottomNav, { BottomNavLabel } from 'components/bottom-nav/BottomNav';
-import PopupLayout from 'components/layout/popup-layout';
-import { useChainPageInfo } from 'hooks';
-import { useDontShowSelectChain } from 'hooks/useDontShowSelectChain';
-import { Images } from 'images';
-import { observer } from 'mobx-react-lite';
-import { ActivityHeader } from 'pages/activity/components/activity-header';
-import SelectChain from 'pages/home/SelectChain';
 import React, { useState } from 'react';
-import { globalSheetsStore } from 'stores/global-sheets-store';
-import { manageChainsStore } from 'stores/manage-chains-store';
+import { View, Text, Image, StyleSheet, Modal, TouchableOpacity } from 'react-native';
+import { observer } from 'mobx-react-lite';
+import { ActivityHeader } from '../../screens/activity/components/activity-header';
+import SelectChain from '../../screens/home/SelectChain';
+import { Images } from '../../../assets/images';
+import BottomNav, { BottomNavLabel } from '../bottom-nav/BottomNav';
 
 type ComingSoonProps = {
   title: string;
-  chainTagsStore: ChainTagsStore;
-  bottomNavLabel: BottomNavLabel;
+  chainTagsStore: any; // or ChainTagsStore if available in your mobile project
+  bottomNavLabel: BottomNavLabel; // or BottomNavLabel if you ported enums to RN
 };
 
 export const ComingSoon = observer(({ chainTagsStore, title, bottomNavLabel }: ComingSoonProps) => {
   const [showChainSelector, setShowChainSelector] = useState(false);
-  const { headerChainImgSrc } = useChainPageInfo();
-  const dontShowSelectChain = useDontShowSelectChain(manageChainsStore);
 
   return (
-    <>
+    <View style={styles.wrapper}>
       <ActivityHeader />
-      <div className='h-[calc(100%-128px)] p-6'>
-        <div className='rounded-2xl bg-secondary-100 px-2 h-full flex flex-col items-center justify-center text-center'>
-          <img className='w-[180px]' src={Images.Logos.LeapLogo} alt='frog-coming-soon' />
-
-          <h3 className='text-foreground font-bold text-[24px] mb-3'>Coming Soon!</h3>
-          <p className='text-secondary-800 text-sm'>
-            We&apos;re working on it. Or perhaps the chain is...
-            <br />
+      <View style={styles.contentWrapper}>
+        <View style={styles.card}>
+          <Image
+            source={Images.Logos.LeapLogo}
+            style={styles.logo}
+            resizeMode="contain"
+            accessibilityLabel="frog-coming-soon"
+          />
+          <Text style={styles.title}>Coming Soon!</Text>
+          <Text style={styles.subtitle}>
+            We&apos;re working on it. Or perhaps the chain is...{'\n'}
             Either way, this page is coming soon!
-          </p>
-        </div>
-      </div>
-      <SelectChain
-        isVisible={showChainSelector}
-        onClose={() => setShowChainSelector(false)}
-        chainTagsStore={chainTagsStore}
-      />
-    </>
+          </Text>
+        </View>
+      </View>
+      <Modal
+        visible={showChainSelector}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowChainSelector(false)}
+      >
+        <SelectChain
+          isVisible={showChainSelector}
+          onClose={() => setShowChainSelector(false)}
+          chainTagsStore={chainTagsStore}
+        />
+      </Modal>
+      <TouchableOpacity onPress={() => setShowChainSelector(true)}>
+        <Text>Change Chain</Text>
+      </TouchableOpacity>
+      <BottomNav label={bottomNavLabel} />
+    </View>
   );
+});
+
+const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  contentWrapper: {
+    flex: 1,
+    padding: 24,
+  },
+  card: {
+    flex: 1,
+    borderRadius: 18,
+    backgroundColor: '#F5F7FB', // secondary-100
+    padding: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logo: {
+    width: 180,
+    height: 80,
+    marginBottom: 22,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#222B45',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 15,
+    color: '#767F95',
+    textAlign: 'center',
+    lineHeight: 22,
+  },
 });

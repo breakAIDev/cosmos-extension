@@ -1,64 +1,134 @@
-import { Warning } from '@phosphor-icons/react';
-import BottomModal from 'components/bottom-modal';
-import React, { Dispatch, SetStateAction } from 'react';
+import React from 'react';
+import {
+  Modal,
+  View,
+  Text,
+  TouchableOpacity,
+  Linking,
+  StyleSheet,
+  Dimensions,
+} from 'react-native';
+import { Warning } from 'phosphor-react-native';
 
 type RedirectionConfirmationProps = {
   isOpen: boolean;
   onClose: () => void;
   url: string;
-  setUrl: Dispatch<SetStateAction<string>>;
+  setUrl: React.Dispatch<React.SetStateAction<string>>;
 };
 
-const RedirectionConfirmation = ({ url, setUrl, onClose }: RedirectionConfirmationProps) => {
-  return (
-    <div className='flex flex-col w-full justify-start items-center gap-6'>
-      <div className='w-12 h-12 bg-red-300 rounded-full flex flex-row justify-center items-center gap-0'>
-        <Warning size={24} className='text-white-100 !leading-[24px]' />
-      </div>
-      <div className='flex flex-col w-full justify-start items-center gap-[12px]'>
-        <div className='dark:text-gray-200 text-gray-800 text-sm !leading-[22.4px] font-medium text-center'>
-          You will be redirected to an external site. Proceed only if you have verified the link.
-        </div>
-        <div className='text-red-300 text-md !leading-[24px] font-medium max-w-full break-words'>{url}</div>
-      </div>
+const RedirectionConfirmationModal: React.FC<RedirectionConfirmationProps> = ({
+  isOpen,
+  onClose,
+  url,
+  setUrl,
+}) => {
+  const handleContinue = () => {
+    Linking.openURL(url);
+    setUrl('');
+    onClose();
+  };
 
-      <div className='flex flex-row justify-between w-full gap-6 items-center'>
-        <button
-          onClick={() => {
-            onClose();
-          }}
-          className='w-full dark:bg-gray-800 bg-gray-200 h-[46px] rounded-full text-center dark:shadow-[0px_3px_0px_0px_#00000066] shadow-[0px_3px_0px_0px_#FFFFFF66] font-bold text-md !leading-[21.6px] dark:text-white-100 text-black-100'
-        >
-          Go Back
-        </button>
-        <button
-          onClick={() => {
-            window.open(url, '_blank', 'noopener noreferrer');
-            setUrl('');
-            onClose();
-          }}
-          className='w-full dark:bg-white-100 bg-black-100 h-[46px] rounded-full text-center dark:shadow-[0px_3px_0px_0px_#00000066] shadow-[0px_3px_0px_0px_#FFFFFF66] font-bold text-md !leading-[21.6px] text-white-100 dark:text-black-100'
-        >
-          Continue
-        </button>
-      </div>
-    </div>
-  );
-};
-
-const RedirectionConfirmationModal = ({ isOpen, onClose, ...rest }: RedirectionConfirmationProps) => {
   return (
-    <BottomModal
-      isOpen={isOpen}
-      onClose={onClose}
-      title='Confirm Redirect'
-      closeOnBackdropClick={true}
-      contentClassName='!bg-white-100 dark:!bg-gray-950'
-      className='p-6'
+    <Modal
+      visible={isOpen}
+      transparent
+      animationType='slide'
+      onRequestClose={onClose}
     >
-      <RedirectionConfirmation isOpen={isOpen} onClose={onClose} {...rest} />
-    </BottomModal>
+      <View style={styles.overlay}>
+        <View style={styles.modal}>
+          <View style={styles.iconWrapper}>
+            <Warning size={24} color='white' weight='bold' />
+          </View>
+
+          <Text style={styles.message}>
+            You will be redirected to an external site. Proceed only if you
+            have verified the link.
+          </Text>
+
+          <Text style={styles.url}>{url}</Text>
+
+          <View style={styles.buttonGroup}>
+            <TouchableOpacity style={styles.cancelBtn} onPress={onClose}>
+              <Text style={styles.cancelText}>Go Back</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.continueBtn} onPress={handleContinue}>
+              <Text style={styles.continueText}>Continue</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
   );
 };
 
 export default RedirectionConfirmationModal;
+
+const { width } = Dimensions.get('window');
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: '#00000099',
+    justifyContent: 'flex-end',
+  },
+  modal: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+  },
+  iconWrapper: {
+    backgroundColor: '#F87171', // red-300
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'center',
+    marginBottom: 16,
+  },
+  message: {
+    color: '#1F2937', // gray-800
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  url: {
+    color: '#F87171', // red-300
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 16,
+    wordBreak: 'break-word',
+  },
+  buttonGroup: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  cancelBtn: {
+    flex: 1,
+    backgroundColor: '#E5E7EB', // gray-200
+    height: 46,
+    borderRadius: 999,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cancelText: {
+    color: '#111827', // black-100
+    fontWeight: 'bold',
+  },
+  continueBtn: {
+    flex: 1,
+    backgroundColor: '#111827', // black-100
+    height: 46,
+    borderRadius: 999,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  continueText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+  },
+});

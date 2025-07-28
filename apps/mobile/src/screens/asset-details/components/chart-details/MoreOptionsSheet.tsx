@@ -2,7 +2,7 @@ import { SelectedNetwork, useIsFeatureExistForChain } from '@leapwallet/cosmos-w
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { GenericCard } from '@leapwallet/leap-ui';
 import { ArrowDown, CurrencyCircleDollar, ShoppingBag } from '@phosphor-icons/react';
-import BottomModal from 'components/bottom-modal';
+import BottomModal from '../bottom-modal';
 import React from 'react';
 
 type MoreOptionsSheetProps = {

@@ -1,3 +1,7 @@
+import React, { useEffect, useMemo } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import Icon from 'react-native-vector-icons/Feather'; // GasPump as "zap", CaretDown as "chevron-down" (or your choice)
+
 import {
   currencyDetail,
   fetchCurrency,
@@ -8,40 +12,51 @@ import {
   useUserPreferredCurrency,
 } from '@leapwallet/cosmos-wallet-hooks';
 import { isSolanaChain, isSuiChain, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { CaretDown, GasPump } from '@phosphor-icons/react';
 import { useQuery } from '@tanstack/react-query';
-import classNames from 'classnames';
-import React, { useEffect, useMemo } from 'react';
 
 import { DisplayFeeValue, useGasPriceContext } from './context';
 import { calculateFeeAmount } from './index';
 
 type DisplayFeeProps = {
-  className?: string;
-  
+  style?: any;
   setDisplayFeeValue?: (value: DisplayFeeValue) => void;
   setShowFeesSettingSheet?: React.Dispatch<React.SetStateAction<boolean>>;
   forceChain?: SupportedChain;
 };
 
-export const DisplayFee: React.FC<DisplayFeeProps> = ({ className, setShowFeesSettingSheet, setDisplayFeeValue }) => {
+export const DisplayFee: React.FC<DisplayFeeProps> = ({
+  style,
+  setShowFeesSettingSheet,
+  setDisplayFeeValue,
+}) => {
   const [formatCurrency] = useformatCurrency();
   const [preferredCurrency] = useUserPreferredCurrency();
 
-  const { gasLimit, value, feeTokenData, activeChain, selectedNetwork, computedGas } = useGasPriceContext();
+  const {
+    gasLimit,
+    value,
+    feeTokenData,
+    activeChain,
+    selectedNetwork,
+    computedGas,
+  } = useGasPriceContext();
   const chainId = useChainId(activeChain, selectedNetwork);
   const chainGasAdjustment = useGasAdjustmentForChain(activeChain);
   const chains = useGetChains();
 
-  const { data: feeTokenFiatValue } = useQuery(['fee-token-fiat-value', feeTokenData.denom.coinGeckoId], async () => {
-    return fetchCurrency(
-      '1',
-      feeTokenData.denom.coinGeckoId,
-      feeTokenData.denom.chain as SupportedChain,
-      currencyDetail[preferredCurrency].currencyPointer,
-      `${chainId}-${feeTokenData.denom.coinMinimalDenom}`,
-    );
-  });
+  const { data: feeTokenFiatValue } = useQuery(
+    ['fee-token-fiat-value', feeTokenData.denom.coinGeckoId],
+    async () => {
+      return fetchCurrency(
+        '1',
+        feeTokenData.denom.coinGeckoId,
+        feeTokenData.denom.chain as SupportedChain,
+        currencyDetail[preferredCurrency].currencyPointer,
+        `${chainId}-${feeTokenData.denom.coinMinimalDenom}`,
+      );
+    }
+  );
+
   const displayFee = useMemo(() => {
     const { amount, formattedAmount, isVerySmallAmount } = calculateFeeAmount({
       gasLimit,
@@ -76,20 +91,61 @@ export const DisplayFee: React.FC<DisplayFeeProps> = ({ className, setShowFeesSe
   }, [displayFee, setDisplayFeeValue]);
 
   return (
-    <div className={classNames('flex gap-1 items-center justify-center text-gray-600 dark:text-gray-200', className)}>
-      <GasPump size={16} className='text-secondary-800' />
-      <button
-        className='flex items-center ml-1 shrink-0'
-        onClick={() => (setShowFeesSettingSheet ? setShowFeesSettingSheet(true) : undefined)}
-        data-testing-id='send-tx-fee-text'
+    <View style={[styles.row, style]}>
+      <Icon name="zap" size={16} color="#26292E" style={styles.icon} /> 
+      <TouchableOpacity
+        activeOpacity={0.7}
+        style={styles.feeButton}
+        onPress={() => setShowFeesSettingSheet && setShowFeesSettingSheet(true)}
+        testID="send-tx-fee-text"
       >
-        <p className='font-medium text-center text-xs text-secondary-800 !leading-[16.2px]'>
+        <Text style={styles.feeText}>
           {displayFee.formattedAmount} {feeTokenData.denom.coinDenom}
           {'  '}
-          <span className='text-muted-foreground'>{displayFee.fiatValue ? `(${displayFee.fiatValue})` : null}</span>
-        </p>
-        {setShowFeesSettingSheet && <CaretDown size={16} className='ml-1 text-muted-foreground' />}
-      </button>
-    </div>
+          <Text style={styles.fiatText}>
+            {displayFee.fiatValue ? `(${displayFee.fiatValue})` : null}
+          </Text>
+        </Text>
+        {setShowFeesSettingSheet && (
+          <Icon name="chevron-down" size={16} color="#AAA" style={styles.caret} />
+        )}
+      </TouchableOpacity>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  row: {
+    flexDirection: 'row',
+    gap: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+    // light/dark theme: update color as needed
+  },
+  icon: {
+    color: '#26292E', // text-secondary-800 (customize for theme)
+    marginRight: 2,
+  },
+  feeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 4,
+  },
+  feeText: {
+    fontWeight: '500',
+    textAlign: 'center',
+    fontSize: 12,
+    color: '#26292E', // text-secondary-800
+    lineHeight: 16,
+  },
+  fiatText: {
+    color: '#AAA', // text-muted-foreground
+    fontWeight: '400',
+  },
+  caret: {
+    marginLeft: 4,
+    color: '#AAA', // text-muted-foreground
+  },
+});
+
+export default DisplayFee;

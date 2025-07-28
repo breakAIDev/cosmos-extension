@@ -13,7 +13,6 @@ import mixpanel from 'mixpanel-browser';
 import React, { useEffect, useMemo, useState } from 'react';
 import CanvasConfetti from 'react-canvas-confetti/dist/presets/fireworks';
 import { createPortal } from 'react-dom';
-import { handleSidePanelClick } from 'utils/isSidePanel';
 
 import { OnboardingLayout } from '../layout';
 
@@ -98,7 +97,7 @@ export default function OnboardingSuccess() {
         <Button
           className='w-full'
           onClick={() => {
-            handleSidePanelClick('https://app.leapwallet.io');
+            alert('https://app.leapwallet.io');
           }}
         >
           Get started

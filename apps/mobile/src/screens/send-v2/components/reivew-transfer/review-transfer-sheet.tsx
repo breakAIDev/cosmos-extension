@@ -17,7 +17,7 @@ import { Avatar, Buttons } from '@leapwallet/leap-ui';
 import { ArrowRight } from '@phosphor-icons/react';
 import { captureException } from '@sentry/react';
 import BigNumber from 'bignumber.js';
-import BottomModal from 'components/bottom-modal';
+import BottomModal from '../bottom-modal';
 import { ErrorCard } from 'components/ErrorCard';
 import LedgerConfirmationPopup from 'components/ledger-confirmation/LedgerConfirmationPopup';
 import { TokenImageWithFallback } from 'components/token-image-with-fallback';

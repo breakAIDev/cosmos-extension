@@ -33,23 +33,22 @@ import { CaretDown } from '@phosphor-icons/react';
 import * as Sentry from '@sentry/react';
 import { useQuery } from '@tanstack/react-query';
 import BigNumber from 'bignumber.js';
-import classNames from 'classnames';
-import Text from 'components/text';
-import { TokenImageWithFallback } from 'components/token-image-with-fallback';
-import { useEnableEvmGasRefetch } from 'hooks/cosm-wasm/use-enable-evm-gas-refetch';
-import { useFormatCurrency } from 'hooks/settings/useCurrency';
-import { Images } from 'images';
-
+import Text from '../text';
+import { TokenImageWithFallback } from '../token-image-with-fallback';
+import { useEnableEvmGasRefetch } from '../../hooks/cosm-wasm/use-enable-evm-gas-refetch';
+import { useFormatCurrency } from '../../hooks/settings/useCurrency';
+import { Images } from '../../../assets/images';
 
 import Long from 'long';
 import { observer } from 'mobx-react-lite';
-import React, { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
-import Skeleton from 'react-loading-skeleton';
-import { activeChainStore } from 'stores/active-chain-store';
-import { evmBalanceStore, solanaCoinDataStore, suiCoinDataStore } from 'stores/balance-store';
-import { chainInfoStore } from 'stores/chain-infos-store';
-import { chainApisStore } from 'stores/chains-api-store';
-import { rootDenomsStore } from 'stores/denoms-store-instance';
+import React, { ChangeEvent, useEffect, useMemo, useState } from 'react';
+import { View, TouchableOpacity, StyleSheet, TextInput } from 'react-native';
+import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
+import { activeChainStore } from '../../context/active-chain-store';
+import { evmBalanceStore, solanaCoinDataStore, suiCoinDataStore } from '../../context/balance-store';
+import { chainInfoStore } from '../../context/chain-infos-store';
+import { chainApisStore } from '../../context/chains-api-store';
+import { rootDenomsStore } from '../../context/denoms-store-instance';
 import {
   defaultGasEstimatesStore,
   feeMarketGasPriceStepStore,
@@ -57,15 +56,15 @@ import {
   gasAdjustmentStore,
   gasPriceOptionsStore,
   gasPriceStepForChainStore,
-} from 'stores/fee-store';
-import { rootBalanceStore } from 'stores/root-store';
-import { selectedNetworkStore } from 'stores/selected-network-store';
-import { cn } from 'utils/cn';
-import { sliceWord } from 'utils/strings';
+} from '../../context/fee-store';
+import { rootBalanceStore } from '../../context/root-store';
+import { selectedNetworkStore } from '../../context/selected-network-store';
+import { sliceWord } from '../../utils/strings';
 
 import { GasPriceOptionsContext, GasPriceOptionsContextType, useGasPriceContext } from './context';
 import { SelectTokenModal } from './select-token-modal';
 import { updateFeeTokenData } from './utils';
+import { Text } from 'react-native-gesture-handler';
 
 type ExtendedNativeDenom = NativeDenom & { ibcDenom?: string };
 
@@ -602,7 +601,7 @@ const GasPriceOptions = observer(
     if (!feeTokenData) return null;
 
     return (
-      <div className={className}>
+      <View style={[className]}>
         <GasPriceOptionsContext.Provider
           value={{
             value: gasPriceOption,
@@ -639,7 +638,7 @@ const GasPriceOptions = observer(
         >
           {children}
         </GasPriceOptionsContext.Provider>
-      </div>
+      </View>
     );
   },
 ) as GasPriceOptionsType;
@@ -748,94 +747,86 @@ function Selector({ className, preSelected = true }: { className?: string; preSe
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
+  
   return (
-    <>
-      <div className={classNames('grid grid-cols-3 gap-[5px]', className)}>
-        {Object.entries(feeTokenData?.gasPriceStep ?? {}).map(([level, gasPrice]) => {
-          const isSelected = value.option === level;
-          const gasPriceBN = new BigNumber(gasPrice);
-          const estimatedGasLimit =
-            gasLimit ??
-            defaultGasEstimatesStore.estimate?.[activeChain].DEFAULT_GAS_TRANSFER ??
-            DefaultGasEstimates.DEFAULT_GAS_TRANSFER;
-          const { amount, formattedAmount, isVerySmallAmount } = calculateFeeAmount({
-            gasPrice: gasPriceBN,
-            gasLimit: estimatedGasLimit,
-            feeDenom: feeTokenData.denom,
-            gasAdjustment: considerGasAdjustment ? gasAdjustmentStore.getGasAdjustments(activeChain) : 1,
-            isSeiEvmTransaction: isSeiEvmTransaction || chains[activeChain]?.evmOnlyChain,
-            isSolana: isSolanaChain(activeChain),
-            isSui: isSuiChain(activeChain),
-            computedGas: computedGas,
-          });
-          const amountInFiat = feeTokenFiatValue ? new BigNumber(amount).multipliedBy(feeTokenFiatValue) : null;
-          const handleChange = () => {
-            onChange(
-              {
-                option: level as GasOptions,
-                gasPrice: GasPrice.fromUserInput(
-                  gasPrice?.toString() || '0',
-                  feeTokenData.ibcDenom ?? feeTokenData.denom.coinMinimalDenom,
-                ),
-              },
-              feeTokenData,
-            );
-          };
-          const levelText = (level: GasOptions) => {
-            if (activeChain === 'bitcoin' || activeChain === 'bitcoinSignet') {
-              const levelMap = {
-                high: 'fast',
-                medium: 'average',
-                low: 'slow',
-              };
-              return levelMap[level];
-            }
-            return level;
-          };
-
-          return (
-            <label
-              id={`gas-option-${level}`}
-              key={level}
-              className={`relative flex flex-col justify-center items-center w-full h-full rounded-lg cursor-pointer py-3 px-2.5 transition-colors ${
-                isSelected ? 'bg-secondary-100' : ''
-              }`}
-              title={amountInFiat ? `${currencyDetail[preferredCurrency].symbol} ${amountInFiat.toFixed(8)}` : level}
-            >
-              <input
-                type='radio'
-                className='opacity-0 absolute'
-                name='fee'
-                value={level}
-                checked={isSelected}
-                onChange={handleChange}
-                onClick={handleChange}
-              />
-              <span
-                className={`capitalize text-[18px] transition-all text-center ${
-                  isSelected ? 'text-monochrome font-bold' : 'text-muted-foreground font-medium'
-                }`}
-              >
-                {levelText(level as GasOptions)}
-              </span>
-              <span
-                className={`transition-all text-center mt-1 text-xs font-medium ${
-                  isSelected ? 'text-monochrome' : 'text-muted-foreground'
-                }`}
-              >
-                {isVerySmallAmount ? '< 0.00001' : formattedAmount} {sliceWord(feeTokenData?.denom?.coinDenom ?? '')}
-              </span>
-              {amountInFiat ? (
-                <span className={`text-muted-foreground text-xs transition-all text-center mt-0.5`}>
-                  {formatCurrency(amountInFiat)}
-                </span>
-              ) : null}
-            </label>
+    <View style={[styles.gasGrid, className]}>
+      {Object.entries(feeTokenData?.gasPriceStep ?? {}).map(([level, gasPrice]) => {
+        const isSelected = value.option === level;
+        const gasPriceBN = new BigNumber(gasPrice);
+        const estimatedGasLimit =
+          gasLimit ??
+          defaultGasEstimatesStore.estimate?.[activeChain]?.DEFAULT_GAS_TRANSFER ??
+          DefaultGasEstimates.DEFAULT_GAS_TRANSFER;
+        const { amount, formattedAmount, isVerySmallAmount } = calculateFeeAmount({
+          gasPrice: gasPriceBN,
+          gasLimit: estimatedGasLimit,
+          feeDenom: feeTokenData.denom,
+          gasAdjustment: considerGasAdjustment ? gasAdjustmentStore.getGasAdjustments(activeChain) : 1,
+          isSeiEvmTransaction: isSeiEvmTransaction || chains[activeChain]?.evmOnlyChain,
+          isSolana: isSolanaChain(activeChain),
+          isSui: isSuiChain(activeChain),
+          computedGas: computedGas,
+        });
+        const amountInFiat = feeTokenFiatValue ? new BigNumber(amount).multipliedBy(feeTokenFiatValue) : null;
+        const handleChange = () => {
+          onChange(
+            {
+              option: level,
+              gasPrice: GasPrice.fromUserInput(
+                gasPrice?.toString() || '0',
+                feeTokenData.ibcDenom ?? feeTokenData.denom.coinMinimalDenom,
+              ),
+            },
+            feeTokenData,
           );
-        })}
-      </div>
-    </>
+        };
+        const levelText = (level) => {
+          if (activeChain === 'bitcoin' || activeChain === 'bitcoinSignet') {
+            const levelMap = {
+              high: 'fast',
+              medium: 'average',
+              low: 'slow',
+            };
+            return levelMap[level];
+          }
+          return level;
+        };
+
+        return (
+          <TouchableOpacity
+            key={level}
+            style={[
+              styles.gasOption,
+              isSelected && styles.gasOptionSelected,
+            ]}
+            onPress={handleChange}
+            activeOpacity={0.7}
+          >
+            <Text
+              style={[
+                styles.gasOptionLabel,
+                isSelected && styles.gasOptionLabelSelected,
+              ]}
+            >
+              {levelText(level)}
+            </Text>
+            <Text
+              style={[
+                styles.gasAmount,
+                isSelected && styles.gasAmountSelected,
+              ]}
+            >
+              {isVerySmallAmount ? '< 0.00001' : formattedAmount} {sliceWord(feeTokenData?.denom?.coinDenom ?? '')}
+            </Text>
+            {amountInFiat ? (
+              <Text style={styles.fiatAmount}>
+                {formatCurrency(amountInFiat)}
+              </Text>
+            ) : null}
+          </TouchableOpacity>
+        );
+      })}
+    </View>
   );
 }
 
@@ -852,24 +843,32 @@ GasPriceOptions.AdditionalSettingsToggle = function AdditionalSettingsToggle({
   const { viewAdditionalOptions, setViewAdditionalOptions } = useGasPriceContext();
 
   return (
-    <div
-      role='button'
-      tabIndex={0}
-      onClick={() => setViewAdditionalOptions((v) => !v)}
-      className='w-full flex-row flex justify-between items-center gap-2 cursor-pointer p-4'
+    <TouchableOpacity
+      activeOpacity={0.7}
+      style={styles.toggleRow}
+      onPress={() => setViewAdditionalOptions((v) => !v)}
     >
       {children?.(viewAdditionalOptions) ?? (
-        <div className='flex w-full justify-between items-center'>
-          <p className={cn('text-xs font-medium transition-colors', !viewAdditionalOptions && 'text-muted-foreground')}>
+        <View style={styles.rowBetween}>
+          <Text
+            style={[
+              styles.toggleLabel,
+              !viewAdditionalOptions && styles.toggleLabelInactive,
+            ]}
+          >
             Show additional settings
-          </p>
-          <CaretDown
+          </Text>
+          <Icon
+            name="chevron-down" // Substitute with CaretDown, or any icon you prefer
             size={14}
-            className={cn('text-muted-foreground transition-transform', viewAdditionalOptions && 'rotate-180')}
+            style={[
+              styles.caret,
+              viewAdditionalOptions && styles.caretOpen,
+            ]}
           />
-        </div>
+        </View>
       )}
-    </div>
+    </TouchableOpacity>
   );
 };
 
@@ -894,9 +893,6 @@ GasPriceOptions.AdditionalSettings = observer(
   }) => {
     const [showTokenSelectSheet, setShowTokenSelectSheet] = useState(false);
     const [inputTouched, setInputTouched] = useState(false);
-
-    const ref = useRef<HTMLDivElement | null>(null);
-    const inputRef = useRef<HTMLInputElement | null>(null);
 
     const {
       feeTokenData,
@@ -980,31 +976,52 @@ GasPriceOptions.AdditionalSettings = observer(
     if (!feeTokenAsset && (!eligibleFeeTokens || eligibleFeeTokens?.length === 0)) {
       if (allTokensStatus === 'error') {
         return (
-          <div className='w-full z-0 p-3'>
-            <p className='text-sm dark:text-gray-400 text-gray-700'>
+          <View style={styles.fullWidth && styles.z0 && styles.p3}>
+            <Text style={colorScheme === 'dark' ? styles.textSmGrayDark : styles.textSmGray}>
               Failed to load your tokens, please reload the extension and try again
-            </p>
-          </div>
+            </Text>
+          </View>
         );
       }
       if (allTokensStatus === 'loading' && viewAdditionalOptions) {
         return (
-          <div className='w-full z-0 p-3'>
-            <div className='flex w-full justify-between items-center'>
-              <Skeleton className='rounded-full h-10 w-20 bg-gray-50 dark:bg-gray-800' />
-              <Skeleton className='rounded-full h-5 w-32 bg-gray-50 dark:bg-gray-800' />
-            </div>
-            <Skeleton className='rounded-lg h-10 bg-gray-50 dark:bg-gray-800 w-full mt-3' />
-          </div>
+          <View style={styles.fullWidth && styles.z0 && styles.p3}>
+            <View style={styles.row && styles.fullWidth}>
+              <SkeletonPlaceholder borderRadius={9999}>
+                <SkeletonPlaceholder.Item
+                  width={80} // w-20
+                  height={40} // h-10
+                  borderRadius={9999} // rounded-full
+                  style={styles.skeleton}
+                />
+              </SkeletonPlaceholder>
+              <SkeletonPlaceholder borderRadius={9999}>
+                <SkeletonPlaceholder.Item
+                  width={128} // w-32
+                  height={20} // h-5
+                  borderRadius={9999} // rounded-full
+                  style={styles.skeleton}
+                />
+              </SkeletonPlaceholder>
+            </View>
+            <SkeletonPlaceholder borderRadius={12}>
+              <SkeletonPlaceholder.Item
+                width="100%" // w-full
+                height={40} // h-10
+                borderRadius={12} // rounded-lg
+                style={[styles.skeleton, { marginTop: 12 }]} // mt-3 = 12
+              />
+            </SkeletonPlaceholder>
+          </View>
         );
       }
       if (allTokensStatus === 'success' && viewAdditionalOptions) {
         return (
-          <div className='w-full z-0 p-3'>
-            <p className='text-sm dark:text-gray-400 text-gray-700'>
+          <View style={styles.fullWidth && styles.z0 && styles.p3}>
+            <Text style={colorScheme === 'dark' ? styles.textSmGrayDark : styles.textSmGray}>
               You do not have any tokens that can be used to pay transaction fees.
-            </p>
-          </div>
+            </Text>
+          </View>
         );
       }
       return null;
@@ -1049,7 +1066,7 @@ GasPriceOptions.AdditionalSettings = observer(
       }
     };
 
-    const handleGasLimitOnChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const handleGasLimitOnChange = (e: ChangeEvent<TextInput>) => {
       const value = e.target.value;
       setGasLimitInputValue(value);
 
@@ -1064,86 +1081,78 @@ GasPriceOptions.AdditionalSettings = observer(
 
     return viewAdditionalOptions ? (
       <>
-        <div ref={ref} className={classNames('w-full p-4', className)}>
-          <p className='text-xs text-secondary-800'>
+        <View style={styles.additionalPanel}>
+          <Text style={styles.toggleLabel}>
             {onlySingleFeeToken
               ? 'You are paying fees transaction fees in'
               : 'Choose a token for paying transaction fees'}
-          </p>
-          <div className='flex items-center justify-between mt-3 bg-secondary-100 rounded-lg pr-3 py-1'>
-            <button
-              className={`rounded-full flex items-center py-2 shrink-0 pl-3 pr-2 disabled:cursor-default ${
-                onlySingleFeeToken ? '' : 'cursor-pointer'
-              }`}
+          </Text>
+          <View style={styles.selectTokenRow}>
+            <TouchableOpacity
+              style={[
+                styles.selectTokenButton,
+                isLoading || onlySingleFeeToken ? styles.disabledButton : null,
+              ]}
               disabled={isLoading || onlySingleFeeToken}
-              onClick={() => {
-                setShowTokenSelectSheet(true);
-              }}
+              onPress={() => setShowTokenSelectSheet(true)}
             >
               <TokenImageWithFallback
                 assetImg={feeTokenData.denom.icon ?? feeTokenAsset?.img}
                 text={feeTokenData.denom.coinDenom}
                 altText={feeTokenData.denom.coinDenom}
-                imageClassName='h-6 w-6 mr-1'
-                containerClassName='h-6 w-6 mr-1'
-                textClassName='text-[7px] !leading-[9px]'
               />
-              <p className='text-black-100 dark:text-white-100 font-bold text-base mr-2'>
+              <Text style={styles.tokenDenomText}>
                 {sliceWord(feeTokenData?.denom?.coinDenom ?? '', 3, 3)}
-              </p>
-              {isLoading || onlySingleFeeToken ? null : <img src={Images.Misc.ArrowDown} />}
-            </button>
-            <p
-              className='text-xs text-muted-foreground text-right max-[350px]:flex max-[350px]:flex-col max-[350px]:items-end'
-              title={`${new BigNumber(feeTokenAsset?.amount ?? '0').decimalPlaces(
-                feeTokenData.denom.coinDecimals ?? 6,
-              )} ${sliceWord(feeTokenData?.denom?.coinDenom ?? '')}`}
-            >
-              <span>BAL:</span>
-              <span className='ml-1'>
+              </Text>
+              {/* RN: Use Icon instead of <img>. For demo, left as null */}
+              {(isLoading || onlySingleFeeToken) ? null : (
+                <Images.Misc.FilledDownArrowSvg /> // You can use a vector icon here
+              )}
+            </TouchableOpacity>
+            <View style={styles.balanceCol}>
+              <Text style={styles.balanceLabel}>BAL:</Text>
+              <Text style={styles.balanceValue}>
                 {formatBigNumber(new BigNumber(feeTokenAsset?.amount ?? '0'))}{' '}
                 {sliceWord(feeTokenData?.denom?.coinDenom ?? '')}
-              </span>
-            </p>
-          </div>
-          <div className='mt-4'>
-            <div className='flex flex-col gap-3'>
-              <p className='text-xs text-secondary-800'>Enter gas limit manually</p>
-              <div className='w-full py-3 px-4 flex items-center bg-secondary-100 rounded-lg'>
-                <input
-                  className={classNames('flex flex-grow text-md  outline-none font-medium bg-transparent', {
-                    'text-monochrome': !gasError,
-                    'text-destructive-100': gasError,
-                  })}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.mt4}>
+            <View style={styles.gap3}>
+              <Text style={styles.inputLabel}>Enter gas limit manually</Text>
+              <View style={styles.inputRow}>
+                <TextInput
+                  style={[
+                    styles.gasLimitInput,
+                    !gasError ? styles.textMonochrome : styles.textDestructive,
+                  ]}
                   value={gasLimitInputValue}
-                  onChange={handleGasLimitOnChange}
+                  onChangeText={handleGasLimitOnChange}
                   ref={inputRef}
+                  keyboardType="numeric"
+                  placeholder="Enter gas limit"
                 />
-                <div
-                  onClick={() => {
-                    setGasLimit(recommendedGasLimit);
-                  }}
+                <TouchableOpacity
+                  onPress={() => setGasLimit(recommendedGasLimit)}
                 >
-                  <Text size='xs' color='text-muted-foreground' className=' font-bold cursor-pointer'>
-                    Clear
-                  </Text>
-                </div>
-              </div>
+                  <Text style={styles.clearButton}>Clear</Text>
+                </TouchableOpacity>
+              </View>
               {gasError ? (
-                <p className='text-destructive-100 text-xs font-medium'>{gasError}</p>
+                <Text style={styles.errorText}>{gasError}</Text>
               ) : showGasLimitWarning &&
                 inputTouched &&
                 new BigNumber(gasLimitInputValue).isLessThan(
                   Math.round(
                     Number(recommendedGasLimit) *
-                      (considerGasAdjustment ? gasAdjustmentStore.getGasAdjustments(activeChain) : 1),
-                  ),
+                      (considerGasAdjustment ? gasAdjustmentStore.getGasAdjustments(activeChain) : 1)
+                  )
                 ) ? (
-                <p className='text-orange-500 text-xs font-medium'>We recommend using the default gas limit</p>
+                <Text style={styles.warningText}>We recommend using the default gas limit</Text>
               ) : null}
-            </div>
-          </div>
-        </div>
+            </View>
+          </View>
+        </View>
         <SelectTokenModal
           isOpen={showTokenSelectSheet}
           assets={eligibleFeeTokens}
@@ -1155,5 +1164,204 @@ GasPriceOptions.AdditionalSettings = observer(
     ) : null;
   },
 );
+const styles = StyleSheet.create({
+  gasGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 5, // or marginHorizontal in each item
+  },
+  gasOption: {
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    margin: 2,
+    backgroundColor: '#fff',
+  },
+  gasOptionSelected: {
+    backgroundColor: '#F4F4F6',
+  },
+  gasOptionLabel: {
+    textTransform: 'capitalize',
+    fontSize: 18,
+    textAlign: 'center',
+    fontWeight: '500',
+    color: '#555',
+  },
+  gasOptionLabelSelected: {
+    color: '#222',
+    fontWeight: '700',
+  },
+  gasAmount: {
+    marginTop: 4,
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#777',
+    textAlign: 'center',
+  },
+  gasAmountSelected: {
+    color: '#222',
+  },
+  fiatAmount: {
+    color: '#AAA',
+    fontSize: 12,
+    marginTop: 2,
+    textAlign: 'center',
+  },
+    additionalPanel: {
+    width: '100%',
+    padding: 16,
+    backgroundColor: '#fff',
+  },
+  selectTokenRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#F4F4F6',
+    borderRadius: 12,
+    paddingRight: 12,
+    paddingVertical: 8,
+    marginTop: 12,
+  },
+  selectTokenButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingLeft: 12,
+    paddingRight: 8,
+    borderRadius: 9999,
+    backgroundColor: '#F4F4F6',
+  },
+  disabledButton: {
+    opacity: 0.5,
+  },
+  tokenDenomText: {
+    color: '#111',
+    fontWeight: '700',
+    fontSize: 16,
+    marginRight: 8,
+  },
+  balanceCol: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  balanceLabel: {
+    fontSize: 12,
+    color: '#888',
+  },
+  balanceValue: {
+    fontSize: 12,
+    color: '#888',
+    marginLeft: 4,
+  },
+  gap3: {
+    flexDirection: 'column',
+    gap: 12,
+  },
+  inputLabel: {
+    fontSize: 12,
+    color: '#555',
+    marginBottom: 4,
+  },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F4F4F6',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    width: '100%',
+  },
+  gasLimitInput: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#222',
+    backgroundColor: 'transparent',
+    padding: 0,
+    margin: 0,
+  },
+  textMonochrome: {
+    color: '#222',
+  },
+  textDestructive: {
+    color: '#FF4C4C',
+  },
+  clearButton: {
+    marginLeft: 10,
+    fontWeight: '700',
+    color: '#AAA',
+    fontSize: 12,
+  },
+  errorText: {
+    color: '#FF4C4C',
+    fontSize: 12,
+    fontWeight: '500',
+    marginTop: 4,
+  },
+  warningText: {
+    color: '#FFA500',
+    fontSize: 12,
+    fontWeight: '500',
+    marginTop: 4,
+  },  toggleRow: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    gap: 8, // Only works on RN >= 0.71
+  },
+  rowBetween: {
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  toggleLabel: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#555', // Normal
+  },
+  toggleLabelInactive: {
+    color: '#AAA', // text-muted-foreground
+  },
+  caret: {
+    color: '#AAA', // Default color, update for theme
+    transform: [{ rotate: '0deg' }],
+  },
+  caretOpen: {
+    transform: [{ rotate: '180deg' }],
+  },
+  textSmGray: {
+    fontSize: 14,
+    color: '#374151', // gray-700
+  },
+  textSmGrayDark: {
+    fontSize: 14,
+    color: '#9CA3AF', // gray-400 for dark mode
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  skeleton: {
+    backgroundColor: '#F9FAFB', // gray-50 (can be changed for dark mode support)
+    marginHorizontal: 2,
+  },
 
+  // General utility
+  fullWidth: { width: '100%' },
+  column: { flexDirection: 'column' },
+  rounded: { borderRadius: 12 },
+  px4: { paddingHorizontal: 16 },
+  py3: { paddingVertical: 12 },
+  mt4: { marginTop: 16 },
+  p3: { padding: 12 },
+  z0: { zIndex: 0 },
+});
 export default GasPriceOptions;

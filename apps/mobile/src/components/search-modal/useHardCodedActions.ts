@@ -1,22 +1,20 @@
 import { sliceAddress, useAddress, useChainInfo, useFeatureFlags } from '@leapwallet/cosmos-wallet-hooks';
-import { captureException } from '@sentry/react';
-import { ButtonName, ButtonType, EventName, PageName } from 'config/analytics';
-import { AGGREGATED_CHAIN_KEY, LEAPBOARD_URL } from 'config/constants';
-import { useAuth } from 'context/auth-context';
-import { useActiveChain } from 'hooks/settings/useActiveChain';
-import mixpanel from 'mixpanel-browser';
-import { useProviderFeatureFlags } from 'pages/swaps-v2/hooks';
+import { useActiveChain } from '../../hooks/settings/useActiveChain';
+import { AggregatedSupportedChain } from '../../types/utility';
+import { useAuth } from '../../context/auth-context';
+import { useProviderFeatureFlags } from '../../screens/swaps-v2/hooks';
+import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { earnFeatureShowStore } from 'stores/earn-feature-show';
-import { AggregatedSupportedChain } from 'types/utility';
-import { UserClipboard } from 'utils/clipboard';
-import { closeSidePanel } from 'utils/closeSidePanel';
-import { isSidePanel } from 'utils/isSidePanel';
-import Browser from 'webextension-polyfill';
+import { Alert, Linking } from 'react-native';
+import Clipboard from '@react-native-clipboard/clipboard';
+import mixpanel from 'mixpanel-browser'; // or omit if not used
+import { captureException } from '@sentry/react-native';
+import { earnFeatureShowStore } from '../../context/earn-feature-show';
+import { AGGREGATED_CHAIN_KEY, LEAPBOARD_URL } from '../../services/config/constants';
+import { PageName, EventName, ButtonName, ButtonType } from '../../services/config/analytics';
 
 export function useHardCodedActions() {
-  const navigate = useNavigate();
+  const navigation = useNavigation();
   const auth = useAuth();
   const { data: featureFlags } = useFeatureFlags();
   const { isEvmSwapEnabled } = useProviderFeatureFlags();
@@ -29,7 +27,8 @@ export function useHardCodedActions() {
   const [alertMessage, setAlertMessage] = useState('');
 
   const handleBuyClick = () => {
-    navigate(`/buy?pageSource=${PageName.Home}`);
+    navigation.navigate('Buy', { pageSource: PageName.Home });
+
     try {
       mixpanel.track(EventName.ButtonClick, {
         buttonName: ButtonName.ONRAMP_TOKEN_SELECTION,
@@ -40,38 +39,36 @@ export function useHardCodedActions() {
     }
   };
 
-  function handleSwapClick(_redirectUrl?: string, navigateUrl?: string) {
+  const handleSwapClick = (_redirectUrl?: string, navigateUrl?: string) => {
     if (featureFlags?.all_chains?.swap === 'redirect') {
       const fallbackUrl = activeChainInfo?.chainId
         ? `https://swapfast.app/?sourceChainId=${activeChainInfo.chainId}`
         : 'https://swapfast.app';
-      const redirectUrl = _redirectUrl ?? fallbackUrl;
-      window.open(redirectUrl, '_blank');
+      Linking.openURL(_redirectUrl ?? fallbackUrl);
     } else {
-      navigate(navigateUrl ?? '/swap');
+      navigation.navigate(navigateUrl ?? 'Swap');
     }
-  }
+  };
 
-  function handleNftsClick(_redirectUrl?: string) {
+  const handleNftsClick = (_redirectUrl?: string) => {
     if (featureFlags?.nfts?.extension === 'redirect') {
-      const redirectUrl = _redirectUrl ?? `${LEAPBOARD_URL}/portfolio/nfts`;
-      window.open(redirectUrl, '_blank');
+      Linking.openURL(_redirectUrl ?? `${LEAPBOARD_URL}/portfolio/nfts`);
     } else {
-      navigate('/nfts');
+      navigation.navigate('NFTs');
     }
-  }
+  };
 
-  function handleVoteClick(_redirectUrl?: string) {
+  const handleVoteClick = (_redirectUrl?: string) => {
     if (featureFlags?.gov?.extension === 'redirect') {
-      const redirectUrl = _redirectUrl ?? `${LEAPBOARD_URL}/portfolio/gov`;
-      window.open(redirectUrl, '_blank');
+      Linking.openURL(_redirectUrl ?? `${LEAPBOARD_URL}/portfolio/gov`);
     } else {
-      navigate('/gov');
+      navigation.navigate('Gov');
     }
-  }
+  };
 
-  function handleBridgeClick(navigateUrl?: string) {
+  const handleBridgeClick = (navigateUrl?: string) => {
     let redirectURL = '';
+
     if (
       featureFlags?.all_chains?.swap === 'redirect' ||
       !isEvmSwapEnabled ||
@@ -87,62 +84,56 @@ export function useHardCodedActions() {
       } else if (activeChain === AGGREGATED_CHAIN_KEY) {
         redirectURL = baseUrl;
       }
-      window.open(redirectURL, '_blank');
+
+      Linking.openURL(redirectURL);
     } else {
-      navigate(navigateUrl ?? '/swap');
+      navigation.navigate(navigateUrl ?? 'Swap');
     }
 
     try {
       mixpanel.track(EventName.ButtonClick, {
         buttonType: ButtonType.HOME,
         buttonName: ButtonName.BRIDGE,
-        redirectURL: redirectURL,
+        redirectURL,
         time: Date.now() / 1000,
       });
     } catch (e) {
       captureException(e);
     }
-  }
+  };
 
-  function onSendClick(_redirectUrl?: string) {
+  const onSendClick = (_redirectUrl?: string) => {
     if (featureFlags?.ibc?.extension === 'redirect') {
       const fallbackUrl = activeChainInfo?.chainId
         ? `${LEAPBOARD_URL}/transact/send?sourceChainId=${activeChainInfo.chainId}`
         : `${LEAPBOARD_URL}/transact/send`;
-      const redirectUrl = _redirectUrl ?? fallbackUrl;
-      window.open(redirectUrl, '_blank');
+      Linking.openURL(_redirectUrl ?? fallbackUrl);
     } else {
-      navigate(`/send`);
+      navigation.navigate('Send');
     }
-  }
+  };
 
-  function handleNobleEarnClick() {
+  const handleNobleEarnClick = () => {
     if (earnFeatureShowStore.show !== 'false') {
-      navigate('/home?openEarnUSDN=true');
+      navigation.navigate('Home', { openEarnUSDN: true });
     } else {
-      navigate('/earn-usdn');
+      navigation.navigate('EarnUSDN');
     }
-  }
+  };
 
-  function handleConnectLedgerClick() {
-    const views = Browser.extension.getViews({ type: 'popup' });
-    if (views.length === 0 && !isSidePanel()) {
-      navigate('/onboardingImport?walletName=ledger');
-    } else {
-      window.open('index.html#/onboardingImport?walletName=ledger');
-      closeSidePanel();
-    }
-  }
+  const handleConnectLedgerClick = () => {
+    navigation.navigate('OnboardingImport', { walletName: 'ledger' });
+  };
 
-  function handleCopyAddressClick() {
-    UserClipboard.copyText(address);
+  const handleCopyAddressClick = () => {
+    Clipboard.setString(address);
     setAlertMessage(`Address Copied (${sliceAddress(address)})`);
     setShowAlert(true);
-  }
+  };
 
-  function handleLockWalletClick() {
-    auth?.signout();
-  }
+  const handleLockWalletClick = () => {
+    auth?.signout?.(); // Update depending on your RN auth context
+  };
 
   return {
     handleBuyClick,

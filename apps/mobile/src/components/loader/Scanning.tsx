@@ -1,16 +1,26 @@
-import scanning from 'lottie-files/scanning.json';
-import Lottie from 'lottie-react';
 import React from 'react';
+import { StyleSheet } from 'react-native';
+import LottieView from 'lottie-react-native';
+import scanning from '../../../assets/lottie-files/scanning.json';
 
-const defaultOptions = {
-  loop: true,
-  autoplay: true,
-  animationData: scanning,
-  rendererSettings: {
-    preserveAspectRatio: 'xMidYMid slice',
-  },
+type ScanningAnimationProps = {
+  style?: object;
 };
 
-export default function ScanningAnimation({ className }: { className?: string }) {
-  return <Lottie {...defaultOptions} className={className ?? 'w-[196px] h-[196px]'} />;
+export default function ScanningAnimation({ style }: ScanningAnimationProps) {
+  return (
+    <LottieView
+      source={scanning}
+      autoPlay
+      loop
+      style={[styles.default, style]}
+    />
+  );
 }
+
+const styles = StyleSheet.create({
+  default: {
+    width: 196,
+    height: 196,
+  },
+});

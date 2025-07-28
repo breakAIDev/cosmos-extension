@@ -1,73 +1,75 @@
-import { AnimatePresence, motion } from 'framer-motion';
-import { CopyIcon } from 'icons/copy-icon';
-import { Images } from 'images';
+{/* <CopyButton onPress={() => {  }}>
+  Copy Address
+</CopyButton> */}
+
 import React, { useEffect, useState } from 'react';
-import { cn } from 'utils/cn';
+import { View, Image, Text, StyleSheet } from 'react-native';
+import * as Animatable from 'react-native-animatable';
+import { Button, ButtonProps } from '.'; // Your Button with types!
+import { CopyIcon } from '../../../../assets/icons/copy-icon'; // Should be an SVG or Image RN component
+import { Images } from '../../../../assets/images'; // Should use require() for RN
 
-import { Button, ButtonProps } from '.';
-
-const transition = { duration: 0.15, type: 'easeIn' };
-
-const copyVariants = {
-  hide: { opacity: 0, scale: 0.8 },
-  animate: { opacity: 1, scale: 1 },
-};
-
-export const CopyButton = ({ children, ...props }: ButtonProps) => {
+export function CopyButton({
+  children,
+  onPress,
+  textStyle,
+  ...props
+}: ButtonProps) {
   const [isCopied, setIsCopied] = useState(false);
 
   useEffect(() => {
+    let timer: NodeJS.Timeout | undefined;
     if (isCopied) {
-      setTimeout(() => {
-        setIsCopied(false);
-      }, 2_000);
+      timer = setTimeout(() => setIsCopied(false), 2000);
     }
+    return () => timer && clearTimeout(timer);
   }, [isCopied]);
+
+  const handlePress = (e: any) => {
+    setIsCopied(true);
+    if (onPress) onPress(e);
+  };
 
   return (
     <Button
-      variant='ghost'
-      size='sm'
+      onPress={handlePress}
+      variant="ghost"
+      size="sm"
+      textStyle={[
+        styles.label,
+        isCopied && styles.copiedLabel,
+        textStyle,
+      ]}
       {...props}
-      className={cn(
-        props.className,
-        isCopied ? 'text-accent-success hover:text-accent-success' : 'text-accent-green hover:text-accent-green-200',
-      )}
-      onClick={(e) => {
-        setIsCopied(true);
-        props.onClick?.(e);
-      }}
     >
-      <AnimatePresence mode='wait'>
+      <Animatable.View
+        animation="fadeIn"
+        duration={150}
+        style={{ marginRight: 8 }}
+        key={isCopied ? 'check' : 'copy'}
+      >
         {isCopied ? (
-          <motion.img
-            key='check'
-            src={Images.Misc.CheckGreenOutline}
-            alt='check'
-            className='size-4'
-            transition={transition}
-            variants={copyVariants}
-            initial='hide'
-            animate='animate'
-            exit='hide'
+          <Image
+            source={Images.Misc.CheckGreenOutline} // Should be a require('...') or static import
+            style={{ width: 16, height: 16 }}
+            resizeMode="contain"
           />
         ) : (
-          <motion.div
-            key='copy'
-            className='size-4'
-            transition={transition}
-            variants={copyVariants}
-            initial='hide'
-            animate='animate'
-            exit='hide'
-          >
-            <CopyIcon className='size-4' />
-          </motion.div>
+          // If CopyIcon is an SVG component, render it directly; else use <Image />
+          <CopyIcon width={16} height={16} color="#26c06f" />
         )}
-      </AnimatePresence>
+      </Animatable.View>
       {children || 'Copy'}
     </Button>
   );
-};
+}
 
-CopyButton.displayName = 'CopyButton';
+const styles = StyleSheet.create({
+  label: {
+    fontWeight: 'bold',
+    fontSize: 13,
+  },
+  copiedLabel: {
+    color: '#0ba360', // Use green text when copied (overrides default)
+  },
+});

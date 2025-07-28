@@ -1,8 +1,9 @@
 import { BigNumber } from 'bignumber.js';
 import { observer } from 'mobx-react-lite';
 import React, { useMemo } from 'react';
-import { hideAssetsStore } from 'stores/hide-assets-store';
+import { View, StyleSheet } from 'react-native';
 
+import { hideAssetsStore } from '../../context/hide-assets-store';
 import { useFormatCurrency } from '../../hooks/settings/useCurrency';
 import { Colors } from '../../theme/colors';
 import TokenCardSkeleton from '../Skeletons/TokenCardSkeleton';
@@ -17,78 +18,162 @@ function _PortfolioDistribution({
   walletBalance: BigNumber | null;
   loading: boolean;
 }) {
-  const totalBalance = useMemo(() => walletBalance?.plus(stakeBalance as BigNumber), [stakeBalance, walletBalance]);
-
-  const threshold = useMemo(() => 3, []);
+  const totalBalance = useMemo(
+    () => walletBalance?.plus(stakeBalance ?? 0),
+    [stakeBalance, walletBalance]
+  );
+  const threshold = 3;
   const [formatCurrency] = useFormatCurrency();
 
-  const walletBalancePct = walletBalance?.times(100).div(totalBalance as BigNumber);
+  const walletBalancePct = walletBalance && totalBalance && !totalBalance.isZero()
+    ? walletBalance.times(100).div(totalBalance)
+    : new BigNumber(0);
+
   const showLoader = walletBalance === null || loading === true;
 
-  if (stakeBalance?.lte(0) && walletBalance?.lte(0) && !showLoader) {
+  if (
+    stakeBalance?.lte(0) &&
+    walletBalance?.lte(0) &&
+    !showLoader
+  ) {
     return null;
   }
 
   return (
-    <div className='rounded-2xl dark:bg-gray-900 bg-white-100 mb-2'>
-      <div className='flex justify-between'>
-        <Text size='sm' color='dark:text-gray-200 text-gray-600 font-medium px-5 pt-4'>
+    <View style={styles.card}>
+      <View style={styles.headerRow}>
+        <Text size="sm" style={styles.title}>
           Portfolio Distribution
         </Text>
-      </div>
+      </View>
       {showLoader ? (
         <TokenCardSkeleton />
       ) : (
-        <div className='w-[344px] pb-2 px-5'>
-          <div className='pt-4'>
-            <div
-              className='w-full bg-gray-200 h-[8px] mb-3 rounded-2xl overflow-hidden'
-              style={{ background: Colors.Indigo300 }}
+        <View style={styles.body}>
+          {/* Progress Bar */}
+          <View style={styles.progressRow}>
+            <View
+              style={[
+                styles.progressBg,
+                { backgroundColor: Colors.Indigo300 }
+              ]}
             >
-              {walletBalancePct?.gte(threshold) && (
-                <div
-                  className='h-[8px] rounded-l-2xl'
-                  style={{
-                    width: `${(walletBalancePct.plus(threshold).gte(100) ? 100 : walletBalancePct).toString()}%`,
-                    background: `${Colors.juno}`,
-                  }}
-                ></div>
+              {walletBalancePct.gte(threshold) && (
+                <View
+                  style={[
+                    styles.progressBar,
+                    {
+                      width: `${
+                        walletBalancePct.plus(threshold).gte(100)
+                          ? 100
+                          : walletBalancePct.toNumber()
+                      }%`,
+                      backgroundColor: Colors.juno,
+                    },
+                  ]}
+                />
               )}
-            </div>
-          </div>
-          <div className='flex justify-between'>
-            <div>
-              <div className='w-[8px] h-[8px] rounded-full inline-block' style={{ background: Colors.juno }}></div>
-              <div className='inline-block align-text-top ml-2'>
-                <Text size='sm' color='text-gray-400'>
+            </View>
+          </View>
+
+          {/* Labels and Amounts */}
+          <View style={styles.balancesRow}>
+            <View style={styles.legend}>
+              <View style={[styles.legendDot, { backgroundColor: Colors.juno }]} />
+              <View style={styles.legendText}>
+                <Text size="sm" style={styles.legendLabel}>
                   Wallet Balance
                 </Text>
-                <Text size='sm' className='font-bold'>
+                <Text size="sm" style={styles.legendValue}>
                   {hideAssetsStore.formatHideBalance(formatCurrency(walletBalance))}
                 </Text>
-              </div>
-            </div>
+              </View>
+            </View>
             {stakeBalance ? (
-              <div>
-                <div
-                  className='w-[8px] h-[8px] rounded-full inline-block'
-                  style={{ background: Colors.Indigo300 }}
-                ></div>
-                <div className='inline-block align-text-top ml-2'>
-                  <Text size='sm' color='text-gray-400'>
+              <View style={styles.legend}>
+                <View style={[styles.legendDot, { backgroundColor: Colors.Indigo300 }]} />
+                <View style={styles.legendText}>
+                  <Text size="sm" style={styles.legendLabel}>
                     Stake Balance
                   </Text>
-                  <Text size='sm' className='font-bold'>
+                  <Text size="sm" style={styles.legendValue}>
                     {hideAssetsStore.formatHideBalance(formatCurrency(stakeBalance))}
                   </Text>
-                </div>
-              </div>
+                </View>
+              </View>
             ) : null}
-          </div>
-        </div>
+          </View>
+        </View>
       )}
-    </div>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    borderRadius: 16,
+    backgroundColor: '#fff', // Light mode, use a dark color for dark mode if needed
+    marginBottom: 8,
+    marginTop: 8,
+    overflow: 'hidden',
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  title: {
+    color: '#6B7280', // text-gray-600
+    fontWeight: '500',
+    paddingLeft: 20,
+    paddingRight: 20,
+    paddingTop: 16,
+  },
+  body: {
+    width: 344,
+    paddingBottom: 8,
+    paddingHorizontal: 20,
+  },
+  progressRow: {
+    paddingTop: 16,
+    marginBottom: 12,
+  },
+  progressBg: {
+    width: '100%',
+    height: 8,
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginBottom: 12,
+    backgroundColor: Colors.Indigo300,
+    justifyContent: 'flex-start',
+  },
+  progressBar: {
+    height: 8,
+    borderTopLeftRadius: 16,
+    borderBottomLeftRadius: 16,
+  },
+  balancesRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  legend: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  legendDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  legendText: {
+    marginLeft: 8,
+  },
+  legendLabel: {
+    color: '#9CA3AF', // text-gray-400
+    fontWeight: '400',
+  },
+  legendValue: {
+    fontWeight: 'bold',
+  },
+});
 
 export const PortfolioDistribution = observer(_PortfolioDistribution);

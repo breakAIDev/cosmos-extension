@@ -1,20 +1,25 @@
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  Pressable,
+} from 'react-native';
+
 import { useCustomChains } from '@leapwallet/cosmos-wallet-hooks';
 import { ChainInfo } from '@leapwallet/cosmos-wallet-sdk';
 import { LineDivider } from '@leapwallet/leap-ui';
-import classNames from 'classnames';
-import { ActionButton } from 'components/button';
-import { useDefaultTokenLogo } from 'hooks';
-import useNewChainTooltip from 'hooks/useNewChainTooltip';
-import { Images } from 'images';
-import AddFromChainStore from 'pages/home/AddFromChainStore';
-import React, { useState } from 'react';
-import { PageHeaderProps } from 'types/components';
-import { imgOnError } from 'utils/imgOnError';
-import { isSidePanel } from 'utils/isSidePanel';
 
-import NewChainSupportTooltip from './NewChainSupportTooltip';
+import { useDefaultTokenLogo } from '../../hooks';
+import useNewChainTooltip from '../../hooks/useNewChainTooltip';
+import AddFromChainStore from '../../screens/home/AddFromChainStore';
+import { PageHeaderProps } from '../../types/components';
+import { imgOnError } from '../../utils/imgOnError';
+import { Images } from '../../../assets/images';
 
-const PageHeader = React.memo(
+export const PageHeader: React.FC<PageHeaderProps> = React.memo(
   ({
     title,
     titleIcon,
@@ -23,81 +28,73 @@ const PageHeader = React.memo(
     onImgClick,
     dontShowFilledArrowIcon = false,
     dontShowBottomDivider = false,
-  }: PageHeaderProps) => {
+  }) => {
     const { showToolTip: _showToolTip, toolTipData, handleToolTipClose } = useNewChainTooltip();
     const defaultTokenLogo = useDefaultTokenLogo();
-    const showToolTip = _showToolTip && !!toolTipData && !!onImgClick;
     const [newChain, setNewChain] = useState<string | null>(null);
     const customChains = useCustomChains();
+
+    const showToolTip = _showToolTip && !!toolTipData && !!onImgClick;
 
     return (
       <>
         {showToolTip && (
-          <div
-            onClick={handleToolTipClose}
-            className='absolute cursor-pointer top-0 z-[2] left-0 panel-height panel-width'
+          <Pressable
+            onPress={handleToolTipClose}
+            style={StyleSheet.absoluteFill}
           />
         )}
-        <div
-          className={classNames('relative h-[72px] panel-width', {
-            'overflow-hidden': !showToolTip,
-          })}
-        >
-          <div className='flex w-full absolute left-0 top-0 items-center justify-center h-full'>
-            <div className='flex gap-2 items-center text-black-100 font-bold text-xl dark:text-white-100'>
-              <span>{title}</span>
-              {titleIcon}
-            </div>
-          </div>
 
-          {action ? (
-            <div
-              className={classNames('flex h-full absolute top-0 items-center', {
-                'left-7': !isSidePanel(),
-                'left-4': isSidePanel(),
-              })}
-            >
-              <ActionButton {...action} />
-            </div>
-          ) : null}
+        <View style={styles.headerContainer}>
+          {/* Title & Icon */}
+          <View style={styles.centeredRow}>
+            <Text style={styles.titleText}>{title}</Text>
+            {titleIcon}
+          </View>
 
-          {imgSrc ? (
-            <div
-              className={classNames('flex h-full absolute top-0 items-center', {
-                'right-7': !isSidePanel(),
-                'right-4': isSidePanel(),
-              })}
-            >
-              <div
-                className={classNames('relative flex items-center', {
-                  'cursor-pointer bg-[#FFFFFF] dark:bg-gray-950 h-fit rounded-3xl px-3 py-2': onImgClick,
-                  'h-full': !onImgClick,
-                })}
-                onClick={onImgClick}
+          {/* Left Action Button */}
+          {action && (
+            <View style={styles.leftAction}>
+              <action.Component {...action.props} />
+            </View>
+          )}
+
+          {/* Right Image/Icon */}
+          {imgSrc && (
+            <View style={styles.rightIconContainer}>
+              <TouchableOpacity
+                style={onImgClick ? styles.imgButton : styles.fullHeight}
+                onPress={onImgClick}
+                disabled={!onImgClick}
               >
                 {typeof imgSrc === 'string' ? (
-                  <img
-                    src={imgSrc}
-                    className={classNames('h-7 w-7', { 'w-[20px] h-[20px]': onImgClick })}
+                  <Image
+                    source={{ uri: imgSrc }}
                     onError={imgOnError(defaultTokenLogo)}
+                    style={onImgClick ? styles.imgSmall : styles.imgLarge}
+                    resizeMode="contain"
                   />
                 ) : (
                   imgSrc
                 )}
-
-                {onImgClick !== undefined && !dontShowFilledArrowIcon && (
-                  <img src={Images.Misc.FilledArrowDown} className='h-1.5 w-4 ml-1' />
+                {onImgClick && !dontShowFilledArrowIcon && (
+                  <Image
+                    source={Images.Misc.FilledArrowDown}
+                    style={styles.arrowIcon}
+                    resizeMode="contain"
+                  />
                 )}
-              </div>
-            </div>
-          ) : null}
+              </TouchableOpacity>
+            </View>
+          )}
 
-          {!dontShowBottomDivider ? (
-            <div className='flex absolute bottom-0'>
+          {/* Bottom Divider */}
+          {!dontShowBottomDivider && (
+            <View style={styles.bottomDivider}>
               <LineDivider />
-            </div>
-          ) : null}
-        </div>
+            </View>
+          )}
+        </View>
 
         <AddFromChainStore
           isVisible={!!newChain}
@@ -106,8 +103,76 @@ const PageHeader = React.memo(
         />
       </>
     );
-  },
+  }
 );
 
 PageHeader.displayName = 'PageHeader';
-export { PageHeader };
+
+const styles = StyleSheet.create({
+  headerContainer: {
+    height: 72,
+    width: '100%',
+    position: 'relative',
+    justifyContent: 'center',
+  },
+  centeredRow: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    height: '100%',
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  titleText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#000', // Adjust for dark mode if needed
+    marginRight: 8,
+  },
+  leftAction: {
+    position: 'absolute',
+    top: 0,
+    left: 16,
+    height: '100%',
+    justifyContent: 'center',
+  },
+  rightIconContainer: {
+    position: 'absolute',
+    top: 0,
+    right: 16,
+    height: '100%',
+    justifyContent: 'center',
+  },
+  imgButton: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  imgLarge: {
+    height: 28,
+    width: 28,
+  },
+  imgSmall: {
+    height: 20,
+    width: 20,
+  },
+  fullHeight: {
+    height: '100%',
+    justifyContent: 'center',
+  },
+  arrowIcon: {
+    width: 16,
+    height: 6,
+    marginLeft: 6,
+  },
+  bottomDivider: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+  },
+});

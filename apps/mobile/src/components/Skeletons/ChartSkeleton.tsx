@@ -1,26 +1,74 @@
-import { LineDivider } from '@leapwallet/leap-ui';
 import React from 'react';
-import Skeleton from 'react-loading-skeleton';
+import { View, StyleSheet, Dimensions } from 'react-native';
+import SkeletonContent from 'react-native-skeleton-content';
+
+const width = Dimensions.get('window').width;
+const minWidth = Math.min(width - 32, 344);
 
 export default function ChartSkeleton() {
   return (
-    <div className='flex-1 h-[300px] min-w-[344px]'>
-      <LineDivider />
-      <div className='flex flex-row mt-3 gap-x-3 h-8 justify-between rounded-2xl'>
-        <Skeleton count={1} width={82} />
-        <Skeleton count={1} width={82} />
-        <Skeleton count={1} width={82} />
-      </div>
-      <div className='flex flex-row gap-x-3 h-8 mb-3 justify-between rounded-2xl'>
-        <Skeleton count={1} width={82} />
-        <Skeleton count={1} width={82} />
-        <Skeleton count={1} width={82} />
-      </div>
-      <LineDivider />
-      <div className='flex flex-col h-[220px] gap-y-3 mt-3 overflow-clip rounded-2xl'>
-        <Skeleton count={1} height={180} />
-        <Skeleton count={1} />
-      </div>
-    </div>
+    <View style={[styles.container, { minWidth }]}>
+      <View style={styles.divider} />
+      <View style={styles.row}>
+        <SkeletonContent
+          isLoading={true}
+          containerStyle={{ flexDirection: 'row', gap: 12, flex: 1, justifyContent: 'space-between' }}
+          layout={[
+            { width: 82, height: 32, borderRadius: 8 },
+            { width: 82, height: 32, borderRadius: 8 },
+            { width: 82, height: 32, borderRadius: 8 },
+          ]}
+        />
+      </View>
+      <View style={styles.row}>
+        <SkeletonContent
+          isLoading={true}
+          containerStyle={{ flexDirection: 'row', gap: 12, flex: 1, justifyContent: 'space-between' }}
+          layout={[
+            { width: 82, height: 32, borderRadius: 8 },
+            { width: 82, height: 32, borderRadius: 8 },
+            { width: 82, height: 32, borderRadius: 8 },
+          ]}
+        />
+      </View>
+      <View style={styles.divider} />
+      <View style={styles.chartArea}>
+        <SkeletonContent
+          isLoading={true}
+          layout={[
+            { width: '100%', height: 180, borderRadius: 16 },
+            { width: '80%', height: 20, marginTop: 12, borderRadius: 6 },
+          ]}
+        />
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    height: 300,
+    minWidth: 344,
+    paddingVertical: 8,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#E5E7EB',
+    marginVertical: 8,
+  },
+  row: {
+    flexDirection: 'row',
+    marginVertical: 8,
+    justifyContent: 'space-between',
+    gap: 12,
+    minHeight: 32,
+    alignItems: 'center',
+  },
+  chartArea: {
+    marginTop: 8,
+    height: 220,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});

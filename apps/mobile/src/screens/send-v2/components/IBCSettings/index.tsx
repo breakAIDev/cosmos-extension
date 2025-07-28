@@ -5,7 +5,7 @@ import { Buttons } from '@leapwallet/leap-ui';
 import { Info, MinusCircle, PlusCircle, Question, Warning } from '@phosphor-icons/react';
 import classNames from 'classnames';
 import Tooltip from 'components/better-tooltip';
-import BottomModal from 'components/bottom-modal';
+import BottomModal from '../bottom-modal';
 import { CustomCheckbox } from 'components/custom-checkbox';
 import { LoaderAnimation } from 'components/loader/Loader';
 import RadioGroup from 'components/radio-group';

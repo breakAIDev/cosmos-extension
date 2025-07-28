@@ -1,27 +1,20 @@
-import { MenuIcon } from 'icons/menu-icon';
 import React, { ReactNode } from 'react';
-import { globalSheetsStore, SideNavDefaults } from 'stores/global-sheets-store';
+import { TouchableOpacity, ViewStyle } from 'react-native';
+import { MenuIcon } from '../../../assets/icons/menu-icon';
+import { globalSheetsStore, SideNavDefaults } from '../../context/global-sheets-store';
 
 type SideNavMenuOpenProps = {
   children?: ReactNode;
-  className?: string;
+  style?: ViewStyle | ViewStyle[];
   sideNavDefaults?: SideNavDefaults;
 };
 
-export const SideNavMenuOpen = ({ children, className, sideNavDefaults }: SideNavMenuOpenProps) => {
+export const SideNavMenuOpen: React.FC<SideNavMenuOpenProps> = ({ children, style, sideNavDefaults }) => {
   const toggle = () => globalSheetsStore.toggleSideNav(sideNavDefaults);
 
-  if (children) {
-    return (
-      <button onClick={toggle} className={className}>
-        {children}
-      </button>
-    );
-  }
-
   return (
-    <button onClick={toggle} className={className}>
-      <MenuIcon />
-    </button>
+    <TouchableOpacity onPress={toggle} style={style}>
+      {children || <MenuIcon />}
+    </TouchableOpacity>
   );
 };

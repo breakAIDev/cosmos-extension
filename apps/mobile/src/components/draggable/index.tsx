@@ -1,25 +1,37 @@
-import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd';
 import React from 'react';
+import DraggableFlatList from 'react-native-draggable-flatlist';
+import { View } from 'react-native';
 
-interface PropTypes {
-  children?: React.ReactNode;
-  
-  onDragEnd: (result: DropResult) => void;
+interface DraggableContainerProps<T> {
+  data: T[];
+  renderItem: (params: {
+    item: T;
+    index: number;
+    drag: () => void;
+    isActive: boolean;
+  }) => React.ReactElement;
+  onDragEnd: (data: T[]) => void;
+  keyExtractor: (item: T, index: number) => string;
+  style?: object;
 }
 
-const DraggableContainer = (props: PropTypes) => {
+function DraggableContainer<T>({
+  data,
+  renderItem,
+  onDragEnd,
+  keyExtractor,
+  style,
+}: DraggableContainerProps<T>) {
   return (
-    <DragDropContext onDragEnd={props.onDragEnd}>
-      <Droppable droppableId='droppable'>
-        {(provided) => (
-          <div {...provided.droppableProps} ref={provided.innerRef}>
-            {props.children}
-            {provided.placeholder}
-          </div>
-        )}
-      </Droppable>
-    </DragDropContext>
+    <View style={style}>
+      <DraggableFlatList
+        data={data}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
+        onDragEnd={({ data }) => onDragEnd(data)}
+      />
+    </View>
   );
-};
+}
 
 export default DraggableContainer;

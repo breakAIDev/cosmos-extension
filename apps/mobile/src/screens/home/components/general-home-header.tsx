@@ -2,7 +2,6 @@ import { CaretDown } from '@phosphor-icons/react';
 import { WalletButtonV2 } from 'components/button';
 import { PageHeader } from 'components/header/PageHeaderV2';
 import { SideNavMenuOpen } from 'components/header/sidenav-menu';
-import { SidePanelTrigger } from 'components/header/sidepanel-trigger';
 import { useDefaultTokenLogo } from 'hooks';
 import { useActiveChain } from 'hooks/settings/useActiveChain';
 import useQuery from 'hooks/useQuery';
@@ -68,11 +67,7 @@ const GeneralHomeHeaderView = (props: { disableWalletButton?: boolean; isLoading
   return (
     <>
       <PageHeader>
-        <div className='flex items-center bg-secondary-200 rounded-full overflow-hidden'>
-          <SideNavMenuOpen className='py-2 pr-1.5 pl-2.5 text-foreground/75 hover:text-foreground transition-colors' />
-          <div className='h-5 w-px bg-secondary-300' />
-          <SidePanelTrigger className='py-2 pl-1.5 pr-2.5 text-foreground/75 hover:text-foreground transition-colors' />
-        </div>
+        <SideNavMenuOpen className='py-2 pr-1.5 pl-2.5 text-foreground/75 hover:text-foreground transition-colors' />
 
         <WalletButtonV2
           showDropdown

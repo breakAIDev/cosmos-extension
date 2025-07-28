@@ -1,26 +1,34 @@
-import { SMALL_BALANCES_HIDDEN } from 'config/storage-keys';
+import { SMALL_BALANCES_HIDDEN } from '../services/config/storage-keys';
 import { makeAutoObservable } from 'mobx';
-import Browser from 'webextension-polyfill';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export class HideSmallBalancesStore {
   isHidden = false;
 
   constructor() {
     makeAutoObservable(this);
-
     this.initHideSmallBalances();
   }
 
   initHideSmallBalances = async () => {
-    const storage = await Browser.storage.local.get(SMALL_BALANCES_HIDDEN);
-    const val = storage[SMALL_BALANCES_HIDDEN];
-    this.setHidden(val);
+    try {
+      const storageValue = await AsyncStorage.getItem(SMALL_BALANCES_HIDDEN);
+      // Convert the string to boolean
+      this.setHidden(storageValue === 'true');
+    } catch (e) {
+      // Fallback or handle error
+      this.setHidden(false);
+    }
   };
 
-  setHidden(val: boolean) {
+  setHidden = async (val: boolean) => {
     this.isHidden = val;
-    Browser.storage.local.set({ [SMALL_BALANCES_HIDDEN]: val });
-  }
+    try {
+      await AsyncStorage.setItem(SMALL_BALANCES_HIDDEN, val ? 'true' : 'false');
+    } catch (e) {
+      // Optionally handle error
+    }
+  };
 }
 
 export const hideSmallBalancesStore = new HideSmallBalancesStore();

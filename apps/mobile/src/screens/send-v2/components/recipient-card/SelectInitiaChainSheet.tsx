@@ -1,6 +1,6 @@
 import { ChainInfo, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { ChainFeatureFlagsStore, ChainInfosStore } from '@leapwallet/cosmos-wallet-store';
-import BottomModal from 'components/bottom-modal';
+import BottomModal from '../bottom-modal';
 import Text from 'components/text';
 import { SearchInput } from 'components/ui/input/search-input';
 import { GenericLight } from 'images/logos';

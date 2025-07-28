@@ -1,31 +1,95 @@
 import React from 'react';
-import { TextInput, StyleSheet, View, TextInputProps } from 'react-native';
+import { View, TextInput, StyleSheet, TextInputProps, ViewStyle, StyleProp } from 'react-native';
 
-type Props = TextInputProps & {
-  error?: boolean;
+export type InputStatus = 'error' | 'success' | 'warning' | 'default';
+
+export interface InputProps extends TextInputProps {
+  trailingElement?: React.ReactNode;
+  status?: InputStatus;
+  containerStyle?: StyleProp<ViewStyle>;
+  inputStyle?: StyleProp<ViewStyle>;
+}
+
+const inputStatusOutlineStyleMap = {
+  error: {
+    borderColor: '#E2655A', // ring-destructive-100
+    borderWidth: 1,
+  },
+  success: {
+    borderColor: '#26c06f', // ring-accent-success
+    borderWidth: 1,
+  },
+  warning: {
+    borderColor: '#FBBF24', // ring-accent-warning
+    borderWidth: 1,
+  },
+  default: {
+    borderColor: '#E3F9EC', // ring-accent-green-200 or your default
+    borderWidth: 1,
+  },
 };
 
-export const UIInput: React.FC<Props> = ({ error, style, ...props }) => (
-  <View>
-    <TextInput
-      style={[styles.input, error && styles.error, style]}
-      {...props}
-      placeholderTextColor="#aaa"
-    />
-  </View>
+export const Input = React.forwardRef<TextInput, InputProps>(
+  ({ trailingElement, status = 'default', containerStyle, inputStyle, editable = true, ...props }, ref) => {
+    const outlineStyle = inputStatusOutlineStyleMap[status] ?? inputStatusOutlineStyleMap.default;
+
+    return (
+      <View
+        style={[
+          styles.container,
+          outlineStyle,
+          !editable && styles.disabled,
+          containerStyle,
+        ]}
+        pointerEvents={editable ? 'auto' : 'none'}
+      >
+        <TextInput
+          ref={ref}
+          style={[
+            styles.input,
+            inputStyle,
+            !editable && styles.inputDisabled,
+          ]}
+          editable={editable}
+          placeholderTextColor="#97A3B9"
+          {...props}
+        />
+        {trailingElement}
+      </View>
+    );
+  }
 );
 
+Input.displayName = 'Input';
+
 const styles = StyleSheet.create({
-  input: {
-    borderWidth: 1,
-    borderColor: '#D6D6D6',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    color: '#222',
-    backgroundColor: '#fff',
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 48,              // h-12
+    borderRadius: 14,        // rounded-xl
+    paddingHorizontal: 20,   // px-5
+    backgroundColor: '#F3F7F6', // bg-secondary-200
+    width: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.07,
+    shadowRadius: 2,
+    marginVertical: 2,
   },
-  error: {
-    borderColor: '#FF707E',
+  input: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '500',
+    backgroundColor: 'transparent',
+    paddingVertical: 8,
+    paddingHorizontal: 0,
+    color: '#232323',
+  },
+  inputDisabled: {
+    color: '#ccc',
+  },
+  disabled: {
+    opacity: 0.5,
   },
 });

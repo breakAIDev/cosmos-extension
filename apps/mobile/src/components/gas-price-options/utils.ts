@@ -1,9 +1,22 @@
-import { FeeTokenData, GasOptions, GasPriceStep, getGasPricesForOsmosisFee } from '@leapwallet/cosmos-wallet-hooks';
-import { defaultGasPriceStep, GasPrice, NetworkType, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { captureException } from '@sentry/react';
-import { chainApisStore } from 'stores/chains-api-store';
-import { gasPriceStepForChainStore } from 'stores/fee-store';
-import { uiErrorTags } from 'utils/sentry';
+import {
+  FeeTokenData,
+  GasOptions,
+  GasPriceStep,
+  getGasPricesForOsmosisFee,
+} from '@leapwallet/cosmos-wallet-hooks';
+import {
+  defaultGasPriceStep,
+  GasPrice,
+  NetworkType,
+  SupportedChain,
+} from '@leapwallet/cosmos-wallet-sdk';
+
+// CHANGE: use Sentry for React Native
+import * as Sentry from '@sentry/react-native';
+
+import { chainApisStore } from '../../context/chains-api-store';
+import { gasPriceStepForChainStore } from '../../context/fee-store';
+import { uiErrorTags } from '../../utils/sentry';
 
 import { GasPriceOptionValue } from './context';
 
@@ -24,16 +37,6 @@ type UpdateFeeTokenDataParams = {
   ) => Promise<GasPriceStep>;
 };
 
-/**
- *
- * @param foundFeeTokenData - Fee Token data that we want to set as default fee token data
- * @param activeChain - Active chain
- * @param baseGasPriceStep - Base gas price step. This is used in case of osmosis, when fetching gas prices fails somehow.
- * @param chainNativeFeeTokenData - Native fee token data of the active chain. This is used as fallback in case of not finding fee token data.
- * @param setFeeTokenData - Function to set fee token data
- * @param onGasPriceOptionChange - Function to set gas price option. This is important to set the default gas price option (This is used in actual transaction).
- * @param notUpdateGasPrice - [Optional] If true, then we don't call onGasPriceOptionChange parameter
- */
 export async function updateFeeTokenData({
   foundFeeTokenData,
   activeChain,
@@ -47,10 +50,10 @@ export async function updateFeeTokenData({
   defaultGasPriceOption = GasOptions.LOW,
 }: UpdateFeeTokenDataParams) {
   let feeTokenDataToSet = foundFeeTokenData;
+
   if (foundFeeTokenData) {
     if (
       activeChain === 'osmosis' &&
-      foundFeeTokenData &&
       ![foundFeeTokenData.ibcDenom, foundFeeTokenData.denom.coinMinimalDenom].includes('uosmo')
     ) {
       try {
@@ -61,9 +64,10 @@ export async function updateFeeTokenData({
 
         const gasPriceStep = await getGasPricesForOsmosisFee(
           lcdUrl ?? '',
-          foundFeeTokenData.ibcDenom ?? foundFeeTokenData?.denom?.coinMinimalDenom ?? '',
+          foundFeeTokenData.ibcDenom ?? foundFeeTokenData.denom.coinMinimalDenom,
           baseGasPriceStep,
         );
+
         feeTokenDataToSet = { ...foundFeeTokenData, gasPriceStep };
       } catch (error) {
         feeTokenDataToSet = {
@@ -74,21 +78,21 @@ export async function updateFeeTokenData({
             high: defaultGasPriceStep.high,
           },
         };
-        captureException(error, {
+
+        // ✅ React Native Sentry
+        Sentry.captureException(error, {
           tags: uiErrorTags,
         });
       }
-    } else if (hasToCalculateDynamicFee && foundFeeTokenData) {
+    } else if (hasToCalculateDynamicFee) {
       let feeDenom = foundFeeTokenData.denom?.coinMinimalDenom ?? '';
       if (foundFeeTokenData.ibcDenom?.toLowerCase().startsWith('ibc/')) {
-        feeDenom = foundFeeTokenData.ibcDenom ?? feeDenom;
+        feeDenom = foundFeeTokenData.ibcDenom;
       }
 
       const gasPriceStep = await getFeeMarketGasPricesSteps(feeDenom, foundFeeTokenData.gasPriceStep);
 
       feeTokenDataToSet = { ...foundFeeTokenData, gasPriceStep };
-    } else {
-      feeTokenDataToSet = foundFeeTokenData;
     }
   } else {
     feeTokenDataToSet = chainNativeFeeTokenData;
@@ -97,16 +101,17 @@ export async function updateFeeTokenData({
   if (feeTokenDataToSet) {
     setFeeTokenData(feeTokenDataToSet);
 
-    !notUpdateGasPrice &&
+    if (!notUpdateGasPrice) {
       onGasPriceOptionChange(
         {
           option: defaultGasPriceOption,
           gasPrice: GasPrice.fromUserInput(
             feeTokenDataToSet.gasPriceStep.low.toString(),
-            feeTokenDataToSet.ibcDenom ?? feeTokenDataToSet?.denom?.coinMinimalDenom,
+            feeTokenDataToSet.ibcDenom ?? feeTokenDataToSet.denom.coinMinimalDenom,
           ),
         },
         feeTokenDataToSet,
       );
+    }
   }
 }

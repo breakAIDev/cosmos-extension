@@ -1,31 +1,61 @@
-import classNames from 'classnames';
-import React from 'react';
-import { ComponentPropsWithoutRef, forwardRef } from 'react';
+import React, { forwardRef } from 'react';
+import {
+  TouchableOpacity,
+  View,
+  Image,
+  StyleSheet,
+  GestureResponderEvent,
+  ViewStyle,
+  ImageSourcePropType,
+} from 'react-native';
 
-/** The `'type'` prop will be `'button'` if `undefined`. */
-export type IconButtonProps = ComponentPropsWithoutRef<'button'> & {
-  readonly image: Pick<HTMLImageElement, 'src' | 'alt'>;
-  readonly isFilled?: boolean;
-  readonly onClick?: () => void;
-  readonly 'data-testing-id'?: string;
+export type IconButtonProps = {
+  image: { src: ImageSourcePropType; alt: string };
+  isFilled?: boolean;
+  onPress?: (event: GestureResponderEvent) => void;
+  testID?: string;
+  style?: ViewStyle | ViewStyle[];
 };
 
-const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
-  ({ type, image, isFilled, onClick, ...rest }, ref) => (
-    <div
-      className={classNames({
-        'h-9 w-9 bg-white-100 dark:bg-gray-900 flex items-center justify-center rounded-full': isFilled,
-      })}
-      onClick={onClick}
-      data-testing-id={rest['data-testing-id']}
-    >
-      <button className=' mx-2 cursor-pointer border-none' ref={ref} type={type ?? 'button'} {...rest}>
-        <img className='invert dark:invert-0' src={image.src} alt={image.alt} />
-      </button>
-    </div>
-  ),
+const IconButton = forwardRef<TouchableOpacity, IconButtonProps>(
+  ({ image, isFilled, onPress, testID, style }, ref) => {
+    return (
+      <TouchableOpacity
+        ref={ref}
+        onPress={onPress}
+        testID={testID}
+        style={[
+          isFilled && styles.filledWrapper,
+          style,
+        ]}
+      >
+        <Image
+          source={typeof image.src === 'string' ? { uri: image.src } : image.src}
+          alt={image.alt}
+          style={styles.iconImage}
+        />
+      </TouchableOpacity>
+    );
+  }
 );
 
 IconButton.displayName = 'IconButton';
 
 export default IconButton;
+
+const styles = StyleSheet.create({
+  filledWrapper: {
+    width: 36,
+    height: 36,
+    backgroundColor: '#fff', // adapt for dark mode
+    borderRadius: 999,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  iconImage: {
+    width: 20,
+    height: 20,
+    resizeMode: 'contain',
+    // invert filter equivalent for dark mode should be handled by theme logic
+  },
+});
