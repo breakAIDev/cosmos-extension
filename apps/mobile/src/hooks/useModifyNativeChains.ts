@@ -2,13 +2,14 @@ import { useChainFeatureFlagsStore, useChainsStore } from '@leapwallet/cosmos-wa
 import { ChainInfos, modifyChains } from '@leapwallet/cosmos-wallet-sdk';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import { chainInfoStore } from 'stores/chain-infos-store';
-import { getStorageAdapter } from 'utils/storageAdapter';
-import Browser from 'webextension-polyfill';
+import DeviceInfo from 'react-native-device-info';
 
-const app = 'extension';
-const version = Browser.runtime.getManifest().version;
-const storage = getStorageAdapter();
+import { chainInfoStore } from '../context/chain-infos-store';
+import { getStorageAdapter } from '../utils/storageAdapter';
+
+const app = 'mobile';
+const version = DeviceInfo.getVersion();
+const storage = getStorageAdapter(); // Ensure this uses AsyncStorage or similar
 
 export function useModifyNativeChains() {
   const [isModificationsComplete, setIsModificationsComplete] = useState(false);
@@ -26,7 +27,6 @@ export function useModifyNativeChains() {
       cacheTime: 5 * 60 * 1000,
       refetchOnWindowFocus: false,
       onError: (error) => {
-        // eslint-disable-next-line no-console
         console.error('Error fetching chain feature flags', error);
         setIsModificationsComplete(true);
       },
@@ -38,18 +38,18 @@ export function useModifyNativeChains() {
 
     const { anyChainModified, modifiedChains } = modifyChains(ChainInfos, chainFeatureFlags, app, version);
     if (anyChainModified) {
-      setChains({ ...ChainInfos, ...modifiedChains });
-      chainInfoStore.setChainInfos({ ...ChainInfos, ...modifiedChains });
+      const updatedChains = { ...ChainInfos, ...modifiedChains };
+      setChains(updatedChains);
+      chainInfoStore.setChainInfos(updatedChains);
     }
+
     setIsModificationsComplete(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isModificationsComplete, chainFeatureFlags, isChainFeatureFlagsLoading]);
+  }, [isModificationsComplete, chainFeatureFlags, isChainFeatureFlagsLoading, setChains]);
 
   useEffect(() => {
     if (!chainFeatureFlags) return;
     setChainFeatureFlags(chainFeatureFlags);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chainFeatureFlags]);
+  }, [chainFeatureFlags, setChainFeatureFlags]);
 
   return { isModificationsComplete };
 }

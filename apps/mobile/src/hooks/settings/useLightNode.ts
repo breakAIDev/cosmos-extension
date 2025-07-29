@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/react';
 import { useEffect } from 'react';
-import { LightNodeStore } from 'stores/light-node-store';
+import { LightNodeStore } from '../../context/light-node-store';
 
 export function useInitLightNode(store: LightNodeStore) {
   useEffect(() => {

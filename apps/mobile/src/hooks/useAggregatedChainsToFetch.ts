@@ -2,8 +2,8 @@ import { useActiveWallet, useGetChains, WALLETTYPE } from '@leapwallet/cosmos-wa
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { AggregatedChainsStore } from '@leapwallet/cosmos-wallet-store';
 import { useMemo } from 'react';
-import { ManageChainSettings, ManageChainsStore } from 'stores/manage-chains-store';
-import { isLedgerEnabled } from 'utils/isLedgerEnabled';
+import { ManageChainSettings, ManageChainsStore } from '../context/manage-chains-store';
+import { isLedgerEnabled } from '../utils/isLedgerEnabled';
 
 export const useAggregatedChainsToFetch = (
   aggregatedChainsStore: AggregatedChainsStore,

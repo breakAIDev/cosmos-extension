@@ -1,36 +1,58 @@
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { View } from 'react-native';
 
-export const useTabIndicatorPosition = <TNavItem extends { label: string }>(config: {
+type NavItem = { label: string };
+
+type IndicatorPosition = {
+  left: number;
+  width: number;
+};
+
+export const useTabIndicatorPosition = <TNavItem extends NavItem>(config: {
   navItems: TNavItem[];
   activeLabel: string;
   widthScale?: number;
 }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const indicatorRef = useRef<HTMLDivElement>(null);
-  const childRefs = useRef<Map<number, HTMLElement | null>>(new Map());
+  const [indicatorPos, setIndicatorPos] = useState<IndicatorPosition>({ left: 0, width: 0 });
+  const containerRef = useRef<View>(null);
+  // Use array of refs for children
+  const childLayouts = useRef<{ left: number; width: number }[]>([]);
 
+  const onContainerLayout = (e: any) => {
+    // Container position is not needed unless you want scroll (see scrollX logic)
+    // Can be extended for horizontal scroll views
+  };
+
+  // Create a callback ref for each tab item
+  const onTabLayout = (idx: number) => (e: any) => {
+    const { x, width } = e.nativeEvent.layout;
+    childLayouts.current[idx] = { left: x, width };
+    // Find the active tab and update indicator position
+    const activeIdx = config.navItems.findIndex((item) => item.label === config.activeLabel);
+    if (activeIdx === idx) {
+      const widthScale = config.widthScale ?? 1;
+      const btnWidth = width * widthScale;
+      const translateX = x + width * (1 - widthScale) / 2;
+      setIndicatorPos({ left: translateX, width: btnWidth });
+    }
+  };
+
+  // Update indicator when activeLabel changes
   useEffect(() => {
-    const idx = config.navItems.findIndex((item) => item.label === config.activeLabel) ?? 0;
-    const target = childRefs.current.get(idx);
-    const container = containerRef.current;
+    const activeIdx = config.navItems.findIndex((item) => item.label === config.activeLabel);
+    if (childLayouts.current[activeIdx]) {
+      const { left, width } = childLayouts.current[activeIdx];
+      const widthScale = config.widthScale ?? 1;
+      const btnWidth = width * widthScale;
+      const translateX = left + width * (1 - widthScale) / 2;
+      setIndicatorPos({ left: translateX, width: btnWidth });
+    }
+  }, [config.activeLabel, config.navItems, config.widthScale]);
 
-    if (!target || !container) return;
-
-    const cRect = container.getBoundingClientRect();
-    if (cRect.width === 0) return;
-
-    const widthScale = config.widthScale ?? 1;
-    const translateXScale = (1 - widthScale) / 2;
-
-    const tRect = target.getBoundingClientRect();
-    const buttonWidth = tRect.width;
-    const containerWidth = cRect.width;
-    const scaleX = (buttonWidth / containerWidth) * widthScale; // 70% of button width
-    const scrollLeft = container.scrollLeft;
-    const translateX = tRect.left - cRect.left + buttonWidth * translateXScale + scrollLeft; // Center the indicator
-
-    indicatorRef.current?.style.setProperty('transform', `translateX(${translateX}px) scaleX(${scaleX})`);
-  }, [containerRef, config.activeLabel, config.navItems, config.widthScale]);
-
-  return { containerRef, indicatorRef, childRefs };
+  return {
+    containerRef,
+    onContainerLayout,
+    onTabLayout,    // Pass this to each tab: onLayout={onTabLayout(idx)}
+    indicatorPos,   // { left, width }
+  };
 };

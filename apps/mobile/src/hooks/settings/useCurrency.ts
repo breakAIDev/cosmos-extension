@@ -1,9 +1,9 @@
 import { usePreferredCurrencyStore } from '@leapwallet/cosmos-wallet-hooks';
 import { Currency } from '@leapwallet/cosmos-wallet-hooks';
 import { BigNumber } from 'bignumber.js';
-import { PREFERRED_CURRENCY } from 'config/storage-keys';
+import { PREFERRED_CURRENCY } from '../../services/config/storage-keys';
 import { useCallback, useEffect } from 'react';
-import browser from 'webextension-polyfill';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type SupportedCurrencies = 'US' | 'EU' | 'GB' | 'AU' | 'CN' | 'KR' | 'IN' | 'JP';
 type SupportedSymbols = '$' | '€' | '£' | 'A$' | '¥' | '₩' | '₹';
@@ -66,18 +66,18 @@ export const useUserPreferredCurrency = () => {
 export const useInitiateCurrencyPreference = () => {
   const { setPreferredCurrency } = usePreferredCurrencyStore();
   useEffect(() => {
-    browser.storage.local.get(PREFERRED_CURRENCY).then((data) => {
+    AsyncStorage.getItem(PREFERRED_CURRENCY).then((data) => {
       // if the object doesn't exists in the storage, then create a new object
-      if (JSON.stringify(data) === '{}') {
+      if (!data) {
         // create an object
         const newPreference = 'US';
-        browser.storage.local.set({ [PREFERRED_CURRENCY]: 'US' });
+        AsyncStorage.setItem(PREFERRED_CURRENCY, 'US' );
 
         setPreferredCurrency(newPreference);
       }
       // if the object exists in the storage, then update the recoil state
       else {
-        setPreferredCurrency(data[PREFERRED_CURRENCY]);
+        setPreferredCurrency(data as SupportedCurrencies);
       }
     });
   }, [setPreferredCurrency]);
@@ -100,7 +100,7 @@ export const useCurrencyUpdater = () => {
   const updatePreferredCurrency = useCallback(
     (currency: SupportedCurrencies) => {
       setPreferredCurrency(currency);
-      browser.storage.local.set({ [PREFERRED_CURRENCY]: currency });
+      AsyncStorage.setItem(PREFERRED_CURRENCY, currency);
     },
     [setPreferredCurrency],
   );

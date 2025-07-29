@@ -1,69 +1,62 @@
-import { ButtonProps } from 'components/ui/button';
-import { Button } from 'components/ui/button';
-import { AnimatePresence, motion } from 'framer-motion';
-import { CopyIcon } from 'icons/copy-icon';
-import { Images } from 'images';
 import React, { useEffect, useState } from 'react';
-import { cn } from 'utils/cn';
+import { GestureResponderEvent, StyleSheet } from 'react-native';
+import * as Animatable from 'react-native-animatable';
 
-const transition = { duration: 0.15, type: 'easeIn' };
+import { Button, ButtonProps } from '../../../components/ui/button';
+import { CopyIcon } from '../../../../assets/icons/copy-icon';
+import { Images } from '../../../../assets/images';
 
-const copyVariants = {
-  hide: { opacity: 0, scale: 0.8 },
-  animate: { opacity: 1, scale: 1 },
-};
-
-export const CopyButton = (props: ButtonProps) => {
+export const CopyButton: React.FC<ButtonProps> = ({ onPress, style, ...rest }) => {
   const [isCopied, setIsCopied] = useState(false);
 
   useEffect(() => {
     if (isCopied) {
-      setTimeout(() => {
-        setIsCopied(false);
-      }, 2_000);
+      const timeout = setTimeout(() => setIsCopied(false), 2000);
+      return () => clearTimeout(timeout);
     }
   }, [isCopied]);
 
+  const handlePress = (e: GestureResponderEvent) => {
+    setIsCopied(true);
+    onPress?.(e);
+  };
+
   return (
     <Button
-      variant='ghost'
-      size='sm'
-      {...props}
-      title='Copy'
-      className={cn(props.className, isCopied ? 'text-accent-success' : 'text-muted-foreground')}
-      onClick={(e) => {
-        setIsCopied(true);
-        props.onClick?.(e);
-      }}
+      variant="ghost"
+      size="sm"
+      onPress={handlePress}
+      style={[style, isCopied ? styles.copied : styles.default]}
+      {...rest}
     >
-      <AnimatePresence mode='wait'>
-        {isCopied ? (
-          <motion.img
-            key='check'
-            src={Images.Misc.CheckGreenOutline}
-            alt='check'
-            className='size-5'
-            transition={transition}
-            variants={copyVariants}
-            initial='hide'
-            animate='animate'
-            exit='hide'
-          />
-        ) : (
-          <motion.div
-            key='copy'
-            transition={transition}
-            variants={copyVariants}
-            initial='hide'
-            animate='animate'
-            exit='hide'
-          >
-            <CopyIcon className='size-5' />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {isCopied ? (
+        <Animatable.Image
+          animation="zoomIn"
+          duration={150}
+          source={Images.Misc.CheckGreenOutline}
+          style={styles.icon}
+          resizeMode="contain"
+        />
+      ) : (
+        <Animatable.View animation="zoomIn" duration={150}>
+          <CopyIcon width={20} height={20} />
+        </Animatable.View>
+      )}
     </Button>
   );
 };
+
+const styles = StyleSheet.create({
+  icon: {
+    width: 20,
+    height: 20,
+  },
+  copied: {
+    opacity: 1,
+  },
+  default: {
+    opacity: 0.8,
+  },
+});
 
 CopyButton.displayName = 'CopyButton';

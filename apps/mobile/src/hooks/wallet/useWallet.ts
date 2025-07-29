@@ -1,5 +1,10 @@
 import { AccountData, DirectSecp256k1HdWallet, OfflineSigner } from '@cosmjs/proto-signing';
-import { FEATURE_FLAG_STORAGE_KEY, Key, useChainsStore, WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks';
+import {
+  FEATURE_FLAG_STORAGE_KEY,
+  Key,
+  useChainsStore,
+  WALLETTYPE,
+} from '@leapwallet/cosmos-wallet-hooks';
 import {
   ChainInfos,
   getLedgerTransport,
@@ -17,7 +22,7 @@ import {
   getFullHDPath,
   KeyChain,
 } from '@leapwallet/leap-keychain';
-import { AGGREGATED_CHAIN_KEY } from 'config/constants';
+import { AGGREGATED_CHAIN_KEY } from '../../services/config/constants';
 import {
   ACTIVE_CHAIN,
   ACTIVE_WALLET,
@@ -29,34 +34,34 @@ import {
   NETWORK_MAP,
   PRIMARY_WALLET_ADDRESS,
   SELECTED_NETWORK,
-} from 'config/storage-keys';
-import { useAuth } from 'context/auth-context';
-import { Address } from 'hooks/onboarding/types';
-import { isAllChainsEnabled, useIsAllChainsEnabled } from 'hooks/settings';
-import { useChainInfos } from 'hooks/useChainInfos';
-import { Images } from 'images';
+} from '../../services/config/storage-keys';
+import { useAuth } from '../../context/auth-context';
+import { Address } from '../onboarding/types';
+import { isAllChainsEnabled, useIsAllChainsEnabled } from '../settings';
+import { useChainInfos } from '../useChainInfos';
+import { Images } from '../../../assets/images';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { chainInfoStore } from 'stores/chain-infos-store';
-import { importWatchWalletSeedPopupStore } from 'stores/import-watch-wallet-seed-popup-store';
-import { lightNodeStore } from 'stores/light-node-store';
-import { passwordStore } from 'stores/password-store';
-import { getDerivationPathToShow } from 'utils';
-import { closeSidePanel } from 'utils/closeSidePanel';
-import correctMnemonic from 'utils/correct-mnemonic';
-import { generateAddresses } from 'utils/generateAddresses';
+import { chainInfoStore } from '../../context/chain-infos-store';
+import { importWatchWalletSeedPopupStore } from '../../context/import-watch-wallet-seed-popup-store';
+import { lightNodeStore } from '../../context/light-node-store';
+import { passwordStore } from '../../context/password-store';
+import { getDerivationPathToShow } from '../../utils';
+import { closeSidePanel } from '../../utils/closeSidePanel';
+import correctMnemonic from '../../utils/correct-mnemonic';
+import { generateAddresses } from '../../utils/generateAddresses';
 import {
   customKeygenfnMove,
   customKeygenfnSolana,
   customKeygenfnSui,
   getChainInfosList,
-} from 'utils/getChainInfosList';
-import { isLedgerEnabled } from 'utils/isLedgerEnabled';
-import { default as browser, default as extension } from 'webextension-polyfill';
+} from '../../utils/getChainInfosList';
+import { isLedgerEnabled } from '../../utils/isLedgerEnabled';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { v4 as uuidv4 } from 'uuid';
 
 import { useActiveChain } from '../settings/useActiveChain';
 import useActiveWallet from '../settings/useActiveWallet';
 import { SeedPhrase } from './seed-phrase/useSeedPhrase';
-
 
 export namespace Wallet {
   export type Keystore = Record<string, Key>;
@@ -70,15 +75,34 @@ export namespace Wallet {
     colorIndex?: number;
   };
 
+  async function getFromStorage<T = any>(key: string): Promise<T | undefined> {
+    const value = await AsyncStorage.getItem(key);
+    if (value === null || value === undefined) return undefined;
+    try {
+      return JSON.parse(value);
+    } catch {
+      return value as unknown as T;
+    }
+  }
+
+  async function setInStorage(key: string, value: any): Promise<void> {
+    await AsyncStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
+  }
+
+  async function removeFromStorage(key: string): Promise<void> {
+    await AsyncStorage.removeItem(key);
+  }
+
   export async function mergeAndStoreWallets(newWallets: Record<string, Key>): Promise<Record<string, Key>> {
     const featureFlagKey = `leap-${FEATURE_FLAG_STORAGE_KEY}`;
-    const data = await browser.storage.local.get([KEYSTORE, featureFlagKey]);
-    const keystore: Keystore = data[KEYSTORE] ?? {};
+    const keystore: Keystore = (await getFromStorage(KEYSTORE)) ?? {};
+    const featureFlags = (await getFromStorage(featureFlagKey)) ?? {};
     const newKeystore = { ...keystore };
+
     for (const [key, value] of Object.entries(newWallets)) {
       try {
-        const existingWalletKey = Object.keys(keystore).find((key) => {
-          return !!keystore?.[key] && !!value.path && keystore[key].path === value.path;
+        const existingWalletKey = Object.keys(keystore).find((k) => {
+          return !!keystore?.[k] && !!value.path && keystore[k].path === value.path;
         });
         if (existingWalletKey) {
           const existingWallet = keystore[existingWalletKey];
@@ -99,45 +123,38 @@ export namespace Wallet {
           newKeystore[key] = value;
         }
       } catch (error) {
-        // eslint-disable-next-line no-console
         console.error(error);
       }
     }
+
     const newWalletEntries = Object.keys(newKeystore);
     const lastEntry = newWalletEntries[0];
-    const featureFlags = JSON.parse(data[featureFlagKey] ?? '{}');
     const allChainsEnabled = isAllChainsEnabled(featureFlags?.data);
 
     const leapFallbackChain = allChainsEnabled ? AGGREGATED_CHAIN_KEY : ChainInfos.cosmos.key;
 
-    await browser.storage.local.set({
-      [KEYSTORE]: newKeystore,
-      [ACTIVE_WALLET]: newKeystore[lastEntry],
-      [ACTIVE_CHAIN]: leapFallbackChain,
-      [SELECTED_NETWORK]: 'mainnet',
-    });
+    await setInStorage(KEYSTORE, newKeystore);
+    await setInStorage(ACTIVE_WALLET, newKeystore[lastEntry]);
+    await setInStorage(ACTIVE_CHAIN, leapFallbackChain);
+    await setInStorage(SELECTED_NETWORK, 'mainnet');
     return newKeystore;
   }
 
   export async function storeWallets(newWallets: Record<string, Key>): Promise<void> {
     const featureFlagKey = `leap-${FEATURE_FLAG_STORAGE_KEY}`;
-    const data = await browser.storage.local.get([KEYSTORE, featureFlagKey]);
-    const keystore: Keystore[] = data[KEYSTORE] ?? {};
+    const keystore: Keystore = (await getFromStorage(KEYSTORE)) ?? {};
+    const featureFlags = (await getFromStorage(featureFlagKey)) ?? {};
     const newKeystore = { ...keystore, ...newWallets };
-
     const newWalletEntries = Object.keys(newWallets);
     const lastEntry = newWalletEntries[0];
-    const featureFlags = JSON.parse(data[featureFlagKey] ?? '{}');
     const allChainsEnabled = isAllChainsEnabled(featureFlags?.data);
 
     const leapFallbackChain = allChainsEnabled ? AGGREGATED_CHAIN_KEY : ChainInfos.cosmos.key;
 
-    return await browser.storage.local.set({
-      [KEYSTORE]: newKeystore,
-      [ACTIVE_WALLET]: newWallets[lastEntry],
-      [ACTIVE_CHAIN]: leapFallbackChain,
-      [SELECTED_NETWORK]: 'mainnet',
-    });
+    await setInStorage(KEYSTORE, newKeystore);
+    await setInStorage(ACTIVE_WALLET, newWallets[lastEntry]);
+    await setInStorage(ACTIVE_CHAIN, leapFallbackChain);
+    await setInStorage(SELECTED_NETWORK, 'mainnet');
   }
 
   export async function getAccountDetails(
@@ -150,8 +167,6 @@ export namespace Wallet {
       ethWallet: false,
     });
     const accounts = mainWallet.getAccounts();
-    
-    
     return { accounts, mainWallet };
   }
 
@@ -168,18 +183,15 @@ export namespace Wallet {
 
     const removeAll = async (signout = true) => {
       const leapFallbackChain = allChainsEnabled ? AGGREGATED_CHAIN_KEY : ChainInfos.cosmos.key;
-
-      await browser.storage.local.set({
-        [KEYSTORE]: null,
-        [ACTIVE_WALLET]: null,
-        [ENCRYPTED_KEY_STORE]: null,
-        [ENCRYPTED_ACTIVE_WALLET]: null,
-        [CONNECTIONS]: null,
-        [BETA_CHAINS]: null,
-        [ACTIVE_CHAIN]: leapFallbackChain,
-        [NETWORK_MAP]: null,
-        [SELECTED_NETWORK]: 'mainnet',
-      });
+      await removeFromStorage(KEYSTORE);
+      await removeFromStorage(ACTIVE_WALLET);
+      await removeFromStorage(ENCRYPTED_KEY_STORE);
+      await removeFromStorage(ENCRYPTED_ACTIVE_WALLET);
+      await removeFromStorage(CONNECTIONS);
+      await removeFromStorage(BETA_CHAINS);
+      await setInStorage(ACTIVE_CHAIN, leapFallbackChain);
+      await removeFromStorage(NETWORK_MAP);
+      await setInStorage(SELECTED_NETWORK, 'mainnet');
 
       await setActiveWallet(null);
       await lightNodeStore.clearLastSyncedInfo();
@@ -188,25 +200,19 @@ export namespace Wallet {
     };
 
     const removeWallets = async (keyIds: string[]) => {
-      await browser.storage.local.get([KEYSTORE]).then((data) => {
-        const _storedWallets: Keystore = data[KEYSTORE];
-
-        keyIds.forEach((keyId) => {
-          delete _storedWallets[keyId];
-        });
-
-        // TODO: wallet type based updation
-        if (Object.keys(_storedWallets ?? {}).length === 0) {
-          removeAll();
-        } else {
-          if (keyIds.includes(activeWallet?.id ?? '') && Object.values(_storedWallets).length > 0) {
-            setActiveWallet(Object.values(_storedWallets)[0]);
-          }
-          browser.storage.local.set({
-            [KEYSTORE]: _storedWallets,
-          });
-        }
+      const _storedWallets: Keystore = (await getFromStorage(KEYSTORE)) ?? {};
+      keyIds.forEach((keyId) => {
+        delete _storedWallets[keyId];
       });
+
+      if (Object.keys(_storedWallets ?? {}).length === 0) {
+        await removeAll();
+      } else {
+        if (keyIds.includes(activeWallet?.id ?? '') && Object.values(_storedWallets).length > 0) {
+          await setActiveWallet(Object.values(_storedWallets)[0]);
+        }
+        await setInStorage(KEYSTORE, _storedWallets);
+      }
     };
 
     return { removeAll, removeWallets };
@@ -221,16 +227,7 @@ export namespace Wallet {
     useEffect(() => {
       KeyChain.getAllWallets().then((keystore) => setWallets(keystore));
     }, []);
-
-    useEffect(() => {
-      browser.storage.local.onChanged.addListener((changes) => {
-        const keystoreChanges = changes[KEYSTORE] as unknown as browser.Storage.StorageAreaOnChangedChangesType;
-        if (keystoreChanges) {
-          const newKeystore = keystoreChanges.newValue;
-          setWallets(newKeystore);
-        }
-      });
-    }, []);
+    // No AsyncStorage.onChanged; use MobX or refresh on app resume if needed.
     return wallets;
   }
 
@@ -243,8 +240,8 @@ export namespace Wallet {
         const wallets = await KeyChain.getAllWallets();
         const hasPrimaryWallet = Object.values(wallets).find((wallet) => wallet.walletType === WALLETTYPE.SEED_PHRASE);
         if (!hasPrimaryWallet) {
-          window.open(extension.runtime.getURL(`index.html#/onboarding?name=${name}&colorIndex=${colorIndex}`));
-          closeSidePanel();
+          // Open onboarding screen in your React Native app here, not browser extension!
+          // e.g. navigation.navigate('Onboarding', { name, colorIndex });
           return '';
         }
         const otherWallet = Object.values(wallets).find((v) => v.name.toLowerCase() === name.toLowerCase());
@@ -267,26 +264,15 @@ export namespace Wallet {
     const wallets = useWallets();
 
     const firstWallet = useMemo(() => {
-      if (!wallets) {
-        return undefined;
-      }
-
+      if (!wallets) return undefined;
       const seedPhraseWallets = Object.values(wallets)
         .filter((wallet) => wallet.walletType === WALLETTYPE.SEED_PHRASE)
         .sort((a, b) => a.addressIndex - b.addressIndex);
 
-      if (seedPhraseWallets.length > 0) {
-        return seedPhraseWallets[0];
-      }
+      if (seedPhraseWallets.length > 0) return seedPhraseWallets[0];
 
-      const otherWallets = Object.values(wallets).sort((a, b) => {
-        // compare IDs as there is no address index for non-seed-phrase wallets
-        return a.id.localeCompare(b.id);
-      });
-
-      if (otherWallets.length > 0) {
-        return otherWallets[0];
-      }
+      const otherWallets = Object.values(wallets).sort((a, b) => a.id.localeCompare(b.id));
+      if (otherWallets.length > 0) return otherWallets[0];
 
       return undefined;
     }, [wallets]);
@@ -294,7 +280,6 @@ export namespace Wallet {
     return firstWallet ? firstWallet?.addresses?.cosmos : undefined;
   }
 
-  // eslint-disable-next-line no-inner-declarations
   function useLastWalletNumber() {
     const wallets = useWallets();
 
@@ -307,7 +292,6 @@ export namespace Wallet {
     }, [wallets]);
 
     const lastWalletNumber: number | undefined = walletsList[walletsList.length - 1]?.addressIndex;
-
     return lastWalletNumber;
   }
 
@@ -448,8 +432,7 @@ export namespace Wallet {
     const allWallets = await KeyChain.getAllWallets();
     const lastIndex = Object.keys(allWallets ?? {}).length;
 
-    const storage = await browser.storage.local.get([PRIMARY_WALLET_ADDRESS]);
-    const hasPrimaryWallet = storage[PRIMARY_WALLET_ADDRESS];
+    const hasPrimaryWallet = await AsyncStorage.getItem(PRIMARY_WALLET_ADDRESS);
 
     const newWallets = Object.entries(addresses).reduce((acc: Record<string, Key>, addressEntries, currentIndex) => {
       const [addressIndex, addressInfo] = addressEntries;
@@ -465,7 +448,7 @@ export namespace Wallet {
           }
         }
         if (primaryWalletAddress) {
-          browser.storage.local.set({ [PRIMARY_WALLET_ADDRESS]: primaryWalletAddress });
+          AsyncStorage.setItem(PRIMARY_WALLET_ADDRESS, primaryWalletAddress);
         }
       }
 
@@ -737,7 +720,7 @@ export namespace Wallet {
           throw new Error('Invalid wallet type');
         }
       },
-      [activeWallet, chainInfos, passwordStore?.password],
+      [activeWallet, chainInfos],
     );
   }
 
@@ -765,7 +748,7 @@ export namespace Wallet {
           throw new Error('Invalid wallet type');
         }
       },
-      [activeWallet, chainInfos, passwordStore?.password],
+      [activeWallet, chainInfos],
     );
   }
 
@@ -793,7 +776,7 @@ export namespace Wallet {
           throw new Error('Invalid wallet type');
         }
       },
-      [activeWallet, chainInfos, passwordStore?.password],
+      [activeWallet, chainInfos],
     );
   }
 }

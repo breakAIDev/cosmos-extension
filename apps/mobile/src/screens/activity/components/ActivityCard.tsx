@@ -1,15 +1,20 @@
+import React from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  GestureResponderEvent,
+  TextStyle,
+  ViewStyle,
+} from 'react-native';
+import { CaretRight } from '@phosphor-icons/react';
+import { observer } from 'mobx-react-lite';
 import { ActivityCardContent } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { CaretRight } from '@phosphor-icons/react';
-import { default as classNames } from 'classnames';
-import { useActivityImage } from 'hooks/activity/useActivityImage';
-import { Images } from 'images';
-import { observer } from 'mobx-react-lite';
-import React from 'react';
-import { hideAssetsStore } from 'stores/hide-assets-store';
-import { cn } from 'utils/cn';
-import { formatTokenAmount } from 'utils/strings';
-
+import { hideAssetsStore } from '../../../context/hide-assets-store';
+import { useActivityImage } from '../../../hooks/activity/useActivityImage';
+import { formatTokenAmount } from '../../../utils/strings';
 import { ActivityIcon } from './index';
 
 export type ActivityCardProps = {
@@ -17,9 +22,9 @@ export type ActivityCardProps = {
   showLoader?: boolean;
   onClick?: () => void;
   isSuccessful: boolean;
-  containerClassNames?: string;
+  containerStyle?: ViewStyle;
   forceChain?: SupportedChain;
-  titleClassName?: string;
+  titleStyle?: TextStyle;
   imgSize?: 'sm' | 'md' | 'lg';
 };
 
@@ -28,9 +33,9 @@ function ActivityCardView({
   onClick,
   showLoader,
   isSuccessful,
-  containerClassNames,
+  containerStyle,
   forceChain,
-  titleClassName,
+  titleStyle,
   imgSize,
 }: ActivityCardProps) {
   const {
@@ -58,69 +63,122 @@ function ActivityCardView({
   const balanceIncreased = txType === 'undelegate' || txType === 'receive' || txType === 'liquidity/remove';
 
   return (
-    <button
-      className={cn(
-        'flex rounded-2xl justify-between items-center p-4 bg-secondary-100 hover:bg-secondary-200 transition-colors',
-        containerClassNames,
-      )}
-      onClick={onClick}
+    <TouchableOpacity
+      style={[styles.container, containerStyle]}
+      activeOpacity={onClick ? 0.7 : 1}
+      onPress={onClick}
     >
-      <div className='flex items-center flex-grow gap-3'>
+      <View style={styles.row}>
         <ActivityIcon
           showLoader={showLoader}
-          voteOption={content.txType === 'vote' ? content.title1 : ''}
+          voteOption={txType === 'vote' ? title1 : ''}
           secondaryImg={secondaryImg}
           type={txType}
           isSuccessful={isSuccessful}
           size={imgSize}
           img={img}
         />
-        <div className='flex flex-col justify-center items-start'>
-          <span className={cn('text-base font-bold', titleClassName)}>{title1}</span>
-          <span className='text-xs font-medium text-muted-foreground'>{subtitle1}</span>
-        </div>
-        <div className='flex flex-grow' />
-
-        <div className='flex flex-col justify-center items-end'>
+        <View style={styles.textBlock}>
+          <Text style={[styles.title, titleStyle]} numberOfLines={1}>
+            {title1}
+          </Text>
+          <Text style={styles.subtitle} numberOfLines={1}>
+            {subtitle1}
+          </Text>
+        </View>
+        <View style={styles.flexGrow} />
+        <View style={styles.amountBlock}>
           {txType === 'swap' ? (
             <>
               {receivedAmountInfo && (
-                <p className='text-xs text-right font-semibold text-green-600 dark:text-green-600'>
+                <Text style={[styles.swapAmount, { color: '#29a874' }]}>
                   {balanceReduced && '-'} {hideAssetsStore.formatHideBalance(receivedAmountInfo)}
-                </p>
+                </Text>
               )}
               {sentAmountInfo && (
-                <p className='text-xs font-medium text-muted-foreground text-end'>
+                <Text style={styles.swapSubAmount}>
                   {balanceReduced && '-'} {hideAssetsStore.formatHideBalance(sentAmountInfo)}
-                </p>
+                </Text>
               )}
             </>
           ) : (
             <>
               {sentUsdValue && (
-                <p
-                  className={cn('text-sm text-end font-bold', {
-                    'text-black-100 dark:text-white-100': !balanceIncreased && !balanceReduced,
-                    'text-destructive-200': balanceReduced,
-                    'text-accent-success': balanceIncreased,
-                  })}
+                <Text
+                  style={[
+                    styles.usdValue,
+                    balanceReduced
+                      ? { color: '#e94f4f' }
+                      : balanceIncreased
+                      ? { color: '#29a874' }
+                      : { color: '#000' },
+                  ]}
                 >
                   {balanceReduced && '-'} ${hideAssetsStore.formatHideBalance(Number(sentUsdValue).toFixed(2))}
-                </p>
+                </Text>
               )}
-
               {sentAmountInfo && (
-                <p className={'text-xs font-medium text-muted-foreground'}>
+                <Text style={styles.tokenAmount}>
                   {balanceReduced && '-'} {hideAssetsStore.formatHideBalance(sentAmountInfo)}
-                </p>
+                </Text>
               )}
             </>
           )}
-        </div>
-        {onClick ? <CaretRight size={12} className='text-muted-foreground' /> : null}
-      </div>
-    </button>
+        </View>
+        {onClick && <CaretRight size={16} color="#aaa" weight="regular" />}
+      </View>
+    </TouchableOpacity>
   );
 }
 
 export const ActivityCard = observer(ActivityCardView);
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: '#f2f4f7', // bg-secondary-100
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 8,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  textBlock: {
+    flexDirection: 'column',
+    marginLeft: 12,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  subtitle: {
+    fontSize: 12,
+    color: '#888',
+    fontWeight: '500',
+  },
+  flexGrow: {
+    flex: 1,
+  },
+  amountBlock: {
+    alignItems: 'flex-end',
+  },
+  usdValue: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  tokenAmount: {
+    fontSize: 12,
+    color: '#888',
+  },
+  swapAmount: {
+    fontSize: 12,
+    fontWeight: '600',
+    textAlign: 'right',
+  },
+  swapSubAmount: {
+    fontSize: 12,
+    color: '#888',
+    textAlign: 'right',
+  },
+});

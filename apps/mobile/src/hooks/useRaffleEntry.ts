@@ -21,7 +21,12 @@ export function useRaffleEntry(raffleId?: string, userId?: string) {
     refetch,
   } = useQuery<boolean, Error>({
     queryKey: ['raffle-entry', raffleId, userId],
-    queryFn: () => (raffleId && userId ? fetchRaffleEntry(raffleId, userId) : false),
+    queryFn: () => {
+      if (!raffleId || !userId) {
+        return Promise.resolve(false);
+      }
+      return fetchRaffleEntry(raffleId, userId);
+    },
     staleTime: 0,
     cacheTime: 0,
   });

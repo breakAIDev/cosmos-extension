@@ -1,6 +1,6 @@
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { useQuery } from '@tanstack/react-query';
-import { useRpcUrl } from 'hooks/settings/useRpcUrl';
+import { useRpcUrl } from '../settings/useRpcUrl';
 
 import { cosmWasmClientRouter } from './cosmWasmClientRouter';
 

@@ -10,7 +10,6 @@ import { passwordStore } from '../../context/password-store';
 import { rootStore } from '../../context/root-store';
 import { AggregatedSupportedChain } from '../../types/utility';
 import { sendMessageToTab } from '../../utils';
-import browser from 'webextension-polyfill';
 
 import {
   ACTIVE_CHAIN,
@@ -20,6 +19,7 @@ import {
   LAST_EVM_ACTIVE_CHAIN,
   MANAGE_CHAIN_SETTINGS,
 } from '../../services/config/storage-keys';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type ActionType = 'UPDATE' | 'DELETE';
 
@@ -95,10 +95,8 @@ export function useUpdateKeyStore() {
         newKs[keystoreEntry[0]] = keystoreEntry[1];
         return newKs;
       }, {});
-      await browser.storage.local.set({
-        [KEYSTORE]: newKeystore,
-        [ACTIVE_WALLET]: newKeystore[wallet.id],
-      });
+      await AsyncStorage.setItem(KEYSTORE, JSON.stringify(newKeystore));
+      await AsyncStorage.setItem(ACTIVE_WALLET, JSON.stringify(newKeystore[wallet.id]));
       return newKeystore;
     },
     [handleMissingAddressAndPubKeys],
@@ -108,17 +106,33 @@ export function useUpdateKeyStore() {
 export function useInitActiveWallet(passwordStore: PasswordStore) {
   const { setActiveWallet } = useActiveWalletStore();
 
-  useEffect(() => {
-    browser.storage.local.get([ACTIVE_WALLET, MANAGE_CHAIN_SETTINGS, ACTIVE_WALLET_ID]).then((storage) => {
-      const activeWallet = storage[ACTIVE_WALLET];
-      const activeWalletId = storage[ACTIVE_WALLET_ID];
+useEffect(() => {
+  async function fetchActiveWallet() {
+    try {
+      const [
+        activeWalletRaw,
+        manageChainSettingsRaw,
+        activeWalletId
+      ] = await Promise.all([
+        AsyncStorage.getItem('ACTIVE_WALLET'),
+        AsyncStorage.getItem('MANAGE_CHAIN_SETTINGS'),
+        AsyncStorage.getItem('ACTIVE_WALLET_ID'),
+      ]);
+
+      const activeWallet = activeWalletRaw ? JSON.parse(activeWalletRaw) : null;
+      const manageChainSettings = manageChainSettingsRaw ? JSON.parse(manageChainSettingsRaw) : null;
       setActiveWallet(activeWallet);
+
       if (!activeWalletId && activeWallet) {
-        browser.storage.local.set({ [ACTIVE_WALLET_ID]: storage[ACTIVE_WALLET].id });
+        await AsyncStorage.setItem('ACTIVE_WALLET_ID', activeWallet.id);
       }
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [passwordStore.password]);
+    } catch (err) {
+      // handle error if needed
+    }
+  }
+
+  fetchActiveWallet();
+  }, [passwordStore.password, setActiveWallet]);
 }
 
 export default function useActiveWallet() {
@@ -129,9 +143,10 @@ export default function useActiveWallet() {
     async (wallet: Key | null) => {
       if (!wallet) return;
 
-      const store = await browser.storage.local.get([ACTIVE_CHAIN, LAST_EVM_ACTIVE_CHAIN]);
-      const lastEvmActiveChain: SupportedChain = store[LAST_EVM_ACTIVE_CHAIN] ?? 'ethereum';
-      const activeChain: SupportedChain = store[ACTIVE_CHAIN] ?? 'cosmos';
+      const activeChainRaw = await AsyncStorage.getItem(ACTIVE_CHAIN);
+      const lastEvmActiveChainRaw = await AsyncStorage.getItem(LAST_EVM_ACTIVE_CHAIN);
+      const lastEvmActiveChain: SupportedChain = lastEvmActiveChainRaw ? JSON.parse(lastEvmActiveChainRaw) : 'ethereum';
+      const activeChain: SupportedChain = activeChainRaw ? JSON.parse(activeChainRaw) : 'cosmos';
 
       const evmAddress = pubKeyToEvmAddressToShow(wallet.pubKeys?.[lastEvmActiveChain]);
       await sendMessageToTab({ event: 'accountsChanged', data: [evmAddress] });
@@ -145,7 +160,8 @@ export default function useActiveWallet() {
       }
 
       await sendMessageToTab({ event: 'leap_keystorechange' });
-      await browser.storage.local.set({ [ACTIVE_WALLET]: wallet, [ACTIVE_WALLET_ID]: wallet.id });
+      await AsyncStorage.setItem(ACTIVE_WALLET, JSON.stringify(wallet));
+      await AsyncStorage.setItem(ACTIVE_WALLET_ID, wallet.id);
 
       rootStore.reloadAddresses().finally(() => {
         if (

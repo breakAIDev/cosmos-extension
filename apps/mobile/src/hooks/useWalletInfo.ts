@@ -10,7 +10,7 @@ export function useWalletInfo() {
     if (activeWallet?.avatar) {
       return activeWallet.avatar;
     }
-    return Images.Logos.leap_logo_28;
+    return Images.Logos.LeapLogo28;
   }, [activeWallet?.avatar]);
 
   const walletName = useMemo(() => {

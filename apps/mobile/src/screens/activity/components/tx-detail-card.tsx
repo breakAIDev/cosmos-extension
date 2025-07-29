@@ -1,9 +1,9 @@
 import { ActivityType } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { useActivityImage } from 'hooks/activity/useActivityImage';
+import { useActivityImage } from '../../../hooks/activity/useActivityImage';
 import React from 'react';
 import { cn } from 'utils/cn';
-import { imgOnError } from 'utils/imgOnError';
+import { imgOnError } from '../../../utils/imgOnError';
 
 export const DetailsCard = (props: {
   title: string;

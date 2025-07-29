@@ -3,14 +3,16 @@ import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { ThemeName, useTheme } from '@leapwallet/leap-ui';
 import { useMemo } from 'react';
 
-import { Images } from '../../images';
+import { Images } from '../../../assets/images';
 
-export const getSwapImage = (activeChain: SupportedChain): string => {
+// Make sure your Images are React Native-compatible (i.e., `require('./path')` or {uri: ...})
+
+export const getSwapImage = (activeChain: SupportedChain): any => {
   switch (activeChain) {
     case 'juno':
       return Images.Logos.JunoSwap;
     default:
-      return Images.Logos.ChainLogos[activeChain] as string;
+      return Images.Logos.ChainLogos[activeChain];
   }
 };
 
@@ -22,7 +24,7 @@ export function useActivityImage(txType: ActivityType, forceChain?: SupportedCha
   const genericAssetIcon = theme === ThemeName.DARK ? Images.Logos.GenericDark : Images.Logos.GenericLight;
 
   return useMemo(() => {
-    const content: Record<ActivityType, string> = {
+    const content: Record<ActivityType, any> = {
       send: chains[activeChain]?.chainSymbolImageUrl ?? genericAssetIcon,
       receive: chains[activeChain]?.chainSymbolImageUrl ?? genericAssetIcon,
       vote: Images.Activity.Voting,

@@ -1,7 +1,7 @@
 import { useSetActiveChain } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { useEffect } from 'react';
-import { rootStore } from 'stores/root-store';
+import { rootStore } from '../../context/root-store';
 
 import { useActiveChain } from './useActiveChain';
 import useActiveWallet from './useActiveWallet';

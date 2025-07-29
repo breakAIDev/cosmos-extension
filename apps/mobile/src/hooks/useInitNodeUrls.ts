@@ -1,7 +1,7 @@
 import { ChainInfos, initiateNodeUrls, NODE_URLS, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { BETA_CHAINS, CUSTOM_ENDPOINTS } from 'config/storage-keys';
+import { BETA_CHAINS, CUSTOM_ENDPOINTS } from '../services/config/storage-keys';
 import { useEffect, useState } from 'react';
-import Browser from 'webextension-polyfill';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { useSelectedNetwork } from './settings/useNetwork';
 
@@ -11,19 +11,18 @@ export function useInitNodeUrls() {
 
   useEffect(() => {
     async function updateNodeUrls() {
-      const storage = await Browser.storage.local.get([BETA_CHAINS, CUSTOM_ENDPOINTS]);
+      const rawBetaChains = await AsyncStorage.getItem(BETA_CHAINS);
+      const rawCustomEndpoints = await AsyncStorage.getItem(CUSTOM_ENDPOINTS);
 
-      const betaChains = JSON.parse(storage[BETA_CHAINS] ?? '{}');
-      const customEndpoints = JSON.parse(storage[CUSTOM_ENDPOINTS] ?? '{}');
+      const betaChains = JSON.parse(rawBetaChains ?? '{}');
+      const customEndpoints = JSON.parse(rawCustomEndpoints ?? '{}');
 
+      // Remove betaChains that already exist in ChainInfos
       for (const chainName in betaChains) {
-        if (
-          Object.values(ChainInfos).some((chainInfo) =>
-            [chainInfo.chainId, chainInfo.testnetChainId].includes(betaChains[chainName].chainId),
-          )
-        ) {
-          delete betaChains[chainName];
-        }
+        const chainMatch = Object.values(ChainInfos).some((chainInfo) =>
+          [chainInfo.chainId, chainInfo.testnetChainId].includes(betaChains[chainName].chainId),
+        );
+        if (chainMatch) delete betaChains[chainName];
       }
 
       const chains = {
@@ -47,7 +46,9 @@ export function useInitNodeUrls() {
             }
 
             if (rpc && NODE_URLS.rpc) {
-              NODE_URLS.rpc[chainId] = [{ nodeUrl: selectedNetwork === 'testnet' ? rpcTest : rpc, nodeProvider: null }];
+              NODE_URLS.rpc[chainId] = [
+                { nodeUrl: selectedNetwork === 'testnet' ? rpcTest : rpc, nodeProvider: null },
+              ];
             }
           }
         }
@@ -57,27 +58,13 @@ export function useInitNodeUrls() {
     (async () => {
       try {
         await initiateNodeUrls();
-        updateNodeUrls();
+        await updateNodeUrls();
       } finally {
         setNodeUrlInitialised(true);
       }
     })();
 
-    Browser.storage.onChanged.addListener((storage) => {
-      if (storage && (storage[BETA_CHAINS] || storage[CUSTOM_ENDPOINTS])) {
-        updateNodeUrls();
-      }
-    });
-
-    return () => {
-      Browser.storage.onChanged.removeListener((storage) => {
-        if (storage && (storage[BETA_CHAINS] || storage[CUSTOM_ENDPOINTS])) {
-          updateNodeUrls();
-        }
-      });
-    };
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // You can simulate reactive behavior using an event emitter or polling
   }, [selectedNetwork]);
 
   return nodeUrlsInitialised;

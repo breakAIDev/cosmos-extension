@@ -1,8 +1,8 @@
 import { cachedRemoteDataWithLastModified, useChainInfo, useGetStorageLayer } from '@leapwallet/cosmos-wallet-hooks';
 import { useQuery } from '@tanstack/react-query';
-import { NEW_CHAIN_TOOLTIP_STORAGE_KEY } from 'config/storage-keys';
+import { NEW_CHAIN_TOOLTIP_STORAGE_KEY } from '../services/config/storage-keys';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import browser from 'webextension-polyfill';
+import DeviceInfo from 'react-native-device-info'; // ✅ RN version getter
 
 import { useActiveChain } from './settings/useActiveChain';
 
@@ -40,7 +40,7 @@ export default function useNewChainTooltip() {
   const [toolTipData, setToolTipData] = useState<NewChainTooltipData>();
   const activeChain = useActiveChain();
   const chainInfo = useChainInfo(activeChain);
-  const version = browser.runtime.getManifest().version;
+  const version = DeviceInfo.getVersion(); // ✅ Updated for React Native
 
   const { data } = useQuery(
     ['leap-new-chains-tooltip', storage],
@@ -81,55 +81,48 @@ export default function useNewChainTooltip() {
         setUserPreferenceLoading(false);
       } catch (_) {
         setUserPreferenceLoading(false);
-        //
       }
     }
     loadUserPreferences();
   }, [storage]);
 
   useEffect(() => {
-    let isFeatureEnabled = false;
-
-    isFeatureEnabled = data?.['featureFlags']?.['leap-extension'] ?? false;
+    let isFeatureEnabled = data?.['featureFlags']?.['leap-extension'] ?? false;
 
     if (!isFeatureEnabled || userPreferenceLoading || !data?.[version] || userPreference?.[toolTipId] === false) {
       setShowToolTip(false);
       return;
     }
 
-    if (!data?.[version]) {
+    const tooltip = data?.[version];
+    if (!tooltip) {
       setShowToolTip(false);
       return;
     }
 
-    if (
-      data?.[version]?.visibility?.hiddenOn &&
-      (data?.[version]?.visibility?.hiddenOn?.includes(activeChain) ||
-        data?.[version]?.visibility?.hiddenOn?.includes(chainInfo?.chainId ?? '') ||
-        data?.[version]?.visibility?.hiddenOn?.includes(chainInfo?.testnetChainId ?? '') ||
-        data?.[version]?.visibility?.hiddenOn?.includes(chainInfo?.evmChainId ?? '') ||
-        data?.[version]?.visibility?.hiddenOn?.includes(chainInfo?.evmChainIdTestnet ?? ''))
-    ) {
+    const hidden = tooltip.visibility?.hiddenOn ?? [];
+    const visible = tooltip.visibility?.visibleOn ?? [];
+
+    const identifiers = [
+      activeChain,
+      chainInfo?.chainId,
+      chainInfo?.testnetChainId,
+      chainInfo?.evmChainId,
+      chainInfo?.evmChainIdTestnet,
+    ];
+
+    if (hidden.some((id) => identifiers.includes(id))) {
       setShowToolTip(false);
       return;
     }
 
-    if (
-      data?.[version]?.visibility?.visibleOn &&
-      !(
-        data?.[version]?.visibility?.visibleOn?.includes(activeChain) ||
-        data?.[version]?.visibility?.visibleOn?.includes(chainInfo?.chainId ?? '') ||
-        data?.[version]?.visibility?.visibleOn?.includes(chainInfo?.testnetChainId ?? '') ||
-        data?.[version]?.visibility?.visibleOn?.includes(chainInfo?.evmChainId ?? '') ||
-        data?.[version]?.visibility?.visibleOn?.includes(chainInfo?.evmChainIdTestnet ?? '')
-      )
-    ) {
+    if (visible.length > 0 && !visible.some((id) => identifiers.includes(id))) {
       setShowToolTip(false);
       return;
     }
 
     setShowToolTip(true);
-    setToolTipData(data?.[version]);
+    setToolTipData(tooltip);
   }, [
     data,
     userPreference,
@@ -149,14 +142,17 @@ export default function useNewChainTooltip() {
       try {
         const _userPreferenceJson = await storage.get(NEW_CHAIN_TOOLTIP_STORAGE_KEY);
         const _userPreference = JSON.parse(_userPreferenceJson);
-        storage.set(NEW_CHAIN_TOOLTIP_STORAGE_KEY, JSON.stringify({ ..._userPreference, [toolTipId]: false }));
+        storage.set(
+          NEW_CHAIN_TOOLTIP_STORAGE_KEY,
+          JSON.stringify({ ..._userPreference, [toolTipId]: false }),
+        );
       } catch (_) {
         //
       }
       setUserPreference((_userPreference) => ({ ...(_userPreference ?? {}), [toolTipId]: false }));
     }
     updateUserPreference();
-  }, [setShowToolTip, toolTipId, storage]);
+  }, [toolTipId, storage]);
 
   return { showToolTip, toolTipData, handleToolTipClose };
 }

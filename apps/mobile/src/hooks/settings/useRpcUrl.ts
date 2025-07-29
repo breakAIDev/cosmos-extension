@@ -1,6 +1,7 @@
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk/dist/browser/constants';
-import { useChainInfos } from 'hooks/useChainInfos';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk/dist/node/constants';
+import { useChainInfos } from '../useChainInfos';
 import { useMemo } from 'react';
+import {LEAP_WALLET_BACKEND_API_URL} from '@env';
 
 import { useActiveChain } from './useActiveChain';
 import { useSelectedNetwork } from './useNetwork';
@@ -15,8 +16,8 @@ export function useRpcUrl(forceChain?: SupportedChain) {
     if (!chain) return { rpcUrl: '', lcdUrl: '' };
     if (selectedNetwork === 'mainnet' && chain === 'cosmos') {
       return {
-        rpcUrl: `${process.env.LEAP_WALLET_BACKEND_API_URL}/figment/cosmos-hub/rpc`,
-        lcdUrl: `${process.env.LEAP_WALLET_BACKEND_API_URL}/figment/cosmos-hub/lcd`,
+        rpcUrl: `${LEAP_WALLET_BACKEND_API_URL}/figment/cosmos-hub/rpc`,
+        lcdUrl: `${LEAP_WALLET_BACKEND_API_URL}/figment/cosmos-hub/lcd`,
       };
     }
 

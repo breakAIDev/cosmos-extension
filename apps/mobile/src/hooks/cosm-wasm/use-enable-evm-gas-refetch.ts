@@ -1,6 +1,6 @@
 import { NetworkType, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { useEffect } from 'react';
-import { evmGasPricesStore } from 'stores/fee-store';
+import { evmGasPricesStore } from '../../context/fee-store';
 
 export const useEnableEvmGasRefetch = (activeChain: SupportedChain, activeNetwork: NetworkType) => {
   const store = evmGasPricesStore.getStore(activeChain, activeNetwork);

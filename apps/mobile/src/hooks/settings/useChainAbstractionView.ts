@@ -1,10 +1,10 @@
 import { useFeatureFlags } from '@leapwallet/cosmos-wallet-hooks';
-import { AGGREGATED_CHAIN_KEY } from 'config/constants';
+import { AGGREGATED_CHAIN_KEY } from '../../services/config/constants';
 import { useEffect, useState } from 'react';
-import { nmsStore } from 'stores/balance-store';
-import { rootDenomsStore } from 'stores/denoms-store-instance';
-import { rootBalanceStore } from 'stores/root-store';
-import { AggregatedSupportedChain } from 'types/utility';
+import { nmsStore } from '../../context/balance-store';
+import { rootDenomsStore } from '../../context/denoms-store-instance';
+import { rootBalanceStore } from '../../context/root-store';
+import { AggregatedSupportedChain } from '../../types/utility';
 
 import { useActiveChain } from './useActiveChain';
 

@@ -7,8 +7,8 @@ export type NftCollection = {
 };
 
 const CHAD_NFT_COLLECTIONS_API = {
-  refetchInterval: 15 * 60 * 1000, // 15 mins
-  staleTime: 10 * 60 * 1000, // 10 mins
+  refetchInterval: 15 * 60 * 1000, // 15 minutes
+  staleTime: 10 * 60 * 1000, // 10 minutes
   retries: 2,
 } as const;
 

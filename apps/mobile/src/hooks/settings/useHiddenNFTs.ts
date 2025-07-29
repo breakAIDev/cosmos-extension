@@ -1,6 +1,6 @@
 import { useActiveWallet } from '@leapwallet/cosmos-wallet-hooks';
 import { useEffect } from 'react';
-import { HiddenNftStore } from 'stores/manage-nft-store';
+import { HiddenNftStore } from '../../context/manage-nft-store';
 
 export function useInitHiddenNFTs(hiddenNFTsStore: HiddenNftStore) {
   const activeWallet = useActiveWallet();

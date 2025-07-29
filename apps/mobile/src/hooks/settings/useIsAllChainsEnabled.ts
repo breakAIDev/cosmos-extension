@@ -1,9 +1,9 @@
 import { FeatureFlags, useFeatureFlags } from '@leapwallet/cosmos-wallet-hooks';
 import semver from 'semver';
-import browser from 'webextension-polyfill';
+import DeviceInfo from 'react-native-device-info';
 
 export function isAllChainsEnabled(featureFlags: FeatureFlags | undefined) {
-  const version = browser.runtime.getManifest().version;
+  const version = DeviceInfo.getVersion();
 
   return (
     semver.satisfies(version, featureFlags?.give_all_chains_option_in_wallet?.extension_v2 || '=0.0.1') ||

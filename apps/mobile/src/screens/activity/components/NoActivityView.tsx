@@ -1,9 +1,9 @@
-import { useGetChains } from '@leapwallet/cosmos-wallet-hooks';
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { EmptyCard } from 'components/empty-card';
-import { Images } from 'images';
 import React from 'react';
-import { Colors } from 'theme/colors';
+import { View, Text, TouchableOpacity, StyleSheet, Linking } from 'react-native';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { EmptyCard } from '../../../components/empty-card';
+import { Images } from '../../../../assets/images';
+import { Colors } from '../../../theme/colors';
 
 type NoActivityViewProps = {
   accountExplorerLink?: string;
@@ -11,21 +11,41 @@ type NoActivityViewProps = {
 };
 
 export function NoActivityView({ accountExplorerLink }: NoActivityViewProps) {
+  const openExplorer = () => {
+    if (accountExplorerLink) {
+      Linking.openURL(accountExplorerLink);
+    }
+  };
+
   return (
-    <div className='flex flex-col h-[350px]'>
-      <EmptyCard src={Images.Activity.ActivityIcon} heading='No activity' subHeading='Your activity will appear here' />
+    <View style={styles.container}>
+      <EmptyCard
+        src={Images.Activity.ActivityIcon}
+        heading="No activity"
+        subHeading="Your activity will appear here"
+      />
 
       {accountExplorerLink ? (
-        <a
-          href={accountExplorerLink}
-          target='_blank'
-          className='font-semibold text-base mt-4 text-center'
-          style={{ color: Colors.green600 }}
-          rel='noreferrer'
-        >
-          Check on Explorer
-        </a>
+        <TouchableOpacity onPress={openExplorer}>
+          <Text style={styles.explorerLink}>Check on Explorer</Text>
+        </TouchableOpacity>
       ) : null}
-    </div>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    height: 350,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  explorerLink: {
+    marginTop: 16,
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+    color: Colors.green600,
+  },
+});

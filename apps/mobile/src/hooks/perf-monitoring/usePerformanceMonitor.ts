@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/react';
 import { Span } from '@sentry/tracing';
 import { QueryStatus } from '@tanstack/react-query';
-import { useActiveChain } from 'hooks/settings/useActiveChain';
+import { useActiveChain } from '../settings/useActiveChain';
 import { useEffect, useRef } from 'react';
 
 type usePerformanceMonitorProps = {

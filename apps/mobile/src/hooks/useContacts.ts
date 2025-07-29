@@ -1,6 +1,6 @@
 import Fuse from 'fuse.js';
 import { useEffect, useMemo, useState } from 'react';
-import { AddressBook } from 'utils/addressbook';
+import { AddressBook } from '../utils/addressbook'; // Ensure this is RN-compatible
 
 export const useContacts = () => {
   const [contacts, setContacts] = useState<AddressBook.SavedAddresses>({});

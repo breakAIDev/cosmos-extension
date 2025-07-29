@@ -1,6 +1,6 @@
 import { getChannelIdData } from '@leapwallet/cosmos-wallet-sdk';
 import { useCallback } from 'react';
-import browser from 'webextension-polyfill';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { useActiveChain } from './settings/useActiveChain';
 import { useRpcUrl } from './settings/useRpcUrl';
@@ -10,18 +10,25 @@ export function useGetChannelIdData() {
   const activeChain = useActiveChain();
 
   return useCallback(
-    async (channelId: string) => {
+    async (channelId: string): Promise<string | null> => {
       const cacheKey = `${channelId}-${activeChain}`;
-      const storage = await browser.storage.local.get(cacheKey);
-      if (cacheKey in storage) {
-        return storage[cacheKey];
-      }
-      const chainId = await getChannelIdData(lcdUrl as string, channelId);
-      await browser.storage.local.set({ [cacheKey]: chainId });
-      return chainId;
-    },
+      try {
+        const cached = await AsyncStorage.getItem(cacheKey);
+        if (cached !== null) {
+          return cached;
+        }
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [lcdUrl],
+        const chainId = await getChannelIdData(lcdUrl as string, channelId);
+        if (chainId) {
+          await AsyncStorage.setItem(cacheKey, chainId);
+        }
+
+        return chainId;
+      } catch (error) {
+        console.error('Failed to get or store channelId data:', error);
+        return null;
+      }
+    },
+    [lcdUrl, activeChain],
   );
 }

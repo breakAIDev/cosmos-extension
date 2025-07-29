@@ -1,7 +1,7 @@
 import { useDenoms } from '@leapwallet/cosmos-wallet-hooks';
 import { NativeDenom, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { useActiveChain } from 'hooks/settings/useActiveChain';
-import { useChainInfos } from 'hooks/useChainInfos';
+import { useActiveChain } from '../settings/useActiveChain';
+import { useChainInfos } from '../useChainInfos';
 import { useCallback } from 'react';
 
 /** @returns `undefined` if either the `token` doesn't exist or the dataset hasn't been successfully fetched yet. */

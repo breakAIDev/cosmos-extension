@@ -1,17 +1,22 @@
 import { useChainInfo } from '@leapwallet/cosmos-wallet-hooks';
 import { ChainInfo } from '@leapwallet/cosmos-wallet-sdk';
-import { EventName, PageName } from 'config/analytics';
-import { AGGREGATED_CHAIN_KEY } from 'config/constants';
-import { useActiveChain } from 'hooks/settings/useActiveChain';
-import mixpanel from 'mixpanel-browser';
+import { EventName, PageName } from '../../services/config/analytics';
+import { AGGREGATED_CHAIN_KEY } from '../../services/config/constants';
+import { useActiveChain } from '../settings/useActiveChain';
+import mixpanel from '../../mixpanel'; // <-- Your RN Mixpanel singleton import
 import { useEffect } from 'react';
-import { AggregatedSupportedChain } from 'types/utility';
+import { AggregatedSupportedChain } from '../../types/utility';
 
 /**
- * Track page view on mixpanel
+ * Track page view on mixpanel (React Native)
  */
 
-export const usePageView = (pageName: PageName, enable = true, additionalProperties?: any, callback?: () => void) => {
+export const usePageView = (
+  pageName: PageName,
+  enable = true,
+  additionalProperties?: any,
+  callback?: () => void
+) => {
   const chain = useChainInfo() as ChainInfo | undefined;
   const activeChain = useActiveChain() as AggregatedSupportedChain;
   const isAggregatedView = activeChain === AGGREGATED_CHAIN_KEY;
@@ -33,10 +38,7 @@ export const usePageView = (pageName: PageName, enable = true, additionalPropert
             chainName,
             time: Date.now() / 1000,
             ...(additionalProperties ?? {}),
-          },
-          {
-            transport: 'sendBeacon',
-          },
+          }
         );
         callback?.();
       } catch (_) {
@@ -47,5 +49,5 @@ export const usePageView = (pageName: PageName, enable = true, additionalPropert
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [additionalProperties, chain?.chainId, chain?.chainName, enable, pageName]);
+  }, [additionalProperties, callback, chain?.chainId, chain?.chainName, chainId, chainName, enable, pageName]);
 };

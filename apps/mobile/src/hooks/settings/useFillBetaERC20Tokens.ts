@@ -1,10 +1,10 @@
 import { BETA_ERC20_TOKENS, useActiveChain, useBetaERC20TokensStore } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { AGGREGATED_CHAIN_KEY } from 'config/constants';
-import { useEffect, useMemo } from 'react';
-import { AggregatedSupportedChain } from 'types/utility';
+import { AGGREGATED_CHAIN_KEY } from '../../services/config/constants';
+import { useMemo } from 'react';
+import { AggregatedSupportedChain } from '../../types/utility';
 
-import { fillBetaValuesFromStorage } from './fillBetaValuesFromStorage';
+import { useFillBetaValuesFromStorage } from './useFillBetaValuesFromStorage';
 
 export function useFillBetaERC20Tokens(forceChain?: SupportedChain) {
   const _activeChain = useActiveChain();
@@ -15,19 +15,14 @@ export function useFillBetaERC20Tokens(forceChain?: SupportedChain) {
 
   const { setBetaERC20Tokens } = useBetaERC20TokensStore();
 
-  useEffect(
-    () => {
+  useFillBetaValuesFromStorage(
+    activeChain !== AGGREGATED_CHAIN_KEY ? activeChain : '',
+    BETA_ERC20_TOKENS,
+    (value) => {
       if (activeChain && activeChain !== AGGREGATED_CHAIN_KEY) {
-        fillBetaValuesFromStorage(
-          activeChain,
-          BETA_ERC20_TOKENS,
-          (value) => setBetaERC20Tokens(value, activeChain),
-          {},
-        );
+        setBetaERC20Tokens(value, activeChain);
       }
     },
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [activeChain],
+    {},
   );
 }

@@ -70,6 +70,7 @@ const ALPHA_INSIGHTS_API = {
   retries: 2,
 } as const;
 
+
 async function fetchAlphaOpportunities(): Promise<AlphaOpportunity[]> {
   const baseUrl = getLeapapiBaseUrl();
   const endpoint = `${baseUrl}/alpha-insights/collection`;
@@ -120,6 +121,7 @@ export function useRaffles() {
     retry: ALPHA_INSIGHTS_API.retries,
   });
 
+  // Filter cancelled raffles
   const filteredRaffles = raffles?.filter((raffle) => raffle.status !== RaffleStatus.CANCELLED);
   return { raffles: filteredRaffles, isLoading, error };
 }

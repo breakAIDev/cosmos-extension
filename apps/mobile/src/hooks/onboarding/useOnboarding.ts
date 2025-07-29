@@ -1,7 +1,7 @@
 import { useChainsStore } from '@leapwallet/cosmos-wallet-hooks';
 import { ChainInfos, importLedgerAccountV2 } from '@leapwallet/cosmos-wallet-sdk';
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk/dist/browser/constants';
-import getHDPath from '@leapwallet/cosmos-wallet-sdk/dist/browser/utils/get-hdpath';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk/dist/node/constants';
+import getHDPath from '@leapwallet/cosmos-wallet-sdk/dist/node/utils/get-hdpath';
 import {
   BtcWalletHD,
   EthWallet,
@@ -10,13 +10,13 @@ import {
   KeyChain,
   NETWORK,
 } from '@leapwallet/leap-keychain';
-import { SeedPhrase } from 'hooks/wallet/seed-phrase/useSeedPhrase';
-import { Wallet } from 'hooks/wallet/useWallet';
-import { LEDGER_NETWORK } from 'pages/onboarding/import/import-wallet-context';
+import { SeedPhrase } from '../wallet/seed-phrase/useSeedPhrase';
+import { Wallet } from '../wallet/useWallet';
+import { LEDGER_NETWORK } from '../../screens/onboarding/import/import-wallet-context';
 import { useEffect, useRef, useState } from 'react';
-import { getDerivationPathToShow } from 'utils';
-import { customKeygenfnMove, customKeygenfnSolana, customKeygenfnSui } from 'utils/getChainInfosList';
-import { getLedgerEnabledEvmChainsKey } from 'utils/getLedgerEnabledEvmChains';
+import { getDerivationPathToShow } from '../../utils';
+import { customKeygenfnMove, customKeygenfnSolana, customKeygenfnSui } from '../../utils/getChainInfosList';
+import { getLedgerEnabledEvmChainsKey } from '../../utils/getLedgerEnabledEvmChains';
 
 import { Address, Addresses, WalletAccount } from './types';
 
@@ -242,7 +242,6 @@ export function useOnboarding() {
         address: account.address,
         pubkey: account.pubkey,
         index: (prev ?? []).length + index,
-        
         path: account.path,
       })),
     ]);
@@ -288,7 +287,6 @@ export function useOnboarding() {
         address: account.address,
         pubkey: account.pubkey,
         index: (prev ?? []).length + index,
-        
         path: account.path,
         name,
       })),

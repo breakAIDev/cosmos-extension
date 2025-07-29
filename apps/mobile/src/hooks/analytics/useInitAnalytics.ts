@@ -4,8 +4,8 @@ import { utils } from '@noble/secp256k1';
 import { setUser as setSentryUser } from '@sentry/react';
 import mixpanel from 'mixpanel-browser';
 import { useEffect, useMemo } from 'react';
-import { getPrimaryWalletAddress } from 'utils/getPrimaryWalletAddress';
-import * as browser from 'webextension-polyfill';
+import { getPrimaryWalletAddress } from '../../utils/getPrimaryWalletAddress';
+import DeviceInfo from 'react-native-device-info';
 
 export const useInitAnalytics = () => {
   const activeWalletCosmosAddress = useAddress('cosmos');
@@ -42,11 +42,10 @@ export const useInitAnalytics = () => {
   }, []);
 
   useEffect(() => {
-    // get extension version
-
+    // get mobile version
     try {
       mixpanel.register({
-        productVersion: browser.runtime.getManifest().version,
+        productVersion: DeviceInfo.getVersion(),
         packageName: chrome.runtime.id,
       });
     } catch (_) {

@@ -1,5 +1,11 @@
-import { QueryFunction, QueryKey, useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
-import browser from 'webextension-polyfill';
+import {
+  QueryFunction,
+  QueryKey,
+  useQuery,
+  UseQueryOptions,
+  UseQueryResult,
+} from '@tanstack/react-query';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export function useQueryCached<
   TQueryFnData = unknown,
@@ -14,13 +20,24 @@ export function useQueryCached<
   const queryData = useQuery(
     queryKey,
     async (qk) => {
-      const storageKey = qk.queryKey.toString();
-      const storage = await browser.storage.local.get(storageKey);
-      if (storage[storageKey]) {
-        return storage[storageKey];
+      const storageKey = JSON.stringify(qk.queryKey);
+      try {
+        const cached = await AsyncStorage.getItem(storageKey);
+        if (cached !== null) {
+          return JSON.parse(cached) as TQueryFnData;
+        }
+      } catch (err) {
+        console.warn('Failed to read from AsyncStorage:', err);
       }
+
       const data = await queryFunction(qk);
-      await browser.storage.local.set({ [storageKey]: data });
+
+      try {
+        await AsyncStorage.setItem(storageKey, JSON.stringify(data));
+      } catch (err) {
+        console.warn('Failed to write to AsyncStorage:', err);
+      }
+
       return data;
     },
     options,

@@ -1,33 +1,39 @@
-import { Images } from 'images';
 import { useEffect, useState } from 'react';
+import { Images } from '../../../assets/images';
+
+// Helper: Parse <link rel="icon" ...> and <link rel="shortcut icon" ...>
+function parseFavicon(html: string, siteOrigin: string): string | undefined {
+  // Match: <link rel="icon" href="..."> or <link rel="shortcut icon" href="...">
+  const iconRegex = /<link\s+[^>]*rel=["'](?:shortcut )?icon["'][^>]*href=["']([^"']+)["'][^>]*>/i;
+  const match = iconRegex.exec(html);
+  if (match && match[1]) {
+    // Handle relative URLs
+    try {
+      return new URL(match[1], siteOrigin).toString();
+    } catch {
+      return undefined;
+    }
+  }
+  return undefined;
+}
 
 export const useSiteLogo = (siteOrigin: string | undefined) => {
   const [logoURL, setLogoURL] = useState(Images.Misc.Globe);
 
   useEffect(() => {
     if (!siteOrigin) return;
-    // Fetch the root HTML document
+
     fetch(siteOrigin)
       .then((response) => response.text())
       .then((html) => {
-        // Create a temporary div to parse the HTML content
-        const tempDiv = document.createElement('div');
-        // create shadow dom
-        const shadow = tempDiv.attachShadow({ mode: 'closed' });
-        // Set the HTML content
-        shadow.innerHTML = html;
-
-        // Find the favicon link in the document head
-        const iconLinkElement: HTMLLinkElement | null =
-          shadow.querySelector("link[rel='icon']") ?? shadow.querySelector("link[rel='shortcut icon']");
-
-        if (iconLinkElement) {
-          // replace origin
-          const link = new URL(new URL(iconLinkElement.href).pathname, siteOrigin);
-          setLogoURL(link.toString());
+        const faviconURL = parseFavicon(html, siteOrigin);
+        if (faviconURL) {
+          setLogoURL(faviconURL);
         }
       })
-      .catch();
+      .catch(() => {
+        // fallback, don't update logoURL
+      });
   }, [siteOrigin]);
 
   return logoURL;

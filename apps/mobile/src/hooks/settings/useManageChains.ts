@@ -1,6 +1,6 @@
 import { ChainInfosStore } from '@leapwallet/cosmos-wallet-store';
 import { useEffect } from 'react';
-import { ManageChainsStore } from 'stores/manage-chains-store';
+import { ManageChainsStore } from '../../context/manage-chains-store';
 
 /**
  * @hook useManageChains

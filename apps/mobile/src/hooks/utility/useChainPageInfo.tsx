@@ -15,7 +15,7 @@ export function useChainPageInfo() {
 
   const headerChainImgSrc = useMemo(() => {
     if (activeChain === AGGREGATED_CHAIN_KEY) {
-      return theme === ThemeName.DARK ? Images.Misc.aggregated_view_dark_mode : Images.Misc.aggregated_view;
+      return theme === ThemeName.DARK ? Images.Misc.AggregatedViewDarkSvg : Images.Misc.AggregatedViewSvg;
     }
     return chains[activeChain]?.chainSymbolImageUrl || defaultTokenLogo;
   }, [activeChain, chains, defaultTokenLogo, theme]);

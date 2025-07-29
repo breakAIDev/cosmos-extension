@@ -1,30 +1,56 @@
-import { WalletButtonV2 } from 'components/button';
-import { PageHeader } from 'components/header/PageHeaderV2';
-import { SideNavMenuOpen } from 'components/header/sidenav-menu';
-import { useWalletInfo } from 'hooks/useWalletInfo';
-import SelectWallet from 'pages/home/SelectWallet/v2';
 import React, { useState } from 'react';
+import { View, Modal, StyleSheet } from 'react-native';
+import { WalletButtonV2 } from '../../../components/button';
+import { PageHeader } from '../../../components/header/PageHeaderV2';
+import { SideNavMenuOpen } from '../../../components/header/sidenav-menu';
+import { useWalletInfo } from '../../../hooks/useWalletInfo';
+import SelectWallet from '../../home/SelectWallet/v2';
 
 export const ActivityHeader = (props: { disableWalletButton?: boolean }) => {
   const walletInfo = useWalletInfo();
   const [showSelectWallet, setShowSelectWallet] = useState(false);
 
+  const handleWalletPress = () => {
+    setShowSelectWallet(true && !props.disableWalletButton)
+  };
+
   return (
-    <>
+    <View>
       <PageHeader>
-        <SideNavMenuOpen className='py-2 pr-1.5 pl-2.5 text-foreground/75 hover:text-foreground transition-colors' />
+        <SideNavMenuOpen style={styles.menuIcon} />
 
         <WalletButtonV2
           showDropdown
           showWalletAvatar
-          className='absolute top-1/2 right-1/2 translate-x-1/2 -translate-y-1/2'
           walletName={walletInfo.walletName}
           walletAvatar={walletInfo.walletAvatar}
-          handleDropdownClick={() => setShowSelectWallet(true && !props.disableWalletButton)}
+          handleDropdownClick={handleWalletPress}
+          style={styles.walletButton}
         />
       </PageHeader>
 
-      <SelectWallet isVisible={showSelectWallet} onClose={() => setShowSelectWallet(false)} title='Your Wallets' />
-    </>
+      <Modal visible={showSelectWallet} transparent animationType="slide">
+        <SelectWallet
+          isVisible={showSelectWallet}
+          onClose={() => setShowSelectWallet(false)}
+          title="Your Wallets"
+        />
+      </Modal>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  menuIcon: {
+    paddingVertical: 8,
+    paddingRight: 6,
+    paddingLeft: 10,
+    color: '#666',
+  },
+  walletButton: {
+    position: 'absolute',
+    top: '50%',
+    right: '50%',
+    transform: [{ translateX: 50 }, { translateY: -20 }],
+  },
+});

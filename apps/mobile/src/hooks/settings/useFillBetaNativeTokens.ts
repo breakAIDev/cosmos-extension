@@ -1,10 +1,10 @@
 import { BETA_NATIVE_TOKENS, useActiveChain, useBetaNativeTokensStore } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { AGGREGATED_CHAIN_KEY } from 'config/constants';
-import { useEffect, useMemo } from 'react';
-import { AggregatedSupportedChain } from 'types/utility';
+import { AGGREGATED_CHAIN_KEY } from '../../services/config/constants';
+import { useMemo } from 'react';
+import { AggregatedSupportedChain } from '../../types/utility';
 
-import { fillBetaValuesFromStorage } from './fillBetaValuesFromStorage';
+import { useFillBetaValuesFromStorage } from './useFillBetaValuesFromStorage';
 
 export function useFillBetaNativeTokens(forceChain?: SupportedChain) {
   const _activeChain = useActiveChain();
@@ -15,14 +15,14 @@ export function useFillBetaNativeTokens(forceChain?: SupportedChain) {
 
   const { setBetaNativeTokens } = useBetaNativeTokensStore();
 
-  useEffect(
-    () => {
+  useFillBetaValuesFromStorage(
+    activeChain !== AGGREGATED_CHAIN_KEY ? activeChain : '',
+    BETA_NATIVE_TOKENS,
+    (value) => {
       if (activeChain && activeChain !== AGGREGATED_CHAIN_KEY) {
-        fillBetaValuesFromStorage(activeChain, BETA_NATIVE_TOKENS, (value) => setBetaNativeTokens(value), {});
+        setBetaNativeTokens(value);
       }
     },
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [activeChain],
+    {},
   );
 }

@@ -3,11 +3,11 @@ import { CosmosTxType } from '@leapwallet/cosmos-wallet-hooks';
 import { ChainInfos, CreateViewingKeyOptions, SigningSscrt, Sscrt } from '@leapwallet/cosmos-wallet-sdk';
 import { encrypt } from '@leapwallet/leap-keychain';
 import { useCallback } from 'react';
-import { passwordStore } from 'stores/password-store';
-import browser from 'webextension-polyfill';
+import { passwordStore } from '../../context/password-store';
 
-import { VIEWING_KEYS } from '../../config/storage-keys';
+import { VIEWING_KEYS } from '../../services/config/storage-keys';
 import { useSecretWallet } from '../wallet/useScrtWallet';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export async function verifyViewingKey(gprcUrl: string, key: string, contractAddress: string, address: string) {
   const sscrt = Sscrt.create(gprcUrl, ChainInfos.secret.chainId, address);
@@ -78,8 +78,8 @@ export function useCreateViewingKey() {
       }
 
       const encryptedViewingKey = encrypt(viewingKey as string, passwordStore.password);
-      const storage = await browser.storage.local.get([VIEWING_KEYS]);
-      const viewingKeys = storage[VIEWING_KEYS];
+      const storage = await AsyncStorage.getItem(VIEWING_KEYS);
+      const viewingKeys = storage ? JSON.parse(storage) : {};
 
       if (viewingKeys) {
         const updatedViewingKeyStore = (shouldEncrypt: boolean) => ({
@@ -90,9 +90,7 @@ export function useCreateViewingKey() {
           },
         });
 
-        await browser.storage.local.set({
-          [VIEWING_KEYS]: updatedViewingKeyStore(true),
-        });
+        await AsyncStorage.setItem(VIEWING_KEYS, updatedViewingKeyStore(true));
         setViewingKeys(updatedViewingKeyStore(false));
       } else {
         const viewingKeyStore = (shouldEncrypt: boolean) => ({
@@ -101,9 +99,7 @@ export function useCreateViewingKey() {
           },
         });
 
-        await browser.storage.local.set({
-          [VIEWING_KEYS]: viewingKeyStore(true),
-        });
+        await AsyncStorage.setItem(VIEWING_KEYS, JSON.stringify(viewingKeyStore(true)));
         setViewingKeys(viewingKeyStore(false));
       }
       return { validKey: true, error: null, key: viewingKey };

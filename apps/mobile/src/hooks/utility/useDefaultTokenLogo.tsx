@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { Images } from '../../../assets/images';
 
 export function getDefaultTokenLogo(isDark: boolean) {
-  return isDark ? Images.Logos.img_not_available_dark : Images.Logos.img_not_available_light;
+  return isDark ? Images.Logos.ImgNotAvailableDark : Images.Logos.ImgNotAvailableLight;
 }
 
 export function useDefaultTokenLogo() {

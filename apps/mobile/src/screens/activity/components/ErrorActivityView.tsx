@@ -1,8 +1,8 @@
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { EmptyCard } from 'components/empty-card';
-import { Images } from 'images';
 import React from 'react';
-import { Colors } from 'theme/colors';
+import { View, Image, Text, Linking, Pressable, StyleSheet } from 'react-native';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { Images } from '../../../../assets/images';
+import { Colors } from '../../../theme/colors';
 
 type ErrorActivityViewProps = {
   accountExplorerLink: string;
@@ -10,21 +10,49 @@ type ErrorActivityViewProps = {
 };
 
 export function ErrorActivityView({ accountExplorerLink }: ErrorActivityViewProps) {
+  const openExplorer = () => {
+    if (accountExplorerLink) {
+      Linking.openURL(accountExplorerLink);
+    }
+  };
+
   return (
-    <div className='flex flex-col h-[350px]'>
-      <EmptyCard src={Images.Activity.ActivityIcon} heading='Unable to fetch activity' />
+    <View style={styles.container}>
+      <Image source={Images.Activity.ActivityIcon} style={styles.image} resizeMode="contain" />
+      <Text style={styles.heading}>Unable to fetch activity</Text>
 
       {accountExplorerLink ? (
-        <a
-          href={accountExplorerLink}
-          target='_blank'
-          className='font-semibold text-base mt-4 text-center'
-          style={{ color: Colors.green600 }}
-          rel='noreferrer'
-        >
-          Check on Explorer
-        </a>
+        <Pressable onPress={openExplorer}>
+          <Text style={styles.explorerLink}>Check on Explorer</Text>
+        </Pressable>
       ) : null}
-    </div>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    height: 350,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  image: {
+    width: 72,
+    height: 72,
+    marginBottom: 12,
+  },
+  heading: {
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+    color: '#1a1a1a',
+  },
+  explorerLink: {
+    marginTop: 16,
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+    color: Colors.green600,
+  },
+});

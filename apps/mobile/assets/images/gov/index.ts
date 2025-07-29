@@ -1,6 +1,6 @@
-// React Native compatible exports for this assets folder
+import VoteOptionAbstain from './vote-abstain.svg';
+import VoteOptionNo from './vote-no.svg';
+import VoteOptionNoWithVeto from './vote-no-with-veto.svg';
+import VoteOptionYes from './vote-yes.svg';
 
-export { default as vote_abstain } from './vote-abstain.svg';
-export { default as vote_no_with_veto } from './vote-no-with-veto.svg';
-export { default as vote_no } from './vote-no.svg';
-export { default as vote_yes } from './vote-yes.svg';
+export { VoteOptionAbstain, VoteOptionNo, VoteOptionNoWithVeto, VoteOptionYes };

@@ -1,11 +1,10 @@
 import type { NameServiceResolveResult } from '@leapwallet/name-matcha';
 import { allowedTopLevelDomains, registry } from '@leapwallet/name-matcha';
-import { useDebounceCallback } from 'hooks/useDebounceCallback';
+import { useDebounceCallback } from '../useDebounceCallback';
 import { useCallback, useEffect, useState } from 'react';
 
 export type { NameServiceResolveResult };
 
-, @typescript-eslint/no-unused-vars
 export const useNameServiceResolver = (queryAddress: string, network: 'mainnet' | 'testnet') => {
   const [data, setData] = useState<Record<string, NameServiceResolveResult | null>>({});
 

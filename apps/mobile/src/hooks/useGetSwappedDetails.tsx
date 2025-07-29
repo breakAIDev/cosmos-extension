@@ -1,7 +1,6 @@
-
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import { getCountryLogo } from 'utils/getCountryLogo';
+import { getCountryLogo } from '../utils/getCountryLogo';
 
 const BASE_API = 'https://api.kado.money';
 const SWAPPED_API = 'https://widget.swapped.com/api/v1';
@@ -24,18 +23,18 @@ export function useSwappedAssets() {
     async () => {
       const res = await axios.get(`${SWAPPED_API}/rates/get_rates`);
       const cryptoAssets = res?.data?.data?.crypto;
-      const fiatAssets = Object.values(res?.data?.data?.fiat ?? {}).map((item: any) => {
-        return {
-          code: item.iso,
-          name: item.name,
-          logo: getCountryLogo(item.iso),
-        };
-      });
+
+      const fiatAssets = Object.values(res?.data?.data?.fiat ?? {}).map((item: any) => ({
+        code: item.iso,
+        name: item.name,
+        logo: getCountryLogo(item.iso),
+      }));
+
       return { cryptoAssets, fiatAssets };
     },
     {
-      staleTime: 1 * 60 * 1000,
-      cacheTime: 5 * 60 * 1000,
+      staleTime: 1 * 60 * 1000, // 1 minute
+      cacheTime: 5 * 60 * 1000, // 5 minutes
     },
   );
 }

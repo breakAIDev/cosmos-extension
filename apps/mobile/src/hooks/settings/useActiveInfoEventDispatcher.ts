@@ -1,8 +1,8 @@
 import { isAptosChain } from '@leapwallet/cosmos-wallet-sdk';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { useChainInfos } from 'hooks/useChainInfos';
+import { useChainInfos } from '../useChainInfos';
 import { useEffect, useRef } from 'react';
-import { sendMessageToTab } from 'utils';
+import { sendMessageToTab } from '../../utils';
 
 import { useActiveChain } from './useActiveChain';
 import { useSelectedNetwork } from './useNetwork';

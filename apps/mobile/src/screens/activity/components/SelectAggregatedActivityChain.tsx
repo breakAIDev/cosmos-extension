@@ -1,9 +1,9 @@
+import React from 'react';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { ChainTagsStore } from '@leapwallet/cosmos-wallet-store';
-import BottomModal from 'components/new-bottom-modal';
+import BottomModal from '../../../components/new-bottom-modal'; // Should be RN modal!
 import { observer } from 'mobx-react-lite';
-import { ListChains } from 'pages/home/SelectChain';
-import React from 'react';
+import { ListChains } from '../../../screens/home/SelectChain';
 
 type SelectAggregatedActivityChainProps = {
   isVisible: boolean;
@@ -24,7 +24,12 @@ export const SelectAggregatedActivityChain = observer(
     chainTagsStore,
   }: SelectAggregatedActivityChainProps) => {
     return (
-      <BottomModal isOpen={isVisible} onClose={onClose} fullScreen className='h-full' title='Switch chain'>
+      <BottomModal
+        isOpen={isVisible}
+        onClose={onClose}
+        fullScreen
+        title="Switch chain"
+      >
         <ListChains
           selectedChain={selectedChain}
           onChainSelect={onChainSelect}
@@ -33,5 +38,5 @@ export const SelectAggregatedActivityChain = observer(
         />
       </BottomModal>
     );
-  },
+  }
 );

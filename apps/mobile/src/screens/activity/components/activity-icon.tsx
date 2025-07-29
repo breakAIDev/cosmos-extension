@@ -1,8 +1,7 @@
-import { ActivityType } from '@leapwallet/cosmos-wallet-hooks';
-import classNames from 'classnames';
-import { Images } from 'images';
 import React from 'react';
-
+import { View, Image, StyleSheet } from 'react-native';
+import { ActivityType } from '@leapwallet/cosmos-wallet-hooks';
+import { Images } from '../../../../assets/images';
 import { LoaderAnimation } from '../../../components/loader/Loader';
 
 export type ActivityIconProps = {
@@ -15,7 +14,7 @@ export type ActivityIconProps = {
   isSuccessful: boolean;
 };
 
-const getVoteIcon = (voteOption: string): string => {
+const getVoteIcon = (voteOption: string): any => {
   switch (voteOption) {
     case 'Yes':
       return Images.Gov.VoteOptionYes;
@@ -25,11 +24,12 @@ const getVoteIcon = (voteOption: string): string => {
       return Images.Gov.VoteOptionNoWithVeto;
     case 'Abstain':
       return Images.Gov.VoteOptionAbstain;
+    default:
+      return Images.Activity.Voting;
   }
-  return Images.Activity.Voting;
 };
 
-export const getActivityActionTypeIcon = (type: ActivityType, voteOption?: string) => {
+export const getActivityActionTypeIcon = (type: ActivityType, voteOption?: string): any => {
   switch (type) {
     case 'send':
       return Images.Activity.SendIcon;
@@ -44,7 +44,6 @@ export const getActivityActionTypeIcon = (type: ActivityType, voteOption?: strin
     case 'pending':
       return Images.Activity.Pending;
     case 'ibc/transfer':
-      return Images.Activity.SwapIcon;
     case 'swap':
       return Images.Activity.SwapIcon;
     case 'vote':
@@ -55,6 +54,8 @@ export const getActivityActionTypeIcon = (type: ActivityType, voteOption?: strin
       return Images.Activity.Delegate;
     case 'liquidity/remove':
       return Images.Activity.Undelegate;
+    default:
+      return Images.Activity.Fallback;
   }
 };
 
@@ -68,49 +69,92 @@ export function ActivityIcon({
   isSuccessful,
 }: ActivityIconProps) {
   const icon = getActivityActionTypeIcon(type, voteOption);
+
+  const containerSize = {
+    sm: 32,
+    md: 40,
+    lg: 64,
+  }[size];
+
+  const iconSize = secondaryImg ? containerSize * 0.7 : containerSize;
+
   return (
-    <div
-      className={classNames('relative', {
-        'h-8 w-8': size === 'sm',
-        'h-10 w-10': size === 'md',
-        'h-16 w-16': size === 'lg',
-      })}
-    >
-      <img
-        src={type === 'fallback' ? Images.Activity.Hash : img}
-        className={classNames('absolute', {
-          'w-full h-full': !secondaryImg,
-          'w-7 h-7 ': size === 'md',
-          'w-12 h-12': size === 'lg',
-          'left-0 bottom-0': !!secondaryImg,
-        })}
+    <View style={[styles.container, { width: containerSize, height: containerSize }]}>
+      <Image
+        source={type === 'fallback' ? Images.Activity.Hash : { uri: img }}
+        style={[
+          secondaryImg ? styles.baseImageWithSecondary : styles.fullSize,
+          { width: iconSize, height: iconSize },
+        ]}
+        resizeMode="contain"
       />
 
       {secondaryImg && (
-        <img
-          src={secondaryImg}
-          className={classNames('absolute top-0 right-0', {
-            'w-4 h-4': size === 'sm',
-            'w-7 h-7': size === 'md',
-            'w-12 h-12': size === 'lg',
-          })}
+        <Image
+          source={{ uri: secondaryImg }}
+          style={[
+            styles.secondaryImage,
+            {
+              width: containerSize * 0.5,
+              height: containerSize * 0.5,
+            },
+          ]}
+          resizeMode="contain"
         />
       )}
 
       {showLoader && (
-        <div className='absolute right-0 bottom-0'>
-          <LoaderAnimation color='#29a874' className='h-5 w-5 bg-white-100 rounded-2xl' />
-        </div>
+        <View style={styles.loaderWrapper}>
+          <LoaderAnimation color="#29a874" style={styles.loader} />
+        </View>
       )}
 
       {!secondaryImg && !showLoader && (
-        <img
-          src={isSuccessful ? icon : Images.Activity.Error}
-          className={classNames('absolute right-0 bottom-0', {
-            'w-4 h-4': size === 'sm',
-          })}
+        <Image
+          source={isSuccessful ? icon : Images.Activity.Error}
+          style={styles.statusIcon}
+          resizeMode="contain"
         />
       )}
-    </div>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    position: 'relative',
+  },
+  fullSize: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+  },
+  baseImageWithSecondary: {
+    position: 'absolute',
+    left: 0,
+    bottom: 0,
+  },
+  secondaryImage: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+  },
+  loaderWrapper: {
+    position: 'absolute',
+    right: 0,
+    bottom: 0,
+  },
+  loader: {
+    height: 20,
+    width: 20,
+    backgroundColor: '#ffffff',
+    borderRadius: 20,
+  },
+  statusIcon: {
+    position: 'absolute',
+    right: 0,
+    bottom: 0,
+    width: 16,
+    height: 16,
+  },
+});

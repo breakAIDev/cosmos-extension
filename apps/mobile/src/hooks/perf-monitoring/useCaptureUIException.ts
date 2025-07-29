@@ -1,6 +1,6 @@
 import { captureException } from '@sentry/react';
 import { useEffect } from 'react';
-import { uiErrorTags } from 'utils/sentry';
+import { uiErrorTags } from '../../utils/sentry';
 
 export const useCaptureUIException = (error?: string | null, tags?: Record<string, string>) => {
   useEffect(() => {

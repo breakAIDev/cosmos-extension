@@ -4,7 +4,7 @@ import { KeyChain } from '@leapwallet/leap-keychain';
 import { useEffect } from 'react';
 import browser from 'webextension-polyfill';
 
-import { PRIMARY_WALLET_ADDRESS } from '../../config/storage-keys';
+import { PRIMARY_WALLET_ADDRESS } from '../../services/config/storage-keys';
 
 export const getPrimaryWalletAddress = async (setPrimaryWalletAddress: (address: string) => void) => {
   KeyChain.getAllWallets<SupportedChain>().then((wallets) => {

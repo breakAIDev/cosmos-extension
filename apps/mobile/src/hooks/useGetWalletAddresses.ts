@@ -1,26 +1,16 @@
-import {
-  useActiveChain,
-  useAddress,
-  useChainInfo,
-  useGetIsMinitiaEvmChain,
-  useSelectedNetwork,
-} from '@leapwallet/cosmos-wallet-hooks';
-import { getEthereumAddress, pubKeyToEvmAddressToShow, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { SHOW_ETH_ADDRESS_CHAINS } from 'config/constants';
-import useActiveWallet from 'hooks/settings/useActiveWallet';
-import { useMemo } from 'react';
-
 export function useGetWalletAddresses(forceChain?: SupportedChain) {
-  const _activeChain = useActiveChain();
+  const _activeChain = useActiveChain(); // Gets chain from global context
   const activeChain = useMemo(() => forceChain || _activeChain, [_activeChain, forceChain]);
-  const selectedNetwork = useSelectedNetwork();
-  const { activeWallet } = useActiveWallet();
-  const address = useAddress(activeChain);
-  const activeChainInfo = useChainInfo(activeChain);
 
-  const getIsMinitias = useGetIsMinitiaEvmChain();
+  const selectedNetwork = useSelectedNetwork(); // mainnet/testnet
+  const { activeWallet } = useActiveWallet();   // selected wallet context
+  const address = useAddress(activeChain);      // bech32 address
+  const activeChainInfo = useChainInfo(activeChain); // full chain metadata
+
+  const getIsMinitias = useGetIsMinitiaEvmChain(); // utility to check Minitia
 
   return useMemo(() => {
+    // show EVM & Cosmos address if the chain supports both
     if (
       activeWallet &&
       activeWallet?.addresses?.[activeChain] &&
@@ -33,9 +23,9 @@ export function useGetWalletAddresses(forceChain?: SupportedChain) {
         return [evmAddress];
       }
 
-      return [getEthereumAddress(address), address];
+      return [getEthereumAddress(address), address]; // [evm, bech32]
     }
 
-    return [address];
+    return [address]; // bech32 only
   }, [activeWallet, activeChain, activeChainInfo?.evmOnlyChain, address, selectedNetwork, getIsMinitias]);
 }

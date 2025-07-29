@@ -2,7 +2,7 @@ import { useActiveWallet } from '@leapwallet/cosmos-wallet-hooks';
 import { decrypt } from '@leapwallet/leap-keychain';
 import { useCallback } from 'react';
 import { Wallet } from 'secretjs';
-import { passwordStore } from 'stores/password-store';
+import { passwordStore } from '../../context/password-store';
 
 export function useSecretWallet() {
   const activeWallet = useActiveWallet();

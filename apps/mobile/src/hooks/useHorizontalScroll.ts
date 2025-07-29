@@ -1,52 +1,45 @@
-import { useCallback, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
+import { PanResponder, ScrollView } from 'react-native';
 
-type scrollBehavior = 'natural' | 'reverse';
+type ScrollBehavior = 'natural' | 'reverse';
 
-const useHorizontalScroll = <T extends HTMLElement>(behavior: scrollBehavior = 'natural') => {
-  const scrollRef = useRef<T>(null);
-  const [clickStartX, setClickStartX] = useState<number | null>(null);
-  const [scrollStartX, setScrollStartX] = useState<number | null>(null);
+export function useHorizontalScroll(behavior: ScrollBehavior = 'natural') {
+  const scrollViewRef = useRef<ScrollView>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [scrollStartX, setScrollStartX] = useState(0);
 
-  const handleDragStart = useCallback((e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-    if (scrollRef.current) {
-      setClickStartX(e.screenX);
-      setScrollStartX(scrollRef.current.scrollLeft);
-      setIsDragging(true);
-    }
-  }, []);
-
-  const handleDragMove = useCallback(
-    (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-      if (scrollRef && scrollRef.current) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        if (clickStartX !== null && scrollStartX !== null && isDragging) {
-          const touchDelta = clickStartX - e.screenX;
-          scrollRef.current.scrollLeft = behavior === 'natural' ? scrollStartX - touchDelta : scrollStartX + touchDelta;
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onPanResponderGrant: () => {
+        setIsDragging(true);
+      },
+      onPanResponderMove: (evt, gestureState) => {
+        if (scrollViewRef.current) {
+          const deltaX = gestureState.dx;
+          scrollViewRef.current.scrollTo({
+            x: behavior === 'natural' ? scrollStartX - deltaX : scrollStartX + deltaX,
+            animated: false,
+          });
         }
-      }
-    },
-    [clickStartX, isDragging, scrollStartX, behavior],
-  );
+      },
+      onPanResponderRelease: () => {
+        setIsDragging(false);
+      },
+      onPanResponderTerminate: () => {
+        setIsDragging(false);
+      },
+    }),
+  ).current;
 
-  const handleDragEnd = useCallback(() => {
-    if (isDragging) {
-      setClickStartX(null);
-      setScrollStartX(null);
-      setIsDragging(false);
-    }
-  }, [isDragging]);
-
-  const props = {
-    onMouseDown: handleDragStart,
-    onMouseMove: handleDragMove,
-    onMouseUp: handleDragEnd,
-    onMouseLeave: handleDragEnd,
+  const onScroll = (event: any) => {
+    setScrollStartX(event.nativeEvent.contentOffset.x);
   };
 
-  return { props, scrollRef, clickStartX, scrollStartX, isDragging };
-};
-
-export default useHorizontalScroll;
+  return {
+    panHandlers: panResponder.panHandlers,
+    scrollViewRef,
+    isDragging,
+    onScroll,
+  };
+}

@@ -1,27 +1,37 @@
 import { useQuery } from '@tanstack/react-query';
-import { CHECKED_NOBLE_AIRDROP_PUBKEYS } from 'config/storage-keys';
-import useActiveWallet from 'hooks/settings/useActiveWallet';
+import { CHECKED_NOBLE_AIRDROP_PUBKEYS } from '../../services/config/storage-keys';
+import useActiveWallet from '../settings/useActiveWallet';
 import { useEffect, useState } from 'react';
-import Browser, { Storage } from 'webextension-polyfill';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export function useAirdropEligibility() {
   const { activeWallet } = useActiveWallet();
   const noblePubKeys = activeWallet?.pubKeys?.noble;
   const [isEligible, setIsEligible] = useState(true);
 
+  // Watch for changes in storage by polling (since AsyncStorage has no event listener)
   useEffect(() => {
-    const nobleAirdropPubKeysListener = (changes: Record<string, Storage.StorageChange>) => {
-      if (changes[CHECKED_NOBLE_AIRDROP_PUBKEYS]) {
-        const { newValue } = changes[CHECKED_NOBLE_AIRDROP_PUBKEYS];
-        if (newValue.includes(noblePubKeys)) {
-          setIsEligible(false);
+    let polling: NodeJS.Timeout | null = null;
+    const pollStorage = async () => {
+      try {
+        const value = await AsyncStorage.getItem(CHECKED_NOBLE_AIRDROP_PUBKEYS);
+        if (value) {
+          const parsed: string[] = JSON.parse(value);
+          if (parsed.includes(noblePubKeys!)) {
+            setIsEligible(false);
+          }
         }
+      } catch (err) {
+        // Handle error
       }
     };
 
-    Browser.storage.onChanged.addListener(nobleAirdropPubKeysListener);
+    pollStorage();
+    polling = setInterval(pollStorage, 2000); // poll every 2s
 
-    return () => Browser.storage.onChanged.removeListener(nobleAirdropPubKeysListener);
+    return () => {
+      if (polling) clearInterval(polling);
+    };
   }, [noblePubKeys]);
 
   const { status: eligibilityStatus } = useQuery(['airdropEligibility', noblePubKeys], async () => {

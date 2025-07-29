@@ -1,13 +1,14 @@
 import { useChainApis, useChainId, useScrtKeysStore } from '@leapwallet/cosmos-wallet-hooks';
-import { SigningSscrt } from '@leapwallet/cosmos-wallet-sdk/dist/browser/secret/sscrt';
+import { SigningSscrt } from '@leapwallet/cosmos-wallet-sdk/dist/node/secret/sscrt';
 import { decrypt, encrypt } from '@leapwallet/leap-keychain';
-import { useSecretWallet } from 'hooks/wallet/useScrtWallet';
+import { useSecretWallet } from '../wallet/useScrtWallet';
 import { useCallback } from 'react';
 import { Permit } from 'secretjs';
-import { passwordStore } from 'stores/password-store';
-import browser from 'webextension-polyfill';
+import { passwordStore } from '../../context/password-store';
 
-import { QUERY_PERMIT } from '../../config/storage-keys';
+import { QUERY_PERMIT } from '../../services/config/storage-keys';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 export function useCreateQueryPermit() {
   const getWallet = useSecretWallet();
@@ -23,8 +24,8 @@ export function useCreateQueryPermit() {
       const wallet = await getWallet();
       const sscrt = SigningSscrt.create(lcdUrl, chainId as string, wallet);
 
-      const storage = await browser.storage.local.get([QUERY_PERMIT]);
-      const permitStore = storage[QUERY_PERMIT];
+      const storage = await AsyncStorage.getItem(QUERY_PERMIT);
+      const permitStore = storage ? JSON.parse(storage) : {};
       const encryptedPermit = permitStore?.[signerAddress];
       const _storedPermit = encryptedPermit ? decrypt(encryptedPermit, passwordStore.password) : null;
 
@@ -47,9 +48,7 @@ export function useCreateQueryPermit() {
         };
       };
       setQueryPermits(getPermitObj(false) as unknown as Record<string, { contracts: Array<string>; permit: Permit }>);
-      await browser.storage.local.set({
-        [QUERY_PERMIT]: getPermitObj(true),
-      });
+      await AsyncStorage.setItem(QUERY_PERMIT, JSON.stringify(getPermitObj(true)));
 
       return permit;
     },

@@ -1,9 +1,9 @@
 import { useTokenPriorityKado } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { useQuery } from '@tanstack/react-query';
-import { useChainInfos } from 'hooks/useChainInfos';
-import { useSwappedAssets } from 'hooks/useGetSwappedDetails';
-import { rootDenomsStore } from 'stores/denoms-store-instance';
+import { useChainInfos } from '../useChainInfos';
+import { useSwappedAssets } from '../useGetSwappedDetails';
+import { rootDenomsStore } from '../../context/denoms-store-instance';
 
 export type AssetProps = {
   id?: string;
