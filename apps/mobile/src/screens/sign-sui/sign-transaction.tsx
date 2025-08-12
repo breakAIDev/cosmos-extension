@@ -29,52 +29,46 @@ import {
 } from '@leapwallet/cosmos-wallet-sdk';
 import { RootBalanceStore, RootDenomsStore } from '@leapwallet/cosmos-wallet-store';
 import { Avatar, Buttons, Header, ThemeName, useTheme } from '@leapwallet/leap-ui';
-import { CheckSquare, Square } from '@phosphor-icons/react';
-import { captureException } from '@sentry/react';
+import { CheckSquare, Square } from 'phosphor-react-native';
+import { captureException } from '@sentry/react-native';
 import BigNumber from 'bignumber.js';
-import classNames from 'classnames';
-import Tooltip from 'components/better-tooltip';
-import { ErrorCard } from 'components/ErrorCard';
-import GasPriceOptions, { useDefaultGasPrice } from 'components/gas-price-options';
-import PopupLayout from 'components/layout/popup-layout';
-import LedgerConfirmationModal from 'components/ledger-confirmation/confirmation-modal';
-import { LoaderAnimation } from 'components/loader/Loader';
-import SelectWalletSheet from 'components/select-wallet-sheet';
-import { Tabs } from 'components/tabs';
-import Text from 'components/text';
-import { walletLabels } from 'config/constants';
-import { MessageTypes } from 'config/message-types';
-import { BG_RESPONSE } from 'config/storage-keys';
-import { decodeChainIdToChain } from 'extension-scripts/utils';
-import { usePerformanceMonitor } from 'hooks/perf-monitoring/usePerformanceMonitor';
-import { useUpdateKeyStore } from 'hooks/settings/useActiveWallet';
-import { useSiteLogo } from 'hooks/utility/useSiteLogo';
-import { Wallet } from 'hooks/wallet/useWallet';
-import { Images } from 'images';
-import { GenericDark, GenericLight } from 'images/logos';
-import mixpanel from 'mixpanel-browser';
+import Tooltip from '../../components/better-tooltip';
+import { ErrorCard } from '../../components/ErrorCard';
+import GasPriceOptions, { useDefaultGasPrice } from '../../components/gas-price-options';
+import PopupLayout from '../../components/layout/popup-layout';
+import LedgerConfirmationModal from '../../components/ledger-confirmation/confirmation-modal';
+import { LoaderAnimation } from '../../components/loader/Loader';
+import SelectWalletSheet from '../../components/select-wallet-sheet';
+import { Tabs } from '../../components/tabs';
+import Text from '../../components/text';
+import { walletLabels } from '../../services/config/constants';
+import { MessageTypes } from '../../services/config/message-types';
+import { BG_RESPONSE } from '../../services/config/storage-keys';
+import { decodeChainIdToChain } from '../../context/utils';
+import { usePerformanceMonitor } from '../../hooks/perf-monitoring/usePerformanceMonitor';
+import { useUpdateKeyStore } from '../../hooks/settings/useActiveWallet';
+import { useSiteLogo } from '../../hooks/utility/useSiteLogo';
+import { Wallet } from '../../hooks/wallet/useWallet';
+import { Images } from '../../../assets/images';
+import { GenericDark, GenericLight } from '../../../assets/images/logos';
 import { observer } from 'mobx-react-lite';
-import { addToConnections } from 'pages/ApproveConnection/utils';
+import { addToConnections } from '../ApproveConnection/utils';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router';
-import { rootDenomsStore } from 'stores/denoms-store-instance';
-import { feeTokensStore } from 'stores/fee-store';
-import { rootBalanceStore } from 'stores/root-store';
-import { Colors } from 'theme/colors';
-import { assert } from 'utils/assert';
-import { formatWalletName } from 'utils/formatWalletName';
-import { imgOnError } from 'utils/imgOnError';
-import { isSidePanel } from 'utils/isSidePanel';
-import { trim } from 'utils/strings';
-import browser from 'webextension-polyfill';
+import { rootDenomsStore } from '../../context/denoms-store-instance';
+import { feeTokensStore } from '../../context/fee-store';
+import { rootBalanceStore } from '../../context/root-store';
+import { Colors, getChainColor } from '../../theme/colors';
+import { assert } from '../../utils/assert';
+import { formatWalletName } from '../../utils/formatWalletName';
+import { trim } from '../../utils/strings';
 
-import { EventName } from '../../config/analytics';
-import { NotAllowSignTxGasOptions } from './additional-fee-settings';
 import StaticFeeDisplay from './static-fee-display';
-import { mapWalletTypeToMixpanelWalletType, mixpanelTrackOptions } from './utils/mixpanel-config';
-//   import { NotAllowSignTxGasOptions } from './additional-fee-settings'
-//   import StaticFeeDisplay from './static-fee-display'
 import { getOriginalSignDoc, getSuiSignDoc } from './utils/sign-sui';
+import { DeviceEventEmitter } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { View, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
 
 const useGetWallet = Wallet.useGetWallet;
 const useSuiSigner = Wallet.useSuiSigner;
@@ -94,6 +88,7 @@ const SignTransaction = observer(
     const isApprovedRef = useRef(false);
     const addressGenerationDone = useRef<boolean>(false);
     const { theme } = useTheme();
+    const navigation = useNavigation();
 
     const [showWalletSelector, setShowWalletSelector] = useState(false);
     const [showLedgerPopup, setShowLedgerPopup] = useState(false);
@@ -124,7 +119,6 @@ const SignTransaction = observer(
     const activeWallet = useActiveWallet();
     const getSuiSigner = useSuiSigner();
     const getWallet = useGetWallet(activeChain);
-    const navigate = useNavigate();
     const { chains } = useChainsStore();
     const updateKeyStore = useUpdateKeyStore();
 
@@ -297,20 +291,12 @@ const SignTransaction = observer(
       //     captureException(e)
       // }
 
-      await browser.runtime.sendMessage({
+      await DeviceEventEmitter.emit('signTransaction', {
         type: MessageTypes.signResponse,
         payload: { status: 'error', data: 'Transaction cancelled by the user.' },
       });
-      if (isSidePanel()) {
-        navigate('/home');
-      } else {
-        await sleep(100);
-
-        setTimeout(async () => {
-          window.close();
-        }, 10);
-      }
-    }, [siteOrigin, activeWallet.walletType, chainInfo.chainId, chainInfo.chainName, navigate]);
+      navigation.goBack();
+    }, [navigation]);
 
     const currentWalletInfo = useMemo(() => {
       if (!activeWallet || !chainId || !siteOrigin) return undefined;
@@ -346,8 +332,8 @@ const SignTransaction = observer(
 
           try {
             // Check if there's an active connection for this dApp
-            const storage = await browser.storage.local.get(['CONNECTIONS']);
-            const connections = storage['CONNECTIONS'] || [];
+            const storage = await AsyncStorage.getItem('CONNECTIONS');
+            const connections = storage ? JSON.parse(storage) : [];
             const origin = siteOrigin || '';
 
             const isConnected = connections.some(
@@ -363,7 +349,7 @@ const SignTransaction = observer(
               await addToConnections(['sui-101', 'sui-103'], selectedWalletIds, origin);
             }
 
-            browser.runtime.sendMessage({
+            DeviceEventEmitter.emit('signTransaction', {
               type: MessageTypes.signResponse,
               payload: { status: 'success', data: { signedTxData, activeAddress } },
             });
@@ -372,14 +358,7 @@ const SignTransaction = observer(
           }
 
           setIsSigning(false);
-          if (isSidePanel()) {
-            refetchData();
-            navigate('/home');
-          } else {
-            setTimeout(async () => {
-              window.close();
-            }, 10);
-          }
+          navigation.goBack();
           return;
         }
         const signedTxData = await suiClient.signTransaction(signDoc);
@@ -409,8 +388,8 @@ const SignTransaction = observer(
         if (!shouldSubmit) {
           try {
             // Check if there's an active connection for this dApp
-            const storage = await browser.storage.local.get(['CONNECTIONS']);
-            const connections = storage['CONNECTIONS'] || [];
+            const storage = await AsyncStorage.getItem('CONNECTIONS');
+            const connections = storage ? JSON.parse(storage) : [];
             const origin = siteOrigin || '';
 
             // Check if this origin is already connected to the active wallet
@@ -428,7 +407,7 @@ const SignTransaction = observer(
               }
             });
 
-            browser.runtime.sendMessage({
+            DeviceEventEmitter.emit('signTransaction', {
               type: MessageTypes.signResponse,
               payload: { status: 'success', data: signedTxData },
             });
@@ -436,22 +415,15 @@ const SignTransaction = observer(
             throw new Error('Could not send transaction to the dApp');
           }
           setIsSigning(false);
-          if (isSidePanel()) {
-            refetchData();
-            navigate('/home');
-          } else {
-            setTimeout(async () => {
-              window.close();
-            }, 10);
-          }
+          navigation.goBack();
           return;
         }
 
         const broadcastedTxn = await suiClient.broadcastTransaction(signedTxData.txnBytes, signedTxData.signature);
 
         try {
-          const storage = await browser.storage.local.get(['CONNECTIONS']);
-          const connections = storage['CONNECTIONS'] || [];
+          const storage = await AsyncStorage.getItem('CONNECTIONS');
+          const connections = storage ? JSON.parse(storage) : [];
           const origin = siteOrigin || '';
 
           const isConnected = connections.some(
@@ -464,7 +436,7 @@ const SignTransaction = observer(
             await addToConnections(['sui-101', 'sui-103'], selectedWalletIds, origin);
           }
 
-          browser.runtime.sendMessage({
+          DeviceEventEmitter.emit('signTransaction', {
             type: MessageTypes.signResponse,
             // payload: { status: 'success', data: signedTxData },
             payload: { status: 'success', data: { broadcastedTxn, signedTxData } },
@@ -473,14 +445,7 @@ const SignTransaction = observer(
           throw new Error('Could not send transaction to the dApp');
         }
         setIsSigning(false);
-        if (isSidePanel()) {
-          refetchData();
-          navigate('/home');
-        } else {
-          setTimeout(async () => {
-            window.close();
-          }, 10);
-        }
+        navigation.goBack();
       } catch (e) {
         captureException(e);
         setIsSigning(false);
@@ -507,11 +472,11 @@ const SignTransaction = observer(
     ]);
 
     useEffect(() => {
-      window.addEventListener('beforeunload', handleCancel);
-      browser.storage.local.remove(BG_RESPONSE);
-      return () => {
-        window.removeEventListener('beforeunload', handleCancel);
-      };
+      // window.addEventListener('beforeunload', handleCancel);
+      AsyncStorage.removeItem(BG_RESPONSE);
+      // return () => {
+      //   window.removeEventListener('beforeunload', handleCancel);
+      // };
     }, [handleCancel]);
 
     useEffect(() => {
@@ -601,242 +566,215 @@ const SignTransaction = observer(
       isLoadingGasLimit ||
       isSigning;
 
-    return (
-      <div
-        className={classNames(
-          'panel-width enclosing-panel h-full relative self-center justify-self-center flex justify-center items-center',
-          { 'mt-2': !isSidePanel() },
-        )}
-      >
-        <div
-          className={classNames(
-            'relative w-full overflow-clip rounded-md border border-gray-300 dark:border-gray-900',
-            { 'panel-height': isSidePanel() },
-          )}
+  return (
+    <View style={[styles.panel, styles.mt2]}>
+      <View style={[styles.panelInner]}>
+        <PopupLayout
+          header={
+            <View style={styles.headerContainer}>
+              <Image source={{uri: chainInfo.chainSymbolImageUrl ?? (theme === ThemeName.DARK ? GenericDark : GenericLight)}}/>
+              <Buttons.Wallet
+                title={trim(walletName, 10)}
+                style={{ paddingRight: 16 }}
+              />
+            </View>
+          }
         >
-          <PopupLayout
-            header={
-              <div className='w-[396px]'>
-                <Header
-                  imgSrc={chainInfo.chainSymbolImageUrl ?? (theme === ThemeName.DARK ? GenericDark : GenericLight)}
-                  // imgOnError={imgOnError(theme === ThemeName.DARK ? GenericDark : GenericLight)}
-                  title={
-                    <Buttons.Wallet
-                      // brandLogo={
-                      //     isCompassWallet() ? (
-                      //         <img
-                      //             className='w-[24px] h-[24px] mr-1'
-                      //             src={Images.Logos.CompassCircle}
-                      //         />
-                      //     ) : undefined
-                      // }
-                      title={trim(walletName, 10)}
-                      className='pr-4 cursor-default'
-                    />
-                  }
-                />
-              </div>
-            }
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            style={{ height: '100%' }}
           >
-            <div
-              className='px-7 py-3 overflow-y-auto relative'
-              style={{
-                height: `calc(100% - 144px)`,
-              }}
-            >
-              <h2 className='text-center text-lg font-bold dark:text-white-100 text-gray-900 w-full'>
-                Approve Transaction
-              </h2>
-              <div className='flex items-center mt-3 rounded-2xl dark:bg-gray-900 bg-white-100 p-4'>
-                <Avatar
-                  avatarImage={siteLogo}
-                  avatarOnError={imgOnError(Images.Misc.Globe)}
-                  size='sm'
-                  className='rounded-full overflow-hidden'
-                />
-                <div className='ml-3'>
-                  <p className='capitalize text-gray-900 dark:text-white-100 text-base font-bold'>{siteName}</p>
-                  <p className='lowercase text-gray-500 dark:text-gray-400 text-xs font-medium'>{siteOrigin}</p>
-                </div>
-              </div>
+            <Text style={styles.title}>Approve Transaction</Text>
+            <View style={styles.siteBox}>
+              <Avatar
+                avatarImage={siteLogo}
+                avatarOnError={() => {}}
+                size="sm"
+                style={styles.avatar}
+              />
+              <View style={styles.siteInfo}>
+                <Text style={styles.siteName}>{siteName}</Text>
+                <Text style={styles.siteOrigin}>{siteOrigin}</Text>
+              </View>
+            </View>
 
-              {!isSignMessage ? (
-                <GasPriceOptions
-                  initialFeeDenom={dappFeeDenom}
-                  gasLimit={userPreferredGasLimit || String(recommendedGasLimit)}
-                  setGasLimit={(value: string | BigNumber | number) => setUserPreferredGasLimit(value.toString())}
-                  recommendedGasLimit={String(recommendedGasLimit)}
-                  gasPriceOption={
-                    selectedGasOptionRef.current || allowSetFee
-                      ? gasPriceOption
-                      : { ...gasPriceOption, option: '' as GasOptions }
-                  }
-                  onGasPriceOptionChange={(value: any) => {
-                    selectedGasOptionRef.current = true;
-                    setGasPriceOption(value);
-                  }}
-                  error={gasPriceError}
-                  setError={setGasPriceError}
-                  considerGasAdjustment={false}
-                  disableBalanceCheck={disableBalanceCheck}
-                  fee={fee}
-                  chain={activeChain}
-                  network={selectedNetwork}
-                  validateFee={true}
-                  onInvalidFees={(_: NativeDenom, isFeesValid: boolean | null) => {
-                    try {
-                      if (isFeesValid === false) {
-                        setIsFeesValid(false);
-                      }
-                    } catch (e) {
-                      captureException(e);
-                    }
-                  }}
-                  hasUserTouchedFees={!!selectedGasOptionRef?.current}
-                  notUpdateInitialGasPrice={!allowSetFee}
-                  rootDenomsStore={rootDenomsStore}
-                  rootBalanceStore={rootBalanceStore}
-                >
-                  <Tabs
-                    className='mt-4'
-                    tabsList={[
-                      { id: 'fees', label: 'Fees' },
-                      { id: 'data', label: 'Data' },
-                    ]}
-                    tabsContent={{
-                      fees: allowSetFee ? (
-                        <div className='rounded-2xl p-4 mt-3 dark:bg-gray-900 bg-white-100'>
-                          <div className='flex items-center'>
-                            <p className='text-gray-500 dark:text-gray-100 text-sm font-medium tracking-wide'>
-                              Gas Fees <span className='capitalize'>({gasPriceOption.option})</span>
-                            </p>
-                            <Tooltip
-                              content={
-                                <p className='text-gray-500 dark:text-gray-100 text-sm'>
-                                  You can choose higher gas fees for faster transaction processing.
-                                </p>
-                              }
-                            >
-                              <div className='relative ml-2'>
-                                <img src={Images.Misc.InfoCircle} alt='Hint' />
-                              </div>
-                            </Tooltip>
-                          </div>
-
-                          <GasPriceOptions.Selector className='mt-2' />
-                          <div className='flex items-center justify-end'>
-                            <GasPriceOptions.AdditionalSettingsToggle className='p-0 mt-3' />
-                          </div>
-                          <GasPriceOptions.AdditionalSettings
-                            className='mt-2'
-                            showGasLimitWarning={true}
-                            rootDenomsStore={rootDenomsStore}
-                            rootBalanceStore={rootBalanceStore}
-                          />
-
-                          {gasPriceError ? (
-                            <p className='text-red-300 text-sm font-medium mt-2 px-1'>{gasPriceError}</p>
-                          ) : null}
-                        </div>
-                      ) : (
-                        <>
-                          <div className='rounded-2xl p-4 mt-3 dark:bg-gray-900 bg-white-100'>
-                            <StaticFeeDisplay
-                              feeToShow={feeToShow}
-                              fee={fee}
-                              error={gasPriceError}
-                              setError={setGasPriceError}
-                              disableBalanceCheck={disableBalanceCheck}
-                              rootBalanceStore={rootBalanceStore}
-                              activeChain={activeChain}
-                              selectedNetwork={selectedNetwork}
-                              feeTokensList={feeTokens}
-                            />
-                          </div>
-                        </>
-                      ),
-                      data: (
-                        <pre className='text-xs text-gray-900 dark:text-white-100 dark:bg-gray-900 bg-white-100 p-4 w-full overflow-x-auto mt-3 rounded-2xl'>
-                          {signDoc}
-                        </pre>
-                      ),
-                    }}
-                  />
-                </GasPriceOptions>
-              ) : (
-                <pre
-                  className={classNames(
-                    'text-xs text-gray-900 dark:text-white-100 dark:bg-gray-900 bg-white-100 p-4 w-full overflow-x-auto mt-3 rounded-2xl whitespace-pre-line break-words',
-                  )}
-                >
-                  {getOriginalSignDoc(signDoc, true).signDoc}
-                </pre>
-              )}
-
-              <div className='mt-3'>
-                {signingError ?? ledgerError ? <ErrorCard text={signingError ?? ledgerError ?? ''} /> : null}
-              </div>
-
-              <LedgerConfirmationModal
-                showLedgerPopup={showLedgerPopup}
-                onClose={() => {
-                  setShowLedgerPopup(false);
+            {!isSignMessage ? (
+              <GasPriceOptions
+                initialFeeDenom={dappFeeDenom}
+                gasLimit={userPreferredGasLimit || String(recommendedGasLimit)}
+                setGasLimit={(value) => setUserPreferredGasLimit(value.toString())}
+                recommendedGasLimit={String(recommendedGasLimit)}
+                gasPriceOption={
+                  selectedGasOptionRef.current || allowSetFee
+                    ? gasPriceOption
+                    : { ...gasPriceOption, option: '' }
+                }
+                onGasPriceOptionChange={(value) => {
+                  selectedGasOptionRef.current = true;
+                  setGasPriceOption(value);
                 }}
-              />
-              <SelectWalletSheet
-                isOpen={showWalletSelector}
-                onClose={() => setShowWalletSelector(false)}
-                currentWalletInfo={currentWalletInfo}
-                title='Select Wallet'
-                activeChain={activeChain}
-              />
-              {isFeesValid === false && (
-                <div
-                  ref={errorMessageRef}
-                  className='flex dark:bg-gray-900 bg-white-100 px-4 py-3 w-full rounded-2xl items-center mt-3'
-                >
-                  <div className='mr-3' onClick={() => setHighFeeAccepted(!highFeeAccepted)}>
-                    {!highFeeAccepted ? (
-                      <Square size={16} className='text-gray-700 cursor-pointer' />
+                error={gasPriceError}
+                setError={setGasPriceError}
+                considerGasAdjustment={false}
+                disableBalanceCheck={disableBalanceCheck}
+                fee={fee}
+                chain={activeChain}
+                network={selectedNetwork}
+                validateFee={true}
+                onInvalidFees={(_, isFeesValid) => {
+                  try {
+                    if (isFeesValid === false) setIsFeesValid(false);
+                  } catch (e) {
+                    captureException(e);
+                  }
+                }}
+                hasUserTouchedFees={!!selectedGasOptionRef?.current}
+                notUpdateInitialGasPrice={!allowSetFee}
+                rootDenomsStore={rootDenomsStore}
+                rootBalanceStore={rootBalanceStore}
+              >
+                <Tabs
+                  style={styles.mt4}
+                  tabsList={[
+                    { id: 'fees', label: 'Fees' },
+                    { id: 'data', label: 'Data' },
+                  ]}
+                  tabsContent={{
+                    fees: allowSetFee ? (
+                      <View style={styles.feesBox}>
+                        <View style={styles.row}>
+                          <Text style={styles.feeLabel}>
+                            Gas Fees <Text style={{ textTransform: 'capitalize' }}>({gasPriceOption.option})</Text>
+                          </Text>
+                          <Tooltip
+                            content={
+                              <Text style={styles.tooltipText}>
+                                You can choose higher gas fees for faster transaction processing.
+                              </Text>
+                            }
+                          >
+                            <View style={styles.infoIconWrap}>
+                              <Image
+                                source={{uri: Images.Misc.InfoCircle}}
+                                style={styles.infoIcon}
+                              />
+                            </View>
+                          </Tooltip>
+                        </View>
+                        <GasPriceOptions.Selector style={styles.mt2} />
+                        <View style={styles.alignEnd}>
+                          <GasPriceOptions.AdditionalSettingsToggle style={styles.mt3} />
+                        </View>
+                        <GasPriceOptions.AdditionalSettings
+                          style={styles.mt2}
+                          showGasLimitWarning={true}
+                          rootDenomsStore={rootDenomsStore}
+                          rootBalanceStore={rootBalanceStore}
+                        />
+                        {gasPriceError ? (
+                          <Text style={styles.errorText}>{gasPriceError}</Text>
+                        ) : null}
+                      </View>
                     ) : (
-                      <CheckSquare size={16} className='cursor-pointer' color={Colors.getChainColor(activeChain)} />
-                    )}
-                  </div>
+                      <View style={styles.feesBox}>
+                        <StaticFeeDisplay
+                          feeToShow={feeToShow}
+                          fee={fee}
+                          error={gasPriceError}
+                          setError={setGasPriceError}
+                          disableBalanceCheck={disableBalanceCheck}
+                          rootBalanceStore={rootBalanceStore}
+                          activeChain={activeChain}
+                          selectedNetwork={selectedNetwork}
+                          feeTokensList={feeTokens}
+                        />
+                      </View>
+                    ),
+                    data: (
+                      <ScrollView
+                        style={styles.preBox}
+                        horizontal
+                        contentContainerStyle={{ flexGrow: 1 }}
+                      >
+                        <Text selectable style={styles.preText}>
+                          {signDoc}
+                        </Text>
+                      </ScrollView>
+                    ),
+                  }}
+                />
+              </GasPriceOptions>
+            ) : (
+              <ScrollView
+                style={styles.preBox}
+                horizontal
+                contentContainerStyle={{ flexGrow: 1 }}
+              >
+                <Text selectable style={styles.preText}>
+                  {getOriginalSignDoc(signDoc, true).signDoc}
+                </Text>
+              </ScrollView>
+            )}
 
-                  <Text size='sm' color='text-gray-400'>
-                    The selected fee amount is unusually high.
-                    <br />I confirm and agree to proceed
-                  </Text>
-                </div>
-              )}
-            </div>
+            <View style={styles.mt3}>
+              {(signingError ?? ledgerError) ? <ErrorCard text={signingError ?? ledgerError ?? ''} /> : null}
+            </View>
 
-            <div className='absolute bottom-0 left-0 py-3 px-7 dark:bg-black-100 bg-gray-50 w-full'>
-              <div className='flex items-center justify-center w-full space-x-3'>
-                <Buttons.Generic title={'Reject Button'} color={Colors.gray900} onClick={handleCancel}>
-                  Reject
-                </Buttons.Generic>
-                <Buttons.Generic
-                  title={'Approve Button'}
-                  color={Colors.getChainColor(activeChain)}
-                  onClick={approveTransaction}
-                  disabled={isApproveBtnDisabled}
-                  className={`${isApproveBtnDisabled ? 'cursor-not-allowed opacity-50' : ''}`}
+            <LedgerConfirmationModal
+              showLedgerPopup={showLedgerPopup}
+              onClose={() => setShowLedgerPopup(false)}
+            />
+            <SelectWalletSheet
+              isOpen={showWalletSelector}
+              onClose={() => setShowWalletSelector(false)}
+              currentWalletInfo={currentWalletInfo}
+              title="Select Wallet"
+              activeChain={activeChain}
+            />
+
+            {isFeesValid === false && (
+              <View ref={errorMessageRef} style={styles.highFeeBox}>
+                <TouchableOpacity
+                  style={styles.checkBox}
+                  onPress={() => setHighFeeAccepted(!highFeeAccepted)}
                 >
-                  {isSigning ? 'Signing...' : 'Approve'}
-                </Buttons.Generic>
-              </div>
-            </div>
-          </PopupLayout>
-        </div>
-      </div>
-    );
+                  {!highFeeAccepted ? (
+                    <Square size={16} color="#374151" />
+                  ) : (
+                    <CheckSquare size={16} color={getChainColor(activeChain)} />
+                  )}
+                </TouchableOpacity>
+                <Text style={styles.highFeeText}>
+                  The selected fee amount is unusually high.
+                  {'\n'}I confirm and agree to proceed
+                </Text>
+              </View>
+            )}
+          </ScrollView>
+
+          <View style={styles.footer}>
+            <View style={styles.footerRow}>
+              <Buttons.Generic title={'Reject Button'} color={Colors.gray900} onClick={handleCancel}>
+                Reject
+              </Buttons.Generic>
+              <Buttons.Generic
+                title={'Approve Button'}
+                color={getChainColor(activeChain)}
+                onClick={approveTransaction}
+                disabled={isApproveBtnDisabled}
+                style={isApproveBtnDisabled ? styles.disabledButton : undefined}
+              >
+                {isSigning ? 'Signing...' : 'Approve'}
+              </Buttons.Generic>
+            </View>
+          </View>
+        </PopupLayout>
+      </View>
+    </View>
+  );
   },
 );
 
-/**
- * This HOC helps makes sure that the txn signing request is decoded and the chain is set
- */
 const withTxnSigningRequest = (Component: React.FC<any>) => {
   const Wrapped = () => {
     const [chain, setChain] = useState<SupportedChain>();
@@ -844,35 +782,26 @@ const withTxnSigningRequest = (Component: React.FC<any>) => {
 
     const [txnData, setTxnData] = useState<any | null>(null);
     const [chainId, setChainId] = useState<string>();
-    const [error] = useState<{
-      message: string;
-      code: string;
-    } | null>(null);
+    const [error] = useState<{ message: string; code: string } | null>(null);
 
-    const navigate = useNavigate();
+    const navigation = useNavigation();
 
     useEffect(() => {
       decodeChainIdToChain().then(setChainIdToChain).catch(captureException);
     }, []);
 
     const signTxEventHandler = (message: any, sender: any) => {
-      if (sender.id !== browser.runtime.id) return;
       if (message.type === MessageTypes.signTransaction) {
         const txnData = message.payload;
         const chainId = txnData.chain ? txnData.chain : 'sui-101';
         const chain = chainId ? (_chainIdToChain['sui-101'] as SupportedChain) : undefined;
         if (!chain) {
-          browser.runtime.sendMessage({
+          DeviceEventEmitter.emit('signTransaction', {
             type: MessageTypes.signResponse,
             payload: { status: 'error', data: `Invalid chainId ${chainId}` },
           });
-          if (isSidePanel()) {
-            navigate('/home');
-          } else {
-            setTimeout(async () => {
-              window.close();
-            }, 10);
-          }
+
+          navigation.goBack();
           return;
         }
         setChain(chain);
@@ -882,13 +811,9 @@ const withTxnSigningRequest = (Component: React.FC<any>) => {
     };
 
     useEffect(() => {
-      browser.runtime.sendMessage({ type: MessageTypes.signingPopupOpen });
-      browser.runtime.onMessage.addListener(signTxEventHandler);
-      return () => {
-        browser.runtime.onMessage.removeListener(signTxEventHandler);
-      };
-
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+      // browser.runtime.sendMessage({ type: MessageTypes.signingPopupOpen });
+      // browser.runtime.onMessage.addListener(signTxEventHandler);
+      // return () => browser.runtime.onMessage.removeListener(signTxEventHandler);
     }, []);
 
     if (chain && txnData && chainId) {
@@ -904,7 +829,7 @@ const withTxnSigningRequest = (Component: React.FC<any>) => {
     }
 
     if (error) {
-      const heading = ((code) => {
+      const heading = ((code: string) => {
         switch (code) {
           case 'no-data':
             return 'No Transaction Data';
@@ -914,41 +839,194 @@ const withTxnSigningRequest = (Component: React.FC<any>) => {
       })(error.code);
 
       return (
-        <PopupLayout className='self-center justify-self-center' header={<Header title='Sign Transaction' />}>
-          <div className='h-full w-full flex flex-col gap-4 items-center justify-center'>
-            <h1 className='text-red-300 text-2xl font-bold px-4 text-center'>{heading}</h1>
-            <p className='text-black-100 dark:text-white-100 text-sm font-medium px-4 text-center'>{error.message}</p>
-            <button
-              className='mt-8 py-1 px-4 text-center text-sm font-medium dark:text-white-100 text-black-100 bg-indigo-300 rounded-full'
-              onClick={() => {
-                if (isSidePanel()) {
-                  navigate('/home');
-                } else {
-                  window.close();
-                }
-              }}
+        <PopupLayout header={<Header title="Sign Transaction" />}>
+          <View style={styles.centered}>
+            <Text style={styles.errorHeading}>{heading}</Text>
+            <Text style={styles.errorMessage}>{error.message}</Text>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => {navigation.goBack()}}
             >
-              Close Wallet
-            </button>
-          </div>
+              <Text style={styles.closeButtonText}>Close Wallet</Text>
+            </TouchableOpacity>
+          </View>
         </PopupLayout>
       );
     }
 
     return (
-      <PopupLayout className='self-center justify-self-center' header={<Header title='Sign Transaction' />}>
-        <div className='h-full w-full flex flex-col gap-4 items-center justify-center'>
-          <LoaderAnimation color='white' />
-        </div>
+      <PopupLayout header={<Header title="Sign Transaction" />}>
+        <View style={styles.centered}>
+          <LoaderAnimation color="white" />
+        </View>
       </PopupLayout>
     );
   };
 
   Wrapped.displayName = `withTxnSigningRequest(${Component.displayName})`;
-
   return Wrapped;
 };
 
 const signTxSui = withTxnSigningRequest(React.memo(SignTransaction));
 
 export default signTxSui;
+
+const styles = StyleSheet.create({
+  centered: {
+    flex: 1,
+    width: '100%',
+    minHeight: 360,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 18,
+  },
+  errorHeading: {
+    color: '#FCA5A5', // text-red-300
+    fontSize: 24,
+    fontWeight: 'bold',
+    paddingHorizontal: 14,
+    textAlign: 'center',
+  },
+  errorMessage: {
+    color: '#0F172A',
+    fontSize: 15,
+    fontWeight: '500',
+    paddingHorizontal: 14,
+    textAlign: 'center',
+  },
+  closeButton: {
+    marginTop: 32,
+    paddingVertical: 7,
+    paddingHorizontal: 18,
+    backgroundColor: '#818CF8', // bg-indigo-300
+    borderRadius: 16,
+  },
+  closeButtonText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  panel: {
+    flex: 1,
+    alignSelf: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  panelInner: {
+    width: '100%',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    overflow: 'hidden',
+    backgroundColor: '#fff',
+    position: 'relative',
+  },
+  panelHeight: {
+    // Add height styling if you need panel-height logic
+  },
+  headerContainer: { width: 396 },
+  scrollContent: { paddingHorizontal: 28, paddingVertical: 12 },
+  title: {
+    textAlign: 'center',
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#111827',
+    marginBottom: 12,
+  },
+  siteBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 12,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 16,
+  },
+  avatar: { borderRadius: 999, overflow: 'hidden' },
+  siteInfo: { marginLeft: 12 },
+  siteName: {
+    textTransform: 'capitalize',
+    color: '#111827',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  siteOrigin: {
+    textTransform: 'lowercase',
+    color: '#6B7280',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  mt2: { marginTop: 8 },
+  mt3: { marginTop: 12 },
+  mt4: { marginTop: 16 },
+  feesBox: {
+    borderRadius: 16,
+    padding: 16,
+    marginTop: 12,
+    backgroundColor: '#fff',
+  },
+  row: { flexDirection: 'row', alignItems: 'center' },
+  feeLabel: {
+    color: '#6B7280',
+    fontSize: 14,
+    fontWeight: '500',
+    flex: 1,
+  },
+  tooltipText: { color: '#6B7280', fontSize: 14 },
+  infoIconWrap: { marginLeft: 8, position: 'relative' },
+  infoIcon: { width: 18, height: 18, resizeMode: 'contain' },
+  alignEnd: { flexDirection: 'row', justifyContent: 'flex-end' },
+  errorText: {
+    color: '#F87171',
+    fontSize: 13,
+    fontWeight: '500',
+    marginTop: 8,
+    paddingLeft: 4,
+  },
+  preBox: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    marginTop: 12,
+    padding: 16,
+    minHeight: 80,
+    maxHeight: 240,
+  },
+  preText: {
+    fontFamily: 'monospace',
+    fontSize: 12,
+    color: '#111827',
+  },
+  highFeeBox: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginTop: 12,
+  },
+  checkBox: { marginRight: 12 },
+  highFeeText: {
+    color: '#6B7280',
+    fontSize: 13,
+    fontWeight: '400',
+  },
+  footer: {
+    backgroundColor: '#F9FAFB',
+    paddingVertical: 12,
+    paddingHorizontal: 28,
+    width: '100%',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+  },
+  footerRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 12,
+  },
+  disabledButton: {
+    opacity: 0.5,
+  },
+});

@@ -10,12 +10,12 @@ import { validatePrivateKey } from '../../../utils/validateSeedPhrase';
 import { TextareaWithPaste } from './textarea-with-paste'; // Implement this for RN
 
 type PrivateKeyInputProps = {
-  onChange: (value: string) => void;
+  onChangeText: (value: string) => void;
   value: string;
   error?: string;
 };
 
-export const PrivateKeyInput = ({ onChange, value, error }: PrivateKeyInputProps) => {
+export const PrivateKeyInput = ({ onChangeText, value, error }: PrivateKeyInputProps) => {
   const addressToDisplay = useMemo(() => {
     if (!value) return '';
 
@@ -49,7 +49,7 @@ export const PrivateKeyInput = ({ onChange, value, error }: PrivateKeyInputProps
         placeholder="Enter private key"
         style={styles.textarea}
         value={value}
-        onChange={onChange}
+        onChangeText={onChangeText}
         error={error}
       />
 

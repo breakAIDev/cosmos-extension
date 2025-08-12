@@ -1,19 +1,19 @@
+import React, { useEffect, useMemo, useState } from 'react';
+import { View, TouchableOpacity, Image, StyleSheet, ScrollView } from 'react-native';
 import { Key, SelectedAddress, useChainInfo, useGetChains, WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { Question } from '@phosphor-icons/react';
-import classNames from 'classnames';
-import Loader from 'components/loader/Loader';
-import Text from 'components/text';
-import useActiveWallet from 'hooks/settings/useActiveWallet';
-import { useChainInfos } from 'hooks/useChainInfos';
-import useQuery from 'hooks/useQuery';
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
-import { Images } from 'images';
-import { useSendContext } from 'pages/send-v2/context';
-import React, { useEffect, useMemo, useState } from 'react';
-import { getLedgerEnabledEvmChainsKey } from 'utils/getLedgerEnabledEvmChains';
-import { isLedgerEnabled } from 'utils/isLedgerEnabled';
-import { capitalize, sliceAddress } from 'utils/strings';
+import { Question } from 'phosphor-react-native';
+import Loader from '../../../../components/loader/Loader';
+import Text from '../../../../components/text';
+import useActiveWallet from '../../../../hooks/settings/useActiveWallet';
+import { useChainInfos } from '../../../../hooks/useChainInfos';
+import useQuery from '../../../../hooks/useQuery';
+import { useDefaultTokenLogo } from '../../../../hooks/utility/useDefaultTokenLogo';
+import { Images } from '../../../../../assets/images';
+import { useSendContext } from '../../../send-v2/context';
+import { getLedgerEnabledEvmChainsKey } from '../../../../utils/getLedgerEnabledEvmChains';
+import { isLedgerEnabled } from '../../../../utils/isLedgerEnabled';
+import { capitalize, sliceAddress } from '../../../../utils/strings';
 
 import SearchChainWithWalletFilter from './SearchChainWithWalletFilter';
 
@@ -42,7 +42,7 @@ function MyWallets({ skipSupportedDestinationChainsIDs, setSelectedAddress }: My
   const [searchQuery, setSearchQuery] = useState('');
   const trimmedQuery = searchQuery.trim();
 
-  
+  // Compose display accounts
   const _displaySkipAccounts: any[][] = [];
   Object.keys(chainInfos).map((chain) => {
     if (skipSupportedDestinationChainsIDs?.includes(chainInfos[chain as SupportedChain]?.chainId)) {
@@ -83,18 +83,17 @@ function MyWallets({ skipSupportedDestinationChainsIDs, setSelectedAddress }: My
         selectionType: 'currentWallet',
       });
     }
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toChainId, displayAccounts?.length > 0, sendActiveChain]);
 
   if (isIbcSupportDataLoading) {
     return (
-      <div className='bg-white-100 dark:bg-gray-900 rounded-2xl p-3 relative h-48 w-full'>
-        <Text size='xs' className='p-1 font-bold' color='text-gray-600 dark:text-gray-200'>
+      <View style={styles.loaderContainer}>
+        <Text size="xs" style={[styles.p1, styles.fontBold, styles.textGray]}>
           Loading IBC Supported Chains
         </Text>
         <Loader />
-      </div>
+      </View>
     );
   }
 
@@ -102,12 +101,12 @@ function MyWallets({ skipSupportedDestinationChainsIDs, setSelectedAddress }: My
     <>
       <SearchChainWithWalletFilter
         value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
+        onChange={setSearchQuery}
         setSelectedWallet={setSelectedWallet}
         selectedWallet={selectedWallet as Key}
       />
 
-      <div className='relative mt-4 h-[calc(100%-300px)] overflow-auto'>
+      <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scrollContent}>
         {displayAccounts.length > 0 ? (
           displayAccounts.map(([_chain, address], index) => {
             const chain = _chain as unknown as SupportedChain;
@@ -123,7 +122,6 @@ function MyWallets({ skipSupportedDestinationChainsIDs, setSelectedAddress }: My
             ) {
               addressText = `Ledger not supported on ${chainInfo.chainName}`;
             }
-
             if (
               selectedWallet?.walletType === WALLETTYPE.LEDGER &&
               isLedgerEnabled(chainInfo.key, chainInfo.bip44.coinType, Object.values(chainInfos)) &&
@@ -134,11 +132,9 @@ function MyWallets({ skipSupportedDestinationChainsIDs, setSelectedAddress }: My
 
             return (
               <React.Fragment key={_chain}>
-                <button
-                  className={classNames('w-full flex items-center gap-3 py-3', {
-                    '!cursor-not-allowed opacity-50': !!addressText,
-                  })}
-                  onClick={() => {
+                <TouchableOpacity
+                  style={[styles.accountRow, !!addressText && styles.disabledRow]}
+                  onPress={() => {
                     setSelectedAddress({
                       address: address,
                       avatarIcon: Images.Misc.getWalletIconAtIndex(colorIndex, watchWallet),
@@ -152,42 +148,140 @@ function MyWallets({ skipSupportedDestinationChainsIDs, setSelectedAddress }: My
                     });
                   }}
                   disabled={!!addressText}
+                  activeOpacity={!!addressText ? 1 : 0.7}
                 >
-                  <img src={img} alt={`${chainName} logo`} className='rounded-full border border-white-30 h-10 w-10' />
-
-                  <div>
-                    <p className='font-bold text-left dark:text-white-100 text-gray-700 capitalize'>{chainName}</p>
-
-                    <p className='text-sm font-medium dark:text-gray-400 text-gray-600 text-left'>
+                  <Image
+                    source={typeof img === 'string' ? { uri: img } : img}
+                    alt={`${chainName} logo`}
+                    style={styles.accountIcon}
+                  />
+                  <View style={styles.accountTextWrap}>
+                    <Text style={styles.chainNameText}>{chainName}</Text>
+                    <Text style={styles.addressText}>
                       {addressText || sliceAddress(address)}
-                    </p>
-                  </div>
-                </button>
-
-                {!isLast && <div className='border-b w-full border-gray-100 dark:border-gray-850' />}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+                {!isLast && <View style={styles.divider} />}
               </React.Fragment>
             );
           })
         ) : (
-          <div className='py-[88px] w-full flex-col flex  justify-center items-center gap-4'>
-            <Question size={40} className='dark:text-white-100' />
-
-            <div className='flex flex-col justify-start items-center w-full gap-1'>
-              <div className='text-md text-center font-bold !leading-[21.5px] dark:text-white-100'>
+          <View style={styles.noChainsContainer}>
+            <Question size={40} color="#fff" style={{ marginBottom: 10 }} />
+            <View style={styles.noChainsTextWrap}>
+              <Text style={styles.noChainsTitle}>
                 {trimmedQuery.length > 0
                   ? `No chains found for "${trimmedQuery}"`
                   : `No chains support IBC with ${chainInfos[sendActiveChain].chainName}`}
-              </div>
-
-              <div className='text-sm font-normal !leading-[22.4px] text-gray-400 dark:text-gray-400'>
+              </Text>
+              <Text style={styles.noChainsSub}>
                 Try searching for a different term
-              </div>
-            </div>
-          </div>
+              </Text>
+            </View>
+          </View>
         )}
-      </div>
+      </ScrollView>
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  loaderContainer: {
+    backgroundColor: '#F3F4F6', // bg-white-100
+    borderRadius: 16,
+    padding: 12,
+    minHeight: 192,
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  p1: {
+    padding: 4,
+  },
+  fontBold: {
+    fontWeight: 'bold',
+  },
+  textGray: {
+    color: '#6B7280',
+  },
+  scrollContainer: {
+    flex: 1,
+    marginTop: 16,
+    maxHeight: 320, // h-[calc(100%-300px)]
+  },
+  scrollContent: {
+    paddingBottom: 16,
+  },
+  accountRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 12,
+    width: '100%',
+  },
+  disabledRow: {
+    opacity: 0.5,
+  },
+  accountIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.3)',
+    marginRight: 8,
+  },
+  accountTextWrap: {
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+  },
+  chainNameText: {
+    fontWeight: 'bold',
+    color: '#1F2937', // text-gray-700
+    textAlign: 'left',
+    textTransform: 'capitalize',
+  },
+  addressText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#6B7280', // text-gray-600
+    textAlign: 'left',
+  },
+  divider: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+    width: '100%',
+  },
+  noChainsContainer: {
+    paddingVertical: 40,
+    width: '100%',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 16,
+  },
+  noChainsTextWrap: {
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    gap: 4,
+    width: '100%',
+  },
+  noChainsTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    lineHeight: 21.5,
+    color: '#fff',
+    marginBottom: 2,
+  },
+  noChainsSub: {
+    fontSize: 14,
+    fontWeight: '400',
+    lineHeight: 22.4,
+    color: '#9CA3AF',
+    textAlign: 'center',
+  },
+});
 
 export default MyWallets;

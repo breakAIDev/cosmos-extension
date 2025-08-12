@@ -1,16 +1,18 @@
-import { NativeDenom } from '@leapwallet/cosmos-wallet-sdk';
-import { LoaderAnimation } from 'components/loader/Loader';
 import React from 'react';
-import { Virtuoso } from 'react-virtuoso';
+import { View, StyleSheet, FlatList } from 'react-native';
+import { NativeDenom } from '@leapwallet/cosmos-wallet-sdk';
+import { LoaderAnimation } from '../../../components/loader/Loader';
 import {
   betaCW20DenomsStore,
   betaERC20DenomsStore,
   disabledCW20DenomsStore,
   enabledCW20DenomsStore,
-} from 'stores/denoms-store-instance';
+} from '../../../context/denoms-store-instance';
 
 import { ManageTokensEmptyCard } from '.';
 import { ManuallyAddedTokenCard } from './ManuallyAddedTokenCard';
+
+// Pass in your stores as props or via context if required for mobile
 
 export const ManuallyAddedTokensTab = ({
   filteredManuallyAddedTokens,
@@ -31,39 +33,55 @@ export const ManuallyAddedTokensTab = ({
 }) => {
   if (fetchingContract === true) {
     return (
-      <div className='flex items-center justify-center flex-1'>
-        <LoaderAnimation color='#29a874' />
-      </div>
+      <View style={styles.centered}>
+        <LoaderAnimation color="#29a874" />
+      </View>
     );
   }
 
   if (fetchingContract === false && filteredManuallyAddedTokens.length === 0) {
-    return <ManageTokensEmptyCard onAddTokenClick={handleAddNewTokenClick} searchedText={searchedText} />;
+    return (
+      <ManageTokensEmptyCard
+        onAddTokenClick={handleAddNewTokenClick}
+        searchedText={searchedText}
+      />
+    );
   }
 
   return (
-    <div className='w-full px-6 flex-1'>
-      <Virtuoso
-        style={{ flexGrow: '1', width: '100%' }}
+    <View style={styles.container}>
+      <FlatList
         data={filteredManuallyAddedTokens}
-        itemContent={(index, item) => {
-          return (
-            <ManuallyAddedTokenCard
-              index={index}
-              key={`${item?.coinMinimalDenom ?? index}`}
-              token={item}
-              tokensLength={filteredManuallyAddedTokens.length}
-              handleToggleChange={handleToggleChange}
-              fetchedTokens={fetchedTokens}
-              onDeleteClick={onDeleteClick}
-              betaCW20DenomsStore={betaCW20DenomsStore}
-              disabledCW20DenomsStore={disabledCW20DenomsStore}
-              enabledCW20DenomsStore={enabledCW20DenomsStore}
-              betaERC20DenomsStore={betaERC20DenomsStore}
-            />
-          );
-        }}
+        keyExtractor={(item, idx) => `${item?.coinMinimalDenom ?? idx}`}
+        renderItem={({ item, index }) => (
+          <ManuallyAddedTokenCard
+            index={index}
+            token={item}
+            tokensLength={filteredManuallyAddedTokens.length}
+            handleToggleChange={handleToggleChange}
+            fetchedTokens={fetchedTokens}
+            onDeleteClick={onDeleteClick}
+            betaCW20DenomsStore={betaCW20DenomsStore}
+            disabledCW20DenomsStore={disabledCW20DenomsStore}
+            enabledCW20DenomsStore={enabledCW20DenomsStore}
+            betaERC20DenomsStore={betaERC20DenomsStore}
+          />
+        )}
+        contentContainerStyle={{ paddingBottom: 16 }}
       />
-    </div>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    width: '100%',
+    paddingHorizontal: 16,
+  },
+  centered: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});

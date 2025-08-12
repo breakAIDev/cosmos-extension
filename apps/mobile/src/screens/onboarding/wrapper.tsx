@@ -1,70 +1,102 @@
-import { motion, Variants } from 'framer-motion';
 import React, { ReactNode } from 'react';
-import { cn } from 'utils/cn';
-import { transition } from 'utils/motion-variants';
+import { View, Text, StyleSheet } from 'react-native';
+import { MotiView } from 'moti';
 
 type OnboardingWrapperProps = {
   children: ReactNode;
-  heading: ReactNode;
-  subHeading?: ReactNode;
+  heading: string;
+  subHeading?: string | React.ReactNode;
   entry?: 'left' | 'right';
-  className?: string;
+  style?: any;
   headerIcon?: ReactNode;
 };
 
-export const onboardingWrapperVariants: Variants = {
-  fromLeft: {
-    opacity: 0,
-    x: -25,
-    transition,
-  },
-  fromRight: {
-    opacity: 0,
-    x: 25,
-    transition,
-  },
-  animate: {
-    opacity: 1,
-    x: 0,
-    transition,
-  },
-  exit: {
-    opacity: 0,
-    x: 0,
-    transition: { ...transition, duration: 0.15 },
-  },
-};
+const transition = { type: 'timing', duration: 350 };
 
 export const OnboardingWrapper = ({
   children,
   heading,
   subHeading,
-  className,
+  style,
   entry = 'right',
   headerIcon,
 }: OnboardingWrapperProps) => {
   return (
-    <motion.div
-      className={cn('flex flex-col items-stretch w-full h-full gap-7', className)}
-      variants={onboardingWrapperVariants}
-      initial={entry === 'left' ? 'fromLeft' : 'fromRight'}
-      animate='animate'
-      exit='exit'
+    <MotiView
+      style={[styles.container, style]}
+      from={{
+        opacity: 0,
+        translateX: entry === 'left' ? -25 : 25,
+      }}
+      animate={{
+        opacity: 1,
+        translateX: 0,
+      }}
+      exit={{
+        opacity: 0,
+        translateX: 0,
+      }}
+      transition={transition}
     >
-      <header className='flex flex-col items-center gap-1'>
-        {headerIcon && (
-          <div className='size-16 bg-secondary-200 rounded-full grid place-content-center'>{headerIcon}</div>
-        )}
+      <View style={styles.header}>
+        {headerIcon ? (
+          <View style={styles.headerIconWrapper}>
+            {React.isValidElement(headerIcon) ? headerIcon : <View/>}
+          </View>
+        ) : null}
+        <Text style={styles.heading}>{heading}</Text>
+        {React.isValidElement(subHeading) ? subHeading :
+        (typeof subHeading === 'string' ?
+          <Text style={styles.subHeading}>{subHeading}</Text> : null
+        ) }
+      </View>
 
-        <h1 className='font-bold text-[1.5rem] text-center'>{heading}</h1>
-        {subHeading && (
-          <div className='text-[0.875rem] font-medium text-muted-foreground leading-[1.4rem] text-center'>
-            {subHeading}
-          </div>
-        )}
-      </header>
-
-      {children}
-    </motion.div>
+      <View style={styles.childrenWrapper}>
+        {React.isValidElement(children) ? children : <View/>}
+      </View>
+    </MotiView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    width: '100%',
+    flexDirection: 'column',
+    alignItems: 'stretch',
+    // Don't use 'gap' in RN <0.71, use margin instead
+  },
+  header: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    marginBottom: 28, // gap between header and children
+  },
+  headerIconWrapper: {
+    width: 64,
+    height: 64,
+    backgroundColor: '#E5E7EB', // secondary-200, change as needed
+    borderRadius: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  heading: {
+    fontWeight: 'bold',
+    fontSize: 24, // 1.5rem
+    textAlign: 'center',
+    color: '#111', // or your theme color
+    marginTop: 4,
+  },
+  subHeading: {
+    fontSize: 14, // 0.875rem
+    fontWeight: '500',
+    color: '#97A3B9', // muted-foreground
+    lineHeight: 22,
+    textAlign: 'center',
+    marginTop: 4,
+  },
+  childrenWrapper: {
+    flex: 1,
+    // you can add padding or margin here if needed
+  },
+});

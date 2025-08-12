@@ -5,7 +5,6 @@ import BigNumber from 'bignumber.js';
 
 import { getStdFee } from './get-fee';
 
-
 function getOriginalSignDoc(signRequestData: Record<string, any>) {
   const _signDoc = Uint8Array.from(Buffer.from(signRequestData.signDoc, 'hex'));
   const signOptions = signRequestData?.signOptions;
@@ -38,8 +37,6 @@ function getUpdatedFee(
       ? defaultFee
       : getStdFee(
           !customGasLimit.isNaN() && customGasLimit.isGreaterThan(0) ? customGasLimit.toString() : defaultFee.gas,
-          
-          
           gasPrice,
         );
 
@@ -68,7 +65,6 @@ export function getAptosSignDoc({
   isGasOptionSelected,
   nativeFeeDenom,
 }: {
-  
   signRequestData: Record<string, any>;
   gasPrice: GasPrice;
   gasLimit: string;

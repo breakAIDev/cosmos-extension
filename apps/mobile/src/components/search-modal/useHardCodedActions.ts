@@ -7,7 +7,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react';
 import { Alert, Linking } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
-import mixpanel from 'mixpanel-browser'; // or omit if not used
+import mixpanel from '../../mixpanel';
 import { captureException } from '@sentry/react-native';
 import { earnFeatureShowStore } from '../../context/earn-feature-show';
 import { AGGREGATED_CHAIN_KEY, LEAPBOARD_URL } from '../../services/config/constants';

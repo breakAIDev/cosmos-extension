@@ -1,5 +1,5 @@
 import { AxelarTransferInfoJSON, AxelarTransferState, TransferState } from '@skip-go/client';
-import { AxelarPacketTxnSeq } from 'types/swap';
+import { AxelarPacketTxnSeq } from '../../../../../../types/swap';
 
 import { convertPacketFromJSON } from './convertPackageFromJson';
 

@@ -10,10 +10,10 @@ import {
   UseSkipGasFeeReturnType,
 } from '@leapwallet/elements-hooks';
 import { BigNumber } from 'bignumber.js';
-import { Wallet } from 'hooks/wallet/useWallet';
+import { Wallet } from '../../../hooks/wallet/useWallet';
 import { useState } from 'react';
 import useSWR, { SWRConfiguration, unstable_serialize } from 'swr';
-import { SourceChain } from 'types/swap';
+import { SourceChain } from '../../../types/swap';
 
 import { MosaicRouteQueryResponse } from './useMosaicRoute';
 import { SWAP_NETWORK } from './useSwapsTx';

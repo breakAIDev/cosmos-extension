@@ -7,6 +7,7 @@ export type UseFillAddressWarningParams = {
   fetchAccountDetailsData: AccountDetails | undefined;
   fetchAccountDetailsStatus: QueryStatus | FetchStatus;
 
+  // In RN, ensure this is a React Native element, e.g., <Text>Error...</Text>
   addressWarningElementError: ReactElement;
   setAddressWarning: React.Dispatch<React.SetStateAction<AddressWarning>>;
 };
@@ -26,9 +27,8 @@ export function useFillAddressWarning({
         case 'loading': {
           setAddressWarning({
             type: 'erc20',
-            message: addressWarningElementError,
+            message: addressWarningElementError, // Should be a RN <Text> node if rendered
           });
-
           break;
         }
 
@@ -53,7 +53,6 @@ export function useFillAddressWarning({
               message: 'You can only transfer EVM tokens to an EVM address.',
             });
           }
-
           break;
         }
 
@@ -70,7 +69,6 @@ export function useFillAddressWarning({
         }
       }
     })();
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchAccountDetailsData?.pubKey?.key, fetchAccountDetailsStatus]);
 }

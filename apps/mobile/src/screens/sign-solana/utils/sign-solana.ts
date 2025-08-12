@@ -8,13 +8,29 @@ import {
   VersionedTransaction,
 } from '@solana/web3.js';
 import BigNumber from 'bignumber.js';
-import { getStdFee } from 'pages/sign-aptos/utils/get-fee';
+import { getStdFee } from '../../sign-aptos/utils/get-fee';
+// If using React Native, import Buffer polyfill:
+import { Buffer } from 'buffer';
 
+/**
+ * Parses the original Solana sign doc and returns a VersionedTransaction.
+ * @param signRequestData - Base64 or Uint8Array encoded transaction data.
+ * @param isDisplay - If true, decodes as a message for display.
+ */
 export function getOriginalSignDoc(signRequestData: any, isDisplay: boolean = false) {
-  const transaction = VersionedTransaction.deserialize(signRequestData);
+  // If signRequestData is already Uint8Array, skip conversion.
+  let tsxBytes: Uint8Array;
+  if (typeof signRequestData === 'string') {
+    tsxBytes = Buffer.from(signRequestData, 'base64');
+  } else if (signRequestData instanceof Uint8Array) {
+    tsxBytes = signRequestData;
+  } else if (Array.isArray(signRequestData)) {
+    tsxBytes = new Uint8Array(signRequestData);
+  } else {
+    throw new Error('signRequestData must be a base64 string, Uint8Array, or array of numbers');
+  }
+  const transaction = VersionedTransaction.deserialize(tsxBytes);
   if (isDisplay) {
-    const tsxBytes = new Uint8Array(Buffer.from(signRequestData, 'base64'));
-    const transaction = VersionedTransaction.deserialize(tsxBytes);
     return {
       signDoc: transaction,
       signOptions: {},
@@ -26,8 +42,9 @@ export function getOriginalSignDoc(signRequestData: any, isDisplay: boolean = fa
   };
 }
 
-function getDefaultFee(nativeFeeDenom: NativeDenom) {
-  return calculateFee(Number(5000), GasPrice.fromString(`${0}${nativeFeeDenom.coinMinimalDenom}`));
+function getDefaultFee(nativeFeeDenom: NativeDenom): StdFee {
+  // 5000 is an arbitrary small gas, update as needed for your network.
+  return calculateFee(5000, GasPrice.fromString(`0${nativeFeeDenom.coinMinimalDenom}`));
 }
 
 function getUpdatedFee(
@@ -47,16 +64,22 @@ function getUpdatedFee(
           gasPrice,
         );
 
+  // Add fixed compute budget (e.g., +5000 units)
   //@ts-ignore
   fee.amount[0].amount = new BigNumber(fee.amount[0].amount).plus(5000).toString();
 
   return fee;
 }
 
+/**
+ * Updates a Solana transaction with new compute unit price and limit.
+ * Returns the serialized VersionedTransaction (Uint8Array).
+ */
 export async function getUpdatedSignDoc(originalSignDocBase64: string, updatedFee: StdFee): Promise<Uint8Array> {
   const originalBuffer = Buffer.from(originalSignDocBase64, 'base64');
   const transaction = VersionedTransaction.deserialize(originalBuffer);
 
+  // Get address lookup tables (ALTs) if used.
   const altLookups = transaction.message.addressTableLookups;
   const lookupTableAccounts: AddressLookupTableAccount[] = [];
   const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
@@ -69,6 +92,7 @@ export async function getUpdatedSignDoc(originalSignDocBase64: string, updatedFe
     }
   }
 
+  // Decompile message and insert compute unit instructions at the beginning.
   const message = TransactionMessage.decompile(transaction.message, {
     addressLookupTableAccounts: lookupTableAccounts,
   });
@@ -83,8 +107,10 @@ export async function getUpdatedSignDoc(originalSignDocBase64: string, updatedFe
       : 0,
   });
 
+  // Add new instructions to the beginning of the message.
   message.instructions.unshift(computeUnitPriceIx, computeUnitLimitIx);
 
+  // Compile and serialize new transaction.
   const compiledMessage = message.compileToV0Message(lookupTableAccounts);
   const newTx = new VersionedTransaction(compiledMessage);
 
@@ -98,7 +124,6 @@ export function getSolanaSignDoc({
   isGasOptionSelected,
   nativeFeeDenom,
 }: {
-  
   signRequestData: Record<string, any>;
   gasPrice: GasPrice;
   gasLimit: string;

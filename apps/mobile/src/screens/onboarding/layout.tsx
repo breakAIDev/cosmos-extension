@@ -1,23 +1,34 @@
-import { motion, MotionProps } from 'framer-motion';
-import React, { PropsWithChildren, ReactNode } from 'react';
-import { cn } from 'utils/cn';
+import React, { PropsWithChildren, ReactNode } from 'react'
+import { StyleProp, StyleSheet, ViewProps, ViewStyle } from 'react-native'
+import { MotiView } from 'moti'
 
 type ExtensionPageProps = {
   children?: ReactNode;
-  className?: string;
+  style?: StyleProp<ViewStyle>;
   hideRightActions?: boolean;
-} & MotionProps;
+} & ViewProps;
 
-export const OnboardingLayout = ({ className, children, ...props }: PropsWithChildren<ExtensionPageProps>) => {
+export const OnboardingLayout = ({ children, style, ...props }: PropsWithChildren<ExtensionPageProps>) => {
   return (
-    <motion.div
-      className={cn(
-        'overflow-auto bg-secondary overflow-x-hidden my-auto mx-auto rounded-3xl flex h-full w-full',
-        className,
-      )}
+    <MotiView
+      style={[styles.container, style]}
       {...props}
     >
       {children}
-    </motion.div>
-  );
-};
+    </MotiView>
+  )
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    overflow: 'hidden', // matches overflow-x-hidden, overflow-auto
+    backgroundColor: '#F1F5F9', // bg-secondary
+    marginVertical: 'auto', // my-auto
+    marginHorizontal: 'auto', // mx-auto
+    borderRadius: 24, // rounded-3xl
+    height: '100%',
+    width: '100%',
+    flexDirection: 'column',
+  },
+})

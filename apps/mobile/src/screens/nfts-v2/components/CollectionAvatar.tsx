@@ -1,32 +1,63 @@
-import classNames from 'classnames';
 import React from 'react';
-import { normalizeImageSrc } from 'utils/normalizeImageSrc';
+import { View, Image, StyleSheet, ViewStyle, StyleProp } from 'react-native';
+import { ResizeMode, Video } from 'expo-av';
+import { normalizeImageSrc } from '../../../utils/normalizeImageSrc';
 
 type CollectionAvatarProps = {
   image?: string;
-  className?: string;
+  style?: StyleProp<ViewStyle>;
   bgColor?: string;
 };
 
-export function CollectionAvatar({ image, className, bgColor }: CollectionAvatarProps) {
+export function CollectionAvatar({ image, style, bgColor }: CollectionAvatarProps) {
+  const isVideo = !!image && image.includes('mp4');
+  const avatarSrc = image ? normalizeImageSrc(image) : undefined;
+
   return (
-    <div className={classNames('rounded-full mr-2', className)} style={{ backgroundColor: bgColor }}>
-      {image &&
-        (image.includes('mp4') ? (
-          <video autoPlay loop playsInline muted className='rounded-full w-full h-full object-cover object-top'>
-            <source type='video/mp4' src={normalizeImageSrc(image)} />
-            Your browser does not support this video player.
-          </video>
+    <View
+      style={[
+        styles.avatar,
+        { backgroundColor: bgColor || '#d4d4d4' },
+        style,
+      ]}
+    >
+      {avatarSrc &&
+        (isVideo ? (
+          <Video
+            source={{ uri: avatarSrc }}
+            shouldPlay
+            isMuted
+            isLooping
+            resizeMode={"cover" as ResizeMode}
+            style={styles.media}
+          />
         ) : (
-          <img
-            className={classNames('rounded-full h-full w-full object-cover object-top')}
-            src={normalizeImageSrc(image)}
-            onError={({ currentTarget }: { currentTarget: HTMLImageElement }) => {
-              currentTarget.onerror = null;
-              currentTarget.style.display = 'none';
+          <Image
+            source={{ uri: avatarSrc }}
+            style={styles.media}
+            resizeMode="cover"
+            onError={() => {
+              // Optionally: Hide image or show fallback
             }}
           />
         ))}
-    </div>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  avatar: {
+    borderRadius: 999,
+    marginRight: 8,
+    width: 40,
+    height: 40,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  media: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 999,
+  },
+});

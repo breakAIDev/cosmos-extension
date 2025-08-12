@@ -1,15 +1,15 @@
-import { getErrorMsg, useActiveChain } from '@leapwallet/cosmos-wallet-hooks';
-import { Buttons, Memo } from '@leapwallet/leap-ui';
-import { ThumbsUp } from '@phosphor-icons/react';
-import classNames from 'classnames';
-import { ErrorCard } from 'components/ErrorCard';
-import { DisplayFee } from 'components/gas-price-options/display-fee';
-import { LoaderAnimation } from 'components/loader/Loader';
-import BottomModal from 'components/new-bottom-modal';
-import { Button } from 'components/ui/button';
-import { useCaptureTxError } from 'hooks/utility/useCaptureTxError';
 import React, { useMemo } from 'react';
-import { Colors } from 'theme/colors';
+import { View, Text, StyleSheet, TextInput } from 'react-native';
+import { getErrorMsg, useActiveChain } from '@leapwallet/cosmos-wallet-hooks';
+import { ThumbsUp } from 'phosphor-react-native';
+import { ErrorCard } from '../../../components/ErrorCard';
+import { DisplayFee } from '../../../components/gas-price-options/display-fee';
+import { LoaderAnimation } from '../../../components/loader/Loader';
+import BottomModal from '../../../components/new-bottom-modal';
+import { Button } from '../../../components/ui/button';
+import { useCaptureTxError } from '../../../hooks/utility/useCaptureTxError';
+import { Colors } from '../../../theme/colors';
+// If you have a Memo component for RN, use it. If not, use TextInput here.
 
 import { ReviewVoteCastProps } from '../components/ReviewVoteCast';
 
@@ -31,34 +31,40 @@ export function NtrnReviewVoteCast({
   useCaptureTxError(error);
 
   return (
-    <BottomModal isOpen={isOpen} onClose={onCloseHandler} title='Review Transaction' className='p-6 !pt-8'>
-      <div className='flex flex-col items-center gap-5'>
-        <div className={classNames('flex p-4 w-full bg-gray-50 dark:bg-gray-900 rounded-2xl')}>
-          <div className='h-10 w-10 bg-green-600 rounded-full flex items-center justify-center'>
-            <ThumbsUp size={20} className='text-foreground' />
-          </div>
-          <div className='flex flex-col justify-center items-start px-3'>
-            <div className='text-sm text-muted-foreground text-left'>Vote message</div>
-            <div className='text-[18px] text-foreground font-bold'>
-              Vote <b>{selectedVote}</b> on <b>Proposal #{proposalId}</b>
-            </div>
-          </div>
-        </div>
+    <BottomModal isOpen={isOpen} onClose={onCloseHandler} title="Review Transaction">
+      <View style={styles.content}>
+        <View style={styles.voteMsgCard}>
+          <View style={styles.iconCircle}>
+            <ThumbsUp size={24} color="#fff" />
+          </View>
+          <View style={{ flex: 1, marginLeft: 12 }}>
+            <Text style={styles.voteMsgLabel}>Vote message</Text>
+            <Text style={styles.voteMsg}>
+              Vote <Text style={styles.voteType}>{selectedVote}</Text> on <Text style={styles.proposalId}>Proposal #{proposalId}</Text>
+            </Text>
+          </View>
+        </View>
 
-        <Memo
+        {/* Memo Input (replace with your Memo component if available) */}
+        <TextInput
+          style={styles.memoInput}
+          placeholder="Enter memo (optional)"
           value={memo}
-          onChange={(e) => {
-            setMemo(e.target.value);
-          }}
+          onChangeText={setMemo}
+          placeholderTextColor="#999"
+          multiline
         />
 
-        <DisplayFee className='mt-4' />
+        {/* DisplayFee (assuming you ported this for RN) */}
+        <DisplayFee style={{ marginTop: 16 }} />
 
-        {error && <ErrorCard text={getErrorMsg(error, gasOption, 'vote')} />}
+        {error ? (
+          <ErrorCard text={getErrorMsg(error, gasOption, 'vote')} />
+        ) : null}
 
         <Button
-          className='w-full mt-1'
-          onClick={async () => {
+          style={styles.approveBtn}
+          onPress={async () => {
             if (selectedVote !== undefined) {
               await onSubmitVote(selectedVote);
             }
@@ -67,7 +73,66 @@ export function NtrnReviewVoteCast({
         >
           {loading ? <LoaderAnimation color={Colors.white100} /> : 'Approve'}
         </Button>
-      </div>
+      </View>
     </BottomModal>
   );
 }
+
+const styles = StyleSheet.create({
+  content: {
+    padding: 20,
+    paddingTop: 8,
+    alignItems: 'center',
+    width: '100%',
+  },
+  voteMsgCard: {
+    flexDirection: 'row',
+    backgroundColor: '#E6FAF0',
+    borderRadius: 16,
+    padding: 16,
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 12,
+  },
+  iconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#29A874',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  voteMsgLabel: {
+    fontSize: 13,
+    color: '#888',
+    marginBottom: 3,
+  },
+  voteMsg: {
+    fontSize: 17,
+    color: '#222',
+    fontWeight: 'bold',
+  },
+  voteType: {
+    color: '#29A874',
+  },
+  proposalId: {
+    color: '#0a69fe',
+  },
+  memoInput: {
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#dedede',
+    backgroundColor: '#fafafa',
+    minHeight: 44,
+    width: '100%',
+    padding: 10,
+    fontSize: 15,
+    marginTop: 8,
+    marginBottom: 8,
+    color: '#222',
+  },
+  approveBtn: {
+    width: '100%',
+    marginTop: 10,
+  },
+});

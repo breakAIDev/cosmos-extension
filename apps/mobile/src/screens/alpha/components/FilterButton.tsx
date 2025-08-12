@@ -1,6 +1,7 @@
-import { FunnelSimple } from '@phosphor-icons/react';
-import { AnimatePresence, motion } from 'framer-motion';
 import React from 'react';
+import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
+import { FunnelSimple } from 'phosphor-react-native';
+import { MotiView, AnimatePresence } from 'moti';
 
 export default function FilterButton({
   setIsFilterDrawerOpen,
@@ -10,40 +11,56 @@ export default function FilterButton({
   filterCount: number;
 }) {
   return (
-    <motion.button
-      className='flex items-center bg-gray-100 dark:bg-gray-900 rounded-full p-2 h-9'
-      onClick={() => setIsFilterDrawerOpen(true)}
-      initial={{ scale: 0.95 }}
-      animate={{ scale: 1 }}
-      transition={{ duration: 0.3, ease: 'easeInOut' }}
+    <TouchableOpacity
+      activeOpacity={0.8}
+      style={styles.button}
+      onPress={() => setIsFilterDrawerOpen(true)}
     >
-      <div className='flex items-center h-full'>
-        <FunnelSimple className='text-gray-600 dark:text-gray-400' size={20} />
+      <View style={styles.iconRow}>
+        <FunnelSimple size={20} color="#4B5563" /> {/* text-gray-600 */}
         <AnimatePresence>
           {filterCount > 0 && (
-            <motion.div
-              initial={{ width: 0, opacity: 0 }}
-              animate={{
-                width: 'auto',
-                opacity: 1,
-                marginLeft: 6,
-              }}
-              exit={{
-                width: 0,
-                opacity: 0,
-                marginLeft: 0,
-              }}
+            <MotiView
+              from={{ width: 0, opacity: 0, marginLeft: 0 }}
+              animate={{ width: 20, opacity: 1, marginLeft: 6 }}
+              exit={{ width: 0, opacity: 0, marginLeft: 0 }}
               transition={{
-                duration: 0.2,
-                ease: [0.4, 0.0, 0.2, 1],
+                type: 'timing',
+                duration: 200,
               }}
-              className='overflow-hidden h-full flex items-center'
+              style={styles.counterContainer}
             >
-              <span className='text-gray-600 dark:text-gray-400 text-xs whitespace-nowrap'>{filterCount}</span>
-            </motion.div>
+              <Text style={styles.counterText}>{filterCount}</Text>
+            </MotiView>
           )}
         </AnimatePresence>
-      </div>
-    </motion.button>
+      </View>
+    </TouchableOpacity>
   );
 }
+
+const styles = StyleSheet.create({
+  button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6', // bg-gray-100
+    borderRadius: 9999,
+    padding: 8,
+    height: 36,
+  },
+  iconRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: '100%',
+  },
+  counterContainer: {
+    overflow: 'hidden',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  counterText: {
+    color: '#4B5563', // text-gray-600
+    fontSize: 12,
+  },
+});

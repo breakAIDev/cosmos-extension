@@ -1,16 +1,15 @@
-
 import { useActiveChain } from '@leapwallet/cosmos-wallet-hooks';
-import { captureException } from '@sentry/react';
-import BottomModal from 'components/new-bottom-modal';
-import { Button } from 'components/ui/button';
-import { PrivateKeyInput } from 'components/ui/input/private-key-input';
-import useActiveWallet from 'hooks/settings/useActiveWallet';
+import { captureException } from '@sentry/react-native';
+import BottomModal from '../../components/new-bottom-modal';
+import { Button } from '../../components/ui/button';
+import { PrivateKeyInput } from '../../components/ui/input/private-key-input';
+import useActiveWallet from '../../hooks/settings/useActiveWallet';
 import { observer } from 'mobx-react-lite';
 import React, { useState } from 'react';
-import { passwordStore } from 'stores/password-store';
-import { validateSeedPhrase } from 'utils/validateSeedPhrase';
-
+import { passwordStore } from '../../context/password-store';
+import { validateSeedPhrase } from '../../utils/validateSeedPhrase';
 import { Wallet } from '../../hooks/wallet/useWallet';
+import { View, StyleSheet } from 'react-native';
 
 type ImportPrivateKeyProps = {
   isVisible: boolean;
@@ -26,7 +25,7 @@ export const ImportPrivateKey = observer(({ isVisible, onClose }: ImportPrivateK
   const importWallet = Wallet.useImportWallet();
   const updateWatchWalletSeed = Wallet.useUpdateWatchWalletSeed();
 
-  const onChangeHandler = (value: string) => {
+  const onChangeText = (value: string) => {
     setError('');
     setPrivateKey(value);
   };
@@ -76,27 +75,39 @@ export const ImportPrivateKey = observer(({ isVisible, onClose }: ImportPrivateK
         onClose(false);
         setError('');
       }}
-      title={'Import Wallet'}
+      title="Import Wallet"
       footerComponent={
         <>
-          <Button variant='secondary' size='md' className='flex-1' onClick={() => onClose(false)}>
+          <Button variant="secondary" size="md" style={styles.flex1} onPress={() => onClose(false)}>
             Cancel
           </Button>
 
           <Button
-            size='md'
+            size="md"
             disabled={!privateKey || !!error || isLoading}
-            onClick={handleImportWallet}
-            className='flex-1'
+            onPress={handleImportWallet}
+            style={styles.flex1}
           >
             Import Wallet
           </Button>
         </>
       }
     >
-      <div className='flex flex-col gap-y-4 items-center justify-center'>
-        <PrivateKeyInput value={privateKey} onChange={onChangeHandler} error={error} />
-      </div>
+      <View style={styles.inputContainer}>
+        <PrivateKeyInput value={privateKey} onChangeText={onChangeText} error={error} />
+      </View>
     </BottomModal>
   );
+});
+
+const styles = StyleSheet.create({
+  flex1: { flex: 1 },
+  inputContainer: {
+    flexDirection: 'column',
+    gap: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 10,
+    width: '100%',
+  },
 });

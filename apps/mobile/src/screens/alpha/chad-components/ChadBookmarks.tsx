@@ -1,12 +1,10 @@
-import { useTheme } from '@leapwallet/leap-ui';
-import BottomModal from 'components/new-bottom-modal';
-import { PageName } from 'config/analytics';
-import Fuse from 'fuse.js';
-import { usePageView } from 'hooks/analytics/usePageView';
-import { useRaffles, useRaffleWins } from 'hooks/useAlphaOpportunities';
 import React, { useMemo, useState } from 'react';
-import { Virtuoso } from 'react-virtuoso';
-
+import { View, StyleSheet, FlatList } from 'react-native';
+import BottomModal from '../../../components/new-bottom-modal'; // Should be a RN modal
+import { PageName } from '../../../services/config/analytics';
+import Fuse from 'fuse.js';
+import { usePageView } from '../../../hooks/analytics/usePageView';
+import { useRaffles, useRaffleWins } from '../../../hooks/useAlphaOpportunities';
 import { AlphaSkeletonList } from '../components/AlphaSkeleton';
 import EmptyBookmarks from '../components/EmptyBookmarks';
 import { NoFilterResult } from '../components/NoResultStates';
@@ -23,10 +21,6 @@ type BookmarkedChadProps = {
   toggler: () => void;
 };
 
-export function BookmarkVirtualizationFooter() {
-  return <div style={{ padding: '3rem', textAlign: 'center' }}> </div>;
-}
-
 export const BookmarkedChad: React.FC<BookmarkedChadProps> = ({ isOpen, toggler }) => {
   const { raffles, isLoading } = useRaffles();
   const { bookmarks } = useChadBookmarks();
@@ -35,11 +29,8 @@ export const BookmarkedChad: React.FC<BookmarkedChadProps> = ({ isOpen, toggler 
     isChad: alphaUser?.isChad ?? false,
   });
   const { raffleWins } = useRaffleWins(alphaUser?.id ?? '');
-  const { theme } = useTheme();
-
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const [searchedTerm, setSearchedTerm] = useState('');
-  const [customScrollParent, setCustomScrollParent] = useState<HTMLDivElement | null>(null);
 
   /**
    * @description filtering raffles according to search query
@@ -78,66 +69,80 @@ export const BookmarkedChad: React.FC<BookmarkedChadProps> = ({ isOpen, toggler 
     });
   }, [searchedRaffles, selectedOpportunities, selectedEcosystems, bookmarks]);
 
-  const filterCount = selectedEcosystems?.length + selectedOpportunities?.length;
+  const filterCount = (selectedEcosystems?.length || 0) + (selectedOpportunities?.length || 0);
 
-  return (
-    <BottomModal fullScreen isOpen={isOpen} onClose={toggler} title='Bookmarks' className='flex-1'>
-      {filteredRaffles.length === 0 && filterCount === 0 && !isLoading && !searchedTerm ? (
+  // Empty state
+  if (filteredRaffles.length === 0 && filterCount === 0 && !isLoading && !searchedTerm) {
+    return (
+      <BottomModal fullScreen isOpen={isOpen} onClose={toggler} title="Bookmarks">
         <EmptyBookmarks
-          title='No Bookmarks Found'
-          subTitle='Try looking at some exclusive opportunities and saving them'
-          className='h-full'
+          title="No Bookmarks Found"
+          subTitle="Try looking at some exclusive opportunities and saving them"
+          style={{height: '100%'}}
         />
-      ) : (
-        <div className='flex flex-col gap-4 h-full' ref={setCustomScrollParent}>
-          <ChadExclusivesFilters setIsFilterDrawerOpen={setIsFilterDrawerOpen} setSearch={setSearchedTerm} />
+      </BottomModal>
+    );
+  }
 
-          {/* Showing Filters */}
-          {selectedOpportunities.length > 0 || selectedEcosystems.length > 0 ? <SelectedChadFilterTags /> : null}
+  // Main modal content
+  return (
+    <BottomModal fullScreen isOpen={isOpen} onClose={toggler} title="Bookmarks">
+      <View style={styles.container}>
+        <ChadExclusivesFilters setIsFilterDrawerOpen={setIsFilterDrawerOpen} setSearch={setSearchedTerm} />
 
-          {/* No results state */}
-          {filteredRaffles.length === 0 && !isLoading && (
-            <NoFilterResult className='mt-3 flex-1 h-full' filterType={searchedTerm ? 'search' : 'no-results'} />
-          )}
+        {(selectedOpportunities.length > 0 || selectedEcosystems.length > 0) && <SelectedChadFilterTags />}
 
-          {/* Virtualized Raffle Listings */}
-          {filteredRaffles.length > 0 ? (
-            <div className='h-full flex flex-col flex-1'>
-              <Virtuoso
-                components={{ Footer: BookmarkVirtualizationFooter }}
-                customScrollParent={customScrollParent ?? undefined}
-                style={{ height: '100%' }}
-                totalCount={filteredRaffles.length}
-                itemContent={(index) => {
-                  const raffle = filteredRaffles[index];
-                  return (
-                    <RaffleListing
-                      key={`${raffle.id}-${index}`}
-                      {...raffle}
-                      pageName={PageName.Bookmark}
-                      isSearched={searchedTerm !== ''}
-                      isBookmarked={bookmarks.has(raffle.id ?? '')}
-                      userWon={!!raffleWins?.find((win) => win.id === raffle.id)}
-                    />
-                  );
-                }}
-              />
-            </div>
-          ) : isLoading ? (
-            <div className='space-y-4 isolate'>
-              <AlphaSkeletonList />
-            </div>
-          ) : null}
-
-          <ChadFilterDrawer
-            isChad={alphaUser?.isChad ?? false}
-            raffles={raffles}
-            isShown={isFilterDrawerOpen}
-            onClose={() => setIsFilterDrawerOpen(false)}
-            pageName={PageName.Bookmark}
+        {/* No results */}
+        {filteredRaffles.length === 0 && !isLoading && (
+          <NoFilterResult
+            filterType={searchedTerm ? 'search' : 'no-results'}
+            style={{marginTop: 12, height: '100%', flex: 1 }}
           />
-        </div>
-      )}
+        )}
+
+        {/* Raffle Listings (virtualized via FlatList) */}
+        {filteredRaffles.length > 0 ? (
+          <FlatList
+            data={filteredRaffles}
+            keyExtractor={(item, index) => `${item.id}-${index}`}
+            renderItem={({ item, index }) => (
+              <RaffleListing
+                key={`${item.id}-${index}`}
+                {...item}
+                pageName={PageName.Bookmark}
+                isSearched={searchedTerm !== ''}
+                isBookmarked={bookmarks.has(item.id ?? '')}
+                userWon={!!raffleWins?.find((win) => win.id === item.id)}
+              />
+            )}
+            ListFooterComponent={() => <View style={{ height: 48 }} />}
+            contentContainerStyle={{ flexGrow: 1 }}
+            style={{ flex: 1 }}
+          />
+        ) : isLoading ? (
+          <AlphaSkeletonList />
+        ) : null}
+
+        {/* Chad Filter Drawer (bottom sheet/drawer) */}
+        <ChadFilterDrawer
+          isChad={alphaUser?.isChad ?? false}
+          raffles={raffles}
+          isShown={isFilterDrawerOpen}
+          onClose={() => setIsFilterDrawerOpen(false)}
+          pageName={PageName.Bookmark}
+        />
+      </View>
     </BottomModal>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    flexDirection: 'column',
+    gap: 12,
+    padding: 12,
+    backgroundColor: '#F7F9FA',
+    height: '100%'
+  },
+});

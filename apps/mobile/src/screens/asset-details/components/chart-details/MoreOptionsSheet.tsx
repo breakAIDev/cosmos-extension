@@ -1,9 +1,9 @@
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { ArrowDown, CurrencyCircleDollar, ShoppingBag } from 'phosphor-react-native';
 import { SelectedNetwork, useIsFeatureExistForChain } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { GenericCard } from '@leapwallet/leap-ui';
-import { ArrowDown, CurrencyCircleDollar, ShoppingBag } from '@phosphor-icons/react';
-import BottomModal from '../bottom-modal';
-import React from 'react';
+import BottomModal from '../../../../components/bottom-modal';
 
 type MoreOptionsSheetProps = {
   isVisible: boolean;
@@ -18,10 +18,32 @@ type MoreOptionsSheetProps = {
   forceNetwork: SelectedNetwork;
 };
 
+const CardButton = ({
+  onPress,
+  icon,
+  label,
+  disabled,
+}: {
+  onPress: () => void;
+  icon: React.ReactNode;
+  label: string;
+  disabled?: boolean;
+}) => (
+  <TouchableOpacity
+    style={[styles.card, disabled && styles.cardDisabled]}
+    onPress={onPress}
+    disabled={disabled}
+    activeOpacity={0.8}
+  >
+    <View style={styles.icon}>{icon}</View>
+    <Text style={styles.label}>{label}</Text>
+  </TouchableOpacity>
+);
+
 export function MoreOptionsSheet({
   isVisible,
-  onClose,
   title,
+  onClose,
   onBuy,
   onStake,
   onDeposit,
@@ -47,34 +69,59 @@ export function MoreOptionsSheet({
   });
 
   return (
-    <BottomModal isOpen={isVisible} title={title} onClose={onClose} closeOnBackdropClick={true} className='p-6'>
-      <div className='flex flex-col gap-y-3'>
+    <BottomModal isOpen={isVisible} title={title} onClose={onClose}>
+      <View style={styles.container}>
+        {/* Stake */}
         {!isStakeDisabled && !isStakeComingSoon && !isStakeNotSupported && (
-          <GenericCard
-            isRounded
-            className='p-4 bg-white-100 dark:bg-gray-950'
-            title='Stake'
-            img={<CurrencyCircleDollar size={20} className='text-black-100 dark:text-white-100 mr-4' />}
-            onClick={onStake}
+          <CardButton
+            label="Stake"
+            icon={<CurrencyCircleDollar size={24} color="#111" />}
+            onPress={onStake}
           />
         )}
-        <GenericCard
-          isRounded
-          className='p-4 bg-white-100 dark:bg-gray-950'
-          title='Deposit'
-          img={<ArrowDown size={20} className='text-black-100 dark:text-white-100 mr-4' />}
-          onClick={onDeposit}
+        {/* Deposit */}
+        <CardButton
+          label="Deposit"
+          icon={<ArrowDown size={24} color="#111" />}
+          onPress={onDeposit}
         />
+        {/* Buy */}
         {!isBuyDisabled && (
-          <GenericCard
-            isRounded
-            className='p-4 bg-white-100 dark:bg-gray-950'
-            title='Buy'
-            img={<ShoppingBag size={20} className='text-black-100 dark:text-white-100 mr-4' />}
-            onClick={onBuy}
+          <CardButton
+            label="Buy"
+            icon={<ShoppingBag size={24} color="#111" />}
+            onPress={onBuy}
           />
         )}
-      </div>
+      </View>
     </BottomModal>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    gap: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 2,
+  },
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8f8f8',
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+    marginBottom: 10,
+  },
+  cardDisabled: {
+    opacity: 0.5,
+  },
+  icon: {
+    marginRight: 16,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#222',
+  },
+});

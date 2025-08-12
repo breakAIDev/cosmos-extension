@@ -1,30 +1,68 @@
-import classNames from 'classnames';
-import Text from 'components/text';
-import { Images } from 'images';
 import React from 'react';
-import { isSidePanel } from 'utils/isSidePanel';
-
+import { View, Image, StyleSheet } from 'react-native';
+import Text from '../../../components/text';
+import { Images } from '../../../../assets/images';
 import GoToLeapboard from './GoToLeapboard';
 
 export default function MoreAirdrops() {
+
   return (
-    <div className='p-4 bg-white-100 dark:bg-gray-950 rounded-xl relative overflow-hidden'>
-      <Text size='sm' className='font-bold mb-1'>
+    <View style={styles.container}>
+      <Text size="sm" style={styles.header}>
         Looking for more?
       </Text>
-      <Text size='xs' color='text-gray-800 dark:text-gray-200' className='font-medium mb-3 !leading-5'>
-        View upcoming airdrops and check
-        <br />
-        eligibility for other addresses.
+      <Text size="xs" style={styles.subtext}>
+        View upcoming airdrops and check{'\n'}eligibility for other addresses.
       </Text>
-      <GoToLeapboard className='relative' />
-      <img
-        src={Images.Misc.FrogHappy}
-        alt='FrogHappy'
-        className={classNames('absolute right-0 bottom-0', {
-          'min-[350px]:!max-w-[40%] max-[349px]:!max-w-[32%]': isSidePanel(),
-        })}
+      <GoToLeapboard style={styles.leapboardBtn} />
+      <Image
+        source={{uri: Images.Misc.FrogHappy}}
+        style={[
+          styles.frog,
+          {
+            width: '40%',
+            maxWidth: 120,
+            minWidth: 60,
+          },
+        ]}
+        resizeMode="contain"
       />
-    </div>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 16,
+    backgroundColor: '#F3F4F6', // white-100; swap for dark mode as needed
+    borderRadius: 16,
+    position: 'relative',
+    overflow: 'hidden',
+    minHeight: 130,
+  },
+  header: {
+    fontWeight: 'bold',
+    marginBottom: 4,
+    fontSize: 14,
+  },
+  subtext: {
+    fontWeight: '500',
+    color: '#222',
+    opacity: 0.85,
+    marginBottom: 12,
+    lineHeight: 20,
+    fontSize: 12,
+  },
+  leapboardBtn: {
+    position: 'relative',
+    zIndex: 2,
+    marginBottom: 8,
+  },
+  frog: {
+    position: 'absolute',
+    right: 0,
+    bottom: 0,
+    height: 60,
+    zIndex: 1,
+  },
+});

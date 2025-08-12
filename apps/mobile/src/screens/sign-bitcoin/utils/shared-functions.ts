@@ -1,18 +1,20 @@
-import { MessageTypes } from 'config/message-types';
-import { NavigateFunction } from 'react-router-dom';
-import { isSidePanel } from 'utils/isSidePanel';
-import Browser from 'webextension-polyfill';
+import { useNavigation } from '@react-navigation/native';
+import { MessageTypes } from '../../../services/config/message-types';
+import { DeviceEventEmitter } from 'react-native'; // Native event system
 
-export async function handleRejectClick(navigate: NavigateFunction, payloadId?: number) {
-  await Browser.runtime.sendMessage({
-    type: MessageTypes.signBitcoinResponse,
-    payloadId,
-    payload: { status: 'error', data: 'User rejected the transaction' },
-  });
+export function useHandleRejectClick() {
+  const navigation = useNavigation();
 
-  if (isSidePanel()) {
-    navigate('/home');
-  } else {
-    window.close();
-  }
+  const handleRejectClick = async (payloadId: any) => {
+    DeviceEventEmitter.emit('bitcoinSignEvent', {
+      type: MessageTypes.signBitcoinResponse,
+      payloadId,
+      payload: { status: 'error', data: 'User rejected the transaction' },
+    });
+
+    // Navigate back to home or close modal as per your UX
+    navigation.goBack();
+  };
+
+  return { setHandleRejectClick: handleRejectClick };
 }

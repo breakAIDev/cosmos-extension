@@ -1,4 +1,8 @@
-// eslint-disable-next-line simple-import-sort/imports
+import React, { useMemo, useState } from 'react';
+import { View, Text, Image, ScrollView, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { observer } from 'mobx-react-lite';
+import BigNumber from 'bignumber.js';
+
 import {
   sliceWord,
   useActiveChain,
@@ -7,25 +11,19 @@ import {
   useSelectedNetwork,
 } from '@leapwallet/cosmos-wallet-hooks';
 import { useTheme } from '@leapwallet/leap-ui';
-import BigNumber from 'bignumber.js';
-import BottomModal from 'components/new-bottom-modal';
-import { ValidatorItemSkeleton } from 'components/Skeletons/StakeSkeleton';
-import { useFormatCurrency } from 'hooks/settings/useCurrency';
-import { Images } from 'images';
-import React, { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { imgOnError } from 'utils/imgOnError';
 
+import BottomModal from '../../../components/new-bottom-modal';
+import { ValidatorItemSkeleton } from '../../../components/Skeletons/StakeSkeleton';
+import { useFormatCurrency } from '../../../hooks/settings/useCurrency';
+import { Images } from '../../../../assets/images';
 import { Provider, ProviderDelegation, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { RootDenomsStore } from '@leapwallet/cosmos-wallet-store';
-import { Button } from 'components/ui/button';
-import { observer } from 'mobx-react-lite';
-import { rootDenomsStore } from 'stores/denoms-store-instance';
-import { hideAssetsStore } from 'stores/hide-assets-store';
-import { isSidePanel } from 'utils/isSidePanel';
+import { Button } from '../../../components/ui/button';
+import { rootDenomsStore } from '../../../context/denoms-store-instance';
+import { hideAssetsStore } from '../../../context/hide-assets-store';
 import { ValidatorCardView } from '../components/ValidatorCardView';
-import { StakeInputPageState } from '../StakeInputPage';
 
+// ---------- StakedProviderDetails (Modal) ---------------
 interface StakedProviderDetailsProps {
   isOpen: boolean;
   onClose: () => void;
@@ -37,108 +35,100 @@ interface StakedProviderDetailsProps {
   forceNetwork?: 'mainnet' | 'testnet';
 }
 
-const StakedProviderDetails = observer(
-  ({
-    isOpen,
-    onClose,
-    onSwitchValidator,
-    provider,
-    delegation,
-    rootDenomsStore,
-    forceChain,
-    forceNetwork,
-  }: StakedProviderDetailsProps) => {
-    const denoms = rootDenomsStore.allDenoms;
-    const _activeChain = useActiveChain();
-    const activeChain = useMemo(() => forceChain || _activeChain, [_activeChain, forceChain]);
+const StakedProviderDetails = observer(({
+  isOpen,
+  onClose,
+  onSwitchValidator,
+  provider,
+  delegation,
+  rootDenomsStore,
+  forceChain,
+  forceNetwork,
+}: StakedProviderDetailsProps) => {
+  const denoms = rootDenomsStore.allDenoms;
+  const _activeChain = useActiveChain();
+  const activeChain = useMemo(() => forceChain || _activeChain, [_activeChain, forceChain]);
+  const _activeNetwork = useSelectedNetwork();
+  const activeNetwork = useMemo(() => forceNetwork || _activeNetwork, [_activeNetwork, forceNetwork]);
+  const [activeStakingDenom] = useActiveStakingDenom(denoms, activeChain, activeNetwork);
+  const [formatCurrency] = useFormatCurrency();
+  const { theme } = useTheme();
 
-    const _activeNetwork = useSelectedNetwork();
-    const activeNetwork = useMemo(() => forceNetwork || _activeNetwork, [_activeNetwork, forceNetwork]);
+  const amountTitleText = useMemo(() => {
+    if (new BigNumber(delegation.amount.currencyAmount ?? '').gt(0)) {
+      return hideAssetsStore.formatHideBalance(formatCurrency(new BigNumber(delegation.amount.currencyAmount ?? '')));
+    } else {
+      return hideAssetsStore.formatHideBalance(delegation.amount.formatted_amount ?? delegation.amount.amount);
+    }
+  }, [
+    delegation.amount.amount,
+    delegation.amount.currencyAmount,
+    delegation.amount.formatted_amount,
+    formatCurrency,
+  ]);
 
-    const [activeStakingDenom] = useActiveStakingDenom(denoms, activeChain, activeNetwork);
-    const [formatCurrency] = useFormatCurrency();
-    const { theme } = useTheme();
+  const amountSubtitleText = useMemo(() => {
+    if (new BigNumber(delegation.amount.currencyAmount ?? '').gt(0)) {
+      return hideAssetsStore.formatHideBalance(delegation.amount.formatted_amount ?? delegation.amount.amount);
+    }
+    return '';
+  }, [delegation.amount.amount, delegation.amount.currencyAmount, delegation.amount.formatted_amount]);
 
-    const amountTitleText = useMemo(() => {
-      if (new BigNumber(delegation.amount.currencyAmount ?? '').gt(0)) {
-        return hideAssetsStore.formatHideBalance(formatCurrency(new BigNumber(delegation.amount.currencyAmount ?? '')));
-      } else {
-        return hideAssetsStore.formatHideBalance(delegation.amount.formatted_amount ?? delegation.amount.amount);
-      }
-    }, [
-      delegation.amount.amount,
-      delegation.amount.currencyAmount,
-      delegation.amount.formatted_amount,
-      formatCurrency,
-    ]);
+  // Responsive moniker slicing (adjust as needed for your UI)
+  const screenWidth = Dimensions.get('window').width;
+  const monikerMaxLen = 18 + Math.floor(((Math.min(screenWidth, 400) - 320) / 81) * 7);
 
-    const amountSubtitleText = useMemo(() => {
-      if (new BigNumber(delegation.amount.currencyAmount ?? '').gt(0)) {
-        return hideAssetsStore.formatHideBalance(delegation.amount.formatted_amount ?? delegation.amount.amount);
-      }
-      return '';
-    }, [delegation.amount.amount, delegation.amount.currencyAmount, delegation.amount.formatted_amount]);
+  return (
+    <BottomModal
+      fullScreen
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Provider Details"
+      contentStyle={{ padding: 0, minHeight: '100%' }}
+    >
+      <ScrollView contentContainerStyle={styles.modalBody}>
+        <View style={styles.providerHeaderRow}>
+          <Image
+            source={{ uri: provider?.image || Images.Misc.Validator }}
+            style={styles.providerAvatar}
+          />
+          <Text style={styles.providerName}>
+            {sliceWord(provider?.moniker ?? '', monikerMaxLen, 3)}
+          </Text>
+        </View>
 
-    return (
-      <BottomModal
-        fullScreen
-        isOpen={isOpen}
-        onClose={onClose}
-        title='Provider Details'
-        className='!p-0 relative h-full'
-        headerClassName='border-secondary-200 border-b'
-      >
-        <div className='p-6 pt-8 px-6 flex flex-col gap-4 h-[calc(100%-84px)] overflow-y-scroll'>
-          <div className='flex w-full gap-4 items-center'>
-            <img
-              width={40}
-              height={40}
-              className='rounded-full'
-              src={provider?.image || Images.Misc.Validator}
-              onError={imgOnError(Images.Misc.Validator)}
-            />
+        <View style={styles.detailBox}>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Total Staked</Text>
+            <Text style={styles.detailValue}>N/A</Text>
+          </View>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Commission</Text>
+            <Text style={styles.detailValue}>N/A</Text>
+          </View>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>APR</Text>
+            <Text style={[styles.detailValue, styles.successValue]}>N/A</Text>
+          </View>
+        </View>
 
-            <span className='font-bold text-lg'>
-              {sliceWord(
-                provider?.moniker ?? '',
-                isSidePanel() ? 18 + Math.floor(((Math.min(window.innerWidth, 400) - 320) / 81) * 7) : 10,
-                3,
-              )}
-            </span>
-          </div>
+        <Text style={styles.depositedLabel}>Your deposited amount</Text>
+        <View style={styles.amountBox}>
+          <Text style={styles.amountText}>{amountTitleText} </Text>
+          {!!amountSubtitleText && (
+            <Text style={styles.amountSubText}>({amountSubtitleText})</Text>
+          )}
+        </View>
+      </ScrollView>
 
-          <div className='flex flex-col gap-4 p-6 bg-secondary-100 rounded-xl'>
-            <div className='flex items-center justify-between'>
-              <span className='text-sm text-muted-foreground'>Total Staked</span>
-              <span className='font-bold text-sm'>N/A</span>
-            </div>
+      <View style={styles.bottomActionRow}>
+        <Button onPress={onSwitchValidator}>Switch provider</Button>
+      </View>
+    </BottomModal>
+  );
+});
 
-            <div className='flex items-center justify-between'>
-              <span className='text-sm text-muted-foreground'>Commission</span>
-              <span className='font-bold text-sm'>N/A</span>
-            </div>
-
-            <div className='flex items-center justify-between'>
-              <span className='text-sm text-muted-foreground'>APR</span>
-              <span className='font-bold text-sm text-accent-success'>N/A</span>
-            </div>
-          </div>
-
-          <span className='text-sm text-muted-foreground mt-4'>Your deposited amount</span>
-          <div className='p-6 bg-secondary-100 rounded-xl'>
-            <span className='font-bold text-lg'>{amountTitleText} </span>
-            {amountSubtitleText && <span className='text-muted-foreground'>({amountSubtitleText})</span>}
-          </div>
-        </div>
-
-        <div className='flex gap-x-3 bg-secondary-200 w-full [&>*]:flex-1 mt-auto absolute bottom-0 py-4 px-5'>
-          <Button onClick={onSwitchValidator}>Switch provider</Button>
-        </div>
-      </BottomModal>
-    );
-  },
-);
-
+// ---------- ProviderCard ---------------
 interface ProviderCardProps {
   provider: Provider;
   delegation: ProviderDelegation;
@@ -175,14 +165,10 @@ const ProviderCard = observer(({ provider, delegation, onClick }: ProviderCardPr
   );
 });
 
-export default function ProviderList({
-  forceChain,
-  forceNetwork,
-}: {
-  forceChain?: SupportedChain;
-  forceNetwork?: 'mainnet' | 'testnet';
-}) {
-  const navigate = useNavigate();
+// ---------- ProviderList (Main Export) ---------------
+const ProviderList = observer(({ forceChain, forceNetwork }: { forceChain?: SupportedChain; forceNetwork?: 'mainnet' | 'testnet' }) => {
+  // Navigation logic will depend on your stack; replace below with useNavigation from react-navigation if needed
+  // const navigation = useNavigation();
   const [showStakedProviderDetails, setShowStakedProviderDetails] = useState(false);
   const [selectedDelegation, setSelectedDelegation] = useState<ProviderDelegation | undefined>();
   const { delegations: providerDelegations, loadingDelegations, providers } = useDualStaking();
@@ -192,33 +178,30 @@ export default function ProviderList({
   }, [providerDelegations]);
 
   const sortedDelegations = useMemo(() => {
-    const _sortedDelegations = Object.values(providerDelegations ?? {}).sort(
+    return Object.values(providerDelegations ?? {}).sort(
       (a, b) => parseFloat(b.amount.amount) - parseFloat(a.amount.amount),
     );
-    return _sortedDelegations;
   }, [providerDelegations]);
 
-  const emptyProvider = useMemo(() => {
-    return {
-      provider: emptyProviderDelegation?.provider ?? '',
-      moniker: 'Empty Provider',
-      address: emptyProviderDelegation?.provider ?? '',
-      specs: [],
-    };
-  }, [emptyProviderDelegation?.provider]);
+  const emptyProvider = useMemo(() => ({
+    provider: emptyProviderDelegation?.provider ?? '',
+    moniker: 'Empty Provider',
+    address: emptyProviderDelegation?.provider ?? '',
+    specs: [],
+  }), [emptyProviderDelegation?.provider]);
 
   return (
-    <>
+    <View>
       {loadingDelegations && <ValidatorItemSkeleton />}
-      <div className='flex flex-col w-full gap-y-2'>
+      <View style={{ flexDirection: 'column', width: '100%', gap: 8 }}>
         {!loadingDelegations && providers && sortedDelegations.length > 0 && (
           <>
             {emptyProviderDelegation && (
               <>
-                <div className='flex justify-between'>
-                  <span className='text-xs text-muted-foreground'>Empty Provider</span>
-                  <span className='text-xs text-muted-foreground'>Amount Staked</span>
-                </div>
+                <View style={styles.labelRow}>
+                  <Text style={styles.labelText}>Empty Provider</Text>
+                  <Text style={styles.labelText}>Amount Staked</Text>
+                </View>
                 <ProviderCard
                   delegation={emptyProviderDelegation}
                   provider={emptyProvider}
@@ -230,10 +213,10 @@ export default function ProviderList({
               </>
             )}
             {sortedDelegations.length > 1 && (
-              <div className='flex justify-between'>
-                <span className='text-xs text-muted-foreground'>Provider</span>
-                <span className='text-xs text-muted-foreground'>Amount Staked</span>
-              </div>
+              <View style={styles.labelRow}>
+                <Text style={styles.labelText}>Provider</Text>
+                <Text style={styles.labelText}>Amount Staked</Text>
+              </View>
             )}
             {sortedDelegations.map((d) => {
               const provider = providers?.find((el) => el.address === d.provider);
@@ -253,7 +236,7 @@ export default function ProviderList({
             })}
           </>
         )}
-      </div>
+      </View>
       {selectedDelegation && (
         <StakedProviderDetails
           rootDenomsStore={rootDenomsStore}
@@ -266,24 +249,122 @@ export default function ProviderList({
           }
           delegation={selectedDelegation}
           onSwitchValidator={() => {
-            const state: StakeInputPageState = {
-              mode: 'REDELEGATE',
-              fromProvider:
-                selectedDelegation.provider === emptyProviderDelegation?.provider
-                  ? emptyProvider
-                  : providers.find((p) => p.address === selectedDelegation.provider),
-              providerDelegation: selectedDelegation,
-              forceChain: 'lava',
-            };
-            sessionStorage.setItem('navigate-stake-input-state', JSON.stringify(state));
-            navigate('/stake/input', {
-              state,
-            });
+            // Navigation logic: you will need to adapt for react-navigation or similar
+            // Prepare next state and trigger navigation
+            // const state: StakeInputPageState = {
+            //   mode: 'REDELEGATE',
+            //   fromProvider: selectedDelegation.provider === emptyProviderDelegation?.provider
+            //     ? emptyProvider
+            //     : providers.find((p) => p.address === selectedDelegation.provider),
+            //   providerDelegation: selectedDelegation,
+            //   forceChain: 'lava',
+            // };
+            // navigation.navigate('StakeInput', { state });
+            setShowStakedProviderDetails(false);
           }}
           forceChain={forceChain}
           forceNetwork={forceNetwork}
         />
       )}
-    </>
+    </View>
   );
-}
+});
+
+const styles = StyleSheet.create({
+  modalBody: {
+    padding: 24,
+    paddingTop: 36,
+    flexDirection: 'column',
+    gap: 18,
+    minHeight: '70%',
+    backgroundColor: '#fff',
+  },
+  providerHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    marginBottom: 14,
+  },
+  providerAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 14,
+    backgroundColor: '#eee',
+  },
+  providerName: {
+    fontWeight: 'bold',
+    fontSize: 18,
+    color: '#222',
+  },
+  detailBox: {
+    flexDirection: 'column',
+    gap: 12,
+    backgroundColor: '#f4f5f8',
+    borderRadius: 14,
+    padding: 18,
+    marginBottom: 14,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+    alignItems: 'center',
+  },
+  detailLabel: {
+    fontSize: 14,
+    color: '#888',
+  },
+  detailValue: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  successValue: {
+    color: '#14b86a',
+  },
+  depositedLabel: {
+    fontSize: 14,
+    color: '#888',
+    marginTop: 18,
+    marginBottom: 4,
+  },
+  amountBox: {
+    backgroundColor: '#f4f5f8',
+    borderRadius: 14,
+    padding: 18,
+    marginBottom: 18,
+  },
+  amountText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#222',
+  },
+  amountSubText: {
+    fontSize: 14,
+    color: '#888',
+  },
+  bottomActionRow: {
+    flexDirection: 'row',
+    gap: 12,
+    backgroundColor: '#f7f7fa',
+    width: '100%',
+    paddingVertical: 18,
+    paddingHorizontal: 18,
+    justifyContent: 'center',
+    borderTopWidth: 1,
+    borderColor: '#e4e4e7',
+  },
+  labelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+    paddingHorizontal: 4,
+  },
+  labelText: {
+    fontSize: 13,
+    color: '#888',
+  },
+});
+
+export default ProviderList;

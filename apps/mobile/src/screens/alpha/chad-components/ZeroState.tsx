@@ -1,33 +1,68 @@
-import classNames from 'classnames';
-import Text from 'components/text';
-import { Images } from 'images';
 import React from 'react';
-
-/**
- * @description This state is when user visits this page for the first time
- * or if they have not previously interacted, they are asked to click on
- * "Join Exclusives" button to get started and check their eligibility.
- */
+import { View, Image, StyleSheet, StyleProp, ViewStyle } from 'react-native';
+import Text from '../../../components/text';
+import { Images } from '../../../../assets/images';
 
 interface EmptyBookmarksProps {
   title: string;
   subTitle: string | React.ReactNode;
-  className?: string;
+  style?: StyleProp<ViewStyle>;
   showRetryButton?: boolean;
 }
 
-export default function ZeroStatePlaceholder({ title, subTitle, className = '' }: EmptyBookmarksProps) {
+export default function ZeroStatePlaceholder({
+  title,
+  subTitle,
+  style = {},
+  showRetryButton,
+}: EmptyBookmarksProps) {
   return (
-    <div
-      className={classNames('bg-white-100 dark:bg-gray-950 rounded-xl pt-8 p-4 flex flex-col items-center', className)}
-    >
-      <img src={Images.Misc.FrogSad} alt='FrogSad' className='mb-6' />
-      <Text size='sm' className='font-bold mb-1'>
+    <View style={[styles.container, style]}>
+      <Image
+        source={{uri: Images.Misc.FrogSad}}
+        style={styles.image}
+        resizeMode="contain"
+        accessibilityLabel="FrogSad"
+      />
+      <Text size="sm" style={styles.title}>
         {title}
       </Text>
-      <Text size='xs' color='text-gray-800 dark:text-gray-200' className='font-medium text-center !leading-5'>
-        {subTitle}
-      </Text>
-    </div>
+      {typeof subTitle === 'string' ?
+        ( <Text size="xs" style={styles.subTitle}>
+          {subTitle}
+        </Text> ) :
+        (React.isValidElement(subTitle) ? subTitle: null)
+      }
+      
+      {/* You can add a retry button here if showRetryButton is true */}
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    paddingTop: 32,
+    paddingHorizontal: 16,
+    paddingBottom: 24,
+    alignItems: 'center',
+    // If you have a dark mode, override with a parent context or theme
+  },
+  image: {
+    width: 80,
+    height: 80,
+    marginBottom: 24,
+  },
+  title: {
+    fontWeight: 'bold',
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  subTitle: {
+    color: '#374151', // gray-800
+    fontWeight: '500',
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+});

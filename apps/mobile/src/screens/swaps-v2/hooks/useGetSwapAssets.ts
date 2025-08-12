@@ -11,11 +11,11 @@ import {
 import { DenomsRecord, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { useQuery } from '@tanstack/react-query';
 import { BigNumber } from 'bignumber.js';
-import { useNonNativeCustomChains } from 'hooks';
-import { useSelectedNetwork } from 'hooks/settings/useNetwork';
-import { useChainInfos } from 'hooks/useChainInfos';
+import { useNonNativeCustomChains } from '../../../hooks';
+import { useSelectedNetwork } from '../../../hooks/settings/useNetwork';
+import { useChainInfos } from '../../../hooks/useChainInfos';
 import { useMemo } from 'react';
-import { SourceChain, SourceToken } from 'types/swap';
+import { SourceChain, SourceToken } from '../../../types/swap';
 
 import { hasCoinType } from '../utils';
 import { MergedAsset } from './useAssets';

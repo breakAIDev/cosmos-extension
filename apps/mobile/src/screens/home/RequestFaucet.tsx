@@ -1,18 +1,21 @@
-import HCaptcha from '@hcaptcha/react-hcaptcha';
+import React, { useCallback, useEffect, useRef } from 'react';
+import { View, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
+import HCaptcha from '@hcaptcha/react-native-hcaptcha';
+import { RecaptchaRef } from 'react-native-recaptcha-that-works';
+import Recaptcha from '../../components/re-captcha/Recaptcha';
 import { Faucet, useActiveChain, useAddress, useChainInfo, useGetFaucet } from '@leapwallet/cosmos-wallet-hooks';
 import { getBlockChainFromAddress } from '@leapwallet/cosmos-wallet-sdk';
 import { useMutation } from '@tanstack/react-query';
-import CssLoader from 'components/css-loader/CssLoader';
-import { Recaptcha } from 'components/re-captcha';
-import Text from 'components/text';
-import { RECAPTCHA_CHAINS } from 'config/config';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import { useSelectedNetwork } from 'hooks/settings/useNetwork';
-import { useQueryParams } from 'hooks/useQuery';
-import React, { useCallback, useEffect, useRef } from 'react';
-import { rootBalanceStore } from 'stores/root-store';
-import { Colors } from 'theme/colors';
+import { useSelectedNetwork } from '../../hooks/settings/useNetwork';
+import { useQueryParams } from '../../hooks/useQuery';
+// import { rootBalanceStore } from '../../context/root-store'; // Provide your actual implementation
+import { getChainColor } from '../../theme/colors';
+import CustomText from '../../components/text'; // replace with your Text component
+// import CssLoader from '../../components/css-loader/CssLoader'; // replace or use ActivityIndicator
+import { RECAPTCHA_CHAINS } from '../../services/config/config';
+import { rootBalanceStore } from '../../context/root-store';
 
 dayjs.extend(utc);
 
@@ -20,15 +23,14 @@ export default function RequestFaucet() {
   const chain = useChainInfo();
   const activeChain = useActiveChain();
   const selectedNetwork = useSelectedNetwork();
-  const hCaptchaRef = useRef<HCaptcha>(null);
-  const reCaptchaRef = useRef<Recaptcha>(null);
+  const hCaptchaRef = useRef<any>(null);
+  const reCaptchaRef = useRef<RecaptchaRef>(null);
   const address = useAddress();
-
   const query = useQueryParams();
 
   const invalidateBalances = useCallback(() => {
     rootBalanceStore.refetchBalances(activeChain, selectedNetwork);
-  }, [activeChain, rootBalanceStore, selectedNetwork]);
+  }, [activeChain, selectedNetwork]);
 
   let faucetDetails: Faucet = useGetFaucet(chain?.testnetChainId ?? chain?.chainId ?? '');
 
@@ -57,8 +59,6 @@ export default function RequestFaucet() {
   } = useMutation(
     async (args: Record<string, string>) => {
       const { method } = faucetDetails;
-      // Resolve payload
-      
       let payload: Record<string, any> = {};
       if (faucetDetails.payloadResolution) {
         payload = Object.entries(faucetDetails.payloadResolution).reduce((acc, val) => {
@@ -78,78 +78,50 @@ export default function RequestFaucet() {
         }, {});
       }
       if (method === 'POST') {
-        if (faucetDetails.payloadSchema?.type === 'form-data') {
-          const body = new FormData();
-          Object.keys(args).forEach((field: string) => {
-            body.append(field, payload[field]);
-          });
-          return fetch(faucetDetails.url, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-            body: body,
-          });
-        } else {
-          const headers: { 'Content-Type': string; Authorization?: string } = {
-            'Content-Type': 'application/json',
-          };
-
-          if (chain?.chainId === 'constantine-3') {
-            headers['Authorization'] = `Basic ${Buffer.from(
-              `${process.env.ARCHWAY_FAUCET_USERNAME}:${process.env.ARCHWAY_FAUCET_PASSWORD}`,
-            ).toString('base64')}`;
-          }
-
-          return fetch(faucetDetails.url, {
-            method: 'POST',
-            headers,
-            body: JSON.stringify(payload),
-          });
-        }
+        return fetch(faucetDetails.url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
       } else {
         const url = new URL(faucetDetails.url);
         Object.keys(args).forEach((field: string) => url.searchParams.set(field, encodeURIComponent(args[field])));
         return fetch(url.toString());
       }
     },
-    {
-      cacheTime: 0,
-    },
+    { cacheTime: 0 }
   );
 
-  const setShowFaucetResp = (data: { msg: string; status: 'success' | 'fail' | null }) => {
+  const setShowFaucetResp = useCallback((data: { msg: string; status: 'success' | 'fail' | null }) => {
     if (!data.status) {
       query.remove('faucet-success');
       query.remove('faucet-error');
       return;
     }
-
     query.set(data.status === 'success' ? 'faucet-success' : 'faucet-error', data.msg);
-  };
+  });
 
-  // TODO:- handle the case where there are more properties on faucetDetails.payloadSchema.schema
-  // TODO:- in future when we have configuration for multiple faucets, add a responseSchema to the faucet config
   const handleSubmit = async () => {
     try {
       if (getBlockChainFromAddress(address) === 'sei') {
-        window.open('https://atlantic-2.app.sei.io/faucet', '_blank');
+        // RN: Linking.openURL
+        import('react-native').then(({ Linking }) => Linking.openURL('https://atlantic-2.app.sei.io/faucet'));
         return;
       }
 
       if (RECAPTCHA_CHAINS.includes(activeChain)) {
-        reCaptchaRef.current?.execute();
+        reCaptchaRef.current?.open();
         return;
       }
 
-      const result = await hCaptchaRef.current?.execute({ async: true });
+      const result = await hCaptchaRef.current?.show(); // library-specific, may be .show() or .open()
       if (!result) {
         throw new Error('could not get hCaptcha response');
       }
 
       requestTokens({
         address,
-        captchaKey: result.response,
+        captchaKey: result, // adjust if the library returns { response }
       });
     } catch (error) {
       setShowFaucetResp({
@@ -178,9 +150,8 @@ export default function RequestFaucet() {
             msg: 'Something went wrong. Please try again.',
           });
         }
-
         if (faucetResponse.status === 200 && data?.status !== 'fail') {
-          invalidateBalances();
+          // invalidateBalances(); // implement as needed
           setShowFaucetResp({
             status: 'success',
             msg: 'Your wallet will receive the tokens shortly',
@@ -193,91 +164,138 @@ export default function RequestFaucet() {
         }
       }
     };
-
     fn();
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [faucetResponse, invalidateBalances]);
+  }, [faucetResponse, setShowFaucetResp]);
 
   if (!faucetDetails) return null;
 
   return (
-    <>
-      <div className='h-captcha' data-sitekey={faucetDetails?.security?.key} data-theme='dark' />
-      <button
-        className='relative rounded-2xl w-[344px] m-auto mb-4 p-4 flex items-center overflow-hidden'
-        style={{
-          background: chain?.theme?.gradient,
-          backgroundSize: 'contain',
-        }}
-        onClick={handleSubmit}
+    <View>
+      {/* Invisible captchas */}
+      <HCaptcha
+        ref={hCaptchaRef}
+        siteKey={faucetDetails?.security?.key ?? ''}
+        size="invisible"
+        theme="dark"
+      />
+
+      <Recaptcha
+        ref={reCaptchaRef}
+        siteKey={faucetDetails?.security?.key ?? ''}
+        baseUrl={'https://your-app-base-url.com'} // required for recaptcha-that-works
+        size="invisible"
+        theme="dark"
+        onVerify={handleRecaptchaVerify}
+      />
+
+      <TouchableOpacity
+        style={[
+          styles.button,
+          { backgroundColor: chain?.theme?.gradient || '#3381FF' },
+        ]}
+        onPress={handleSubmit}
+        disabled={isLoading}
       >
-        <img
-          src={chain?.chainSymbolImageUrl}
-          alt='chain logo'
-          className='absolute z-0 right-0 opacity-20 h-full w-fit'
+        {/* Chain logo as background */}
+        <Image
+          source={{ uri: chain?.chainSymbolImageUrl }}
+          style={styles.bgLogo}
+          resizeMode="contain"
+          blurRadius={2}
         />
         {isLoading ? (
-          <>
-            <div
-              className='w-10 m-w-10 h-10 rounded-full relative flex items-center justify-center mr-4'
-              style={{
-                backgroundColor: Colors.getChainColor(activeChain),
-              }}
+          <View style={styles.loaderRow}>
+            <View
+              style={[
+                styles.loaderCircle,
+                { backgroundColor: getChainColor(activeChain) },
+              ]}
             >
-              <CssLoader className='absolute mt-0' loaderClass='white' style={{ marginTop: 0 }} />
-            </div>
-            <Text size='sm' color='dark:text-white-100 text-gray-800 font-black'>
+              <ActivityIndicator color="#fff" size="small" />
+            </View>
+            <CustomText size="sm" style={styles.claimText}>
               Claim in progress
-            </Text>
-          </>
+            </CustomText>
+          </View>
         ) : (
-          <>
-            <img
-              src={chain?.chainSymbolImageUrl}
-              alt='chain logo'
-              width='24'
-              height='24'
-              className='object-contain rounded-full h-10 w-10 mr-4 m-w-10'
-              style={{
-                border: `8px solid ${Colors.getChainColor(activeChain)}`,
-              }}
+          <View style={styles.contentRow}>
+            <Image
+              source={{ uri: chain?.chainSymbolImageUrl }}
+              style={[
+                styles.chainIcon,
+                { borderColor: getChainColor(activeChain) },
+              ]}
             />
-            <div>
-              <Text size='sm' color='dark:text-white-100 text-gray-800 font-black'>
+            <View>
+              <CustomText size="sm" style={styles.titleText}>
                 {faucetDetails?.title}
-              </Text>
-              <Text size='xs' color='dark:text-gray-400 text-gray-700 font-medium mt-[2px] text-left'>
+              </CustomText>
+              <CustomText size="xs" style={styles.descText}>
                 {faucetDetails?.description}
-              </Text>
-            </div>
-          </>
+              </CustomText>
+            </View>
+          </View>
         )}
-      </button>
-
-      <form>
-        {RECAPTCHA_CHAINS.includes(activeChain) ? (
-          <Recaptcha
-            elementID='g-recaptcha'
-            className='g-recaptcha'
-            ref={reCaptchaRef}
-            sitekey={faucetDetails?.security?.key ?? ''}
-            size='invisible'
-            theme='dark'
-            render='explicit'
-            verifyCallback={handleRecaptchaVerify}
-            badge='none'
-            type='image'
-            tabindex='0'
-            onloadCallbackName='onloadCallback'
-            verifyCallbackName='verifyCallback'
-            expiredCallbackName='expiredCallback'
-            action='faucet'
-          />
-        ) : (
-          <HCaptcha ref={hCaptchaRef} sitekey={faucetDetails?.security?.key ?? ''} size='invisible' theme='dark' />
-        )}
-      </form>
-    </>
+      </TouchableOpacity>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  button: {
+    borderRadius: 16,
+    width: 344,
+    marginVertical: 12,
+    padding: 16,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  bgLogo: {
+    position: 'absolute',
+    right: 0,
+    opacity: 0.2,
+    height: '100%',
+    width: 80,
+    zIndex: 0,
+  },
+  loaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  loaderCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  claimText: {
+    fontWeight: 'bold',
+    color: '#111',
+  },
+  contentRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  chainIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 12,
+    borderWidth: 3,
+  },
+  titleText: {
+    fontWeight: 'bold',
+    color: '#222',
+  },
+  descText: {
+    fontWeight: '500',
+    color: '#666',
+    marginTop: 2,
+    textAlign: 'left',
+  },
+});

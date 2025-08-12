@@ -1,11 +1,10 @@
+import React, { useState } from 'react';
+import { View, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { SelectedAddress, sliceAddress } from '@leapwallet/cosmos-wallet-hooks';
 import { Avatar } from '@leapwallet/leap-ui';
-import Text from 'components/text';
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
-import { Images } from 'images';
-import React, { useState } from 'react';
-import { imgOnError } from 'utils/imgOnError';
-
+import Text from '../../../../components/text';
+import { useDefaultTokenLogo } from '../../../../hooks/utility/useDefaultTokenLogo';
+import { Images } from '../../../../../assets/images';
 import WalletDetailsSheet from '../wallet-details-sheet';
 
 type SelectedAddressPreviewProps = {
@@ -22,38 +21,35 @@ export const SelectedAddressPreview: React.FC<SelectedAddressPreviewProps> = ({
   const defaultTokenLogo = useDefaultTokenLogo();
   const [showContactDetailsSheet, setShowContactDetailsSheet] = useState(false);
 
-  const handleClick: React.MouseEventHandler<HTMLButtonElement> = (e) => {
-    e.stopPropagation();
-    setShowContactDetailsSheet(true);
-  };
+  // No stopPropagation in RN, just control navigation logic
+  const handleMenuPress = () => setShowContactDetailsSheet(true);
 
   return (
     <>
-      <div
-        className='flex items-center'
-        title={`${selectedAddress.chainName}: ${
-          selectedAddress.ethAddress ? selectedAddress.ethAddress : selectedAddress.address
-        }`}
-      >
+      <View style={styles.row} /* add accessibilityLabel or testID if needed */>
         <Avatar
-          size='sm'
+          size="sm"
           avatarImage={selectedAddress.avatarIcon ?? defaultTokenLogo}
-          avatarOnError={imgOnError(defaultTokenLogo)}
+          avatarOnError={() => {}}
           emoji={selectedAddress.emoji}
-          chainIcon={selectedAddress.avatarIcon === selectedAddress.chainIcon ? undefined : selectedAddress.chainIcon}
-          className='bg-gray-200 dark:bg-gray-800 !h-8 !w-8'
+          chainIcon={
+            selectedAddress.avatarIcon === selectedAddress.chainIcon
+              ? undefined
+              : selectedAddress.chainIcon
+          }
+          style={styles.avatar}
         />
-        <Text size='md' className='text-black-100 dark:text-white-100 ml-2 font-bold'>
+        <Text size="md" style={styles.nameText}>
           {selectedAddress.ethAddress && selectedAddress.chainName !== 'injective'
             ? sliceAddress(selectedAddress.ethAddress)
             : selectedAddress.name}
         </Text>
         {showEditMenu ? (
-          <button onClick={handleClick} className='ml-auto'>
-            <img src={Images.Misc.Menu} alt='Menu' className='ml-auto' />
-          </button>
+          <TouchableOpacity style={styles.menuButton} onPress={handleMenuPress}>
+            <Image source={{uri: Images.Misc.Menu}} style={styles.menuIcon} />
+          </TouchableOpacity>
         ) : null}
-      </div>
+      </View>
       <WalletDetailsSheet
         isOpen={showEditMenu && showContactDetailsSheet}
         selectedAddress={selectedAddress}
@@ -63,3 +59,37 @@ export const SelectedAddressPreview: React.FC<SelectedAddressPreviewProps> = ({
     </>
   );
 };
+
+const styles = StyleSheet.create({
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 0,
+    paddingHorizontal: 0,
+  },
+  avatar: {
+    backgroundColor: '#E5E7EB', // bg-gray-200
+    height: 32, // 8 * 4
+    width: 32,
+    borderRadius: 16,
+  },
+  nameText: {
+    color: '#1A202C', // text-black-100
+    marginLeft: 8,
+    fontWeight: 'bold',
+    fontSize: 16,
+    flexShrink: 1,
+  },
+  menuButton: {
+    marginLeft: 'auto',
+    padding: 6,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  menuIcon: {
+    width: 20,
+    height: 20,
+    resizeMode: 'contain',
+  },
+});

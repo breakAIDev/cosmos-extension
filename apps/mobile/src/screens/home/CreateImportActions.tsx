@@ -1,18 +1,15 @@
 import { CardDivider, ThemeName, useTheme } from '@leapwallet/leap-ui';
-import { DownloadSimple, PlusCircle, Usb } from '@phosphor-icons/react';
-import { ButtonName, EventName } from 'config/analytics';
-import { Images } from 'images';
-import mixpanel from 'mixpanel-browser';
+import { DownloadSimple, PlusCircle, Usb } from 'phosphor-react-native';
+import { ButtonName, EventName } from '../../services/config/analytics';
+import { Images } from '../../../assets/images';
+import mixpanel from '../../mixpanel';
 import { observer } from 'mobx-react-lite';
 import React, { useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { closeSidePanel } from 'utils/closeSidePanel';
-import { hasMnemonicWallet } from 'utils/hasMnemonicWallet';
-import { isSidePanel } from 'utils/isSidePanel';
-import extension from 'webextension-polyfill';
-
+import { View, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import Text from '../../components/text';
 import { Wallet } from '../../hooks/wallet/useWallet';
+import { hasMnemonicWallet } from '../../utils/hasMnemonicWallet';
+import { useNavigation } from '@react-navigation/native'; // Uncomment and use for navigation
 
 const CreateImportActions = observer(
   ({
@@ -27,17 +24,16 @@ const CreateImportActions = observer(
     setIsNewWalletFormVisible: (show: boolean) => void;
   }) => {
     const { theme } = useTheme();
-    const navigate = useNavigate();
+    const navigation = useNavigation();
     const wallets = Wallet.useWallets();
 
     const handleCreateNewWalletClick = useCallback(() => {
       if (hasMnemonicWallet(wallets as Wallet.Keystore)) {
         setIsNewWalletFormVisible(true);
       } else {
-        window.open(extension.runtime.getURL(`index.html#/onboarding`));
-        closeSidePanel();
+        navigation.navigate('Onboarding'); // Use your React Native navigation here
       }
-    }, [setIsNewWalletFormVisible, wallets]);
+    }, [navigation, setIsNewWalletFormVisible, wallets]);
 
     const handleWatchWalletClick = useCallback(() => {
       setShowImportWatchWallet(true);
@@ -47,81 +43,133 @@ const CreateImportActions = observer(
     }, [setShowImportWatchWallet]);
 
     const handleConnectLedgerClick = useCallback(() => {
-      const views = extension.extension.getViews({ type: 'popup' });
-      if (views.length === 0 && !isSidePanel()) {
-        navigate('/onboardingImport?walletName=ledger');
-      } else {
-        window.open('index.html#/onboardingImport?walletName=ledger');
-        closeSidePanel();
-      }
-    }, [navigate]);
+      navigation.navigate('OnboardingImport', { walletName: 'ledger' });
+    }, []);
 
     return (
-      <>
-        <div className='bg-white-100 dark:bg-gray-900 rounded-2xl mb-4 overflow-hidden'>
-          <div
-            data-testing-id='create-new-wallet-div'
-            onClick={handleCreateNewWalletClick}
-            className='flex items-center p-4 bg-white-100 dark:bg-gray-900 cursor-pointer'
+      <View>
+        <View style={styles.cardSection}>
+          <TouchableOpacity
+            onPress={handleCreateNewWalletClick}
+            style={styles.actionRow}
+            testID="create-new-wallet-div"
+            activeOpacity={0.8}
           >
-            <PlusCircle size={20} className='text-gray-400 mr-4' />
-            <Text size='md' className='font-bold'>
+            <PlusCircle size={20} color="#9CA3AF" style={styles.icon} />
+            <Text size="md" style={styles.actionText}>
               Create new wallet
             </Text>
-          </div>
+          </TouchableOpacity>
 
           <CardDivider />
-          <div
-            onClick={() => setShowImportSeedPhrase(true)}
-            className='flex items-center px-4 py-4 bg-white-100 dark:bg-gray-900 cursor-pointer'
+          <TouchableOpacity
+            onPress={() => setShowImportSeedPhrase(true)}
+            style={styles.actionRow}
+            activeOpacity={0.8}
           >
-            <DownloadSimple size={20} className='text-gray-400 mr-4' />
-            <Text size='md' className='font-bold'>
+            <DownloadSimple size={20} color="#9CA3AF" style={styles.icon} />
+            <Text size="md" style={styles.actionText}>
               Import using recovery phrase
             </Text>
-          </div>
+          </TouchableOpacity>
 
           <CardDivider />
-          <div
-            onClick={() => setShowImportPrivateKey(true)}
-            className='flex items-center px-4 py-4 bg-white-100 dark:bg-gray-900 cursor-pointer'
+          <TouchableOpacity
+            onPress={() => setShowImportPrivateKey(true)}
+            style={styles.actionRow}
+            activeOpacity={0.8}
           >
-            <img src={Images.Misc.FilledKey} alt='filled-key' className='mr-4' />
-            <Text size='md' className='font-bold'>
+            <Image
+              source={{uri: Images.Misc.FilledKey}}
+              style={styles.imgIcon}
+              resizeMode="contain"
+            />
+            <Text size="md" style={styles.actionText}>
               Import using private key
             </Text>
-          </div>
+          </TouchableOpacity>
 
-          <>
-            <CardDivider />
-            <div
-              onClick={handleWatchWalletClick}
-              className='flex items-center p-4 bg-white-100 dark:bg-gray-900 cursor-pointer'
-            >
-              <img
-                src={theme === ThemeName.DARK ? Images.Misc.EyeDark : Images.Misc.EyeLight}
-                className='mr-4 w-5 h-5 dark:opacity-60'
-              />
-              <Text size='md' className='font-bold'>
-                Watch wallet
+          <CardDivider />
+          <TouchableOpacity
+            onPress={handleWatchWalletClick}
+            style={styles.actionRow}
+            activeOpacity={0.8}
+          >
+            <Image
+              source={{uri : theme === ThemeName.DARK ? Images.Misc.EyeDark : Images.Misc.EyeLight}}
+              style={styles.imgIcon}
+              resizeMode="contain"
+            />
+            <Text size="md" style={styles.actionText}>
+              Watch wallet
+            </Text>
+            <View style={styles.newBadge}>
+              <Text size="xs" style={styles.newBadgeText}>
+                NEW
               </Text>
-              <div className='text-xs font-medium text-green-500 bg-green-500/10 py-1 px-2.5 rounded-2xl ml-2'>NEW</div>
-            </div>
-          </>
-        </div>
+            </View>
+          </TouchableOpacity>
+        </View>
 
-        <div
-          onClick={handleConnectLedgerClick}
-          className='flex items-center px-4 py-4 bg-white-100 dark:bg-gray-900 cursor-pointer rounded-2xl'
+        <TouchableOpacity
+          onPress={handleConnectLedgerClick}
+          style={[styles.actionRow, styles.ledgerRow]}
+          activeOpacity={0.8}
         >
-          <Usb size={20} className='text-gray-400 mr-4' />
-          <Text size='md' className='font-bold'>
+          <Usb size={20} color="#9CA3AF" style={styles.icon} />
+          <Text size="md" style={styles.actionText}>
             Connect Ledger
           </Text>
-        </div>
-      </>
+        </TouchableOpacity>
+      </View>
     );
   },
 );
+
+const styles = StyleSheet.create({
+  cardSection: {
+    backgroundColor: '#fff', // bg-white-100
+    borderRadius: 16,
+    marginBottom: 16,
+    overflow: 'hidden',
+  },
+  actionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    backgroundColor: '#fff', // or dark variant if in dark mode
+  },
+  icon: {
+    marginRight: 16,
+  },
+  imgIcon: {
+    width: 20,
+    height: 20,
+    marginRight: 16,
+  },
+  actionText: {
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  newBadge: {
+    backgroundColor: 'rgba(34,197,94,0.1)', // bg-green-500/10
+    paddingVertical: 2,
+    paddingHorizontal: 10,
+    borderRadius: 18,
+    marginLeft: 8,
+    alignSelf: 'center',
+  },
+  newBadgeText: {
+    color: '#22C55E',
+    fontWeight: '500',
+    fontSize: 12,
+  },
+  ledgerRow: {
+    borderRadius: 16,
+    marginTop: 8,
+    backgroundColor: '#fff',
+  },
+});
 
 export default CreateImportActions;

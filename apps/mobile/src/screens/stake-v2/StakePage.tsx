@@ -1,3 +1,7 @@
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { observer } from 'mobx-react-lite';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 import {
   SelectedNetwork,
@@ -12,32 +16,18 @@ import {
 } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { Validator } from '@leapwallet/cosmos-wallet-sdk/dist/browser/types/validators';
-import {
-  AggregatedSupportedChainType,
-  ChainTagsStore,
-  ClaimRewardsStore,
-  DelegationsStore,
-  RootBalanceStore,
-  RootDenomsStore,
-  UndelegationsStore,
-  ValidatorsStore,
-} from '@leapwallet/cosmos-wallet-store';
+
 import BigNumber from 'bignumber.js';
-import { EmptyCard } from 'components/empty-card';
-import { AGGREGATED_CHAIN_KEY } from 'config/constants';
-import { decodeChainIdToChain } from 'extension-scripts/utils';
-import { useChainPageInfo, useWalletInfo } from 'hooks';
-import { usePerformanceMonitor } from 'hooks/perf-monitoring/usePerformanceMonitor';
-import { useSetActiveChain } from 'hooks/settings/useActiveChain';
-import { useDontShowSelectChain } from 'hooks/useDontShowSelectChain';
-import { useGetWalletAddresses } from 'hooks/useGetWalletAddresses';
-import useQuery from 'hooks/useQuery';
-import { Images } from 'images';
-import { observer } from 'mobx-react-lite';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { nmsStore } from 'stores/balance-store';
-import { manageChainsStore } from 'stores/manage-chains-store';
+import { EmptyCard } from '../../components/empty-card';
+import { AGGREGATED_CHAIN_KEY } from '../../services/config/constants';
+import { decodeChainIdToChain } from '../../context/utils';
+import { useChainPageInfo, useWalletInfo } from '../../hooks';
+import { usePerformanceMonitor } from '../../hooks/perf-monitoring/usePerformanceMonitor';
+import { useSetActiveChain } from '../../hooks/settings/useActiveChain';
+import { useDontShowSelectChain } from '../../hooks/useDontShowSelectChain';
+import { useGetWalletAddresses } from '../../hooks/useGetWalletAddresses';
+import useQuery from '../../hooks/useQuery';
+import { Images } from '../../../assets/images';
 
 import ClaimInfo from './components/ClaimInfo';
 import NotStakedCard from './components/NotStakedCard';
@@ -52,7 +42,9 @@ import { ReviewClaimLavaTx } from './restaking/ReviewClaimLavaTx';
 import { StakeHeader } from './stake-header';
 import { StakeInputPageState } from './StakeInputPage';
 import { StakeTxnSheet } from './StakeTxnSheet';
+import { ChainTagsStore, ClaimRewardsStore, DelegationsStore, RootBalanceStore, RootDenomsStore, UndelegationsStore, ValidatorsStore } from '@leapwallet/cosmos-wallet-store';
 
+// TypeScript type for props
 type StakePageProps = {
   forceChain?: SupportedChain;
   forceNetwork?: SelectedNetwork;
@@ -71,7 +63,6 @@ const StakePage = observer(
   ({
     forceChain,
     forceNetwork,
-    showBackAction,
     onBackClick,
     rootDenomsStore,
     delegationsStore,
@@ -79,8 +70,9 @@ const StakePage = observer(
     unDelegationsStore,
     claimRewardsStore,
     rootBalanceStore,
-    chainTagsStore,
   }: StakePageProps) => {
+    const navigation = useNavigation<any>();
+
     const _activeChain = useActiveChain();
     const setActiveChain = useSetActiveChain();
     const activeChain = useMemo(() => forceChain || _activeChain, [_activeChain, forceChain]);
@@ -89,17 +81,16 @@ const StakePage = observer(
     const _activeNetwork = useSelectedNetwork();
     const activeNetwork = useMemo(() => forceNetwork || _activeNetwork, [_activeNetwork, forceNetwork]);
 
-    const { walletAvatar, walletName, activeWallet } = useWalletInfo();
-    const { headerChainImgSrc } = useChainPageInfo();
-    const dontShowSelectChain = useDontShowSelectChain(manageChainsStore);
-    const walletAddresses = useGetWalletAddresses(activeChain);
+    const { activeWallet } = useWalletInfo();
 
-    const query = useQuery();
-    const paramValidatorAddress = query.get('validatorAddress') ?? undefined;
-    const paramChainId = query.get('chainId') ?? undefined;
-    const paramAction = query.get('action') ?? undefined;
+    // For query params, you need to adjust your navigation to pass these as params or use a state manager
+    // For now, let's assume you get params from route.params:
+    const route = useRoute<any>();
+    const paramValidatorAddress = route.params?.validatorAddress;
+    const paramChainId = route.params?.chainId;
+    const paramAction = route.params?.action;
 
-    const navigate = useNavigate();
+    // If you're using a query manager, adapt her
 
     const denoms = rootDenomsStore.allDenoms;
     const chainDelegations = delegationsStore.delegationsForChain(activeChain);
@@ -139,7 +130,6 @@ const StakePage = observer(
       const _sortedTokenProviders = lsProviders[activeStakingDenom?.coinDenom]?.sort((a, b) => {
         const priorityA = a.priority;
         const priorityB = b.priority;
-
         if (priorityA !== undefined && priorityB !== undefined) {
           return priorityA - priorityB;
         } else if (priorityA !== undefined) {
@@ -155,10 +145,8 @@ const StakePage = observer(
 
     const chainRewards = useMemo(() => {
       const rewardMap: Record<string, any> = {};
-
       rewards?.rewards?.forEach((rewardObj: any) => {
         const validatorAddress = rewardObj.validator_address;
-
         if (!rewardMap[validatorAddress]) {
           rewardMap[validatorAddress] = {
             validator_address: validatorAddress,
@@ -169,7 +157,6 @@ const StakePage = observer(
         rewardObj.reward.forEach((reward: any) => {
           const { denom, amount, tokenInfo } = reward;
           const numAmount = parseFloat(amount);
-
           if (accumulatedAmounts[denom]) {
             accumulatedAmounts[denom] += numAmount * Math.pow(10, tokenInfo?.coinDecimals ?? 6);
           } else {
@@ -185,7 +172,6 @@ const StakePage = observer(
       });
 
       const totalRewards = rewards?.total.find((reward: any) => reward.denom === activeStakingDenom?.coinMinimalDenom);
-
       const rewardsStatus = '';
       const usdValueStatus = '';
       return {
@@ -202,14 +188,13 @@ const StakePage = observer(
 
     useEffect(() => {
       async function updateChain() {
-        if (paramChainId && (_activeChain as AggregatedSupportedChainType) !== AGGREGATED_CHAIN_KEY) {
+        if (paramChainId && (_activeChain as any) !== AGGREGATED_CHAIN_KEY) {
           const chainIdToChain = await decodeChainIdToChain();
           const chain = chainIdToChain[paramChainId] as SupportedChain;
           setActiveChain(chain);
         }
       }
       updateChain();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [paramChainId]);
 
     const validators = useMemo(
@@ -221,11 +206,9 @@ const StakePage = observer(
       [chainValidators.validatorData.validators],
     );
 
-    const consensusValidators = useConsensusValidators(validators, nmsStore, activeChain, activeNetwork);
-
     const redirectToInputPage = useCallback(async () => {
       let chain = activeChain;
-      if (paramChainId && (_activeChain as AggregatedSupportedChainType) !== AGGREGATED_CHAIN_KEY) {
+      if (paramChainId && (_activeChain as any) !== AGGREGATED_CHAIN_KEY) {
         const chainIdToChain = await decodeChainIdToChain();
         chain = chainIdToChain[paramChainId] as SupportedChain;
       }
@@ -236,14 +219,9 @@ const StakePage = observer(
         forceChain: chain,
         forceNetwork: activeNetwork,
       };
-      sessionStorage.setItem('navigate-stake-input-state', JSON.stringify(state));
-      // if `toValidator` is not found, we need to redirect to the input page with the validator address
-      const queryString = !toValidator ? `?validatorAddress=${paramValidatorAddress}` : '';
-      navigate(`/stake/input${queryString}`, {
-        state,
-        replace: true,
-      });
-    }, [_activeChain, activeChain, activeNetwork, navigate, paramChainId, paramValidatorAddress, validators]);
+      // React Native: use navigation params or a state manager for navigation state
+      navigation.replace('StakeInput', { state, validatorAddress: paramValidatorAddress });
+    }, [_activeChain, activeChain, activeNetwork, navigation, paramChainId, paramValidatorAddress, validators]);
 
     useEffect(() => {
       switch (paramAction) {
@@ -279,16 +257,17 @@ const StakePage = observer(
 
     if (!activeWallet) {
       return (
-        <div className='relative w-full overflow-clip panel-height flex items-center justify-center'>
-          <EmptyCard src={Images.Logos.LeapCosmos} heading='No wallet found' logoClassName='size-14' />
-        </div>
+        <View style={styles.centeredPanel}>
+          <EmptyCard src={Images.Logos.LeapCosmos} heading='No wallet found' logoStyle={{width: 56, height: 56}} />
+        </View>
       );
     }
 
     return (
-      <>
+      <View style={styles.container}>
         <StakeHeader onBackClick={onBackClick} />
-        <div className='flex flex-col gap-y-5 px-6 py-7 w-full flex-1'>
+
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
           <StakeHeading forceChain={activeChain} forceNetwork={activeNetwork} />
 
           {isLoadingAll || Object.values(delegations ?? {}).length > 0 ? (
@@ -303,7 +282,8 @@ const StakePage = observer(
             />
           )}
           <TabList forceChain={activeChain} forceNetwork={activeNetwork} setClaimTxMode={setClaimTxMode} />
-        </div>
+        </ScrollView>
+
         <StakeTxnSheet
           mode={claimTxMode}
           isOpen={!!claimTxMode}
@@ -311,6 +291,7 @@ const StakePage = observer(
           forceChain={activeChain}
           forceNetwork={activeNetwork}
         />
+
         {!loadingNetwork && (
           <>
             <ReviewClaimTx
@@ -396,9 +377,28 @@ const StakePage = observer(
             forceNetwork={activeNetwork}
           />
         )}
-      </>
+      </View>
     );
   },
 );
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  scrollContainer: {
+    paddingHorizontal: 24,
+    paddingTop: 28,
+    paddingBottom: 16,
+    gap: 20,
+    flexGrow: 1,
+  },
+  centeredPanel: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
 
 export default StakePage;

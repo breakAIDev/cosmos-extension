@@ -57,7 +57,6 @@
     "@web3auth/base": "9.6.0",
     "@web3auth/ethereum-provider": "9.6.0",
     "@web3auth/no-modal": "9.6.0",
-    "@zondax/ledger-cosmos-js": "4.0.1",
     "@zxcvbn-ts/core": "2.1.0",
     "@zxcvbn-ts/language-common": "2.0.1",
     "@zxcvbn-ts/language-de": "2.1.0",

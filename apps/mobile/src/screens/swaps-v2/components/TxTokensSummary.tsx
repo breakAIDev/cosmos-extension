@@ -1,4 +1,4 @@
-import { ArrowRight } from '@phosphor-icons/react';
+import { ArrowRight } from 'phosphor-react-native';
 import BigNumber from 'bignumber.js';
 import classNames from 'classnames';
 import React from 'react';

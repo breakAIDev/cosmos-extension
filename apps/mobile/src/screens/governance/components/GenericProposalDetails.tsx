@@ -2,8 +2,17 @@ import { Proposal, ProposalApi } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import React from 'react';
 
-import { NtrnProposalDetails } from '../neutron';
-import { ProposalDetails } from './index';
+import { NtrnProposalDetails } from '../neutron';        // <- should be your React Native version
+import { ProposalDetails } from './index';               // <- should be your React Native version
+
+type GenericProposalDetailsProps = {
+  selectedProposalChain: SupportedChain;
+  selectedProposalId: string;
+  handleProposalDetailsBack: () => void;
+  allProposals: (Proposal | ProposalApi)[];
+  shouldUseFallback: boolean;
+  forceNetwork: 'mainnet' | 'testnet';
+};
 
 export default function GenericProposalDetails({
   selectedProposalChain,
@@ -12,14 +21,7 @@ export default function GenericProposalDetails({
   allProposals,
   shouldUseFallback,
   forceNetwork,
-}: {
-  selectedProposalChain: SupportedChain;
-  selectedProposalId: string;
-  handleProposalDetailsBack: () => void;
-  allProposals: (Proposal | ProposalApi)[];
-  shouldUseFallback: boolean;
-  forceNetwork: 'mainnet' | 'testnet';
-}) {
+}: GenericProposalDetailsProps) {
   if (selectedProposalChain === 'neutron') {
     return (
       <NtrnProposalDetails
@@ -40,8 +42,6 @@ export default function GenericProposalDetails({
       forceChain={selectedProposalChain}
       forceNetwork={forceNetwork}
       governanceStore={{
-        
-        
         chainProposals: {
           data: allProposals as ProposalApi[] | Proposal[],
           shouldUseFallback,

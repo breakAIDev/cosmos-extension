@@ -3,6 +3,11 @@ import { ChainInfos, SupportedChain } from '@leapwallet/cosmos-wallet-sdk/dist/b
 
 // Gradients are not strings; use react-native-linear-gradient for real gradients!
 export const Colors = {
+  promotedBg: '#29A87426', // 15% opacity
+  border: '#E5E7EB',
+  text: '#111827',
+  secondary300: '#E5E7EB',
+  secondary400: '#D1D5DB',
   compassPrimary: '#224874',
   compassPrimaryDark: '#0D233D',
   // For gradients, use react-native-linear-gradient

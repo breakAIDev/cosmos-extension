@@ -1,35 +1,99 @@
+import React from 'react';
+import { View, Text, Image, StyleSheet } from 'react-native';
 import { ActivityType } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { useActivityImage } from '../../../hooks/activity/useActivityImage';
-import React from 'react';
-import { cn } from 'utils/cn';
-import { imgOnError } from '../../../utils/imgOnError';
 
-export const DetailsCard = (props: {
+type DetailsCardProps = {
   title: string;
   imgSrc: string | React.ReactNode;
   subtitle: string;
   trailing?: React.ReactNode;
   txType?: ActivityType;
   activeChain: SupportedChain;
-  className?: string;
+  style?: any;
+};
+
+export const DetailsCard: React.FC<DetailsCardProps> = ({
+  title,
+  imgSrc,
+  subtitle,
+  trailing,
+  txType,
+  activeChain,
+  style,
 }) => {
-  const defaultImg = useActivityImage(props.txType ?? 'fallback', props.activeChain);
+  const defaultImg = useActivityImage(txType ?? 'fallback', activeChain);
+  const [imageError, setImageError] = React.useState(false);
 
   return (
-    <div className={cn('flex items-center p-5 gap-3 bg-secondary-100 rounded-xl w-full', props.className)}>
-      {typeof props.imgSrc === 'string' ? (
-        <img src={props.imgSrc} onError={imgOnError(defaultImg)} className='size-10' />
+    <View style={[styles.container, style]}>
+      {typeof imgSrc === 'string' ? (
+        <Image
+          source={imageError ? { uri: defaultImg } : { uri: imgSrc }}
+          onError={() => setImageError(true)}
+          style={styles.image}
+          resizeMode="contain"
+        />
       ) : (
-        props.imgSrc
+        React.isValidElement(imgSrc) ? imgSrc : null
       )}
 
-      <span className='flex flex-col gap-px'>
-        <span className='text-sm font-medium text-muted-foreground'>{props.title}</span>
-        <span className='font-bold text-base'>{props.subtitle}</span>
-      </span>
+      <View style={styles.textCol}>
+        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.subtitle}>{subtitle}</Text>
+      </View>
 
-      <span className={'text-muted-foreground ml-auto'}>{props.trailing}</span>
-    </div>
+      {trailing ? (
+        <View style={styles.trailing}>
+          {typeof trailing === 'string' ? (
+            <Text style={styles.trailingText}>{trailing}</Text>
+          ) : (
+            React.isValidElement(trailing) ? trailing : null
+          )}
+        </View>
+      ) : null}
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#F7F8FA', // secondary-100
+    borderRadius: 16,
+    width: '100%',
+  },
+  image: {
+    width: 40,
+    height: 40,
+    marginRight: 12,
+    borderRadius: 8,
+  },
+  textCol: {
+    flex: 1,
+    flexDirection: 'column',
+    // gap: 2,    // REMOVE THIS!
+  },
+  title: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#8A94A6', // muted-foreground
+    marginBottom: 2,  // Simulate gap
+  },
+  subtitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#222',
+  },
+  trailing: {
+    marginLeft: 12,   // Give some space from the content
+    justifyContent: 'center',
+  },
+  trailingText: {
+    color: '#8A94A6',
+    fontSize: 14,
+  },
+});

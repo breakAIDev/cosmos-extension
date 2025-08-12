@@ -1,55 +1,56 @@
-import dayjs from 'dayjs';
-import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
-import Skeleton from 'react-loading-skeleton';
-import { cn } from 'utils/cn';
+import { View, Text, StyleSheet } from 'react-native';
+import { MotiView } from 'moti';
+import dayjs from 'dayjs';
+import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 
-const cardVariants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -10 },
+// Card animation variants for moti
+const motiCardVariants = {
+  from: { opacity: 0, translateY: 10 },
+  animate: { opacity: 1, translateY: 0 },
+  exit: { opacity: 0, translateY: -10 },
 };
 
-const transition = { duration: 0.2, ease: 'easeOut' };
+const transition = { type: 'timing', duration: 200 };
 
+// ----- Card Wrapper -----
 const CardWrapper = ({
   primary = false,
   children,
-  className,
+  style,
 }: {
   primary?: boolean;
   children: React.ReactNode;
-  className?: string;
-}) => {
-  return (
-    <motion.div
-      initial='hidden'
-      animate='visible'
-      exit='exit'
-      variants={cardVariants}
-      transition={transition}
-      className={cn(
-        'rounded-lg p-5 flex flex-col items-center gap-3 border border-secondary-200',
-        primary ? 'gradient-linear-primary' : 'gradient-linear-mono',
-        className,
-      )}
-    >
-      {children}
-    </motion.div>
-  );
-};
+  style?: any;
+}) => (
+  <MotiView
+    from={motiCardVariants.from}
+    animate={motiCardVariants.animate}
+    exit={motiCardVariants.exit}
+    transition={transition}
+    style={[
+      styles.card,
+      primary ? styles.primaryCard : styles.defaultCard,
+      style,
+    ]}
+  >
+    {children}
+  </MotiView>
+);
 
-const CountdownItem = ({ label, value }: { label: string; value: number }) => {
-  return (
-    <div className='flex flex-col items-center gap-1'>
-      <div className='w-14 h-12 flex text-lg items-center justify-center rounded-lg font-bold bg-primary/40 border border-primary'>
+// ----- Countdown Item -----
+const CountdownItem = ({ label, value }: { label: string; value: number }) => (
+  <View style={styles.countdownItem}>
+    <View style={styles.countdownValueBox}>
+      <Text style={styles.countdownValueText}>
         {String(value).padStart(2, '0')}
-      </div>
-      <span className='text-xs'>{label}</span>
-    </div>
-  );
-};
+      </Text>
+    </View>
+    <Text style={styles.countdownLabel}>{label}</Text>
+  </View>
+);
 
+// ----- Countdown -----
 interface CountdownProps {
   title: string;
   endDate: string;
@@ -74,7 +75,6 @@ export function SubscriptionCountdown({ title, endDate, onExpire }: CountdownPro
         onExpire?.();
         return;
       }
-
       const days = Math.floor(diff / (24 * 60 * 60));
       const hours = Math.floor((diff % (24 * 60 * 60)) / (60 * 60));
       const minutes = Math.floor((diff % (60 * 60)) / 60);
@@ -93,23 +93,23 @@ export function SubscriptionCountdown({ title, endDate, onExpire }: CountdownPro
 
   return (
     <CardWrapper primary>
-      <span className='text-secondary-800 text-sm'>{title}</span>
-
-      <div className='flex justify-center gap-3'>
-        <CountdownItem label='D' value={days} />
-        <CountdownItem label='H' value={hours} />
-        <CountdownItem label='M' value={minutes} />
-        <CountdownItem label='S' value={seconds} />
-      </div>
+      <Text style={styles.countdownTitle}>{title}</Text>
+      <View style={styles.countdownRow}>
+        <CountdownItem label="D" value={days} />
+        <CountdownItem label="H" value={hours} />
+        <CountdownItem label="M" value={minutes} />
+        <CountdownItem label="S" value={seconds} />
+      </View>
     </CardWrapper>
   );
 }
 
+// ----- Other Info Cards -----
 export function IneligibleRaffle() {
   return (
     <CardWrapper>
-      <span className='text-secondary-800 text-sm'>You&apos;re not a Leap Chad yet</span>
-      <span className='text-lg font-bold text-center'>We&apos;ll notify you when you are eligible</span>
+      <Text style={styles.infoText}>You're not a Leap Chad yet</Text>
+      <Text style={styles.infoBoldText}>We'll notify you when you are eligible</Text>
     </CardWrapper>
   );
 }
@@ -117,8 +117,8 @@ export function IneligibleRaffle() {
 export function ResultSoon() {
   return (
     <CardWrapper>
-      <span className='text-secondary-800 text-sm'>Giveaway has ended</span>
-      <span className='text-lg font-bold text-center'>Results will be declared soon</span>
+      <Text style={styles.infoText}>Giveaway has ended</Text>
+      <Text style={styles.infoBoldText}>Results will be declared soon</Text>
     </CardWrapper>
   );
 }
@@ -126,8 +126,8 @@ export function ResultSoon() {
 export function RaffleWinner({ rewardUnit }: { rewardUnit?: string }) {
   return (
     <CardWrapper primary>
-      <span className='text-secondary-800 text-sm'>Congratulations!</span>
-      <span className='text-lg font-bold text-center'>You&apos;ve won {rewardUnit}!</span>
+      <Text style={styles.infoText}>Congratulations!</Text>
+      <Text style={styles.infoBoldText}>You've won {rewardUnit}!</Text>
     </CardWrapper>
   );
 }
@@ -135,8 +135,8 @@ export function RaffleWinner({ rewardUnit }: { rewardUnit?: string }) {
 export function NotRaffleWinner() {
   return (
     <CardWrapper>
-      <span className='text-secondary-800 text-sm'>You did not win</span>
-      <span className='text-lg font-bold text-center'>Better luck next time</span>
+      <Text style={styles.infoText}>You did not win</Text>
+      <Text style={styles.infoBoldText}>Better luck next time</Text>
     </CardWrapper>
   );
 }
@@ -144,23 +144,97 @@ export function NotRaffleWinner() {
 export function RaffleClosed() {
   return (
     <CardWrapper>
-      <span className='text-secondary-800 text-sm'>You did not win</span>
-      <span className='text-lg font-bold text-center'>Better luck next time</span>
+      <Text style={styles.infoText}>You did not win</Text>
+      <Text style={styles.infoBoldText}>Better luck next time</Text>
     </CardWrapper>
   );
 }
 
+// ----- Skeleton Loader -----
 export function RaffleEntrySkeleton() {
   return (
-    <motion.div
-      initial='hidden'
-      animate='visible'
-      exit='exit'
-      variants={cardVariants}
+    <MotiView
+      from={motiCardVariants.from}
+      animate={motiCardVariants.animate}
+      exit={motiCardVariants.exit}
       transition={transition}
-      className='relative rounded-xl'
+      style={{ borderRadius: 20, overflow: 'hidden', marginVertical: 10 }}
     >
-      <Skeleton className='w-full' height={100} borderRadius={20} />
-    </motion.div>
+      <SkeletonPlaceholder borderRadius={20}>
+        <SkeletonPlaceholder.Item width="100%" height={100} borderRadius={20} />
+      </SkeletonPlaceholder>
+    </MotiView>
   );
 }
+
+// ----- Styles -----
+const styles = StyleSheet.create({
+  card: {
+    borderRadius: 12,
+    padding: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    borderWidth: 1,
+    marginVertical: 8,
+  },
+  defaultCard: {
+    backgroundColor: '#f7f7f8',
+    borderColor: '#ececf1',
+  },
+  primaryCard: {
+    backgroundColor: '#f0fbf5',
+    borderColor: '#b1e5c9',
+    // You can add gradient backgrounds using 3rd-party libs if needed
+  },
+  infoText: {
+    color: '#4B5563',
+    fontSize: 15,
+    marginVertical: 2,
+    textAlign: 'center',
+  },
+  infoBoldText: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#222',
+    marginVertical: 2,
+  },
+  countdownTitle: {
+    color: '#222',
+    fontSize: 14,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  countdownRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 12,
+    marginTop: 2,
+  },
+  countdownItem: {
+    alignItems: 'center',
+    marginHorizontal: 4,
+  },
+  countdownValueBox: {
+    width: 48,
+    height: 44,
+    borderRadius: 8,
+    backgroundColor: '#e8f5e9',
+    borderColor: '#4ade80',
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 2,
+  },
+  countdownValueText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#036635',
+  },
+  countdownLabel: {
+    fontSize: 11,
+    color: '#888',
+  },
+});
+

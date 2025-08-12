@@ -1,14 +1,14 @@
 import { Key } from '@leapwallet/cosmos-wallet-hooks';
 import { pubKeyToEvmAddressToShow, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { MagnifyingGlassMinus, Plus } from '@phosphor-icons/react';
-import BottomModal from 'components/new-bottom-modal';
-import { Button } from 'components/ui/button';
-import { SearchInput } from 'components/ui/input/search-input';
-import { useChainInfos } from 'hooks/useChainInfos';
+import { MagnifyingGlassMinus, Plus } from 'phosphor-react-native';
+import BottomModal from '../../../components/new-bottom-modal';
+import { Button } from '../../../components/ui/button';
+import { SearchInput } from '../../../components/ui/input/search-input';
+import { useChainInfos } from '../../../hooks/useChainInfos';
 import React, { useEffect, useMemo, useState } from 'react';
-import { activeChainStore } from 'stores/active-chain-store';
-import { chainInfoStore } from 'stores/chain-infos-store';
-import { cn } from 'utils/cn';
+import { activeChainStore } from '../../../context/active-chain-store';
+import { chainInfoStore } from '../../../context/chain-infos-store';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 
 import { Wallet } from '../../../hooks/wallet/useWallet';
 import { EditWalletForm } from '../EditWallet/index';
@@ -27,7 +27,12 @@ type SelectWalletProps = {
   } | null;
 };
 
-const SelectWallet = ({ isVisible, onClose, title = 'Your Wallets', currentWalletInfo }: SelectWalletProps) => {
+const SelectWallet = ({
+  isVisible,
+  onClose,
+  title = 'Your Wallets',
+  currentWalletInfo,
+}: SelectWalletProps) => {
   const [isEditWalletVisible, setIsEditWalletVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const wallets = Wallet.useWallets();
@@ -73,22 +78,21 @@ const SelectWallet = ({ isVisible, onClose, title = 'Your Wallets', currentWalle
         isOpen={isVisible}
         onClose={onClose}
         title={title}
-        className='h-full mb-4'
         fullScreen
         footerComponent={
-          <Button className='w-full' size={'md'} onClick={() => setShowCreateImportActions(true)}>
+          <Button style={styles.createButton} size={'md'} onPress={() => setShowCreateImportActions(true)}>
             <Plus size={16} /> Create / Import Wallet
           </Button>
         }
       >
-        <div className='h-full'>
+        <View style={styles.content}>
           <SearchInput
             value={searchQuery}
             autoFocus={false}
-            onChange={(e) => setSearchQuery(e?.target?.value ?? '')}
-            placeholder='Search by wallet name or address'
+            onChangeText={setSearchQuery}
+            placeholder="Search by wallet name or address"
             onClear={() => setSearchQuery('')}
-            className='mb-6'
+            style={styles.searchInput}
           />
 
           {currentWalletInfo && !searchQuery && (
@@ -96,7 +100,7 @@ const SelectWallet = ({ isVisible, onClose, title = 'Your Wallets', currentWalle
           )}
 
           {walletsList?.length > 0 ? (
-            <div className='flex flex-col rounded-2xl overflow-y-auto mb-4 py-1 gap-3.5'>
+            <ScrollView style={styles.walletList} contentContainerStyle={styles.walletListContent}>
               {walletsList?.map((wallet, index, array) => {
                 if (wallet.id === currentWalletInfo?.wallets?.[0]?.id) return null;
                 return (
@@ -110,26 +114,22 @@ const SelectWallet = ({ isVisible, onClose, title = 'Your Wallets', currentWalle
                   />
                 );
               })}
-            </div>
+            </ScrollView>
           ) : searchQuery ? (
-            <div
-              className={cn(
-                'w-full flex items-center justify-center rounded-2xl border border-secondary-200 h-[calc(100%-63px)]',
-              )}
-            >
-              <div className='flex items-center justify-center flex-col gap-4'>
-                <div className='p-5 bg-secondary-200 rounded-full flex items-center justify-center'>
-                  <MagnifyingGlassMinus size={24} className='text-foreground' />
-                </div>
-                <p className='text-[18px] !leading-[24px] font-bold text-foreground text-center'>No results found</p>
-              </div>
-            </div>
+            <View style={styles.noResultBox}>
+              <View style={styles.noResultInner}>
+                <View style={styles.noResultIconWrap}>
+                  <MagnifyingGlassMinus size={24} color="#222" />
+                </View>
+                <Text style={styles.noResultText}>No results found</Text>
+              </View>
+            </View>
           ) : null}
-        </div>
+        </View>
       </BottomModal>
 
       <CreateImportActions
-        title='Create / Import Wallet'
+        title="Create / Import Wallet"
         isVisible={showCreateImportActions}
         onClose={(closeParent) => {
           setShowCreateImportActions(false);
@@ -149,5 +149,65 @@ const SelectWallet = ({ isVisible, onClose, title = 'Your Wallets', currentWalle
     </>
   );
 };
+
+const styles = StyleSheet.create({
+  content: {
+    flex: 1,
+    height: '100%',
+  },
+  searchInput: {
+    marginBottom: 24,
+  },
+  walletList: {
+    flex: 1,
+    marginBottom: 12,
+    borderRadius: 16,
+  },
+  walletListContent: {
+    flexDirection: 'column',
+    gap: 16,
+    paddingBottom: 20,
+  },
+  createButton: {
+    width: '100%',
+    minHeight: 48,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: 16,
+    marginTop: 12,
+  },
+  noResultBox: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    height: 260,
+    backgroundColor: '#F3F4F6',
+  },
+  noResultInner: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'column',
+    gap: 16,
+  },
+  noResultIconWrap: {
+    padding: 20,
+    backgroundColor: '#E5E7EB',
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  noResultText: {
+    fontSize: 18,
+    lineHeight: 24,
+    fontWeight: 'bold',
+    color: '#222',
+    textAlign: 'center',
+  },
+});
 
 export default SelectWallet;

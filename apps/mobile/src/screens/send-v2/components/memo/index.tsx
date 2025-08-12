@@ -1,8 +1,8 @@
+import React from 'react';
+import { View, TextInput, Text, StyleSheet } from 'react-native';
 import { useGetChains } from '@leapwallet/cosmos-wallet-hooks';
 import { BTC_CHAINS, isAptosChain } from '@leapwallet/cosmos-wallet-sdk';
-import classNames from 'classnames';
-import { useSendContext } from 'pages/send-v2/context';
-import React from 'react';
+import { useSendContext } from '../../../send-v2/context';
 
 export const Memo: React.FC = () => {
   const { memo, setMemo, addressWarning, sendActiveChain } = useSendContext();
@@ -16,20 +16,53 @@ export const Memo: React.FC = () => {
     return null;
   }
 
+  const isDisabled = addressWarning.type === 'link';
+
   return (
-    <div
-      className={classNames('p-4 rounded-2xl bg-white-100 dark:bg-gray-950', {
-        'opacity-50 pointer-events-none': addressWarning.type === 'link',
-      })}
-    >
-      <p className='font-bold text-sm text-gray-600 dark:text-gray-400 mb-3'>Memo</p>
-      <input
-        type='text'
+    <View style={[
+      styles.container,
+      isDisabled && styles.disabled,
+    ]}>
+      <Text style={styles.label}>Memo</Text>
+      <TextInput
         value={memo}
-        placeholder='Required for CEX transfers...'
-        className='w-full h-10 rounded-xl px-4 py-2 font-medium text-xs placeholder:text-gray-600 dark:placeholder:text-gray-400 text-black-100 dark:text-white-100 outline-none border border-[transparent] focus-within:border-green-600 bg-gray-50 dark:bg-gray-900'
-        onChange={(e) => setMemo(e.target?.value)}
+        onChangeText={setMemo}
+        editable={!isDisabled}
+        placeholder="Required for CEX transfers..."
+        placeholderTextColor="#6B7280"
+        style={styles.input}
       />
-    </div>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 16,
+    borderRadius: 18,
+    backgroundColor: '#F3F4F6', // bg-white-100
+    marginBottom: 16,
+  },
+  disabled: {
+    opacity: 0.5,
+  },
+  label: {
+    fontWeight: 'bold',
+    fontSize: 14,
+    color: '#6B7280', // text-gray-600
+    marginBottom: 12,
+  },
+  input: {
+    width: '100%',
+    height: 40,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    fontWeight: '500',
+    fontSize: 13,
+    backgroundColor: '#F9FAFB', // bg-gray-50
+    color: '#111827', // text-black-100
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+});

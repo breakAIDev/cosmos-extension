@@ -1,5 +1,5 @@
-import classNames from 'classnames';
 import React from 'react';
+import { TouchableOpacity, View, Image, StyleSheet } from 'react-native';
 
 type SecondaryActionButtonProps = {
   
@@ -10,23 +10,47 @@ type SecondaryActionButtonProps = {
   
 } & React.PropsWithChildren<any>;
 
-export const SecondaryActionButton: React.FC<SecondaryActionButtonProps> = ({
+export const SecondaryActionButton = ({
   actionLabel,
   leftIcon,
-  onClick,
+  onPress,
   children,
-  className,
-}) => {
+  style,
+}: SecondaryActionButtonProps) => {
   return (
-    <button
-      className={classNames(
-        className,
-        'flex items-center rounded-full px-4 py-2 border border-gray-300 dark:border-gray-800 focus:border-gray-400 dark:focus:border-gray-500 outline-none',
-      )}
-      onClick={onClick}
+    <TouchableOpacity
+      accessibilityLabel={actionLabel}
+      style={[styles.button, style]}
+      onPress={onPress}
+      activeOpacity={0.85}
     >
-      {leftIcon && <img src={leftIcon} alt={actionLabel} className='mr-2' />}
-      <span>{children}</span>
-    </button>
+      {leftIcon && (
+        <Image
+          source={typeof leftIcon === 'string' ? { uri: leftIcon } : leftIcon}
+          style={styles.icon}
+          resizeMode="contain"
+        />
+      )}
+      <View>{children}</View>
+    </TouchableOpacity>
   );
 };
+
+const styles = StyleSheet.create({
+  button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 999,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: '#d1d5db', // gray-300
+    backgroundColor: 'white',
+    // Add more as needed for dark mode, etc.
+  },
+  icon: {
+    width: 20,
+    height: 20,
+    marginRight: 8,
+  },
+});

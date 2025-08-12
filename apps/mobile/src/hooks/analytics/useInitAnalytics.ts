@@ -1,8 +1,8 @@
 import { useAddress } from '@leapwallet/cosmos-wallet-hooks';
 import { sha256 } from '@noble/hashes/sha256';
 import { utils } from '@noble/secp256k1';
-import { setUser as setSentryUser } from '@sentry/react';
-import mixpanel from 'mixpanel-browser';
+import { setUser as setSentryUser } from '@sentry/react-native';
+import mixpanel from '../../mixpanel';
 import { useEffect, useMemo } from 'react';
 import { getPrimaryWalletAddress } from '../../utils/getPrimaryWalletAddress';
 import DeviceInfo from 'react-native-device-info';

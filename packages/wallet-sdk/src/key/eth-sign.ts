@@ -9,6 +9,14 @@ import { LeapKeystoneSignerEth } from '../keystone';
 import { LeapLedgerSignerEth } from '../ledger';
 import { EIP712MessageValidator } from '../utils/eip-712-validator';
 
+type EIP712Types = Record<string, { name: string; type: string }[]>;
+interface EIP712TypedData {
+  types: EIP712Types;
+  primaryType: string;
+  domain: Record<string, any>;
+  message: Record<string, any>;
+}
+
 export type EthSignType = 'message' | 'transaction' | 'eip-712';
 
 export const domainHash = (message: {
@@ -245,16 +253,16 @@ async function signEip712Tx(
       },
     };
   }
+  
+  const typed = data as unknown as EIP712TypedData;
+
   const hash = keccak256(
     Buffer.concat([
       Buffer.from('19', 'hex'),
       Buffer.from('01', 'hex'),
       
-      
-      Buffer.from(domainHash(data).replace('0x', ''), 'hex'),
-      
-      
-      Buffer.from(messageHash(data).replace('0x', ''), 'hex'),
+      Buffer.from(domainHash(typed).replace('0x', ''), 'hex'),
+      Buffer.from(messageHash(typed).replace('0x', ''), 'hex'),
     ]),
   );
 

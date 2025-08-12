@@ -1,18 +1,12 @@
-import classNames from 'classnames';
-import Text from 'components/text';
-import { SearchInput } from 'components/ui/input/search-input';
+import React, { forwardRef, useMemo } from 'react';
+import { View, TextInput, FlatList, TouchableOpacity, Image, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import Fuse from 'fuse.js';
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
-import { CompassIcon } from 'icons/compass-icon';
-import { SwapsCheckIcon } from 'icons/swaps-check-icon';
-import { GenericLight } from 'images/logos';
 import { observer } from 'mobx-react-lite';
-import React, { forwardRef, useEffect, useMemo, useRef } from 'react';
-import Skeleton from 'react-loading-skeleton';
-import { Virtuoso } from 'react-virtuoso';
-import { SourceChain, SourceToken } from 'types/swap';
-import { imgOnError } from 'utils/imgOnError';
-import { isSidePanel } from 'utils/isSidePanel';
+import { SourceChain, SourceToken } from '../../../types/swap';
+import { useDefaultTokenLogo } from '../../../hooks/utility/useDefaultTokenLogo';
+import { CompassIcon } from '../../../../assets/icons/compass-icon';
+import { SwapsCheckIcon } from '../../../../assets/icons/swaps-check-icon';
+import { GenericLight } from '../../../../assets/images/logos';
 
 export type TokenAssociatedChain = {
   chain: SourceChain;
@@ -29,30 +23,19 @@ export type ListChainsProps = {
   loadingChains: boolean;
 };
 
-export function ChainsListSkeleton({ index, isLast }: { index: number; isLast: boolean }) {
+function ChainsListSkeleton({ index, isLast }: { index: number; isLast: boolean }) {
+  // Use ActivityIndicator or custom skeleton UI
   return (
-    <React.Fragment key={`chain-list-skeleton-${index}`}>
-      <div className='flex items-center py-4 mx-6 z-0 !h-[72px]'>
-        <div className='w-9 h-9'>
-          <Skeleton
-            circle
-            className='w-9 h-9'
-            containerClassName='block !leading-none'
-            style={{
-              zIndex: 0,
-            }}
-          />
-        </div>
-        <div className='max-w-[80px] z-0 ml-4'>
-          <Skeleton width={80} className='z-0 h-[17px]' />
-        </div>
-      </div>
-      {!isLast && <div className='border-b border-gray-100 dark:border-gray-850 mx-6' />}
-    </React.Fragment>
+    <View key={`chain-list-skeleton-${index}`} style={[styles.skeletonContainer, !isLast && styles.skeletonDivider]}>
+      <View style={styles.skeletonCircle}>
+        <ActivityIndicator size="small" color="#ccc" />
+      </View>
+      <View style={styles.skeletonText} />
+    </View>
   );
 }
 
-export function ChainCard({
+function ChainCard({
   itemsLength,
   tokenAssociatedChain,
   index,
@@ -80,38 +63,34 @@ export function ChainCard({
     (!selectedToken || selectedToken.skipAsset?.denom === tokenAssociatedChain.asset?.skipAsset?.denom);
 
   return (
-    <React.Fragment
+    <TouchableOpacity
+      onPress={() => {
+        setSearchedChain('');
+        onChainSelect(tokenAssociatedChain);
+      }}
+      style={[styles.cardWrapper, !isLast && { marginBottom: 12 }]}
       key={`${tokenAssociatedChain.chain.chainName}-${tokenAssociatedChain.asset?.skipAsset?.denom}-${index}`}
+      activeOpacity={0.7}
     >
-      <div
-        onClick={() => {
-          setSearchedChain('');
-          onChainSelect(tokenAssociatedChain);
-        }}
-        className={classNames('flex flex-1 items-center cursor-pointer px-6', isLast ? '' : 'mb-3')}
-      >
-        <div className='flex items-center flex-1 bg-secondary-100 hover:bg-secondary-200 rounded-xl px-4 py-2'>
-          <div className='flex items-center justify-center h-10 w-10 mr-3 shrink-0'>
-            <img
-              src={img || defaultTokenLogo}
-              className='h-8 w-8 rounded-full'
-              onError={imgOnError(defaultTokenLogo)}
-            />
-          </div>
-          <Text
-            className='font-bold text-base !leading-[22px] text-foreground'
-            data-testing-id={`switch-chain-${chainName.toLowerCase()}-ele`}
-          >
-            {chainName}
-          </Text>
-          {isSelected && <SwapsCheckIcon size={20} className='text-accent-green ml-auto size-6' />}
-        </div>
-      </div>
-    </React.Fragment>
+      <View style={styles.card}>
+        <View style={styles.cardImgBox}>
+          <Image
+            source={{ uri: img ?? defaultTokenLogo}}
+            style={styles.cardImg}
+            onError={() => {
+            }}
+            resizeMode="cover"
+          />
+        </View>
+        <Text style={styles.cardChainName}>{chainName}</Text>
+        {isSelected && <SwapsCheckIcon size={20} style={styles.checkIcon} />}
+      </View>
+    </TouchableOpacity>
   );
 }
 
-const ChainsListView = forwardRef<HTMLInputElement, ListChainsProps>(
+// FORWARD REF version for focusing TextInput from parent
+const ChainsListView = forwardRef<TextInput, ListChainsProps>(
   (
     {
       onChainSelect,
@@ -140,66 +119,58 @@ const ChainsListView = forwardRef<HTMLInputElement, ListChainsProps>(
     }, [chainsFuse, searchedChain, chainsToShow]);
 
     return (
-      <>
-        <div className='flex flex-col items-center px-6 pt-6 pb-7'>
-          <SearchInput
-            value={searchedChain}
+      <View style={styles.container}>
+        <View style={styles.inputWrapper}>
+          <TextInput
             ref={ref}
-            onChange={(e) => setSearchedChain(e.target.value)}
-            data-testing-id='switch-chain-input-search'
-            placeholder='Search by chain name'
-            onClear={() => setSearchedChain('')}
+            value={searchedChain}
+            onChangeText={setSearchedChain}
+            placeholder="Search by chain name"
+            style={styles.searchInput}
+            clearButtonMode="while-editing"
+            autoCorrect={false}
+            autoCapitalize="none"
           />
-        </div>
+        </View>
 
-        <div
-          className={classNames('w-full pb-6', {
-            'mt-3': filteredChains.length === 0 && !loadingChains,
-          })}
-          style={{ height: (isSidePanel() ? window.innerHeight : 600) - 160, overflowY: 'scroll' }}
-        >
+        <View style={styles.listContainer}>
           {loadingChains ? (
             Array.from({ length: 5 }).map((_, index) => (
               <ChainsListSkeleton key={index} index={index} isLast={index === 4} />
             ))
           ) : filteredChains.length === 0 ? (
-            <div className='w-full px-6 h-full pb-6'>
-              <div className='h-full px-5 w-full flex-col flex justify-center items-center gap-4 border border-secondary-200 rounded-2xl'>
-                <div className='p-2 bg-secondary-200 rounded-full'>
-                  <CompassIcon size={40} className='text-muted-foreground' />
-                </div>
-                <div className='flex flex-col justify-start items-center w-full gap-3'>
-                  <div className='text-[18px] !leading-[24px] text-center font-bold text-foreground'>
-                    No chains found
-                  </div>
-                  <div className='text-xs !leading-[16px] text-secondary-800 text-center'>
-                    We couldn&apos;t find a match. Try searching again or use a different keyword.
-                  </div>
-                </div>
-              </div>
-            </div>
+            <View style={styles.noChainsContainer}>
+              <View style={styles.noChainsIcon}>
+                <CompassIcon size={40} color="#bbb" />
+              </View>
+              <Text style={styles.noChainsTitle}>No chains found</Text>
+              <Text style={styles.noChainsSubtitle}>
+                We couldn’t find a match. Try searching again or use a different keyword.
+              </Text>
+            </View>
           ) : (
-            <>
-              <Virtuoso
-                data={filteredChains}
-                style={{ flexGrow: '1', width: '100%' }}
-                itemContent={(index, tokenAssociatedChain) => (
-                  <ChainCard
-                    key={`${tokenAssociatedChain?.chain?.chainName}-${tokenAssociatedChain?.asset?.skipAsset.denom}`}
-                    tokenAssociatedChain={tokenAssociatedChain}
-                    index={index}
-                    itemsLength={filteredChains.length}
-                    selectedChain={selectedChain}
-                    selectedToken={selectedToken}
-                    onChainSelect={onChainSelect}
-                    setSearchedChain={setSearchedChain}
-                  />
-                )}
-              />
-            </>
+            <FlatList
+              data={filteredChains}
+              keyExtractor={(item, idx) =>
+                `${item.chain.chainName}-${item.asset?.skipAsset?.denom ?? ''}-${idx}`
+              }
+              renderItem={({ item, index }) => (
+                <ChainCard
+                  tokenAssociatedChain={item}
+                  index={index}
+                  itemsLength={filteredChains.length}
+                  selectedChain={selectedChain}
+                  selectedToken={selectedToken}
+                  onChainSelect={onChainSelect}
+                  setSearchedChain={setSearchedChain}
+                />
+              )}
+              contentContainerStyle={{ paddingBottom: 16 }}
+              keyboardShouldPersistTaps="handled"
+            />
           )}
-        </div>
-      </>
+        </View>
+      </View>
     );
   },
 );
@@ -207,3 +178,121 @@ const ChainsListView = forwardRef<HTMLInputElement, ListChainsProps>(
 ChainsListView.displayName = 'ChainsListView';
 
 export const ChainsList = observer(ChainsListView);
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 24,
+    backgroundColor: '#fff',
+  },
+  inputWrapper: {
+    marginBottom: 18,
+  },
+  searchInput: {
+    borderWidth: 1,
+    borderColor: '#eee',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    fontSize: 16,
+    backgroundColor: '#fafbfc',
+  },
+  listContainer: {
+    flex: 1,
+    minHeight: 240,
+  },
+  skeletonContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+    backgroundColor: '#f7f7f7',
+    borderRadius: 16,
+    marginBottom: 6,
+  },
+  skeletonCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#e1e1e1',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  skeletonText: {
+    height: 18,
+    width: 80,
+    borderRadius: 5,
+    backgroundColor: '#e1e1e1',
+  },
+  skeletonDivider: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  cardWrapper: {
+    width: '100%',
+  },
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f0f2f7',
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    minHeight: 56,
+  },
+  cardImgBox: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#eee',
+    marginRight: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  cardImg: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+  },
+  cardChainName: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    color: '#18181a',
+  },
+  checkIcon: {
+    marginLeft: 'auto',
+  },
+  noChainsContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#eee',
+    borderRadius: 18,
+    padding: 24,
+    marginVertical: 18,
+    backgroundColor: '#fcfcfc',
+  },
+  noChainsIcon: {
+    backgroundColor: '#f1f2f4',
+    borderRadius: 24,
+    padding: 6,
+    marginBottom: 8,
+  },
+  noChainsTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#232324',
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  noChainsSubtitle: {
+    fontSize: 12,
+    color: '#636363',
+    textAlign: 'center',
+    marginTop: 6,
+  },
+});

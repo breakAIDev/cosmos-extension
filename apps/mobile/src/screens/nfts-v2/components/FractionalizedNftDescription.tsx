@@ -1,6 +1,7 @@
 import { FractionalizedNftInformation } from '@leapwallet/cosmos-wallet-hooks';
-import { MapPin } from '@phosphor-icons/react';
+import { MapPin } from 'phosphor-react-native';
 import React, { useMemo } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 
 import { NonFractionalizedNftDescriptionProps } from './index';
 
@@ -11,17 +12,16 @@ type RoomsCountProps = {
 
 function RoomsCount({ noOfRooms, roomTitle }: RoomsCountProps) {
   return (
-    <p className='rounded-xl px-3 py-2 mr-2 min-w-[80px] flex-1 flex justify-between border dark:border-gray-900 border-gray-100 border-solid flex-wrap gap-3'>
-      <span className='text-gray-400 dark:text-gray-200 text-sm'>{roomTitle}</span>
-      <span className='text-gray-900 text-base dark:text-white-100 font-bold'>{noOfRooms}</span>
-    </p>
+    <View style={styles.roomsCount}>
+      <Text style={styles.roomTitle}>{roomTitle}</Text>
+      <Text style={styles.roomNo}>{noOfRooms}</Text>
+    </View>
   );
 }
 
 export function FractionalizedNftDescription({ nftDetails }: NonFractionalizedNftDescriptionProps) {
   const { towerName, location, noOfBathrooms, noOfBedrooms, additionalFeatures, yourAllocations } = useMemo(() => {
     const _nftDetails = nftDetails as unknown as FractionalizedNftInformation;
-
     return {
       towerName: _nftDetails['Tower Name'],
       location: _nftDetails['Address'],
@@ -33,37 +33,108 @@ export function FractionalizedNftDescription({ nftDetails }: NonFractionalizedNf
   }, [nftDetails]);
 
   return (
-    <>
-      <h3 className='font-bold text-left text-gray-400 text-sm mt-4'>{towerName ?? ''}</h3>
+    <View>
+      <Text style={styles.towerName}>{towerName ?? ''}</Text>
 
       {location ? (
-        <p className='text-left text-gray-900 dark:text-gray-50 text-xs mt-2 flex items-center gap-1'>
-          <MapPin size={16} className='text-gray-900 dark:text-gray-50' /> {location}
-        </p>
+        <View style={styles.locationRow}>
+          <MapPin size={16} color="#18181b" weight="regular" style={styles.locationIcon} />
+          <Text style={styles.locationText}>{location}</Text>
+        </View>
       ) : null}
 
       {yourAllocations ? (
-        <div className='flex space-between gap-1 mt-4'>
-          <RoomsCount noOfRooms={yourAllocations} roomTitle='Your Allocations' />
-        </div>
+        <View style={styles.flexRow}>
+          <RoomsCount noOfRooms={yourAllocations} roomTitle="Your Allocations" />
+        </View>
       ) : null}
 
-      <div className='flex space-between gap-1 my-4'>
-        {noOfBathrooms ? <RoomsCount noOfRooms={noOfBathrooms} roomTitle='Bathrooms' /> : null}
-        {noOfBedrooms ? <RoomsCount noOfRooms={noOfBedrooms} roomTitle='Bedrooms' /> : null}
-      </div>
+      <View style={styles.flexRow}>
+        {noOfBathrooms ? <RoomsCount noOfRooms={noOfBathrooms} roomTitle="Bathrooms" /> : null}
+        {noOfBedrooms ? <RoomsCount noOfRooms={noOfBedrooms} roomTitle="Bedrooms" /> : null}
+      </View>
 
       {additionalFeatures ? (
-        <ul className='flex flex-col'>
-          <p className='font-bold text-left text-gray-400 text-sm mb-1'>Additional Features</p>
-
-          {additionalFeatures.map((feature, index) => (
-            <li key={`${feature}-${index}`} className='text-gray-900 dark:text-gray-100 text-sm'>
+        <View style={styles.featureSection}>
+          <Text style={styles.featureHeader}>Additional Features</Text>
+          {additionalFeatures.map((feature: string, index: number) => (
+            <Text key={`${feature}-${index}`} style={styles.featureItem}>
               {feature}
-            </li>
+            </Text>
           ))}
-        </ul>
+        </View>
       ) : null}
-    </>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  towerName: {
+    fontWeight: 'bold',
+    textAlign: 'left',
+    color: '#9ca3af',
+    fontSize: 13,
+    marginTop: 16,
+    marginBottom: 0,
+  },
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    marginBottom: 0,
+  },
+  locationIcon: {
+    marginRight: 4,
+  },
+  locationText: {
+    color: '#18181b',
+    fontSize: 13,
+    textAlign: 'left',
+  },
+  flexRow: {
+    flexDirection: 'row',
+    gap: 6,
+    marginTop: 16,
+    marginBottom: 0,
+  },
+  roomsCount: {
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    minWidth: 80,
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: '#f3f4f6',
+    marginRight: 8,
+    marginBottom: 4,
+    flexWrap: 'wrap',
+  },
+  roomTitle: {
+    color: '#9ca3af',
+    fontSize: 13,
+  },
+  roomNo: {
+    color: '#18181b',
+    fontWeight: 'bold',
+    fontSize: 15,
+  },
+  featureSection: {
+    marginTop: 18,
+    flexDirection: 'column',
+    gap: 2,
+  },
+  featureHeader: {
+    fontWeight: 'bold',
+    textAlign: 'left',
+    color: '#9ca3af',
+    fontSize: 13,
+    marginBottom: 2,
+  },
+  featureItem: {
+    color: '#18181b',
+    fontSize: 14,
+    marginBottom: 2,
+  },
+});

@@ -11,10 +11,11 @@ import { fromSmallBN, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { FeeTokensStoreData, RootBalanceStore } from '@leapwallet/cosmos-wallet-store';
 import { useQuery } from '@tanstack/react-query';
 import BigNumber from 'bignumber.js';
-import Loader from 'components/loader/Loader';
-import { useFormatCurrency } from 'hooks/settings/useCurrency';
+import Loader from '../../components/loader/Loader';
+import { useFormatCurrency } from '../../hooks/settings/useCurrency';
 import { observer } from 'mobx-react-lite';
 import React, { useEffect, useMemo } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 
 const generateFeeValues = (fee: StdFee, coinDecimals: number) => {
   const { amount } = fee;
@@ -60,9 +61,7 @@ const StaticFeeDisplay: React.FC<StaticFeeDisplayProps> = observer(
 
     const allAssets = rootBalanceStore.getSpendableBalancesForChain(activeChain, selectedNetwork);
     const allTokensLoading = rootBalanceStore.getLoadingStatusForChain(activeChain, selectedNetwork);
-    const allTokensStatus = useMemo(() => {
-      return allTokensLoading ? 'loading' : 'success';
-    }, [allTokensLoading]);
+    const allTokensStatus = useMemo(() => (allTokensLoading ? 'loading' : 'success'), [allTokensLoading]);
 
     const chainId = useChainId();
     const [formatCurrency] = useFormatCurrency();
@@ -98,9 +97,7 @@ const StaticFeeDisplay: React.FC<StaticFeeDisplayProps> = observer(
     const feeValues = useMemo(() => {
       if (!fee) return null;
       return generateFeeValues(fee, feeToken?.denom?.coinDecimals ?? 0);
-
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [activeChain, defaultGasEstimates, fee, feeToken?.denom?.coinDecimals]);
+    }, [fee, feeToken?.denom?.coinDecimals]);
 
     useEffect(() => {
       const amountString = feeValues?.amount?.toString();
@@ -111,31 +108,70 @@ const StaticFeeDisplay: React.FC<StaticFeeDisplayProps> = observer(
           setError(null);
         }
       }
+    }, [feeToken, feeValues, allTokensStatus, disableBalanceCheck, setError]);
 
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [feeToken, feeValues, allTokensStatus, disableBalanceCheck]);
+    if (!feeValues || feeToShow === 0) {
+      return <Loader />;
+    }
 
-    return feeValues && feeToShow !== 0 ? (
-      <div>
-        <p className='text-gray-500 dark:text-gray-200 text-sm font-medium tracking-wide flex items-center'>
-          <span className='mr-3'>Transaction Fee</span>
-        </p>
-        <p className='text-gray-700 dark:text-white-100 text-sm font-bold tracking-wide mt-2'>
-          <span className='mt-[2px] mr-[2px]'>
+    return (
+      <View style={styles.container}>
+        <Text style={styles.label}>Transaction Fee</Text>
+        <Text style={styles.feeText}>
+          <Text style={styles.amount}>
             {feeToShow} {feeToken?.denom?.coinDenom}
-          </span>
+          </Text>
           {feeTokenFiatValue ? (
-            <span className='mr-[2px]'>
-              ({formatCurrency(new BigNumber(feeValues?.amount ?? 0).multipliedBy(feeTokenFiatValue))})
-            </span>
+            <Text style={styles.fiat}>
+              {' '}
+              (
+              {formatCurrency(
+                new BigNumber(feeValues?.amount ?? 0).multipliedBy(feeTokenFiatValue),
+              )}
+              )
+            </Text>
           ) : null}
-        </p>
-        {error ? <p className='text-red-300 text-sm font-medium mt-2 px-1'>{error}</p> : null}
-      </div>
-    ) : (
-      <Loader />
+        </Text>
+        {error ? <Text style={styles.error}>{error}</Text> : null}
+      </View>
     );
   },
 );
+
+const styles = StyleSheet.create({
+  container: {
+    marginVertical: 8,
+  },
+  label: {
+    color: '#6B7280', // gray-500
+    fontSize: 14,
+    fontWeight: '500',
+    marginBottom: 2,
+  },
+  feeText: {
+    color: '#374151', // gray-700
+    fontSize: 15,
+    fontWeight: 'bold',
+    marginTop: 8,
+  },
+  amount: {
+    fontWeight: 'bold',
+    fontSize: 15,
+    marginRight: 4,
+  },
+  fiat: {
+    color: '#6B7280',
+    fontWeight: '400',
+    fontSize: 14,
+    marginLeft: 2,
+  },
+  error: {
+    color: '#F87171', // red-300
+    fontSize: 13,
+    fontWeight: '500',
+    marginTop: 8,
+    paddingLeft: 4,
+  },
+});
 
 export default StaticFeeDisplay;

@@ -8,19 +8,20 @@ import {
   UndelegationsStore,
   ValidatorsStore,
 } from '@leapwallet/cosmos-wallet-store';
-import { GenericCard } from '@leapwallet/leap-ui';
 import BigNumber from 'bignumber.js';
-import BottomModal from 'components/new-bottom-modal';
-import Text from 'components/text';
-import { Button } from 'components/ui/button';
-import { useActiveChain } from 'hooks/settings/useActiveChain';
-import { useFormatCurrency } from 'hooks/settings/useCurrency';
-import { SelectedNetwork, useSelectedNetwork } from 'hooks/settings/useNetwork';
+import BottomModal from '../../../components/new-bottom-modal';
+import { Button } from '../../../components/ui/button';
+import { useActiveChain } from '../../../hooks/settings/useActiveChain';
+import { useFormatCurrency } from '../../../hooks/settings/useCurrency';
+import { SelectedNetwork, useSelectedNetwork } from '../../../hooks/settings/useNetwork';
 import { observer } from 'mobx-react-lite';
 import React, { useMemo } from 'react';
-import { hideAssetsStore } from 'stores/hide-assets-store';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { hideAssetsStore } from '../../../context/hide-assets-store';
 
 import { ClaimCard } from '../components/ClaimInfo';
+import Text from '../../../components/text';
+import { GenericCard } from '@leapwallet/leap-ui';
 
 interface LavaClaimInfoProps {
   isOpen: boolean;
@@ -148,119 +149,215 @@ const LavaClaimInfo = observer(
     }, [formattedTokenProviderReward, providerRewards?.totalRewardsDollarAmt]);
 
     return (
-      <BottomModal isOpen={isOpen} onClose={onClose} title='Claim rewards' className='flex flex-col gap-8 mt-4'>
-        {/* <div className='flex flex-col items-center w-full gap-y-4'>
-          <div className='flex flex-col gap-y-2'>
-            <Text size='xs' color='text-gray-700 dark:text-gray-400'>
+      <BottomModal
+        isOpen={isOpen}
+        onClose={onClose}
+        title="Claim rewards"
+        containerStyle={styles.modalContainer}
+        contentStyle={styles.modalContent}
+      >
+        <View style={styles.columnCenter}>
+          {/* Validator Rewards */}
+          <View style={styles.cardBlock}>
+            <Text size="xs" style={styles.sectionLabel} color="text-gray-700">
               Validator Rewards
             </Text>
             <GenericCard
               title={
-                <Text
-                  size='sm'
-                  color='text-gray-800 dark:text-white-100'
-                  className='font-bold mb-0.5'
-                >
+                <Text size="sm" style={styles.cardTitle} color="text-gray-800">
                   {validatorRewardTitle}
                 </Text>
               }
               subtitle={
-                <Text size='xs' color='text-gray-600 dark:text-gray-400' className='font-medium'>
+                <Text size="xs" style={styles.cardSubtitle} color="text-gray-600">
                   {validatorRewardSubtitle}
                 </Text>
               }
-              size='md'
+              size="md"
               isRounded
-              className='bg-white-100 dark:bg-gray-950'
+              // containerStyle={styles.cardContainer}
               title2={
-                <button
-                  onClick={onClaimValidatorRewards}
+                <TouchableOpacity
+                  onPress={onClaimValidatorRewards}
                   disabled={isClaimDisabled}
-                  className={`rounded-full text-xs font-bold text-white-100 dark:text-gray-900 dark:bg-white-100 bg-gray-900 px-4 py-2 ${
-                    isClaimDisabled && 'opacity-70 !cursor-not-allowed'
-                  }`}
+                  style={[
+                    styles.claimBtn,
+                    isClaimDisabled && styles.claimBtnDisabled,
+                  ]}
                 >
-                  Claim
-                </button>
+                  <Text
+                    size="xs"
+                    style={[
+                      styles.claimBtnText,
+                      isClaimDisabled && styles.claimBtnTextDisabled,
+                    ]}
+                  >
+                    Claim
+                  </Text>
+                </TouchableOpacity>
               }
             />
-          </div>
+          </View>
 
-          <div className='flex flex-col gap-y-2'>
-            <Text size='xs' color='text-gray-700 dark:text-gray-400'>
+          {/* Provider Rewards */}
+          <View style={styles.cardBlock}>
+            <Text size="xs" style={styles.sectionLabel} color="text-gray-700">
               Provider Rewards
             </Text>
             <GenericCard
               title={
-                <Text
-                  size='sm'
-                  color='text-black-100 dark:text-white-100'
-                  className='font-bold mb-0.5'
-                >
+                <Text size="sm" style={styles.cardTitle} color="text-black-100">
                   {providerRewardTitle}
                 </Text>
               }
               subtitle={
-                <Text size='xs' color='text-gray-600 dark:text-gray-400' className='font-medium'>
+                <Text size="xs" style={styles.cardSubtitle} color="text-gray-600">
                   {providerRewardSubtitle}
                 </Text>
               }
-              size='md'
+              size="md"
               isRounded
-              className='bg-white-100 dark:bg-gray-950'
+              // containerStyle={styles.cardContainer}
               title2={
-                <button
-                  onClick={onClaimProviderRewards}
+                <TouchableOpacity
+                  onPress={onClaimProviderRewards}
                   disabled={isProviderClaimDisabled}
-                  className={`rounded-full text-xs font-bold text-white-100 dark:text-gray-900 dark:bg-white-100 bg-gray-900 px-4 py-2 ${
-                    isProviderClaimDisabled && 'opacity-70 !cursor-not-allowed'
-                  }`}
+                  style={[
+                    styles.claimBtn,
+                    isProviderClaimDisabled && styles.claimBtnDisabled,
+                  ]}
                 >
-                  Claim
-                </button>
+                  <Text
+                    size="xs"
+                    style={[
+                      styles.claimBtnText,
+                      isProviderClaimDisabled && styles.claimBtnTextDisabled,
+                    ]}
+                  >
+                    Claim
+                  </Text>
+                </TouchableOpacity>
               }
             />
-          </div>
-        </div> */}
-        <div className='flex flex-col gap-4 w-full'>
-          <span className='text-muted-foreground text-sm'>Validator Rewards</span>
+          </View>
+        </View>
+        <View style={styles.rewardBlock}>
+          <Text size="sm" style={styles.sectionTitle} color="text-gray-600">
+            Validator Rewards
+          </Text>
           <ClaimCard
             titleAmount={validatorRewardTitle}
             secondaryAmount={validatorRewardSubtitle}
             button={
               <Button
-                onClick={onClaimValidatorRewards}
+                onPress={onClaimValidatorRewards}
                 disabled={isClaimDisabled}
-                size='md'
-                variant={'secondary'}
-                className='w-[7.5rem] bg-secondary-350 disabled:bg-secondary-300 hover:bg-secondary-300'
+                size="md"
+                variant="secondary"
+                style={styles.claimBtn}
               >
                 Claim
               </Button>
             }
           />
-        </div>
-        <div className='flex flex-col gap-4 w-full'>
-          <span className='text-muted-foreground text-sm'>Provider Rewards</span>
+        </View>
+        <View style={styles.rewardBlock}>
+          <Text size="sm" style={styles.sectionTitle} color="text-gray-600">
+            Provider Rewards
+          </Text>
           <ClaimCard
             titleAmount={providerRewardTitle ?? ''}
             secondaryAmount={providerRewardSubtitle ?? ''}
             button={
               <Button
-                size='md'
-                variant={'secondary'}
-                className='w-[7.5rem] bg-secondary-350 disabled:bg-secondary-300 hover:bg-secondary-300'
-                onClick={onClaimProviderRewards}
+                onPress={onClaimProviderRewards}
                 disabled={isProviderClaimDisabled}
+                size="md"
+                variant="secondary"
+                style={styles.claimBtn}
               >
                 Claim
               </Button>
             }
           />
-        </div>
+        </View>
       </BottomModal>
     );
   },
 );
+
+const styles = StyleSheet.create({
+  columnCenter: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    width: '100%',
+    gap: 16,
+  },
+  cardBlock: {
+    flexDirection: 'column',
+    gap: 8,
+    width: '100%',
+    marginBottom: 4,
+  },
+  sectionLabel: {
+    marginBottom: 2,
+    color: '#475569', // Tailwind gray-700, adjust for dark mode if needed
+  },
+  cardContainer: {
+    backgroundColor: '#fff', // or dark: '#09090b'
+    borderRadius: 14,
+  },
+  cardTitle: {
+    fontWeight: 'bold',
+    marginBottom: 2,
+    color: '#1e293b', // gray-800 or white-100
+  },
+  cardSubtitle: {
+    fontWeight: '500',
+    color: '#475569', // gray-600
+  },
+  claimBtn: {
+    borderRadius: 999,
+    paddingVertical: 8,
+    paddingHorizontal: 18,
+    backgroundColor: '#0f172a',
+    alignSelf: 'flex-start',
+    marginTop: 6,
+    width: 120,
+  },
+  claimBtnText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 13,
+  },
+  claimBtnDisabled: {
+    opacity: 0.7,
+    backgroundColor: '#e2e8f0',
+  },
+  claimBtnTextDisabled: {
+    color: '#a1a1aa', // gray-400 or gray-900 for dark
+  },
+  modalContainer: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 18,
+    marginTop: 12,
+  },
+  modalContent: {
+    flex: 1,
+    gap: 24,
+  },
+  rewardBlock: {
+    flexDirection: 'column',
+    gap: 12,
+    width: '100%',
+    marginBottom: 12,
+  },
+  sectionTitle: {
+    color: '#64748b',
+    marginBottom: 4,
+    fontSize: 14,
+  },
+});
 
 export default LavaClaimInfo;

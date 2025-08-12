@@ -1,16 +1,16 @@
 import { NftStore } from '@leapwallet/cosmos-wallet-store';
 import { Buttons } from '@leapwallet/leap-ui';
-import { ArrowCounterClockwise } from '@phosphor-icons/react';
-import classNames from 'classnames';
-import Text from 'components/text';
-import { Images } from 'images';
+import { ArrowCounterClockwise } from 'phosphor-react-native';
+import Text from '../../../components/text';
+import { Images } from '../../../../assets/images';
 import React from 'react';
+import { View, Image, StyleSheet } from 'react-native';
 
 import { CantSeeNfts } from './index';
 
 type NetworkErrorInNftProps = {
   title: string;
-  subTitle: string | React.ReactNode;
+  subTitle: string;
   showRetryButton?: boolean;
   className?: string;
   nftStore: NftStore;
@@ -21,7 +21,6 @@ export default function NetworkErrorInNft({
   title,
   subTitle,
   showRetryButton = false,
-  className = '',
   nftStore,
   setShowAddCollectionSheet,
 }: NetworkErrorInNftProps) {
@@ -30,46 +29,91 @@ export default function NetworkErrorInNft({
   };
 
   return (
-    <div className='px-6 pt-4 pb-8'>
-      <div
-        className={classNames(
-          'bg-white-100 dark:bg-gray-950 rounded-xl pt-8 p-4 flex flex-col items-center',
-          className,
-        )}
-      >
-        <img src={Images.Misc.FrogSad} alt='FrogSad' className='mb-6' />
-
-        <Text size='sm' className='font-bold mb-1'>
-          {title}
-        </Text>
-        <Text size='xs' color='text-gray-800 dark:text-gray-200' className='font-medium text-center !leading-5'>
-          {subTitle}
-        </Text>
-
+    <View style={styles.outer}>
+      <View style={styles.card}>
+        <Image source={{uri: Images.Misc.FrogSad}} style={styles.frogImg} />
+        <Text style={styles.titleText}>{title}</Text>
+        <Text style={styles.subTitleText}>{subTitle}</Text>
         {showRetryButton && (
           <Buttons.Generic
-            size='normal'
-            className='w-full mt-6 !bg-black-100 dark:!bg-white-100 text-white-100 dark:text-black-100'
+            size="normal"
+            style={styles.retryBtn}
             title={'Retry'}
             onClick={onRetry}
           >
-            <div className='flex items-center gap-2'>
-              Retry
+            <View style={styles.retryBtnContent}>
+              <Text style={styles.retryBtnLabel}>Retry</Text>
               <ArrowCounterClockwise
                 size={20}
-                className='text-white-100 dark:text-black-100'
-                style={{ transform: 'rotateY(180deg)' }}
+                color="#fff"
+                style={{ transform: [{ scaleX: -1 }] }}
               />
-            </div>
+            </View>
           </Buttons.Generic>
         )}
-      </div>
-
+      </View>
       <CantSeeNfts
         openAddCollectionSheet={() => setShowAddCollectionSheet(true)}
-        className='mt-4 w-full'
+        style={styles.cantSee}
         nftStore={nftStore}
       />
-    </div>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  outer: {
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingBottom: 32,
+  },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 18,
+    paddingTop: 32,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    alignItems: 'center',
+  },
+  frogImg: {
+    width: 80,
+    height: 80,
+    marginBottom: 24,
+    resizeMode: 'contain',
+  },
+  titleText: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    marginBottom: 4,
+    color: '#222',
+  },
+  subTitleText: {
+    fontSize: 14,
+    color: '#18181b',
+    fontWeight: '500',
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 2,
+  },
+  retryBtn: {
+    width: '100%',
+    marginTop: 24,
+    backgroundColor: '#18181b',
+  },
+  retryBtnContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    justifyContent: 'center',
+  },
+  retryBtnLabel: {
+    color: '#fff',
+    marginRight: 4,
+    fontWeight: 'bold',
+    fontSize: 15,
+  },
+  cantSee: {
+    marginTop: 16,
+    width: '100%',
+  },
+});

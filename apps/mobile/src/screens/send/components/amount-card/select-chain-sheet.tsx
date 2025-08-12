@@ -1,7 +1,7 @@
 import { ChainInfo } from '@leapwallet/cosmos-wallet-sdk';
-import BottomModal from 'components/new-bottom-modal';
-import { PriorityChains } from 'config/constants';
-import { useAllChainsPlaceholder } from 'pages/swaps-v2/hooks/useAllChainsPlaceholder';
+import BottomModal from '../../../../components/new-bottom-modal';
+import { PriorityChains } from '../../../../services/config/constants';
+import { useAllChainsPlaceholder } from '../../../swaps-v2/hooks/useAllChainsPlaceholder';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ChainsList } from './ChainsList';
@@ -66,13 +66,11 @@ export function SelectChainSheet({
   return (
     <BottomModal
       title={title ?? `Select Chain`}
-      onClose={() => {
-        onClose();
-      }}
-      fullScreen={true}
+      onClose={onClose}
+      fullScreen
       isOpen={isOpen}
-      contentClassName='!bg-white-100 dark:!bg-gray-950 !overflow-hidden'
-      className='p-0'
+      contentStyle={{ backgroundColor: '#fff', flex: 1, overflow: 'hidden' }}
+      style={{ padding: 0 }}
     >
       <ChainsList
         onChainSelect={handleOnChainSelect}

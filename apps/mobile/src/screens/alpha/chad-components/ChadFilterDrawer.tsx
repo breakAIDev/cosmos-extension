@@ -1,7 +1,9 @@
-import BottomModal from 'components/new-bottom-modal';
-import { PageName } from 'config/analytics';
-import { Raffle } from 'hooks/useAlphaOpportunities';
 import React, { useMemo } from 'react';
+import { StyleSheet } from 'react-native';
+
+import BottomModal from '../../../components/new-bottom-modal';
+import { PageName } from '../../../services/config/analytics';
+import { Raffle } from '../../../hooks/useAlphaOpportunities';
 
 import ChadCategoryFilter from './ChadCategoryFilter';
 import ChadEcosystemFilter from './ChadEcosystemFilter';
@@ -48,9 +50,34 @@ export default function ChadFilterDrawer({
   }, [raffles]);
 
   return (
-    <BottomModal fullScreen isOpen={isShown} onClose={onClose} title='Filter by' className='flex flex-col gap-10'>
-      <ChadCategoryFilter categoryFilters={categoryFilters} pageName={pageName} isChad={isChad} onClose={onClose} />
-      <ChadEcosystemFilter onClose={onClose} ecosystemFilters={ecosystemFilters} pageName={pageName} isChad={isChad} />
+    <BottomModal
+      isOpen={isShown}
+      onClose={onClose}
+      title="Filter by"
+      fullScreen
+      containerStyle={styles.container}
+    >
+      <ChadCategoryFilter
+        categoryFilters={categoryFilters}
+        pageName={pageName}
+        isChad={isChad}
+        onClose={onClose}
+      />
+      <ChadEcosystemFilter
+        ecosystemFilters={ecosystemFilters}
+        pageName={pageName}
+        isChad={isChad}
+        onClose={onClose}
+      />
     </BottomModal>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    gap: 24,
+    flexDirection: 'column',
+    padding: 16,
+  },
+});

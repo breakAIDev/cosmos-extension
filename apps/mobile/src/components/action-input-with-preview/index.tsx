@@ -1,14 +1,6 @@
-import React, { useRef, useState } from 'react';
-import {
-  View,
-  TextInput,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Animated,
-  Platform,
-} from 'react-native';
-// import Icon from 'react-native-vector-icons/MaterialIcons'; // or your icon library
+import React, { useEffect, useState, forwardRef } from 'react';
+import { View, TextInput, TouchableOpacity, Image, StyleSheet, Text, Platform } from 'react-native';
+import { AnimatePresence, MotiView } from 'moti';
 import { hex2rgba } from '../../utils/hextorgba';
 
 interface ActionInputProps {
@@ -18,7 +10,7 @@ interface ActionInputProps {
   icon?: any; // Should be a React Native image source or icon component
   value: string;
   onAction: (action: string, value: string) => void;
-  onChange: (value: string) => void;
+  onChangeText: (e: string) => void;
   placeholder?: string;
   style?: any;
   preview?: React.ReactNode;
@@ -26,92 +18,127 @@ interface ActionInputProps {
   warning?: boolean;
   rightElement?: React.ReactNode;
   disabled?: boolean;
+  autoComplete?: any;
+  spellCheck?: boolean | undefined;
 }
-
-export const ActionInputWithPreview = React.forwardRef<TextInput, ActionInputProps>(
+export const ActionInputWithPreview = forwardRef(
   (
     {
+      action,
       buttonText,
       buttonTextColor,
       icon,
       value,
-      onChange,
+      onChangeText,
       onAction,
-      action,
       placeholder = '',
-      style = {},
+      style,
       preview,
       invalid = false,
       warning = false,
       rightElement,
       disabled = false,
-    },
-    ref,
+      autoComplete,
+      spellCheck,
+    }: ActionInputProps,
+    ref: React.Ref<TextInput>
   ) => {
-    const [showPreview, setShowPreview] = useState(true);
+    const [showPreview, setShowPreview] = useState(preview !== undefined);
 
-    // Optional: Use Animated for fade transitions
-    // Skipped for simplicity
+    // If preview disappears, hide preview
+    useEffect(() => {
+      if (!preview) setShowPreview(false);
+    }, [preview, value]);
+
+    const handleFocus = () => setShowPreview(false);
+    const handleButtonClick = () => onAction && onAction(action, value);
 
     return (
-      <View style={[styles.container, style]}>
-        {preview !== undefined && showPreview ? (
-          <TouchableOpacity
-            style={[
-              styles.previewBox,
-              invalid && styles.invalid,
-              warning && styles.warning,
-            ]}
-            onPress={() => setShowPreview(false)}
-            activeOpacity={0.8}
-            disabled={disabled}
-          >
-            {typeof preview === 'string' ? <Text>{preview}</Text> : preview}
-          </TouchableOpacity>
-        ) : (
-          <TextInput
-            ref={ref}
-            style={[
-              styles.input,
-              invalid && styles.invalid,
-              warning && styles.warning,
-              disabled && styles.disabled,
-            ]}
-            value={value}
-            onChangeText={onChange}
-            placeholder={placeholder}
-            editable={!disabled}
-            placeholderTextColor="#999"
-            // testID or accessibilityLabel if needed
-          />
-        )}
+      <View style={[styles.relative, style]}>
+        <AnimatePresence>
+          {preview !== undefined && showPreview ? (
+            <MotiView
+              key="preview"
+              from={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.97 }}
+              transition={{ type: 'timing', duration: 180 }}
+              style={[
+                styles.preview,
+                invalid && styles.borderRed,
+                warning && styles.borderYellow,
+                !invalid && !warning && styles.borderTransparent,
+              ]}
+              onTouchEnd={() => setShowPreview(false)}
+            >
+              {React.isValidElement(preview) ? preview : <View/>}
+            </MotiView>
+          ) : (
+            <MotiView
+              key="input"
+              from={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.97 }}
+              transition={{ type: 'timing', duration: 180 }}
+              style={[
+                styles.inputWrapper,
+                invalid && styles.borderRed,
+                warning && styles.borderYellow,
+                !invalid && !warning && styles.borderGray,
+                disabled && styles.disabled,
+              ]}
+            >
+              <TextInput
+                ref={ref}
+                style={[styles.input, disabled && styles.inputDisabled]}
+                value={value}
+                onChangeText={onChangeText}
+                onFocus={handleFocus}
+                placeholder={placeholder}
+                placeholderTextColor="#a1a1aa"
+                editable={!disabled}
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete={autoComplete}
+                spellCheck={spellCheck}
+              />
+            </MotiView>
+          )}
+        </AnimatePresence>
         <View style={styles.rightElement}>
-          {rightElement ? (
+          {React.isValidElement(rightElement) ? (
             rightElement
           ) : !disabled ? (
             icon ? (
               <TouchableOpacity
-                onPress={() => onAction(action, value)}
-                style={styles.iconBtn}
+                onPress={handleButtonClick}
+                style={styles.iconButton}
                 accessibilityLabel={action}
+                hitSlop={{ top: 8, left: 8, bottom: 8, right: 8 }}
               >
-                {/* If icon is a local asset */}
-                {/* <Image source={icon} style={{ width: 24, height: 24 }} /> */}
-                {/* Or if using vector icons */}
-                {/* <Icon name={icon} size={24} color={buttonTextColor || '#000'} /> */}
-                {icon}
+                <Image source={{uri: icon}} style={styles.icon} />
               </TouchableOpacity>
             ) : buttonText ? (
               <TouchableOpacity
                 style={[
                   styles.button,
-                  buttonTextColor && {
-                    backgroundColor: hex2rgba(buttonTextColor, 0.1),
+                  {
+                    backgroundColor: buttonTextColor
+                      ? hex2rgba(buttonTextColor, 0.1)
+                      : '#f3f4f6',
                   },
                 ]}
-                onPress={() => onAction(action, value)}
+                onPress={handleButtonClick}
+                disabled={disabled}
               >
-                <Text style={[styles.buttonText, buttonTextColor && { color: buttonTextColor }]}>
+                <Text
+                  style={{
+                    color: buttonTextColor || '#222',
+                    fontSize: 12,
+                    fontWeight: '500',
+                    textTransform: 'capitalize',
+                  }}
+                >
                   {buttonText}
                 </Text>
               </TouchableOpacity>
@@ -120,73 +147,87 @@ export const ActionInputWithPreview = React.forwardRef<TextInput, ActionInputPro
         </View>
       </View>
     );
-  },
+  }
 );
 
-ActionInputWithPreview.displayName = 'ActionInput';
-
-// ------ Styles -------
 const styles = StyleSheet.create({
-  container: {
+  relative: {
     position: 'relative',
     width: '100%',
-    marginVertical: 8,
+    marginBottom: 0,
   },
-  previewBox: {
+  preview: {
     borderWidth: 1,
-    borderColor: 'transparent',
     borderRadius: 14,
-    backgroundColor: '#f3f4f6',
-    paddingVertical: 10,
+    backgroundColor: '#f8fafc',
+    paddingVertical: Platform.OS === 'ios' ? 10 : 6,
     paddingHorizontal: 16,
+    minHeight: 42,
+    justifyContent: 'center',
+    width: '100%',
+  },
+  inputWrapper: {
+    borderWidth: 1,
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    paddingVertical: Platform.OS === 'ios' ? 10 : 6,
+    paddingHorizontal: 16,
+    minHeight: 42,
+    justifyContent: 'center',
+    width: '100%',
   },
   input: {
-    borderWidth: 1,
-    borderColor: 'transparent',
-    borderRadius: 10,
-    backgroundColor: 'rgba(0,0,0,0.04)',
-    color: '#222',
-    paddingLeft: 16,
-    paddingRight: 60,
-    paddingVertical: Platform.OS === 'ios' ? 12 : 10,
     fontSize: 16,
+    color: '#222',
+    padding: 0,
+    margin: 0,
+    backgroundColor: 'transparent',
+    width: '100%',
+  },
+  inputDisabled: {
+    color: '#9ca3af',
+  },
+  borderRed: {
+    borderColor: '#fca5a5',
+  },
+  borderYellow: {
+    borderColor: '#f59e42',
+  },
+  borderTransparent: {
+    borderColor: 'transparent',
+  },
+  borderGray: {
+    borderColor: '#d1d5db',
+  },
+  disabled: {
+    backgroundColor: '#f3f4f6',
   },
   rightElement: {
     position: 'absolute',
-    right: 0,
+    right: 12,
     top: 0,
-    height: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingRight: 8,
-  },
-  iconBtn: {
+    bottom: 0,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 8,
-    borderRadius: 20,
+    height: '100%',
+    flexDirection: 'row',
+  },
+  iconButton: {
+    borderRadius: 999,
+    padding: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+  },
+  icon: {
+    width: 18,
+    height: 18,
   },
   button: {
-    borderRadius: 16,
+    borderRadius: 99,
     paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: '#f3f4f6',
-  },
-  buttonText: {
-    fontSize: 13,
-    fontWeight: '600',
-    textTransform: 'capitalize',
-  },
-  invalid: {
-    borderColor: '#ef4444', // red
-  },
-  warning: {
-    borderColor: '#eab308', // yellow
-  },
-  disabled: {
-    backgroundColor: '#eee',
-    color: '#aaa',
+    paddingVertical: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
-
-export default ActionInputWithPreview;

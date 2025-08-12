@@ -4,7 +4,7 @@ import Clipboard from '@react-native-clipboard/clipboard'; // yarn add @react-na
 
 type TextareaWithPasteProps = {
   value: string;
-  onChange: (value: string) => void;
+  onChangeText: (value: string) => void;
   error?: string;
   placeholder?: string;
   autoFocus?: boolean;
@@ -14,14 +14,14 @@ type TextareaWithPasteProps = {
 export const TextareaWithPaste = ({
   error,
   value,
-  onChange,
+  onChangeText,
   placeholder,
   autoFocus,
   style,
 }: TextareaWithPasteProps) => {
   const handlePaste = async () => {
     const text = await Clipboard.getString();
-    if (text) onChange(text);
+    if (text) onChangeText(text);
   };
 
   return (
@@ -33,7 +33,7 @@ export const TextareaWithPaste = ({
           style,
         ]}
         value={value}
-        onChangeText={onChange}
+        onChangeText={onChangeText}
         placeholder={placeholder}
         autoFocus={autoFocus}
         multiline

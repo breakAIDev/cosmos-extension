@@ -17,15 +17,16 @@ import {
   UndelegationsStore,
   ValidatorsStore,
 } from '@leapwallet/cosmos-wallet-store';
-import { CaretDown } from '@phosphor-icons/react';
+import { CaretDown } from 'phosphor-react-native';
 import BigNumber from 'bignumber.js';
-import Text from 'components/text';
-import useActiveWallet from 'hooks/settings/useActiveWallet';
-import { useFormatCurrency } from 'hooks/settings/useCurrency';
+import Text from '../../../components/text';
+import useActiveWallet from '../../../hooks/settings/useActiveWallet';
+import { useFormatCurrency } from '../../../hooks/settings/useCurrency';
 import { observer } from 'mobx-react-lite';
 import React, { useMemo } from 'react';
-import Skeleton from 'react-loading-skeleton';
-import { hideAssetsStore } from 'stores/hide-assets-store';
+import { View, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import { hideAssetsStore } from '../../../context/hide-assets-store';
+import { ThemeName, useTheme } from '@leapwallet/leap-ui';
 
 interface StakeRewardCardProps {
   onClaim?: () => void;
@@ -39,121 +40,172 @@ interface StakeRewardCardProps {
   forceNetwork?: SelectedNetwork;
 }
 
-const StakeRewardCard = observer(
-  ({
-    onClaim,
-    onClaimAndStake,
-    rootDenomsStore,
-    delegationsStore,
-    validatorsStore,
-    unDelegationsStore,
-    claimRewardsStore,
-    forceChain,
-    forceNetwork,
-  }: StakeRewardCardProps) => {
-    const _activeChain = useActiveChain();
-    const activeChain = useMemo(() => forceChain || _activeChain, [_activeChain, forceChain]);
-    const { data: featureFlags } = useFeatureFlags();
-    const _activeNetwork = useSelectedNetwork();
-    const activeNetwork = useMemo(() => forceNetwork || _activeNetwork, [_activeNetwork, forceNetwork]);
+const StakeRewardCard = observer(({
+  onClaim,
+  onClaimAndStake,
+  rootDenomsStore,
+  delegationsStore,
+  validatorsStore,
+  unDelegationsStore,
+  claimRewardsStore,
+  forceChain,
+  forceNetwork,
+}: StakeRewardCardProps) => {
+  const { theme } = useTheme();
+  const _activeChain = useActiveChain();
+  const activeChain = useMemo(() => forceChain || _activeChain, [_activeChain, forceChain]);
+  const { data: featureFlags } = useFeatureFlags();
+  const _activeNetwork = useSelectedNetwork();
+  const activeNetwork = useMemo(() => forceNetwork || _activeNetwork, [_activeNetwork, forceNetwork]);
 
-    const denoms = rootDenomsStore.allDenoms;
-    const [activeStakingDenom] = useActiveStakingDenom(denoms, activeChain, activeNetwork);
-    const chainDelegations = delegationsStore.delegationsForChain(activeChain);
-    const chainValidators = validatorsStore.validatorsForChain(activeChain);
-    const chainUnDelegations = unDelegationsStore.unDelegationsForChain(activeChain);
-    const chainClaimRewards = claimRewardsStore.claimRewardsForChain(activeChain);
+  const denoms = rootDenomsStore.allDenoms;
+  const [activeStakingDenom] = useActiveStakingDenom(denoms, activeChain, activeNetwork);
+  const chainDelegations = delegationsStore.delegationsForChain(activeChain);
+  const chainValidators = validatorsStore.validatorsForChain(activeChain);
+  const chainUnDelegations = unDelegationsStore.unDelegationsForChain(activeChain);
+  const chainClaimRewards = claimRewardsStore.claimRewardsForChain(activeChain);
 
-    const [formatCurrency] = useFormatCurrency();
-    const { activeWallet } = useActiveWallet();
-    const { rewards: providerRewards } = useDualStaking();
-    const { totalRewards, totalRewardsDollarAmt, loadingRewards, rewards } = useStaking(
-      denoms,
-      chainDelegations,
-      chainValidators,
-      chainUnDelegations,
-      chainClaimRewards,
-      activeChain,
-      activeNetwork,
-    );
-    const isClaimDisabled = useMemo(() => {
-      if (activeChain === 'evmos' && activeWallet?.walletType === WALLETTYPE.LEDGER) {
-        return true;
-      }
-      return !totalRewards || new BigNumber(totalRewards).lt(0.00001);
-    }, [activeChain, activeWallet?.walletType, totalRewards]);
-    const nativeTokenReward = useMemo(() => {
-      if (rewards) {
-        return rewards.total?.find((token) => token.denom === activeStakingDenom?.coinMinimalDenom);
-      }
-    }, [activeStakingDenom?.coinMinimalDenom, rewards]);
+  const [formatCurrency] = useFormatCurrency();
+  const { activeWallet } = useActiveWallet();
+  const { rewards: providerRewards } = useDualStaking();
+  const { totalRewards, totalRewardsDollarAmt, loadingRewards, rewards } = useStaking(
+    denoms,
+    chainDelegations,
+    chainValidators,
+    chainUnDelegations,
+    chainClaimRewards,
+    activeChain,
+    activeNetwork,
+  );
 
-    const formattedRewardAmount = useMemo(() => {
-      if (totalRewardsDollarAmt && new BigNumber(totalRewardsDollarAmt).gt(0)) {
-        return hideAssetsStore.formatHideBalance(formatCurrency(new BigNumber(totalRewardsDollarAmt)));
-      } else {
-        const rewardsCount = rewards?.total?.length ?? 0;
-        return hideAssetsStore.formatHideBalance(
-          `${formatTokenAmount(nativeTokenReward?.amount ?? '', activeStakingDenom?.coinDenom)} ${
-            rewardsCount > 1 ? `+${rewardsCount - 1} more` : ''
-          }`,
-        );
-      }
-    }, [
-      activeStakingDenom?.coinDenom,
-      formatCurrency,
-      nativeTokenReward?.amount,
-      rewards?.total.length,
-      totalRewardsDollarAmt,
-    ]);
+  const isClaimDisabled = useMemo(() => {
+    if (activeChain === 'evmos' && activeWallet?.walletType === WALLETTYPE.LEDGER) {
+      return true;
+    }
+    return !totalRewards || new BigNumber(totalRewards).lt(0.00001);
+  }, [activeChain, activeWallet?.walletType, totalRewards]);
 
-    return (
-      <div className='rounded-2xl flex items-center p-4 bg-gray-50 dark:bg-gray-900 justify-between w-full'>
-        <div className='flex flex-col gap-y-0.5'>
-          <Text size='xs' className='font-medium' color='text-gray-700 dark:text-gray-400'>
-            You have earned
+  const nativeTokenReward = useMemo(() => {
+    if (rewards) {
+      return rewards.total?.find((token) => token.denom === activeStakingDenom?.coinMinimalDenom);
+    }
+  }, [activeStakingDenom?.coinMinimalDenom, rewards]);
+
+  const formattedRewardAmount = useMemo(() => {
+    if (totalRewardsDollarAmt && new BigNumber(totalRewardsDollarAmt).gt(0)) {
+      return hideAssetsStore.formatHideBalance(formatCurrency(new BigNumber(totalRewardsDollarAmt)));
+    } else {
+      const rewardsCount = rewards?.total?.length ?? 0;
+      return hideAssetsStore.formatHideBalance(
+        `${formatTokenAmount(nativeTokenReward?.amount ?? '', activeStakingDenom?.coinDenom)} ${
+          rewardsCount > 1 ? `+${rewardsCount - 1} more` : ''
+        }`,
+      );
+    }
+  }, [
+    activeStakingDenom?.coinDenom,
+    formatCurrency,
+    nativeTokenReward?.amount,
+    rewards?.total?.length,
+    totalRewardsDollarAmt,
+  ]);
+
+  // Button color logic
+  const bgColor = theme === ThemeName.DARK ? '#18181c' : '#f5f6fa';
+  const btnColor = theme === ThemeName.DARK ? '#2e2f39' : '#ededed';
+  const textColor = theme === ThemeName.DARK ? '#fff' : '#111';
+  const btnTextColor = theme === ThemeName.DARK ? '#fff' : '#222';
+
+  return (
+    <View style={[styles.card, { backgroundColor: bgColor }]}>
+      <View style={styles.column}>
+        <Text style={{ color: theme === ThemeName.DARK ? '#bcbcbc' : '#666' }} size="xs">
+          You have earned
+        </Text>
+        {loadingRewards ? (
+          <ActivityIndicator size="small" color={theme === ThemeName.DARK ? '#fff' : '#000'} style={{ marginTop: 2 }} />
+        ) : (
+          <Text style={{ color: textColor, fontWeight: 'bold', fontSize: 15, marginTop: 1 }} size="sm">
+            {formattedRewardAmount}
           </Text>
-          {loadingRewards && <Skeleton width={50} height={14} />}
-          {!loadingRewards && (
-            <Text size='sm' className='font-bold' color='text-black-100 dark:text-white-100'>
-              {formattedRewardAmount}
-            </Text>
-          )}
-        </div>
-        {loadingRewards && <Skeleton width={95} height={28} borderRadius={100} />}
-        {!loadingRewards &&
-          (activeChain === 'lava' && featureFlags?.restaking?.extension === 'active' ? (
-            <button
-              disabled={isClaimDisabled && new BigNumber(providerRewards.totalRewards).lt(0.00001)}
-              onClick={onClaim}
-              className={`py-2 pl-4 pr-3 hover:cursor-pointer flex items-center rounded-full bg-gray-200 dark:bg-gray-800 gap-x-2 ${
-                isClaimDisabled &&
-                new BigNumber(providerRewards.totalRewards).lt(0.00001) &&
-                'opacity-70 !cursor-not-allowed'
-              }`}
-            >
-              <span className='font-bold text-xs text-black-100 dark:text-white-100'>Claim</span>
-              <CaretDown size={12} className='text-black-100 dark:text-white-100' />
-            </button>
-          ) : (
-            <button
-              disabled={isClaimDisabled}
-              className={`hover:cursor-pointer flex items-center rounded-full overflow-hidden bg-gray-200 dark:bg-gray-800 ${
-                isClaimDisabled && 'opacity-70 !cursor-not-allowed'
-              }`}
-            >
-              <span onClick={onClaim} className='pr-2 py-2 pl-4 font-bold text-xs text-black-100 dark:text-white-100'>
-                Claim
-              </span>
-              <div className='w-px h-4 bg-gray-400 dark:bg-gray-700' />
-              <span onClick={onClaimAndStake} className='pr-3 py-2 pl-2'>
-                <CaretDown size={12} className='text-black-100 dark:text-white-100' />
-              </span>
-            </button>
-          ))}
-      </div>
-    );
+        )}
+      </View>
+      {loadingRewards ? (
+        <ActivityIndicator size="small" color={theme === ThemeName.DARK ? '#fff' : '#000'} style={{ marginLeft: 10 }} />
+      ) : activeChain === 'lava' && featureFlags?.restaking?.extension === 'active' ? (
+        <TouchableOpacity
+          disabled={isClaimDisabled && new BigNumber(providerRewards.totalRewards).lt(0.00001)}
+          onPress={onClaim}
+          style={[
+            styles.claimBtn,
+            {
+              backgroundColor: btnColor,
+              opacity: (isClaimDisabled && new BigNumber(providerRewards.totalRewards).lt(0.00001)) ? 0.6 : 1,
+            },
+          ]}
+        >
+          <Text style={[styles.claimText, { color: btnTextColor }]}>Claim</Text>
+          <CaretDown size={14} color={btnTextColor} />
+        </TouchableOpacity>
+      ) : (
+        <View style={[styles.splitBtn, { backgroundColor: btnColor, opacity: isClaimDisabled ? 0.6 : 1 }]}>
+          <TouchableOpacity
+            disabled={isClaimDisabled}
+            onPress={onClaim}
+            style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 7, paddingHorizontal: 12 }}
+          >
+            <Text style={[styles.claimText, { color: btnTextColor, paddingRight: 2 }]}>Claim</Text>
+          </TouchableOpacity>
+          <View style={{ width: 1, height: 18, backgroundColor: theme === ThemeName.DARK ? '#444' : '#ccc' }} />
+          <TouchableOpacity
+            disabled={isClaimDisabled}
+            onPress={onClaimAndStake}
+            style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 7, paddingHorizontal: 8 }}
+          >
+            <CaretDown size={14} color={btnTextColor} />
+          </TouchableOpacity>
+        </View>
+      )}
+    </View>
+  );
+});
+
+const styles = StyleSheet.create({
+  card: {
+    borderRadius: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    marginBottom: 10,
+    justifyContent: 'space-between',
+    width: '100%',
+    gap: 10,
   },
-);
+  column: {
+    flexDirection: 'column',
+    gap: 2,
+    minWidth: 120,
+  },
+  claimBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 999,
+    gap: 8,
+    marginLeft: 4,
+  },
+  claimText: {
+    fontWeight: 'bold',
+    fontSize: 13,
+  },
+  splitBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 999,
+    overflow: 'hidden',
+    marginLeft: 4,
+  },
+});
 
 export default StakeRewardCard;

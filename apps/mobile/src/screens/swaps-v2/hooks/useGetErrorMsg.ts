@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { SourceChain, SourceToken } from 'types/swap';
+import { SourceChain, SourceToken } from '../../../types/swap';
 
 const NO_TRANSACTION_ROUTES_ERROR = 'No transaction routes available';
 // Skip's API responses for which to show NO_TRANSACTION_ROUTES_ERROR

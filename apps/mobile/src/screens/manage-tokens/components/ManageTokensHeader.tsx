@@ -1,25 +1,57 @@
-import { ArrowLeft } from '@phosphor-icons/react';
-import { PageHeader } from 'components/header/PageHeaderV2';
-import Text from 'components/text';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { ArrowLeft } from 'phosphor-react-native';
+import { useNavigation } from '@react-navigation/native';
+import Text from '../../../components/text';
+import { PageHeader } from '../../../components/header/PageHeaderV2';
 
 const ManageTokensHeader = ({ title, onBack }: { title?: string; onBack?: () => void }) => {
-  const navigate = useNavigate();
+  const navigation = useNavigation();
+
   return (
-    <PageHeader className='bg-secondary-50 border-b border-secondary-300'>
-      <ArrowLeft
-        className='size-9 p-2 cursor-pointer text-muted-foreground hover:text-foreground'
-        onClick={() => {
-          onBack ? onBack() : navigate(-1);
+    <PageHeader style={styles.header}>
+      <TouchableOpacity
+        onPress={() => {
+          if (onBack) onBack();
+          else navigation.goBack();
         }}
-      />
-      <Text className='text-[18px] font-bold !leading-6' color='text-monochrome'>
+        style={styles.iconWrapper}
+      >
+        <ArrowLeft size={28} color="#64748b" />
+      </TouchableOpacity>
+      <Text style={styles.title} color="text-monochrome">
         {title ?? 'Manage tokens'}
       </Text>
-      <div className='w-9 h-9' />
+      {/* Spacer to balance flex layout */}
+      <View style={styles.iconWrapper} />
     </PageHeader>
   );
 };
+
+const styles = StyleSheet.create({
+  header: {
+    backgroundColor: '#f8fafc', // secondary-50
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0', // secondary-300
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    height: 56,
+    justifyContent: 'space-between',
+  },
+  iconWrapper: {
+    width: 36,
+    height: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    lineHeight: 24,
+    flex: 1,
+    textAlign: 'center',
+  },
+});
 
 export default ManageTokensHeader;

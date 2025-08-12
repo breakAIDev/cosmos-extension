@@ -1,20 +1,24 @@
 import { Token, useGetTokenSpendableBalances } from '@leapwallet/cosmos-wallet-hooks';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 
+// The prop types remain the same
 export type LoadChainAssetsProps = {
   setAllAssets: React.Dispatch<React.SetStateAction<Token[]>>;
   setIsAllAssetsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
+// Functional component using hooks, works identically in React Native
 export function LoadChainAssets({ setAllAssets, setIsAllAssetsLoading }: LoadChainAssetsProps) {
   const { allAssets, nativeTokensStatus, s3IbcTokensStatus } = useGetTokenSpendableBalances();
 
   useEffect(() => {
     setAllAssets(allAssets);
-    setIsAllAssetsLoading([nativeTokensStatus, s3IbcTokensStatus].some((status) => status === 'loading'));
+    setIsAllAssetsLoading(
+      [nativeTokensStatus, s3IbcTokensStatus].some((status) => status === 'loading')
+    );
+    // No need for eslint-disable in RN, but you can keep it if you want
+  }, [allAssets, nativeTokensStatus, s3IbcTokensStatus, setAllAssets, setIsAllAssetsLoading]);
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allAssets, nativeTokensStatus, s3IbcTokensStatus]);
-
+  // Return null as it is a logic-only component
   return null;
 }

@@ -7,6 +7,7 @@ import {
   Keyboard,
   StyleSheet,
   Dimensions,
+  Linking,
 } from 'react-native';
 import { observer } from 'mobx-react-lite';
 import { useNavigation } from '@react-navigation/native';
@@ -19,6 +20,7 @@ import {
   useGetChains,
   useActiveWallet,
   OptionPlatformConfig,
+  QuickSearchOption,
 } from '@leapwallet/cosmos-wallet-hooks';
 import { WALLETTYPE } from '@leapwallet/leap-keychain';
 import { Colors } from '../../theme/colors';
@@ -74,7 +76,7 @@ const SearchModalView = () => {
           action_name.toLowerCase().includes(searchedText.trim().toLowerCase()) && show_in_search,
         ) ?? [];
 
-      let _filteredDapps = [];
+      let _filteredDapps: QuickSearchOption[] = [];
 
       if (dappsList?.dapps?.length) {
         _filteredDapps = getFilteredDapps(dappsList.dapps, dappsList.types, searchedText);

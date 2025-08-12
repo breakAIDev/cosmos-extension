@@ -3,7 +3,7 @@ import { PanResponder, ScrollView } from 'react-native';
 
 type ScrollBehavior = 'natural' | 'reverse';
 
-export function useHorizontalScroll(behavior: ScrollBehavior = 'natural') {
+export default function useHorizontalScroll(behavior: ScrollBehavior = 'natural') {
   const scrollViewRef = useRef<ScrollView>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [scrollStartX, setScrollStartX] = useState(0);

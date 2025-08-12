@@ -1,8 +1,9 @@
+import React, { useMemo } from 'react';
+import { View, Text } from 'react-native';
+import SkeletonPlaceholder from 'react-native-skeleton-placeholder'; // Uncomment if using a skeleton lib
 import { sliceAddress, useChainApis } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { ParsedMessage, ParsedMessageType } from '@leapwallet/parser-parfait';
-import React, { useMemo } from 'react';
-import Skeleton from 'react-loading-skeleton';
 
 import { useMessageDetails } from './message-details';
 
@@ -16,20 +17,28 @@ const DetailItem: React.FC<DetailItemProps> = ({ message, activeChain, selectedN
   const { lcdUrl } = useChainApis(activeChain, selectedNetwork);
   const { data, isLoading } = useMessageDetails(message, lcdUrl ?? '', activeChain);
 
-  return isLoading ? (
-    <Skeleton />
-  ) : (
-    <li className='font-bold dark:text-white-100 text-gray-900 text-sm mt-1 list-none ml-0'>
-      {data === 'unknown'
-        ? message.__type === ParsedMessageType.Unimplemented
-          ? ((typeUrl: string) => {
-              const splitTypeUrl = typeUrl.split('.');
-              const messageType = splitTypeUrl[splitTypeUrl.length - 1];
-              return <span className='text-red-500'>{messageType}</span>;
-            })(message.message['@type'])
-          : 'Unknown'
-        : data}
-    </li>
+  if (isLoading) {
+    return (
+      <SkeletonPlaceholder>
+        <SkeletonPlaceholder.Item/>
+      </SkeletonPlaceholder>
+    );
+  }
+
+  return (
+    <View style={{ marginTop: 4 }}>
+      <Text style={{ fontWeight: 'bold', color: '#111', fontSize: 15 }}>
+        {data === 'unknown'
+          ? message.__type === ParsedMessageType.Unimplemented
+            ? (() => {
+                const splitTypeUrl = message.message['@type'].split('.');
+                const messageType = splitTypeUrl[splitTypeUrl.length - 1];
+                return <Text style={{ color: '#EF4444' }}>{messageType}</Text>;
+              })()
+            : 'Unknown'
+          : data}
+      </Text>
+    </View>
   );
 };
 
@@ -39,7 +48,11 @@ type TransactionDetailsProps = {
   selectedNetwork: 'mainnet' | 'testnet';
 };
 
-const TransactionDetails: React.FC<TransactionDetailsProps> = ({ parsedMessages, activeChain, selectedNetwork }) => {
+const TransactionDetails: React.FC<TransactionDetailsProps> = ({
+  parsedMessages,
+  activeChain,
+  selectedNetwork,
+}) => {
   const noMessageIsParsed = parsedMessages === null || parsedMessages.length === 0;
   const noMessageIsDecoded = noMessageIsParsed
     ? true
@@ -65,31 +78,35 @@ const TransactionDetails: React.FC<TransactionDetailsProps> = ({ parsedMessages,
 
       return message;
     }
-
     return '';
   }, [parsedMessages]);
 
-  return noMessageIsDecoded ? null : (
-    <div
-      className='rounded-2xl p-4 mt-3'
+  if (noMessageIsDecoded) return null;
+
+  return (
+    <View
       style={{
+        borderRadius: 16,
+        padding: 16,
+        marginTop: 12,
         backgroundColor: 'rgba(58, 207, 146, 0.17)',
       }}
     >
-      <p className='text-gray-500 dark:text-gray-100 text-sm font-medium tracking-wide'>Transaction Summary</p>
-
-      <ul className='mt-2'>
+      <Text style={{ color: '#777', fontSize: 14, fontWeight: '500', letterSpacing: 0.2, marginBottom: 4 }}>
+        Transaction Summary
+      </Text>
+      <View style={{ marginTop: 8 }}>
         {claimRewardsMessage ? (
-          <li className='font-bold dark:text-white-100 text-gray-900 text-sm mt-1 list-none ml-0'>
-            {claimRewardsMessage}
-          </li>
+          <Text style={{ fontWeight: 'bold', color: '#111', fontSize: 15 }}>{claimRewardsMessage}</Text>
         ) : (
           parsedMessages?.map((msg, i) => (
             <DetailItem key={i} message={msg} activeChain={activeChain} selectedNetwork={selectedNetwork} />
-          )) ?? 'No information available'
+          )) || (
+            <Text style={{ color: '#EF4444', fontSize: 14 }}>No information available</Text>
+          )
         )}
-      </ul>
-    </div>
+      </View>
+    </View>
   );
 };
 

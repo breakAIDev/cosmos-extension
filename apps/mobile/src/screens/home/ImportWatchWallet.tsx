@@ -1,22 +1,21 @@
 import { getBlockChainFromAddress, isValidWalletAddress } from '@leapwallet/cosmos-wallet-sdk';
 import { KeyChain } from '@leapwallet/leap-keychain';
-import SelectWalletColors from 'components/create-wallet-form/SelectWalletColors';
-import BottomModal from 'components/new-bottom-modal';
-import { Button } from 'components/ui/button';
-import { Input } from 'components/ui/input';
-import { Textarea } from 'components/ui/input/textarea';
-import { LEDGER_NAME_EDITED_SUFFIX_REGEX } from 'config/config';
-import { useChainInfos } from 'hooks/useChainInfos';
+import SelectWalletColors from '../../components/create-wallet-form/SelectWalletColors';
+import BottomModal from '../../components/new-bottom-modal';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { LEDGER_NAME_EDITED_SUFFIX_REGEX } from '../../services/config/config';
+import { useChainInfos } from '../../hooks/useChainInfos';
 import React, { useEffect, useRef, useState } from 'react';
-import { passwordStore } from 'stores/password-store';
+import { passwordStore } from '../../context/password-store';
 
 import { Wallet } from '../../hooks/wallet/useWallet';
 import { getWalletName } from './utils/wallet-names';
 import { WatchWalletAvatar } from './WalletCardWrapper';
+import { View, Text, TextInput, StyleSheet, ScrollView } from 'react-native';
 
 type ImportWatchAddressProps = {
   isVisible: boolean;
-  
   onClose: (closeParent: boolean) => void;
 };
 
@@ -111,57 +110,139 @@ export default function ImportWatchWallet({ isVisible, onClose }: ImportWatchAdd
     <BottomModal
       fullScreen
       isOpen={isVisible}
-      title='Watch wallet'
+      title="Watch wallet"
       onClose={handleClose}
       footerComponent={
-        <>
-          <Button variant='secondary' size='md' className='flex-1' onClick={handleClose}>
+        <View style={styles.footerRow}>
+          <Button variant="secondary" size="md" style={styles.footerBtn} onPress={handleClose}>
             Cancel
           </Button>
           <Button
-            size='md'
-            className='flex-1'
+            size="md"
+            style={styles.footerBtn}
             disabled={!watchAddress || !!error || isLoading}
-            onClick={handleImportWallet}
+            onPress={handleImportWallet}
           >
             Watch Wallet
           </Button>
-        </>
+        </View>
       }
     >
-      <div className='flex flex-col p-6 justify-between items-center gap-4 bg-secondary-50 rounded-xl'>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
         <WatchWalletAvatar
           colorIndex={colorIndex}
-          className='size-20 rounded-full transition-colors duration-300'
-          iconClassName='size-10'
+          style={styles.avatar}
+          iconSize={40}
         />
 
-        <Textarea
-          className='w-full h-[7.5rem] resize-none'
-          placeholder='Public address'
-          spellCheck={false}
+        {/* Public address input (multiline) */}
+        <TextInput
+          style={[
+            styles.textarea,
+            error ? styles.inputError : undefined,
+          ]}
+          placeholder="Public address"
           autoFocus={isVisible}
-          onChange={(e) => onChangeHandler(e.target.value)}
-          status={error ? 'error' : undefined}
-        />
-
-        <Input
-          maxLength={24}
+          value={watchAddress}
+          onChangeText={onChangeHandler}
+          multiline
+          numberOfLines={3}
           spellCheck={false}
-          placeholder='Enter wallet name'
-          value={walletName.replace(LEDGER_NAME_EDITED_SUFFIX_REGEX, '')}
-          onChange={(e) => setWalletName(e.target.value)}
-          trailingElement={
-            walletName.length > 0 ? (
-              <div className='text-muted-foreground text-sm font-medium'>{`${walletName.length}/24`}</div>
-            ) : null
-          }
         />
 
-        {error && <span className='font-medium text-destructive-200 text-sm mx-auto'>{error}</span>}
+        {/* Wallet name input with trailing length counter */}
+        <View style={styles.inputWrapper}>
+          <Input
+            maxLength={24}
+            spellCheck={false}
+            placeholder="Enter wallet name"
+            value={walletName.replace(LEDGER_NAME_EDITED_SUFFIX_REGEX, '')}
+            onChangeText={setWalletName}
+            style={styles.input}
+          />
+          <Text style={styles.counterText}>{walletName.length > 0 ? `${walletName.length}/24` : ''}</Text>
+        </View>
+
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
         <SelectWalletColors selectColorIndex={setColorIndex} colorIndex={colorIndex} />
-      </div>
+      </ScrollView>
     </BottomModal>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    padding: 24,
+    backgroundColor: '#F6F7FB', // bg-secondary-50
+    borderRadius: 20,
+    gap: 18,
+  },
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginBottom: 6,
+    marginTop: 2,
+    alignSelf: 'center',
+  },
+  textarea: {
+    width: '100%',
+    height: 100,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 14,
+    padding: 12,
+    fontSize: 16,
+    color: '#222',
+    textAlignVertical: 'top',
+    marginBottom: 8,
+  },
+  inputWrapper: {
+    width: '100%',
+    position: 'relative',
+    marginTop: 4,
+    marginBottom: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  input: {
+    flex: 1,
+  },
+  counterText: {
+    position: 'absolute',
+    right: 16,
+    color: '#9CA3AF',
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  errorText: {
+    fontWeight: '500',
+    color: '#E2655A',
+    fontSize: 15,
+    alignSelf: 'center',
+    marginVertical: 2,
+  },
+  inputError: {
+    borderColor: '#E2655A',
+    borderWidth: 1,
+  },
+  footerRow: {
+    flexDirection: 'row',
+    gap: 14,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 18,
+    backgroundColor: '#F3F4F6',
+  },
+  footerBtn: {
+    flex: 1,
+    marginHorizontal: 4,
+  },
+});

@@ -1,17 +1,15 @@
 import { useGetChains } from '@leapwallet/cosmos-wallet-hooks';
-import classNames from 'classnames';
-import { Button } from 'components/ui/button';
-import { useActiveChain } from 'hooks/settings/useActiveChain';
-import { WalletIcon } from 'icons/wallet-icon';
+import { Button } from '../../../components/ui/button';
+import { useActiveChain } from '../../../hooks/settings/useActiveChain';
+import { WalletIcon } from '../../../../assets/icons/wallet-icon';
 import React, { useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { closeSidePanel } from 'utils/closeSidePanel';
-import { getLedgerEnabledEvmChainsKey } from 'utils/getLedgerEnabledEvmChains';
-import { isSidePanel } from 'utils/isSidePanel';
-import Browser from 'webextension-polyfill';
+import { View, Text, StyleSheet } from 'react-native';
+// Replace with your navigation hook or prop!
+import { useNavigation } from '@react-navigation/native';
+import { getLedgerEnabledEvmChainsKey } from '../../../utils/getLedgerEnabledEvmChains';
 
 export function WalletNotConnected({ visible }: { visible: boolean }) {
-  const navigate = useNavigate();
+  const navigation = useNavigation();
   const activeChain = useActiveChain();
   const chains = useGetChains();
 
@@ -23,39 +21,95 @@ export function WalletNotConnected({ visible }: { visible: boolean }) {
     return ledgerEnabledEvmChainsKeys.includes(activeChain) ? 'EVM' : 'Cosmos';
   }, [activeChain, ledgerEnabledEvmChainsKeys]);
 
+  if (!visible) return null;
+
   return (
-    <div
-      className={classNames('h-[calc(100%-128px)] p-6', {
-        hidden: !visible,
-      })}
-    >
-      <div className='flex flex-col h-full justify-center items-center rounded-2xl bg-secondary-100'>
-        <div className='text-center gap-3 flex flex-col justify-end items-center px-6'>
-          <div className='bg-secondary-200 h-16 w-16 rounded-full p-3 flex items-center justify-center'>
-            <WalletIcon className='text-foreground' size={24} />
-          </div>
-          <div className='text-center gap-3 flex flex-col justify-end items-center'>
-            <div className='!leading-[24px] font-bold text-foreground text-[18px]'>Wallet not connected</div>
-            <div className='!leading-[16px] text-xs text-secondary-800'>
+    <View style={styles.outerContainer}>
+      <View style={styles.innerContainer}>
+        <View style={styles.centerBlock}>
+          <View style={styles.iconCircle}>
+            <WalletIcon size={24} />
+          </View>
+          <View style={styles.textBlock}>
+            <Text style={styles.title}>Wallet not connected</Text>
+            <Text style={styles.desc}>
               You need to import Ledger using {ledgerApp} app to use this chain.
-            </div>
-          </div>
-        </div>
+            </Text>
+          </View>
+        </View>
         <Button
-          className='w-[260px] h-[44px] text-sm !leading-[20px] text-foreground mt-8'
-          onClick={() => {
-            const views = Browser.extension.getViews({ type: 'popup' });
-            if (views.length === 0 && !isSidePanel()) {
-              navigate(`/importLedger?app=${ledgerApp}`);
-            } else {
-              window.open(Browser.runtime.getURL(`index.html#/importLedger?app=${ledgerApp}`));
-              closeSidePanel();
-            }
+          style={styles.button}
+          onPress={() => {
+            // For mobile, just navigate!
+            navigation.navigate('ImportLedgerScreen', { app: ledgerApp });
           }}
         >
           Connect {ledgerApp} wallet
         </Button>
-      </div>
-    </div>
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  outerContainer: {
+    flex: 1,
+    padding: 24,
+    // Height minus 128px, if you need to enforce it:
+    // height: 'calc(100%-128px)', // Not supported in RN
+    // Instead, use flex and padding or set a fixed height if absolutely necessary.
+  },
+  innerContainer: {
+    flex: 1,
+    borderRadius: 24,
+    backgroundColor: '#F3F4F6', // bg-secondary-100
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 0,
+  },
+  centerBlock: {
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: 12, // gap is not supported, add marginBottom on items if you need spacing
+    paddingHorizontal: 24,
+  },
+  iconCircle: {
+    backgroundColor: '#E5E7EB', // bg-secondary-200
+    height: 64,
+    width: 64,
+    borderRadius: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  textBlock: {
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    marginTop: 6,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#222', // text-foreground
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 8,
+  },
+  desc: {
+    fontSize: 12,
+    color: '#6B7280', // text-secondary-800
+    textAlign: 'center',
+    lineHeight: 16,
+  },
+  button: {
+    width: 260,
+    height: 44,
+    fontSize: 14,
+    marginTop: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    // leading-20 is lineHeight: 20
+    lineHeight: 20,
+    color: '#222',
+  },
+});

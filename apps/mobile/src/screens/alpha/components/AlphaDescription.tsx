@@ -1,98 +1,100 @@
-import { Separator } from 'components/ui/separator';
-import { EventName, PageName } from 'config/analytics';
-import mixpanel from 'mixpanel-browser';
 import React from 'react';
-import Markdown from 'react-markdown';
-import gfm from 'remark-gfm';
-
-import { RaffleListingProps } from '../chad-components/RaffleListing';
+import { View, Text, StyleSheet, TextStyle } from 'react-native';
+import Markdown from 'react-native-markdown-display';
+import { Separator } from '../../../components/ui/separator';
+import { EventName, PageName } from '../../../services/config/analytics';
+import mixpanel from '../../../mixpanel'; // or your RN mixpanel wrapper
 import { getHostname } from '../utils';
+import { RaffleListingProps } from '../chad-components/RaffleListing';
 import { AlphaOpportunityProps } from './AlphaOpportunity';
 
-const remarkPlugins = [gfm];
-
 /**
- * renders the description for a Alpha listing using markdown
+ * Description for Alpha listing (markdown)
  */
 export default function AlphaDescription(opportunity: AlphaOpportunityProps) {
-  const components = {
-    a: ({ ...props }) => (
-      <a
-        onClick={() => {
-          try {
-            // mixpanel.track(EventName.PageView, {
-            //   pageName: PageName.Post,
-            //   name: opportunity.homepageDescription,
-            //   id: opportunity.id,
-            //   alphaExternalURL: getHostname(props?.href ?? ''),
-            //   ecosystem: [...(opportunity.ecosystemFilter ?? [])],
-            //   categories: [...(opportunity.categoryFilter ?? [])],
-            // })
-          } catch (err) {
-            // ignore
-          }
-        }}
-        {...props}
-        target='_blank'
-        rel='noreferrer noopener'
-        className='text-green-600 hover:text-green-500 no-underline transition-colors break-all'
-        style={{ wordBreak: 'break-all' }}
-      />
-    ),
-    hr: () => <Separator className='my-6' />,
-  };
+  if (!opportunity.descriptionActions) return null;
 
   return (
-    <div className='rounded-xl prose-neutral prose prose-sm dark:prose-invert'>
-      <Markdown remarkPlugins={remarkPlugins} components={components}>
+    <View style={styles.markdownContainer}>
+      <Markdown
+        style={markdownStyles}
+        onLinkPress={url => {
+          // Optional: Analytics
+          // mixpanel.track(EventName.PageView, { ... });
+          return true;
+        }}
+        rules={{
+          hr: (node, children, parent, styles) => (
+            <Separator key={node.key} style={{ marginVertical: 20 }} />
+          ),
+        }}
+      >
         {opportunity.descriptionActions}
       </Markdown>
-    </div>
+    </View>
   );
 }
 
 /**
- * renders the description for a Chad listing using markdown
+ * Description for Chad listing (markdown)
  */
 export function ChadDescription(raffle: RaffleListingProps) {
-  const components = {
-    a: ({ ...props }) => (
-      <a
-        onClick={() => {
+  if (!raffle.description) return null;
+
+  return (
+    <View style={styles.markdownSection}>
+      <Text style={styles.aboutTitle}>About</Text>
+      <Markdown
+        style={markdownStyles}
+        onLinkPress={url => {
           try {
             mixpanel.track(EventName.PageView, {
               pageName: PageName.ChadExclusivesDetail,
               name: raffle.title,
               id: raffle.id,
-              raffleExternalURL: getHostname(props?.href ?? ''),
+              raffleExternalURL: getHostname(url ?? ''),
               ecosystem: [...(raffle?.categories ?? [])],
               categories: [...(raffle?.ecosystem ?? [])],
               isChad: true,
             });
-          } catch (err) {
-            // ignore
-          }
+          } catch (err) {}
+          return true;
         }}
-        {...props}
-        target='_blank'
-        rel='noreferrer noopener'
-        className='text-green-600 hover:text-green-500 no-underline transition-colors break-all'
-        style={{ wordBreak: 'break-all' }}
-      />
-    ),
-  };
-
-  if (!raffle.description) {
-    return null;
-  }
-
-  return (
-    <section className='rounded-xl prose-neutral prose prose-sm dark:prose-invert space-y-3'>
-      <span className='text-[1.125rem] font-bold'>About</span>
-
-      <Markdown remarkPlugins={remarkPlugins} components={components}>
-        {raffle.description || ''}
+      >
+        {raffle.description}
       </Markdown>
-    </section>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  markdownContainer: {
+    borderRadius: 16,
+    backgroundColor: '#fafafc',
+    padding: 16,
+    marginVertical: 6,
+  },
+  markdownSection: {
+    borderRadius: 16,
+    backgroundColor: '#fafafc',
+    padding: 16,
+    marginVertical: 6,
+  },
+  aboutTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 14,
+  },
+});
+
+const markdownStyles = {
+  body: {
+    color: '#222',
+    fontSize: 15,
+    lineHeight: 22,
+  } as TextStyle,
+  link: {
+    color: '#16a34a',
+    textDecorationLine: 'underline' as TextStyle['textDecorationLine'],
+  },
+};

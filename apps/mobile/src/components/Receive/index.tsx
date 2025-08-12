@@ -8,11 +8,12 @@ import useActiveWallet from '../../hooks/settings/useActiveWallet';
 import { useGetWalletAddresses } from '../../hooks/useGetWalletAddresses';
 import { sliceAddress } from '../../utils/strings';
 import { Images } from '../../../assets/images';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 
 type Props = {
-  visible: boolean;
-  onClose: () => void;
-  forceChain?: string;
+  visible?: boolean;
+  onClose?: () => void;
+  forceChain?: SupportedChain;
 };
 
 export default function ReceiveToken({ visible, onClose, forceChain }: Props) {

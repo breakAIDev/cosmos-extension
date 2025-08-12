@@ -18,7 +18,7 @@ export function parseFormaTx(tx: any, nativeDenom?: string) {
     },
     memo: '',
     timeoutHeight: '0',
-    types: [],
+    types: [] as string[],
     messages: [
       {
         __type: '',

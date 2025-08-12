@@ -1,8 +1,8 @@
 import { useRoute, useNavigation } from '@react-navigation/native';
 
-export default function useQuery(): Record<string, string | undefined> {
-  const route = useRoute<any>();
-  return route.params || {};
+export default function useQuery<T extends object = Record<string, any>>(): T {
+  const route = useRoute();
+  return (route.params as T) || {} as T;
 }
 
 // Similar "useQueryParams" for React Navigation v6+

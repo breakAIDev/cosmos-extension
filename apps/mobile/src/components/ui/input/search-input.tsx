@@ -1,5 +1,5 @@
 import React, { forwardRef } from 'react';
-import { TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
 import { SearchIcon } from '../../../../assets/icons/search-icon'; // Should be an SVG or Icon RN component
 import { Input, InputProps } from '.'; // Your RN Input component
 
@@ -7,8 +7,9 @@ interface SearchInputProps extends Omit<InputProps, 'trailingElement'> {
   onClear: () => void;
 }
 
-export const SearchInput = forwardRef<any, SearchInputProps>(
-  ({ onClear, style, value, ...props }, ref) => {
+export const SearchInput = forwardRef(
+  ({ onClear, style, value, ...props }: SearchInputProps,
+    ref: React.Ref<View>) => {
     return (
       <Input
         ref={ref}
@@ -21,7 +22,7 @@ export const SearchInput = forwardRef<any, SearchInputProps>(
               <Text style={styles.clearText}>clear</Text>
             </TouchableOpacity>
           ) : (
-            <SearchIcon width={18} height={18} color="#97A3B9" />
+            <SearchIcon size={18} color="#97A3B9" />
           )
         }
         placeholderTextColor="#97A3B9"

@@ -1,36 +1,28 @@
+// src/components/draggable/index.tsx (React Native version)
 import React from 'react';
-import DraggableFlatList from 'react-native-draggable-flatlist';
-import { View } from 'react-native';
+import { StyleProp, ViewStyle } from 'react-native';
+import DraggableFlatList, {
+  RenderItemParams,
+  DragEndParams,
+} from 'react-native-draggable-flatlist';
 
-interface DraggableContainerProps<T> {
+interface PropTypes<T> {
   data: T[];
-  renderItem: (params: {
-    item: T;
-    index: number;
-    drag: () => void;
-    isActive: boolean;
-  }) => React.ReactElement;
-  onDragEnd: (data: T[]) => void;
+  renderItem: (params: RenderItemParams<T>) => React.ReactNode;
   keyExtractor: (item: T, index: number) => string;
-  style?: object;
+  onDragEnd?: (params: DragEndParams<T>) => void;
+  style?: StyleProp<ViewStyle>;
 }
 
-function DraggableContainer<T>({
-  data,
-  renderItem,
-  onDragEnd,
-  keyExtractor,
-  style,
-}: DraggableContainerProps<T>) {
+function DraggableContainer<T>(props: PropTypes<T>) {
   return (
-    <View style={style}>
-      <DraggableFlatList
-        data={data}
-        renderItem={renderItem}
-        keyExtractor={keyExtractor}
-        onDragEnd={({ data }) => onDragEnd(data)}
-      />
-    </View>
+    <DraggableFlatList
+      data={props.data}
+      renderItem={props.renderItem}
+      keyExtractor={props.keyExtractor}
+      onDragEnd={props.onDragEnd}
+      style={props.style}
+    />
   );
 }
 

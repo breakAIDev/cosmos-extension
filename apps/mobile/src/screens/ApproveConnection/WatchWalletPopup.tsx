@@ -1,8 +1,11 @@
-import { Buttons, ThemeName, useTheme } from '@leapwallet/leap-ui';
-import Text from 'components/text';
-import { Images } from 'images';
 import React from 'react';
-import { Colors } from 'theme/colors';
+import { View, Image, StyleSheet, Dimensions } from 'react-native';
+import { Buttons, ThemeName, useTheme } from '@leapwallet/leap-ui';
+import Text from '../../components/text';
+import { Images } from '../../../assets/images';
+import { Colors } from '../../theme/colors';
+
+const SCREEN_WIDTH = Dimensions.get('window').width;
 
 type WatchWalletPopupProps = {
   origin: string;
@@ -11,49 +14,136 @@ type WatchWalletPopupProps = {
 
 export default function WatchWalletPopup({ handleCancel, origin }: WatchWalletPopupProps) {
   const { theme } = useTheme();
+  const isDark = theme === ThemeName.DARK;
+
   return (
-    <div className='panel-height enclosing-panel relative w-screen max-w-3xl h-full self-center p-6 pb-0'>
-      <div className='flex flex-col gap-y-4 items-center'>
-        <div className='flex flex-col gap-y-2 items-center px-6 pb-4'>
-          <img src={Images.Misc.Connect} width={80} height={80} />
-          <div className='flex flex-col gap-y-0.5 items-center'>
-            <Text size='lg' color='text-black-100 dark:text-white-100' className='font-bold text-center'>
-              {origin}
-            </Text>
-            <Text size='md' color='text-gray-800 dark:text-gray-200' className='font-bold text-center'>
+    <View style={[styles.container, { backgroundColor: isDark ? Colors.gray900 : Colors.gray100 }]}>
+      <View style={styles.centerColumn}>
+        {/* Icon & Title */}
+        <View style={styles.headerBox}>
+          <Image source={{uri: Images.Misc.Connect}} style={{ width: 80, height: 80, resizeMode: 'contain' }} />
+          <View style={styles.titleBox}>
+            <Text size="lg" style={[styles.boldText, { color: isDark ? '#fff' : '#181818' }]}>{origin}</Text>
+            <Text size="md" style={[styles.boldText, { color: isDark ? '#dedede' : '#424242' }]}>
               wants to connect to your wallet
             </Text>
-          </div>
-          <div className='flex gap-x-1 items-center'>
-            <Text size='md' color='text-green-500' className='font-bold text-center'>
-              {origin}
-            </Text>
-            <img src={Images.Activity.TxSwapSuccess} width={16} height={16} />
-          </div>
-        </div>
-        <div className='flex flex-col gap-y-4 items-center rounded-[13px] dark:bg-gray-850 bg-gray-100 p-4 border border-orange-500'>
-          <div className='relative'>
-            <img src={Images.Misc.GreenEye} width={40} height={40} />
-            <img src={Images.Activity.TxSwapFailure} width={18} height={18} className='absolute top-0 left-[31px]' />
-          </div>
-          <div className='flex flex-col gap-y-2 items-center'>
-            <Text size='md' color='text-gray-800 dark:text-gray-200' className='font-bold text-center'>
+          </View>
+          <View style={styles.row}>
+            <Text size="md" style={[styles.boldText, { color: Colors.green500 }]}>{origin}</Text>
+            <Image source={{uri: Images.Activity.TxSwapSuccess}} style={{ width: 16, height: 16, marginLeft: 4, resizeMode: 'contain' }} />
+          </View>
+        </View>
+
+        {/* Info Panel */}
+        <View style={[styles.infoPanel, {
+          backgroundColor: isDark ? Colors.gray800 : Colors.gray100,
+          borderColor: Colors.orange500
+        }]}>
+          <View style={styles.relativeIconBox}>
+            <Image source={{uri: Images.Misc.GreenEye}} style={{ width: 40, height: 40, resizeMode: 'contain' }} />
+            <Image
+              source={{uri: Images.Activity.TxSwapFailure}}
+              style={[styles.absIcon, { left: 31, top: 0 }]}
+            />
+          </View>
+          <View style={styles.titleBox}>
+            <Text size="md" style={[styles.boldText, { color: isDark ? '#dedede' : '#424242' }]}>
               You are watching this wallet.
             </Text>
-            <Text size='md' color='text-gray-800 dark:text-gray-200' className='font-medium text-center'>
+            <Text size="md" style={[styles.mediumText, { color: isDark ? '#dedede' : '#424242' }]}>
               Import the wallet using your recovery phrase to manage assets and sign transactions.
             </Text>
-          </div>
-        </div>
-      </div>
-      <Buttons.Generic
-        size='normal'
-        color={theme === ThemeName.DARK ? Colors.gray900 : Colors.gray100}
-        className='w-[344px] absolute bottom-0 p-6 pt-0'
-        onClick={handleCancel}
-      >
-        Cancel
-      </Buttons.Generic>
-    </div>
+          </View>
+        </View>
+      </View>
+
+      {/* Cancel Button */}
+      <View style={styles.buttonBox}>
+        <Buttons.Generic
+          size="normal"
+          color={isDark ? Colors.gray900 : Colors.gray100}
+          style={styles.button}
+          onClick={handleCancel}
+        >
+          Cancel
+        </Buttons.Generic>
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    width: SCREEN_WIDTH,
+    flex: 1,
+    padding: 24,
+    paddingBottom: 0,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  centerColumn: {
+    flexDirection: 'column',
+    gap: 16,
+    alignItems: 'center',
+    width: '100%',
+  },
+  headerBox: {
+    flexDirection: 'column',
+    gap: 8,
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingBottom: 16,
+  },
+  titleBox: {
+    flexDirection: 'column',
+    gap: 2,
+    alignItems: 'center',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  infoPanel: {
+    flexDirection: 'column',
+    gap: 16,
+    alignItems: 'center',
+    borderRadius: 13,
+    borderWidth: 1,
+    padding: 16,
+    width: '100%',
+    marginTop: 8,
+  },
+  relativeIconBox: {
+    position: 'relative',
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  absIcon: {
+    position: 'absolute',
+    width: 18,
+    height: 18,
+  },
+  boldText: {
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  mediumText: {
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  buttonBox: {
+    width: 344,
+    position: 'absolute',
+    bottom: 0,
+    left: (SCREEN_WIDTH - 344) / 2,
+    paddingHorizontal: 24,
+    paddingTop: 0,
+  },
+  button: {
+    width: '100%',
+  },
+});

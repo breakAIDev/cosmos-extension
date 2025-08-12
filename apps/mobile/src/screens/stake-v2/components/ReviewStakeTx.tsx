@@ -7,21 +7,20 @@ import {
   useValidatorImage,
 } from '@leapwallet/cosmos-wallet-hooks';
 import { Provider, Validator } from '@leapwallet/cosmos-wallet-sdk';
-import { Info } from '@phosphor-icons/react';
+import { Info } from 'phosphor-react-native';
 import BigNumber from 'bignumber.js';
-import LedgerConfirmationPopup from 'components/ledger-confirmation/LedgerConfirmationPopup';
-import BottomModal from 'components/new-bottom-modal';
-import { Button } from 'components/ui/button';
-import { Images } from 'images';
-import { GenericLight } from 'images/logos';
-import loadingImage from 'lottie-files/swaps-btn-loading.json';
+import LedgerConfirmationPopup from '../../../components/ledger-confirmation/LedgerConfirmationPopup';
+import BottomModal from '../../../components/new-bottom-modal';
+import { Button } from '../../../components/ui/button';
+import { Images } from '../../../../assets/images';
+import { GenericLight } from '../../../../assets/images/logos';
+import loadingImage from '../../../../assets/lottie-files/swaps-btn-loading.json';
 import Lottie from 'lottie-react';
 import React, { useMemo } from 'react';
-import { cn } from 'utils/cn';
-import { imgOnError } from 'utils/imgOnError';
-import { sidePanel } from 'utils/isSidePanel';
 
 import { transitionTitleMap } from '../utils/stake-text';
+import { View, Text, Image, StyleSheet, ViewStyle, StyleProp } from 'react-native';
+import LottieView from 'lottie-react-native';
 
 type ReviewStakeTxProps = {
   isVisible: boolean;
@@ -55,22 +54,19 @@ export const getButtonTitle = (mode: STAKE_MODE, isProvider = false) => {
   }
 };
 
-const ValidatorCard = (props: { title: string; subTitle: string; imgSrc?: string; className?: string }) => {
+const ValidatorCard = (props: { title: string; subTitle: string; imgSrc?: string; style?: StyleProp<ViewStyle> }) => {
   return (
-    <div className={cn('flex justify-between items-center p-6 rounded-xl bg-secondary-100 w-full', props.className)}>
-      <div className='flex flex-col gap-1'>
-        <span className='font-bold text-lg'>{props.title}</span>
-        <span className='text-sm text-muted-foreground'>{props.subTitle}</span>
-      </div>
-
-      <img
-        width={48}
-        height={48}
-        src={props.imgSrc}
-        onError={imgOnError(GenericLight)}
-        className='border rounded-full bg-secondary-50'
+    <View style={[styles.card, props.style]}>
+      <View style={styles.cardInfo}>
+        <Text style={styles.cardTitle}>{props.title}</Text>
+        <Text style={styles.cardSubtitle}>{props.subTitle}</Text>
+      </View>
+      <Image
+        source={{ uri: props.imgSrc ?? Images.Logos.GenericLight}}
+        style={styles.cardImage}
+        resizeMode="cover"
       />
-    </div>
+    </View>
   );
 };
 
@@ -109,76 +105,122 @@ export default function ReviewStakeTx({
         isOpen={isVisible}
         onClose={onClose}
         title={
-          <span className=''>
+          <Text>
             {mode === 'REDELEGATE' && provider ? 'Review provider switching' : transitionTitleMap[mode || 'DELEGATE']}
-          </span>
+          </Text>
         }
-        className='p-6 pt-8'
+        style={{padding: 24, paddingTop: 32}}
       >
-        <div className='flex flex-col gap-4 items-center'>
-          <ValidatorCard
-            title={`${formatTokenAmount(tokenAmount)} ${token?.symbol}`}
-            subTitle={currentAmount}
-            imgSrc={token?.img}
-          />
-          {validator && (
-            <div className='w-full'>
-              <ValidatorCard
-                title={sliceWord(
-                  validator?.moniker,
-                  sidePanel ? 15 + Math.floor(((Math.min(window.innerWidth, 400) - 320) / 81) * 7) : 10,
-                  2,
-                )}
-                subTitle={'Validator'}
-                imgSrc={imageUrl}
-                className={mode === 'REDELEGATE' ? '!rounded-b-none' : ''}
-              />
-              {mode === 'REDELEGATE' && validator && (
-                <div className='flex items-start gap-1.5 px-3 py-2.5 rounded-b-xl text-blue-400 bg-blue-400/10'>
-                  <Info size={16} className='shrink-0' />
-                  <span className='text-xs font-medium'>
-                    Redelegating to a new validator takes {unstakingPeriod} as funds unbond from the source validator,
-                    then moved to the new one.
-                  </span>
-                </div>
-              )}
-            </div>
-          )}
-          {provider && (
+        <View style={modalStyles.backdrop}>
+          <View style={modalStyles.sheet}>
             <ValidatorCard
-              title={sliceWord(
-                provider.moniker,
-                sidePanel ? 15 + Math.floor(((Math.min(window.innerWidth, 400) - 320) / 81) * 7) : 10,
-                2,
-              )}
-              subTitle={'Provider'}
-              imgSrc={Images.Misc.Validator}
+              title={`${tokenAmount} ${token?.symbol}`}
+              subTitle={currentAmount}
+              imgSrc={token?.img}
             />
-          )}
-          {anyError && <p className='text-xs font-bold text-destructive-100 px-2'>{anyError}</p>}
-
-          <Button
-            className='w-full mt-4'
-            disabled={isLoading || (!!error && !ledgerError) || !!gasError}
-            onClick={onSubmit}
-          >
-            {isLoading ? (
-              <Lottie
-                loop={true}
-                autoplay={true}
-                animationData={loadingImage}
-                rendererSettings={{
-                  preserveAspectRatio: 'xMidYMid slice',
-                }}
-                className={'h-[24px] w-[24px]'}
-              />
-            ) : (
-              `Confirm ${getButtonTitle(mode, !!provider)}`
+            {validator && (
+              <View style={{ width: '100%' }}>
+                <ValidatorCard
+                  title={validator?.moniker}
+                  subTitle={'Validator'}
+                  imgSrc={validator?.image}
+                  style={mode === 'REDELEGATE' ? { borderBottomLeftRadius: 0, borderBottomRightRadius: 0 } : {}}
+                />
+                {mode === 'REDELEGATE' && (
+                  <View style={modalStyles.infoBox}>
+                    <Info size={16} color="#2563EB" style={{ marginRight: 6 }} />
+                    <Text style={modalStyles.infoText}>
+                      Redelegating to a new validator takes {unstakingPeriod} as funds unbond from the source validator,
+                      then moved to the new one.
+                    </Text>
+                  </View>
+                )}
+              </View>
             )}
-          </Button>
-        </div>
+            {provider && (
+              <ValidatorCard
+                title={provider.moniker as string}
+                subTitle={'Provider'}
+                imgSrc={provider.image}
+              />
+            )}
+            {anyError ? (
+              <Text style={modalStyles.errorText}>{anyError}</Text>
+            ) : null}
+            <Button
+              style={modalStyles.button}
+              disabled={isLoading || (!!error && !ledgerError) || !!gasError}
+              onPress={onSubmit}
+            >
+              {isLoading ? (
+                <LottieView
+                  source={loadingImage}
+                  autoPlay
+                  loop
+                  style={{ height: 28, width: 28 }}
+                />
+              ) : (
+                `Confirm ${getButtonTitle(mode, !!provider)}`
+              )}
+            </Button>
+          </View>
+        </View>
       </BottomModal>
       {showLedgerPopup && <LedgerConfirmationPopup showLedgerPopup={showLedgerPopup} />}
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 18,
+    borderRadius: 18,
+    backgroundColor: '#F4F4F5', // bg-secondary-100
+    width: '100%',
+    marginBottom: 10,
+  },
+  cardInfo: { flex: 1 },
+  cardTitle: { fontWeight: 'bold', fontSize: 18 },
+  cardSubtitle: { fontSize: 14, color: '#7E869E', marginTop: 2 },
+  cardImage: { width: 48, height: 48, borderRadius: 24, backgroundColor: '#EEE', marginLeft: 8 },
+});
+
+const modalStyles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.18)',
+    justifyContent: 'flex-end',
+  },
+  sheet: {
+    backgroundColor: '#fff',
+    padding: 24,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '600',
+    alignSelf: 'flex-start',
+    marginBottom: 20,
+  },
+  infoBox: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: '#DBEAFE', // blue-400/10
+    borderRadius: 8,
+    padding: 10,
+    marginTop: 2,
+  },
+  infoText: {
+    fontSize: 12,
+    color: '#2563EB', // blue-400
+    fontWeight: '500',
+    flex: 1,
+  },
+  button: { width: '100%', marginTop: 16 },
+  errorText: { color: '#EF4444', fontSize: 13, marginTop: 10, fontWeight: 'bold' },
+});

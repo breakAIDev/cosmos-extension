@@ -2,29 +2,27 @@ import { Key, WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks';
 import { getEthereumAddress, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { ActiveChainStore, ChainInfosStore } from '@leapwallet/cosmos-wallet-store';
 import { KeyChain } from '@leapwallet/leap-keychain';
-import { Buttons, Input, ThemeName, useTheme } from '@leapwallet/leap-ui';
-import { Check, Wallet } from '@phosphor-icons/react';
-import classNames from 'classnames';
-import BottomModal from '../bottom-modal';
-import { ErrorCard } from 'components/ErrorCard';
-import IconButton from 'components/icon-button';
-import { LEDGER_NAME_EDITED_SUFFIX, LEDGER_NAME_EDITED_SUFFIX_REGEX } from 'config/config';
-import { AGGREGATED_CHAIN_KEY } from 'config/constants';
-import { useChainPageInfo } from 'hooks';
-import useActiveWallet from 'hooks/settings/useActiveWallet';
-import { Images } from 'images';
+import { Buttons, ThemeName, useTheme } from '@leapwallet/leap-ui';
+import { Check, Wallet } from 'phosphor-react-native';
+import BottomModal from '../../components/bottom-modal';
+import { ErrorCard } from '../../components/ErrorCard';
+import IconButton from '../../components/icon-button';
+import { LEDGER_NAME_EDITED_SUFFIX, LEDGER_NAME_EDITED_SUFFIX_REGEX } from '../../services/config/config';
+import { AGGREGATED_CHAIN_KEY } from '../../services/config/constants';
+import { useChainPageInfo } from '../../hooks';
+import useActiveWallet from '../../hooks/settings/useActiveWallet';
+import { Images } from '../../../assets/images';
 import { observer } from 'mobx-react-lite';
-import React, { ChangeEventHandler, useEffect, useState } from 'react';
-import { Colors } from 'theme/colors';
-import { UserClipboard } from 'utils/clipboard';
-import { sliceAddress } from 'utils/strings';
-
-import { RemoveWallet } from './RemoveWallet';
+import React, { useEffect, useState } from 'react';
+import { getChainColor, walletColors } from '../../theme/colors';
+import { UserClipboard } from '../../utils/clipboard';
+import { sliceAddress } from '../../utils/strings';
+import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
+import { Input } from '../../components/ui/input';
 
 type EditWalletFormProps = {
   wallet: Key;
   isVisible: boolean;
-  
   onClose: (closeParent: boolean) => void;
   activeChainStore: ActiveChainStore;
   chainInfosStore: ChainInfosStore;
@@ -47,10 +45,6 @@ export const EditWalletForm = observer(
     }, [wallet, isVisible]);
 
     const { topChainColor } = useChainPageInfo();
-    const handleInputChange: ChangeEventHandler<HTMLInputElement> = (e) => {
-      setError('');
-      if (e.target.value.length < 25) setName(e.target.value);
-    };
 
     const handleSaveChanges = async () => {
       if (name) {
@@ -68,7 +62,6 @@ export const EditWalletForm = observer(
           }
 
           onClose(false);
-          
         } catch (error: any) {
           setError(error.message);
         }
@@ -87,36 +80,37 @@ export const EditWalletForm = observer(
     return (
       <>
         <BottomModal
-          containerDiv={document.getElementById('edit-wallet-container') ?? undefined}
+          // containerDiv is web only; omit in RN
           isOpen={isVisible}
           onClose={() => onClose(false)}
           title={'Edit wallet'}
           closeOnBackdropClick={true}
           secondaryActionButton={
-            <div className='absolute top-[22px] left-7'>
+            <View style={styles.iconButtonContainer}>
               <IconButton
-                onClick={() => {
-                  setShowRemoveWallet(true);
-                }}
-                image={{ src: Images.Misc.DeleteRed, alt: ' ' }}
-                data-testing-id='btn-remove-wallet-bin'
+                onPress={() => setShowRemoveWallet(true)}
+                image={{src: 0, alt: Images.Misc.DeleteRed}}
+                data-testing-id="btn-remove-wallet-bin"
               />
-            </div>
+            </View>
           }
         >
-          <div className='flex flex-col  justify-center gap-y-[16px] items-center'>
-            <div className='flex w-[344px] rounded-2xl flex-col dark:bg-gray-900 bg-white-100 items-center py-[24px] gap-y-[20px] px-4'>
-              <div className='rounded-full' style={{ backgroundColor: Colors.walletColors[colorIndex] }}>
-                <div className='p-[24px] text-white-100'>
-                  <Wallet size={40} className='text-white-100' />
-                </div>
-              </div>
+          <View style={styles.centeredColumn}>
+            <View style={styles.modalContent}>
+              <View
+                style={[
+                  styles.walletIconCircle,
+                  { backgroundColor: walletColors[colorIndex] },
+                ]}
+              >
+                <Wallet size={40} color="#fff" />
+              </View>
 
               {activeChain && activeChain !== AGGREGATED_CHAIN_KEY && wallet && (
                 <Buttons.CopyWalletAddress
-                  color={Colors.getChainColor(activeChain)}
+                  color={getChainColor(activeChain)}
                   walletAddress={sliceAddress(getAddress(activeChain, wallet))}
-                  data-testing-id='copy-wallet-address'
+                  data-testing-id="copy-wallet-address"
                   style={{
                     backgroundColor: isDark ? '#383838' : '#E8E8E8',
                     color: !isDark ? '#383838' : '#E8E8E8',
@@ -128,60 +122,142 @@ export const EditWalletForm = observer(
               )}
 
               {wallet ? (
-                <div className='flex relative justify-center shrink w-full'>
+                <View style={styles.inputContainer}>
                   <Input
-                    placeholder='Enter wallet Name'
+                    placeholder="Enter wallet Name"
                     maxLength={24}
                     value={name.replace(LEDGER_NAME_EDITED_SUFFIX_REGEX, '')}
-                    onChange={handleInputChange}
+                    onChangeText={text => {
+                      setError('');
+                      if (text.length <= 24) setName(text);
+                    }}
                   />
-                  <div className='absolute right-[16px] top-[14px] text-gray-400 text-sm font-medium'>{`${name.length}/24`}</div>
-                </div>
+                  <Text style={styles.counterText}>{`${name.length}/24`}</Text>
+                </View>
               ) : null}
 
-              <div className='flex items-center gap-x-[8px] justify-center'>
-                {Colors.walletColors.map((color, index) => {
-                  return (
-                    <div
-                      key={index}
-                      onClick={() => {
-                        setColorIndex(index);
-                      }}
-                      className={classNames('p-[5px] rounded-full', {
-                        'border-2': colorIndex === index,
-                      })}
-                      style={{ borderColor: color }}
+              <View style={styles.colorRow}>
+                {walletColors.map((color, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    onPress={() => setColorIndex(index)}
+                    style={[
+                      styles.colorOuter,
+                      { borderColor: color },
+                      colorIndex === index && styles.colorSelected,
+                    ]}
+                  >
+                    <View
+                      style={[
+                        styles.colorInner,
+                        { backgroundColor: color },
+                      ]}
                     >
-                      <div
-                        className={classNames('flex items-center justify-center rounded-full w-[24px] h-[24px]')}
-                        style={{ backgroundColor: color }}
-                      >
-                        {index === colorIndex && <Check size={16} className='text-white-100' />}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+                      {index === colorIndex && <Check size={16} color="#fff" />}
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
 
             {!!error && <ErrorCard text={error} />}
-            <div className='flex shrink w-[344px]'>
+            <View style={styles.saveButtonRow}>
               <Buttons.Generic disabled={!name} color={topChainColor} onClick={handleSaveChanges}>
                 Save changes
               </Buttons.Generic>
-            </div>
-          </div>
+            </View>
+          </View>
         </BottomModal>
 
-        {/* <RemoveWallet
+        {/* 
+        // TODO: RemoveWallet modal, if needed, should be implemented in React Native.
+        <RemoveWallet
           wallet={wallet}
           isVisible={isShowRemoveWallet}
           onClose={(action) => {
             setShowRemoveWallet(false)
             if (action) onClose(action)
           }}
-        /> */}
+        /> 
+        */}
       </>
     );
   },
 );
+
+const styles = StyleSheet.create({
+  iconButtonContainer: {
+    position: 'absolute',
+    top: 22,
+    left: 28,
+    zIndex: 10,
+  },
+  centeredColumn: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    gap: 16,
+  },
+  modalContent: {
+    width: 344,
+    borderRadius: 18,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    paddingVertical: 24,
+    paddingHorizontal: 16,
+    gap: 20,
+  },
+  walletIconCircle: {
+    borderRadius: 100,
+    padding: 24,
+    marginBottom: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  inputContainer: {
+    width: '100%',
+    position: 'relative',
+    justifyContent: 'center',
+    marginTop: 4,
+    marginBottom: 4,
+  },
+  counterText: {
+    position: 'absolute',
+    right: 16,
+    top: 14,
+    color: '#9CA3AF',
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  colorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 4,
+    marginBottom: 4,
+  },
+  colorOuter: {
+    padding: 5,
+    borderRadius: 99,
+    borderWidth: 2,
+    marginHorizontal: 4,
+  },
+  colorSelected: {
+    borderWidth: 3,
+  },
+  colorInner: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  saveButtonRow: {
+    width: 344,
+    marginTop: 8,
+    marginBottom: 16,
+  },
+});
+

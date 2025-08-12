@@ -1,22 +1,29 @@
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  View,
+  TextInput,
+  ScrollView,
+  StyleSheet,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { SecretToken, useSecretTokenStore } from '@leapwallet/cosmos-wallet-hooks';
 import { CardDivider, GenericCard, Header, HeaderActionType } from '@leapwallet/leap-ui';
-import { Plus } from '@phosphor-icons/react';
-import classNames from 'classnames';
-import { EmptyCard } from 'components/empty-card';
-import PopupLayout from 'components/layout/popup-layout';
-import useQuery from 'hooks/useQuery';
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
-import { Images } from 'images';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { sliceSearchWord } from 'utils/strings';
+import { Plus } from 'phosphor-react-native';
+import { EmptyCard } from '../../components/empty-card';
+import PopupLayout from '../../components/layout/popup-layout';
+import { useDefaultTokenLogo } from '../../hooks/utility/useDefaultTokenLogo';
+import { Images } from '../../../assets/images';
+import { sliceSearchWord } from '../../utils/strings';
 
 import { AddTokenSheet, CreateKeySheet, ImportKeySheet } from './components';
 import { Snip20ManageTokensProvider } from './context';
 
 export default function SecretManageTokens() {
   const defaultLogo = useDefaultTokenLogo();
-  const navigate = useNavigate();
+  const navigation = useNavigation();
 
   const [searchText, setSearchText] = useState('');
   const [showAddToken, setShowAddToken] = useState(false);
@@ -25,7 +32,7 @@ export default function SecretManageTokens() {
   const [showUpdateViewingKey, setShowUpdateViewingKey] = useState(false);
   const [importKey, setImportKey] = useState(false);
 
-  const contractAddress = useQuery().get('contractAddress') ?? undefined;
+  const contractAddress = useRoute().params?.contractAddress;
   const { secretTokens } = useSecretTokenStore();
 
   const selectToken = (token: SecretToken & { contractAddr: string }) => {
@@ -40,8 +47,8 @@ export default function SecretManageTokens() {
     }
   }, [contractAddress, secretTokens]);
 
-  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchText(e.target.value);
+  const handleFilterChange = (text: string) => {
+    setSearchText(text);
   };
 
   const tokensList = useMemo(() => {
@@ -57,9 +64,7 @@ export default function SecretManageTokens() {
       .map(([contractAddr, tokenData]) => {
         return { ...tokenData, contractAddr };
       });
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchText]);
+  }, [searchText, secretTokens]);
 
   const clearState = useCallback(() => {
     setReviewTx(false);
@@ -79,39 +84,52 @@ export default function SecretManageTokens() {
 
   return (
     <Snip20ManageTokensProvider>
-      <div className='relative w-full overflow-clip panel-height'>
+      <View style={styles.root}>
         <PopupLayout
           header={
             <Header
               action={{
-                onClick: () => navigate(-1),
+                onClick: () => navigation.goBack(),
                 type: HeaderActionType.BACK,
               }}
-              title='Manage Tokens'
+              title="Manage Tokens"
             />
           }
         >
-          <div className='w-full flex flex-col pt-6 pb-2 px-7 sticky top-[72px] bg-gray-50 dark:bg-black-100'>
-            <div className='w-[344px] flex h-10 bg-white-100 dark:bg-gray-900 rounded-[30px]  mb-4 py-2 pl-5 pr-[10px]'>
-              <input
-                placeholder='search tokens'
-                className='flex flex-grow text-base text-gray-600 dark:text-gray-200  outline-none bg-white-0'
-                onChange={handleFilterChange}
-              />
-              <img src={Images.Misc.Search} />
-            </div>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            style={styles.keyboardAvoid}
+          >
+            <View style={styles.inputSection}>
+              <View style={styles.inputWrap}>
+                <TextInput
+                  placeholder="search tokens"
+                  placeholderTextColor="#6B7280"
+                  style={styles.input}
+                  value={searchText}
+                  onChangeText={handleFilterChange}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+                <Image source={{uri: Images.Misc.Search}} style={styles.searchIcon} resizeMode="contain" />
+              </View>
+            </View>
 
-            <div className='overflow-y-auto pb-20'>
+            <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
               {tokensList.length === 0 ? (
                 <EmptyCard
                   isRounded
                   subHeading={searchText ? 'Please try again with something else' : ''}
-                  heading={searchText ? 'No results for “' + sliceSearchWord(searchText) + '”' : 'No Tokens'}
+                  heading={
+                    searchText
+                      ? 'No results for “' + sliceSearchWord(searchText) + '”'
+                      : 'No Tokens'
+                  }
                   src={Images.Misc.Explore}
                 />
               ) : null}
 
-              <div className='rounded-2xl flex flex-col items-center mx-7 m-auto justify-center dark:bg-gray-900 bg-white-100'>
+              <View style={styles.tokenListPanel}>
                 {tokensList.map((tokenData, index, array) => {
                   const isLast = index === array.length - 1;
                   const isFirst = index === 0;
@@ -120,17 +138,17 @@ export default function SecretManageTokens() {
                     <React.Fragment key={tokenData.contractAddr}>
                       <GenericCard
                         onClick={() => selectToken(tokenData)}
-                        className={classNames({
-                          'rounded-t-2xl': isFirst,
-                          'rounded-b-2xl': isLast,
-                        })}
+                        style={[
+                          isFirst && { borderTopLeftRadius: 18, borderTopRightRadius: 18 },
+                          isLast && { borderBottomLeftRadius: 18, borderBottomRightRadius: 18 },
+                        ]}
                         title={tokenData.symbol}
                         subtitle={tokenData.name}
-                        icon={<Plus size={16} className='text-gray-400' />}
+                        icon={<Plus size={16} color="#9CA3AF" weight="regular" />}
                         img={
-                          <img
-                            src={tokenData.icon === '' ? defaultLogo : tokenData.icon}
-                            className='w-[28px] h-[28px] mr-2'
+                          <Image
+                            source={{ uri: tokenData.icon ?? defaultLogo}}
+                            style={styles.tokenImg}
                           />
                         }
                       />
@@ -138,9 +156,9 @@ export default function SecretManageTokens() {
                     </React.Fragment>
                   );
                 })}
-              </div>
-            </div>
-          </div>
+              </View>
+            </ScrollView>
+          </KeyboardAvoidingView>
         </PopupLayout>
 
         <AddTokenSheet
@@ -166,7 +184,64 @@ export default function SecretManageTokens() {
           token={selectedToken ?? undefined}
           onSuccess={handleImportSuccess}
         />
-      </div>
+      </View>
     </Snip20ManageTokensProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    width: '100%',
+    backgroundColor: '#F3F4F6',
+  },
+  keyboardAvoid: {
+    flex: 1,
+  },
+  inputSection: {
+    width: '100%',
+    paddingHorizontal: 0,
+    paddingTop: 24,
+    paddingBottom: 8,
+    backgroundColor: '#F3F4F6',
+  },
+  inputWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 40,
+    backgroundColor: '#fff',
+    borderRadius: 30,
+    marginBottom: 16,
+    paddingLeft: 20,
+    paddingRight: 12,
+    width: 344,
+    alignSelf: 'center',
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    color: '#374151',
+    backgroundColor: 'transparent',
+  },
+  searchIcon: {
+    width: 20,
+    height: 20,
+    marginLeft: 10,
+  },
+  tokenListPanel: {
+    borderRadius: 18,
+    backgroundColor: '#fff',
+    paddingHorizontal: 0,
+    marginTop: 2,
+    marginBottom: 12,
+    marginHorizontal: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  tokenImg: {
+    width: 28,
+    height: 28,
+    marginRight: 8,
+    borderRadius: 14,
+  },
+});

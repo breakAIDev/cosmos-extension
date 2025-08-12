@@ -1,11 +1,11 @@
 import React from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView, ViewStyle, StyleProp } from 'react-native';
 import { WatchingWalletStrip } from '../alert-strip/WatchingWalletStrip';
 
 type PopupLayoutProps = {
   children: React.ReactNode;
   header?: React.ReactNode;
-  style?: object;
+  style?: StyleProp<ViewStyle>;
   headerZIndex?: number;
   skipWatchingWalletHeader?: boolean;
 };
@@ -19,20 +19,16 @@ export default function PopupLayout({
 }: PopupLayoutProps) {
   return (
     <View style={[styles.container, style]}>
-      {header && (
-        <View style={[styles.header, { zIndex: headerZIndex }]}>
-          {header}
-        </View>
-      )}
-      {/* Spacer to push content below fixed header */}
-      {header && <View style={styles.headerSpacer} />}
-      {header && !skipWatchingWalletHeader && <WatchingWalletStrip />}
-      {/* Scrollable content */}
+      <View style={[styles.header, { zIndex: headerZIndex }]}>
+        {React.isValidElement(header) ? header : <View/>}
+      </View>
+      {React.isValidElement(header) ? header : <View style={styles.headerSpacer} />}
+      {React.isValidElement(header) && !skipWatchingWalletHeader ? <WatchingWalletStrip /> : <View/>}
       <ScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
-        {children}
+        {React.isValidElement(children) ? children : <View/>}
       </ScrollView>
     </View>
   );

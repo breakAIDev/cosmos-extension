@@ -1,43 +1,43 @@
+import React, { useEffect, useMemo, useState } from 'react';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import { useAddress } from '@leapwallet/cosmos-wallet-hooks';
-import { bech32ToEthAddress } from '@leapwallet/cosmos-wallet-sdk';
 import { sha256 } from '@noble/hashes/sha256';
 import { utils } from '@noble/secp256k1';
-import { ArrowUp } from '@phosphor-icons/react';
-import { captureException } from '@sentry/react';
-import { Button } from 'components/ui/button';
-import { EventName } from 'config/analytics';
+import { Button } from '../../../components/ui/button';
+import { EventName } from '../../../services/config/analytics';
 import dayjs from 'dayjs';
-import { AnimatePresence, motion, Variants } from 'framer-motion';
-import { Images } from 'images';
-import mixpanel from 'mixpanel-browser';
-import React, { useEffect, useMemo, useState } from 'react';
-import CanvasConfetti from 'react-canvas-confetti/dist/presets/fireworks';
-import { createPortal } from 'react-dom';
-
+import { Images } from '../../../../assets/images';
+import mixpanel from '../../../mixpanel';
+import { captureException } from '@sentry/react-native';
+import ConfettiCannon from 'react-native-confetti-cannon'; // install this package
+import { MotiView } from 'moti';
 import { OnboardingLayout } from '../layout';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const ctrlKey = typeof navigator !== 'undefined' && navigator.userAgent.includes('Mac') ? 'Cmd' : 'Ctrl';
-
-export default function OnboardingSuccess() {
+export default function OnboardingSuccess({ navigation }: {navigation: any}) {
   const activeWalletCosmosAddress = useAddress('cosmos');
   const activeWalletEvmAddress = useAddress('ethereum');
   const activeWalletSolanaAddress = useAddress('solana');
   const activeWalletSuiAddress = useAddress('sui');
+  const [showConfetti, setShowConfetti] = useState(true);
 
   const activeWalletAddress = useMemo(
-    () => activeWalletCosmosAddress || activeWalletEvmAddress || activeWalletSolanaAddress || activeWalletSuiAddress,
+    () =>
+      activeWalletCosmosAddress ||
+      activeWalletEvmAddress ||
+      activeWalletSolanaAddress ||
+      activeWalletSuiAddress,
     [activeWalletCosmosAddress, activeWalletEvmAddress, activeWalletSolanaAddress, activeWalletSuiAddress],
   );
 
   useEffect(() => {
+    // On success, fire analytics
     const currentTime = new Date().getTime();
-    const timeStarted1 = Number(localStorage.getItem('timeStarted1'));
-    const timeStarted2 = Number(localStorage.getItem('timeStarted2'));
-    const methodChosen = localStorage.getItem('onboardingMethodChosen');
-
+    const timeStarted1 = Number(AsyncStorage.getItem('timeStarted1'));
+    const timeStarted2 = Number(AsyncStorage.getItem('timeStarted2'));
+    const methodChosen = AsyncStorage.getItem('onboardingMethodChosen');
     if (timeStarted1 && timeStarted2 && activeWalletAddress) {
       const hashedAddress = utils.bytesToHex(sha256(activeWalletAddress));
-
       try {
         mixpanel.track(EventName.OnboardingCompleted, {
           methodChosen,
@@ -50,129 +50,135 @@ export default function OnboardingSuccess() {
         captureException(e);
       }
 
-      localStorage.removeItem('timeStarted1');
-      localStorage.removeItem('timeStarted2');
-      localStorage.removeItem('onboardingMethodChosen');
+      AsyncStorage.removeItem('timeStarted1');
+      AsyncStorage.removeItem('timeStarted2');
+      AsyncStorage.removeItem('onboardingMethodChosen');
     }
   }, [activeWalletAddress]);
 
-  return (
-    <>
-      {createPortal(
-        <>
-          <Confetti />
-          <PinButton />
-        </>,
-        document.body,
-      )}
+  // Fire confetti for 5 seconds
+  useEffect(() => {
+    if (showConfetti) {
+      const timer = setTimeout(() => setShowConfetti(false), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showConfetti]);
 
-      <OnboardingLayout
-        hideRightActions
-        className='flex flex-col items-center gap-7 p-7 overflow-auto z-20 bg-background'
-        style={{
-          backgroundImage:
-            'linear-gradient(180deg, hsl(var(--bg-linear-gradient-start) / 0.4) 19.35%, hsl(var(--bg-linear-gradient-end)/ 0.4) 80.65%)',
+  return (
+    <OnboardingLayout style={styles.layout}>
+      {showConfetti && (
+        <ConfettiCannon
+          count={180}
+          origin={{ x: 200, y: -10 }}
+          fadeOut
+          fallSpeed={3000}
+          explosionSpeed={700}
+        />
+      )}
+      <View style={styles.contentWrapper}>
+        <MotiView
+          from={{ opacity: 0, translateY: 30 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ type: 'timing', duration: 400 }}
+          style={styles.frogWrapper}
+        >
+          <Image
+            source={{uri: Images.Misc.OnboardingFrog}}
+            style={styles.frogImage}
+            resizeMode="contain"
+          />
+        </MotiView>
+
+        <MotiView
+          from={{ opacity: 0, translateY: 20 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ delay: 200, type: 'timing', duration: 400 }}
+          style={styles.header}
+        >
+          <Text style={styles.title}>You are all set!</Text>
+          <View style={styles.subtitleBlock}>
+            <Text style={styles.subtitle}>Discover Cosmos, Ethereum & more with Leap.</Text>
+            {/* On mobile, adapt or remove keyboard shortcut instructions */}
+            <Text style={styles.mobileShortcut}>
+              Open Leap app anytime from your home screen!
+            </Text>
+          </View>
+        </MotiView>
+      </View>
+      <Button
+        style={styles.button}
+        onPress={() => {
+          // You could link to a webapp or home screen if needed
+          // Linking.openURL('https://app.leapwallet.io');
+          navigation.navigate('Home');
         }}
       >
-        <div className='flex flex-col gap-y-8 my-auto'>
-          <div className='w-32 h-auto mx-auto'>
-            <img src={Images.Misc.OnboardingFrog} className='w-full h-full' />
-          </div>
-
-          <header className='flex flex-col gap-y-5 items-center text-center'>
-            <h1 className='font-bold text-xxl'>You are all set!</h1>
-
-            <span className='flex flex-col gap-y-1 text-muted-foreground text-md'>
-              <span>Discover Cosmos, Ethereum & more with Leap.</span>
-              <span>
-                Open Leap with
-                <span className='text-accent-foreground font-bold'> {ctrlKey}</span> +
-                <span className='text-accent-foreground font-bold'> Shift</span> +
-                <span className='text-accent-foreground font-bold'> L</span>
-              </span>
-            </span>
-          </header>
-        </div>
-
-        <Button
-          className='w-full'
-          onClick={() => {
-            alert('https://app.leapwallet.io');
-          }}
-        >
-          Get started
-        </Button>
-      </OnboardingLayout>
-    </>
+        Get started
+      </Button>
+    </OnboardingLayout>
   );
 }
 
-const Confetti = () => {
-  return (
-    <CanvasConfetti
-      className='w-full h-full absolute opacity-50 top-0 left-0 right-0 z-10 isolate'
-      onInit={({ conductor }) => {
-        conductor.run({
-          speed: 1,
-        });
-        setTimeout(() => {
-          conductor.stop();
-        }, 5_000);
-      }}
-      globalOptions={{
-        useWorker: true,
-        resize: true,
-      }}
-    />
-  );
-};
-
-const transition = {
-  duration: 0.3,
-  ease: 'easeInOut',
-};
-
-const pinVariants: Variants = {
-  show: {
-    opacity: 1,
-    y: 0,
+const styles = StyleSheet.create({
+  layout: {
+    flex: 1,
+    backgroundColor: '#f5f9ff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
   },
-  hide: {
-    opacity: 0,
-    y: -10,
+  contentWrapper: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 30,
+    marginTop: 60,
+    marginBottom: 16,
   },
-};
-
-const PinButton = () => {
-  const [isPinned, setIsPinned] = useState(true);
-
-  useEffect(() => {
-    const checkPinned = setInterval(async () => {
-      const userSettings = await chrome.action.getUserSettings();
-      setIsPinned(userSettings?.isOnToolbar);
-    }, 2000);
-
-    return () => clearInterval(checkPinned);
-  }, []);
-
-  return (
-    <AnimatePresence>
-      {!isPinned && (
-        <motion.div
-          transition={transition}
-          variants={pinVariants}
-          initial='hide'
-          animate='show'
-          exit='hide'
-          className='absolute top-0 right-10 z-10 rounded-b-xl px-9 flex items-center gap-3 bg-[hsl(var(--gradient-radial-mono-end))]'
-        >
-          <div className='text-white-100 bg-primary rounded-b-xl px-4 py-2 flex items-center gap-3'>
-            <span className='text-sm font-bold w-32'>Pin Leap to your toolbar</span>
-
-            <ArrowUp size={24} weight='bold' />
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-};
+  frogWrapper: {
+    width: 128,
+    height: 128,
+    marginBottom: 16,
+    alignSelf: 'center',
+  },
+  frogImage: {
+    width: 128,
+    height: 128,
+  },
+  header: {
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 24,
+    marginBottom: 12,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#101D35',
+    marginBottom: 10,
+  },
+  subtitleBlock: {
+    gap: 2,
+    alignItems: 'center',
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#6878A7',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  mobileShortcut: {
+    fontSize: 15,
+    color: '#3282fa',
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 4,
+  },
+  button: {
+    width: '100%',
+    marginTop: 'auto',
+    marginBottom: 24,
+    alignSelf: 'center',
+  },
+});

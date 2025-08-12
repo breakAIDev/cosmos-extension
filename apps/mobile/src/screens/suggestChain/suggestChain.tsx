@@ -1,82 +1,98 @@
+// src/screens/.../SuggestChain.tsx (React Native)
+
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { View, Image, Pressable, StyleSheet, Text as TextRN } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { observer } from 'mobx-react-lite';
+import { useNavigation } from '@react-navigation/native';
 
 import { Key as WalletKey, useCustomChains } from '@leapwallet/cosmos-wallet-hooks';
 import { sleep, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { GenericCard } from '@leapwallet/leap-ui';
-import { Divider, Key, Value } from 'components/dapp';
-import { LoaderAnimation } from 'components/loader/Loader';
-import { BETA_CHAINS, BG_RESPONSE, NEW_CHAIN_REQUEST } from 'config/storage-keys';
-import { usePerformanceMonitor } from 'hooks/perf-monitoring/usePerformanceMonitor';
-import { useSetActiveChain } from 'hooks/settings/useActiveChain';
-import useActiveWallet, { useUpdateKeyStore } from 'hooks/settings/useActiveWallet';
-import { useChainInfos, useSetChainInfos } from 'hooks/useChainInfos';
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
-import { observer } from 'mobx-react-lite';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { chainTagsStore } from 'stores/chain-infos-store';
-import { Colors } from 'theme/colors';
-import { imgOnError } from 'utils/imgOnError';
-import { isSidePanel } from 'utils/isSidePanel';
-import browser from 'webextension-polyfill';
+
+import { Divider, Key, Value } from '../../components/dapp';
+import { LoaderAnimation } from '../../components/loader/Loader';
+
+import { BETA_CHAINS, BG_RESPONSE, NEW_CHAIN_REQUEST } from '../../services/config/storage-keys';
+import { usePerformanceMonitor } from '../../hooks/perf-monitoring/usePerformanceMonitor';
+import { useSetActiveChain } from '../../hooks/settings/useActiveChain';
+import useActiveWallet, { useUpdateKeyStore } from '../../hooks/settings/useActiveWallet';
+import { useChainInfos, useSetChainInfos } from '../../hooks/useChainInfos';
+import { useDefaultTokenLogo } from '../../hooks/utility/useDefaultTokenLogo';
 
 import { addToConnections } from '../ApproveConnection/utils';
-import { ChildrenParams, Footer, FooterAction, Heading, SubHeading, SuggestContainer } from './components';
+import { Colors } from '../../theme/colors';
 
-const SuggestChain = observer(({ handleError, handleRejectBtnClick, chainTagsStore }: ChildrenParams) => {
-  const navigate = useNavigate();
+import { ChildrenParams, Footer, FooterAction, Heading, SubHeading, SuggestContainer } from './components';
+import { chainTagsStore } from '../../context/chain-infos-store';
+
+const SuggestChain = observer(({ handleRejectBtnClick }: ChildrenParams) => {
+  const navigation = useNavigation<any>();
+
   const chainInfos = useChainInfos();
-  const customChains = useCustomChains();
   const setChainInfos = useSetChainInfos();
+  const customChains = useCustomChains();
+
   const [isLoading, setIsLoading] = useState(false);
+  const [err, setErr] = useState<string>('');
 
   const [newChain, setNewChain] = useState<any | null>(null);
-  const siteName = newChain?.origin.replace('https://', '');
+  const siteName = newChain?.origin?.replace?.('https://', '') ?? '';
 
   const updateKeyStore = useUpdateKeyStore();
   const { activeWallet, setActiveWallet } = useActiveWallet();
   const [showMore, setShowMore] = useState(false);
 
-  const origin = useRef();
+  const originRef = useRef<string | undefined>(undefined);
   const setActiveChain = useSetActiveChain();
   const defaultTokenLogo = useDefaultTokenLogo();
+  const [logoUri, setLogoUri] = useState<string | undefined>(defaultTokenLogo);
 
   const chainRegistryPath = useMemo(() => {
-    if (!newChain) return null;
+    if (!newChain?.chainInfo) return null;
     return (
-      customChains.filter((chain) => chain.chainId === newChain.chainInfo?.chainId)?.[0]?.chainRegistryPath ||
-      newChain.chainInfo?.chainRegistryPath
+      customChains.find((c) => c.chainId === newChain.chainInfo.chainId)?.chainRegistryPath ??
+      newChain.chainInfo.chainRegistryPath ??
+      null
     );
   }, [customChains, newChain]);
 
   useEffect(() => {
-    browser.storage.local.get([NEW_CHAIN_REQUEST]).then((res: any) => {
-      const newChain = res[NEW_CHAIN_REQUEST];
-      setChainInfos({ ...chainInfos, [chainRegistryPath]: newChain.chainInfo });
-      setNewChain(newChain);
-      origin.current = newChain.origin;
-    });
+    (async () => {
+      const raw = await AsyncStorage.getItem(NEW_CHAIN_REQUEST);
+      if (!raw) return;
+      const payload = JSON.parse(raw); // expecting the same structure as web
+      setNewChain(payload);
+      originRef.current = payload?.origin;
 
+      const pathFromPayload =
+        customChains.find((c) => c.chainId === payload?.chainInfo?.chainId)?.chainRegistryPath ??
+        payload?.chainInfo?.chainRegistryPath;
+
+      if (pathFromPayload && payload?.chainInfo) {
+        setChainInfos({ ...chainInfos, [pathFromPayload]: payload.chainInfo });
+      }
+
+      setLogoUri(payload?.chainInfo?.chainSymbolImageUrl ?? defaultTokenLogo);
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const addBetaChainTags = useCallback(async () => {
-    if (newChain?.chainInfo?.chainId) {
-      await chainTagsStore.setBetaChainTags(newChain.chainInfo.chainId, ['Cosmos']);
-    }
-    if (newChain?.chainInfo?.testnetChainId) {
-      await chainTagsStore.setBetaChainTags(newChain.chainInfo.testnetChainId, ['Cosmos']);
-    }
-    if (newChain?.chainInfo?.evmChainId) {
-      await chainTagsStore.setBetaChainTags(newChain.chainInfo.evmChainId, ['Cosmos']);
-    }
-    if (newChain?.chainInfo?.evmChainIdTestnet) {
-      await chainTagsStore.setBetaChainTags(newChain.chainInfo.evmChainIdTestnet, ['Cosmos']);
-    }
-  }, [newChain, chainTagsStore]);
+    const info = newChain?.chainInfo;
+    if (!info) return;
+    if (info.chainId) await chainTagsStore.setBetaChainTags(info.chainId, ['Cosmos']);
+    if (info.testnetChainId) await chainTagsStore.setBetaChainTags(info.testnetChainId, ['Cosmos']);
+    if (info.evmChainId) await chainTagsStore.setBetaChainTags(info.evmChainId, ['Cosmos']);
+    if (info.evmChainIdTestnet) await chainTagsStore.setBetaChainTags(info.evmChainIdTestnet, ['Cosmos']);
+  }, [newChain]);
 
-  const approveNewChain = async () => {
+  const approveNewChain = useCallback(async () => {
+    if (!newChain?.chainInfo || !chainRegistryPath) return;
     await sleep(200);
     setIsLoading(true);
+    setErr('');
+
     try {
       const updatedKeystore = await updateKeyStore(
         activeWallet as WalletKey,
@@ -85,41 +101,44 @@ const SuggestChain = observer(({ handleError, handleRejectBtnClick, chainTagsSto
         newChain.chainInfo,
       );
 
-      const storedBetaChains = await browser.storage.local.get([BETA_CHAINS]);
-      const betaChains = JSON.parse(storedBetaChains[BETA_CHAINS] ?? '{}');
+      // merge into BETA_CHAINS
+      const stored = await AsyncStorage.getItem(BETA_CHAINS);
+      const betaChains = stored ? JSON.parse(stored) : {};
       const newBetaChains = { ...betaChains, [chainRegistryPath]: newChain.chainInfo };
+      await AsyncStorage.setItem(BETA_CHAINS, JSON.stringify(newBetaChains));
 
-      await browser.storage.local.set({ [BETA_CHAINS]: JSON.stringify(newBetaChains) });
       await addBetaChainTags();
 
       if (activeWallet) {
-        await addToConnections([newChain.chainInfo.chainId], [activeWallet.id], origin.current ?? '');
+        await addToConnections([newChain.chainInfo.chainId], [activeWallet.id], originRef.current ?? '');
         await setActiveWallet(updatedKeystore[activeWallet.id] as WalletKey);
       }
 
       await setActiveChain(chainRegistryPath);
 
-      window.removeEventListener('beforeunload', handleRejectBtnClick);
-      await browser.storage.local.set({
-        [BG_RESPONSE]: { data: 'Approved', success: 'Chain enabled' },
-      });
+      await AsyncStorage.setItem(BG_RESPONSE, JSON.stringify({ data: 'Approved', success: 'Chain enabled' }));
+
       setTimeout(async () => {
-        await browser.storage.local.remove(BG_RESPONSE);
+        await AsyncStorage.removeItem(BG_RESPONSE);
         setIsLoading(false);
-        if (isSidePanel()) {
-          navigate('/home');
-        } else {
-          setTimeout(async () => {
-            //await browser.storage.local.remove(SIGN_REQUEST)
-            window.close();
-          }, 10);
-        }
+
+        if (navigation.canGoBack()) navigation.goBack();
+        else navigation.navigate('Home');
       }, 100);
     } catch (e) {
-      handleError('Something went wrong. Please try again.');
+      setErr('Something went wrong. Please try again.');
       setIsLoading(false);
     }
-  };
+  }, [
+    activeWallet,
+    addBetaChainTags,
+    chainRegistryPath,
+    navigation,
+    newChain,
+    setActiveChain,
+    setActiveWallet,
+    updateKeyStore,
+  ]);
 
   usePerformanceMonitor({
     page: 'suggest-chain',
@@ -130,42 +149,52 @@ const SuggestChain = observer(({ handleError, handleRejectBtnClick, chainTagsSto
 
   return (
     <>
-      <div className='flex flex-col items-center'>
-        <Heading text='Add Network' />
-        <SubHeading text={`This will allow this network to be used within Leap Wallet.`} />
+      <View style={styles.centerCol}>
+        <Heading text="Add Network" />
+        <SubHeading text="This will allow this network to be used within Leap Wallet." />
 
         <GenericCard
-          title={<span className='text-[15px] truncate'>{newChain?.chainInfo?.chainName ?? ''}</span>}
+          title={
+            <View>
+              <TextRN numberOfLines={1} style={styles.cardTitle}>
+                {newChain?.chainInfo?.chainName ?? ''}
+              </TextRN>
+            </View>
+          }
           subtitle={siteName}
-          className='py-8 my-5'
+          style={styles.card}
           img={
-            <img
-              src={newChain?.chainInfo?.chainSymbolImageUrl ?? defaultTokenLogo}
-              className='h-10 w-10 mr-3'
-              onError={imgOnError(defaultTokenLogo)}
+            <Image
+              source={{ uri: logoUri }}
+              onError={() => setLogoUri(defaultTokenLogo)}
+              style={styles.logo}
             />
           }
-          size='sm'
+          size="sm"
           isRounded
         />
 
-        <div className='flex flex-col gap-y-[10px] bg-white-100 dark:bg-gray-900 rounded-2xl p-4 w-full'>
+        <View style={styles.infoBox}>
           <Key>Network Name</Key>
           <Value>{newChain?.chainInfo?.chainName ?? ''}</Value>
           {Divider}
+
           <Key>Network URL</Key>
           <Value>{newChain?.chainInfo?.apis?.rest || newChain?.chainInfo?.apis?.restTest || ''}</Value>
           {Divider}
+
           <Key>Chain ID</Key>
           <Value>{newChain?.chainInfo?.chainId ?? ''}</Value>
           {Divider}
+
           <Key>Currency Symbol</Key>
           <Value>{newChain?.chainInfo?.denom ?? ''}</Value>
+
           {showMore && (
             <>
               {Divider}
               <Key>Coin Type</Key>
-              <Value>{newChain?.chainInfo?.bip44.coinType ?? ''}</Value>
+              <Value>{newChain?.chainInfo?.bip44?.coinType ?? ''}</Value>
               {Divider}
               <Key>Address Prefix</Key>
               <Value>{newChain?.chainInfo?.addressPrefix ?? ''}</Value>
@@ -174,22 +203,20 @@ const SuggestChain = observer(({ handleError, handleRejectBtnClick, chainTagsSto
               <Value>{newChain?.chainInfo?.chainRegistryPath ?? ''}</Value>
             </>
           )}
-          <button
-            className='text-sm font-bold text-gray-400 h-5 w-full text-left'
-            style={{ color: '#726FDC' }}
-            onClick={() => setShowMore(!showMore)}
-          >
-            {showMore ? 'Show less' : 'Show more'}
-          </button>
-        </div>
-      </div>
 
-      <Footer>
+          <Pressable onPress={() => setShowMore((v) => !v)}>
+            <TextRN style={styles.showMoreText}>{showMore ? 'Show less' : 'Show more'}</TextRN>
+          </Pressable>
+        </View>
+      </View>
+
+      <Footer error={err}>
         <FooterAction
           rejectBtnClick={handleRejectBtnClick}
-          rejectBtnText='Reject'
+          rejectBtnText="Reject"
           confirmBtnText={isLoading ? <LoaderAnimation color={Colors.white100} /> : 'Approve'}
           confirmBtnClick={approveNewChain}
+          isConfirmBtnDisabled={isLoading}
         />
       </Footer>
     </>
@@ -198,14 +225,45 @@ const SuggestChain = observer(({ handleError, handleRejectBtnClick, chainTagsSto
 
 export default function SuggestChainWrapper() {
   return (
-    <SuggestContainer suggestKey={NEW_CHAIN_REQUEST} chainTagsStore={chainTagsStore}>
-      {({ handleError, handleRejectBtnClick, chainTagsStore }) => (
-        <SuggestChain
-          handleError={handleError}
-          handleRejectBtnClick={handleRejectBtnClick}
-          chainTagsStore={chainTagsStore}
-        />
+    <SuggestContainer suggestKey={NEW_CHAIN_REQUEST}>
+      {({ handleRejectBtnClick }) => (
+        <SuggestChain handleRejectBtnClick={handleRejectBtnClick} />
       )}
     </SuggestContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  centerCol: {
+    alignItems: 'center',
+    flexDirection: 'column',
+  },
+  card: {
+    paddingVertical: 8, // py-8
+    marginVertical: 20, // my-5
+  },
+  cardTitle: {
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  logo: {
+    height: 40,
+    width: 40,
+    marginRight: 12,
+    borderRadius: 8,
+  },
+  infoBox: {
+    width: '100%',
+    backgroundColor: Colors.white100, // add dark-mode swap if needed
+    borderRadius: 16,
+    padding: 16,
+    rowGap: 10 as any,
+  },
+  showMoreText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#726FDC',
+    height: 20,
+    marginTop: 4,
+  },
+});

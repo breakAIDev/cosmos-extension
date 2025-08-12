@@ -1,4 +1,4 @@
-import { Images } from 'images';
+import { Images } from '../../../assets/images';
 
 export const IMPORT_WALLET_DATA: {
   [name: string]: {

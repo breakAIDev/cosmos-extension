@@ -1,14 +1,15 @@
+import React, { useEffect, useState } from 'react';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { SelectedAddress, useChainsStore } from '@leapwallet/cosmos-wallet-hooks';
 import { isAptosChain } from '@leapwallet/cosmos-wallet-sdk';
 import { isBitcoinChain } from '@leapwallet/cosmos-wallet-store/dist/utils';
-import classNames from 'classnames';
-import BottomModal from '../bottom-modal';
-import { useSendContext } from 'pages/send-v2/context';
-import React, { useEffect, useState } from 'react';
+import BottomModal from '../../../../components/bottom-modal';
+import { useSendContext } from '../../../send-v2/context';
 
 import MyContacts from './MyContacts';
 import { MyEvmWalletAddresses } from './MyEvmWalletAddresses';
 import MyWallets from './MyWallets';
+import Text from '../../../../components/text'; // Ensure your Text is a RN-compatible component
 
 export type DestinationType = 'My Wallets' | 'My Contacts';
 
@@ -42,32 +43,35 @@ export const SelectDestinationSheet: React.FC<SelectDestinationSheetProps> = ({
 
   return (
     <BottomModal
-      title='Select Destination'
+      title="Select Destination"
       onClose={onClose}
       isOpen={!!isOpenType}
-      closeOnBackdropClick={true}
-      contentClassName='!bg-white-100 dark:!bg-gray-950'
-      className='p-6'
+      containerStyle={styles.modalContainer}
     >
-      <div className='w-full flex bg-gray-50 dark:bg-black-100 border-[3px] border-gray-50 dark:border-black-100 rounded-[25px] mb-6'>
-        {['My Contacts', 'My Wallets'].map((type) => (
-          <div
+      <View style={styles.tabsRow}>
+        {(['My Contacts', 'My Wallets'] as DestinationType[]).map((type) => (
+          <TouchableOpacity
             key={type}
-            className={classNames(
-              'rounded-[40px] flex-1 text-center py-2 cursor-pointer text-sm font-bold transition-all duration-200',
-              {
-                'bg-white-100 dark:bg-gray-950 text-black-100 dark:text-white-100': destinationType === type,
-              },
-              { 'bg-[transparent] text-gray-600 dark:text-gray-400': destinationType !== type },
-            )}
-            onClick={() => setDestinationType(type as DestinationType)}
+            style={[
+              styles.tab,
+              destinationType === type ? styles.tabActive : styles.tabInactive,
+            ]}
+            onPress={() => setDestinationType(type)}
+            activeOpacity={0.8}
           >
-            {type}
-          </div>
+            <Text
+              style={[
+                styles.tabText,
+                destinationType === type ? styles.tabTextActive : styles.tabTextInactive,
+              ]}
+            >
+              {type}
+            </Text>
+          </TouchableOpacity>
         ))}
-      </div>
+      </View>
 
-      <div>
+      <View style={{ width: '100%' }}>
         {destinationType === 'My Contacts' ? (
           <MyContacts handleContactSelect={handleContactSelect} />
         ) : chainData.evmOnlyChain ||
@@ -81,7 +85,49 @@ export const SelectDestinationSheet: React.FC<SelectDestinationSheetProps> = ({
             setSelectedAddress={setSelectedAddress}
           />
         )}
-      </div>
+      </View>
     </BottomModal>
   );
 };
+
+const styles = StyleSheet.create({
+  modalContainer: {
+    padding: 24,
+    backgroundColor: '#fff',
+    borderRadius: 24,
+  },
+  tabsRow: {
+    flexDirection: 'row',
+    backgroundColor: '#f5f5f7',
+    borderWidth: 3,
+    borderColor: '#f5f5f7',
+    borderRadius: 25,
+    marginBottom: 24,
+    width: '100%',
+  },
+  tab: {
+    flex: 1,
+    borderRadius: 40,
+    alignItems: 'center',
+    paddingVertical: 10,
+    justifyContent: 'center',
+  },
+  tabActive: {
+    backgroundColor: '#fff',
+  },
+  tabInactive: {
+    backgroundColor: 'transparent',
+  },
+  tabText: {
+    fontWeight: 'bold',
+    fontSize: 15,
+  },
+  tabTextActive: {
+    color: '#111',
+  },
+  tabTextInactive: {
+    color: '#888',
+  },
+});
+
+export default SelectDestinationSheet;

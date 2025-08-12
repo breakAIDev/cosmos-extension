@@ -1,16 +1,23 @@
 import { RootBalanceStore, RootDenomsStore } from '@leapwallet/cosmos-wallet-store';
 import BigNumber from 'bignumber.js';
-import GasPriceOptions, { useDefaultGasPrice } from 'components/gas-price-options';
-import { GasPriceOptionValue } from 'components/gas-price-options/context';
-import { DisplayFee } from 'components/gas-price-options/display-fee';
-import { FeesSettingsSheet } from 'components/gas-price-options/fees-settings-sheet';
+import GasPriceOptions, { useDefaultGasPrice } from '../../../components/gas-price-options';
+import { GasPriceOptionValue } from '../../../components/gas-price-options/context';
+import { DisplayFee } from '../../../components/gas-price-options/display-fee';
+import { FeesSettingsSheet } from '../../../components/gas-price-options/fees-settings-sheet';
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useState } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 
 import { useSnip20ManageTokens } from '../context';
 
 export const Fee = observer(
-  ({ rootDenomsStore, rootBalanceStore }: { rootDenomsStore: RootDenomsStore; rootBalanceStore: RootBalanceStore }) => {
+  ({
+    rootDenomsStore,
+    rootBalanceStore,
+  }: {
+    rootDenomsStore: RootDenomsStore;
+    rootBalanceStore: RootBalanceStore;
+  }) => {
     const {
       gasOption,
       userPreferredGasLimit,
@@ -45,7 +52,6 @@ export const Fee = observer(
         option: gasOption,
         gasPrice: defaultGasPrice.gasPrice,
       });
-
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [defaultGasPrice.gasPrice]);
 
@@ -55,7 +61,7 @@ export const Fee = observer(
     }, [gasPriceOption, setGasOption, setUserPreferredGasPrice]);
 
     return (
-      <div className='mb-4'>
+      <View style={styles.feeContainer}>
         <GasPriceOptions
           recommendedGasLimit={recommendedGasLimit.toString()}
           gasLimit={userPreferredGasLimit?.toString() ?? recommendedGasLimit.toString()}
@@ -70,12 +76,29 @@ export const Fee = observer(
           <DisplayFee setShowFeesSettingSheet={setShowFeesSettingSheet} />
 
           {gasError && !showFeesSettingSheet ? (
-            <p className='text-red-300 text-sm font-medium mt-2 text-center'>{gasError}</p>
+            <Text style={styles.gasError}>{gasError}</Text>
           ) : null}
 
-          <FeesSettingsSheet showFeesSettingSheet={showFeesSettingSheet} onClose={onClose} gasError={gasError} />
+          <FeesSettingsSheet
+            showFeesSettingSheet={showFeesSettingSheet}
+            onClose={onClose}
+            gasError={gasError}
+          />
         </GasPriceOptions>
-      </div>
+      </View>
     );
   },
 );
+
+const styles = StyleSheet.create({
+  feeContainer: {
+    marginBottom: 16,
+  },
+  gasError: {
+    color: '#F87171', // text-red-300
+    fontSize: 14,
+    fontWeight: '500',
+    marginTop: 8,
+    textAlign: 'center',
+  },
+});

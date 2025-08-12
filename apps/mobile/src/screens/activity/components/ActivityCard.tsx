@@ -8,7 +8,7 @@ import {
   TextStyle,
   ViewStyle,
 } from 'react-native';
-import { CaretRight } from '@phosphor-icons/react';
+import { CaretRight } from 'phosphor-react-native';
 import { observer } from 'mobx-react-lite';
 import { ActivityCardContent } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';

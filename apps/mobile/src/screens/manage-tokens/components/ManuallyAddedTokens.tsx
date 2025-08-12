@@ -1,4 +1,5 @@
-import { capitalize, sliceWord, useGetExplorerAccountUrl } from '@leapwallet/cosmos-wallet-hooks';
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import { NativeDenom } from '@leapwallet/cosmos-wallet-sdk';
 import {
   BetaCW20DenomsStore,
@@ -6,9 +7,9 @@ import {
   DisabledCW20DenomsStore,
   EnabledCW20DenomsStore,
 } from '@leapwallet/cosmos-wallet-store';
-import { CardDivider } from '@leapwallet/leap-ui';
+import { capitalize, sliceWord, useGetExplorerAccountUrl } from '@leapwallet/cosmos-wallet-hooks';
 import { observer } from 'mobx-react-lite';
-import React from 'react';
+import { Linking } from 'react-native';
 
 import { CustomToggleCard, TokenType } from './index';
 import { TokenTitle } from './TokenTitle';
@@ -42,29 +43,27 @@ export const ManuallyAddedTokens = observer(
     const { getExplorerAccountUrl } = useGetExplorerAccountUrl({});
 
     return (
-      <div>
-        <div className='font-bold text-sm text-gray-600 dark:text-gray-200 mb-2'>Manually added tokens</div>
-
-        <div className='rounded-2xl flex flex-col items-center justify-center dark:bg-gray-900 bg-white-100 overflow-hidden'>
+      <View>
+        <Text style={styles.header}>Manually added tokens</Text>
+        <View style={styles.cardContainer}>
           {tokens.map((token, index, array) => {
             const isLast = index === array.length - 1;
-            let _TokenType = <TokenType type='native' className='bg-[#ff9f0a1a] text-orange-500' />;
+            let _TokenType = <TokenType type="native" style={{ backgroundColor: '#ff9f0a1a', color: '#ff9500' }} />;
 
             const title = sliceWord(token?.name ?? capitalize(token.coinDenom.toLowerCase()), 7, 4);
             const subTitle = sliceWord(token.coinDenom, 4, 4);
 
             if (betaCW20Denoms[token.coinMinimalDenom]) {
-              _TokenType = <TokenType type='cw20' className='bg-[#29A8741A] text-green-600' />;
+              _TokenType = <TokenType type="cw20" style={{ backgroundColor: '#29A8741A', color: '#22c55e' }} />;
             } else if (betaERC20Denoms[token.coinMinimalDenom]) {
-              _TokenType = <TokenType type='erc20' className='bg-[#A52A2A1A] text-[#a52a2a]' />;
+              _TokenType = <TokenType type="erc20" style={{ backgroundColor: '#A52A2A1A', color: '#a52a2a' }} />;
             } else if (token.coinMinimalDenom.trim().toLowerCase().startsWith('factory')) {
-              _TokenType = <TokenType type='factory' className='bg-[#0AB8FF1A] text-teal-500' />;
+              _TokenType = <TokenType type="factory" style={{ backgroundColor: '#0AB8FF1A', color: '#14b8a6' }} />;
             }
 
             const explorerURL = getExplorerAccountUrl(token.coinMinimalDenom);
-            const handleRedirectionClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-              e.stopPropagation();
-              window.open(explorerURL, '_blank');
+            const handleRedirectionClick = () => {
+              if (explorerURL) Linking.openURL(explorerURL);
             };
 
             return (
@@ -86,16 +85,40 @@ export const ManuallyAddedTokens = observer(
                     !fetchedTokens.includes(token.coinMinimalDenom) &&
                     enabledCW20Denoms.includes(token.coinMinimalDenom)
                   }
-                  onToggleChange={(isEnabled) => handleToggleChange(isEnabled, token.coinMinimalDenom)}
+                  onToggleChange={(isEnabled: boolean) => handleToggleChange(isEnabled, token.coinMinimalDenom)}
                   onDeleteClick={() => onDeleteClick(token)}
                 />
-
-                {!isLast ? <CardDivider /> : null}
+                {!isLast ? <View style={styles.cardDivider} /> : null}
               </React.Fragment>
             );
           })}
-        </div>
-      </div>
+        </View>
+      </View>
     );
-  },
+  }
 );
+
+const styles = StyleSheet.create({
+  header: {
+    fontWeight: 'bold',
+    fontSize: 15,
+    color: '#64748b',
+    marginBottom: 8,
+  },
+  cardContainer: {
+    borderRadius: 16,
+    backgroundColor: '#fff',
+    overflow: 'hidden',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    // Add shadow if you want
+  },
+  cardDivider: {
+    height: 1,
+    backgroundColor: '#e5e7eb',
+    alignSelf: 'stretch',
+    marginHorizontal: 8,
+  },
+});
+

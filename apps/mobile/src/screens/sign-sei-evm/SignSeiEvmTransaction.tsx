@@ -1,5 +1,5 @@
-
-import { ETHEREUM_METHOD_TYPE } from '@leapwallet/cosmos-wallet-provider/dist/provider/types';
+import React, { useCallback, useEffect, useState } from 'react';
+import { DeviceEventEmitter, View } from 'react-native';
 import {
   formatEtherUnits,
   getChainApis,
@@ -7,18 +7,19 @@ import {
   getErc721TokenDetails,
   SupportedChain,
 } from '@leapwallet/cosmos-wallet-sdk';
-import { MessageTypes } from 'config/message-types';
-import { BG_RESPONSE } from 'config/storage-keys';
-import { getChainOriginStorageKey, getSupportedChains } from 'extension-scripts/utils';
-import React, { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { evmBalanceStore } from 'stores/balance-store';
-import { rootDenomsStore } from 'stores/denoms-store-instance';
-import { rootBalanceStore } from 'stores/root-store';
-import Browser from 'webextension-polyfill';
+import { MessageTypes } from '../../services/config/message-types';
+import { BG_RESPONSE } from '../../services/config/storage-keys';
+import { getChainOriginStorageKey, getSupportedChains } from '../../context/utils';
+import { evmBalanceStore } from '../../context/balance-store';
+import { rootDenomsStore } from '../../context/denoms-store-instance';
+import { rootBalanceStore } from '../../context/root-store';
 
+// Import your RN navigation, components, and utilities:
+import { useNavigation } from '@react-navigation/native';
 import { ArrowHeader, Loading, MessageSignature, SignTransaction } from './components';
-import { handleRejectClick } from './utils';
+import { useHandleRejectClick } from '../sign-bitcoin/utils';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ETHEREUM_METHOD_TYPE } from '@leapwallet/cosmos-wallet-provider/dist/provider/types';
 
 type TxOriginData = {
   activeChain: SupportedChain;
@@ -32,19 +33,19 @@ type SeiEvmTransactionProps = {
 };
 
 function SeiEvmTransaction({ txnDataList, setTxnDataList, txOriginData }: SeiEvmTransactionProps) {
-  const navigate = useNavigate();
   const [activeTxn, setActiveTxn] = useState(0);
+  const navigation = useNavigation();
+  const { setHandleRejectClick} = useHandleRejectClick();
 
+  // Listen to navigation's beforeRemove event if you want to reject on screen exit
   useEffect(() => {
-    window.addEventListener('beforeunload', () => handleRejectClick(navigate, txnDataList[0]?.payloadId));
-    Browser.storage.local.remove(BG_RESPONSE);
+    const unsubscribe = navigation.addListener('beforeRemove', () => {
+      setHandleRejectClick(txnDataList[0]?.payloadId);
+    });
+    AsyncStorage.removeItem(BG_RESPONSE);
 
-    return () => {
-      window.removeEventListener('beforeunload', () => handleRejectClick(navigate, txnDataList[0]?.payloadId));
-    };
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    return unsubscribe;
+  }, [navigation, setHandleRejectClick, txnDataList]);
 
   const handleTxnListUpdate = (customId: string) => {
     const filteredTxnDataList = txnDataList.filter((_txnData) => _txnData.customId !== customId);
@@ -53,7 +54,7 @@ function SeiEvmTransaction({ txnDataList, setTxnDataList, txOriginData }: SeiEvm
   };
 
   return (
-    <>
+    <View>
       {txnDataList.length > 1 ? (
         <ArrowHeader activeIndex={activeTxn} setActiveIndex={setActiveTxn} limit={txnDataList.length} />
       ) : null}
@@ -91,26 +92,22 @@ function SeiEvmTransaction({ txnDataList, setTxnDataList, txOriginData }: SeiEvm
           />
         );
       })}
-    </>
+    </View>
   );
 }
 
-/**
- * This HOC helps makes sure that the txn signing request is decoded and the chain is set
- */
 const withSeiEvmTxnSigningRequest = (Component: React.FC<any>) => {
   const Wrapped = () => {
     const [txnDataList, setTxnDataList] = useState<Record<string, any>[] | null>(null);
     const [txOriginData, setTxOriginData] = useState<TxOriginData | null>(null);
 
     const signSeiEvmTxEventHandler = useCallback(async (message: any, sender: any) => {
-      if (sender.id !== Browser.runtime.id) return;
-
       if (message.type === MessageTypes.signTransaction) {
         const txnData = message.payload;
         const storageKey = getChainOriginStorageKey(txnData.origin);
 
-        const storage = await Browser.storage.local.get(storageKey);
+        const storageRaw = await AsyncStorage.getItem(storageKey);
+        const storage = storageRaw ? JSON.parse(storageRaw) : {};
         const defaultChain = 'ethereum';
         const { chainKey = defaultChain, network = 'mainnet' } = storage[storageKey] || {};
         const supportedChains = await getSupportedChains();
@@ -134,7 +131,6 @@ const withSeiEvmTxnSigningRequest = (Component: React.FC<any>) => {
                 ...txnData.signTxnData.details,
               };
             } catch (error) {
-              // eslint-disable-next-line no-console
               console.error('Error fetching token details as ERC20 token, retrying as ERC721 token', error);
               tokenDetails = await getErc721TokenDetails(txnData.signTxnData.to, evmJsonRpc ?? '', Number(evmChainId));
               txnData.signTxnData.details = {
@@ -143,7 +139,7 @@ const withSeiEvmTxnSigningRequest = (Component: React.FC<any>) => {
               };
             }
           } catch (error) {
-            // eslint-disable-next-line no-console
+            // Log error as needed
             console.error('Error fetching token details', error);
           }
         }
@@ -153,22 +149,18 @@ const withSeiEvmTxnSigningRequest = (Component: React.FC<any>) => {
           if (prev.some((txn) => txn?.origin?.toLowerCase() !== txnData?.origin?.toLowerCase())) {
             return prev;
           }
-
-          return [...prev, { ...txnData, customId: `${sender.id}-00${prev.length}` }];
+          return [...prev, { ...txnData, customId: `evt-00${prev.length}` }];
         });
       }
     }, []);
 
     useEffect(() => {
-      Browser.runtime.sendMessage({ type: MessageTypes.signingPopupOpen });
-      Browser.runtime.onMessage.addListener(signSeiEvmTxEventHandler);
-
-      return () => {
-        Browser.runtime.onMessage.removeListener(signSeiEvmTxEventHandler);
-      };
+      // Listen to events via your own system (WebSocket, DeviceEventEmitter, etc)
+      // DeviceEventEmitter.addListener('signTransaction', signSeiEvmTxEventHandler);
+      // return () => DeviceEventEmitter.removeAllListeners('signTransaction', signSeiEvmTxEventHandler);
     }, [signSeiEvmTxEventHandler]);
 
-    if (txnDataList?.length) {
+    if (txnDataList?.length && txOriginData) {
       return <Component txnDataList={txnDataList} setTxnDataList={setTxnDataList} txOriginData={txOriginData} />;
     }
 

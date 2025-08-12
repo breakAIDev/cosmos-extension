@@ -1,27 +1,29 @@
-import { formatTokenAmount, useAirdropsEligibilityData } from '@leapwallet/cosmos-wallet-hooks';
-import { CaretRight } from '@phosphor-icons/react';
-import classNames from 'classnames';
-import Text from 'components/text';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { cn } from 'utils/cn';
-import { isSidePanel } from 'utils/isSidePanel';
-import { trim } from 'utils/strings';
-
+import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet, Dimensions } from 'react-native';
+import { CaretRight } from 'phosphor-react-native'; // Replace with RN icon if needed
+import { formatTokenAmount, useAirdropsEligibilityData } from '@leapwallet/cosmos-wallet-hooks';
+import { trim } from '../../../utils/strings';
 import EmptyAirdrops from './EmptyAirdrops';
+import { useNavigation } from '@react-navigation/native';
 
 export default function EligibleAirdrops() {
   const airdropsEligibilityData = useAirdropsEligibilityData() || {};
   const eligibleAirdrops = Object.values(airdropsEligibilityData).filter((d) => d?.isEligible && !d?.isHidden);
-  const navigate = useNavigate();
+  const navigation = useNavigation();
+
+  // For trimming name: use device width to decide max length
+  const windowWidth = Dimensions.get('window').width;
+  const nameTrimLength = windowWidth > 400
+    ? 17 + Math.floor(((Math.min(windowWidth, 400) - 320) / 81) * 7)
+    : 17;
 
   if (eligibleAirdrops.length < 1) {
     return (
       <EmptyAirdrops
-        title='No eligible Airdrops'
+        title="No eligible Airdrops"
         subTitle={
           <>
-            You can change your wallet or <br /> check all airdrops on Leapboard.
+            You can change your wallet or{'\n'}check all airdrops on Leapboard.
           </>
         }
         showLeapBoardButton={true}
@@ -30,39 +32,81 @@ export default function EligibleAirdrops() {
   }
 
   return (
-    <div>
-      <Text size='sm' className='font-bold mb-3'>
-        Eligible Airdrops
-      </Text>
-      <div>
+    <View>
+      <Text style={styles.header}>Eligible Airdrops</Text>
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 16 }}
+        showsVerticalScrollIndicator={false}
+      >
         {eligibleAirdrops.map((d, index) => (
-          <div
+          <TouchableOpacity
             key={index}
-            className={cn(
-              'flex gap-2 items-center bg-secondary-100 hover:bg-secondary-200 py-3 cursor-pointer px-3 rounded-xl',
-              index !== eligibleAirdrops.length - 1 && 'mb-4',
-            )}
-            onClick={() => navigate(`/airdropsDetails?airdropId=${d.id}`)}
+            style={[
+              styles.row,
+              index !== eligibleAirdrops.length - 1 && styles.rowMargin,
+            ]}
+            activeOpacity={0.85}
+            onPress={() =>
+              navigation.navigate('AirdropsDetails', { airdropId: d.id })
+            }
           >
-            <img src={d.airdropIcon} alt='airdrop-icon' className='w-8 h-8 rounded-full' />
-            <Text size='sm' className='flex-1 font-medium'>
-              {trim(d.name, isSidePanel() ? 10 + Math.floor(((Math.min(window.innerWidth, 400) - 320) / 81) * 7) : 17)}
+            <Image source={{ uri: d.airdropIcon }} style={styles.icon} />
+            <Text style={styles.name}>
+              {trim(d.name, nameTrimLength)}
             </Text>
-            <Text
-              size='sm'
-              className={classNames('font-medium', {
-                'w-[100px]': !isSidePanel(),
-                'text-right': isSidePanel(),
-              })}
-            >
+            <Text style={styles.amount}>
               {d.totalAmount
                 ? formatTokenAmount(String(d.totalAmount), d.tokenInfo[0]?.denom, 2)
                 : d.tokenInfo[0]?.denom}
             </Text>
-            <CaretRight size={16} className='text-gray-600 dark:text-gray-400' />
-          </div>
+            <CaretRight size={16} color="#64748b" /* gray-600 */ style={styles.caretIcon} />
+          </TouchableOpacity>
         ))}
-      </div>
-    </div>
+      </ScrollView>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  header: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    color: '#111', // or use your theme color
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F7F8FA', // secondary-100
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    marginBottom: 0,
+    gap: 8,
+  },
+  rowMargin: {
+    marginBottom: 16,
+  },
+  icon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    marginRight: 8,
+  },
+  name: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#111',
+  },
+  amount: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#111',
+    minWidth: 80,
+    textAlign: 'right',
+  },
+  caretIcon: {
+    marginLeft: 8,
+  },
+});

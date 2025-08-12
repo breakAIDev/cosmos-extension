@@ -21,29 +21,28 @@ import {
   useSkipDestinationChains,
   useSkipSupportedChains,
 } from '@leapwallet/elements-hooks';
-import { ArrowLeft } from '@phosphor-icons/react/dist/ssr';
-import { bech32 } from 'bech32';
+import { ArrowLeft } from 'phosphor-react-native';
+import { decode } from 'bech32';
 import { BigNumber } from 'bignumber.js';
-import { WalletButtonV2 } from 'components/button';
-import { PageHeader } from 'components/header/PageHeaderV2';
-import { AGGREGATED_CHAIN_KEY } from 'config/constants';
-import { useWalletInfo } from 'hooks';
-import { usePerformanceMonitor } from 'hooks/perf-monitoring/usePerformanceMonitor';
-import { useSelectedNetwork } from 'hooks/settings/useNetwork';
-import useQuery from 'hooks/useQuery';
+import { WalletButtonV2 } from '../../components/button';
+import { PageHeader } from '../../components/header/PageHeaderV2';
+import { AGGREGATED_CHAIN_KEY } from '../../services/config/constants';
+import { useWalletInfo } from '../../hooks';
+import { usePerformanceMonitor } from '../../hooks/perf-monitoring/usePerformanceMonitor';
+import { useSelectedNetwork } from '../../hooks/settings/useNetwork';
+import useQuery from '../../hooks/useQuery';
 import { observer } from 'mobx-react-lite';
-import SelectWallet from 'pages/home/SelectWallet/v2';
-import TxPage, { TxType } from 'pages/nfts/send-nft/TxPage';
+import SelectWallet from '../home/SelectWallet/v2';
+import TxPage, { TxType } from '../nfts/send-nft/TxPage';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { chainFeatureFlagsStore, evmBalanceStore } from 'stores/balance-store';
-import { chainInfoStore } from 'stores/chain-infos-store';
-import { rootCW20DenomsStore, rootDenomsStore, rootERC20DenomsStore } from 'stores/denoms-store-instance';
-import { manageChainsStore } from 'stores/manage-chains-store';
-import { rootBalanceStore } from 'stores/root-store';
-import { AggregatedSupportedChain } from 'types/utility';
-import { AddressBook } from 'utils/addressbook';
-import { isLedgerEnabled } from 'utils/isLedgerEnabled';
+import { chainFeatureFlagsStore, evmBalanceStore } from '../../context/balance-store';
+import { chainInfoStore } from '../../context/chain-infos-store';
+import { rootCW20DenomsStore, rootDenomsStore, rootERC20DenomsStore } from '../../context/denoms-store-instance';
+import { manageChainsStore } from '../../context/manage-chains-store';
+import { rootBalanceStore } from '../../context/root-store';
+import { AggregatedSupportedChain } from '../../types/utility';
+import { AddressBook } from '../../utils/addressbook';
+import { isLedgerEnabled } from '../../utils/isLedgerEnabled';
 
 import { AmountCard } from './components/amount-card';
 import { SelectTokenSheet } from './components/amount-card/select-token-sheet';
@@ -55,22 +54,20 @@ import { ReviewTransfer } from './components/review-transfer';
 import { SendContextProvider, useSendContext } from './context';
 import { useCheckIbcTransfer } from './hooks/useCheckIbcTransfer';
 import { SelectRecipientSheet } from './SelectRecipientSheet';
+import { View, TouchableOpacity, ScrollView, StyleSheet, TextInput } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 const Send = observer(() => {
-  // usePageView(PageName.Send)
-
-  const navigate = useNavigate();
+  const navigation = useNavigation();
   const isAllAssetsLoading = rootBalanceStore.loading;
   const [showSelectWallet, setShowSelectWallet] = useState(false);
   const [showSelectRecipient, setShowSelectRecipient] = useState(false);
   const { walletAvatar, walletName } = useWalletInfo();
-  const locationState = useLocation().state;
   const activeChain = useActiveChain();
   const [amount, setAmount] = useState('');
   const {
     selectedAddress,
     setSelectedAddress,
-    addressError,
     setAddressError,
     isIBCTransfer,
     setCustomIbcChannelId,
@@ -79,7 +76,6 @@ const Send = observer(() => {
     sendActiveChain,
     setSelectedChain,
     sendSelectedNetwork,
-    selectedChain,
     setGasError,
     setInputAmount,
     setFeeDenom,
@@ -96,6 +92,8 @@ const Send = observer(() => {
   const [resetForm, setResetForm] = useState(false);
 
   const chainInfos = chainInfoStore.chainInfos;
+  const goBack = () => navigation.goBack();
+  const inputRef = useRef<TextInput>(null);
 
   usePerformanceMonitor({
     page: 'send',
@@ -110,16 +108,13 @@ const Send = observer(() => {
     setShowSelectRecipient(false);
   }, []);
 
-  const handleCloseTokenSelectSheet = useCallback(
-    (isTokenSelected?: boolean) => {
+  const handleCloseTokenSelectSheet = (isTokenSelected?: boolean) => {
       if (!selectedToken && !isTokenSelected) {
-        navigate(-1);
+        goBack();
       } else {
         setShowTokenSelectSheet(false);
       }
-    },
-    [navigate, selectedToken],
-  );
+    };
 
   const editContact = (savedAddress?: AddressBook.SavedAddress) => {
     if (savedAddress) {
@@ -133,11 +128,9 @@ const Send = observer(() => {
   const activeWallet = useActiveWallet();
 
   const { data: elementsChains } = useSkipSupportedChains({ chainTypes: ['cosmos'] });
-  const { getAggregatedSpendableBalances } = rootBalanceStore;
   const evmBalance = evmBalanceStore.evmBalance;
   const { data: featureFlags } = useFeatureFlags();
   const selectedNetwork = useSelectedNetwork();
-  const inputRef = useRef<HTMLInputElement | null>(null);
 
   const activeChainInfo = chains[sendActiveChain];
 
@@ -236,7 +229,7 @@ const Send = observer(() => {
         } else if (address.startsWith('bc1q')) {
           chain = 'bitcoin';
         } else {
-          const { prefix } = bech32.decode(address);
+          const { prefix } = decode(address);
           chain = addressPrefixes[prefix] as SupportedChain;
           if (prefix === 'init') {
             chain = selectedAddress?.chainName as SupportedChain;
@@ -264,7 +257,7 @@ const Send = observer(() => {
     if (selectedToken && selectedToken.tokenBalanceOnChain && sendActiveChain !== selectedToken.tokenBalanceOnChain) {
       setSelectedChain(selectedToken.tokenBalanceOnChain);
     }
-  }, [selectedToken, sendActiveChain]);
+  }, [selectedToken, sendActiveChain, setSelectedChain]);
 
   const updateSelectedToken = useCallback(
     (token: Token | null) => {
@@ -310,15 +303,6 @@ const Send = observer(() => {
   }, [chainInfos, evmBalance.status, isAllAssetsLoading, sendActiveChain]);
 
   useEffect(() => {
-    if (!selectedToken && !assetCoinDenom && isTokenStatusSuccess) {
-      if (locationState && (locationState as Token).coinMinimalDenom) {
-        const token = locationState as Token;
-        updateSelectedToken(token);
-      }
-    }
-  }, [assets, locationState, isTokenStatusSuccess, selectedToken, updateSelectedToken, assetCoinDenom, selectedChain]);
-
-  useEffect(() => {
     if (assetCoinDenom) {
       const tokenFromParams: Token | null =
         assets.find((asset) => {
@@ -340,17 +324,15 @@ const Send = observer(() => {
     }
   }, [chainId, assetCoinDenom, activeChain, assets, updateSelectedToken]);
 
-  const isNotIBCError = addressError ? !addressError.includes('IBC transfers are not supported') : false;
-
   return (
-    <>
+    <View style={{ flex: 1, backgroundColor: '#fff' }}>
       {selectedToken ? (
         <>
           <PageHeader>
-            <ArrowLeft size={36} className='text-monochrome cursor-pointer p-2' onClick={() => navigate(-1)} />
-
+            <TouchableOpacity onPress={goBack}>
+              <ArrowLeft size={36} color="#212121" style={{ padding: 8 }} />
+            </TouchableOpacity>
             <WalletButtonV2
-              className='absolute top-1/2 right-1/2 translate-x-1/2 -translate-y-1/2'
               walletName={walletName}
               showWalletAvatar={true}
               walletAvatar={walletAvatar}
@@ -359,8 +341,7 @@ const Send = observer(() => {
             />
           </PageHeader>
 
-          {/* <div className='flex flex-1 flex-col justify-between w-full gap-3 relative overflow-y-scroll h-full'> */}
-          <div className='flex flex-col w-full h-full gap-3 relative pt-6'>
+          <ScrollView contentContainerStyle={styles.scrollContent}>
             <AmountCard
               rootBalanceStore={rootBalanceStore}
               isAllAssetsLoading={isAllAssetsLoading}
@@ -390,22 +371,18 @@ const Send = observer(() => {
               chainFeatureFlagsStore={chainFeatureFlagsStore}
             />
             <Memo />
-            <div className='mx-6'>
+            <View style={{ marginHorizontal: 24 }}>
               <ErrorChannel />
-            </div>
-
+            </View>
             <ReviewTransfer setShowTxPage={setShowTxPage} />
-          </div>
-          {/* </div> */}
+          </ScrollView>
         </>
       ) : null}
 
       <SelectRecipientSheet
         isOpen={showSelectRecipient && !isAddContactSheetVisible}
         onClose={handleCloseRecipientSheet}
-        postSelectRecipient={() => {
-          setInputInProgress(false);
-        }}
+        postSelectRecipient={() => setInputInProgress(false)}
         editContact={editContact}
       />
 
@@ -423,14 +400,16 @@ const Send = observer(() => {
           txType={TxType.SEND}
         />
       )}
+
       <SelectWallet
         isVisible={showSelectWallet}
         onClose={() => {
           setShowSelectWallet(false);
-          navigate('/home');
+          navigation.navigate('Home');
         }}
-        title='Your Wallets'
+        title="Your Wallets"
       />
+
       <SaveAddressSheet
         isOpen={isAddContactSheetVisible}
         onSave={setSelectedAddress}
@@ -458,10 +437,21 @@ const Send = observer(() => {
           inputRef.current?.focus();
         }}
       />
-    </>
+    </View>
   );
 });
 
+const styles = StyleSheet.create({
+  scrollContent: {
+    flexGrow: 1,
+    paddingTop: 24,
+    paddingHorizontal: 0,
+    gap: 12,
+  },
+  // ...add other styles as needed
+});
+
+// Context Provider wrapper
 const SendPage = observer(() => {
   const activeChain = useActiveChain();
   return (
@@ -471,7 +461,7 @@ const SendPage = observer(() => {
       rootCW20DenomsStore={rootCW20DenomsStore}
       rootERC20DenomsStore={rootERC20DenomsStore}
     >
-      <Send />
+      <Send/>
     </SendContextProvider>
   );
 });

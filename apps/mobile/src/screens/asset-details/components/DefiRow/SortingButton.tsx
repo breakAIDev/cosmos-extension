@@ -1,54 +1,48 @@
-import { ArrowDown, ArrowUp } from '@phosphor-icons/react';
-import classNames from 'classnames';
-import React, { Dispatch, SetStateAction, useMemo, useState } from 'react';
+import React, { Dispatch, SetStateAction, useMemo } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, StyleProp, ViewStyle } from 'react-native';
+import { ArrowDown, ArrowUp } from 'phosphor-react-native';
 
-export function SortingButton({
-  sortBy,
-  sortDir,
-  defaultSortBy = '',
-  defaultSortDir = '',
-  setSortBy,
-  setSortDir,
-  classNamesObj,
-  label,
-  sortName,
-  showEmptySymbolArea = false,
-}: {
+type SortingButtonProps = {
   sortBy: string;
   sortDir: string;
   defaultSortBy?: string;
   defaultSortDir?: string;
   setSortDir: Dispatch<SetStateAction<string>>;
   setSortBy: Dispatch<SetStateAction<string>>;
-  classNamesObj?: {
-    outerContainer?: string;
-    symbol?: string;
-  };
-  sortName: string;
   label: string;
+  sortName: string;
   showEmptySymbolArea?: boolean;
-}) {
-  const [isHovered] = useState<boolean>(false);
+  style?: StyleProp<ViewStyle>;
+};
 
+export function SortingButton({
+  sortBy,
+  sortDir,
+  defaultSortBy = '',
+  defaultSortDir = '',
+  setSortDir,
+  setSortBy,
+  label,
+  sortName,
+  showEmptySymbolArea = false,
+  style,
+}: SortingButtonProps) {
   const symbol = useMemo(() => {
     if (sortBy === sortName) {
       if (sortDir === 'asc') {
-        return isHovered === true ? <ArrowDown size={12} /> : <ArrowUp size={12} />;
+        return <ArrowUp size={14} color="#6B7280" />; // gray-500
       } else {
-        return isHovered === true ? null : <ArrowDown size={12} />;
+        return <ArrowDown size={14} color="#6B7280" />;
       }
     }
-    return isHovered === true ? <ArrowUp size={12} /> : null;
-  }, [isHovered, sortBy, sortDir, sortName]);
+    // If not active sort, show nothing or empty area if requested
+    return showEmptySymbolArea ? <View style={{ width: 14, height: 14 }} /> : null;
+  }, [sortBy, sortDir, sortName, showEmptySymbolArea]);
 
   return (
-    <button
-      className={classNames(
-        'group flex cursor-pointer flex-row items-center justify-start gap-[10px] text-sm font-black !leading-[20px] text-black-100 dark:text-white-100',
-        classNamesObj?.outerContainer,
-      )}
-      id='sorting-button'
-      onClick={() => {
+    <TouchableOpacity
+      style={[styles.button, style]}
+      onPress={() => {
         if (sortBy === sortName) {
           if (sortDir === 'asc') {
             setSortDir('dsc');
@@ -61,19 +55,33 @@ export function SortingButton({
           setSortDir('asc');
         }
       }}
+      activeOpacity={0.7}
     >
-      {label}
-      {
-        <div
-          className={classNames(
-            '!h-[12px] !w-[12px] flex-row items-center justify-center !text-xs !leading-[12px] !text-gray-500 group-hover:!text-black-100 dark:!text-gray-500 dark:group-hover:!text-white-100',
-            classNamesObj?.symbol,
-            showEmptySymbolArea === true || symbol ? 'flex' : 'hidden group-hover:flex',
-          )}
-        >
-          {symbol}
-        </div>
-      }
-    </button>
+      <Text style={styles.label}>{label}</Text>
+      <View style={[styles.iconArea, style]}>{symbol}</View>
+    </TouchableOpacity>
   );
 }
+
+const styles = StyleSheet.create({
+  button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8, // requires RN >= 0.71, otherwise use marginRight/marginLeft
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+  },
+  label: {
+    fontWeight: 'bold',
+    fontSize: 14,
+    color: '#111827', // text-black-100
+  },
+  iconArea: {
+    width: 14,
+    height: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 4,
+  },
+});

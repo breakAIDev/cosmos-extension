@@ -1,79 +1,143 @@
-import { useTabIndicatorPosition } from 'hooks/utility/useTabIndicatorPosition';
-import React, { forwardRef } from 'react';
-import { cn } from 'utils/cn';
+import React, { useRef, useEffect, useState } from 'react';
+import { TouchableOpacity, Text, View, Animated, StyleSheet, LayoutChangeEvent } from 'react-native';
 
-const TabButton = forwardRef<
-  HTMLButtonElement,
-  { children: React.ReactNode; onClick: () => void; active?: boolean; className?: string }
->((props, ref) => {
+type TabButtonProps = {
+  children: string | React.ReactNode;
+  onPress: () => void;
+  active?: boolean;
+  style?: any;
+};
+
+export function TabButton({ children, onPress, active, style }: TabButtonProps) {
   return (
-    <button
-      ref={ref}
-      className={cn(
-        'text-sm font-medium text-foreground transition-colors capitalize pb-3.5 rounded-full',
-        ' ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none focus-visible:ring-accent-success/50',
-        props.active ? 'text-accent-green' : 'text-secondary-700 hover:text-foreground',
-        props.className,
-      )}
-      onClick={props.onClick}
+    <TouchableOpacity
+      onPress={onPress}
+      style={[
+        styles.tabButton,
+        active ? styles.activeTab : styles.inactiveTab,
+        style,
+      ]}
+      activeOpacity={0.8}
     >
-      {props.children}
-    </button>
+      {React.isValidElement(children) ? children : typeof children === 'string' ?
+        <Text style={[styles.tabButtonText, active ? styles.activeTabText : styles.inactiveTabText]}>
+          {children}
+        </Text>
+        : null
+      }
+    </TouchableOpacity>
   );
-});
-
-TabButton.displayName = 'TabButton';
+}
 
 type Tab = {
   label: string;
   id?: string;
 };
 
-const indicatorDefaultStyles = {
-  transform: 'translateX(0px) scaleX(0.441654)',
-};
-
-export const TabSelectors = <T extends Tab>({
+export function TabSelectors<T extends Tab>({
   setSelectedTab,
   selectedIndex,
   buttons,
-  buttonClassName,
-  className,
-  indicatorDefaultScale,
+  buttonStyle,
+  containerStyle,
 }: {
   setSelectedTab: (tab: T) => void;
   selectedIndex: number;
   buttons: T[];
-  buttonClassName?: string;
-  className?: string;
-  indicatorDefaultScale?: React.CSSProperties;
-}) => {
-  const { containerRef, indicatorRef, childRefs } = useTabIndicatorPosition({
-    navItems: buttons,
-    activeLabel: buttons[selectedIndex]?.label,
-  });
+  buttonStyle?: any;
+  containerStyle?: any;
+}) {
+  const [tabLayouts, setTabLayouts] = useState<{ x: number; width: number }[]>([]);
+  const indicatorX = useRef(new Animated.Value(0)).current;
+  const indicatorWidth = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (tabLayouts[selectedIndex]) {
+      Animated.spring(indicatorX, {
+        toValue: tabLayouts[selectedIndex].x,
+        useNativeDriver: false,
+      }).start();
+      Animated.spring(indicatorWidth, {
+        toValue: tabLayouts[selectedIndex].width,
+        useNativeDriver: false,
+      }).start();
+    }
+  }, [selectedIndex, tabLayouts]);
+
+  const onLayoutTab = (e: LayoutChangeEvent, index: number) => {
+    const { x, width } = e.nativeEvent.layout;
+    setTabLayouts((layouts) => {
+      const next = [...layouts];
+      next[index] = { x, width };
+      return next;
+    });
+  };
 
   return (
-    <div ref={containerRef} className={cn('relative flex items-center isolate gap-7', className)}>
-      {buttons.map((button, index) => (
-        <TabButton
-          ref={(ref) => childRefs.current.set(index, ref)}
+    <View style={[styles.container, containerStyle]}>
+      {buttons.map((button, i) => (
+        <View
           key={button.id ?? button.label}
-          active={index === selectedIndex}
-          onClick={() => setSelectedTab(button)}
-          className={buttonClassName}
+          onLayout={(e) => onLayoutTab(e, i)}
+          style={{ flexShrink: 1 }}
         >
-          {button.label}
-        </TabButton>
+          <TabButton
+            onPress={() => setSelectedTab(button)}
+            active={i === selectedIndex}
+            style={buttonStyle}
+          >
+            {button.label}
+          </TabButton>
+        </View>
       ))}
-
-      <div
-        className='absolute bottom-0 h-0.5 origin-left scale-0 translate-x-3 transition-transform duration-200 w-full rounded-[50vmin/10vmin] z-10 bg-accent-green'
-        ref={indicatorRef}
-        style={indicatorDefaultScale ?? indicatorDefaultStyles}
+      <Animated.View
+        style={[
+          styles.indicator,
+          {
+            left: indicatorX,
+            width: indicatorWidth,
+          },
+        ]}
       />
-    </div>
+    </View>
   );
-};
+}
 
-TabSelectors.displayName = 'TabSelectors';
+const styles = StyleSheet.create({
+  tabButton: {
+    paddingBottom: 14,
+    paddingHorizontal: 12,
+    borderRadius: 999,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minWidth: 60,
+  },
+  activeTab: {},
+  inactiveTab: {},
+  tabButtonText: {
+    fontSize: 15,
+    fontWeight: '500',
+    textTransform: 'capitalize',
+  },
+  activeTabText: {
+    color: '#22c55e', // green-500, replace with your accent color
+  },
+  inactiveTabText: {
+    color: '#64748b', // slate-500, replace with your secondary color
+  },
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    position: 'relative',
+    gap: 28,
+    marginBottom: 8,
+  },
+  indicator: {
+    position: 'absolute',
+    bottom: 0,
+    height: 3,
+    borderRadius: 999,
+    backgroundColor: '#22c55e', // green-500, replace with your accent
+    zIndex: 10,
+  },
+});

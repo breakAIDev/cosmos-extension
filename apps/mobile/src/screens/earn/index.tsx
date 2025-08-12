@@ -1,28 +1,24 @@
 import { ChainTagsStore } from '@leapwallet/cosmos-wallet-store';
 import { Header, HeaderActionType } from '@leapwallet/leap-ui';
-import { TestnetAlertStrip } from 'components/alert-strip';
-import BottomNav, { BottomNavLabel } from 'components/bottom-nav/BottomNav';
-import { EmptyCard } from 'components/empty-card';
-import PopupLayout from 'components/layout/popup-layout';
-import { PageName } from 'config/analytics';
-import { useChainPageInfo } from 'hooks';
-import { usePageView } from 'hooks/analytics/usePageView';
-import useActiveWallet from 'hooks/settings/useActiveWallet';
-import Sort from 'icons/sort';
-import { LeapCosmos } from 'images/logos';
+import { TestnetAlertStrip } from '../../components/alert-strip';
+import { EmptyCard } from '../../components/empty-card';
+import PopupLayout from '../../components/layout/popup-layout';
+import { useChainPageInfo } from '../../hooks';
+import useActiveWallet from '../../hooks/settings/useActiveWallet';
+import Sort from '../../../assets/icons/sort';
+import { LeapCosmos } from '../../../assets/images/logos';
 import { observer } from 'mobx-react-lite';
-import SelectChain from 'pages/home/SelectChain';
+import SelectChain from '../home/SelectChain';
 import React, { useState } from 'react';
-import { globalSheetsStore } from 'stores/global-sheets-store';
+import { globalSheetsStore } from '../../context/global-sheets-store';
 
 import { DisplaySettingsModal } from './display-settings-modal';
 import InvestViewContainer from './invest-view';
 import type { DisplaySettings } from './types';
 
-const EarnPage = observer(({ chainTagsStore }: { chainTagsStore: ChainTagsStore }) => {
-  // usePageView(PageName.Earn)
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
 
-  const [showSideNav, setShowSideNav] = useState(false);
+const EarnPage = observer(({ chainTagsStore }: { chainTagsStore: ChainTagsStore }) => {
   const [showChainSelector, setShowChainSelector] = useState(false);
   const [showDisplaySettings, setShowDisplaySettings] = useState(false);
 
@@ -34,54 +30,51 @@ const EarnPage = observer(({ chainTagsStore }: { chainTagsStore: ChainTagsStore 
 
   if (!activeWallet) {
     return (
-      <div className='relative w-full overflow-clip panel-height'>
+      <SafeAreaView style={{ flex: 1 }}>
         <PopupLayout>
-          <div>
-            <EmptyCard src={LeapCosmos} heading='No wallet found' />
-          </div>
+          <EmptyCard src={LeapCosmos} heading="No wallet found" />
         </PopupLayout>
-      </div>
+      </SafeAreaView>
     );
   }
 
   return (
-    <div className='relative w-full overflow-clip panel-height'>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
       <PopupLayout
         header={
           <Header
             action={{
               onClick: () => globalSheetsStore.toggleSideNav(),
               type: HeaderActionType.NAVIGATION,
-              
-              
-              className:
-                'min-w-[48px] h-[36px] px-2 bg-[#FFFFFF] dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full',
             }}
             imgSrc={headerChainImgSrc}
             onImgClick={() => setShowChainSelector(true)}
-            title='Earn'
+            title="Earn"
           />
         }
       >
         <TestnetAlertStrip />
 
-        <div className='w-full px-7 pt-7 mb-[84px]'>
-          <div className='mb-5'>
-            <div className='flex justify-between items-baseline'>
-              <div>
-                <h2 className='text-[28px] text-black-100 dark:text-white-100 font-bold w-[194px]'>Earn</h2>
-                <h3 className='text-sm text-gray-600 font-bold'>Invest your crypto and earn rewards</h3>
-              </div>
-              <button
-                className='flex items-center justify-center h-9 w-9 bg-white-100 dark:bg-gray-900 rounded-full ml-3'
-                onClick={() => setShowDisplaySettings(true)}
-              >
-                <Sort size={20} className='dark:text-white-100 text-gray-800' />
-              </button>
-            </div>
-          </div>
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.headerSection}>
+            <View>
+              <Text style={styles.title}>Earn</Text>
+              <Text style={styles.subtitle}>Invest your crypto and earn rewards</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.sortButton}
+              onPress={() => setShowDisplaySettings(true)}
+              activeOpacity={0.85}
+            >
+              <Sort size={20} color={'#1f2937'} />
+            </TouchableOpacity>
+          </View>
           <InvestViewContainer displaySettings={displaySettings} />
-        </div>
+        </ScrollView>
+
         <DisplaySettingsModal
           isOpen={showDisplaySettings}
           onClose={() => setShowDisplaySettings(false)}
@@ -89,13 +82,64 @@ const EarnPage = observer(({ chainTagsStore }: { chainTagsStore: ChainTagsStore 
           onSettingsChange={setDisplaySettings}
         />
       </PopupLayout>
+
       <SelectChain
         isVisible={showChainSelector}
         onClose={() => setShowChainSelector(false)}
         chainTagsStore={chainTagsStore}
       />
-    </div>
+      {/* If you use BottomNav, add it here */}
+      {/* <BottomNav activeLabel={BottomNavLabel.Earn} /> */}
+    </SafeAreaView>
   );
 });
 
 export default EarnPage;
+
+const styles = StyleSheet.create({
+  scrollContainer: {
+    paddingHorizontal: 28,
+    paddingTop: 28,
+    paddingBottom: 84, // To mimic `mb-[84px]`
+    flexGrow: 1,
+  },
+  headerSection: {
+    marginBottom: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+  },
+  title: {
+    fontSize: 28,
+    color: '#111827', // black-100
+    fontWeight: 'bold',
+    width: 194,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#4b5563', // gray-600
+    fontWeight: 'bold',
+    marginTop: 4,
+  },
+  sortButton: {
+    height: 36,
+    width: 36,
+    backgroundColor: '#fff',
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 12,
+    // Add shadow for better appearance if needed
+    elevation: 2,
+  },
+  header: {
+    minWidth: 48,
+    height: 36,
+    paddingHorizontal: 8,      // px-2 = 8px horizontal
+    backgroundColor: '#FFFFFF',// default bg
+    borderRadius: 9999,        // rounded-full
+    justifyContent: 'center',
+    alignItems: 'center',
+    // For dynamic/dark/hover, see notes below
+  },
+});

@@ -32,7 +32,7 @@ export function parseBitcoinTx(tx: any, nativeDenom?: string, address?: string) 
     },
     memo: '',
     timeoutHeight: '0',
-    types: [],
+    types: [] as string[],
     messages: [
       {
         __type: '',
@@ -49,8 +49,6 @@ export function parseBitcoinTx(tx: any, nativeDenom?: string, address?: string) 
   };
 
   if (recipient?.value > 0) {
-    
-    
     parsedTx.types.push('cosmos.bank.send');
     parsedTx.messages[0].__type = 'cosmos.bank.send';
   }

@@ -57,7 +57,7 @@ const QuickSearchOptionsView = ({
         <Image
           source={{ uri: iconSrc || defaultTokenLogo }}
           style={styles.optionIcon}
-          defaultSource={defaultTokenLogo}
+          defaultSource={{uri: defaultTokenLogo}}
         />
         <Text style={[styles.optionText, isDark && styles.optionTextDark]}>{item.action_name}</Text>
 
@@ -70,7 +70,7 @@ const QuickSearchOptionsView = ({
         </ScrollView>
 
         {item.extension_config?.action_type === 'redirect-external' && (
-          <Image source={require(Images.Misc.OpenLink)} style={styles.openLinkIcon} />
+          <Image source={{uri: Images.Misc.OpenLink}} style={styles.openLinkIcon} />
         )}
       </TouchableOpacity>
     );

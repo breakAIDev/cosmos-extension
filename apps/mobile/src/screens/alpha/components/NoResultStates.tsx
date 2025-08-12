@@ -1,5 +1,4 @@
 import React from 'react';
-
 import EmptyBookmarks from './EmptyBookmarks';
 
 type FilterType = 'upcoming' | 'live' | 'ended' | 'search' | 'no-results';
@@ -27,16 +26,18 @@ const filterTypeMap: Record<FilterType, { title: string; subTitle: string }> = {
   },
 };
 
-export const NoFilterResult = ({
-  filterType = 'no-results',
-  className,
-}: {
+type NoFilterResultProps = {
   filterType?: FilterType;
-  className?: string;
+  style?: any; // Use StyleProp<ViewStyle> for strict TS
+};
+
+export const NoFilterResult: React.FC<NoFilterResultProps> = ({
+  filterType = 'no-results',
+  style,
 }) => {
   return (
     <EmptyBookmarks
-      className={className}
+      style={style}
       title={filterTypeMap[filterType].title}
       subTitle={filterTypeMap[filterType].subTitle}
     />

@@ -1,6 +1,5 @@
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { useDefaultTokenLogo } from '../../../hooks/utility/useDefaultTokenLogo';
 import React from 'react';
-import { imgOnError } from 'utils/imgOnError';
 
 export type ChainDivProps = {
   src: string;

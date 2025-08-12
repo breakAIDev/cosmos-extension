@@ -1,161 +1,216 @@
-import React from 'react';
-import {
-  Modal,
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ViewStyle,
-  ScrollView,
-} from 'react-native';
+import React, { useCallback, useMemo, useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ViewStyle, StyleProp } from 'react-native';
+import { X } from 'phosphor-react-native'; // Use your preferred icon library
+import { DrawerClose } from '../ui/drawer';
+import BottomSheet, { BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 import { observer } from 'mobx-react-lite';
-import { X } from 'phosphor-react-native'; // Use phosphor-react-native instead of /ssr
-import { Portal } from '@gorhom/portal'; // optional: ensures modal renders outside React tree
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+export const BottomModalClose = ({ onPress }: { onPress?: () => void }) => (
+  <DrawerClose>
+    <TouchableOpacity
+      onPress={onPress}
+      style={styles.closeBtn}
+      accessibilityRole="button"
+      accessibilityLabel="Close"
+    >
+      <X size={18} weight="bold" />
+    </TouchableOpacity>
+  </DrawerClose>
+);
 
 type BottomModalProps = {
   isOpen: boolean;
-  onClose?: () => void;
   title?: string | React.ReactNode;
-  children: React.ReactNode;
+  onClose?: () => void;
   disableClose?: boolean;
+  style?: StyleProp<ViewStyle>; // Not used, but can be mapped to style
+  containerStyle?: StyleProp<ViewStyle>;
+  contentStyle?: StyleProp<ViewStyle>;
+  headerStyle?: StyleProp<ViewStyle>;
+  onActionButtonClick?: () => void;
   hideActionButton?: boolean;
   actionButton?: React.ReactNode;
   secondaryActionButton?: React.ReactNode;
   footerComponent?: React.ReactNode;
   fullScreen?: boolean;
-  direction?: 'bottom' | 'top'; // not used directly here, just for parity
-  containerStyle?: ViewStyle;
-  contentStyle?: ViewStyle;
+  direction?: 'top' | 'bottom' | 'left' | 'right'; // Only 'bottom' handled here
+  children?: React.ReactNode;
 };
 
-const BottomModal = ({
+const BottomModal: React.FC<BottomModalProps> = observer(({
   isOpen,
-  onClose,
   title,
+  onClose,
   children,
-  disableClose = false,
-  hideActionButton = false,
-  secondaryActionButton,
-  footerComponent,
-  fullScreen = false,
+  disableClose,
+  style,
   containerStyle,
   contentStyle,
-}: BottomModalProps) => {
-  const handleDismiss = () => {
+  headerStyle,
+  actionButton,
+  onActionButtonClick,
+  hideActionButton,
+  secondaryActionButton,
+  footerComponent,
+  fullScreen,
+}) => {
+  const sheetRef = useRef<BottomSheet>(null);
+  const insets = useSafeAreaInsets();
+  const snapPoints = useMemo(() => [fullScreen ? '100%' : 'CONTENT_HEIGHT'], [fullScreen]);
+
+  const handleClose = useCallback(() => {
     if (!disableClose) {
       onClose?.();
     }
-  };
+  }, [disableClose, onClose]);
+
+  useEffect(() => {
+    if (isOpen) {
+      sheetRef.current?.expand();
+    } else {
+      sheetRef.current?.close();
+    }
+  }, [isOpen]);
 
   return (
-    <Modal
-      visible={isOpen}
-      animationType="slide"
-      transparent
-      onRequestClose={handleDismiss}
+    <BottomSheet
+      ref={sheetRef}
+      index={isOpen ? 0 : -1}
+      snapPoints={snapPoints}
+      enablePanDownToClose={!disableClose}
+      onClose={handleClose}
+      backdropComponent={props => (
+        <BottomSheetBackdrop
+          {...props}
+          opacity={0.3}
+          appearsOnIndex={0}
+          disappearsOnIndex={-1}
+          pressBehavior={!disableClose ? 'close' : 'none'}
+        />
+      )}
+      keyboardBlurBehavior="restore"
+      style={styles.sheet}
+      handleStyle={styles.handle}
     >
-      <View style={styles.backdrop}>
-        <View style={[styles.modalContainer, fullScreen && styles.fullScreen, containerStyle]}>
-          {/* Header */}
-          {(title || !hideActionButton || secondaryActionButton) && (
-            <View style={styles.header}>
-              <View style={styles.sideAction}>{secondaryActionButton}</View>
-              {typeof title === 'string' ? (
-                <Text style={styles.title}>{title}</Text>
-              ) : (
-                title
-              )}
-              {!hideActionButton ? (
-                <TouchableOpacity
-                  onPress={handleDismiss}
-                  style={styles.closeButton}
-                  disabled={disableClose}
-                >
-                  <X size={20} weight="bold" />
-                </TouchableOpacity>
-              ) : (
-                <View style={styles.sideAction} />
-              )}
-            </View>
+      <View style={[
+        containerStyle,
+        contentStyle,
+        styles.container,
+        fullScreen && { height: '100%', borderRadius: 0 },
+        { paddingBottom: insets.bottom }
+      ]}>
+        {/* Header */}
+        <View style={[styles.header, headerStyle]}>
+          {/* Left: secondary action button */}
+          <View style={styles.headerIcon}>
+            {secondaryActionButton && React.isValidElement(secondaryActionButton) ? secondaryActionButton : <View/>}
+          </View>
+          {/* Center: Title */}
+          {typeof title === 'string' ? (
+            <Text style={styles.title}>{title}</Text>
+          ) : (
+            React.isValidElement(title) ? title : null
           )}
-
-          {/* Body */}
-          <ScrollView
-            contentContainerStyle={[
-              styles.body,
-              fullScreen && styles.fullBody,
-              contentStyle,
-            ]}
-          >
-            {children}
-          </ScrollView>
-
-          {/* Footer */}
-          {footerComponent && (
-            <View style={styles.footer}>{footerComponent}</View>
+          {/* Right: close/action button */}
+          {!hideActionButton ? (
+            actionButton &&  actionButton ? (
+              <View style={styles.headerIcon}>{React.isValidElement(actionButton) ? actionButton : <View/>}</View>
+            ) : (
+              <TouchableOpacity
+                style={styles.headerIcon}
+                onPress={onActionButtonClick ?? handleClose}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                {/* <X size={18} weight="bold" /> */}
+                <Text style={{ fontSize: 24, color: '#1F2937', fontWeight: 'bold' }}>×</Text>
+              </TouchableOpacity>
+            )
+          ) : (
+            <View style={styles.headerIcon} />
           )}
         </View>
+        {/* Content */}
+        <ScrollView
+          style={[styles.content, fullScreen && { maxHeight: '100%' }, style]}
+          contentContainerStyle={{ flexGrow: 1 }}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {React.isValidElement(children) ? children : <View/>}
+        </ScrollView>
+        {/* Footer */}
+        {footerComponent && React.isValidElement(footerComponent) ? (
+          <View style={styles.footer}>
+            {React.isValidElement(footerComponent) ? footerComponent : <View/>}
+          </View>
+        ) : null}
       </View>
-    </Modal>
+    </BottomSheet>
   );
-};
+});
 
 const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.35)',
-    justifyContent: 'flex-end',
+  closeBtn: {
+    width: 48,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent', // "ghost" style: no fill
+    borderRadius: 24,
   },
-  modalContainer: {
-    backgroundColor: '#f8f9fa',
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
+  sheet: {
+    backgroundColor: 'transparent',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    overflow: 'hidden',
+    shadowColor: "#000", shadowOffset: { width: 0, height: -4 }, shadowOpacity: 0.15, shadowRadius: 24,
+    elevation: 12,
+  },
+  handle: {
+    backgroundColor: 'transparent',
+  },
+  container: {
+    backgroundColor: '#F9FAFB',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
     maxHeight: '90%',
     overflow: 'hidden',
-  },
-  fullScreen: {
-    borderRadius: 0,
-    height: '100%',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderColor: '#e5e7eb',
     justifyContent: 'space-between',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  headerIcon: {
+    width: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   title: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
-    flex: 1,
+    color: '#1F2937',
     textAlign: 'center',
+    flex: 1,
   },
-  sideAction: {
-    width: 32,
-    height: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  closeButton: {
-    width: 32,
-    height: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  body: {
+  content: {
     padding: 16,
-  },
-  fullBody: {
-    maxHeight: '100%',
+    maxHeight: 400, // Adjust as needed
   },
   footer: {
+    flexDirection: 'row',
+    gap: 8,
     padding: 16,
     borderTopWidth: 1,
-    borderColor: '#e5e7eb',
-    backgroundColor: '#f1f5f9',
+    borderTopColor: '#E5E7EB',
+    backgroundColor: '#F3F4F6',
+    marginTop: 'auto',
   },
 });
 
-export default observer(BottomModal);
+export default BottomModal;

@@ -1,4 +1,3 @@
-
 import {
   CosmosTxType,
   getChainId,
@@ -40,14 +39,14 @@ import {
 import { useChains } from '@leapwallet/elements-hooks';
 import BigNumber from 'bignumber.js';
 import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
-import useActiveWallet from 'hooks/settings/useActiveWallet';
-import { useWalletClient } from 'hooks/useWalletClient';
-import { Wallet } from 'hooks/wallet/useWallet';
-import { useSendContext } from 'pages/send/context';
-import { handleCosmosTx } from 'pages/swaps-v2/tx/cosmosTxHandler';
+import useActiveWallet from '../../../../hooks/settings/useActiveWallet';
+import { useWalletClient } from '../../../../hooks/useWalletClient';
+import { Wallet } from '../../../../hooks/wallet/useWallet';
+import { useSendContext } from '../../../send/context';
+import { handleCosmosTx } from '../../../swaps-v2/tx/cosmosTxHandler';
 import { useMemo, useState } from 'react';
-import { SourceChain } from 'types/swap';
-import { getLedgerEnabledEvmChainsKey } from 'utils/getLedgerEnabledEvmChains';
+import { SourceChain } from '../../../../types/swap';
+import { getLedgerEnabledEvmChainsKey } from '../../../../utils/getLedgerEnabledEvmChains';
 
 export const useExecuteSkipTx = () => {
   const [txnProcessing, setTxnProcessing] = useState<boolean>(false);
@@ -346,8 +345,6 @@ export const useExecuteSkipTx = () => {
           chainId: activeChainId,
         });
 
-        
-        
         setPendingTx(pendingTx);
 
         if (success) {

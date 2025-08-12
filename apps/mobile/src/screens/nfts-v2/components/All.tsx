@@ -1,11 +1,11 @@
 import { sliceSearchWord, sortStringArr, useDisabledNFTsCollections } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { NftInfo, NftStore } from '@leapwallet/cosmos-wallet-store';
-import { EmptyCard } from 'components/empty-card';
-import { Images } from 'images';
+import { EmptyCard } from '../../../components/empty-card';
+import { Images } from '../../../../assets/images';
 import { observer } from 'mobx-react-lite';
 import React, { useMemo } from 'react';
-import { hiddenNftStore } from 'stores/manage-nft-store';
+import { hiddenNftStore } from '../../../context/manage-nft-store';
 
 import { AllNftsHidden, ChainHeaderCollectionCard, Favourites } from './index';
 

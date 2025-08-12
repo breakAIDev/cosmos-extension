@@ -11,23 +11,20 @@ import {
   useGetNumiaBanner,
 } from '@leapwallet/cosmos-wallet-hooks';
 import { bech32ToEthAddress, ChainInfo } from '@leapwallet/cosmos-wallet-sdk';
-import { captureException } from '@sentry/react';
-import { EventName } from 'config/analytics';
-import { AGGREGATED_CHAIN_KEY } from 'config/constants';
-import { DISABLE_BANNER_ADS } from 'config/storage-keys';
-import { AnimatePresence } from 'framer-motion';
-import { useActiveChain, useSetActiveChain } from 'hooks/settings/useActiveChain';
-import { useChainInfos } from 'hooks/useChainInfos';
-import { useQueryParams } from 'hooks/useQuery';
+import { captureException } from '@sentry/react-native';
+import { EventName } from '../../../../services/config/analytics';
+import { AGGREGATED_CHAIN_KEY } from '../../../../services/config/constants';
+import { DISABLE_BANNER_ADS } from '../../../../services/config/storage-keys';
+import { useActiveChain, useSetActiveChain } from '../../../../hooks/settings/useActiveChain';
+import { useChainInfos } from '../../../../hooks/useChainInfos';
+import { useQueryParams } from '../../../../hooks/useQuery';
 import { observer } from 'mobx-react-lite';
-import AddFromChainStore from 'pages/home/AddFromChainStore';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { AggregatedSupportedChain } from 'types/utility';
-import { uiErrorTags } from 'utils/sentry';
-import { mixpanelTrack } from 'utils/tracking';
-import { tryCatch, tryCatchSync } from 'utils/try-catch';
-import Browser from 'webextension-polyfill';
+import AddFromChainStore from '../../../home/AddFromChainStore';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { AggregatedSupportedChain } from '../../../../types/utility';
+import { uiErrorTags } from '../../../../utils/sentry';
+import { mixpanelTrack } from '../../../../utils/tracking';
+import { tryCatch, tryCatchSync } from '../../../../utils/try-catch';
 
 import { BannersLoading } from '../home-loading-state';
 import { BannerAdCard } from './ad-card';
@@ -41,8 +38,10 @@ import {
   NUMIA_IMPRESSION_INFO,
 } from './utils';
 
+import { View, ScrollView, StyleSheet, Linking } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 export const GlobalBannersAD = React.memo(({ show = true }: { show?: boolean }) => {
-  const navigate = useNavigate();
   const chain = useChainInfo();
   const chainInfos = useChainInfos();
   const customChains = useCustomChains();
@@ -87,12 +86,7 @@ export const GlobalBannersAD = React.memo(({ show = true }: { show?: boolean }) 
   }, [bannerAds, disabledBannerAds]);
 
   const {
-    scrollableContainerRef,
     activeBannerIndex,
-    handleContainerScroll,
-    handleScroll,
-    handleMouseEnter,
-    handleMouseLeave,
   } = useCarousel(displayADs.length, bannerConfig?.extension?.['auto-scroll-duration']);
 
   const activeBannerData = displayADs[activeBannerIndex];
@@ -213,16 +207,14 @@ export const GlobalBannersAD = React.memo(({ show = true }: { show?: boolean }) 
       const newDisabledBannerAds = new Set(disabledBannerAds);
       newDisabledBannerAds.add(bannerId);
 
-      const storedDisabledBannerAds = await Browser.storage.local.get([DISABLE_BANNER_ADS]);
+      const storedDisabledBannerAds = await getStoredJSON(DISABLE_BANNER_ADS);
       const addressToUse = seiWalletAddress;
       const [parsedDisabledAds] = tryCatchSync(() => JSON.parse(storedDisabledBannerAds[DISABLE_BANNER_ADS] ?? '{}'));
 
-      await Browser.storage.local.set({
-        [DISABLE_BANNER_ADS]: JSON.stringify({
+      await setStoredJSON(DISABLE_BANNER_ADS, JSON.stringify({
           ...parsedDisabledAds,
           [addressToUse ?? '']: Array.from(newDisabledBannerAds),
-        }),
-      });
+        }));
 
       const banner = bannerAds.find((_banner) => _banner.id === bannerId);
       mixpanelTrack(EventName.BannerClose, {
@@ -272,7 +264,7 @@ export const GlobalBannersAD = React.memo(({ show = true }: { show?: boolean }) 
 
       if (banner.banner_type === 'redirect-interanlly') {
         const bannerId = getMixpanelBannerId(banner?.id, banner?.attributes?.campaign_id);
-        navigate(
+       Linking.openURL(
           banner.redirect_url.includes('?')
             ? `${banner.redirect_url}&bannerId=${bannerId}`
             : `${banner.redirect_url}?bannerId=${bannerId}`,
@@ -292,27 +284,17 @@ export const GlobalBannersAD = React.memo(({ show = true }: { show?: boolean }) 
       }
 
       if (banner?.redirect_url && banner?.redirect_url !== '#') {
-        window.open(banner.redirect_url);
+        Linking.openURL(banner.redirect_url)
       }
 
       return;
     },
-    [
-      bannerAds,
-      chainId,
-      chainName,
-      handleAddChainClick,
-      handleSwitchChainClick,
-      navigate,
-      osmoWalletAddress,
-      query,
-      walletAddress,
-    ],
+    [bannerAds, chainId, chainName, handleAddChainClick, handleSwitchChainClick, osmoWalletAddress, query, walletAddress],
   );
 
   useEffect(() => {
     const fn = async () => {
-      const disabledBannerAds = await Browser.storage.local.get([DISABLE_BANNER_ADS]);
+      const disabledBannerAds = await getStoredJSON(DISABLE_BANNER_ADS);
       const parsedDisabledAds = JSON.parse(disabledBannerAds[DISABLE_BANNER_ADS] ?? '{}');
       const addressToUse = seiWalletAddress;
 
@@ -326,51 +308,69 @@ export const GlobalBannersAD = React.memo(({ show = true }: { show?: boolean }) 
   if (displayADs.length === 0 && (numiaStatus === 'loading' || isLeapBannersLoading)) {
     return <BannersLoading />;
   }
+  // For scroll, use a ref:
+  const scrollableContainerRef = useRef<ScrollView>(null);
+
+  // Instead of sessionStorage, use AsyncStorage:
+  const getStoredJSON = async (key: string) => {
+    try {
+      const value = await AsyncStorage.getItem(key);
+      return value ? JSON.parse(value) : {};
+    } catch {
+      return {};
+    }
+  };
+  const setStoredJSON = async (key: string, obj: any) => {
+    await AsyncStorage.setItem(key, JSON.stringify(obj));
+  };
+
+  // handle scroll: ScrollView's onMomentumScrollEnd/onScroll
+  const handleScroll = (event: any) => {
+    // your handle scroll logic...
+  };
+
+  if (displayADs.length === 0 && (numiaStatus === 'loading' || isLeapBannersLoading)) {
+    return <BannersLoading />;
+  }
 
   return (
     <GlobalBannersWrapper items={displayADs.length} show={show}>
-      <AnimatePresence mode='wait' initial={false}>
-        {displayADs.length > 0 ? (
-          <div
-            className={
-              'flex flex-col items-center justify-center w-full overflow-visible mb-5 transition-all duration-150 ease-out origin-top'
-            }
+      {displayADs.length > 0 ? (
+        <View style={styles.inner}>
+          <ScrollView
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            ref={scrollableContainerRef}
+            style={styles.carousel}
+            onMomentumScrollEnd={handleScroll}
+            // no onMouseEnter/onMouseLeave on native
           >
-            <div
-              className='flex items-center overflow-hidden px-6 snap-x snap-mandatory gap-2 w-full h-full'
-              ref={scrollableContainerRef}
-              onScroll={handleScroll}
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-            >
-              {displayADs.map((bannerData, index) => {
-                return (
-                  <BannerAdCard
-                    key={bannerData.id}
-                    index={index}
-                    bannerData={bannerData}
-                    chain={chain}
-                    onClick={handleBannerClick}
-                    onClose={handleBannerClose}
-                    activeIndex={activeBannerIndex}
-                  />
-                );
-              })}
-            </div>
-            {displayADs.length > 1 && (
-              <BannerControls
-                activeBannerIndex={activeBannerIndex}
-                activeBannerId={activeBannerId}
-                totalItems={displayADs.length}
-                handleContainerScroll={handleContainerScroll}
-                handleMouseEnter={handleMouseEnter}
-                handleMouseLeave={handleMouseLeave}
+            {displayADs.map((bannerData, index) => (
+              <BannerAdCard
+                key={bannerData.id}
+                index={index}
+                bannerData={bannerData}
+                chain={chain}
+                onClick={handleBannerClick}
+                onClose={handleBannerClose}
+                activeIndex={activeBannerIndex}
               />
-            )}
-          </div>
-        ) : null}
-      </AnimatePresence>
-
+            ))}
+          </ScrollView>
+          {displayADs.length > 1 && (
+            <BannerControls
+              activeBannerIndex={activeBannerIndex}
+              activeBannerId={activeBannerId}
+              totalItems={displayADs.length}
+              handleContainerScroll={(idx) => {
+                // scroll to page idx
+                scrollableContainerRef.current?.scrollTo({ x: idx, animated: true });
+              }}
+            />
+          )}
+        </View>
+      ) : null}
       <AddFromChainStore
         isVisible={!!newChain}
         onClose={() => setNewChain(null)}
@@ -382,17 +382,32 @@ export const GlobalBannersAD = React.memo(({ show = true }: { show?: boolean }) 
 
 GlobalBannersAD.displayName = 'GlobalBannersAD';
 
-const GlobalBannersWrapper = observer((props: { items: number; show: boolean; children: React.ReactNode }) => {
-  const show = props.items > 0 && props.show;
+const GlobalBannersWrapper = observer(
+  (props: { items: number; show: boolean; children: React.ReactNode }) => {
+    const show = props.items > 0 && props.show;
+    const height = show ? (props.items === 1 ? 84 : 105) : 0;
 
-  return (
-    <div
-      className='w-full overflow-hidden transition-all h-0 will-change-auto duration-300 ease-in-out'
-      style={{
-        height: show ? (props.items === 1 ? '84px' : '105px') : '0px', // 84px without controls
-      }}
-    >
-      {props.children}
-    </div>
-  );
+    return (
+      <View style={[styles.wrapper, { height }]}>
+        {props.children}
+      </View>
+    );
+  }
+);
+const styles = StyleSheet.create({
+  wrapper: {
+    width: '100%',
+    overflow: 'hidden',
+  },
+  inner: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    marginBottom: 20,
+  },
+  carousel: {
+    width: '100%',
+    height: 84, // or 105 if controls
+    flexDirection: 'row',
+  },
 });

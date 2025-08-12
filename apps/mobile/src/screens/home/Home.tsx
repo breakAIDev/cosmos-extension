@@ -1,10 +1,10 @@
-import { PageName } from 'config/analytics';
-import { usePageView } from 'hooks/analytics/usePageView';
-import useActiveWallet from 'hooks/settings/useActiveWallet';
-import { useAlphaUser } from 'hooks/useAlphaUser';
+import { PageName } from '../../services/config/analytics';
+import { usePageView } from '../../hooks/analytics/usePageView';
+import useActiveWallet from '../../hooks/settings/useActiveWallet';
+import { useAlphaUser } from '../../hooks/useAlphaUser';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
-import { homePageViewStore } from 'stores/home-pageview-store';
+import { homePageViewStore } from '../../context/home-pageview-store';
 
 import { GeneralHome } from './components';
 

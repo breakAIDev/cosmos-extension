@@ -2,8 +2,8 @@ import { ActivePage, NftPage } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { NftInfo } from '@leapwallet/cosmos-wallet-store';
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-import { nftStore } from 'stores/nft-store';
-import { assert } from 'utils/assert';
+import { nftStore } from '../../context/nft-store';
+import { assert } from '../../utils/assert';
 
 export type NftDetailsType = NftInfo & { chain: SupportedChain };
 
@@ -56,9 +56,7 @@ export function NftContextProvider({ children, value: _value }: NftContextProvid
         await nftStore.loadNfts();
       }
     })();
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nftStore.haveToFetchNfts]);
+  }, []);
 
   const value = {
     nftDetails,

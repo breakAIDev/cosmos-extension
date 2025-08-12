@@ -1,17 +1,18 @@
-import { Key, SelectedAddress, useActiveChain } from '@leapwallet/cosmos-wallet-hooks';
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { InputWithButton } from '@leapwallet/leap-ui';
-import BottomModal from '../bottom-modal';
-import { EmptyCard } from 'components/empty-card';
-import Loader from 'components/loader/Loader';
-import Text from 'components/text';
-import useActiveWallet from 'hooks/settings/useActiveWallet';
-import { useChainInfos } from 'hooks/useChainInfos';
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
-import { Images } from 'images';
 import React, { useMemo, useState } from 'react';
-import { formatWalletName } from 'utils/formatWalletName';
-import { capitalize } from 'utils/strings';
+import { View, ScrollView, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import BottomModal from '../../../../components/bottom-modal';
+import { EmptyCard } from '../../../../components/empty-card';
+import Loader from '../../../../components/loader/Loader';
+import Text from '../../../../components/text';
+import useActiveWallet from '../../../../hooks/settings/useActiveWallet';
+import { useChainInfos } from '../../../../hooks/useChainInfos';
+import { useDefaultTokenLogo } from '../../../../hooks/utility/useDefaultTokenLogo';
+import { Images } from '../../../../../assets/images';
+import { formatWalletName } from '../../../../utils/formatWalletName';
+import { capitalize } from '../../../../utils/strings';
+import { SelectedAddress, useActiveChain } from '@leapwallet/cosmos-wallet-hooks';
+import InputWithButton from '../../../../components/input-with-button';
 
 type MyWalletSheetProps = {
   isOpen: boolean;
@@ -20,7 +21,7 @@ type MyWalletSheetProps = {
   setSelectedAddress: (address: SelectedAddress) => void;
 };
 
-export const MyWalletSheet: React.FC<MyWalletSheetProps> = ({ isOpen, onClose, setSelectedAddress }) => {
+export const MyWalletSheet = ({ isOpen, onClose, setSelectedAddress }: MyWalletSheetProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const trimmedQuery = searchQuery.trim();
 
@@ -31,12 +32,11 @@ export const MyWalletSheet: React.FC<MyWalletSheetProps> = ({ isOpen, onClose, s
 
   const {
     activeWallet: { addresses, name, colorIndex, watchWallet },
-  } = useActiveWallet() as {
-    activeWallet: Key;
-  };
-  const activeChain = useActiveChain();
+  } = useActiveWallet();
   const chainInfos = useChainInfos();
   const defaultTokenLogo = useDefaultTokenLogo();
+
+  const activeChain = useActiveChain();
 
   const displayAccounts = useMemo(() => {
     if (addresses && !isIbcSupportDataLoading && ibcSupportData) {
@@ -49,47 +49,48 @@ export const MyWalletSheet: React.FC<MyWalletSheetProps> = ({ isOpen, onClose, s
   }, [addresses, chainInfos, ibcSupportData, isIbcSupportDataLoading, trimmedQuery]);
 
   return (
-    <BottomModal isOpen={isOpen} closeOnBackdropClick={true} title='Choose Recipient Wallet' onClose={onClose}>
-      <div>
+    <BottomModal isOpen={isOpen} closeOnBackdropClick={true} title="Choose Recipient Wallet" onClose={onClose}>
+      <View>
         {isIbcSupportDataLoading ? (
-          <div className='bg-white-100 dark:bg-gray-900 rounded-2xl p-3 relative h-48 w-full'>
-            <Text size='xs' className='p-1 font-bold' color='text-gray-600 dark:text-gray-200'>
+          <View style={styles.loadingCard}>
+            <Text size="xs" style={styles.loadingText}>
               Loading IBC Supported Chains
             </Text>
             <Loader />
-          </div>
+          </View>
         ) : (
           <>
             <InputWithButton
               icon={Images.Misc.Search}
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder='Search chains...'
+              onChangeText={(e: string) => setSearchQuery(e)}
+              placeholder="Search chains..."
+              style={{ marginTop: 2, marginBottom: 2 }}
             />
-            <div className='bg-white-100 dark:bg-gray-900 rounded-2xl p-4 relative mt-4'>
+            <View style={styles.accountListCard}>
               {displayAccounts.length > 0 ? (
                 <>
-                  <div className='flex justify-between items-center'>
-                    <Text size='xs' className='p-1 font-bold' color='text-gray-600 dark:text-gray-200'>
+                  <View style={styles.headerRow}>
+                    <Text size="xs" style={styles.headerText}>
                       Other chains in current wallet: {formatWalletName(name)}
                     </Text>
-                  </div>
-                  <div className='mt-2'>
+                  </View>
+                  <ScrollView style={{ marginTop: 8, maxHeight: 300 }}>
                     {displayAccounts.map(([_chain, address], index) => {
                       const chain = _chain as unknown as SupportedChain;
                       const img = chainInfos[chain]?.chainSymbolImageUrl ?? defaultTokenLogo;
                       const isFirst = index === 0;
                       const isLast = index === displayAccounts.length - 1;
-
                       return (
-                        <React.Fragment key={_chain}>
-                          <button
-                            className={`card-container w-full flex-row items-center py-3 px-4 ${
-                              isFirst || isLast ? 'rounded-2xl' : ''
-                            }`}
-                            onClick={() => {
+                        <View key={_chain}>
+                          <TouchableOpacity
+                            style={[
+                              styles.cardContainer,
+                              (isFirst || isLast) && styles.rounded,
+                            ]}
+                            onPress={() => {
                               setSelectedAddress({
-                                address: address,
+                                address: address as string | undefined,
                                 avatarIcon: Images.Misc.getWalletIconAtIndex(colorIndex, watchWallet),
                                 chainIcon: img ?? '',
                                 chainName: chain,
@@ -100,36 +101,107 @@ export const MyWalletSheet: React.FC<MyWalletSheetProps> = ({ isOpen, onClose, s
                               onClose();
                             }}
                           >
-                            <img
-                              src={img}
-                              alt={`${chain} logo`}
-                              className='rounded-full border border-white-30 h-10 w-10'
+                            <Image
+                              source={typeof img === 'string' ? { uri: img } : img}
+                              style={styles.chainImage}
                             />
-                            <p className='font-bold dark:text-white-100 text-gray-700 capitalize ml-2'>{chain}</p>
-                            <img className='ml-auto' src={Images.Misc.RightArrow} alt='Right Arrow' />
-                          </button>
-                          {!isLast && <div className='w-full bg-gray-100 dark:bg-gray-800 h-[1px]' />}
-                        </React.Fragment>
+                            <Text size="md" style={styles.chainName}>
+                              {chain}
+                            </Text>
+                            <Image source={{uri: Images.Misc.RightArrow}} style={styles.arrowIcon} />
+                          </TouchableOpacity>
+                          {!isLast && <View style={styles.separator} />}
+                        </View>
                       );
                     })}
-                  </div>
+                  </ScrollView>
                 </>
               ) : (
                 <EmptyCard
                   src={trimmedQuery.length > 0 ? Images.Misc.NoSearchResult : Images.Misc.Blockchain}
-                  heading='No Chain Found'
+                  heading="No Chain Found"
                   subHeading={
                     trimmedQuery.length > 0
                       ? `No chains found for "${trimmedQuery}"`
                       : `No chains support IBC with ${chainInfos[activeChain].chainName}`
                   }
-                  classname='!px-0 !py-5 !w-full justify-center'
+                  style={{ paddingVertical: 20, width: '100%', justifyContent: 'center' }}
                 />
               )}
-            </div>
+            </View>
           </>
         )}
-      </div>
+      </View>
     </BottomModal>
   );
 };
+
+const styles = StyleSheet.create({
+  loadingCard: {
+    backgroundColor: '#f8fafc',
+    borderRadius: 16,
+    padding: 12,
+    height: 160,
+    width: '100%',
+    justifyContent: 'center',
+  },
+  loadingText: {
+    padding: 4,
+    fontWeight: 'bold',
+    color: '#6b7280',
+  },
+  accountListCard: {
+    backgroundColor: '#f8fafc',
+    borderRadius: 16,
+    padding: 12,
+    marginTop: 16,
+    position: 'relative',
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  headerText: {
+    padding: 4,
+    fontWeight: 'bold',
+    color: '#6b7280',
+  },
+  cardContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    backgroundColor: 'white',
+    marginBottom: 0,
+  },
+  rounded: {
+    borderRadius: 16,
+  },
+  chainImage: {
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    height: 40,
+    width: 40,
+    backgroundColor: '#fff',
+  },
+  chainName: {
+    fontWeight: 'bold',
+    color: '#374151',
+    textTransform: 'capitalize',
+    marginLeft: 8,
+    fontSize: 16,
+  },
+  arrowIcon: {
+    marginLeft: 'auto',
+    width: 18,
+    height: 18,
+    resizeMode: 'contain',
+  },
+  separator: {
+    width: '100%',
+    backgroundColor: '#e5e7eb',
+    height: 1,
+  },
+});

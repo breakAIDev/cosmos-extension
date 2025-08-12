@@ -1,4 +1,4 @@
-import { Icon, IconBase, IconWeight } from '@phosphor-icons/react';
+import { Icon, IconBase, IconWeight } from 'phosphor-react-native';
 import React, { forwardRef, ReactElement } from 'react';
 
 const weights = new Map<IconWeight, ReactElement>([

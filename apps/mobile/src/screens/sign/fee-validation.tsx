@@ -1,15 +1,22 @@
-import {
+import { 
   currencyDetail,
   fetchCurrency,
   useChainApis,
   useChainId,
-  useTransactionConfigs,
+  useTransactionConfigs
 } from '@leapwallet/cosmos-wallet-hooks';
-import { DenomsRecord, fromSmallBN, NativeDenom, SupportedChain, SupportedDenoms } from '@leapwallet/cosmos-wallet-sdk';
+import { 
+  DenomsRecord, 
+  fromSmallBN, 
+  NativeDenom, 
+  SupportedChain, 
+  SupportedDenoms 
+} from '@leapwallet/cosmos-wallet-sdk';
 import { FeeTokensStoreData } from '@leapwallet/cosmos-wallet-store';
 import Long from 'long';
 import { useCallback } from 'react';
 
+// Types
 type FeeValidationParams = {
   feeDenomData: NativeDenom;
   gaslimit: Long;
@@ -39,7 +46,6 @@ export async function feeValidation({
 /*
  * useFeeValidation returns a function that takes in a FeeValidationParams object and returns a boolean or null
  * null value is returned when feeValidation could not be performed due to missing feeDenomData
- *
  */
 
 type UseFeeValidationReturn = (
@@ -94,7 +100,7 @@ export function useFeeValidation(
       return isFeeValid;
     },
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [feeTokens, txConfig, isFeeTokensLoading, lcdUrl],
+    // Add all relevant dependencies here to avoid stale closures.
+    [feeTokens, txConfig, lcdUrl, denoms, chainId]
   );
 }

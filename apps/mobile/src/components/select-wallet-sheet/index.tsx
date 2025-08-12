@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import useActiveWallet from '../../hooks/settings/useActiveWallet';
 import { useSiteLogo } from '../../hooks/utility/useSiteLogo';
-import { useWallets } from '../../hooks/wallet/useWallet';
+import { Wallet } from '../../hooks/wallet/useWallet';
 import { sliceAddress } from '../../utils/strings';
 import { formatWalletName } from '../../utils/formatWalletName';
 import { addToConnections } from '../../screens/ApproveConnection/utils';
@@ -18,6 +18,22 @@ import { LEDGER_NAME_EDITED_SUFFIX_REGEX } from '../../services/config/config';
 import { walletLabels } from '../../services/config/constants';
 import { WALLETTYPE } from '@leapwallet/leap-keychain';
 import BottomModal from '../bottom-modal'; // You will need to create this component for mobile
+import { Key } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+
+import useWallets = Wallet.useWallets;
+
+type SelectWalletProps = {
+  readonly title: string;
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
+  readonly currentWalletInfo?: {
+    wallets: [Key];
+    chainIds: [string];
+    origin: string;
+  } | null;
+  readonly activeChain: SupportedChain;
+};
 
 export default function SelectWalletSheet({
   isOpen,
@@ -25,7 +41,7 @@ export default function SelectWalletSheet({
   title,
   currentWalletInfo,
   activeChain,
-}) {
+}: SelectWalletProps) {
   const wallets = useWallets();
   const { activeWallet, setActiveWallet } = useActiveWallet();
 
@@ -43,13 +59,13 @@ export default function SelectWalletSheet({
   const siteLogo = useSiteLogo(currentWalletInfo?.origin);
 
   return (
-    <BottomModal isVisible={isOpen} onClose={onClose} title={title}>
+    <BottomModal isOpen={isOpen} onClose={onClose} title={title}>
       <View style={styles.container}>
         {currentWalletInfo && (
           <View style={styles.connectedCard}>
             <View style={styles.rowCenter}>
               <Image
-                source={Images.Misc.getWalletIconAtIndex(walletColorIndex, currentWalletInfo?.wallets?.[0]?.watchWallet)}
+                source={{uri: Images.Misc.getWalletIconAtIndex(walletColorIndex as number, currentWalletInfo?.wallets?.[0]?.watchWallet)}}
                 style={[styles.walletIcon, { zIndex: 10 }]}
               />
               <Image
@@ -66,7 +82,7 @@ export default function SelectWalletSheet({
         )}
 
         <ScrollView style={styles.walletsList}>
-          {walletsList.map((wallet, index) => {
+          {walletsList.map((wallet) => {
             if (wallet.id === currentWalletInfo?.wallets?.[0]?.id) return null;
 
             let walletLabel = '';
@@ -94,14 +110,14 @@ export default function SelectWalletSheet({
                 style={styles.card}
                 onPress={async () => {
                   const walletIds = currentWalletInfo?.wallets.map((wallet) => wallet.id);
-                  await addToConnections(currentWalletInfo?.chainIds, walletIds ?? [], currentWalletInfo?.origin);
+                  await addToConnections(currentWalletInfo?.chainIds as [string], walletIds ?? [], currentWalletInfo?.origin as string);
                   setActiveWallet(wallet);
                   onClose();
                 }}
               >
                 <View style={styles.rowBetween}>
                   <Image
-                    source={Images.Misc.getWalletIconAtIndex(wallet.colorIndex, wallet.watchWallet)}
+                    source={{uri: Images.Misc.getWalletIconAtIndex(wallet.colorIndex, wallet.watchWallet)}}
                     style={styles.icon}
                   />
                   <View style={styles.walletTextBox}>
@@ -109,7 +125,7 @@ export default function SelectWalletSheet({
                     <Text style={styles.walletSub}>{sliceAddress(wallet.addresses[activeChain]) + walletLabel}</Text>
                   </View>
                   {activeWallet?.id === wallet.id && (
-                    <Image source={Images.Misc.CheckCosmos} style={styles.iconCheck} />
+                    <Image source={{uri :Images.Misc.CheckCosmos}} style={styles.iconCheck} />
                   )}
                 </View>
               </TouchableOpacity>

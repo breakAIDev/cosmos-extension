@@ -195,8 +195,7 @@ export const getMessageDetails = async (message: ParsedMessage, restUrl: string,
   switch (message.__type) {
     case ParsedMessageType.AuthzExec:
       return Promise.resolve(
-        `${sliceAddress(message.grantee)} shall execute the following authorized message ${message.messages
-          
+        `${sliceAddress(message.grantee)} shall execute the following authorized message ${message.messages}          
            not sure why ts is complaining here
           .map((m) => getSimpleType('type' in m ? (m.type as string) : m['@type']))
           .join(', ')} on behalf of you`,

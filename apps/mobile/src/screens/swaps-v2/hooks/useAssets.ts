@@ -6,7 +6,7 @@ import {
 } from '@leapwallet/elements-hooks';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { compassTokenTagsStore } from 'stores/denoms-store-instance';
+import { compassTokenTagsStore } from '../../../context/denoms-store-instance';
 
 import { useProviderFeatureFlags } from './useProviderFeatureFlags';
 
@@ -57,7 +57,7 @@ export default function useAssets() {
       return allSkipAssets as Record<string, MergedAsset[]> | undefined;
     },
     {
-      enabled: ['search', '/home', '/swap', '/assetDetails'].some((path) => location.hash.includes(path)),
+      enabled: ['search', 'Home', 'Swap', 'AssetDetails'].some((path) => location.hash.includes(path)),
       staleTime: 1000 * 60 * 2,
       cacheTime: 1000 * 60 * 5,
     },

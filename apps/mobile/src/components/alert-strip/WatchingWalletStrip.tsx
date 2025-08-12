@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 // Import your Eye icon from a compatible React Native icon set
-import Icon from 'react-native-vector-icons/Feather'; // or @phosphor-icons/react-native if available
+import Icon from 'react-native-vector-icons/Feather'; // or phosphor-react-native-native if available
 import { useTheme } from '@leapwallet/leap-ui';
 import { Colors } from '../../theme/colors';
 import Text from '../text';

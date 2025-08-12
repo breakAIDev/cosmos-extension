@@ -1,4 +1,6 @@
-import { isDeliverTxSuccess } from '@cosmjs/stargate';
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Linking } from 'react-native';
+import { DeliverTxResponse, isDeliverTxSuccess } from '@cosmjs/stargate';
 import {
   SelectedNetwork,
   STAKE_MODE,
@@ -8,15 +10,14 @@ import {
 } from '@leapwallet/cosmos-wallet-hooks';
 import { Provider, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { Validator } from '@leapwallet/cosmos-wallet-sdk/dist/browser/types/validators';
-import { CaretRight } from '@phosphor-icons/react';
-import BottomModal from 'components/new-bottom-modal';
-import { Button } from 'components/ui/button';
-import { useActiveChain } from 'hooks/settings/useActiveChain';
-import { Images } from 'images';
+import { CaretRight } from 'phosphor-react-native';
+import BottomModal from '../../components/new-bottom-modal';
+import { Button } from '../../components/ui/button';
+import { useActiveChain } from '../../hooks/settings/useActiveChain';
+import { Images } from '../../../assets/images';
 import { observer } from 'mobx-react-lite';
-import React, { useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { rootBalanceStore, rootStakeStore } from 'stores/root-store';
+import { useNavigation } from '@react-navigation/native';
+import { rootBalanceStore, rootStakeStore } from '../../context/root-store';
 
 import { txModeTitleMap } from './utils/stake-text';
 import { txStatusMap } from './utils/stake-text';
@@ -37,106 +38,215 @@ type StakeTxnSheetProps = {
   forceNetwork?: SelectedNetwork;
 };
 
-export const StakeTxnSheet = observer(({ isOpen, onClose, mode, forceChain, forceNetwork }: StakeTxnSheetProps) => {
-  const _activeChain = useActiveChain();
-  const _selectedNetwork = useSelectedNetwork();
-  const activeChain = forceChain ?? _activeChain;
-  const selectedNetwork = forceNetwork ?? _selectedNetwork;
+export const StakeTxnSheet = observer(
+  ({ isOpen, onClose, mode, forceChain, forceNetwork }: StakeTxnSheetProps) => {
+    const navigation = useNavigation<any>();
+    const _activeChain = useActiveChain();
+    const _selectedNetwork = useSelectedNetwork();
+    const activeChain = forceChain ?? _activeChain;
+    const selectedNetwork = forceNetwork ?? _selectedNetwork;
 
-  const { pendingTx, setPendingTx } = usePendingTxState();
+    const { pendingTx, setPendingTx } = usePendingTxState();
 
-  const { explorerTxnUrl: txnUrl } = useGetExplorerTxnUrl({
-    forceChain: activeChain,
-    forceNetwork: selectedNetwork,
-    forceTxHash: pendingTx?.txHash,
-  });
+    const { explorerTxnUrl: txnUrl } = useGetExplorerTxnUrl({
+      forceChain: activeChain,
+      forceNetwork: selectedNetwork,
+      forceTxHash: pendingTx?.txHash,
+    });
 
-  useEffect(() => {
-    if (!pendingTx?.promise) {
-      return;
-    }
+    useEffect(() => {
+      if (!pendingTx?.promise) return;
 
-    pendingTx.promise
-      .then(
-        (result) => {
-          
-          
-          if (result && isDeliverTxSuccess(result)) {
+      pendingTx.promise
+        .then((result) => {
+          if (result && isDeliverTxSuccess(result as DeliverTxResponse)) {
             setPendingTx({ ...pendingTx, txStatus: 'success' });
           } else {
             setPendingTx({ ...pendingTx, txStatus: 'failed' });
           }
-        },
-        () => setPendingTx({ ...pendingTx, txStatus: 'failed' }),
-      )
-      .catch(() => {
-        setPendingTx({ ...pendingTx, txStatus: 'failed' });
-      })
-      .finally(() => {
-        rootBalanceStore.refetchBalances(activeChain, selectedNetwork);
-        rootStakeStore.updateStake(activeChain, selectedNetwork, true);
-      });
-  }, [pendingTx?.promise]);
+        }, () => setPendingTx({ ...pendingTx, txStatus: 'failed' }))
+        .catch(() => setPendingTx({ ...pendingTx, txStatus: 'failed' }))
+        .finally(() => {
+          rootBalanceStore.refetchBalances(activeChain, selectedNetwork);
+          rootStakeStore.updateStake(activeChain, selectedNetwork, true);
+        });
+    }, [pendingTx?.promise]);
 
-  return (
-    <BottomModal
-      fullScreen
-      isOpen={isOpen}
-      onClose={onClose}
-      containerClassName='bg-secondary-50'
-      className='h-full flex flex-col'
-    >
-      <div className='flex flex-col gap-6 items-center my-auto'>
-        <div className='flex flex-col gap-10 items-center'>
-          <div className='flex items-center justify-center'>
-            {pendingTx?.txStatus === 'loading' && (
-              <div className='size-[100px] p-8 rounded-full bg-secondary-200 animate-spin'>
-                <img className='size-full' src={Images.Swap.Rotate} />
-              </div>
-            )}
-            {pendingTx?.txStatus === 'success' && (
-              <div className='size-[100px] p-8 rounded-full bg-green-400'>
-                <img className='size-full' src={Images.Swap.CheckGreen} />
-              </div>
-            )}
-            {pendingTx?.txStatus === 'failed' && (
-              <div className='size-[100px] p-8 rounded-full bg-red-600 dark:bg-red-400'>
-                <img className='size-full' src={Images.Swap.FailedRed} />
-              </div>
-            )}
-          </div>
+    // Image and background color by status
+    let statusContent;
+    if (pendingTx?.txStatus === 'loading') {
+      statusContent = (
+        <View style={[styles.statusIcon, styles.bgSecondary200, styles.animateSpin]}>
+          <Image source={{uri: Images.Swap.rotate}} style={styles.statusImg} />
+        </View>
+      );
+    } else if (pendingTx?.txStatus === 'success') {
+      statusContent = (
+        <View style={[styles.statusIcon, styles.bgGreen400]}>
+          <Image source={{uri: Images.Swap.check_green}} style={styles.statusImg} />
+        </View>
+      );
+    } else if (pendingTx?.txStatus === 'failed') {
+      statusContent = (
+        <View style={[styles.statusIcon, styles.bgRed600]}>
+          <Image source={{uri: Images.Swap.failed_circle_red}} style={styles.statusImg} />
+        </View>
+      );
+    }
 
-          <div className='flex flex-col gap-3 items-center'>
-            <span className='font-bold text-[1.5rem] text-center text-foreground'>
-              {txModeTitleMap[mode || 'DELEGATE']} {txStatusMap[pendingTx?.txStatus || 'loading']}
-            </span>
-            {pendingTx?.subtitle2 && pendingTx.txStatus === 'success' ? (
-              <span className='text-sm text-secondary-800 text-center mx-6'>{pendingTx.subtitle2}</span>
-            ) : null}
-          </div>
-        </div>
+    // Action button text
+    const actionText =
+      pendingTx?.txStatus === 'failed'
+        ? 'Retry'
+        : mode === 'DELEGATE'
+        ? 'Stake Again'
+        : 'Done';
 
-        {txnUrl ? (
-          <a
-            target='_blank'
-            rel='noreferrer'
-            href={txnUrl}
-            className='flex font-medium items-center gap-1 text-sm text-accent-green hover:text-accent-green-200 transition-colors'
+    // Handler for navigation to Home (uses stack navigation)
+    const handleGoHome = () => {
+      navigation.navigate('Home'); // Change 'Home' to your actual Home screen name
+      onClose();
+    };
+
+    // Handler for explorer link
+    const handleOpenUrl = async () => {
+      if (txnUrl) await Linking.openURL(txnUrl);
+    };
+
+    return (
+      <BottomModal
+        fullScreen
+        isOpen={isOpen}
+        onClose={onClose}
+        containerStyle={styles.modalContainer}
+        contentStyle={styles.modalContent}
+      >
+        <View style={styles.centerContainer}>
+          <View style={styles.centerTop}>
+            <View style={styles.centerIcon}>{statusContent}</View>
+
+            <View style={styles.centerTextBlock}>
+              <Text style={styles.centerTitle}>
+                {txModeTitleMap[mode || 'DELEGATE']}{' '}
+                {txStatusMap[pendingTx?.txStatus || 'loading']}
+              </Text>
+              {pendingTx?.subtitle2 && pendingTx.txStatus === 'success' ? (
+                <Text style={styles.centerSubtitle}>{pendingTx.subtitle2}</Text>
+              ) : null}
+            </View>
+          </View>
+
+          {txnUrl ? (
+            <TouchableOpacity style={styles.txnLink} onPress={handleOpenUrl}>
+              <Text style={styles.txnLinkText}>View transaction</Text>
+              <CaretRight size={12} color="#27ae60" weight="bold" />
+            </TouchableOpacity>
+          ) : null}
+        </View>
+
+        <View style={styles.actionRow}>
+          <Button variant="mono" onPress={handleGoHome}>
+            Home
+          </Button>
+          <Button
+            onPress={onClose}
+            disabled={pendingTx?.txStatus === 'loading'}
           >
-            View transaction
-            <CaretRight size={12} />
-          </a>
-        ) : null}
-      </div>
+            {actionText}
+          </Button>
+        </View>
+      </BottomModal>
+    );
+  }
+);
 
-      <div className='flex gap-x-4 mt-auto [&>*]:flex-1'>
-        <Button variant={'mono'} asChild>
-          <Link to='/home'>Home</Link>
-        </Button>
-        <Button onClick={onClose} disabled={pendingTx?.txStatus === 'loading'}>
-          {pendingTx?.txStatus === 'failed' ? 'Retry' : mode === 'DELEGATE' ? 'Stake Again' : 'Done'}
-        </Button>
-      </div>
-    </BottomModal>
-  );
+// Styles (replace with your styling solution if needed)
+const styles = StyleSheet.create({
+  modalContainer: {
+    backgroundColor: '#F8FAFC', // secondary-50
+    flex: 1,
+  },
+  modalContent: {
+    flex: 1,
+    flexDirection: 'column',
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 16,
+  },
+  centerTop: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  centerIcon: {
+    marginBottom: 20,
+  },
+  statusIcon: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    padding: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 0,
+  },
+  statusImg: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'contain',
+  },
+  bgSecondary200: {
+    backgroundColor: '#E5E7EB',
+  },
+  bgGreen400: {
+    backgroundColor: '#4ADE80',
+  },
+  bgRed600: {
+    backgroundColor: '#DC2626',
+  },
+  centerTextBlock: {
+    alignItems: 'center',
+    gap: 6,
+  },
+  centerTitle: {
+    fontWeight: 'bold',
+    fontSize: 24,
+    textAlign: 'center',
+    color: '#0F172A', // foreground
+    marginBottom: 4,
+  },
+  centerSubtitle: {
+    fontSize: 14,
+    color: '#334155', // secondary-800
+    textAlign: 'center',
+    marginHorizontal: 24,
+    marginTop: 2,
+  },
+  txnLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 10,
+  },
+  txnLinkText: {
+    fontSize: 14,
+    color: '#27ae60', // accent-green
+    fontWeight: '500',
+    marginRight: 2,
+  },
+  actionRow: {
+    flexDirection: 'row',
+    gap: 16,
+    marginBottom: 24,
+    marginHorizontal: 16,
+    justifyContent: 'space-between',
+  },
+  animateSpin: {
+    // Native spin animation would use Moti or Animated API, not a class.
+    // Placeholder, apply your own animation.
+  },
 });
+
+export default StakeTxnSheet;

@@ -1,31 +1,36 @@
+import React, { useCallback, useState } from 'react';
+import { View, StyleSheet, ViewStyle, StyleProp } from 'react-native';
+import { useRoute, useNavigation } from '@react-navigation/native';
+import { observer } from 'mobx-react-lite';
 import { Key, useChainsStore } from '@leapwallet/cosmos-wallet-hooks';
 import { importLedgerAccountV2, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { WALLETTYPE } from '@leapwallet/cosmos-wallet-store';
 import { Keystore } from '@leapwallet/leap-keychain';
-import { KEYSTORE } from 'config/storage-keys';
-import { AnimatePresence } from 'framer-motion';
-import useActiveWallet from 'hooks/settings/useActiveWallet';
-import { LedgerDriveIcon } from 'icons/ledger-drive-icon';
-import { observer } from 'mobx-react-lite';
-import { CreatingWalletLoader } from 'pages/onboarding/create/creating-wallet-loader';
-import { LEDGER_NETWORK } from 'pages/onboarding/import/import-wallet-context';
-import { OnboardingLayout } from 'pages/onboarding/layout';
-import React, { useCallback, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { cn } from 'utils/cn';
-import { getLedgerEnabledEvmChainsKey } from 'utils/getLedgerEnabledEvmChains';
-import Browser from 'webextension-polyfill';
-
+import { KEYSTORE } from '../../services/config/storage-keys';
+import useActiveWallet from '../../hooks/settings/useActiveWallet';
+import { LedgerDriveIcon } from '../../../assets/icons/ledger-drive-icon';
+import { CreatingWalletLoader } from '../onboarding/create/creating-wallet-loader';
+import { LEDGER_NETWORK } from '../onboarding/import/import-wallet-context';
 import { HoldState } from './hold-state';
+// Storage
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getLedgerEnabledEvmChainsKey } from '../../utils/getLedgerEnabledEvmChains';
+import { OnboardingLayout } from '../onboarding/layout';
 
-const ImportLedgerView = () => {
-  const [searchParams] = useSearchParams();
-
+const ImportLedgerView = observer(() => {
+  const route = useRoute<any>();
+  const navigation = useNavigation<any>();
   const { chains } = useChainsStore();
+  const [isLoading, setIsLoading] = useState(false);
+  const { activeWallet, setActiveWallet } = useActiveWallet();
+
+  // Fetch the 'app' param passed in navigation
+  const app = route.params?.app as string | undefined;
 
   const getLedgerAccountDetails = async (app: LEDGER_NETWORK) => {
     const primaryChain = app === LEDGER_NETWORK.ETH ? 'ethereum' : 'cosmos';
     const defaultIndexes = [0, 1, 2, 3, 4];
+    // Get EVM chains enabled for ledger, replace this with your util
     const ledgerEnabledEvmChains = getLedgerEnabledEvmChainsKey(Object.values(chains));
     const chainsToImport = app === LEDGER_NETWORK.ETH ? ledgerEnabledEvmChains : [];
     const chainInfos = {} as Record<SupportedChain, { addressPrefix: string; enabled: boolean; coinType: string }>;
@@ -48,12 +53,6 @@ const ImportLedgerView = () => {
     return pathWiseAddresses;
   };
 
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
-  const app = searchParams.get('app');
-
-  const { activeWallet, setActiveWallet } = useActiveWallet();
-
   const importComplete = useCallback(
     async (
       addresses: Record<
@@ -69,13 +68,14 @@ const ImportLedgerView = () => {
     ) => {
       setIsLoading(true);
       if (!activeWallet || !addresses) throw new Error('Unable to import ledger wallet');
-      const store = await Browser.storage.local.get('keystore');
+      // Load keystore from AsyncStorage
+      const keystoreRaw = await AsyncStorage.getItem(KEYSTORE);
+      if (!keystoreRaw) throw new Error('Unable to import ledger wallet');
+      const keystore: Keystore<SupportedChain> = JSON.parse(keystoreRaw);
 
-      const keystore: Keystore<SupportedChain> = store[KEYSTORE];
-      if (!keystore) throw new Error('Unable to import ledger wallet');
-
-      const existingLedgerWallets = Object.values(keystore).filter((key) => key.walletType === WALLETTYPE.LEDGER);
-      const newKeystore = keystore;
+      // Find existing ledger wallets in keystore
+      const existingLedgerWallets = Object.values(keystore).filter((key: any) => key.walletType === WALLETTYPE.LEDGER);
+      const newKeystore = { ...keystore };
 
       for (const ledgerWallet of existingLedgerWallets) {
         const path =
@@ -110,17 +110,19 @@ const ImportLedgerView = () => {
 
       const newActiveWallet = newKeystore[activeWallet.id];
 
-      await Browser.storage.local.set({ keystore: newKeystore, 'active-wallet': newActiveWallet });
+      await AsyncStorage.setItem(KEYSTORE, JSON.stringify(newKeystore));
+      await AsyncStorage.setItem('active-wallet', JSON.stringify(newActiveWallet));
       setActiveWallet(newActiveWallet);
-      navigate('/onboardingSuccess');
+      navigation.navigate('OnboardingSuccess');
     },
-    [activeWallet, navigate, setActiveWallet],
+    [activeWallet, setActiveWallet, navigation],
   );
 
   const currentAppToImport = (app === 'EVM' ? 'eth' : app)?.toLowerCase() as LEDGER_NETWORK;
 
   return (
-    <AnimatePresence mode='wait' presenceAffectsLayout>
+    <View style={{ flex: 1 }}>
+      {/* AnimatePresence not needed for native - just conditional render */}
       {currentAppToImport && !isLoading && (
         <HoldState
           key={`hold-state-${currentAppToImport}`}
@@ -131,26 +133,23 @@ const ImportLedgerView = () => {
           getLedgerAccountDetails={getLedgerAccountDetails}
         />
       )}
-      {isLoading && <CreatingWalletLoader title={`Importing ${app} wallets`} key='creating-wallet-loader' />}
-
-      {/* {currentStepName === 'importing-ledger-accounts' && (
-        <ImportingLedgerAccounts key={'importing-ledger-accounts-view'} />
-      )} */}
-    </AnimatePresence>
-  );
-};
-
-export const ImportLedgerLayout = (props: React.PropsWithChildren<{ className?: string }>) => {
-  return (
-    <OnboardingLayout
-      className={cn(
-        'flex flex-col items-stretch gap-7 p-7 overflow-auto border-secondary-300 relative',
-        props.className,
+      {isLoading && (
+        <CreatingWalletLoader title={`Importing ${app} wallets`} key='creating-wallet-loader' />
       )}
+    </View>
+  );
+});
+
+const ImportLedgerLayout: React.FC<React.PropsWithChildren<{ style?: StyleProp<ViewStyle> }>> = (props) => {
+  // For native, just wrap children. If you want a styled layout, adjust here.
+  return <OnboardingLayout
+      style = {[
+        layoutStyles.wrapper,
+        props.style
+      ]}
     >
       {props.children}
     </OnboardingLayout>
-  );
 };
 
 const ImportLedger = () => (
@@ -159,4 +158,13 @@ const ImportLedger = () => (
   </ImportLedgerLayout>
 );
 
-export default observer(ImportLedger);
+export default ImportLedger;
+
+// --- Styles ---
+const layoutStyles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+    padding: 24,
+    backgroundColor: '#fff', // Change to your theme
+  },
+});

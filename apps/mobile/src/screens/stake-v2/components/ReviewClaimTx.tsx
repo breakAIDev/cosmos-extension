@@ -13,53 +13,47 @@ import {
 } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain, Validator } from '@leapwallet/cosmos-wallet-sdk';
 import BigNumber from 'bignumber.js';
-import GasPriceOptions, { useDefaultGasPrice } from 'components/gas-price-options';
-import { GasPriceOptionValue } from 'components/gas-price-options/context';
-import { DisplayFee } from 'components/gas-price-options/display-fee';
-import { FeesSettingsSheet } from 'components/gas-price-options/fees-settings-sheet';
-import LedgerConfirmationPopup from 'components/ledger-confirmation/LedgerConfirmationPopup';
-import BottomModal from 'components/new-bottom-modal';
-import { EventName } from 'config/analytics';
-import { useFormatCurrency } from 'hooks/settings/useCurrency';
-import { useCaptureTxError } from 'hooks/utility/useCaptureTxError';
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
-import { Wallet } from 'hooks/wallet/useWallet';
-import { Images } from 'images';
-import loadingImage from 'lottie-files/swaps-btn-loading.json';
-import mixpanel from 'mixpanel-browser';
+import GasPriceOptions, { useDefaultGasPrice } from '../../../components/gas-price-options';
+import { GasPriceOptionValue } from '../../../components/gas-price-options/context';
+import { DisplayFee } from '../../../components/gas-price-options/display-fee';
+import { FeesSettingsSheet } from '../../../components/gas-price-options/fees-settings-sheet';
+import LedgerConfirmationPopup from '../../../components/ledger-confirmation/LedgerConfirmationPopup';
+import BottomModal from '../../../components/new-bottom-modal';
+import { useFormatCurrency } from '../../../hooks/settings/useCurrency';
+import { useCaptureTxError } from '../../../hooks/utility/useCaptureTxError';
+import { useDefaultTokenLogo } from '../../../hooks/utility/useDefaultTokenLogo';
+import { Wallet } from '../../../hooks/wallet/useWallet';
+import { Images } from '../../../../assets/images';
+import loadingImage from '../../../../assets/lottie-files/swaps-btn-loading.json';
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { imgOnError } from 'utils/imgOnError';
-import { sidePanel } from 'utils/isSidePanel';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import useGetWallet = Wallet.useGetWallet;
-
-import { Button } from 'components/ui/button';
-import { useCaptureUIException } from 'hooks/perf-monitoring/useCaptureUIException';
-import Lottie from 'lottie-react';
-import { rootDenomsStore } from 'stores/denoms-store-instance';
-import { hideAssetsStore } from 'stores/hide-assets-store';
-import { rootBalanceStore } from 'stores/root-store';
-import { claimRewardsStore, delegationsStore, unDelegationsStore, validatorsStore } from 'stores/stake-store';
-
+import { Button } from '../../../components/ui/button';
+import { useCaptureUIException } from '../../../hooks/perf-monitoring/useCaptureUIException';
+import LottieView from 'lottie-react-native';
+import { rootDenomsStore } from '../../../context/denoms-store-instance';
+import { hideAssetsStore } from '../../../context/hide-assets-store';
+import { rootBalanceStore } from '../../../context/root-store';
+import { claimRewardsStore, delegationsStore, unDelegationsStore, validatorsStore } from '../../../context/stake-store';
 import { transitionTitleMap } from '../utils/stake-text';
+import { MotiView } from 'moti';
 
 export const ClaimCard = (props: { title?: string; subText?: string; imgSrc: string; fallbackImgSrc?: string }) => {
-  const defaultTokenLogo = useDefaultTokenLogo();
-
+  // Adapt this for RN if not already:
   return (
-    <div className='flex gap-2 items-center justify-between bg-secondary-100 p-6 rounded-xl w-full'>
-      <div className='flex flex-col'>
-        <span className='text-lg font-bold'>{props.title}</span>
-        <span className='text-sm text-muted-foreground'>{props.subText}</span>
-      </div>
-
-      <img
-        src={props.imgSrc}
-        alt='validator'
-        className='size-12 rounded-full'
-        onError={imgOnError(props.fallbackImgSrc ?? defaultTokenLogo)}
-      />
-    </div>
+    <View style={styles.claimCard}>
+      <View style={{ flex: 1 }}>
+        <Text style={styles.claimCardTitle}>{props.title}</Text>
+        {!!props.subText && <Text style={styles.claimCardSub}>{props.subText}</Text>}
+      </View>
+      <View>
+        <Image
+          source={{ uri: props.imgSrc }}
+          style={styles.claimCardImg}
+        />
+      </View>
+    </View>
   );
 };
 
@@ -74,7 +68,9 @@ interface ReviewClaimTxProps {
 }
 
 const ReviewClaimTx = observer(
-  ({ isOpen, onClose, validator, validators, setClaimTxMode, forceChain, forceNetwork }: ReviewClaimTxProps) => {
+  ({
+    isOpen, onClose, validator, validators, setClaimTxMode, forceChain, forceNetwork,
+  }: ReviewClaimTxProps) => {
     const _activeChain = useActiveChain();
     const activeChain = forceChain ?? _activeChain;
     const _activeNetwork = useSelectedNetwork();
@@ -160,16 +156,11 @@ const ReviewClaimTx = observer(
     useCaptureTxError(error);
     useEffect(() => {
       setAmount(nativeTokenReward?.amount ?? '0');
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [totalRewards]);
 
     useEffect(() => {
-      if (gasPriceOption.option) {
-        setGasOption(gasPriceOption.option);
-      }
-      if (gasPriceOption.gasPrice) {
-        setUserPreferredGasPrice(gasPriceOption.gasPrice);
-      }
+      if (gasPriceOption.option) setGasOption(gasPriceOption.option);
+      if (gasPriceOption.gasPrice) setUserPreferredGasPrice(gasPriceOption.gasPrice);
     }, [gasPriceOption, setGasOption, setUserPreferredGasPrice]);
 
     const onGasPriceOptionChange = useCallback(
@@ -180,16 +171,14 @@ const ReviewClaimTx = observer(
       [setFeeDenom],
     );
 
-    const handleCloseFeeSettingSheet = useCallback(() => {
-      setShowFeesSettingSheet(false);
-    }, []);
+    const handleCloseFeeSettingSheet = useCallback(() => setShowFeesSettingSheet(false), []);
 
     const formattedTokenAmount = useMemo(() => {
       const rewardCount = rewards?.total?.length ?? 0;
       return hideAssetsStore.formatHideBalance(
-        `${formatTokenAmount(nativeTokenReward?.amount ?? '', activeStakingDenom?.coinDenom)} ${
-          rewardCount > 1 ? `+${rewardCount - 1} more` : ''
-        }`,
+        `${formatTokenAmount(nativeTokenReward?.amount ?? '', activeStakingDenom?.coinDenom)}${
+          rewardCount > 1 ? ` +${rewardCount - 1} more` : ''
+        }`
       );
     }, [activeStakingDenom?.coinDenom, nativeTokenReward?.amount, rewards?.total.length]);
 
@@ -211,9 +200,6 @@ const ReviewClaimTx = observer(
     const txCallback = useCallback(() => {
       setClaimTxMode('CLAIM_REWARDS');
       onClose();
-      // mixpanel.track(EventName.TransactionSigned, {
-      //   transactionType: 'stake_claim',
-      // })
     }, [onClose, setClaimTxMode]);
 
     const onClaimRewardsClick = useCallback(async () => {
@@ -238,7 +224,7 @@ const ReviewClaimTx = observer(
         rewardValidators &&
         sliceWord(
           rewardValidators[0]?.moniker,
-          sidePanel ? 15 + Math.floor(((Math.min(window.innerWidth, 400) - 320) / 81) * 7) : 10,
+          10,
           3,
         );
 
@@ -273,44 +259,50 @@ const ReviewClaimTx = observer(
         rootBalanceStore={rootBalanceStore}
         rootDenomsStore={rootDenomsStore}
       >
-        <BottomModal isOpen={isOpen} onClose={onClose} title={transitionTitleMap.CLAIM_REWARDS} className='p-6 mt-4'>
-          <div className='flex flex-col items-center w-full gap-y-4'>
-            <ClaimCard title={titleText} subText={subTitleText} imgSrc={activeStakingDenom.icon} />
-            <ClaimCard {...validatorDetails} />
-          </div>
+        <BottomModal isOpen={isOpen} onClose={onClose} title={transitionTitleMap.CLAIM_REWARDS}>
+          <MotiView
+            from={{ opacity: 0, translateY: 32 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{ type: 'timing', duration: 400 }}
+            style={styles.motiContainer}
+          >
+            <View style={styles.cardsRow}>
+              <ClaimCard title={titleText} subText={subTitleText} imgSrc={activeStakingDenom.icon} />
+              <ClaimCard {...validatorDetails} />
+            </View>
 
-          <div className='flex items-center w-full justify-between mt-5 mb-7'>
-            <span className='text-sm text-muted-foreground font-medium'>Fees</span>
-            <DisplayFee setShowFeesSettingSheet={setShowFeesSettingSheet} />
-          </div>
+            <View style={styles.feesRow}>
+              <Text style={styles.feesLabel}>Fees</Text>
+              <DisplayFee setShowFeesSettingSheet={setShowFeesSettingSheet} />
+            </View>
 
-          <div className='flex flex-col items-center w-full gap-y-2'>
-            {ledgerError && <p className='text-sm font-bold text-destructive-100 px-2'>{ledgerError}</p>}
-            {error && <p className='text-sm font-bold text-destructive-100 px-2'>{error}</p>}
-            {gasError && !showFeesSettingSheet && (
-              <p className='text-sm font-bold text-destructive-100 px-2'>{gasError}</p>
-            )}
+            <View style={{ alignItems: 'center', minHeight: 34 }}>
+              {!!ledgerError && <Text style={styles.errorText}>{ledgerError}</Text>}
+              {!!error && <Text style={styles.errorText}>{error}</Text>}
+              {!!gasError && !showFeesSettingSheet && (
+                <Text style={styles.errorText}>{gasError}</Text>
+              )}
+            </View>
 
             <Button
-              className='w-full'
+              style={styles.button}
               disabled={isLoading || !!error || !!gasError || showLedgerPopup || !!ledgerError}
-              onClick={onClaimRewardsClick}
+              onPress={onClaimRewardsClick}
             >
               {isLoading ? (
-                <Lottie
-                  loop={true}
-                  autoplay={true}
-                  animationData={loadingImage}
-                  rendererSettings={{
-                    preserveAspectRatio: 'xMidYMid slice',
-                  }}
-                  className={'h-[24px] w-[24px]'}
-                />
+                <View style={{ height: 24, width: 24 }}>
+                  <LottieView
+                    source={loadingImage}
+                    autoPlay
+                    loop
+                    style={{ height: 24, width: 24 }}
+                  />
+                </View>
               ) : (
-                'Confirm Claim'
+                <Text style={{ color: '#fff', fontWeight: 'bold' }}>Confirm Claim</Text>
               )}
             </Button>
-          </div>
+          </MotiView>
         </BottomModal>
 
         <LedgerConfirmationPopup showLedgerPopup={showLedgerPopup} />
@@ -322,7 +314,79 @@ const ReviewClaimTx = observer(
         />
       </GasPriceOptions>
     );
-  },
+  }
 );
+
+const styles = StyleSheet.create({
+  motiContainer: {
+    flex: 1,
+    alignItems: 'center',
+    padding: 16,
+    gap: 18,
+  },
+  cardsRow: {
+    width: '100%',
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 18,
+    justifyContent: 'center',
+  },
+  claimCard: {
+    flexDirection: 'row',
+    backgroundColor: '#F3F4F6',
+    borderRadius: 14,
+    alignItems: 'center',
+    paddingVertical: 18,
+    paddingHorizontal: 16,
+    width: 165,
+    gap: 8,
+  },
+  claimCardTitle: {
+    fontWeight: 'bold',
+    fontSize: 18,
+    color: '#222',
+    marginBottom: 4,
+  },
+  claimCardSub: {
+    color: '#6b7280',
+    fontSize: 13,
+  },
+  claimCardImg: {
+    height: 48,
+    width: 48,
+    borderRadius: 24,
+    marginLeft: 10,
+    backgroundColor: '#fff',
+  },
+  feesRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginTop: 12,
+    marginBottom: 18,
+  },
+  feesLabel: {
+    fontSize: 15,
+    color: '#6b7280',
+    fontWeight: '500',
+  },
+  errorText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#ff453a',
+    marginBottom: 3,
+    paddingHorizontal: 6,
+    textAlign: 'center',
+  },
+  button: {
+    width: '100%',
+    marginTop: 10,
+    borderRadius: 14,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
 
 export default ReviewClaimTx;

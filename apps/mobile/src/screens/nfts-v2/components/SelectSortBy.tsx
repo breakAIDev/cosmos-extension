@@ -2,16 +2,16 @@ import { useDisabledNFTsCollections } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { NftStore } from '@leapwallet/cosmos-wallet-store';
 import { Card } from '@leapwallet/leap-ui';
-import BottomModal from '../bottom-modal';
-import { CustomCardDivider } from 'components/custom-card-divider';
-import { useChainInfos } from 'hooks/useChainInfos';
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
-import { Images } from 'images';
+import BottomModal from '../../../components/bottom-modal';
+import { CustomCardDivider } from '../../../components/custom-card-divider';
+import { useChainInfos } from '../../../hooks/useChainInfos';
+import { useDefaultTokenLogo } from '../../../hooks/utility/useDefaultTokenLogo';
+import { Images } from '../../../../assets/images';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
-import { hiddenNftStore } from 'stores/manage-nft-store';
-import { getChainName } from 'utils/getChainName';
-import { imgOnError } from 'utils/imgOnError';
+import { ScrollView, Image, View, StyleSheet } from 'react-native';
+import { hiddenNftStore } from '../../../context/manage-nft-store';
+import { getChainName } from '../../../utils/getChainName';
 
 type SelectSortByProps = {
   readonly isVisible: boolean;
@@ -28,46 +28,93 @@ export const SelectSortBy = observer(
       disabledNFTsCollections,
       hiddenNftStore.hiddenNfts,
     );
-
     const defaultTokenLogo = useDefaultTokenLogo();
     const chainInfos = useChainInfos();
 
     return (
-      <BottomModal isOpen={isVisible} onClose={onClose} title={'Filter by Chain'} closeOnBackdropClick={true}>
-        <div className='flex flex-col gap-y-1'>
-          <div className='dark:bg-gray-950 overflow-clip bg-white-100 rounded-2xl max-h-[300px] overflow-y-scroll'>
-            {sortedCollectionChains.map((chain, index) => {
-              const chainInfo = chainInfos[chain as SupportedChain];
+      <BottomModal
+        isOpen={isVisible}
+        onClose={onClose}
+        title={'Filter by Chain'}
+        closeOnBackdropClick={true}
+      >
+        <View style={styles.container}>
+          <View style={styles.innerContainer}>
+            <ScrollView
+              style={styles.scroll}
+              contentContainerStyle={styles.scrollContent}
+              showsVerticalScrollIndicator={false}
+            >
+              {sortedCollectionChains.map((chain, index) => {
+                const chainInfo = chainInfos[chain as SupportedChain];
+                const isSelected = selectedSortsBy.includes(chain);
 
-              return (
-                <React.Fragment key={`${chain}-${index}`}>
-                  {index !== 0 && <CustomCardDivider />}
-                  <Card
-                    iconSrc={selectedSortsBy.includes(chain) ? Images.Misc.CheckCosmos : undefined}
-                    size='sm'
-                    title={getChainName(chainInfo.chainName)}
-                    className='dark:bg-gray-950'
-                    onClick={() =>
-                      setSelectedSortsBy((prevValue) => [
-                        ...(prevValue ?? []).filter((prevChain) => prevChain !== chain),
-                        chain,
-                      ])
-                    }
-                    avatar={
-                      <img
-                        src={chainInfo.chainSymbolImageUrl ?? defaultTokenLogo}
-                        onError={imgOnError(defaultTokenLogo)}
-                        alt={`${chainInfo.chainName} logo`}
-                        className='rounded-full w-[24px] h-[24px]'
-                      />
-                    }
-                  />
-                </React.Fragment>
-              );
-            })}
-          </div>
-        </div>
+                return (
+                  <React.Fragment key={`${chain}-${index}`}>
+                    {index !== 0 && <CustomCardDivider />}
+                    <Card
+                      iconSrc={isSelected ? Images.Misc.CheckCosmos : undefined}
+                      size="sm"
+                      title={getChainName(chainInfo.chainName)}
+                      style={styles.card}
+                      onPress={() =>
+                        setSelectedSortsBy((prevValue) => {
+                          // toggle logic: remove if exists, add if not
+                          if (prevValue.includes(chain)) {
+                            return prevValue.filter((prevChain) => prevChain !== chain);
+                          } else {
+                            return [...prevValue, chain];
+                          }
+                        })
+                      }
+                      avatar={
+                        <Image
+                          source={{ uri: chainInfo.chainSymbolImageUrl ?? defaultTokenLogo}}
+                          style={styles.avatar}
+                          resizeMode="cover"
+                        />
+                      }
+                    />
+                  </React.Fragment>
+                );
+              })}
+            </ScrollView>
+          </View>
+        </View>
       </BottomModal>
     );
   },
 );
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    flexDirection: 'column',
+    gap: 8,
+  },
+  innerContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    maxHeight: 300,
+    overflow: 'hidden',
+    marginTop: 0,
+  },
+  scroll: {
+    flexGrow: 0,
+    width: '100%',
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingVertical: 0,
+  },
+  card: {
+    backgroundColor: '#fff',
+    // For dark mode, override as needed
+  },
+  avatar: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    marginRight: 8,
+  },
+});

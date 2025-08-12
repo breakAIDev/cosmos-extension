@@ -3,22 +3,22 @@ import { NativeDenom } from '@leapwallet/cosmos-wallet-sdk';
 import { FeeTokenData } from '@leapwallet/cosmos-wallet-store';
 import { formatTokenAmount } from '@leapwallet/cosmos-wallet-store/dist/utils';
 import BigNumber from 'bignumber.js';
-import classNames from 'classnames';
-import GasPriceOptions, { useDefaultGasPrice } from 'components/gas-price-options';
-import { DisplayFeeValue, GasPriceOptionValue } from 'components/gas-price-options/context';
-import { DisplayFee } from 'components/gas-price-options/display-fee';
-import { FeesSettingsSheet } from 'components/gas-price-options/fees-settings-sheet';
-import LedgerConfirmationPopup from 'components/ledger-confirmation/LedgerConfirmationPopup';
-import BottomModal from 'components/new-bottom-modal';
-import Text from 'components/text';
-import { useSelectedNetwork } from 'hooks/settings/useNetwork';
-import { Wallet } from 'hooks/wallet/useWallet';
-import loadingImage from 'lottie-files/swaps-btn-loading.json';
-import Lottie from 'lottie-react';
+import GasPriceOptions, { useDefaultGasPrice } from '../../components/gas-price-options';
+import { GasPriceOptionValue } from '../../components/gas-price-options/context';
+import { DisplayFee } from '../../components/gas-price-options/display-fee';
+import { FeesSettingsSheet } from '../../components/gas-price-options/fees-settings-sheet';
+import LedgerConfirmationPopup from '../../components/ledger-confirmation/LedgerConfirmationPopup';
+import BottomModal from '../../components/new-bottom-modal';
+import Text from '../../components/text';
+import { useSelectedNetwork } from '../../hooks/settings/useNetwork';
+import { Wallet } from '../../hooks/wallet/useWallet';
+import loadingImage from '../../../assets/lottie-files/swaps-btn-loading.json';
+import LottieView from 'lottie-react-native';
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useState } from 'react';
-import { rootDenomsStore } from 'stores/denoms-store-instance';
-import { rootBalanceStore } from 'stores/root-store';
+import { rootDenomsStore } from '../../context/denoms-store-instance';
+import { rootBalanceStore } from '../../context/root-store';
+import { View, TouchableOpacity, Image, StyleSheet } from 'react-native';
 
 type Props = {
   isOpen: boolean;
@@ -60,7 +60,6 @@ const ReviewClaimTxSheet = observer(({ isOpen, onClose, denom, amount, setTxHash
     option: gasOption,
     gasPrice: userPreferredGasPrice ?? defaultGasPrice.gasPrice,
   });
-  const [displayFeeValue, setDisplayFeeValue] = useState<DisplayFeeValue>();
   const isReviewDisabled = isLoading || !!error || !!gasError || !!ledgerError || isProcessing;
 
   const handleConfirmTx = useCallback(async () => {
@@ -89,7 +88,6 @@ const ReviewClaimTxSheet = observer(({ isOpen, onClose, denom, amount, setTxHash
       option: gasOption,
       gasPrice: defaultGasPrice.gasPrice,
     });
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultGasPrice.gasPrice.amount.toString(), defaultGasPrice.gasPrice.denom]);
 
@@ -128,48 +126,43 @@ const ReviewClaimTxSheet = observer(({ isOpen, onClose, denom, amount, setTxHash
       rootDenomsStore={rootDenomsStore}
       rootBalanceStore={rootBalanceStore}
     >
-      <BottomModal title='Confirm Transaction' isOpen={isOpen} onClose={onClose} className='p-6 z-10'>
-        <div className='flex flex-col gap-4 w-full'>
-          <div className='w-full bg-gray-50 dark:bg-gray-900 flex items-center justify-between p-4 gap-2 rounded-2xl mb-4'>
-            <div className='flex items-center w-full gap-5'>
-              <img src={denom.icon} className='w-11 h-11' />
-              <Text color='text-black-100 dark:text-white-100' size='sm' className='font-bold'>
-                {formatTokenAmount(amount, denom.coinDenom, 5)}
-              </Text>
-            </div>
-          </div>
+      <BottomModal title="Confirm Transaction" isOpen={isOpen} onClose={onClose} style={{ zIndex: 10 }}>
+        <View style={styles.sheet}>
+          <View style={styles.tokenCard}>
+            <Image
+              source={{ uri: denom.icon ?? '../../../assets/images/default-token.png'}}
+              style={styles.tokenIcon}
+              resizeMode="contain"
+            />
+            <Text style={styles.tokenAmountText}>
+              {formatTokenAmount(amount, denom.coinDenom, 5)}
+            </Text>
+          </View>
 
           <DisplayFee setShowFeesSettingSheet={setShowFeesSettingSheet} />
 
           {(error || gasError || ledgerError) && (
-            <p className='text-sm font-bold text-red-600 px-2 mt-2'>{error || gasError || ledgerError}</p>
+            <Text style={styles.errorText}>{error || gasError || ledgerError}</Text>
           )}
-          <button
-            className={classNames(
-              'w-full text-md font-bold text-white-100 h-12 rounded-full cursor-pointer bg-green-600',
-              {
-                'hover:bg-green-500 ': !isReviewDisabled,
-                'opacity-40': isReviewDisabled,
-              },
-            )}
+
+          <TouchableOpacity
+            style={[styles.confirmBtn, isReviewDisabled && styles.disabledBtn]}
             disabled={isReviewDisabled}
-            onClick={handleConfirmTx}
+            onPress={handleConfirmTx}
+            activeOpacity={0.85}
           >
             {isProcessing ? (
-              <Lottie
-                loop={true}
-                autoplay={true}
-                animationData={loadingImage}
-                rendererSettings={{
-                  preserveAspectRatio: 'xMidYMid slice',
-                }}
-                className={'h-[24px] w-[24px]'}
+              <LottieView
+                source={loadingImage}
+                autoPlay
+                loop
+                style={{ width: 24, height: 24 }}
               />
             ) : (
-              'Confirm Claim'
+              <Text style={styles.confirmBtnText}>Confirm Claim</Text>
             )}
-          </button>
-        </div>
+          </TouchableOpacity>
+        </View>
       </BottomModal>
       {showLedgerPopup && <LedgerConfirmationPopup showLedgerPopup={showLedgerPopup} />}
       <FeesSettingsSheet
@@ -182,3 +175,61 @@ const ReviewClaimTxSheet = observer(({ isOpen, onClose, denom, amount, setTxHash
 });
 
 export default ReviewClaimTxSheet;
+
+const styles = StyleSheet.create({
+  sheet: {
+    flexDirection: 'column',
+    gap: 16,
+    width: '100%',
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  tokenCard: {
+    width: '100%',
+    backgroundColor: '#f9fafb',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    padding: 16,
+    borderRadius: 18,
+    marginBottom: 12,
+    gap: 18,
+  },
+  tokenIcon: {
+    width: 44,
+    height: 44,
+    marginRight: 16,
+    borderRadius: 22,
+    backgroundColor: '#fff',
+  },
+  tokenAmountText: {
+    fontWeight: 'bold',
+    color: '#222', // black-100
+    fontSize: 18,
+  },
+  errorText: {
+    color: '#dc2626',
+    fontSize: 15,
+    fontWeight: 'bold',
+    marginTop: 8,
+    marginBottom: 2,
+    textAlign: 'center',
+  },
+  confirmBtn: {
+    width: '100%',
+    height: 48,
+    borderRadius: 9999,
+    backgroundColor: '#22c55e',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 12,
+  },
+  confirmBtnText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  disabledBtn: {
+    opacity: 0.4,
+  },
+});

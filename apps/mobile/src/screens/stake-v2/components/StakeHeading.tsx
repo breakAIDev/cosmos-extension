@@ -1,16 +1,20 @@
-import { SelectedNetwork, useChainInfo, useSelectedNetwork, useStaking } from '@leapwallet/cosmos-wallet-hooks';
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import currency from 'currency.js';
-import { AnimatePresence, motion } from 'framer-motion';
-import { useActiveChain } from 'hooks/settings/useActiveChain';
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
-import { observer } from 'mobx-react-lite';
 import React, { useMemo } from 'react';
-import Skeleton from 'react-loading-skeleton';
-import { rootDenomsStore } from 'stores/denoms-store-instance';
-import { claimRewardsStore, delegationsStore, unDelegationsStore, validatorsStore } from 'stores/stake-store';
-import { imgOnError } from 'utils/imgOnError';
-import { opacityFadeInOut, transition150 } from 'utils/motion-variants';
+import { View, Text, Image, StyleSheet } from 'react-native';
+import { observer } from 'mobx-react-lite';
+import currency from 'currency.js';
+import { MotiView, AnimatePresence } from 'moti';
+import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
+
+import { useChainInfo, useSelectedNetwork, useStaking, SelectedNetwork } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+
+import { useActiveChain } from '../../../hooks/settings/useActiveChain';
+import { useDefaultTokenLogo } from '../../../hooks/utility/useDefaultTokenLogo';
+
+import { rootDenomsStore } from '../../../context/denoms-store-instance';
+import { claimRewardsStore, delegationsStore, unDelegationsStore, validatorsStore } from '../../../context/stake-store';
+
+// ---- RN version of StakeHeading ----
 
 type StakeHeadingProps = {
   forceChain?: SupportedChain;
@@ -53,46 +57,77 @@ const StakeHeading = observer(({ forceChain, forceNetwork }: StakeHeadingProps) 
   }, [network?.chainApr]);
 
   return (
-    <div className='flex justify-between w-full items-center'>
-      <div className='flex gap-x-2 items-center'>
-        <img
-          width={24}
-          height={24}
-          src={activeChainInfo.chainSymbolImageUrl ?? defaultTokenLogo}
-          onError={imgOnError(defaultTokenLogo)}
-          className='size-6 bg-secondary-300 rounded-full'
+    <View style={styles.headingRow}>
+      <View style={styles.left}>
+        <Image
+          source={{ uri: activeChainInfo.chainSymbolImageUrl ?? defaultTokenLogo }}
+          style={styles.logo}
+          // fallback for onError: show defaultTokenLogo
+          defaultSource={{ uri: defaultTokenLogo }}
         />
-        <span className='font-medium text-lg'>{activeChainInfo.chainName}</span>
-      </div>
-
-      <AnimatePresence mode='wait'>
+        <Text style={styles.chainName}>{activeChainInfo.chainName}</Text>
+      </View>
+      <AnimatePresence>
         {network?.chainApr === undefined ? (
-          <motion.div
-            key='skeleton'
-            transition={transition150}
-            variants={opacityFadeInOut}
-            initial='hidden'
-            animate='visible'
-            exit='hidden'
+          <MotiView
+            from={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ type: 'timing', duration: 150 }}
+            key="skeleton"
           >
-            <Skeleton className='w-20 h-5' />
-          </motion.div>
+            <SkeletonPlaceholder>
+              <SkeletonPlaceholder.Item width={80} height={20} borderRadius={8} />
+            </SkeletonPlaceholder>
+          </MotiView>
         ) : (
-          <motion.span
-            key='span'
-            transition={transition150}
-            variants={opacityFadeInOut}
-            initial='hidden'
-            animate='visible'
-            exit='hidden'
-            className='font-medium text-muted-foreground'
+          <MotiView
+            from={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ type: 'timing', duration: 150 }}
+            key="span"
           >
-            {aprValue && `APR ${aprValue}%`}
-          </motion.span>
+            <Text style={styles.aprText}>
+              {aprValue && `APR ${aprValue}%`}
+            </Text>
+          </MotiView>
         )}
       </AnimatePresence>
-    </div>
+    </View>
   );
+});
+
+const styles = StyleSheet.create({
+  headingRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 8,
+  },
+  left: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  logo: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#E5E7EB', // bg-secondary-300
+    marginRight: 6,
+  },
+  chainName: {
+    fontSize: 18,
+    fontWeight: '500',
+    color: '#111',
+  },
+  aprText: {
+    fontSize: 15,
+    color: '#6B7280', // text-muted-foreground
+    fontWeight: '500',
+  },
 });
 
 export default StakeHeading;

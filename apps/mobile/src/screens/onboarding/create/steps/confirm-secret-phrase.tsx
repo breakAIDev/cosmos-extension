@@ -1,14 +1,11 @@
-import { CanvasBox } from 'components/canvas-box/CanvasTextBox';
-import { Button } from 'components/ui/button';
-import { AnimatePresence, motion } from 'framer-motion';
-import { KeySlimIcon } from 'icons/key-slim-icon';
-import React, { ChangeEvent, ChangeEventHandler, ComponentPropsWithoutRef, useMemo, useState } from 'react';
-import { cn } from 'utils/cn';
-import { getWordFromMnemonic } from 'utils/getWordFromMnemonic';
-import { errorVariants } from 'utils/motion-variants';
-
-import { OnboardingWrapper } from '../../wrapper';
-import { useCreateWalletContext } from '../create-wallet-context';
+import React, { useMemo, useState } from 'react'
+import { View, Text, TextInput, StyleSheet, ViewStyle, StyleProp } from 'react-native'
+import { AnimatePresence, MotiText } from 'moti'
+import { Button } from '../../../../components/ui/button'
+import { getWordFromMnemonic } from '../../../../utils/getWordFromMnemonic'
+import { OnboardingWrapper } from '../../wrapper'
+import { useCreateWalletContext } from '../create-wallet-context'
+import { KeySlimIcon } from '../../../../../assets/icons/key-slim-icon'
 
 type StatusType = 'error' | 'success' | '';
 
@@ -18,47 +15,55 @@ type Status = {
   tweleve: StatusType;
 };
 
-type WordInputProps = ComponentPropsWithoutRef<'input'> & {
+type WordInputProps = React.Ref<TextInput> & {
   readonly value?: string;
-  readonly onChange?: ChangeEventHandler;
+  readonly onChangeText?: (value: string) => void;
   readonly onBlur?: () => void;
   readonly name?: string;
-  readonly className?: string;
+  readonly style?: StyleProp<ViewStyle>;
   readonly prefixNumber?: number;
   readonly status?: StatusType;
 };
 
-const outlineClassMap = {
-  error: 'outline-destructive-100',
-  success: 'outline-accent-success',
-  default: 'focus-within:outline-foreground',
-};
+const outlineColor = {
+  error: '#EF4444',   // destructive
+  success: '#13c47b', // accent-success
+  default: '#475569', // foreground
+}
 
-const WordInput = ({ value, onChange, onBlur, name, prefixNumber, className, status, ...rest }: WordInputProps) => {
+export function WordInput({
+  value,
+  onChangeText,
+  onBlur,
+  name,
+  prefixNumber,
+  style,
+  status = '',
+  ...rest
+}: WordInputProps) {
   return (
-    <div
-      className={cn(
-        'w-[100px] h-7 rounded-lg bg-secondary text-center flex items-center justify-center outline outline-transparent outline-1 px-2 gap-4 transition-[outline-color]',
-        outlineClassMap[status as keyof typeof outlineClassMap] ?? outlineClassMap.default,
-        className,
-      )}
+    <View
+      style={[
+        styles.inputBox,
+        { borderColor: outlineColor[status] || outlineColor.default },
+        style,
+      ]}
     >
-      <span className='text-muted-foreground'>{prefixNumber}</span>
-      <input
-        className='bg-inherit border-none outline-none w-full h-full'
-        type='text'
-        value={value ?? ''}
-        name={name ?? ''}
-        onChange={onChange}
+      <Text style={styles.prefix}>{prefixNumber}</Text>
+      <TextInput
+        style={styles.textInput}
+        value={value}
+        onChangeText={onChangeText}
         onBlur={onBlur}
-        autoComplete='off'
-        autoCorrect='off'
-        autoCapitalize='off'
+        autoComplete={"off"}
+        autoCorrect={false}
+        autoCapitalize="none"
+        placeholder=""
         {...rest}
       />
-    </div>
-  );
-};
+    </View>
+  )
+}
 
 type MissingWords = {
   four: string;
@@ -66,161 +71,183 @@ type MissingWords = {
   tweleve: string;
 };
 
-function ConfirmSecretPhraseView({ mnemonic, onProceed }: { mnemonic: string; onProceed: () => void }) {
-  const [status, setStatus] = useState<Status>({
-    four: '',
-    eight: '',
-    tweleve: '',
-  });
-  const [missingWords, setMissingWords] = useState<MissingWords>({
-    four: '',
-    eight: '',
-    tweleve: '',
-  });
+const positions = [
+  { name: 'four', prefix: 4, top: 56, left: 28 },
+  { name: 'eight', prefix: 8, top: 91, left: 144 },
+  { name: 'tweleve', prefix: 12, top: 127, left: 259 },
+]
 
-  const hasError = status.four === 'error' || status.eight === 'error' || status.tweleve === 'error';
+export function ConfirmSecretPhraseView({ mnemonic, onProceed }: { mnemonic: string; onProceed: () => void }) {
+  const [status, setStatus] = useState<Status>({ four: '', eight: '', tweleve: '' })
+  const [missingWords, setMissingWords] = useState<MissingWords>({ four: '', eight: '', tweleve: '' })
 
+  const hasError = status.four === 'error' || status.eight === 'error' || status.tweleve === 'error'
+
+  // Mask words
   const words = useMemo(() => {
-    const _words = mnemonic.trim().split(' ');
-    _words[3] = '';
-    _words[7] = '';
-    _words[11] = '';
+    const _words = mnemonic.trim().split(' ')
+    _words[3] = ''
+    _words[7] = ''
+    _words[11] = ''
+    return _words
+  }, [mnemonic])
 
-    return _words.join(' ');
-  }, [mnemonic]);
-
-  function handleInputChange(event: ChangeEvent<HTMLInputElement>) {
-    setStatus({
-      ...status,
-      [event.target.name]: '',
-    });
-    setMissingWords((prevValue) => ({ ...prevValue, [event.target.name]: event.target.value }));
+  function handleInputChange(name: string, value: string) {
+    setStatus(s => ({ ...s, [name]: '' }))
+    setMissingWords(s => ({ ...s, [name]: value }))
   }
 
   const validateInput = (index: number, numberWord: keyof typeof missingWords) => {
-    const word = getWordFromMnemonic(mnemonic, index);
-    const missingWord = missingWords[numberWord].trim();
-
-    setStatus({
-      ...status,
+    const word = getWordFromMnemonic(mnemonic, index)
+    const missingWord = missingWords[numberWord].trim()
+    setStatus(s => ({
+      ...s,
       [numberWord]: missingWord && word !== missingWord ? 'error' : missingWord ? 'success' : '',
-    });
-  };
+    }))
+  }
 
   function handleConfirmClick() {
     if (getWordFromMnemonic(mnemonic, 4) !== missingWords.four.trim()) {
-      setStatus({
-        ...status,
-        four: 'error',
-      });
-      return;
+      setStatus(s => ({ ...s, four: 'error' }))
+      return
     }
-
     if (getWordFromMnemonic(mnemonic, 8) !== missingWords.eight.trim()) {
-      setStatus({
-        ...status,
-        eight: 'error',
-      });
-      return;
+      setStatus(s => ({ ...s, eight: 'error' }))
+      return
     }
-
     if (getWordFromMnemonic(mnemonic, 12) !== missingWords.tweleve.trim()) {
-      setStatus({
-        ...status,
-        tweleve: 'error',
-      });
-      return;
+      setStatus(s => ({ ...s, tweleve: 'error' }))
+      return
     }
-
-    onProceed();
+    onProceed()
   }
 
   return (
-    <>
-      <div className='space-y-6'>
-        <div className={'relative rounded-2xl bg-secondary-200 text-xs font-medium box-border h-[184px] w-[376px] p-5'}>
-          <CanvasBox height={144} width={376 - 30} text={words} noSpace={false} />
-
+    <View style={{ flex: 1, gap: 16 }}>
+      <View style={viewStyles.phraseBox}>
+        {/* You could use CanvasBox RN alternative here, or display as Text */}
+        <Text style={viewStyles.phraseText}>
+          {words.map((w, i) => (w ? w : '______')).join(' ')}
+        </Text>
+        {/* Inputs overlay */}
+        {positions.map(pos => (
           <WordInput
-            name='four'
-            prefixNumber={4}
-            value={missingWords.four}
-            onChange={handleInputChange}
-            className='absolute top-[56px] left-[28px]'
-            data-testing-id='input-fourth-word'
-            onBlur={() => validateInput(4, 'four')}
-            status={status.four}
+            key={pos.name}
+            name={pos.name}
+            prefixNumber={pos.prefix}
+            value={missingWords[pos.name as keyof typeof missingWords]}
+            onChangeText={(val) => handleInputChange(pos.name, val)}
+            onBlur={() => validateInput(pos.prefix, pos.name as keyof typeof missingWords)}
+            status={status[pos.name as keyof typeof missingWords]}
+            style={[viewStyles.input, { top: pos.top, left: pos.left }]}
           />
-
-          <WordInput
-            name='eight'
-            prefixNumber={8}
-            value={missingWords.eight}
-            onChange={handleInputChange}
-            className='absolute top-[91px] left-[144px]'
-            data-testing-id='input-eighth-word'
-            onBlur={() => validateInput(8, 'eight')}
-            status={status.eight}
-          />
-
-          <WordInput
-            name='tweleve'
-            prefixNumber={12}
-            value={missingWords.tweleve}
-            onChange={handleInputChange}
-            className='absolute top-[127] left-[259px]'
-            data-testing-id='input-tweleveth-word'
-            onBlur={() => validateInput(12, 'tweleve')}
-            status={status.tweleve}
-          />
-        </div>
-
-        <AnimatePresence>
-          {hasError && (
-            <motion.span
-              className='text-xs text-destructive-100 font-medium text-center mt-4 block'
-              data-testing-id='error-text-ele'
-              variants={errorVariants}
-              initial='hidden'
-              animate='visible'
-              exit='hidden'
-            >
-              Seed phrase does not match. Please try again.
-            </motion.span>
-          )}
-        </AnimatePresence>
-      </div>
-
+        ))}
+      </View>
+      <AnimatePresence>
+        {hasError && (
+          <MotiText
+            from={{ opacity: 0, translateY: 12 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            exit={{ opacity: 0, translateY: 12 }}
+            style={viewStyles.error}
+          >
+            Seed phrase does not match. Please try again.
+          </MotiText>
+        )}
+      </AnimatePresence>
       <Button
-        className='w-full mt-auto'
-        onClick={handleConfirmClick}
-        disabled={Boolean(hasError || Object.values(missingWords).includes(''))}
-        data-testing-id='confirm-phrase-btn'
+        style={viewStyles.button}
+        onPress={handleConfirmClick}
+        disabled={hasError || Object.values(missingWords).some(v => !v)}
       >
         Confirm and continue
       </Button>
-    </>
-  );
+    </View>
+  )
 }
 
 export const ConfirmSecretPhrase = () => {
-  const { prevStep, currentStep, mnemonic, moveToNextStep } = useCreateWalletContext();
-
+  const { prevStep, currentStep, mnemonic, moveToNextStep } = useCreateWalletContext()
   return (
-    <form onSubmit={(event) => event.preventDefault()} className='flex flex-col h-full'>
+    <View style={{ flex: 1 }}>
       <OnboardingWrapper
-        headerIcon={<KeySlimIcon className='size-6' />}
+        headerIcon={<KeySlimIcon size={24} />}
         entry={prevStep <= currentStep ? 'right' : 'left'}
-        heading='Verify your recovery phrase'
+        heading="Verify your recovery phrase"
         subHeading={
           <>
-            Select the 4th, 6th and 8th words of your recovery <br />
+            Select the 4th, 6th and 8th words of your recovery {'\n'}
             phrase in that same order.
           </>
         }
       >
         <ConfirmSecretPhraseView mnemonic={mnemonic} onProceed={moveToNextStep} />
       </OnboardingWrapper>
-    </form>
-  );
-};
+    </View>
+  )
+}
+
+const viewStyles = StyleSheet.create({
+  phraseBox: {
+    borderRadius: 16,
+    backgroundColor: '#E2E8F0',
+    minHeight: 184,
+    width: 376,
+    padding: 20,
+    position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    marginBottom: 8,
+  },
+  phraseText: {
+    fontSize: 13,
+    color: '#334155',
+    fontWeight: '500',
+    letterSpacing: 0.4,
+    marginBottom: 24,
+  },
+  input: {
+    position: 'absolute',
+  },
+  error: {
+    color: '#EF4444',
+    fontSize: 13,
+    fontWeight: '500',
+    marginTop: 10,
+    textAlign: 'center',
+  },
+  button: {
+    marginTop: 16,
+    width: '100%',
+    alignSelf: 'center',
+  },
+})
+
+const styles = StyleSheet.create({
+  inputBox: {
+    width: 100,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: '#F1F5F9',
+    textAlign: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'transparent',
+    paddingHorizontal: 8,
+    gap: 8,
+    marginVertical: 2,
+  },
+  prefix: {
+    color: '#94A3B8',
+  },
+  textInput: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+    height: '100%',
+    color: '#475569',
+    fontSize: 16,
+    padding: 0,
+  },
+})

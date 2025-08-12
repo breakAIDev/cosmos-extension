@@ -9,7 +9,7 @@ import { getKeyToUseForDenoms } from '@leapwallet/cosmos-wallet-hooks';
 import { DenomsRecord } from '@leapwallet/cosmos-wallet-sdk';
 import { RouteAggregator } from '@leapwallet/elements-hooks';
 import BigNumber from 'bignumber.js';
-import { SourceToken } from 'types/swap';
+import { SourceToken } from '../../../types/swap';
 
 import { MosaicRouteQueryResponse } from '../hooks/useMosaicRoute';
 import { SkipRouteResponse } from '../hooks/useRoute';

@@ -14,7 +14,7 @@ import {
 } from '@leapwallet/cosmos-wallet-store';
 import { observer } from 'mobx-react-lite';
 import React, { createContext, useContext } from 'react';
-import { assert } from 'utils/assert';
+import { assert } from '../../../utils/assert';
 
 import { SwapsTxType, useSwapsTx } from '../hooks';
 

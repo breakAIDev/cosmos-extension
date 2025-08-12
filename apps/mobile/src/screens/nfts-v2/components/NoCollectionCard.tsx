@@ -1,5 +1,6 @@
-import { Tag } from '@phosphor-icons/react';
+import { Tag } from 'phosphor-react-native';
 import React, { ReactNode } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 
 type NoCollectionCardProps = {
   title: string;
@@ -8,12 +9,46 @@ type NoCollectionCardProps = {
 
 export function NoCollectionCard({ title, subTitle }: NoCollectionCardProps) {
   return (
-    <div className='rounded-2xl bg-white-100 dark:bg-gray-950 p-8 flex flex-col items-center mb-4 text-center'>
-      <div className='rounded-full bg-gray-50 dark:bg-gray-900 p-[18px] w-fit flex'>
-        <Tag size={24} className='w-6 h-6 text-gray-200' />
-      </div>
-      <div className='font-bold text-gray-800 dark:text-white-100 text-base mt-3'>{title}</div>
-      {subTitle && <div className='text-gray-400 font-medium text-sm'>{subTitle}</div>}
-    </div>
+    <View style={styles.card}>
+      <View style={styles.iconCircle}>
+        <Tag size={24} color="#a1a1aa" /> {/* text-gray-200 */}
+      </View>
+      <Text style={styles.title}>{title}</Text>
+      {typeof subTitle === 'string' ? <Text style={styles.subTitle}>{subTitle}</Text>
+      : React.isValidElement(subTitle) ? subTitle : <View/>}
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    borderRadius: 18,
+    backgroundColor: '#fff',
+    padding: 32,
+    alignItems: 'center',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  iconCircle: {
+    borderRadius: 99,
+    backgroundColor: '#f9fafb', // bg-gray-50
+    padding: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+  },
+  title: {
+    fontWeight: 'bold',
+    color: '#18181b', // text-gray-800
+    fontSize: 16,
+    marginTop: 12,
+    textAlign: 'center',
+  },
+  subTitle: {
+    color: '#9ca3af', // text-gray-400
+    fontWeight: '500',
+    fontSize: 14,
+    marginTop: 4,
+    textAlign: 'center',
+  },
+});

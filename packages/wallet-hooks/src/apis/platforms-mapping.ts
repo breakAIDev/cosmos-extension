@@ -61,56 +61,31 @@ export const platforms: Record<string, Platform> = {
   quicksilver: Platform.QuickSilver,
   provenance: Platform.Provenance,
   kichain: Platform.Ki,
-
-  
-  aura: 'AURA',
-  
-  seiTestnet2: 'SEI_TESTNET_2',
-  
-  impacthub: 'IMPACT_HUB',
-
-  //@ts-ignore
-  jackal: 'JACKAL',
-  //@ts-ignore
-  planq: 'PLANQ',
-
-  //@ts-ignore
-  nomic: 'NOMIC',
-  //@ts-ignore
-  nibiru: 'NIBIRU',
-  //@ts-ignore
-  odin: 'ODIN_CHAIN',
-  
-  mayachain: 'MAYA_CHAIN',
-  
-  empowerchain: 'EMPOWER_CHAIN',
-  //@ts-ignore
-  dydx: 'DYDX',
-  
-  gitopia: 'GITOPIA',
-  
-  sge: 'SGE',
-  
-  celestia: 'CELESTIA',
-  
-  xpla: 'XPLA',
-  
-  composable: 'COMPOSABLE',
-  
-  dymension: 'DYMENSION',
-  
-  pryzmtestnet: 'PRYZM',
-  
-  thorchain: 'THOR_CHAIN',
-  
-  saga: 'SAGA',
-  
-  initia: 'INITIA',
-  
-  humans: 'HUMANS_AI',
+  aura: Platform.Aura,
+  seiTestnet2: Platform.SeiTestNet2,
+  impacthub: Platform.ImpactHub,
+  jackal: Platform.Jackal,
+  planq: Platform.Planq,
+  nomic: Platform.Nomic,
+  nibiru: Platform.Nibiru,
+  odin: Platform.Odin,
+  mayachain: Platform.MayaChain,
+  empowerchain: Platform.EmpowerChain,
+  dydx: Platform.Dydx,
+  gitopia: Platform.Gitopia,
+  sge: Platform.Sge,
+  celestia: Platform.Celestia,
+  xpla: Platform.Xpla,
+  composable: Platform.Composable,
+  dymension: Platform.Dymension,
+  pryzmtestnet: Platform.PryzmTestNet,
+  thorchain: Platform.ThorChain,
+  saga: Platform.Saga,
+  initia: Platform.Initia,
+  humans: Platform.HumansAi,
 };
 
-export const platformToChain: Record<Platform, string> = {
+export const platformToChain: Partial<Record<Platform, string>> = {
   [Platform.CosmosHub]: 'cosmos',
   [Platform.Osmosis]: 'osmosis',
   [Platform.Agoric]: 'agoric',
@@ -162,28 +137,26 @@ export const platformToChain: Record<Platform, string> = {
   [Platform.Ki]: 'kichain',
   [Platform.Sentinel]: 'sentinel',
   [Platform.Band]: 'bandchain',
-
-  
-  AURA: 'aura',
-  SEI_TESTNET_2: 'seiTestnet2',
-  IMPACT_HUB: 'impacthub',
-  JACKAL: 'jackal',
-  PLANQ: 'planq',
-  NOMIC: 'nomic',
-  NIBIRU: 'nibiru',
-  MAYA_CHAIN: 'mayachain',
-  EMPOWER_CHAIN: 'empowerchain',
-  DYDX: 'dydx',
-  GITOPIA: 'gitopia',
-  SGE: 'sge',
-  CELESTIA: 'celestia',
-  XPLA: 'xpla',
-  COMPOSABLE: 'composable',
-  DYMENSION: 'dymension',
-  PRYZM: 'pryzmtestnet',
-  THOR_CHAIN: 'thorchain',
-  ODIN_CHAIN: 'odin',
-  SAGA: 'saga',
-  INITIA: 'initia',
-  HUMANS_AI: 'humans',
+  [Platform.Aura]: 'aura',
+  [Platform.SeiTestNet2]: 'seiTestnet2',
+  [Platform.ImpactHub]: 'impacthub',
+  [Platform.Jackal]: 'jackal',
+  [Platform.Planq]: 'planq',
+  [Platform.Nomic]: 'nomic',
+  [Platform.Nibiru]: 'nibiru',
+  [Platform.MayaChain]: 'mayachain',
+  [Platform.EmpowerChain]: 'empowerchain',
+  [Platform.Dydx]: 'dydx',
+  [Platform.Gitopia]: 'gitopia',
+  [Platform.Sge]: 'sge',
+  [Platform.Celestia]: 'celestia',
+  [Platform.Xpla]: 'xpla',
+  [Platform.Composable]: 'composable',
+  [Platform.Dymension]: 'dymension',
+  [Platform.PryzmTestNet]: 'pryzmtestnet',
+  [Platform.ThorChain]: 'thorchain',
+  [Platform.Odin]: 'odin',
+  [Platform.Saga]: 'saga',
+  [Platform.Initia]: 'initia',
+  [Platform.HumansAi]: 'humans',
 };

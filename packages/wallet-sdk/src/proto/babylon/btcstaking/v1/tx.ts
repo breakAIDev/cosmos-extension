@@ -520,7 +520,7 @@ export interface MsgUpdateParams {
    *
    * NOTE: All parameters must be supplied.
    */
-  params: Params;
+  params: Params | undefined;
 }
 export interface MsgUpdateParamsProtoMsg {
   typeUrl: '/babylon.btcstaking.v1.MsgUpdateParams';
@@ -1658,7 +1658,6 @@ export const MsgUpdateParams = {
   fromPartial(object: Partial<MsgUpdateParams>): MsgUpdateParams {
     const message = createBaseMsgUpdateParams();
     message.authority = object.authority ?? '';
-    
     
     message.params =
       object.params !== undefined && object.params !== null ? Params.fromPartial(object.params) : undefined;

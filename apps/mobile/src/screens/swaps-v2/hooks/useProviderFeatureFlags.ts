@@ -1,7 +1,7 @@
 import { useFeatureFlags } from '@leapwallet/cosmos-wallet-hooks';
 import { useMemo } from 'react';
+import DeviceInfo from 'react-native-device-info';
 import semver from 'semver';
-import browser from 'webextension-polyfill';
 
 export function useProviderFeatureFlags() {
   const { data: featureFlags } = useFeatureFlags();
@@ -10,7 +10,7 @@ export function useProviderFeatureFlags() {
     if (!featureFlags?.swaps?.providers?.skip?.disabled_on_versions) {
       return true;
     }
-    const version = browser.runtime.getManifest().version;
+    const version = DeviceInfo.getVersion();
     return !featureFlags.swaps.providers.skip.disabled_on_versions?.some((disabledVersions) => {
       return semver.satisfies(version, disabledVersions);
     });
@@ -20,7 +20,7 @@ export function useProviderFeatureFlags() {
     if (!featureFlags?.swaps?.evm?.disabled_on_versions) {
       return true;
     }
-    const version = browser.runtime.getManifest().version;
+    const version = DeviceInfo.getVersion();
     return !featureFlags.swaps.evm.disabled_on_versions?.some((disabledVersions) => {
       return semver.satisfies(version, disabledVersions);
     });

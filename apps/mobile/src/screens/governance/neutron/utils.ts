@@ -1,5 +1,3 @@
-
-
 export enum VoteOptions {
   YES = 'Yes',
   NO = 'No',

@@ -1,10 +1,16 @@
-import Text from 'components/text';
-import { ButtonName, EventName, PageName } from 'config/analytics';
-import { Images } from 'images';
 import React from 'react';
-import { mixpanelTrack } from 'utils/tracking';
+import { View, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import Text from '../../../components/text';
+import { ButtonName, EventName, PageName } from '../../../services/config/analytics';
+import { Images } from '../../../../assets/images';
+import { mixpanelTrack } from '../../../utils/tracking';
 
-export function Introduction({ onJoinClick, pageName }: { onJoinClick: () => void; pageName: PageName }) {
+type IntroductionProps = {
+  onJoinClick: () => void;
+  pageName: PageName;
+};
+
+export function Introduction({ onJoinClick, pageName }: IntroductionProps) {
   const handleJoinClick = () => {
     onJoinClick();
     mixpanelTrack(EventName.ButtonClick, {
@@ -12,45 +18,83 @@ export function Introduction({ onJoinClick, pageName }: { onJoinClick: () => voi
       ButtonPageName: pageName,
     });
   };
+
   return (
-    <div className='pt-2 p-4 flex flex-col gap-2 items-center'>
-      <img src={Images.Alpha.chadDefaultBanner} alt='FrogSad' className='mb-6' />
-      <Text size='sm' className='font-medium !text-[1.2rem]'>
-        Introducing Leap Chads
-      </Text>
-      <div className='flex flex-col items-center gap-1 mt-2'>
-        <Text size='sm' className='text-center !text-gray-800 dark:!text-gray-400'>
-          Exclusive rewards for loyal Leap users.
-        </Text>
-        <Text size='sm' className='text-center !text-gray-800 dark:!text-gray-400 !leading-5'>
+    <View style={[styles.container, { gap: 8 }]}>
+      <Image source={Images.Alpha.chadDefaultBanner} style={styles.bannerImg} resizeMode="contain" />
+      <Text size="sm" style={styles.heading}>Introducing Leap Chads</Text>
+      <View style={[styles.centeredCol, { gap: 4, marginTop: 8 }]}>
+        <Text size="sm" style={styles.subtext}>Exclusive rewards for loyal Leap users.</Text>
+        <Text size="sm" style={[styles.subtext, styles.leading5]}>
           NFTs, WL Spots, Early Access, Points, Airdrops and so much more!
         </Text>
-      </div>
-      <button
-        className='w-full mt-2 mb-2 py-3 rounded-full bg-green-600 !text-gray-100 font-bold hover:bg-green-700 transition-colors mt-4'
-        onClick={handleJoinClick}
-      >
-        Join the Chads
-      </button>
-    </div>
+      </View>
+      <TouchableOpacity style={styles.button} onPress={handleJoinClick}>
+        <Text style={styles.buttonText}>Join the Chads</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 
 export function VerifyingEligibility() {
   return (
-    <div className='pt-2 p-4 flex flex-col gap-4 items-center'>
-      <img src={Images.Alpha.chadDefaultBanner} alt='FrogSad' className='mb-2' />
-      <Text size='sm' className='font-medium !text-[1.2rem]'>
-        Verifying your eligibility
-      </Text>
-      <div className='flex flex-col items-center gap-1'>
-        <Text size='sm' className='text-center !text-gray-800 dark:!text-gray-400'>
-          Exclusive rewards for loyal Leap users.
-        </Text>
-        <Text size='sm' className='text-center !text-gray-800 dark:!text-gray-400 !leading-5'>
+    <View style={[styles.container, { gap: 16 }]}>
+      <Image source={Images.Alpha.chadDefaultBanner} style={styles.bannerImg} resizeMode="contain" />
+      <Text size="sm" style={styles.heading}>Verifying your eligibility</Text>
+      <View style={styles.centeredCol}>
+        <Text size="sm" style={styles.subtext}>Exclusive rewards for loyal Leap users.</Text>
+        <Text size="sm" style={[styles.subtext, styles.leading5]}>
           NFTs, WL Spots, Early Access, Points, Airdrops and so much more!
         </Text>
-      </div>
-    </div>
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    paddingTop: 8,
+    padding: 16,
+    flexDirection: 'column',
+    alignItems: 'center',
+    width: '100%',
+  },
+  bannerImg: {
+    marginBottom: 24,
+    width: 200,
+    height: 80,
+  },
+  heading: {
+    fontWeight: '500',
+    fontSize: 18,
+    marginBottom: 0,
+    color: '#222',
+    textAlign: 'center',
+  },
+  centeredCol: {
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  subtext: {
+    fontSize: 15,
+    color: '#444',
+    textAlign: 'center',
+  },
+  leading5: {
+    lineHeight: 21,
+  },
+  button: {
+    width: '100%',
+    marginTop: 16,
+    marginBottom: 8,
+    paddingVertical: 12,
+    borderRadius: 24,
+    backgroundColor: '#16a34a', // green-600
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#f1f5f9',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+});

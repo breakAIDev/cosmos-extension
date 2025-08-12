@@ -1,187 +1,98 @@
-import { KeyChain } from '@leapwallet/leap-keychain';
-import { captureException } from '@sentry/react';
-import { Button } from 'components/ui/button';
-import { EventName } from 'config/analytics';
-import { AuthContextType, useAuth } from 'context/auth-context';
-import { motion, useAnimate, Variants } from 'framer-motion';
-import { HappyFrog } from 'icons/frog';
-import mixpanel from 'mixpanel-browser';
-import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { passwordStore } from 'stores/password-store';
-import { hasMnemonicWallet } from 'utils/hasMnemonicWallet';
-import { preloadOnboardingRoutes } from 'utils/preload';
-import extension from 'webextension-polyfill';
-
+import { View, Text, StyleSheet, ImageBackground } from 'react-native';
+import { observer } from 'mobx-react-lite';
+import { Button } from '../../components/ui/button';
+import { useAuth } from '../../context/auth-context';
+import { KeyChain } from '@leapwallet/leap-keychain';
+import { EventName } from '../../services/config/analytics';
+import { passwordStore } from '../../context/password-store';
+import { hasMnemonicWallet } from '../../utils/hasMnemonicWallet';
+import { preloadOnboardingRoutes } from '../../utils/preload';
+import { captureException } from '@sentry/react-native';
+import mixpanel from '../../mixpanel';
+import { MotiView, MotiImage } from 'moti';
+import { HappyFrog } from '../../../assets/icons/frog';
 import { OnboardingLayout } from './layout';
+import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Replace this with your RN gradient implementation (e.g., react-native-linear-gradient)
+const backgroundGradient = '../../../assets/images/onboarding-gradient.png';
 
 const transition = {
-  duration: 0.25,
-  delay: 1.05,
-  ease: 'easeOut',
+  type: 'timing',
+  duration: 250,
+  delay: 1050,
 };
 
-const headerTextVariants: Variants = {
-  hidden: { opacity: 0, y: '-25%' },
-  visible: { opacity: 1, y: 0 },
-};
-
-const buttonVariants: Variants = {
-  hidden: { opacity: 0, y: '25%' },
-  visible: { opacity: 1, y: 0 },
-};
-
-const backgroundGradient =
-  'linear-gradient(180deg, hsl(var(--bg-linear-gradient-start) / 1) 19.35%, hsl(var(--bg-linear-gradient-end)/ 1) 80.65%)';
-
-const OnboardingView = ({
-  navigate,
-  trackCTAEvent,
-}: {
-  navigate: (path: string) => void;
+const OnboardingView = ({ navigation, trackCTAEvent }: {
+  navigation: any;
   trackCTAEvent: (methodChosen: string) => void;
 }) => {
-  const [scope, animate] = useAnimate();
-
-  const intiAnimation = useCallback(async () => {
-    const logoId = '#leap-logo';
-    const backgroundGradientId = '#background-gradient';
-
-    const logoUpScale = 1.3334;
-    const yShift = 120;
-
-    await Promise.all([
-      animate(logoId, { y: yShift }, { duration: 0 }),
-      animate(backgroundGradientId, { opacity: 0.4 }, { duration: 0 }),
-    ]);
-
-    await Promise.all([
-      animate(
-        logoId,
-        { scale: logoUpScale, y: yShift },
-        {
-          duration: 0.25,
-          ease: 'easeOut',
-        },
-      ),
-      animate(
-        backgroundGradientId,
-        { opacity: 0.75 },
-        {
-          duration: 0.25,
-        },
-      ),
-    ]);
-
-    await Promise.all([
-      animate(
-        logoId,
-        { scale: 1, y: yShift },
-        {
-          delay: 0.25,
-          duration: 0.25,
-          ease: 'easeOut',
-        },
-      ),
-      animate(
-        backgroundGradientId,
-        { opacity: 0.4 },
-        {
-          delay: 0.25,
-          duration: 0.25,
-        },
-      ),
-    ]);
-
-    await Promise.all([
-      animate(
-        logoId,
-        { scale: logoUpScale, y: 0 },
-        {
-          delay: 0.25,
-          duration: 0.2,
-          ease: 'easeOut',
-        },
-      ),
-      animate(
-        backgroundGradientId,
-        { opacity: 1 },
-        {
-          delay: 0.25,
-          duration: 0.25,
-        },
-      ),
-    ]);
-  }, [animate]);
-
-  useEffect(() => {
-    intiAnimation();
-  }, [intiAnimation]);
-
   return (
-    <div ref={scope} className='flex flex-col flex-1 w-full p-7 isolate'>
-      <div
-        id='background-gradient'
-        style={{ backgroundImage: backgroundGradient }}
-        className='absolute inset-0 -z-10'
-      />
+    <View style={styles.flexContainer}>
+      {/* Background gradient */}
+      <ImageBackground source={{uri: backgroundGradient}} style={styles.background} imageStyle={styles.backgroundImage} />
 
-      <div className='flex flex-col gap-6 items-center justify-center flex-1'>
-        <HappyFrog id='leap-logo' className='size-[5.625rem]' style={{ transform: 'translateY(120px)' }} />
-
-        <motion.span
-          key='main-text'
-          initial='hidden'
-          animate='visible'
-          variants={headerTextVariants}
-          transition={transition}
-          className='flex flex-col gap-4'
+      {/* Logo + Headings */}
+      <View style={styles.centerContent}>
+        <MotiView
+          from={{ opacity: 0, translateY: 120 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ ...transition, type: 'timing' }}
+          style={styles.logoWrapper}
         >
-          <span className='text-center text-xxl font-bold text-secondary-foreground'>Leap everywhere</span>
-          <span className='text-center text-xl text-secondary-800'>
+          <HappyFrog width={90} height={90} />
+        </MotiView>
+        <MotiView
+          from={{ opacity: 0, translateY: -30 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ ...transition, delay: 200 }}
+          style={styles.textWrapper}
+        >
+          <Text style={styles.heading}>Leap everywhere</Text>
+          <Text style={styles.subHeading}>
             Multi-chain wallet for Cosmos, Ethereum, Solana, Bitcoin & more
-          </span>
-        </motion.span>
-      </div>
+          </Text>
+        </MotiView>
+      </View>
 
-      <motion.div
-        className='flex flex-col gap-y-4 w-full mt-auto'
-        initial='hidden'
-        animate='visible'
-        variants={buttonVariants}
-        transition={transition}
+      {/* Buttons */}
+      <MotiView
+        from={{ opacity: 0, translateY: 25 }}
+        animate={{ opacity: 1, translateY: 0 }}
+        transition={{ ...transition, delay: 300 }}
+        style={styles.buttonWrapper}
       >
         <Button
-          className='w-full'
-          data-testing-id='create-new-wallet'
-          onClick={() => {
-            navigate('/onboardingCreate');
+          style={styles.button}
+          testID="create-new-wallet"
+          onPress={() => {
+            navigation.navigate('OnboardingCreate');
             trackCTAEvent('new');
           }}
         >
           Create a new wallet
         </Button>
-
         <Button
-          variant='mono'
-          className='w-full'
-          data-testing-id='import-existing-wallet'
-          onClick={() => {
-            navigate('/onboardingImport');
+          variant="mono"
+          style={styles.button}
+          testID="import-existing-wallet"
+          onPress={() => {
+            navigation.navigate('OnboardingImport');
             trackCTAEvent('import-seed-phrase');
           }}
         >
           Import an existing wallet
         </Button>
-      </motion.div>
-    </div>
+      </MotiView>
+    </View>
   );
 };
 
 export default observer(function Onboarding() {
-  const navigate = useNavigate();
-  const { loading, noAccount } = useAuth() as AuthContextType;
+  const navigation = useNavigation();
+  const { loading, noAccount } = useAuth() || {};
 
   const trackCTAEvent = (methodChosen: string) => {
     try {
@@ -189,31 +100,27 @@ export default observer(function Onboarding() {
     } catch (e) {
       captureException(e);
     }
-
-    localStorage.setItem('onboardingMethodChosen', methodChosen);
-    localStorage.setItem('timeStarted2', new Date().getTime().toString());
+    AsyncStorage.setItem('onboardingMethodChosen', methodChosen);
+    AsyncStorage.setItem('timeStarted2', new Date().getTime().toString());
   };
 
   useEffect(() => {
     (async () => {
       const wallets = await KeyChain.getAllWallets();
-
       if (loading === false && hasMnemonicWallet(wallets)) {
         if (!noAccount || passwordStore.password) {
-          navigate('/onboardingSuccess');
+          navigation.navigate('OnboardingSuccess');
         }
       }
     })();
-  }, [loading, navigate, noAccount, passwordStore.password]);
+  }, [loading, navigation, noAccount]);
 
   useEffect(() => {
     preloadOnboardingRoutes();
 
-    extension.extension.getViews({ type: 'popup' });
-
-    const timeStarted1 = localStorage.getItem('timeStarted1');
+    const timeStarted1 = AsyncStorage.getItem('timeStarted1');
     if (!timeStarted1) {
-      localStorage.setItem('timeStarted1', new Date().getTime().toString());
+      AsyncStorage.setItem('timeStarted1', new Date().getTime().toString());
     }
 
     try {
@@ -226,13 +133,72 @@ export default observer(function Onboarding() {
     }
   }, []);
 
-  if (loading) {
-    return null;
-  }
+  if (loading) return null;
 
   return (
-    <OnboardingLayout className='flex flex-col gap-y-5 justify-center items-center grow'>
-      <OnboardingView navigate={navigate} trackCTAEvent={trackCTAEvent} />
+    <OnboardingLayout style={styles.layout}>
+      <OnboardingView navigation={navigation} trackCTAEvent={trackCTAEvent} />
     </OnboardingLayout>
   );
+});
+
+const styles = StyleSheet.create({
+  layout: {
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 20,
+  },
+  flexContainer: {
+    flex: 1,
+    flexDirection: 'column',
+    width: '100%',
+    padding: 28,
+    position: 'relative',
+    backgroundColor: '#f7fafd',
+  },
+  background: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: -1,
+  },
+  backgroundImage: {
+    resizeMode: 'cover',
+    opacity: 1,
+  },
+  centerContent: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 24,
+  },
+  logoWrapper: {
+    marginBottom: 16,
+  },
+  textWrapper: {
+    alignItems: 'center',
+    gap: 10,
+  },
+  heading: {
+    textAlign: 'center',
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#273852', // secondary-foreground
+    marginBottom: 4,
+  },
+  subHeading: {
+    textAlign: 'center',
+    fontSize: 18,
+    color: '#4a5973', // secondary-800
+    marginBottom: 2,
+  },
+  buttonWrapper: {
+    width: '100%',
+    marginTop: 'auto',
+    gap: 16,
+  },
+  button: {
+    width: '100%',
+    marginBottom: 12,
+  },
 });

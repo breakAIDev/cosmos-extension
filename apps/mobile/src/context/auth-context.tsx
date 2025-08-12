@@ -1,11 +1,12 @@
 // src/context/AuthContext.tsx
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   BETA_NFTS_COLLECTIONS,
   ENABLED_NFTS_COLLECTIONS,
   StoredBetaNftCollection,
+  useActiveChain,
   useGetChains,
 } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
@@ -29,6 +30,17 @@ import { passwordStore } from './password-store';
 import { rootStore } from './root-store';
 
 import { SeedPhrase } from '../hooks/wallet/seed-phrase/useSeedPhrase';
+import { ActivityIndicator, DeviceEventEmitter, EmitterSubscription, View, ScrollView, StyleSheet, TouchableOpacity, Text, Platform } from 'react-native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { Wallet } from '../hooks/wallet/useWallet';
+import { hasMnemonicWallet } from '../utils/hasMnemonicWallet';
+import { AggregatedSupportedChain } from '../types/utility';
+import { HomeLoadingState } from '../screens/home/components/home-loading-state';
+import { QUICK_SEARCH_DISABLED_PAGES } from '../services/config/config';
+import { searchModalStore } from './search-modal-store';
+import { SearchModal } from '../components/search-modal';
+import ExtensionPage from '../components/extension-page';
+
 
 export type LockedState = 'pending' | 'locked' | 'unlocked';
 
@@ -42,6 +54,35 @@ export interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+export const v2LayoutPages = new Set([
+  'Onboarding',
+  'OnboardingCreateWallet',
+  'OnboardingImportWallet',
+  'OnboardingSuccess',
+  'ImportLedger',
+  'Swap',
+  'Home',
+  'Login',
+  'Nfts',
+  'Alpha',
+  'Activity',
+  'AssetDetails',
+  'Send',
+  'Stake',
+  'StakeInput',
+  'Airdrops',
+  'Alpha',
+  'Earn-usdn',
+  'Initia-vip',
+  'Buy',
+  'Airdrops',
+  'AirdropsDetails',
+  'Gov',
+  'ForgotPassword',
+  'AddToken',
+  'ManageTokens',
+]);
+
 export const AuthProvider = observer(({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [locked, setLocked] = useState<LockedState>('pending');
@@ -49,24 +90,15 @@ export const AuthProvider = observer(({ children }: { children: React.ReactNode 
 
   const testPassword = SeedPhrase.useTestPassword();
   const chains = useGetChains();
-
   useEffect(() => {
-    // Check for existing wallet/account on mount.
-    const init = async () => {
-      setLoading(true);
-      // Replace with your AsyncStorage or wallet check
-      const activeWallet = await AsyncStorage.getItem('ACTIVE_WALLET');
-      if (!activeWallet) {
-        setNoAccount(true);
-        setLocked('locked');
-        setLoading(false);
-      } else {
-        setNoAccount(false);
-        setLocked('locked'); // Always lock on app start
-        setLoading(false);
-      }
+    
+    const listener = DeviceEventEmitter.addListener('auto-lock', () => {
+      setLocked('locked');
+
+    });
+    return () => {
+      listener.remove();
     };
-    init();
   }, []);
 
   const signin = useCallback(
@@ -78,7 +110,20 @@ export const AuthProvider = observer(({ children }: { children: React.ReactNode 
         try {
           await testPassword(password);
 
-          // You would load/decrypt wallet with password here and save to state
+          /**
+           * when there is an active wallet, we don't need to decrypt the keychain,
+           * if we do it will overwrite the active wallet and keychain with the encrypted version
+           *
+           * on signout, we encrypt the updated keychain and active wallet.
+           *
+           * for some reason the password authentication failed errors are not propagated to the calling function when using async await
+           */
+          try {
+            const passwordBase64 = Buffer.from(password).toString('base64');
+            await DeviceEventEmitter.emit('unlock', { password: passwordBase64 });
+          } catch (e) {
+          }
+
           const [
             activeWallet,
             keyStore,
@@ -251,6 +296,7 @@ export const AuthProvider = observer(({ children }: { children: React.ReactNode 
       if(locked === 'locked') return;
       
       passwordStore.setPassword(null);
+      DeviceEventEmitter.emit('lock');
       
       const [
         activeWallet,
@@ -259,18 +305,64 @@ export const AuthProvider = observer(({ children }: { children: React.ReactNode 
         AsyncStorage.getItem(ACTIVE_WALLET),
         AsyncStorage.getItem(ENCRYPTED_ACTIVE_WALLET),
       ]);
+      await AsyncStorage.setItem(CONNECTIONS, JSON.stringify({}));
+
       if(!activeWallet && !encryptedActiveWallet) {
         setNoAccount(true);
       }
 
-      await AsyncStorage.setItem(CONNECTIONS, JSON.stringify({}));
       setLocked('locked');
       
-      // You should clear any sensitive state, cached decrypted wallet, etc.
-      setLoading(false);
       if(callback) callback();
     }, [locked]
   );
+  
+  useEffect(() => {
+    let listener: EmitterSubscription;
+
+    const fn = async () => {
+      setLoading(true);
+      const activeWallet = await AsyncStorage.getItem(ACTIVE_WALLET);
+      const encryptedActiveWallet = await AsyncStorage.getItem(ENCRYPTED_ACTIVE_WALLET);
+      if (activeWallet || encryptedActiveWallet) {
+        setNoAccount(false);
+        listener = DeviceEventEmitter.addListener('authentication', async (message: any) => {
+          if (message.status === 'success') {
+            try {
+              const passwordBase64 = message.password;
+              const password = Buffer.from(passwordBase64, 'base64');
+              await signin(password);
+            } catch (_) {
+              signout();
+              setLoading(false);
+            }
+          } else {
+            setLocked('locked');
+            setLoading(() => false);
+          }
+          listener.remove();
+        });
+        DeviceEventEmitter.emit('popup-open');
+        setTimeout(() => {
+          if (loading) {
+            setLoading(false);
+          }
+        }, 1000);
+      } else {
+        await AsyncStorage.setItem(V80_KEYSTORE_MIGRATION_COMPLETE, 'true');
+        await AsyncStorage.setItem(V118_KEYSTORE_MIGRATION_COMPLETE, 'true');
+        setLocked('locked');
+        setNoAccount(true);
+        setLoading(false);
+      }
+    };
+
+    fn();
+
+    return () => {
+      listener.remove();
+    };
+  }, [signin]);
 
   const value: AuthContextType = {
     locked,
@@ -286,3 +378,170 @@ export const AuthProvider = observer(({ children }: { children: React.ReactNode 
 export function useAuth() {
   return useContext(AuthContext)!;
 }
+
+export const RequireAuth = ({
+  children,
+  hideBorder,
+  titleComponent,
+}: {
+  children: React.ReactNode;
+  hideBorder?: boolean;
+  titleComponent?: React.ReactNode;
+}) => {
+  const auth = useAuth();
+  const navigation = useNavigation();
+  const route = useRoute();
+  const activeChain = useActiveChain() as AggregatedSupportedChain;
+
+  if (!auth || auth?.locked === 'pending') {
+    return route.name === 'Home' ? <HomeLoadingState /> : (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  if (auth?.locked === 'locked') {
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Login' }],
+    });
+    return null;
+  }
+
+  if (v2LayoutPages.has(route.name)) {
+    return children;
+  }
+
+  const isQuickSearchDisabled = QUICK_SEARCH_DISABLED_PAGES.includes(route.name) || activeChain === 'aggregated';
+
+  // Keyboard/Hotkey logic: On mobile, use a button or gesture instead!
+  const openSearchModal = () => {
+    searchModalStore.setShowModal(!searchModalStore.showModal);
+    searchModalStore.setEnteredOption(null);
+  };
+
+  const Children = isQuickSearchDisabled ? (
+    children
+  ) : (
+    <>
+      <TouchableOpacity style={styles.searchButton} onPress={openSearchModal}>
+        <Text style={styles.searchButtonText}>🔍</Text>
+      </TouchableOpacity>
+      {children}
+      <SearchModal />
+    </>
+  );
+
+  if (hideBorder) {
+    return (
+      <ScrollView
+        style={styles.hideBorderContainer}
+        contentContainerStyle={{ flexGrow: 1 }}
+      >
+        {React.isValidElement(Children) ? Children : <View/>}
+      </ScrollView>
+    );
+  }
+
+  return (
+    <ExtensionPage titleComponent={titleComponent}>
+      <View style={styles.extensionPageWrapper}>
+        <View style={styles.extensionPanel}>
+          {React.isValidElement(Children) ? Children : <View/>}
+        </View>
+      </View>
+    </ExtensionPage>
+  );
+};
+
+export function RequireAuthOnboarding({ children }: { children: React.ReactNode }) {
+  const [redirectTo, setRedirectTo] = useState<'Home' | 'Onboarding' | undefined>();
+  const auth = useAuth();
+  const route = useRoute();
+  const navigation = useNavigation();
+  const newUser = useRef(false);
+  const walletName = route.params?.walletName ?? undefined;
+
+  // Trigger navigation in useEffect, NOT in the render
+  useEffect(() => {
+    if (redirectTo === 'Home') {
+      navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
+    }
+    // No need to handle 'Onboarding' here because that's the current screen
+  }, [redirectTo, navigation]);
+
+  useEffect(() => {
+    const fn = async () => {
+      if (newUser.current) {
+        return;
+      }
+
+      const encryptedActiveWallet = await AsyncStorage.getItem(ENCRYPTED_ACTIVE_WALLET);
+      if (!auth?.loading && auth?.locked === 'locked' && encryptedActiveWallet) {
+        setRedirectTo('Home');
+        return;
+      }
+
+      const allWallets = await Wallet.getAllWallets();
+      if (!allWallets || Object.keys(allWallets).length === 0) {
+        newUser.current = true;
+      }
+      const hasPrimaryWallet = hasMnemonicWallet(allWallets);
+      const isLedger = walletName === 'ledger';
+
+      if (hasPrimaryWallet && !isLedger) {
+        setRedirectTo('Home');
+      } else {
+        setRedirectTo('Onboarding');
+      }
+    };
+    fn();
+  }, [auth, walletName]);
+
+  if (redirectTo === 'Onboarding') {
+    return <>{children}</>;
+  }
+
+  // When redirecting or loading, return null (renders nothing)
+  return null;
+}
+
+const styles = StyleSheet.create({
+  hideBorderContainer: {
+    flex: 1,
+    backgroundColor: '#18181B', // dark:bg-black-100
+    // Add more style props as needed
+  },
+  searchButton: {
+    position: 'absolute',
+    right: 20,
+    top: Platform.OS === 'ios' ? 60 : 30,
+    zIndex: 10,
+    backgroundColor: '#222',
+    padding: 12,
+    borderRadius: 30,
+  },
+  searchButtonText: {
+    color: '#fff',
+    fontSize: 22,
+  },
+  extensionPageWrapper: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    // Add any shadow or background styling as needed
+  },
+  extensionPanel: {
+    width: '90%',
+    minHeight: 350,
+    backgroundColor: '#222', // dark:shadow-sm shadow-xl dark:shadow-gray-700
+    borderRadius: 18,
+    padding: 18,
+    shadowColor: '#000',
+    shadowOpacity: 0.14,
+    shadowRadius: 20,
+    elevation: 6,
+    // etc...
+  },
+});

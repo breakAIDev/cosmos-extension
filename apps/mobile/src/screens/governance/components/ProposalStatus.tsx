@@ -1,5 +1,5 @@
-/* eslint-disable no-unused-vars */
 import React from 'react';
+import { Text, StyleSheet } from 'react-native';
 
 export enum ProposalStatusEnum {
   PROPOSAL_STATUS_IN_PROGRESS = 'PROPOSAL_STATUS_IN_PROGRESS',
@@ -19,18 +19,37 @@ export type ProposalStatusProps = {
 export function ProposalStatus({ status }: ProposalStatusProps): JSX.Element {
   switch (status) {
     case ProposalStatusEnum.PROPOSAL_STATUS_DEPOSIT_PERIOD:
-      return <span className=' font-semibold dark:text-orange-300 text-orange-600'>Deposit Period</span>;
+      return <Text style={[styles.status, styles.orange]}>Deposit Period</Text>;
     case ProposalStatusEnum.PROPOSAL_STATUS_VOTING_PERIOD:
-      return <span className='font-semibold  dark:text-orange-300 text-orange-600'>Voting Period</span>;
+      return <Text style={[styles.status, styles.orange]}>Voting Period</Text>;
     case ProposalStatusEnum.PROPOSAL_STATUS_PASSED:
-      return <span className='font-semibold text-green-600 dark:text-green-300'>Passed</span>;
+      return <Text style={[styles.status, styles.green]}>Passed</Text>;
     case ProposalStatusEnum.PROPOSAL_STATUS_FAILED:
-      return <span className='font-semibold text-red-300'>Failed</span>;
+      return <Text style={[styles.status, styles.red]}>Failed</Text>;
     case ProposalStatusEnum.PROPOSAL_STATUS_REJECTED:
-      return <span className='font-semibold text-red-300'>Rejected</span>;
+      return <Text style={[styles.status, styles.red]}>Rejected</Text>;
     case ProposalStatusEnum.PROPOSAL_STATUS_UNSPECIFIED:
-      return <span className='font-semibold text-gray-400 '>Unspecified</span>;
+      return <Text style={[styles.status, styles.gray]}>Unspecified</Text>;
     default:
-      return <span className='font-semibold text-gray-400'>Unspecified</span>;
+      return <Text style={[styles.status, styles.gray]}>Unspecified</Text>;
   }
 }
+
+const styles = StyleSheet.create({
+  status: {
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  orange: {
+    color: '#f59e42', // Orange-600
+  },
+  green: {
+    color: '#29A874',
+  },
+  red: {
+    color: '#FF707E',
+  },
+  gray: {
+    color: '#8e99af',
+  },
+});

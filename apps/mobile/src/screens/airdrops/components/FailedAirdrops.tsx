@@ -1,49 +1,104 @@
-import { useAirdropsEligibilityData } from '@leapwallet/cosmos-wallet-hooks';
-import { CaretRight } from '@phosphor-icons/react';
-import Text from 'components/text';
-import { Images } from 'images';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { cn } from 'utils/cn';
-import { trim } from 'utils/strings';
+import { View, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { useAirdropsEligibilityData } from '@leapwallet/cosmos-wallet-hooks';
+import { CaretRight } from 'phosphor-react-native';
+import Text from '../../../components/text';
+import { Images } from '../../../../assets/images';
+import { trim } from '../../../utils/strings';
 
 export default function FailedAirdrops() {
-  const navigate = useNavigate();
+  const navigation = useNavigation();
   const airdropsEligibilityData = useAirdropsEligibilityData() || {};
-  const failedAirdrops = Object.values(airdropsEligibilityData).filter((d) => d?.status === 'failed' && !d?.isHidden);
+  const failedAirdrops = Object.values(airdropsEligibilityData).filter(
+    (d) => d?.status === 'failed' && !d?.isHidden
+  );
 
   if (failedAirdrops.length < 1) {
     return null;
   }
 
   return (
-    <div>
-      <Text size='sm' className='font-bold mb-3'>
+    <View>
+      <Text size="sm" style={styles.title}>
         Status unavailable
       </Text>
-      <div>
+      <View>
         {failedAirdrops.map((d, index) => (
-          <div
+          <TouchableOpacity
             key={index}
-            className={cn(
-              'flex gap-2 items-center bg-secondary-100 hover:bg-secondary-200 py-3 cursor-pointer px-3 rounded-xl',
-              index !== failedAirdrops.length - 1 && 'mb-4',
-            )}
-            onClick={() => navigate(`/airdropsDetails?airdropId=${d.id}`)}
+            style={[
+              styles.airdropContainer,
+              index !== failedAirdrops.length - 1 && styles.marginBottom,
+            ]}
+            activeOpacity={0.8}
+            onPress={() =>
+              navigation.navigate('AirdropsDetails', { airdropId: d.id })
+            }
           >
-            <img src={d.airdropIcon} alt='airdrop-icon' className='w-8 h-8 rounded-full' />
-            <Text size='sm' className='flex-1 font-medium'>
-              {trim(d.name, 30)}
-              <img
-                src={Images.Misc.InfoFilledExclamationRedMark}
-                alt='InfoFilledExclamationRedMark'
-                className='w-5 h-5 rounded-full ml-2 rotate-180'
+            <Image
+              source={typeof d.airdropIcon === 'string' ? { uri: d.airdropIcon } : d.airdropIcon}
+              style={styles.airdropIcon}
+            />
+            <View style={styles.nameRow}>
+              <Text size="sm" style={styles.airdropName}>
+                {trim(d.name, 30)}
+              </Text>
+              <Image
+                source={{uri: Images.Misc.InfoFilledExclamationRedMark}}
+                style={styles.infoIcon}
+                resizeMode="contain"
               />
-            </Text>
-            <CaretRight size={16} className='text-gray-600 dark:text-gray-400' />
-          </div>
+            </View>
+            <CaretRight size={16} color="#6B7280" style={styles.caret} />
+          </TouchableOpacity>
         ))}
-      </div>
-    </div>
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  title: {
+    fontWeight: 'bold',
+    marginBottom: 12,
+    fontSize: 14,
+  },
+  airdropContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6', // secondary-100
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+  },
+  marginBottom: {
+    marginBottom: 16,
+  },
+  airdropIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    marginRight: 8,
+  },
+  nameRow: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  airdropName: {
+    fontWeight: '500',
+    fontSize: 14,
+    flexShrink: 1,
+  },
+  infoIcon: {
+    width: 20,
+    height: 20,
+    marginLeft: 8,
+    transform: [{ rotate: '180deg' }],
+  },
+  caret: {
+    marginLeft: 8,
+    alignSelf: 'center',
+  },
+});

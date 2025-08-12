@@ -16,7 +16,7 @@ export type GasPriceOptionValue = { option: GasOptions; gasPrice: GasPrice };
 
 export type GasPriceOptionsContextType = {
   gasLimit: BigNumber | string;
-  setGasLimit: (gasLimit: number | string | BigNumber) => void;
+  setGasLimit: (gasLimit: string | BigNumber) => void;
   recommendedGasLimit: string;
   feeTokenData: FeeTokenData;
   

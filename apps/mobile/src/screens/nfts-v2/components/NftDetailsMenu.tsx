@@ -1,7 +1,6 @@
-import classNames from 'classnames';
-import { Images } from 'images';
+import { Images } from '../../../../assets/images';
 import React from 'react';
-import { isSidePanel } from 'utils/isSidePanel';
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 
 type NftDetailsMenuProps = {
   handleProfileClick: VoidFunction;
@@ -18,35 +17,78 @@ export function NftDetailsMenu({
   handleHideNftClick,
   isInHiddenNfts,
 }: NftDetailsMenuProps) {
+  // Responsive width
+  const width = 344;
+
   return (
-    <div
-      className={classNames(
-        'absolute w-[344px] rounded-2xl border border-[0.5px] border-gray-50 dark:border-gray-100 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white-100',
-        {
-          '!w-[calc(100%-56px)]': isSidePanel(),
-        },
-      )}
-    >
+    <View style={[styles.menu, { width }]}>
       {showProfileOption && (
-        <div className='flex px-3 py-4 cursor-pointer' onClick={handleProfileClick}>
-          <img className='mr-3 invert dark:invert-0' src={Images.Misc.NftProfile} alt='profile' />
-          {isInProfile ? 'Remove from' : 'Set as'} profile avatar
-        </div>
+        <TouchableOpacity style={styles.row} onPress={handleProfileClick} activeOpacity={0.8}>
+          <Image
+            source={{uri: Images.Misc.NftProfile}}
+            style={styles.icon}
+            resizeMode="contain"
+          />
+          <Text style={styles.menuText}>
+            {isInProfile ? 'Remove from' : 'Set as'} profile avatar
+          </Text>
+        </TouchableOpacity>
       )}
 
-      <div className='flex px-3 py-4 cursor-pointer' onClick={handleHideNftClick}>
+      <TouchableOpacity style={styles.row} onPress={handleHideNftClick} activeOpacity={0.8}>
         {isInHiddenNfts ? (
           <>
-            <img className='mr-3 invert dark:invert-0' src={Images.Misc.UnhideNft} alt='unhide nft' />
-            Unhide NFT
+            <Image
+              source={{uri: Images.Misc.UnhideNft}}
+              style={styles.icon}
+              resizeMode="contain"
+            />
+            <Text style={styles.menuText}>Unhide NFT</Text>
           </>
         ) : (
           <>
-            <img className='mr-3 invert dark:invert-0' src={Images.Misc.HideNft} alt='hide nft' />
-            Hide NFT
+            <Image
+              source={{uri: Images.Misc.HideNft}}
+              style={styles.icon}
+              resizeMode="contain"
+            />
+            <Text style={styles.menuText}>Hide NFT</Text>
           </>
         )}
-      </div>
-    </div>
+      </TouchableOpacity>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  menu: {
+    position: 'absolute',
+    borderRadius: 18,
+    borderWidth: 0.5,
+    borderColor: '#f3f4f6',
+    backgroundColor: '#f3f4f6',
+    // For dark mode: override with theme if needed
+    paddingVertical: 0,
+    paddingHorizontal: 0,
+    zIndex: 100,
+    top: 0, // Set as needed
+    left: 0, // Set as needed
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 16,
+  },
+  icon: {
+    width: 24,
+    height: 24,
+    marginRight: 12,
+    // "invert" for dark mode would require a custom style or color swap logic
+  },
+  menuText: {
+    color: '#18181b',
+    fontSize: 15,
+    fontWeight: '500',
+  },
+});

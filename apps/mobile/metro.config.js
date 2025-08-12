@@ -1,11 +1,15 @@
-const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+const { getDefaultConfig } = require('@react-native/metro-config');
 
-/**
- * Metro configuration
- * https://reactnative.dev/docs/metro
- *
- * @type {import('@react-native/metro-config').MetroConfig}
- */
-const config = {};
+module.exports = (async () => {
+  const config = await getDefaultConfig(__dirname);
 
-module.exports = mergeConfig(getDefaultConfig(__dirname), config);
+  // make sure Metro resolves .mjs from ESM packages like cosmjs-types
+  config.resolver.sourceExts = Array.from(
+    new Set([...(config.resolver.sourceExts || []), 'mjs'])
+  );
+
+  // prefer RN/main over module to avoid tricky ESM paths when CJS exists
+  config.resolver.resolverMainFields = ['react-native', 'main', 'module'];
+
+  return config;
+})();

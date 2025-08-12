@@ -1,40 +1,29 @@
-import { formatTokenAmount, useAddress, useDebounce } from '@leapwallet/cosmos-wallet-hooks';
-import { pubKeyToEvmAddressToShow, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { ThemeName, useTheme } from '@leapwallet/leap-ui';
-import { ArrowLeft, ArrowSquareOut, CaretDown } from '@phosphor-icons/react';
-import { captureException } from '@sentry/react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { View, Text, TouchableOpacity, Image, ScrollView, StyleSheet, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
+import { ArrowLeft, ArrowSquareOut, CaretDown } from 'phosphor-react-native';
+import { captureException } from '@sentry/react-native';
 import BigNumber from 'bignumber.js';
-import { WalletButtonV2 } from 'components/button/WalletButtonV2';
-import { PageHeader } from 'components/header/PageHeaderV2';
-import Text from 'components/text';
-import { Button } from 'components/ui/button';
-import { PageName } from 'config/analytics';
-import useActiveWallet from 'hooks/settings/useActiveWallet';
-import { AssetProps } from 'hooks/swapped/useGetSupportedAssets';
-import { useChainInfos } from 'hooks/useChainInfos';
-import { getConversionRateKado, getQuoteSwapped } from 'hooks/useGetSwappedDetails';
-import useQuery from 'hooks/useQuery';
-import { useWalletInfo } from 'hooks/useWalletInfo';
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
-import { useThemeColor } from 'hooks/utility/useThemeColor';
-import { Wallet } from 'hooks/wallet/useWallet';
-import { Images } from 'images';
-import { isString } from 'markdown-it/lib/common/utils';
-import SelectWallet from 'pages/home/SelectWallet/v2';
-import { convertObjInQueryParams } from 'pages/home/utils';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import Skeleton from 'react-loading-skeleton';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { cn } from 'utils/cn';
-import { getCountryLogo } from 'utils/getCountryLogo';
-import { imgOnError } from 'utils/imgOnError';
-import { uiErrorTags } from 'utils/sentry';
-import { removeLeadingZeroes } from 'utils/strings';
 
+import { formatTokenAmount, useAddress, useDebounce } from '@leapwallet/cosmos-wallet-hooks';
+import { useChainInfos } from '../../hooks/useChainInfos';
+import { getConversionRateKado, getQuoteSwapped } from '../../hooks/useGetSwappedDetails';
+import { removeLeadingZeroes } from '../../utils/strings';
+import { isString } from 'markdown-it/lib/common/utils';
+
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import SelectWallet from '../home/SelectWallet/v2';
 import SelectAssetSheet from './components/SelectAssetSheet';
 import SelectCurrencySheet from './components/SelectCurrencySheet';
+import { convertObjInQueryParams } from '../home/utils';
+import { Images } from '../../../assets/images';
+import { AssetProps } from '../../hooks/swapped/useGetSupportedAssets';
 
-import useWallets = Wallet.useWallets;
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { PageName } from '../../services/config/analytics';
+import { uiErrorTags } from '../../utils/sentry';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import useQuery from '../../hooks/useQuery';
 
 export enum ServiceProviderEnum {
   SWAPPED = 'swapped',
@@ -44,25 +33,15 @@ export enum ServiceProviderBaseUrlEnum {
   SWAPPED = 'https://widget.swapped.com',
 }
 
-const Buy = () => {
-  const { walletAvatar, walletName } = useWalletInfo();
+export default function Buy() {
+  const navigation = useNavigation();
   const [showSelectWallet, setShowSelectWallet] = useState(false);
   const pageViewSource = useQuery().get('pageSource') ?? undefined;
-  const pageViewAdditionalProperties = useMemo(
-    () => ({
-      pageViewSource,
-    }),
-    [pageViewSource],
-  );
   // usePageView(PageName.OnRampQuotePreview, true, pageViewAdditionalProperties)
-  const themeColor = useThemeColor();
-  const { theme } = useTheme();
-  const defaultTokenLogo = useDefaultTokenLogo();
 
-  const navigate = useNavigate();
-  const location = useLocation();
+  const route = useRoute();
   
-  const asset: any = location.state;
+  const asset: any = route.params;
 
   const [showSelectCurrencySheet, setShowSelectCurrencySheet] = useState(false);
   const [showSelectTokenSheet, setShowSelectTokenSheet] = useState(false);
@@ -79,8 +58,6 @@ const Buy = () => {
   const [error, setError] = useState<string | null>(null);
   const inputAmountRef = useRef(null);
   const chains = useChainInfos();
-
-  const handleOpenWalletSheet = useCallback(() => setShowSelectWallet(true), []);
 
   useEffect(() => {
     async function getQuote() {
@@ -195,206 +172,239 @@ const Buy = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fiatAmountInUsd, payFiatAmount, selectedAddress, selectedAsset, selectedCurrency]);
 
+  // Main Render
   return (
-    <>
-      {selectedAsset ? (
-        <>
-          <PageHeader>
-            <ArrowLeft size={36} className='text-monochrome cursor-pointer p-2' onClick={() => navigate(-1)} />
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <View style={{ flex: 1, backgroundColor: '#fff' }}>
+          {/* Header */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', padding: 16 }}>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <ArrowLeft size={36} color="#222" />
+            </TouchableOpacity>
+            {/* Custom WalletButtonV2 component as-is */}
+          </View>
 
-            <WalletButtonV2
-              className='absolute top-1/2 right-1/2 translate-x-1/2 -translate-y-1/2'
-              walletName={walletName}
-              showWalletAvatar={true}
-              walletAvatar={walletAvatar}
-              showDropdown={true}
-              handleDropdownClick={handleOpenWalletSheet}
-            />
-          </PageHeader>
-          <div className='flex flex-col gap-3 p-6'>
-            <div className='w-full bg-secondary-100 rounded-2xl p-5 flex flex-col gap-3'>
-              <div className='flex justify-between items-center'>
-                <p className='text-muted-foreground text-sm font-medium !leading-[22.4px]'>You pay</p>
-              </div>
-
-              <div className='flex rounded-2xl justify-between w-full items-center gap-2 h-[34px] p-[2px]'>
-                <input
-                  value={payFiatAmount}
-                  onChange={(e) => {
-                    setError(null);
-                    const val = e.target.value;
-                    const amount = removeLeadingZeroes(val);
-                    if (parseFloat(amount) < 0) {
-                      setError('Please enter a valid positive number.');
-                    } else {
-                      setPayFiatAmount(amount);
-                    }
-                  }}
-                  type='number'
-                  placeholder='0'
-                  ref={inputAmountRef}
-                  className={cn(
-                    'bg-transparent outline-none w-full text-left placeholder:font-bold placeholder:text-[24px] placeholder:text-monochrome font-bold !leading-[32.4px] caret-accent-blue',
-                    {
-                      'text-destructive-100': !!error,
-                      'text-monochrome': !error,
-                      'text-[24px]': payFiatAmount.length < 12,
-                      'text-[22px]': payFiatAmount.length >= 12 && payFiatAmount.length < 15,
-                      'text-[20px]': payFiatAmount.length >= 15 && payFiatAmount.length < 18,
-                      'text-[18px]': payFiatAmount.length >= 18,
-                    },
-                  )}
-                />
-                <button
-                  className={cn(
-                    'flex justify-end items-center gap-2 shrink-0 py-1 px-1.5 rounded-[40px] bg-secondary-300 hover:bg-secondary-400',
-                  )}
-                  onClick={() => setShowSelectCurrencySheet(true)}
-                >
-                  <img src={getCountryLogo(selectedCurrency)} className='w-[24px] h-[24px] rounded-full' />
-
-                  <p className={cn('dark:text-white-100 text-sm font-medium')}>{selectedCurrency}</p>
-                  <CaretDown size={14} className='dark:text-white-100' />
-                </button>
-              </div>
-              {error && (
-                <Text size='xs' className='text-red-600 dark:text-red-300 pt-1.5'>
-                  {error}
-                </Text>
-              )}
-              <div className='flex gap-1.5 mt-1'>
-                {[100, 500, 1000].map((element) => {
-                  return (
-                    <button
-                      key={element}
-                      onClick={() => setPayFiatAmount(element.toString())}
-                      className='rounded-full bg-secondary-200 px-[6px] py-0.5 font-medium text-xs hover:bg-secondary-300 dark:hover:text-white-100 hover:text-black-100 !leading-[19.2px] text-muted-foreground'
-                    >
-                      {element}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className='w-full bg-secondary-100 rounded-2xl p-5 flex flex-col gap-3'>
-              <div className='flex justify-between items-center'>
-                <p className='text-muted-foreground text-sm font-medium !leading-[22.4px]'>You get</p>
-              </div>
-
-              <div className='flex rounded-2xl justify-between w-full items-center gap-2 h-[34px] p-[2px]'>
-                {loadingQuote ? (
-                  <div className='w-[50px] h-full z-0'>
-                    <Skeleton className='rounded-full bg-gray-50 dark:bg-gray-800' />
-                  </div>
-                ) : (
-                  <input
-                    value={
-                      parseFloat(getAssetAmount) * 10000 > 0
-                        ? formatTokenAmount(getAssetAmount, undefined, 4)
-                        : getAssetAmount
-                    }
-                    placeholder='0'
-                    className={cn(
-                      'bg-transparent outline-none w-full text-left placeholder:font-bold placeholder:text-[24px] placeholder:text-monochrome font-bold !leading-[32.4px] caret-accent-blue text-[24px] text-monochrome',
-                    )}
-                    readOnly={true}
+          {selectedAsset && (
+            <View style={{ flex: 1 }}>
+              {/* You pay section */}
+              <View style={styles.section}>
+                <Text style={styles.label}>You pay</Text>
+                <View style={styles.inputRow}>
+                  <Input
+                    value={payFiatAmount}
+                    onChangeText={(val) => {
+                      setError(null);
+                      const amount = removeLeadingZeroes(val);
+                      if (parseFloat(amount) < 0) setError('Please enter a valid positive number.');
+                      else setPayFiatAmount(amount);
+                    }}
+                    keyboardType="numeric"
+                    placeholder="0"
+                    style={[
+                      styles.input,
+                      !!error ? styles.inputError : styles.inputNormal,
+                    ]}
+                    ref={inputAmountRef}
                   />
-                )}
-                <button
-                  className={cn(
-                    'flex justify-end items-center gap-2 shrink-0 py-1 px-1.5 rounded-[40px] bg-secondary-300 hover:bg-secondary-400',
+                  <TouchableOpacity
+                    style={styles.currencyButton}
+                    onPress={() => setShowSelectCurrencySheet(true)}
+                  >
+                    {/* Add your currency flag image */}
+                    <Text style={styles.currencyText}>{selectedCurrency}</Text>
+                    <CaretDown size={14} color="#222" />
+                  </TouchableOpacity>
+                </View>
+                {error && <Text style={styles.error}>{error}</Text>}
+                <View style={styles.quickRow}>
+                  {[100, 500, 1000].map((amt) => (
+                    <TouchableOpacity key={amt} style={styles.quickButton} onPress={() => setPayFiatAmount(String(amt))}>
+                      <Text style={styles.quickButtonText}>{amt}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              {/* You get section */}
+              <View style={styles.section}>
+                <Text style={styles.label}>You get</Text>
+                <View style={styles.inputRow}>
+                  {loadingQuote ? (
+                    <ActivityIndicator style={styles.assetInput} />
+                  ) : (
+                    <Input
+                      value={
+                        parseFloat(getAssetAmount) * 10000 > 0
+                          ? formatTokenAmount(getAssetAmount, undefined, 4)
+                          : getAssetAmount
+                      }
+                      placeholder="0"
+                      style={[styles.input, styles.inputNormal]}
+                      editable={false}
+                    />
                   )}
-                  onClick={() => setShowSelectTokenSheet(true)}
-                >
-                  <img
-                    src={selectedAsset?.assetImg}
-                    onError={imgOnError(defaultTokenLogo)}
-                    className='w-[24px] h-[24px] rounded-full'
+                  <TouchableOpacity style={styles.currencyButton} onPress={() => setShowSelectTokenSheet(true)}>
+                    {/* Your asset image */}
+                    <Text style={styles.currencyText}>{selectedAsset?.symbol}</Text>
+                    <CaretDown size={14} color="#222" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* Provider row */}
+              <View style={styles.providerRow}>
+                <Text style={styles.providerLabel}>Provider</Text>
+                <View style={styles.providerInfo}>
+                  <Image
+                    source={{uri: Images.Logos.SwappedLight}}
+                    style={styles.providerLogo}
                   />
+                  <Text style={styles.providerText}>Swapped</Text>
+                </View>
+              </View>
 
-                  <p className={cn('dark:text-white-100 text-sm font-medium')}>{selectedAsset?.symbol}</p>
-                  <CaretDown size={14} className='dark:text-white-100' />
-                </button>
-              </div>
-            </div>
+              {/* Buy Button */}
+              <View style={styles.footer}>
+                <Button
+                  style={[
+                    styles.buyButton,
+                    (!new BigNumber(getAssetAmount).isGreaterThan(0) || loadingQuote || isString(error)) && styles.buyButtonDisabled,
+                    !!error && styles.buyButtonError,
+                  ]}
+                  onPress={handleBuyClick}
+                  disabled={!new BigNumber(getAssetAmount).isGreaterThan(0) || loadingQuote || isString(error)}
+                >
+                  {!new BigNumber(getAssetAmount).isGreaterThan(0) ? (
+                    'Enter amount'
+                  ) : (
+                    <View style={styles.buyButtonContent}>
+                      <ArrowSquareOut size={20} weight="bold" color="#fff" />
+                      <Text style={styles.buyButtonText}>Buy</Text>
+                    </View>
+                  )}
+                </Button>
+              </View>
+            </View>
+          )}
 
-            <div className='w-full flex justify-between mt-2'>
-              <Text size='sm' color='text-muted-foreground' className='font-medium'>
-                Provider
-              </Text>
-              <div className={cn('flex items-center gap-1')}>
-                <img
-                  src={theme === ThemeName.DARK ? Images.Logos.SwappedDark : Images.Logos.SwappedLight}
-                  className='w-5 h-5'
-                />
-                <Text size='sm' color='text-monochrome' className='font-medium'>
-                  Swapped
-                </Text>
-              </div>
-            </div>
-          </div>
-          <div className='w-full p-4 mt-auto sticky bottom-0 bg-secondary-100 '>
-            <Button
-              className={cn('w-full', {
-                '!bg-red-300 text-white-100': error,
-              })}
-              onClick={handleBuyClick}
-              disabled={!new BigNumber(getAssetAmount).isGreaterThan(0) || loadingQuote || isString(error)}
-            >
-              {!new BigNumber(getAssetAmount).isGreaterThan(0) ? (
-                'Enter amount'
-              ) : (
-                <div className='flex items-center gap-1.5'>
-                  <ArrowSquareOut size={20} weight='bold' />
-                  <span>Buy</span>
-                </div>
-              )}
-            </Button>
-          </div>
-        </>
-      ) : null}
-
-      <SelectCurrencySheet
-        isVisible={showSelectCurrencySheet}
-        selectedCurrency={selectedCurrency}
-        onClose={() => setShowSelectCurrencySheet(false)}
-        onCurrencySelect={(currency) => {
-          setSelectedCurrency(currency);
-          setShowSelectCurrencySheet(false);
-          if (inputAmountRef.current) {
-            (inputAmountRef.current as HTMLElement).focus();
-          }
-        }}
-      />
-      <SelectWallet
-        isVisible={showSelectWallet}
-        onClose={() => {
-          setShowSelectWallet(false);
-          navigate('/home');
-        }}
-        title='Your Wallets'
-      />
-      <SelectAssetSheet
-        isVisible={showSelectTokenSheet}
-        selectedAsset={selectedAsset}
-        onClose={() => {
-          if (!selectedAsset) {
-            navigate(-1);
-          } else {
-            setShowSelectTokenSheet(false);
-          }
-        }}
-        onAssetSelect={(asset) => {
-          setSelectedAsset(asset);
-          setShowSelectTokenSheet(false);
-          if (inputAmountRef.current) {
-            (inputAmountRef.current as HTMLElement).focus();
-          }
-        }}
-      />
-    </>
+          {/* Modals */}
+          <SelectCurrencySheet
+            isVisible={showSelectCurrencySheet}
+            selectedCurrency={selectedCurrency}
+            onClose={() => setShowSelectCurrencySheet(false)}
+            onCurrencySelect={(currency) => {
+              setSelectedCurrency(currency);
+              setShowSelectCurrencySheet(false);
+            }}
+          />
+          <SelectWallet
+            isVisible={showSelectWallet}
+            onClose={() => {
+              setShowSelectWallet(false);
+              navigation.navigate('Home');
+            }}
+            title="Your Wallets"
+          />
+          <SelectAssetSheet
+            isVisible={showSelectTokenSheet}
+            selectedAsset={selectedAsset}
+            onClose={() => {
+              if (!selectedAsset) navigation.goBack();
+              else setShowSelectTokenSheet(false);
+            }}
+            onAssetSelect={(asset) => {
+              setSelectedAsset(asset);
+              setShowSelectTokenSheet(false);
+            }}
+          />
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
-};
+}
 
-export default Buy;
+const styles = StyleSheet.create({
+  header: {
+    paddingTop: 32,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    // justifyContent: 'space-between',
+  },
+  headerIcon: { padding: 8 },
+  section: {
+    backgroundColor: '#F7F8FA',
+    borderRadius: 18,
+    margin: 16,
+    padding: 20,
+    marginBottom: 0,
+  },
+  label: {
+    color: '#888',
+    fontSize: 15,
+    marginBottom: 12,
+    fontWeight: '600',
+  },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 12,
+    backgroundColor: '#fff',
+    paddingHorizontal: 6,
+    paddingVertical: 0,
+    height: 44,
+    marginBottom: 2,
+  },
+  input: {
+    flex: 1,
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#1A202C',
+    backgroundColor: 'transparent',
+    padding: 0,
+    margin: 0,
+  },
+  inputNormal: { color: '#1A202C' },
+  inputError: { color: '#F44' },
+  assetInput: { width: 60, textAlign: 'center' },
+  currencyButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EEE',
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    marginLeft: 8,
+  },
+  currencyLogo: { width: 24, height: 24, borderRadius: 12, marginRight: 6 },
+  currencyText: { color: '#1A202C', fontSize: 16, fontWeight: '500', marginRight: 2 },
+  error: { color: '#F44', fontSize: 12, paddingTop: 6, fontWeight: '500' },
+  quickRow: { flexDirection: 'row', gap: 10, marginTop: 8 },
+  quickButton: {
+    backgroundColor: '#ECEFF3',
+    borderRadius: 100,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    marginHorizontal: 2,
+  },
+  quickButtonText: { fontSize: 13, color: '#888', fontWeight: '500' },
+  providerRow: { flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: 20, marginTop: 16 },
+  providerLabel: { color: '#888', fontWeight: '500', fontSize: 15 },
+  providerInfo: { flexDirection: 'row', alignItems: 'center' },
+  providerLogo: { width: 20, height: 20, marginRight: 6 },
+  providerText: { color: '#222', fontWeight: '600', fontSize: 15 },
+  footer: { padding: 20 },
+  buyButton: {
+    backgroundColor: '#1880FF',
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  buyButtonDisabled: { backgroundColor: '#D4D4D4' },
+  buyButtonError: { backgroundColor: '#F44' },
+  buyButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 18 },
+  buyButtonContent: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+});

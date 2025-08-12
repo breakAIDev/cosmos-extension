@@ -12,7 +12,7 @@ export function reduceActivityInSections(
   if (acc[date]) {
     acc[date].push(tx);
   } else {
-    acc = { ...acc, [date]: [tx] };
+    acc[date] = [tx];
   }
 
   return acc;

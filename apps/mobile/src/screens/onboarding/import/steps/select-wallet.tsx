@@ -1,9 +1,9 @@
-import { KeyChain } from '@leapwallet/leap-keychain';
-import { Button } from 'components/ui/button';
-import WalletInfoCard, { SelectWalletsLabel } from 'components/wallet-info-card';
-import { OnboardingWrapper } from 'pages/onboarding/wrapper';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-
+import { View, StyleSheet, ScrollView } from 'react-native';
+import { KeyChain } from '@leapwallet/leap-keychain';
+import { Button } from '../../../../components/ui/button';
+import WalletInfoCard, { SelectWalletsLabel } from '../../../../components/wallet-info-card';
+import { OnboardingWrapper } from '../../../onboarding/wrapper';
 import { useImportWalletContext } from '../import-wallet-context';
 
 export const SelectWallet = () => {
@@ -15,6 +15,7 @@ export const SelectWallet = () => {
     prevStep,
     currentStep,
   } = useImportWalletContext();
+
   const [isLoading, setIsLoading] = useState(false);
   const [existingAddresses, setExistingAddresses] = useState<string[]>([]);
 
@@ -22,13 +23,11 @@ export const SelectWallet = () => {
     const fn = async () => {
       const allWallets = await KeyChain.getAllWallets();
       const addresses = [];
-
       for (const wallet of Object.values(allWallets ?? {})) {
         const address = wallet.addresses.cosmos;
         if ((wallet as any)?.watchWallet) continue;
         addresses.push(address);
       }
-
       setExistingAddresses(addresses);
     };
     fn();
@@ -65,10 +64,14 @@ export const SelectWallet = () => {
       heading={'Your wallets'}
       subHeading={'Select the ones you want to import'}
       entry={prevStep <= currentStep ? 'right' : 'left'}
-      className='gap-0'
+      style={styles.gap0}
     >
-      <div className='gradient-overlay mt-7 flex-1'>
-        <div className='flex flex-col gap-3 h-[21rem] pb-28 overflow-auto'>
+      <View style={styles.gradientOverlay}>
+        <ScrollView
+          contentContainerStyle={styles.walletList}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
           <SelectWalletsLabel
             count={selectedCount}
             total={filteredWalletAccounts.length}
@@ -76,13 +79,21 @@ export const SelectWallet = () => {
               setSelectedIds(
                 flag
                   ? Object.fromEntries(filteredWalletAccounts.map(({ index: id }) => [id, true]))
-                  : Object.fromEntries(filteredWalletAccounts.map(({ index: id }) => [id, false])),
+                  : Object.fromEntries(filteredWalletAccounts.map(({ index: id }) => [id, false]))
               );
             }}
           />
 
           {walletAccounts.map(
-            ({ address, index: id, evmAddress, bitcoinAddress, moveAddress, solanaAddress, suiAddress }) => {
+            ({
+              address,
+              index: id,
+              evmAddress,
+              bitcoinAddress,
+              moveAddress,
+              solanaAddress,
+              suiAddress,
+            }) => {
               const isExistingAddress = !!address && existingAddresses.indexOf(address) > -1;
               const isChosen = selectedIds[id];
 
@@ -103,19 +114,38 @@ export const SelectWallet = () => {
                   onSelectChange={handleSelectChange}
                 />
               );
-            },
+            }
           )}
-        </div>
-      </div>
+        </ScrollView>
+      </View>
 
       <Button
-        data-testing-id='btn-select-wallet-proceed'
-        className='w-full'
-        disabled={isLoading || Object.values(selectedIds).filter((val) => val).length === 0}
-        onClick={handleProceedClick}
+        data-testing-id="btn-select-wallet-proceed"
+        style={styles.fullWidth}
+        disabled={isLoading || selectedCount === 0}
+        onPress={handleProceedClick}
       >
         Proceed
       </Button>
     </OnboardingWrapper>
   );
 };
+
+const styles = StyleSheet.create({
+  gap0: {
+    gap: 0,
+  },
+  gradientOverlay: {
+    flex: 1,
+    marginTop: 28, // mt-7
+  },
+  walletList: {
+    flexDirection: 'column',
+    gap: 12, // gap-3, i.e. 3 * 4 = 12
+    paddingBottom: 112, // pb-28 (28 * 4 = 112)
+    height: 336, // h-[21rem] => 21 * 16 = 336 (can be omitted if you want scroll to be dynamic)
+  },
+  fullWidth: {
+    width: '100%',
+  },
+});

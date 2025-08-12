@@ -1,44 +1,38 @@
-import { Button } from 'components/ui/button';
-import { Skeleton } from 'components/ui/skeleton';
-import { AnimatePresence, motion } from 'framer-motion';
-import useActiveWallet from 'hooks/settings/useActiveWallet';
-import { EyeIcon } from 'icons/eye-icon';
-import { observer } from 'mobx-react-lite';
 import React from 'react';
-import { rootBalanceStore } from 'stores/root-store';
-import { opacityFadeInOut, transition250 } from 'utils/motion-variants';
-
+import { View, StyleSheet, Text } from 'react-native';
+import { Skeleton } from '../../../../components/ui/skeleton';
+import { Button } from '../../../../components/ui/button';
+import { EyeIcon } from '../../../../../assets/icons/eye-icon';
+import { observer } from 'mobx-react-lite';
+import { MotiView, AnimatePresence } from 'moti';
+import { rootBalanceStore } from '../../../../context/root-store';
 import { CopyAddress } from './copy-address';
 import { TotalBalance } from './total-balance';
+import useActiveWallet from '../../../../hooks/settings/useActiveWallet';
 
-export const BalanceHeaderLoading = (props: { watchWallet?: boolean }) => {
-  return (
-    <div key='loading' className='flex flex-col gap-y-2 justify-center items-center'>
-      <div className='h-[49px] flex items-center'>
-        <Skeleton className='w-44 h-6 rounded-full' />
-      </div>
-      <Skeleton className='h-4 m-[6px] rounded-full w-28' />
-      {props.watchWallet ? <Skeleton className='w-56 h-8 rounded-full my-3' /> : null}
-    </div>
-  );
-};
+export const BalanceHeaderLoading = ({ watchWallet }: { watchWallet?: boolean }) => (
+  <View style={styles.centeredCol}>
+    <View style={styles.row}>
+      <Skeleton style={styles.skeletonTitle} />
+    </View>
+    <Skeleton style={styles.skeletonSubtitle} />
+    {watchWallet ? <Skeleton style={styles.skeletonWatch} /> : null}
+  </View>
+);
 
-const WatchWalletIndicator = () => {
-  return (
-    <Button
-      variant={'secondary'}
-      size={'sm'}
-      className='bg-secondary-100 gap-2 px-4 py-2 h-auto my-3'
-      onClick={() => {
-        // TODO: add watch wallet popup to sheet store
-        // globalSheetsStore.setImportWatchWalletSeedPopupOpen(true)
-      }}
-    >
-      <EyeIcon className='size-4' />
-      <span className='font-medium text-sm'>You are watching this wallet</span>
-    </Button>
-  );
-};
+export const WatchWalletIndicator = () => (
+  <Button
+    variant="secondary"
+    size="sm"
+    style={{ backgroundColor: '#F3F5F7', flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingVertical: 8, marginVertical: 12, alignItems: 'center' }}
+    onPress={() => {
+      // TODO: open watch wallet popup sheet
+    }}
+  >
+    <EyeIcon size={16} />
+    <Text style={{ fontWeight: '500', fontSize: 14 }}>You are watching this wallet</Text>
+  </Button>
+);
 
 export const BalanceHeader = observer(() => {
   const { activeWallet } = useActiveWallet();
@@ -46,27 +40,35 @@ export const BalanceHeader = observer(() => {
   const isTokenLoading = rootBalanceStore.loading;
 
   return (
-    <div className='w-full py-8 px-7 flex flex-col items-center justify-center'>
-      <AnimatePresence mode='wait'>
+    <View style={styles.container}>
+      <AnimatePresence>
         {isTokenLoading ? (
-          <BalanceHeaderLoading key='balance-header-loading' watchWallet={watchWallet} />
+          <BalanceHeaderLoading key="balance-header-loading" watchWallet={watchWallet} />
         ) : (
-          <motion.div
-            key='balance'
-            className='flex flex-col items-center gap-2'
-            transition={transition250}
-            variants={opacityFadeInOut}
-            initial='hidden'
-            animate='visible'
-            exit='hidden'
+          <MotiView
+            key="balance"
+            style={styles.motiCol}
+            from={{ opacity: 0, translateY: 12 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            exit={{ opacity: 0, translateY: 12 }}
+            transition={{ type: 'timing', duration: 250 }}
           >
             <TotalBalance />
             <CopyAddress />
-
             {watchWallet && <WatchWalletIndicator />}
-          </motion.div>
+          </MotiView>
         )}
       </AnimatePresence>
-    </div>
+    </View>
   );
+});
+
+const styles = StyleSheet.create({
+  container: { width: '100%', paddingVertical: 32, paddingHorizontal: 28, flexDirection: 'column', alignItems: 'center', justifyContent: 'center' },
+  motiCol: { flexDirection: 'column', alignItems: 'center', gap: 8 },
+  centeredCol: { flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 },
+  row: { height: 49, flexDirection: 'row', alignItems: 'center' },
+  skeletonTitle: { width: 176, height: 24, borderRadius: 12 },
+  skeletonSubtitle: { height: 16, marginVertical: 6, borderRadius: 8, width: 112 },
+  skeletonWatch: { width: 224, height: 32, borderRadius: 16, marginVertical: 8 },
 });

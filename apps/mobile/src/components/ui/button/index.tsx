@@ -1,190 +1,158 @@
-import React from 'react';
-import {
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-  ActivityIndicator,
-  StyleProp,
-  ViewStyle,
-  TextStyle,
-  GestureResponderEvent,
-} from 'react-native';
+import React, { forwardRef } from 'react';
+import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle, GestureResponderEvent, StyleProp, View } from 'react-native';
 
-type ButtonVariant = {
-  backgroundColor: string;
-  textColor: string;
-};
+export type Variant = 'default' | 'mono' | 'ghost' | 'action' | 'secondary' | 'destructive' | "text";
+export type Size = 'default' | 'md' | 'slim' | 'sm' | 'icon' | 'iconSm' | 'action';
 
-type VariantType =
-  | 'default'
-  | 'mono'
-  | 'ghost'
-  | 'action'
-  | 'secondary'
-  | 'destructive';
+export interface ButtonProps {
+  children: React.ReactNode;
+  variant?: Variant;
+  size?: Size;
+  onPress?: (event: GestureResponderEvent) => void;
+  disabled?: boolean;
+  style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
+  testID?: string;
+} 
 
-type ButtonVariants = Record<VariantType, ButtonVariant>;
+export const Button = forwardRef(
+  (
+    {
+      children,
+      variant = 'default',
+      size = 'default',
+      onPress,
+      disabled,
+      style,
+      textStyle,
+      testID,
+      ...props
+    }: ButtonProps,
+    ref: React.Ref<View>
+  ) => {
+    const variantStyle = buttonVariantStyles[variant] || buttonVariantStyles.default;
+    const sizeStyle = buttonSizeStyles[size] || buttonSizeStyles.default;
+    const textColor = variantTextColor[variant] || '#fff';
 
-type ButtonSize = {
-  height: number;
-  paddingHorizontal?: number;
-  fontSize: number;
-  borderRadius: number;
-  width?: number; // for icon/iconSm
-};
+    return (
+      <TouchableOpacity
+        ref={ref}
+        style={[
+          styles.base,
+          variantStyle,
+          sizeStyle,
+          disabled && styles.disabled,
+          style,
+        ]}
+        activeOpacity={0.8}
+        onPress={onPress}
+        disabled={disabled}
+        testID={testID}
+        {...props}
+      >
+        {typeof children === 'string' ? (
+          <Text style={[styles.text, { color: textColor }, textStyle]}>{children}</Text>
+        ) : (
+          React.isValidElement(children) ? children : null
+        )}
+      </TouchableOpacity>
+    );
+  }
+);
 
-type SizeType = 'default' | 'md' | 'slim' | 'sm' | 'icon' | 'iconSm' | 'action';
+Button.displayName = 'Button';
 
-type ButtonSizes = Record<SizeType, ButtonSize>;
+// --- Styles ---
 
-const BUTTON_VARIANTS: ButtonVariants = {
+const styles = StyleSheet.create({
+  base: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 999,
+    fontWeight: 'bold',
+    gap: 8, // Not natively supported in RN, use marginRight on icon/text if needed
+  },
+  text: {
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  disabled: {
+    opacity: 0.5,
+  },
+});
+
+// Variant styles
+const buttonVariantStyles: Record<Variant, ViewStyle> = {
   default: {
-    backgroundColor: '#3664F4',
-    textColor: '#fff',
+    backgroundColor: '#2563EB', // primary
   },
   mono: {
-    backgroundColor: '#ededed',
-    textColor: '#232323',
+    backgroundColor: '#F3F4F6', // monochrome
   },
   ghost: {
     backgroundColor: 'transparent',
-    textColor: '#69788A',
+    borderWidth: 0,
   },
   action: {
-    backgroundColor: '#26c06f',
-    textColor: '#fff',
+    backgroundColor: '#059669', // accent-green-700
   },
   secondary: {
-    backgroundColor: '#f5f5f5',
-    textColor: '#69788A',
+    backgroundColor: '#E5E7EB', // secondary-300
   },
   destructive: {
-    backgroundColor: '#FFE8E7',
-    textColor: '#E2655A',
+    backgroundColor: '#FF4D4F',
   },
 };
 
-const BUTTON_SIZES: ButtonSizes = {
+const variantTextColor: Record<Variant, string> = {
+  default: '#fff',
+  mono: '#374151',
+  ghost: '#6B7280',
+  action: '#D1FAE5',
+  secondary: '#222',
+  destructive: '#fff',
+};
+
+// Size styles
+const buttonSizeStyles: Record<Size, ViewStyle> = {
   default: {
     height: 52,
     paddingHorizontal: 24,
-    fontSize: 16,
-    borderRadius: 999,
+    paddingVertical: 8,
   },
   md: {
-    height: 44,
+    height: 48,
     paddingHorizontal: 16,
-    fontSize: 15,
-    borderRadius: 999,
+    paddingVertical: 12,
   },
   slim: {
-    height: 38,
+    height: 36,
     paddingHorizontal: 12,
-    fontSize: 15,
-    borderRadius: 999,
+    paddingVertical: 8,
   },
   sm: {
     height: 32,
     paddingHorizontal: 12,
-    fontSize: 13,
-    borderRadius: 999,
+    paddingVertical: 4,
   },
   icon: {
     height: 48,
     width: 48,
-    fontSize: 16,
-    borderRadius: 999,
-    paddingHorizontal: 0,
+    padding: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   iconSm: {
-    height: 36,
-    width: 36,
-    fontSize: 14,
-    borderRadius: 999,
-    paddingHorizontal: 0,
+    height: 32,
+    width: 32,
+    padding: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   action: {
     height: 28,
     paddingHorizontal: 8,
-    fontSize: 13,
-    borderRadius: 999,
+    paddingVertical: 0,
   },
 };
-
-export interface ButtonProps {
-  children?: React.ReactNode;
-  onPress?: (event: GestureResponderEvent) => void;
-  variant?: VariantType;
-  size?: SizeType;
-  style?: StyleProp<ViewStyle>;
-  textStyle?: StyleProp<TextStyle>;
-  disabled?: boolean;
-  loading?: boolean;
-}
-
-export function Button({
-  children,
-  onPress,
-  variant = 'default',
-  size = 'default',
-  style,
-  textStyle,
-  disabled,
-  loading,
-  ...rest
-}: ButtonProps) {
-  const v = BUTTON_VARIANTS[variant] || BUTTON_VARIANTS.default;
-  const s = BUTTON_SIZES[size] || BUTTON_SIZES.default;
-
-  const content = loading ? (
-    <ActivityIndicator color={v.textColor} />
-  ) : (
-    <Text
-      style={[
-        styles.text,
-        { color: v.textColor, fontSize: s.fontSize },
-        textStyle,
-      ]}
-    >
-      {children}
-    </Text>
-  );
-
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      style={[
-        styles.button,
-        {
-          backgroundColor: v.backgroundColor,
-          height: s.height,
-          paddingHorizontal: s.paddingHorizontal,
-          borderRadius: s.borderRadius,
-          opacity: disabled ? 0.5 : 1,
-          ...(s.width ? { width: s.width } : {}),
-        },
-        style,
-      ]}
-      disabled={disabled || loading}
-      activeOpacity={0.85}
-      {...rest}
-    >
-      {content}
-    </TouchableOpacity>
-  );
-}
-
-const styles = StyleSheet.create({
-  button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 32,
-    minWidth: 48,
-    marginVertical: 2,
-  },
-  text: {
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-});

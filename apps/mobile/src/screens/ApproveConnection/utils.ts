@@ -1,15 +1,17 @@
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { CONNECTIONS } from 'config/storage-keys';
-import browser from 'webextension-polyfill';
+import { CONNECTIONS } from '../../services/config/storage-keys';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
+/**
+ * Add origin to the allowed sites for each walletId/chainId
+ */
 export const addToConnections = async (chainIds: string[], walletIds: string[], origin: string) => {
-  let { connections = {} } = await browser.storage.local.get(CONNECTIONS);
-  if (connections === null) {
-    connections = {};
-  }
+  let stored = await AsyncStorage.getItem(CONNECTIONS);
+  let connections = stored ? JSON.parse(stored) : {};
+
   chainIds.forEach((chainId: string) => {
     walletIds.forEach((walletId: string) => {
-      const sites: [string] = connections?.[walletId]?.[chainId] || [];
+      const sites = connections?.[walletId]?.[chainId] || [];
       if (!sites.includes(origin)) {
         sites.push(origin);
       }
@@ -19,13 +21,13 @@ export const addToConnections = async (chainIds: string[], walletIds: string[], 
       };
     });
   });
-  await browser.storage.local.set({
-    [CONNECTIONS]: { ...connections },
-  });
+
+  await AsyncStorage.setItem(CONNECTIONS, JSON.stringify(connections));
 };
 
-export const getChainName = (chainId: string): SupportedChain => {
-  
-  
+/**
+ * Get the base chain name from the chainId
+ */
+export const getChainName = (chainId: string) => {
   return chainId?.split('-')?.slice(0, -1)?.join('-');
 };

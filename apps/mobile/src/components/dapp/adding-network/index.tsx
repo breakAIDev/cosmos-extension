@@ -3,7 +3,7 @@ import React from 'react';
 import { View, StyleSheet, useColorScheme } from 'react-native';
 
 type KeyProps = {
-  readonly children: React.ReactNode;
+  readonly children: string;
 };
 
 export function Key({ children }: KeyProps) {

@@ -1,8 +1,7 @@
-import { Skeleton } from 'components/ui/skeleton';
 import React from 'react';
-import { cn } from 'utils/cn';
-
-import { BannerControls } from './controls';
+import { View, ScrollView, StyleSheet, Dimensions } from 'react-native';
+import { Skeleton } from '../../../../components/ui/skeleton';
+import { BannerControls } from './controls'; // You’ll need RN version!
 import { useCarousel } from './use-carousel';
 
 const BANNER_LOADING_COUNT = 4;
@@ -13,46 +12,76 @@ export const BannersLoading = () => {
     activeBannerIndex,
     handleContainerScroll,
     handleScroll,
-    handleMouseEnter,
-    handleMouseLeave,
     scrollableContainerRef,
   } = useCarousel(BANNER_LOADING_COUNT);
 
   return (
-    <>
-      <div
-        className='flex items-center overflow-hidden px-4 snap-x snap-mandatory gap-2 w-full '
+    <View>
+      <ScrollView
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.bannerContainer}
         ref={scrollableContainerRef}
         onScroll={handleScroll}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
+        scrollEventThrottle={16}
       >
         {loadingBanners.map((_, index) => (
-          <div
+          <View
             key={index}
-            className={'relative shrink-0 inline-block overflow-hidden w-full snap-center h-16 aspect-[11/2]'}
+            style={[
+              styles.bannerWrapper,
+              {
+                transform: [
+                  { scale: activeBannerIndex === index ? 1 : 0.875 }
+                ]
+              }
+            ]}
           >
-            <div
-              className={cn(
-                'overflow-hidden w-full h-full rounded-lg items-center flex bg-secondary transform transition-transform ease-out duration-300',
-                activeBannerIndex === index ? 'scale-100' : 'scale-[87.5%]',
-                activeBannerIndex < index ? 'origin-left' : 'origin-right',
-              )}
-            >
-              <Skeleton className='w-full h-full bg-secondary-200' />
-            </div>
-          </div>
+            <View style={styles.skeletonWrapper}>
+              <Skeleton style={styles.skeleton} />
+            </View>
+          </View>
         ))}
-      </div>
+      </ScrollView>
 
       <BannerControls
         activeBannerIndex={activeBannerIndex}
         activeBannerId={''}
         totalItems={BANNER_LOADING_COUNT}
         handleContainerScroll={handleContainerScroll}
-        handleMouseEnter={handleMouseEnter}
-        handleMouseLeave={handleMouseLeave}
       />
-    </>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  bannerContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    gap: 8,
+  },
+  bannerWrapper: {
+    height: 64, // h-16
+    width: Dimensions.get('window').width - 32, // fill parent minus padding
+    overflow: 'hidden',
+    borderRadius: 12,
+    marginRight: 8,
+    backgroundColor: 'transparent',
+  },
+  skeletonWrapper: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    borderRadius: 12,
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  skeleton: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 12,
+    backgroundColor: '#E5E7EB', // bg-secondary-200
+  },
+});
+

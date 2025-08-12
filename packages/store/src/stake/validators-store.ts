@@ -1,4 +1,5 @@
 import {
+  AllParams,
   getChainInfo,
   getUnbondingTime,
   isAptosChain,
@@ -280,9 +281,7 @@ export class ValidatorsStore {
       runInAction(() => {
         this.chainWiseValidators[chainKey] = {
           chainData: {
-            
-            
-            params: Object.assign({}, { calculated_apr: calculatedApr, unbonding_time }),
+            params: Object.assign({}, { calculated_apr: calculatedApr, unbonding_time }) as AllParams,
           },
           validators,
         };

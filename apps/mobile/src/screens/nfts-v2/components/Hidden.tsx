@@ -3,7 +3,7 @@ import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { NftInfo, NftStore } from '@leapwallet/cosmos-wallet-store';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
-import { hiddenNftStore } from 'stores/manage-nft-store';
+import { hiddenNftStore } from '../../../context/manage-nft-store';
 
 import { TextHeaderCollectionCard } from './index';
 
@@ -17,7 +17,8 @@ export const Hidden = observer(({ nftStore }: HiddenProps) => {
     hiddenNfts: hiddenNftStore.hiddenNfts,
   });
 
-  if (hiddenNftsList.length === 0) return <></>;
+  if (hiddenNftsList.length === 0) return null;
+
   return (
     <TextHeaderCollectionCard
       headerTitle={`${hiddenNftsList.length} NFT${hiddenNftsList.length > 1 ? 's' : ''}`}

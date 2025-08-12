@@ -90,12 +90,6 @@ export const ContactsMatchList: React.FC<ContactsMatchListProps> = ({ contacts, 
   );
 };
 
-type NameServiceMatchListProps = {
-  address: string;
-  
-  handleContactSelect: (contact: SelectedAddress) => void;
-};
-
 export const NameServiceMatchList: React.FC<NameServiceMatchListProps> = ({ address, handleContactSelect }) => {
   const network = useSelectedNetwork();
   const chainInfos = useChainInfos();

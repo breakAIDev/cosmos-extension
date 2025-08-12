@@ -1,8 +1,8 @@
 import { SKIP_TXN_STATUS, SkipAPI, TRANSFER_STATE, TXN_STATUS } from '@leapwallet/elements-core';
 import { TransferAssetRelease } from '@skip-go/client';
-import { getChainIdsFromRoute } from 'pages/swaps-v2/utils';
+import { getChainIdsFromRoute } from '../../../../swaps-v2/utils';
 import { useCallback, useEffect, useRef } from 'react';
-import { SourceChain, SwapTxnStatus, TransferSequence } from 'types/swap';
+import { SourceChain, SwapTxnStatus, TransferSequence } from '../../../../../types/swap';
 
 import { RoutingInfo } from '../../useSwapsTx';
 import { getAxelarTransactionSequence } from './transactionSequence/axelar';

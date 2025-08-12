@@ -3,7 +3,7 @@ import { TransferState } from '@leapwallet/cosmos-wallet-sdk/dist/browser/proto/
 import { RootDenomsStore } from '@leapwallet/cosmos-wallet-store';
 import { TRANSFER_STATE } from '@leapwallet/elements-core';
 import { Action } from '@leapwallet/elements-hooks';
-import { ArrowSquareOut } from '@phosphor-icons/react';
+import { ArrowSquareOut } from 'phosphor-react-native';
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useMemo } from 'react';
 import Skeleton from 'react-loading-skeleton';

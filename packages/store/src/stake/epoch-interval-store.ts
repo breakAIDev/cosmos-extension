@@ -13,7 +13,7 @@ export type EpochInterval = {
 
 export class EpochIntervalStore extends BaseQueryStore<EpochInterval> {
   data: EpochInterval = {};
-  private intervalId: NodeJS.Timeout | null = null;
+  private intervalId: ReturnType<typeof setInterval> | null = null;
   private rootStackStore: RootStakeStore;
   private chainInfoStore: ChainInfosStore;
   private selectNetworkStore: SelectedNetworkStore;
@@ -145,6 +145,6 @@ export class EpochIntervalStore extends BaseQueryStore<EpochInterval> {
 
     this.intervalId = setInterval(() => {
       this.refetchAllData();
-    }, interval);
+    }, Math.max(0, interval));
   }
 }

@@ -2,26 +2,25 @@ import { useActiveWallet, WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks';
 import { ChainInfo, ChainInfos, toSmall } from '@leapwallet/cosmos-wallet-sdk';
 import { RootBalanceStore } from '@leapwallet/cosmos-wallet-store';
 import { Buttons } from '@leapwallet/leap-ui';
-import { ArrowSquareOut } from '@phosphor-icons/react';
+import { ArrowSquareOut } from 'phosphor-react-native';
 import BigNumber from 'bignumber.js';
 import classNames from 'classnames';
-import { AutoAdjustAmountSheet } from 'components/auto-adjust-amount-sheet';
-import Text from 'components/text';
-import { EventName, PageName } from 'config/analytics';
-import { usePageView } from 'hooks/analytics/usePageView';
-import { usePerformanceMonitor } from 'hooks/perf-monitoring/usePerformanceMonitor';
-import { useSelectedNetwork } from 'hooks/settings/useNetwork';
-import { useNonNativeCustomChains } from 'hooks/useNonNativeCustomChains';
-import useQuery from 'hooks/useQuery';
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
-import mixpanel from 'mixpanel-browser';
+import { AutoAdjustAmountSheet } from '../../components/auto-adjust-amount-sheet';
+import Text from '../../components/text';
+import { EventName, PageName } from '../../services/config/analytics';
+import { usePageView } from '../../hooks/analytics/usePageView';
+import { usePerformanceMonitor } from '../../hooks/perf-monitoring/usePerformanceMonitor';
+import { useSelectedNetwork } from '../../hooks/settings/useNetwork';
+import { useNonNativeCustomChains } from '../../hooks/useNonNativeCustomChains';
+import useQuery from '../../hooks/useQuery';
+import { useDefaultTokenLogo } from '../../hooks/utility/useDefaultTokenLogo';
+import mixpanel from '../../mixpanel';
 import { observer } from 'mobx-react-lite';
-import AddFromChainStore from 'pages/home/AddFromChainStore';
+import AddFromChainStore from '../home/AddFromChainStore';
 import qs from 'qs';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { activeChainStore } from 'stores/active-chain-store';
-import { cw20TokenBalanceStore, priceStore } from 'stores/balance-store';
+import { activeChainStore } from '../../context/active-chain-store';
+import { cw20TokenBalanceStore, priceStore } from '../../context/balance-store';
 import {
   autoFetchedCW20DenomsStore,
   betaCW20DenomsStore,
@@ -393,7 +392,7 @@ const SwapPage = observer(() => {
 
   const handleOnBackClick = useCallback(() => {
     if (pageViewSource === 'swapAgain') {
-      navigate('/home');
+      navigate('Home');
     } else {
       navigate(-1);
     }

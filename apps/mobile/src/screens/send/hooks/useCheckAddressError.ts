@@ -1,5 +1,3 @@
-
-
 import { AddressWarning, INITIAL_ADDRESS_WARNING, useAddress } from '@leapwallet/cosmos-wallet-hooks';
 import {
   isAptosAddress,

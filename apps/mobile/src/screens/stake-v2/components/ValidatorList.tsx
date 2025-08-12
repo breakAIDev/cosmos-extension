@@ -19,23 +19,22 @@ import {
   ValidatorsStore,
 } from '@leapwallet/cosmos-wallet-store';
 import BigNumber from 'bignumber.js';
-import BottomModal from 'components/new-bottom-modal';
-import { ValidatorItemSkeleton } from 'components/Skeletons/StakeSkeleton';
-import { Button } from 'components/ui/button';
+import BottomModal from '../../../components/new-bottom-modal';
+import { ValidatorItemSkeleton } from '../../../components/Skeletons/StakeSkeleton';
+import { Button } from '../../../components/ui/button';
 import currency from 'currency.js';
-import { useFormatCurrency } from 'hooks/settings/useCurrency';
-import useQuery from 'hooks/useQuery';
-import { Images } from 'images';
+import { useFormatCurrency } from '../../../hooks/settings/useCurrency';
+import useQuery from '../../../hooks/useQuery';
+import { Images } from '../../../../assets/images';
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { hideAssetsStore } from 'stores/hide-assets-store';
-import { imgOnError } from 'utils/imgOnError';
-import { isSidePanel } from 'utils/isSidePanel';
+import { hideAssetsStore } from '../../../context/hide-assets-store';
 
 import { StakeInputPageState } from '../StakeInputPage';
 import ReviewValidatorClaimTx from './ReviewValidatorClaimTx';
 import { ValidatorCardView } from './ValidatorCardView';
+import { View, Text, Image, ScrollView, StyleSheet } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 interface StakedValidatorDetailsProps {
   isOpen: boolean;
@@ -145,106 +144,103 @@ const StakedValidatorDetails = observer(
         fullScreen
         isOpen={isOpen}
         onClose={onClose}
-        title='Validator details'
-        className='!p-0 relative h-full'
-        headerClassName='border-secondary-200 border-b'
+        title="Validator details"
+        containerStyle={styles.modalContainer}
+        headerStyle={styles.headerBorder}
       >
-        <div className='p-6 flex flex-col gap-4 h-[calc(100%-84px)] overflow-y-scroll'>
-          <div className='flex w-full gap-4 items-center'>
-            <img
-              width={40}
-              height={40}
-              className='rounded-full'
-              src={imageUrl}
-              onError={imgOnError(Images.Misc.Validator)}
+        <ScrollView contentContainerStyle={styles.scrollArea}>
+          {/* Validator header */}
+          <View style={styles.validatorRow}>
+            <Image
+              source={{ uri: imageUrl }}
+              style={styles.validatorImg}
+              onError={() => {}}
             />
-
-            <span className='font-bold text-lg'>
+            <Text style={styles.validatorMoniker}>
               {sliceWord(
                 validator?.moniker ?? '',
-                isSidePanel() ? 18 + Math.floor(((Math.min(window.innerWidth, 400) - 320) / 81) * 7) : 10,
+                10,
                 3,
               )}
-            </span>
-          </div>
+            </Text>
+          </View>
 
-          <div className='flex flex-col gap-4 p-5 bg-secondary-100 rounded-xl'>
-            <div className='flex items-center justify-between'>
-              <span className='text-sm text-muted-foreground !leading-[19px]'>Total Staked</span>
-
-              <span className='font-bold text-sm !leading-[19px]'>
+          {/* Stats card */}
+          <View style={styles.statsCard}>
+            <View style={styles.statsRow}>
+              <Text style={styles.statsLabel}>Total Staked</Text>
+              <Text style={styles.statsValue}>
                 {currency(validator?.delegations?.total_tokens_display ?? validator?.tokens ?? '', {
                   symbol: '',
                   precision: 0,
                 }).format()}
-              </span>
-            </div>
-
-            <div className='flex items-center justify-between'>
-              <span className='text-sm text-muted-foreground !leading-[19px]'>Commission</span>
-
-              <span className='font-bold text-sm !leading-[19px]'>
+              </Text>
+            </View>
+            <View style={styles.statsRow}>
+              <Text style={styles.statsLabel}>Commission</Text>
+              <Text style={styles.statsValue}>
                 {validator?.commission?.commission_rates?.rate
                   ? `${new BigNumber(validator?.commission?.commission_rates?.rate ?? '')
                       .multipliedBy(100)
                       .toFixed(0)}%`
                   : 'N/A'}
-              </span>
-            </div>
+              </Text>
+            </View>
+            <View style={styles.statsRow}>
+              <Text style={styles.statsLabel}>APR</Text>
+              <Text style={styles.statsAprValue}>
+                {aprs && (aprs[validator?.address ?? '']
+                  ? `${currency(aprs[validator?.address ?? ''] * 100, {
+                      precision: 2,
+                      symbol: '',
+                    }).format()}%`
+                  : 'N/A')}
+              </Text>
+            </View>
+          </View>
 
-            <div className='flex items-center justify-between'>
-              <span className='text-sm text-muted-foreground !leading-[19px]'>APR</span>
+          {/* Deposited amount */}
+          <View style={styles.sectionBlock}>
+            <Text style={styles.sectionLabel}>Your deposited amount</Text>
+            <View style={styles.sectionCard}>
+              <Text style={styles.sectionAmount}>{amountTitleText}</Text>
+              {amountSubtitleText ? (
+                <Text style={styles.sectionSubAmount}>({amountSubtitleText})</Text>
+              ) : null}
+            </View>
+          </View>
 
-              <span className='font-bold text-sm text-accent-success !leading-[19px]'>
-                {aprs &&
-                  (aprs[validator?.address ?? '']
-                    ? `${currency(aprs[validator?.address ?? ''] * 100, {
-                        precision: 2,
-                        symbol: '',
-                      }).format()}%`
-                    : 'N/A')}
-              </span>
-            </div>
-          </div>
-
-          <div className='mt-3 flex flex-col gap-3'>
-            <span className='text-sm text-muted-foreground'>Your deposited amount</span>
-            <div className='p-5 bg-secondary-100 rounded-xl'>
-              <span className='font-bold text-[18px]'>{amountTitleText} </span>
-              <span className='text-muted-foreground text-sm'>({amountSubtitleText})</span>
-            </div>
-          </div>
-
-          <div className='mt-3 flex flex-col gap-3'>
-            <span className='text-sm text-muted-foreground'>Your Rewards</span>
-            <div className='flex items-center justify-between gap-4 p-5 bg-secondary-100 rounded-xl'>
-              <span className='flex flex-col'>
-                <span className='font-bold text-[18px]'>
+          {/* Rewards */}
+          <View style={styles.sectionBlock}>
+            <Text style={styles.sectionLabel}>Your Rewards</Text>
+            <View style={styles.rewardCard}>
+              <View>
+                <Text style={styles.rewardAmount}>
                   {formatCurrency(validatorRewardCurrency ?? new BigNumber(''))}
-                </span>
-                <span className='text-muted-foreground text-sm'>{validatorRewardToken}</span>
-              </span>
-
+                </Text>
+                <Text style={styles.rewardToken}>{validatorRewardToken}</Text>
+              </View>
               <Button
-                size='md'
-                variant={'secondary'}
-                className='bg-secondary-350 disabled:bg-secondary-300 h-fit w-[121px]'
+                size="md"
+                variant="secondary"
+                style={styles.claimBtn}
                 disabled={!validatorRewardTotal || validatorRewardTotal.lt(0.00001)}
-                onClick={onValidatorClaim}
+                onPress={onValidatorClaim}
               >
                 Claim
               </Button>
-            </div>
-          </div>
-        </div>
-
-        <div className='flex gap-x-3 bg-secondary-200 w-full [&>*]:flex-1 mt-auto absolute bottom-0 py-4 px-5'>
-          <Button onClick={onSwitchValidator}>Switch validator</Button>
-
-          <Button variant={'mono'} onClick={onUnstake}>
+            </View>
+          </View>
+        </ScrollView>
+        {/* Footer Buttons */}
+        <View style={styles.footerBar}>
+          <Button style={styles.footerBtn} onPress={onSwitchValidator}>
+            Switch validator
+          </Button>
+          <Button style={styles.footerBtn} variant="mono" onPress={onUnstake}>
             Unstake
           </Button>
-        </div>
+        </View>
       </BottomModal>
     );
   },
@@ -321,7 +317,7 @@ const ValidatorList = observer(
     rootBalanceStore,
     setClaimTxMode,
   }: ValidatorListProps) => {
-    const navigate = useNavigate();
+    const navigation = useNavigation();
     const [showStakedValidatorDetails, setShowStakedValidatorDetails] = useState(false);
     const [showReviewValidatorClaimTx, setShowReviewValidatorClaimTx] = useState(false);
     const [selectedDelegation, setSelectedDelegation] = useState<Delegation | undefined>();
@@ -405,64 +401,60 @@ const ValidatorList = observer(
       setSelectedDelegation(delegation);
       setShowStakedValidatorDetails(true);
     }, []);
-
+    
     return (
-      <div className='flex flex-col w-full gap-7'>
+      <ScrollView contentContainerStyle={styles.container}>
+        {/* Loading */}
         {isLoading && (
-          <div className='flex flex-col w-full gap-4'>
-            <div className='flex justify-between'>
-              <span className='text-xs text-muted-foreground'>Validator</span>
-              <span className='text-xs text-muted-foreground'>Amount Staked</span>
-            </div>
-
+          <View style={styles.section}>
+            <View style={styles.row}>
+              <Text style={styles.header}>Validator</Text>
+              <Text style={styles.header}>Amount Staked</Text>
+            </View>
             <ValidatorItemSkeleton count={5} />
-          </div>
+          </View>
         )}
 
+        {/* Active validators */}
         {!isLoading && validators && activeValidatorDelegations.length > 0 && (
-          <div className='flex flex-col w-full gap-4'>
-            <div className='flex justify-between'>
-              <span className='text-xs text-muted-foreground'>Validator</span>
-              <span className='text-xs text-muted-foreground'>Amount Staked</span>
-            </div>
-
-            <div className='flex flex-col w-full gap-4'>
-              {activeValidatorDelegations.map((d) => {
-                const validator = validators?.[d?.delegation?.validator_address];
-                return (
-                  <ValidatorCard
-                    key={validator.address}
-                    delegation={d}
-                    validator={validator}
-                    onClick={handleValidatorCardClick}
-                  />
-                );
-              })}
-            </div>
-          </div>
+          <View style={styles.section}>
+            <View style={styles.row}>
+              <Text style={styles.header}>Validator</Text>
+              <Text style={styles.header}>Amount Staked</Text>
+            </View>
+            {activeValidatorDelegations.map((d) => {
+              const validator = validators?.[d?.delegation?.validator_address];
+              return (
+                <ValidatorCard
+                  key={validator.address}
+                  delegation={d}
+                  validator={validator}
+                  onClick={handleValidatorCardClick}
+                />
+              );
+            })}
+          </View>
         )}
 
+        {/* Inactive validators */}
         {!isLoading && validators && inactiveValidatorDelegations.length > 0 && (
-          <div className='flex flex-col w-full gap-4'>
-            <div className='flex justify-between'>
-              <span className='text-xs text-muted-foreground'>Inactive validator</span>
-              <span className='text-xs text-muted-foreground'>Amount Staked</span>
-            </div>
-
-            <div className='flex flex-col w-full gap-4'>
-              {inactiveValidatorDelegations.map((d) => {
-                const validator = validators?.[d?.delegation?.validator_address];
-                return (
-                  <ValidatorCard
-                    key={validator?.address}
-                    delegation={d}
-                    validator={validator}
-                    onClick={handleValidatorCardClick}
-                  />
-                );
-              })}
-            </div>
-          </div>
+          <View style={styles.section}>
+            <View style={styles.row}>
+              <Text style={styles.header}>Inactive validator</Text>
+              <Text style={styles.header}>Amount Staked</Text>
+            </View>
+            {inactiveValidatorDelegations.map((d) => {
+              const validator = validators?.[d?.delegation?.validator_address];
+              return (
+                <ValidatorCard
+                  key={validator?.address}
+                  delegation={d}
+                  validator={validator}
+                  onClick={handleValidatorCardClick}
+                />
+              );
+            })}
+          </View>
         )}
 
         <StakedValidatorDetails
@@ -478,7 +470,7 @@ const ValidatorList = observer(
             } as StakeInputPageState;
 
             sessionStorage.setItem('navigate-stake-input-state', JSON.stringify(state));
-            navigate('/stake/input', {
+            navigation.navigate('Stakeinput', {
               state,
             });
           }}
@@ -492,7 +484,7 @@ const ValidatorList = observer(
             } as StakeInputPageState;
 
             sessionStorage.setItem('navigate-stake-input-state', JSON.stringify(state));
-            navigate('/stake/input', {
+            navigation.navigate('Stakeinput', {
               state,
             });
           }}
@@ -519,9 +511,156 @@ const ValidatorList = observer(
             setClaimTxMode={setClaimTxMode}
           />
         )}
-      </div>
+      </ScrollView>
     );
   },
 );
 
 export default ValidatorList;
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'column',
+    gap: 24,
+    width: '100%',
+    paddingHorizontal: 0,
+  },
+  section: {
+    flexDirection: 'column',
+    width: '100%',
+    gap: 16,
+    marginBottom: 12,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  header: {
+    fontSize: 12,
+    color: '#64748b',
+  },
+  modalContainer: {
+    padding: 0,
+    height: '100%',
+  },
+  headerBorder: {
+    borderBottomWidth: 1,
+    borderColor: '#E2E8F0', // secondary-200
+  },
+  scrollArea: {
+    padding: 24,
+    flexGrow: 1,
+    gap: 14,
+  },
+  validatorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    marginBottom: 10,
+  },
+  validatorImg: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 12,
+  },
+  validatorMoniker: {
+    fontWeight: 'bold',
+    fontSize: 18,
+    color: '#1e293b',
+  },
+  statsCard: {
+    flexDirection: 'column',
+    gap: 12,
+    backgroundColor: '#F1F5F9', // secondary-100
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 10,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 2,
+  },
+  statsLabel: {
+    fontSize: 14,
+    color: '#64748b',
+  },
+  statsValue: {
+    fontWeight: 'bold',
+    fontSize: 14,
+    color: '#1e293b',
+  },
+  statsAprValue: {
+    fontWeight: 'bold',
+    fontSize: 14,
+    color: '#059669', // accent-success
+  },
+  sectionBlock: {
+    marginTop: 10,
+    marginBottom: 4,
+    flexDirection: 'column',
+    gap: 8,
+  },
+  sectionLabel: {
+    fontSize: 14,
+    color: '#64748b',
+    marginBottom: 3,
+  },
+  sectionCard: {
+    backgroundColor: '#F1F5F9',
+    borderRadius: 16,
+    padding: 20,
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 6,
+  },
+  sectionAmount: {
+    fontWeight: 'bold',
+    fontSize: 18,
+    color: '#1e293b',
+    marginRight: 6,
+  },
+  sectionSubAmount: {
+    fontSize: 13,
+    color: '#64748b',
+  },
+  rewardCard: {
+    backgroundColor: '#F1F5F9',
+    borderRadius: 16,
+    padding: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  rewardAmount: {
+    fontWeight: 'bold',
+    fontSize: 18,
+    color: '#1e293b',
+  },
+  rewardToken: {
+    fontSize: 13,
+    color: '#64748b',
+  },
+  claimBtn: {
+    width: 121,
+    alignSelf: 'flex-end',
+  },
+  footerBar: {
+    flexDirection: 'row',
+    gap: 12,
+    backgroundColor: '#E2E8F0', // secondary-200
+    width: '100%',
+    paddingVertical: 18,
+    paddingHorizontal: 20,
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+  },
+  footerBtn: {
+    flex: 1,
+  },
+});

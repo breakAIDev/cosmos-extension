@@ -2,12 +2,12 @@ import { StdFee } from '@cosmjs/stargate';
 import { GasOptions } from '@leapwallet/cosmos-wallet-hooks';
 import { GasPrice } from '@leapwallet/cosmos-wallet-sdk';
 import { RootBalanceStore, RootDenomsStore } from '@leapwallet/cosmos-wallet-store';
-import GasPriceOptions, { useDefaultGasPrice } from 'components/gas-price-options';
-import { GasPriceOptionValue } from 'components/gas-price-options/context';
-import { DisplayFee } from 'components/gas-price-options/display-fee';
-import { useChainInfos } from 'hooks/useChainInfos';
+import GasPriceOptions, { useDefaultGasPrice } from '../../../../components/gas-price-options';
+import { GasPriceOptionValue } from '../../../../components/gas-price-options/context';
+import { DisplayFee } from '../../../../components/gas-price-options/display-fee';
+import { useChainInfos } from '../../../../hooks/useChainInfos';
 import { observer } from 'mobx-react-lite';
-import { NftDetailsType } from 'pages/nfts-v2/context';
+import { NftDetailsType } from '../../..//nfts-v2/context';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { useSendNftCardContext } from '../send-nft';

@@ -8,11 +8,11 @@ export const LEDGER_NAME_EDITED_SUFFIX = '%LEDGER_NAME_EDITED%';
 export const LEDGER_NAME_EDITED_SUFFIX_REGEX = new RegExp(LEDGER_NAME_EDITED_SUFFIX);
 
 export const QUICK_SEARCH_DISABLED_PAGES = [
-  '/sign',
-  '/approveConnection',
-  '/suggestChain',
-  '/add-token',
-  '/add-secret-token',
+  'Sign',
+  'ApproveConnection',
+  'SuggestChain',
+  'Add-token',
+  'Add-secret-token',
 ];
 
 export const RECAPTCHA_CHAINS = ['pryzmtestnet'];

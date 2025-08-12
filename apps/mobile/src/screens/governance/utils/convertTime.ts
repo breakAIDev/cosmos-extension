@@ -1,13 +1,11 @@
-export function convertTime(seconds: number) {
-  let sec: number | string = seconds;
-  let hours: number | string = Math.floor(sec / 3600);
-  hours >= 1 ? (sec = sec - hours * 3600) : (hours = '00');
-  let min: number | string = Math.floor(sec / 60);
-  min >= 1 ? (sec = sec - min * 60) : (min = '00');
-  sec < 1 ? (sec = '00') : void 0;
+export function convertTime(seconds: number): string {
+  if (!Number.isFinite(seconds) || seconds < 0) return '00:00:00';
 
-  min.toString().length == 1 ? (min = '0' + min) : void 0;
-  sec.toString().length == 1 ? (sec = '0' + sec) : void 0;
+  const hrs = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
 
-  return hours + ':' + min + ':' + sec;
+  // Pad with zeros
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  return `${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
 }

@@ -1,11 +1,10 @@
-import { Button } from 'components/ui/button';
-import { Checkbox } from 'components/ui/check-box';
-import { useDefaultTokenLogo } from 'hooks';
-import { Images } from 'images';
-import { OnboardingWrapper } from 'pages/onboarding/wrapper';
 import React, { useEffect } from 'react';
-import { imgOnError } from 'utils/imgOnError';
-
+import { View, Image, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { Button } from '../../../../components/ui/button';
+import { Checkbox } from '../../../../components/ui/check-box';
+import { useDefaultTokenLogo } from '../../../../hooks';
+import { Images } from '../../../../../assets/images';
+import { OnboardingWrapper } from '../../../onboarding/wrapper';
 import { LEDGER_NETWORK, useImportWalletContext } from '../import-wallet-context';
 
 export const ledgerNetworkOptions = [
@@ -40,7 +39,7 @@ export const SelectLedgerNetwork = () => {
     if (addresses && Object.keys(addresses).length > 0) {
       setAddresses({});
     }
-  }, []);
+  }, [addresses, setAddresses, setWalletAccounts]);
 
   return (
     <OnboardingWrapper
@@ -48,7 +47,7 @@ export const SelectLedgerNetwork = () => {
       subHeading={'Select networks you want to connect with'}
       entry={prevStep <= currentStep ? 'right' : 'left'}
     >
-      <div className='flex flex-col rounded-xl overflow-hidden py-1'>
+      <ScrollView style={styles.cardContainer}>
         {ledgerNetworkOptions.map((network) => (
           <LedgerNetworkCard
             key={network.id}
@@ -62,15 +61,18 @@ export const SelectLedgerNetwork = () => {
                 } else {
                   newSet.delete(network.id);
                 }
-
                 return newSet;
               });
             }}
           />
         ))}
-      </div>
+      </ScrollView>
 
-      <Button disabled={ledgerNetworks.size === 0} className='w-full mt-auto' onClick={moveToNextStep}>
+      <Button
+        disabled={ledgerNetworks.size === 0}
+        style={styles.proceedButton}
+        onPress={moveToNextStep}
+      >
         Proceed
       </Button>
     </OnboardingWrapper>
@@ -87,24 +89,73 @@ const LedgerNetworkCard = (props: {
   const defaultTokenLogo = useDefaultTokenLogo();
 
   return (
-    <label
-      className={
-        'flex flex-row gap-[14px] items-center p-5 border-b border-secondary-600/25 last:border-b-0 bg-secondary-200 hover:bg-secondary-300/75 transition-colors cursor-pointer text-start'
-      }
+    <TouchableOpacity
+      style={styles.card}
+      activeOpacity={0.7}
+      onPress={() => props.onCheckedChange(!props.checked)}
     >
-      <img
-        src={props.img || defaultTokenLogo}
-        alt={props.title}
-        onError={imgOnError(defaultTokenLogo)}
-        className='size-10 rounded-full'
+      <Image
+        source={{uri: props.img ?? defaultTokenLogo}}
+        onError={() => {}}
+        style={styles.cardImage}
+        resizeMode="contain"
       />
-
-      <div className='flex flex-col'>
-        <h3 className='text-md font-bold'>{props.title}</h3>
-        <p className='text-sm font-medium text-muted-foreground'>{props.subText}</p>
-      </div>
-
-      <Checkbox className='ml-auto' checked={props.checked} onCheckedChange={props.onCheckedChange} />
-    </label>
+      <View style={styles.cardTextContainer}>
+        <Text style={styles.cardTitle}>{props.title}</Text>
+        <Text style={styles.cardSubText}>{props.subText}</Text>
+      </View>
+      <Checkbox style={styles.cardCheckbox} checked={props.checked} onChange={props.onCheckedChange} />
+    </TouchableOpacity>
   );
 };
+
+const styles = StyleSheet.create({
+  cardContainer: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    paddingVertical: 4,
+    marginBottom: 12,
+    flexGrow: 0,
+    backgroundColor: 'transparent',
+  },
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(100,100,100,0.25)',
+    backgroundColor: '#F5F6F7', // Secondary-200
+  },
+  cardImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 999,
+    marginRight: 14,
+    backgroundColor: '#EEE',
+  },
+  cardTextContainer: {
+    flex: 1,
+    flexDirection: 'column',
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#181818',
+  },
+  cardSubText: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '500',
+    marginTop: 2,
+  },
+  cardCheckbox: {
+    marginLeft: 'auto',
+  },
+  proceedButton: {
+    width: '100%',
+    marginTop: 'auto',
+    marginBottom: 4,
+    alignSelf: 'center',
+  },
+});
+

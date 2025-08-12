@@ -1,5 +1,7 @@
-import { Divider, Key, Value } from 'components/dapp';
 import React from 'react';
+import { View, StyleSheet } from 'react-native';
+import { Divider, Key, Value } from '../../../components/dapp';
+import { Colors } from '../../../theme/colors';
 
 type TokenContractInfoProps = {
   name: string;
@@ -9,7 +11,7 @@ type TokenContractInfoProps = {
 
 export function TokenContractInfo({ name, symbol, decimals }: TokenContractInfoProps) {
   return (
-    <div className='flex flex-col gap-y-[10px] bg-white-100 dark:bg-gray-900 rounded-2xl p-4 w-full'>
+    <View style={styles.container}>
       <Key>Coin Name</Key>
       <Value>{name}</Value>
       {Divider}
@@ -20,6 +22,16 @@ export function TokenContractInfo({ name, symbol, decimals }: TokenContractInfoP
 
       <Key>Coin Decimals</Key>
       <Value>{decimals}</Value>
-    </div>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    width: '100%',
+    backgroundColor: Colors.white100, // swap via theme for dark mode if needed
+    borderRadius: 16, // rounded-2xl
+    padding: 16, // p-4
+    rowGap: 10 as any, // RN supports gap on newer versions; if not, add margins to children
+  },
+});

@@ -1,29 +1,38 @@
 import React from 'react';
-import { cn } from 'utils/cn';
+import { View, Text, TouchableOpacity, StyleSheet, ViewStyle, StyleProp } from 'react-native';
 
-import { RaffleVisibilityStatus } from './alpha-timeline/use-raffle-status-map';
+type RaffleVisibilityStatus = 'completed' | 'hidden' | undefined;
 
-const Tag = (
-  props: React.PropsWithChildren<{
-    onClick?: () => void;
-    className?: string;
-  }>,
-) => {
-  return (
-    <span
-      className={cn(
-        'text-xs font-medium h-6 px-2 flex items-center justify-center border bg-secondary hover:bg-secondary-200 rounded border-secondary-300 transition-colors',
-        props.className,
-      )}
-      onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        props.onClick?.();
-      }}
-    >
-      {props.children}
-    </span>
-  );
+type TagProps = {
+  onPress?: () => void;
+  style?: any;
+  children: string | React.ReactNode;
+};
+
+const Tag = ({ onPress, style, children }: TagProps) => (
+  <TouchableOpacity
+    activeOpacity={0.8}
+    onPress={onPress}
+    style={[styles.tagBase, style]}
+  >
+    {typeof children === 'string' ?(
+      <Text style={styles.tagText}>{children}</Text>
+    ) : (
+      React.isValidElement(children) ? children : null
+    )
+    }    
+  </TouchableOpacity>
+);
+
+type TagsProps = {
+  isLive?: boolean;
+  visibilityStatus?: RaffleVisibilityStatus;
+  ecosystemFilter: string[];
+  categoryFilter: string[];
+  style?: StyleProp<ViewStyle>;
+  handleEcosystemClick?: (ecosystem: string) => void;
+  handleCategoryClick?: (category: string) => void;
+  handleLiveClick?: () => void;
 };
 
 export default function Tags({
@@ -31,59 +40,95 @@ export default function Tags({
   visibilityStatus,
   ecosystemFilter,
   categoryFilter,
-  className,
+  style,
   handleEcosystemClick,
   handleCategoryClick,
   handleLiveClick,
-}: {
-  isLive?: boolean;
-  visibilityStatus?: RaffleVisibilityStatus;
-  ecosystemFilter: string[];
-  categoryFilter: string[];
-  className?: string;
-  handleEcosystemClick?: (ecosystem: string) => void;
-  handleCategoryClick?: (category: string) => void;
-  handleLiveClick?: () => void;
-}) {
+}: TagsProps) {
   return (
-    <div className={cn('flex items-center justify-between w-full gap-2', className)}>
-      <div className='flex flex-wrap gap-2'>
+    <View style={[styles.row, style]}>
+      <View style={styles.wrapRow}>
         {visibilityStatus === 'completed' && (
           <Tag
-            className='bg-accent-foreground/10 hover:bg-accent-green-100 border-primary/40 text-accent-success'
-            onClick={() => handleCategoryClick?.('Completed')}
+            style={[styles.completedTag]}
+            onPress={() => handleCategoryClick?.('Completed')}
           >
             Completed
           </Tag>
         )}
         {visibilityStatus === 'hidden' && (
           <Tag
-            className='bg-destructive-100/20 hover:bg-destructive-red-100 border-destructive/40 text-destructive-error'
-            onClick={() => handleCategoryClick?.('hidden')}
+            style={[styles.hiddenTag]}
+            onPress={() => handleCategoryClick?.('hidden')}
           >
             Hidden
           </Tag>
         )}
         {ecosystemFilter?.filter(Boolean).map((ecosystem) => (
-          <Tag key={ecosystem} onClick={() => handleEcosystemClick?.(ecosystem)}>
+          <Tag key={ecosystem} onPress={() => handleEcosystemClick?.(ecosystem)}>
             {ecosystem}
           </Tag>
         ))}
         {categoryFilter?.filter(Boolean).map((category) => (
-          <Tag key={category} onClick={() => handleCategoryClick?.(category)}>
+          <Tag key={category} onPress={() => handleCategoryClick?.(category)}>
             {category}
           </Tag>
         ))}
-      </div>
+      </View>
 
       {isLive && (
-        <Tag
-          className='bg-destructive-400 hover:bg-destructive-200 text-white-100 font-medium'
-          onClick={handleLiveClick}
-        >
+        <Tag style={styles.liveTag} onPress={handleLiveClick}>
           Live
         </Tag>
       )}
-    </div>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8, // If your React Native version supports it
+    width: '100%',
+  },
+  wrapRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  tagBase: {
+    height: 24,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    backgroundColor: '#f5f6f7', // Secondary background
+    borderColor: '#e2e3e5',     // Secondary border
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 4,
+    marginBottom: 4,
+    minWidth: 48,
+  },
+  tagText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#333',
+  },
+  completedTag: {
+    backgroundColor: '#e6f9e9', // light green
+    borderColor: '#a6e3b0',     // accent green
+    color: '#22c55e',
+  },
+  hiddenTag: {
+    backgroundColor: '#fbe9e9', // light red/pink
+    borderColor: '#ffbdbd',     // accent red
+    color: '#f43f5e',
+  },
+  liveTag: {
+    backgroundColor: '#ef4444', // bright red
+    borderColor: '#ef4444',
+    color: '#fff',
+  },
+});

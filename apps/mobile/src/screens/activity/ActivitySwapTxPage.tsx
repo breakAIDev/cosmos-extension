@@ -1,7 +1,7 @@
-import { TxPage } from 'pages/swaps-v2/components';
+import { TxPage } from '../swaps-v2/components';
 import React, { useEffect, useMemo } from 'react';
-import { rootCW20DenomsStore, rootDenomsStore } from 'stores/denoms-store-instance';
-import { generateObjectKey, removePendingSwapTxs, TxStoreObject } from 'utils/pendingSwapsTxsStore';
+import { rootCW20DenomsStore, rootDenomsStore } from '../../context/denoms-store-instance';
+import { generateObjectKey, removePendingSwapTxs, TxStoreObject } from '../../utils/pendingSwapsTxsStore';
 
 export function ActivitySwapTxPage({
   onClose,

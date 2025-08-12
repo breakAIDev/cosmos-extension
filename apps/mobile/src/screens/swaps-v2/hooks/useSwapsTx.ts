@@ -52,15 +52,15 @@ import {
 } from '@leapwallet/elements-hooks';
 import { QueryStatus, useQuery as reactUseQuery } from '@tanstack/react-query';
 import BigNumber from 'bignumber.js';
-import { calculateFeeAmount, useDefaultGasPrice } from 'components/gas-price-options';
-import { GasPriceOptionValue } from 'components/gas-price-options/context';
-import { AGGREGATED_CHAIN_KEY } from 'config/constants';
-import { useNonNativeCustomChains } from 'hooks';
-import { useChainInfos } from 'hooks/useChainInfos';
-import useQuery from 'hooks/useQuery';
+import { calculateFeeAmount, useDefaultGasPrice } from '../../../components/gas-price-options';
+import { GasPriceOptionValue } from '../../../components/gas-price-options/context';
+import { AGGREGATED_CHAIN_KEY } from '../../../services/config/constants';
+import { useNonNativeCustomChains } from '../../../hooks';
+import { useChainInfos } from '../../../hooks/useChainInfos';
+import useQuery from '../../../hooks/useQuery';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { chainInfoStore } from 'stores/chain-infos-store';
-import { SourceChain, SourceToken, SwapFeeInfo } from 'types/swap';
+import { chainInfoStore } from '../../../context/chain-infos-store';
+import { SourceChain, SourceToken, SwapFeeInfo } from '../../../types/swap';
 
 import { findMinAsset, hasCoinType } from '../utils';
 import {

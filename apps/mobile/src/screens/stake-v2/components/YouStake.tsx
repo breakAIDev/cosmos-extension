@@ -1,3 +1,9 @@
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { observer } from 'mobx-react-lite';
+import BigNumber from 'bignumber.js';
+import { AnimatePresence, MotiText } from 'moti';
+
 import {
   formatTokenAmount,
   SelectedNetwork,
@@ -8,19 +14,12 @@ import {
 import { fromSmall, SupportedChain, toSmall } from '@leapwallet/cosmos-wallet-sdk';
 import { Amount } from '@leapwallet/cosmos-wallet-sdk/dist/browser/types/staking';
 import { RootDenomsStore } from '@leapwallet/cosmos-wallet-store';
-import BigNumber from 'bignumber.js';
-import { Skeleton } from 'components/ui/skeleton';
-import { AnimatePresence, motion } from 'framer-motion';
-import { SwapIcon } from 'icons/swap-icon';
-import { observer } from 'mobx-react-lite';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Token } from 'types/bank';
-import { opacityFadeInOut, transition150 } from 'utils/motion-variants';
-
+import { SwapIcon } from '../../../../assets/icons/swap-icon'; // Should be RN compatible!
+import { Skeleton } from '../../../components/ui/skeleton'; // Should be RN compatible!
 import { stakeModeMap } from '../utils/stake-text';
 
 interface YouStakeProps {
-  token?: Token;
+  token?: any;
   setAmount: (val: string) => void;
   fees?: { amount: string; denom: string };
   hasError: boolean;
@@ -37,248 +36,312 @@ interface YouStakeProps {
   delegationBalanceLoading: boolean;
 }
 
-const YouStake = observer(
-  ({
-    token,
-    amount,
-    setAmount,
-    fees,
-    hasError,
-    setHasError,
-    mode,
-    delegationBalance,
-    adjustAmount,
-    setAdjustAmount,
-    tokenLoading,
-    rootDenomsStore,
-    activeChain,
-    activeNetwork,
-    delegationBalanceLoading,
-  }: YouStakeProps) => {
-    const inputRef = useRef<HTMLInputElement>(null);
-    const [activeStakingDenom] = useActiveStakingDenom(rootDenomsStore.allDenoms, activeChain, activeNetwork);
-    const [formatCurrency] = useformatCurrency();
-    const [inputValue, setInputValue] = useState('');
-    const [isDollarInput, setIsDollarInput] = useState(false);
-    const [balanceLoading, setBalanceLoading] = useState(false);
+const YouStake = observer(({
+  token,
+  amount,
+  setAmount,
+  fees,
+  hasError,
+  setHasError,
+  mode,
+  delegationBalance,
+  adjustAmount,
+  setAdjustAmount,
+  tokenLoading,
+  rootDenomsStore,
+  activeChain,
+  activeNetwork,
+  delegationBalanceLoading,
+}: YouStakeProps) => {
+  const inputRef = useRef<TextInput>(null);
+  const [activeStakingDenom] = useActiveStakingDenom(rootDenomsStore.allDenoms, activeChain, activeNetwork);
+  const [formatCurrency] = useformatCurrency();
+  const [inputValue, setInputValue] = useState('');
+  const [isDollarInput, setIsDollarInput] = useState(false);
+  const [balanceLoading, setBalanceLoading] = useState(false);
 
-    const displayedValue = useMemo(() => {
-      return inputValue
-        ? isDollarInput
-          ? new BigNumber(inputValue).dividedBy(new BigNumber(token?.usdPrice ?? '0')).toString()
-          : new BigNumber(inputValue).multipliedBy(new BigNumber(token?.usdPrice ?? '0')).toString()
-        : '';
-    }, [inputValue, isDollarInput, token?.usdPrice]);
+  const displayedValue = useMemo(() => {
+    return inputValue
+      ? isDollarInput
+        ? new BigNumber(inputValue).dividedBy(new BigNumber(token?.usdPrice ?? '0')).toString()
+        : new BigNumber(inputValue).multipliedBy(new BigNumber(token?.usdPrice ?? '0')).toString()
+      : '';
+  }, [inputValue, isDollarInput, token?.usdPrice]);
 
-    const maxValue = useMemo(() => {
-      if (mode !== 'DELEGATE') {
-        return isDollarInput
-          ? new BigNumber(delegationBalance?.currencyAmount ?? '')
-          : new BigNumber(delegationBalance?.amount ?? '');
-      }
+  const maxValue = useMemo(() => {
+    if (mode !== 'DELEGATE') {
+      return isDollarInput
+        ? new BigNumber(delegationBalance?.currencyAmount ?? '')
+        : new BigNumber(delegationBalance?.amount ?? '');
+    }
 
-      const tokenAmount = toSmall(token?.amount ?? '0', token?.coinDecimals ?? 6);
-      const maxMinimalTokens = new BigNumber(tokenAmount).minus(fees?.amount ?? '0');
-      if (maxMinimalTokens.lte(0)) {
-        return new BigNumber(0);
-      }
+    const tokenAmount = toSmall(token?.amount ?? '0', token?.coinDecimals ?? 6);
+    const maxMinimalTokens = new BigNumber(tokenAmount).minus(fees?.amount ?? '0');
+    if (maxMinimalTokens.lte(0)) {
+      return new BigNumber(0);
+    }
 
-      const maxTokens = new BigNumber(fromSmall(maxMinimalTokens.toString(), token?.coinDecimals ?? 6));
-      return isDollarInput ? new BigNumber(maxTokens).multipliedBy(token?.usdPrice ?? '0') : maxTokens;
-    }, [delegationBalance, fees?.amount, isDollarInput, mode, token]);
+    const maxTokens = new BigNumber(fromSmall(maxMinimalTokens.toString(), token?.coinDecimals ?? 6));
+    return isDollarInput ? new BigNumber(maxTokens).multipliedBy(token?.usdPrice ?? '0') : maxTokens;
+  }, [delegationBalance, fees?.amount, isDollarInput, mode, token]);
 
-    const validateInput = useCallback(
-      (value: string) => {
-        const numericValue = new BigNumber(value);
-        if (numericValue.isLessThan(0)) {
-          setHasError(true);
-          return;
-        }
-        let limit;
-        if (mode === 'DELEGATE') {
-          limit = isDollarInput ? token?.usdValue ?? '0' : token?.amount ?? '0';
-        } else {
-          limit = isDollarInput ? delegationBalance?.currencyAmount ?? '' : delegationBalance?.amount ?? '';
-        }
-        if (numericValue.isGreaterThan(limit)) {
-          setHasError(true);
-          return;
-        }
-        setHasError(false);
-      },
-      [delegationBalance?.amount, delegationBalance?.currencyAmount, isDollarInput, mode, setHasError, token],
-    );
+  const validateInput = useCallback((value: string) => {
+    const numericValue = new BigNumber(value);
+    if (numericValue.isLessThan(0)) {
+      setHasError(true);
+      return;
+    }
+    let limit;
+    if (mode === 'DELEGATE') {
+      limit = isDollarInput ? token?.usdValue ?? '0' : token?.amount ?? '0';
+    } else {
+      limit = isDollarInput ? delegationBalance?.currencyAmount ?? '' : delegationBalance?.amount ?? '';
+    }
+    if (numericValue.isGreaterThan(limit)) {
+      setHasError(true);
+      return;
+    }
+    setHasError(false);
+  }, [delegationBalance?.amount, delegationBalance?.currencyAmount, isDollarInput, mode, setHasError, token]);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value
-        .replace(/\$/, '')
-        .replace?.(/^0+(?=\d)/, '')
-        ?.replace?.(/(\.+)/g, '.');
-      if (/^\d*\.?\d*$/.test(value)) {
-        setInputValue(value);
-        validateInput(value);
-      }
-    };
-
-    const handleSwapClick = () => {
-      if (inputValue) {
-        const newInputValue = isDollarInput
-          ? (parseFloat(inputValue) / parseFloat(token?.usdPrice ?? '0')).toFixed(6)
-          : (parseFloat(inputValue) * parseFloat(token?.usdPrice ?? '0')).toFixed(6);
-        setInputValue(newInputValue);
-      }
-      setIsDollarInput(!isDollarInput);
-      inputRef.current?.focus();
-    };
-
-    const balance = useMemo(() => {
-      if (isDollarInput) {
-        const currencyAmount = new BigNumber(
-          (mode === 'DELEGATE' ? token?.usdValue : delegationBalance?.currencyAmount) ?? '',
-        );
-        return currencyAmount;
-      } else {
-        const tokenAmount = new BigNumber((mode === 'DELEGATE' ? token?.amount : delegationBalance?.amount) ?? '');
-        return tokenAmount;
-      }
-    }, [
-      delegationBalance?.amount,
-      delegationBalance?.currencyAmount,
-      isDollarInput,
-      mode,
-      token?.amount,
-      token?.usdValue,
-    ]);
-
-    const handleUpdateInputValue = (value: string) => {
+  const handleInputChange = (text: string) => {
+    const value = text
+      .replace(/\$/, '')
+      .replace(/^0+(?=\d)/, '')
+      .replace(/(\.+)/g, '.');
+    if (/^\d*\.?\d*$/.test(value)) {
       setInputValue(value);
       validateInput(value);
-    };
+    }
+  };
 
-    useEffect(() => {
-      if (adjustAmount) {
-        if (isDollarInput) {
-          setInputValue((parseFloat(amount) * parseFloat(token?.usdPrice ?? '0')).toFixed(6));
-        } else {
-          setInputValue(amount);
-        }
-        setAdjustAmount(false);
-      }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [adjustAmount]);
+  const handleSwapClick = () => {
+    if (inputValue) {
+      const newInputValue = isDollarInput
+        ? (parseFloat(inputValue) / parseFloat(token?.usdPrice ?? '0')).toFixed(6)
+        : (parseFloat(inputValue) * parseFloat(token?.usdPrice ?? '0')).toFixed(6);
+      setInputValue(newInputValue);
+    }
+    setIsDollarInput(!isDollarInput);
+    inputRef.current?.focus();
+  };
 
-    useEffect(() => {
-      if (inputValue && !hasError) {
-        const tokenAmount = isDollarInput
-          ? parseFloat(inputValue) / parseFloat(token?.usdPrice ?? '0')
-          : parseFloat(inputValue);
-        setAmount(tokenAmount.toFixed(6));
+  const balance = useMemo(() => {
+    if (isDollarInput) {
+      const currencyAmount = new BigNumber(
+        (mode === 'DELEGATE' ? token?.usdValue : delegationBalance?.currencyAmount) ?? '',
+      );
+      return currencyAmount;
+    } else {
+      const tokenAmount = new BigNumber((mode === 'DELEGATE' ? token?.amount : delegationBalance?.amount) ?? '');
+      return tokenAmount;
+    }
+  }, [
+    delegationBalance?.amount,
+    delegationBalance?.currencyAmount,
+    isDollarInput,
+    mode,
+    token?.amount,
+    token?.usdValue,
+  ]);
+
+  const handleUpdateInputValue = (value: string) => {
+    setInputValue(value);
+    validateInput(value);
+  };
+
+  useEffect(() => {
+    if (adjustAmount) {
+      if (isDollarInput) {
+        setInputValue((parseFloat(amount) * parseFloat(token?.usdPrice ?? '0')).toFixed(6));
       } else {
-        setAmount('');
+        setInputValue(amount);
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [inputValue, isDollarInput, token?.usdPrice, hasError]);
+      setAdjustAmount(false);
+    }
+  }, [adjustAmount]);
 
-    useEffect(() => {
-      if (mode === 'DELEGATE') {
-        setBalanceLoading(tokenLoading);
-      } else {
-        setBalanceLoading(delegationBalanceLoading);
-      }
-    }, [mode, tokenLoading, delegationBalanceLoading]);
+  useEffect(() => {
+    if (inputValue && !hasError) {
+      const tokenAmount = isDollarInput
+        ? parseFloat(inputValue) / parseFloat(token?.usdPrice ?? '0')
+        : parseFloat(inputValue);
+      setAmount(tokenAmount.toFixed(6));
+    } else {
+      setAmount('');
+    }
+  }, [inputValue, isDollarInput, token?.usdPrice, hasError]);
 
-    return (
-      <div className='flex flex-col gap-y-3 rounded-xl bg-secondary-100 p-5'>
-        <span className='text-sm text-muted-foreground font-medium'>{stakeModeMap[mode]}</span>
+  useEffect(() => {
+    if (mode === 'DELEGATE') {
+      setBalanceLoading(tokenLoading);
+    } else {
+      setBalanceLoading(delegationBalanceLoading);
+    }
+  }, [mode, tokenLoading, delegationBalanceLoading]);
 
-        <input
-          ref={inputRef}
-          className='bg-transparent text-[1.5rem] font-bold caret-blue-200 outline-none border-none focus-within:placeholder:opacity-0'
-          value={isDollarInput ? `$${inputValue}` : inputValue}
-          onChange={handleInputChange}
-          placeholder={'0'}
-          autoFocus
-        />
+  return (
+    <View style={styles.card}>
+      <Text style={styles.modeLabel}>{stakeModeMap[mode]}</Text>
 
-        <div className='flex items-center justify-between w-full'>
-          <div className='flex items-center gap-1'>
-            <span className='text-sm text-muted-foreground'>
-              {inputValue
-                ? isDollarInput
-                  ? `${formatTokenAmount(displayedValue)} ${activeStakingDenom?.coinDenom}`
-                  : formatCurrency(new BigNumber(displayedValue))
-                : isDollarInput
+      <TextInput
+        ref={inputRef}
+        style={[styles.input, hasError && styles.inputError]}
+        value={isDollarInput ? `$${inputValue}` : inputValue}
+        onChangeText={handleInputChange}
+        placeholder="0"
+        keyboardType="decimal-pad"
+        autoFocus
+        selectionColor="#2563eb"
+      />
+
+      <View style={styles.rowBetween}>
+        <View style={styles.rowLeft}>
+          <Text style={styles.hintText}>
+            {inputValue
+              ? isDollarInput
+                ? `${formatTokenAmount(displayedValue)} ${activeStakingDenom?.coinDenom}`
+                : formatCurrency(new BigNumber(displayedValue))
+              : isDollarInput
                 ? '$0.00'
                 : '0.00'}
-            </span>
-
-            <button
-              onClick={handleSwapClick}
-              title={isDollarInput ? 'Switch to amount' : 'Switch to USD'}
-              className={
-                'rounded-full size-5 bg-secondary-200 hover:bg-secondary-300 items-center flex gap-1 justify-center shrink-0 ' +
-                ' ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none focus-visible:ring-accent-success/50'
-              }
-            >
-              <SwapIcon className='!leading-[12px] rotate-90 p-1 size-[18px]' />
-            </button>
-          </div>
-
-          <div className='flex items-center gap-1'>
-            <AnimatePresence mode='wait'>
-              {balanceLoading ? (
-                <Skeleton key={'loading'} className='w-16 h-5' asChild>
-                  <motion.div
-                    transition={transition150}
-                    variants={opacityFadeInOut}
-                    initial='hidden'
-                    animate='visible'
-                    exit='hidden'
-                  />
-                </Skeleton>
-              ) : (
-                <motion.span
-                  key={'balance'}
-                  className='text-sm font-medium text-muted-foreground'
-                  transition={transition150}
-                  variants={opacityFadeInOut}
-                  initial='hidden'
-                  animate='visible'
-                  exit='hidden'
-                >
-                  {balance.eq(0)
-                    ? '0'
-                    : isDollarInput
+          </Text>
+          <TouchableOpacity
+            onPress={handleSwapClick}
+            style={styles.swapBtn}
+            activeOpacity={0.7}
+          >
+            <SwapIcon style={{ transform: [{ rotate: '90deg' }], padding: 2, width: 18, height: 18 }} />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.rowRight}>
+          <AnimatePresence>
+            {balanceLoading ? (
+              <Skeleton width={64} height={22} key="skeleton" />
+            ) : (
+              <MotiText
+                key="balance"
+                from={{ opacity: 0, translateY: 10 }}
+                animate={{ opacity: 1, translateY: 0 }}
+                exit={{ opacity: 0, translateY: -10 }}
+                transition={{ type: 'timing', duration: 220 }}
+                style={styles.balanceText}
+              >
+                {balance.eq(0)
+                  ? '0'
+                  : isDollarInput
                     ? formatCurrency(balance)
                     : formatTokenAmount(balance.toString())}{' '}
-                  {activeStakingDenom?.coinDenom}
-                </motion.span>
-              )}
-            </AnimatePresence>
+                {activeStakingDenom?.coinDenom}
+              </MotiText>
+            )}
+          </AnimatePresence>
+          <TouchableOpacity
+            style={styles.percBtn}
+            onPress={() => handleUpdateInputValue(maxValue.dividedBy(2).toFixed(6, 1).toString())}
+          >
+            <Text style={styles.percBtnText}>50%</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.maxBtn}
+            onPress={() => handleUpdateInputValue(maxValue.toFixed(6, 1).toString())}
+          >
+            <Text style={styles.maxBtnText}>Max</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  );
+});
 
-            <button
-              className={
-                'ml-0.5 text-muted-foreground text-sm font-medium bg-secondary-200 px-1.5 rounded-full hover:text-foreground hover:bg-secondary-300 transition-colors ' +
-                ' ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none focus-visible:ring-accent-success/50'
-              }
-              onClick={() => handleUpdateInputValue(maxValue.dividedBy(2).toFixed(6, 1).toString())}
-            >
-              50%
-            </button>
-            <button
-              className={
-                'text-muted-foreground text-sm font-medium bg-secondary-200 px-2 rounded-full hover:text-foreground hover:bg-secondary-300 transition-colors ' +
-                ' ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none focus-visible:ring-accent-success/50'
-              }
-              onClick={() => handleUpdateInputValue(maxValue.toFixed(6, 1).toString())}
-            >
-              Max
-            </button>
-          </div>
-        </div>
-      </div>
-    );
+const styles = StyleSheet.create({
+  card: {
+    flexDirection: 'column',
+    borderRadius: 16,
+    backgroundColor: '#f4f5f8',
+    padding: 20,
+    marginVertical: 8,
+    gap: 10,
   },
-);
+  modeLabel: {
+    fontSize: 15,
+    color: '#888',
+    fontWeight: '600',
+    marginBottom: 6,
+  },
+  input: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#222',
+    backgroundColor: 'transparent',
+    paddingVertical: 6,
+    paddingHorizontal: 0,
+    borderWidth: 0,
+    marginBottom: 6,
+  },
+  inputError: {
+    color: '#dc2626',
+  },
+  rowBetween: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  rowLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  hintText: {
+    fontSize: 13,
+    color: '#888',
+    marginRight: 2,
+  },
+  swapBtn: {
+    backgroundColor: '#ebecef',
+    borderRadius: 999,
+    width: 26,
+    height: 26,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 4,
+  },
+  rowRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+  },
+  balanceText: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '600',
+    marginRight: 4,
+  },
+  percBtn: {
+    marginLeft: 2,
+    backgroundColor: '#ebecef',
+    borderRadius: 999,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    marginHorizontal: 2,
+  },
+  percBtnText: {
+    color: '#666',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  maxBtn: {
+    backgroundColor: '#ebecef',
+    borderRadius: 999,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    marginLeft: 2,
+  },
+  maxBtnText: {
+    color: '#666',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+});
 
 export default YouStake;

@@ -1,24 +1,47 @@
-// React Native compatible exports for this assets folder
+import airdrop from './airdrop.svg';
+import chadCrown from './chad-crown.svg';
+import chadDefaultBanner from './chad-default-banner.png';
+import chadDetailsBanner from './chad-details-banner.svg';
+import chadEligibleBanner from './chad-eligible-banner.png';
+import chadHighlightBanner from './chad-highlight-banner.png';
+import chadStar from './chad-star-icon.svg';
+import exclusive from './exclusive.svg';
+import mainnet from './mainnet.svg';
+import news from './news.svg';
+import nftGiveaway from './nft-giveaway.svg';
+import nftMint from './nft-mint.svg';
+import nonChadDefaultBanner from './non-chad-banner.png';
+import notChadStar from './not-chad-star-icon.svg';
+import presale from './presale.svg';
+import quest from './quest.svg';
+import reward from './reward.svg';
+import testnet from './testnet.svg';
+import tge from './tge.svg';
+import WarningShield from './warning-shield.svg';
+import whitelist from './whitelist.svg';
+import zeroCost from './zero-cost.svg';
 
-export { default as airdrop } from './airdrop.svg';
-export { default as chad_crown } from './chad-crown.svg';
-export { default as chad_details_banner } from './chad-details-banner.svg';
-export { default as chad_star_icon } from './chad-star-icon.svg';
-export { default as exclusive } from './exclusive.svg';
-export { default as mainnet } from './mainnet.svg';
-export { default as news } from './news.svg';
-export { default as nft_giveaway } from './nft-giveaway.svg';
-export { default as nft_mint } from './nft-mint.svg';
-export { default as not_chad_star_icon } from './not-chad-star-icon.svg';
-export { default as presale } from './presale.svg';
-export { default as quest } from './quest.svg';
-export { default as reward } from './reward.svg';
-export { default as testnet } from './testnet.svg';
-export { default as tge } from './tge.svg';
-export { default as warning_shield } from './warning-shield.svg';
-export { default as whitelist } from './whitelist.svg';
-export { default as zero_cost } from './zero-cost.svg';
-export const chad_default_banner = require('./chad-default-banner.png');
-export const chad_eligible_banner = require('./chad-eligible-banner.png');
-export const chad_highlight_banner = require('./chad-highlight-banner.png');
-export const non_chad_banner = require('./non-chad-banner.png');
+export {
+  airdrop,
+  chadCrown,
+  chadDefaultBanner,
+  chadDetailsBanner,
+  chadEligibleBanner,
+  chadHighlightBanner,
+  chadStar,
+  exclusive,
+  mainnet,
+  news,
+  nftGiveaway,
+  nftMint,
+  nonChadDefaultBanner,
+  notChadStar,
+  presale,
+  quest,
+  reward,
+  testnet,
+  tge,
+  WarningShield,
+  whitelist,
+  zeroCost,
+};

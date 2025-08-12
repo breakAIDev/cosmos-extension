@@ -1,14 +1,12 @@
-
+import React, { useEffect, useMemo, useState } from 'react';
+import { View, StyleSheet } from 'react-native';
 import { ThemeName, useTheme } from '@leapwallet/leap-ui';
-import classNames from 'classnames';
-import { LoaderAnimation } from 'components/loader/Loader';
-import BottomModal from 'components/new-bottom-modal';
-import Text from 'components/text';
-import { Button } from 'components/ui/button';
-import { Input } from 'components/ui/input';
-import React, { ChangeEvent, useEffect, useMemo, useState } from 'react';
-import { Colors } from 'theme/colors';
-import { cn } from 'utils/cn';
+import { LoaderAnimation } from '../../../../components/loader/Loader';
+import BottomModal from '../../../../components/new-bottom-modal';
+import Text from '../../../../components/text';
+import { Button } from '../../../../components/ui/button';
+import { Input } from '../../../../components/ui/input';
+import { Colors } from '../../../../theme/colors';
 
 function removeLeadingZero(input: string) {
   return Number(input).toString();
@@ -36,12 +34,8 @@ export const LedgerAdvancedMode = ({
   setSelectedIds,
   selectedIds,
 }: LedgerAdvancedModeProps) => {
-  const [walletName, setWalletName] = useState<string>('');
-  const [derivationInput, setDerivationInput] = useState<{
-    index1: string;
-    index2: '0' | '1';
-    index3: string;
-  }>({
+  const [walletName, setWalletName] = useState('');
+  const [derivationInput, setDerivationInput] = useState({
     index1: '0',
     index2: '0',
     index3: '0',
@@ -53,48 +47,38 @@ export const LedgerAdvancedMode = ({
     addError?: string;
   }>({});
   const { theme } = useTheme();
+
   const isDisabled = useMemo(() => {
     return (
       !walletName ||
       Object.values(derivationInput).filter((value) => value === '0').length === 3 ||
-      !!Object.values(derivationInput).some((value) => value === undefined || value === '') ||
-      !!errors['derivationInput'] ||
+      Object.values(derivationInput).some((value) => value === undefined || value === '') ||
+      !!errors.derivationInput ||
       isLoading
     );
   }, [derivationInput, errors, walletName, isLoading]);
 
-  const handleDerivationInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const inputName = e.target.name;
-    const value = e.target.value;
-    const index2Range = (input: string) => parseInt(input) === 0 || parseInt(input) === 1;
-    if (inputName === 'index2' && !index2Range(value)) return;
-
-    setDerivationInput({ ...derivationInput, [e.target.name]: removeLeadingZero(e.target.value) });
+  const handleDerivationInputChange = (name: string, value: string) => {
+    if (name === 'index2' && (parseInt(value) !== 0 && parseInt(value) !== 1)) return;
+    setDerivationInput({ ...derivationInput, [name]: removeLeadingZero(value) });
   };
 
   const clearFields = () => {
     setErrors({});
     setWalletName('');
-
-    setDerivationInput({
-      index1: '0',
-      index2: '0',
-      index3: '0',
-    });
+    setDerivationInput({ index1: '0', index2: '0', index3: '0' });
   };
 
   useEffect(() => {
-    if (!isAdvanceModeEnabled) {
-      clearFields();
-    }
+    if (!isAdvanceModeEnabled) clearFields();
   }, [isAdvanceModeEnabled]);
 
   useEffect(() => {
     if (Object.values(derivationInput).every((value) => !value || parseInt(value) >= 0)) {
-      setErrors((prevValue: any) => ({ ...prevValue, derivationInput: undefined }));
+      setErrors((prevValue) => ({ ...prevValue, derivationInput: undefined }));
       return;
     }
-    setErrors((prevValue: any) => ({
+    setErrors((prevValue) => ({
       ...prevValue,
       derivationInput: 'Kindly enter a valid derivation path',
     }));
@@ -104,8 +88,8 @@ export const LedgerAdvancedMode = ({
     try {
       setIsLoading(true);
       if (!walletName) {
-        setErrors((prevValue: any) => ({
-          ...(prevValue ?? {}),
+        setErrors((prevValue) => ({
+          ...prevValue,
           walletName: 'Kindly enter wallet name to continue',
         }));
         setIsLoading(false);
@@ -113,24 +97,14 @@ export const LedgerAdvancedMode = ({
       }
       if (parseInt(derivationInput.index1) > 100 || parseInt(derivationInput.index3) > 100) {
         setErrors((prevValue) => ({
-          ...(prevValue ?? {}),
+          ...prevValue,
           derivationInput: 'Please enter a value between 0 - 100 for Account and Address index fields',
         }));
         setIsLoading(false);
         return;
       }
-
-      // if (Object.values(derivationInput).includes(undefined)) {
-      //   setErrors((prevValue: any) => ({
-      //     ...(prevValue ?? {}),
-      //     derivationInput: 'Kindly enter a valid derivation path',
-      //   }))
-      //   setIsLoading(false)
-      //   return
-      // }
       const input = `${derivationInput.index1}'/${derivationInput.index2}/${derivationInput.index3}`;
       await getCustomLedgerAccountDetails(false, input, walletName, existingAddresses);
-
       const hdPath = `m/44'/118'/${input}`;
       setSelectedIds({ ...selectedIds, [hdPath]: true });
       setIsLoading(false);
@@ -138,119 +112,171 @@ export const LedgerAdvancedMode = ({
       setIsAdvanceModeEnabled(false);
     } catch (error) {
       setIsLoading(false);
-      // eslint-disable-next-line no-console
-      console.error('ledger advanced mode error', error);
-      setErrors((prevValue: any) => ({
-        ...(prevValue ?? {}),
-        addError: (error as Error)?.message ?? 'Path does not seem to be valid',
+      setErrors((prevValue) => ({
+        ...prevValue,
+        addError: ((error as Error)?.message ?? 'Path does not seem to be valid'),
       }));
     }
   };
+
   return (
-    <BottomModal isOpen={isAdvanceModeEnabled} onClose={() => setIsAdvanceModeEnabled(false)} title='Advanced mode'>
-      <Text className='font-medium mb-4' size='md'>
+    <BottomModal
+      isOpen={isAdvanceModeEnabled}
+      onClose={() => setIsAdvanceModeEnabled(false)}
+      title="Advanced mode"
+    >
+      <Text style={styles.label} size="md">
         Wallet name
       </Text>
       <Input
-        autoComplete='off'
-        placeholder='Enter wallet name'
+        autoComplete="off"
+        placeholder="Enter wallet name"
         value={walletName}
-        name='walletName'
-        onChange={(e) => {
-          setErrors((prevValue: any) => ({ ...prevValue, walletName: undefined }));
-          setWalletName(e.target.value);
+        onChangeText={val => {
+          setErrors((prev) => ({ ...prev, walletName: undefined }));
+          setWalletName(val);
         }}
-        className={classNames('w-full h-[58px] !text-md', {
-          '!border-gray-800 mb-10': !errors?.walletName,
-          '!border-red-300 mb-2': errors?.walletName,
-        })}
         status={errors?.walletName ? 'error' : undefined}
+        style={[
+          styles.input,
+          errors?.walletName ? styles.inputError : styles.inputDefault,
+          { marginBottom: errors?.walletName ? 6 : 20 },
+        ]}
       />
-
       {!!errors?.walletName && (
-        <Text size='sm' color='text-red-300' className='mb-3 font-medium'>
+        <Text style={styles.errorText} size="sm">
           {errors?.walletName}
         </Text>
       )}
-
-      <Text className='font-medium' size='md'>
+      <Text style={styles.label} size="md">
         Custom derivation path
       </Text>
 
-      <div className='flex items-center gap-4 w-full mt-4 mb-5'>
-        <Text className='font-bold' color='text-secondary-800' size='sm'>
-          m/44&apos;/...&apos;
-        </Text>
+      <View style={styles.derivationRow}>
+        <Text style={styles.derivationText} size="sm">m/44'/...'</Text>
         <Input
-          placeholder='0'
-          name='index1'
-          autoComplete='off'
-          onChange={handleDerivationInputChange}
-          className={classNames('w-[81.67px] overflow-hidden', {
-            '!border-red-300': errors?.derivationInput,
-            '!border-gray-800': !errors?.derivationInput,
-          })}
-          inputClassName='!text-center !w-full'
-          type='number'
+          placeholder="0"
+          value={derivationInput.index1}
+          onChangeText={val => handleDerivationInputChange('index1', val)}
           status={errors?.derivationInput ? 'error' : undefined}
+          keyboardType="numeric"
+          style={[
+            styles.derivationInput,
+            errors?.derivationInput ? styles.inputError : styles.inputDefault,
+          ]}
         />
-
-        <Text className='font-bold' color='text-secondary-800' size='sm'>
-          &apos;/
-        </Text>
+        <Text style={styles.derivationText} size="sm">{`'/`}</Text>
         <Input
-          placeholder='0'
-          autoComplete='off'
-          name='index2'
-          disabled={true}
-          min='0'
-          max='1'
-          onChange={handleDerivationInputChange}
-          className='w-[81.67px] overflow-hidden border-gray-300 opacity-50'
-          pattern='[01]'
-          maxLength={1}
-          step='1'
-          inputClassName='!text-center !w-full'
-          type='text'
+          placeholder="0"
+          value={derivationInput.index2}
+          onChangeText={val => handleDerivationInputChange('index2', val)}
+          editable={false}
+          style={[styles.derivationInput, styles.inputDisabled]}
         />
-
-        <Text className='font-bold' color='text-secondary-800' size='sm'>
-          /
-        </Text>
+        <Text style={styles.derivationText} size="sm">/</Text>
         <Input
-          placeholder='0'
-          name='index3'
-          autoComplete='off'
-          onChange={handleDerivationInputChange}
-          className={classNames('w-[81.67px] overflow-hidden', {
-            '!border-red-300': errors?.derivationInput,
-            '!border-gray-800': !errors?.derivationInput,
-          })}
-          inputClassName='!text-center !w-full'
-          type='number'
-          step='1'
+          placeholder="0"
+          value={derivationInput.index3}
+          onChangeText={val => handleDerivationInputChange('index3', val)}
           status={errors?.derivationInput ? 'error' : undefined}
+          keyboardType="numeric"
+          style={[
+            styles.derivationInput,
+            errors?.derivationInput ? styles.inputError : styles.inputDefault,
+          ]}
         />
-      </div>
-
-      {!!(errors?.derivationInput ?? errors?.addError) && (
-        <Text size='sm' color='text-red-300' className='font-medium mt-2'>
+      </View>
+      {(!!errors?.derivationInput || !!errors?.addError) && (
+        <Text style={styles.errorText} size="sm">
           {errors?.derivationInput ?? errors?.addError}
         </Text>
       )}
 
       <Button
-        color={theme === ThemeName.DARK ? Colors.white100 : 'black'}
-        className={cn('w-full overflow-hidden', {
-          'opacity-50': isDisabled,
-          'mt-10': !(errors?.derivationInput ?? errors?.addError),
-          'mt-5': !!(errors?.derivationInput ?? errors?.addError),
-        })}
-        onClick={onAdd}
+        style={[
+          {backgroundColor: theme === ThemeName.DARK ? Colors.white100 : 'black'},
+          styles.confirmButton,
+          isDisabled ? { opacity: 0.5 } : null,
+          (!!errors?.derivationInput || !!errors?.addError)
+            ? { marginTop: 16 }
+            : { marginTop: 32 },
+        ]}
+        onPress={onAdd}
         disabled={isDisabled}
       >
-        {isLoading ? <LoaderAnimation color={Colors.white100} className='w-10 h-10' /> : <>Confirm and proceed</>}
+        {isLoading ? (
+          <LoaderAnimation color={Colors.white100} style={styles.loader} />
+        ) : (
+          <>Confirm and proceed</>
+        )}
       </Button>
     </BottomModal>
   );
 };
+
+const styles = StyleSheet.create({
+  label: {
+    fontWeight: '500',
+    marginBottom: 8,
+  },
+  input: {
+    width: '100%',
+    height: 58,
+    fontSize: 16,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginBottom: 0,
+  },
+  inputDefault: {
+    borderColor: '#27272a',
+    backgroundColor: '#fff',
+  },
+  inputError: {
+    borderColor: '#FF5A5F',
+    backgroundColor: '#fff0f0',
+  },
+  inputDisabled: {
+    borderColor: '#D1D5DB',
+    backgroundColor: '#f1f1f1',
+    opacity: 0.5,
+  },
+  errorText: {
+    color: '#FF5A5F',
+    fontWeight: '500',
+    marginBottom: 8,
+    marginTop: 2,
+  },
+  derivationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    width: '100%',
+    marginTop: 16,
+    marginBottom: 20,
+  },
+  derivationText: {
+    fontWeight: 'bold',
+    color: '#444',
+    textAlign: 'center',
+    marginHorizontal: 2,
+  },
+  derivationInput: {
+    width: 82,
+    textAlign: 'center',
+    borderRadius: 8,
+    borderWidth: 1,
+    fontSize: 16,
+    marginHorizontal: 2,
+  },
+  confirmButton: {
+    width: '100%',
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  loader: {
+    width: 40,
+    height: 40,
+    alignSelf: 'center',
+  },
+});

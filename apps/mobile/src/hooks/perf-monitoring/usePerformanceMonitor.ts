@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/react';
+import * as Sentry from '@sentry/react-native';
 import { Span } from '@sentry/tracing';
 import { QueryStatus } from '@tanstack/react-query';
 import { useActiveChain } from '../settings/useActiveChain';

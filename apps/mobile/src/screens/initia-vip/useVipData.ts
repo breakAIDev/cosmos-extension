@@ -1,8 +1,8 @@
 import { useIsMinitia, useSelectedNetwork } from '@leapwallet/cosmos-wallet-hooks';
 import { axiosWrapper } from '@leapwallet/cosmos-wallet-sdk';
 import { useQuery } from '@tanstack/react-query';
-import { useActiveChain } from 'hooks/settings/useActiveChain';
-import useActiveWallet from 'hooks/settings/useActiveWallet';
+import { useActiveChain } from '../../hooks/settings/useActiveChain';
+import useActiveWallet from '../../hooks/settings/useActiveWallet';
 const INITIA_VIP_API = 'https://vip-api.initia.xyz';
 
 type VotingResponse = {

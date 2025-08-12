@@ -1,8 +1,8 @@
-import { CheckCircle } from '@phosphor-icons/react';
-import classNames from 'classnames';
-import Text from 'components/text';
-import { Images } from 'images';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text as RNText, Image, StyleSheet, Animated, Easing } from 'react-native';
+import { CheckCircle } from 'phosphor-react-native';
+import Text from '../../../components/text';
+import { Images } from '../../../../assets/images';
 
 export interface StepCardProps {
   stepNo: number;
@@ -12,7 +12,11 @@ export interface StepCardProps {
 }
 
 export default function StepCard({ stepNo, description, suggestion, status }: StepCardProps) {
-  const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  // Animation refs for suggestion box
+  const opacity = useRef(new Animated.Value(0)).current;
+  const height = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (status === 'pending') {
@@ -28,58 +32,166 @@ export default function StepCard({ stepNo, description, suggestion, status }: St
     }
   }, [status]);
 
-  const transition = 'transition-all duration-300 ease';
+  useEffect(() => {
+    if (showSuggestions && status === 'done') {
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: false,
+        easing: Easing.linear,
+      }).start();
+      Animated.timing(height, {
+        toValue: 54,
+        duration: 300,
+        useNativeDriver: false,
+        easing: Easing.linear,
+      }).start();
+    } else {
+      Animated.timing(opacity, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: false,
+        easing: Easing.linear,
+      }).start();
+      Animated.timing(height, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: false,
+        easing: Easing.linear,
+      }).start();
+    }
+  }, [height, opacity, showSuggestions, status]);
+
+  // Card opacity
+  const cardOpacity = status === 'pending' ? 0.4 : 1;
 
   return (
-    <div
-      className={classNames(`rounded-2xl mb-8 overflow-hidden ${transition}`, {
-        'opacity-[0.4]': status === 'pending',
-      })}
-    >
-      <div className='flex p-6 gap-6 rounded-2xl bg-gray-200 dark:bg-gray-800 items-center'>
+    <View style={[styles.card, { opacity: cardOpacity }]}>
+      <View style={styles.row}>
+        {/* Step image or icon */}
         {status === 'pending' ? (
-          <img src={Images.Misc.ConnectLedgerSteps} alt='Connect Ledger Steps' />
+          <Image
+            source={{uri: Images.Misc.ConnectLedgerSteps}}
+            style={styles.ledgerImage}
+            resizeMode="contain"
+          />
         ) : (
-          <div
-            className={classNames(
-              `w-[72px] h-[72px] bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center border-2 ${transition}`,
-              {
-                'border-green-600': status === 'processing',
-                'ripple-loader': status === 'processing',
-              },
-            )}
+          <View
+            style={[
+              styles.iconCircle,
+              status === 'processing' && styles.processingBorder,
+            ]}
           >
-            {status === 'done' && (
-              <>
-                <button />
-                <button />
-              </>
-            )}
-            <div className={`h-6 w-6 rounded-full bg-white-100 z-[10] flex items-center justify-center ${transition}`}>
-              {status === 'done' && <CheckCircle weight='fill' size={32} className='text-green-600' />}
-            </div>
-          </div>
+            <View style={styles.innerCircle}>
+              {status === 'done' && (
+                <CheckCircle weight="fill" size={32} color="#22c55e" />
+              )}
+            </View>
+          </View>
         )}
-        <div className='bg-gray-400 dark:bg-gray-600 h-8 w-[2px] rounded-lg' />
-        <div className='flex-1'>
-          <Text size='lg' className='font-bold mb-2'>
+
+        {/* Vertical Divider */}
+        <View style={styles.verticalDivider} />
+
+        {/* Step Content */}
+        <View style={styles.flex1}>
+          <Text size="lg" style={styles.bold}>
             Step {stepNo}
           </Text>
-          <Text size='md' color='text-gray-800 dark:text-gray-200' className='font-medium'>
+          <Text size="md" style={styles.desc}>
             {description}
           </Text>
-        </div>
-      </div>
+        </View>
+      </View>
+
+      {/* Suggestion */}
       {suggestion && (
-        <div
-          className={classNames(`px-4 rounded-b-[12px] font-medium text-white-100 dark:text-black-100 ${transition}`, {
-            'opacity-0 h-0 py-0': !(showSuggestions && status === 'done'),
-            'opacity-1 h-[54px] py-4': showSuggestions && status === 'done',
-          })}
+        <Animated.View
+          style={[
+            styles.suggestion,
+            {
+              opacity: opacity,
+              height: height,
+              paddingVertical: showSuggestions && status === 'done' ? 16 : 0,
+            },
+          ]}
         >
-          {suggestion}
-        </div>
+          <RNText style={styles.suggestionText}>{suggestion}</RNText>
+        </Animated.View>
       )}
-    </div>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    borderRadius: 16,
+    marginBottom: 32,
+    overflow: 'hidden',
+    backgroundColor: '#fff',
+  },
+  row: {
+    flexDirection: 'row',
+    padding: 24,
+    gap: 24,
+    borderRadius: 16,
+    backgroundColor: '#E5E7EB', // bg-gray-200
+    alignItems: 'center',
+  },
+  ledgerImage: {
+    width: 56,
+    height: 56,
+  },
+  iconCircle: {
+    width: 72,
+    height: 72,
+    backgroundColor: '#F3F4F6', // bg-gray-300
+    borderRadius: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#E5E7EB', // gray border
+  },
+  processingBorder: {
+    borderColor: '#22c55e', // border-green-600
+    // Optionally add a ripple loader here if needed
+  },
+  innerCircle: {
+    height: 24,
+    width: 24,
+    borderRadius: 12,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
+  },
+  verticalDivider: {
+    backgroundColor: '#9CA3AF', // bg-gray-400
+    height: 32,
+    width: 2,
+    borderRadius: 4,
+  },
+  flex1: {
+    flex: 1,
+  },
+  bold: {
+    fontWeight: 'bold',
+    marginBottom: 6,
+  },
+  desc: {
+    color: '#1f2937', // text-gray-800
+    fontWeight: '500',
+  },
+  suggestion: {
+    paddingHorizontal: 16,
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
+    backgroundColor: '#fff',
+    overflow: 'hidden',
+    justifyContent: 'center',
+  },
+  suggestionText: {
+    color: '#fff', // text-white-100
+    fontWeight: '500',
+  },
+});

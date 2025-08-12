@@ -1,20 +1,20 @@
-import { useActiveChain, useIsFeatureExistForChain } from '@leapwallet/cosmos-wallet-hooks';
-import { PageName } from 'config/analytics';
-import { AGGREGATED_CHAIN_KEY } from 'config/constants';
-import { usePageView } from 'hooks/analytics/usePageView';
-import useQuery from 'hooks/useQuery';
 import React, { useMemo } from 'react';
-import { chainTagsStore } from 'stores/chain-infos-store';
-import { rootDenomsStore } from 'stores/denoms-store-instance';
-import { rootBalanceStore } from 'stores/root-store';
+import { View } from 'react-native';
+
+import { useActiveChain, useIsFeatureExistForChain } from '@leapwallet/cosmos-wallet-hooks';
+import { AGGREGATED_CHAIN_KEY } from '../../services/config/constants';
+import useQuery from '../../hooks/useQuery';
+import { chainTagsStore } from '../../context/chain-infos-store';
+import { rootDenomsStore } from '../../context/denoms-store-instance';
+import { rootBalanceStore } from '../../context/root-store';
 import {
   aggregateStakeStore,
   claimRewardsStore,
   delegationsStore,
   unDelegationsStore,
   validatorsStore,
-} from 'stores/stake-store';
-import { AggregatedSupportedChain } from 'types/utility';
+} from '../../context/stake-store';
+import { AggregatedSupportedChain } from '../../types/utility';
 
 import { AggregatedStake } from './components/AggregatedStake';
 import StakingUnavailable from './components/StakingUnavailable';
@@ -61,10 +61,13 @@ export default function Stake() {
 
   if (isStakeNotSupported || isStakeComingSoon) {
     return (
-      <>
+      <View>
         <StakeHeader />
-        <StakingUnavailable isStakeComingSoon={isStakeComingSoon} isStakeNotSupported={isStakeNotSupported} />
-      </>
+        <StakingUnavailable
+          isStakeComingSoon={isStakeComingSoon}
+          isStakeNotSupported={isStakeNotSupported}
+        />
+      </View>
     );
   }
 

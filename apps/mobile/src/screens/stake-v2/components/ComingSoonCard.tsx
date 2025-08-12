@@ -1,22 +1,27 @@
-import { useActiveChain } from '@leapwallet/cosmos-wallet-hooks';
-import { useChainInfos } from 'hooks/useChainInfos';
 import React from 'react';
+import { useActiveChain } from '@leapwallet/cosmos-wallet-hooks';
+import { useChainInfos } from '../../../hooks/useChainInfos';
 
-import StakeStatusCard from './StakeStatusCard';
+import StakeStatusCard from './StakeStatusCard'; // <-- Make sure you have RN version!
 
-export default function ComingSoonCard({ onAction }: { onAction: () => void }) {
+type ComingSoonCardProps = {
+  onAction: () => void;
+};
+
+export default function ComingSoonCard({ onAction }: ComingSoonCardProps) {
   const activeChain = useActiveChain();
   const chainInfos = useChainInfos();
   const activeChainInfo = chainInfos[activeChain];
 
   return (
     <StakeStatusCard
-      title='Coming soon!'
+      title="Coming soon!"
       onAction={onAction}
       message={`Staking for ${activeChainInfo.chainName} is coming soon. Devs are hard at work. Stay tuned.`}
-      backgroundColor='bg-blue-100 dark:bg-blue-900'
-      backgroundColorDark='bg-blue-200 dark:bg-blue-800'
-      color='text-blue-600 dark:text-blue-400'
+      backgroundColor="#DBEAFE"       // blue-100
+      backgroundColorDark="#1E3A8A"   // blue-900
+      color="#2563EB"                 // blue-600
+      // colorDark="#60A5FA"             // blue-400
     />
   );
 }

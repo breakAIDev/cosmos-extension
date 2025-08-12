@@ -9,23 +9,37 @@ import {
   SupportedChain,
 } from '@leapwallet/cosmos-wallet-sdk';
 import { ChainFeatureFlagsStore, ChainInfosStore } from '@leapwallet/cosmos-wallet-store';
-import { CaretRight } from '@phosphor-icons/react';
-import { bech32 } from 'bech32';
-import useQuery from 'hooks/useQuery';
-import { Wallet } from 'hooks/wallet/useWallet';
-import { ContactCalenderIcon } from 'icons/contact-calender-icon';
-import { Images } from 'images';
+import { CaretRight } from 'phosphor-react-native';
+import { decode } from 'bech32';
+import useQuery from '../../../../hooks/useQuery';
+import { Wallet } from '../../../../hooks/wallet/useWallet';
+import { ContactCalenderIcon } from '../../../../../assets/icons/contact-calender-icon';
+import { Images } from '../../../../../assets/images';
 import { observer } from 'mobx-react-lite';
-import { useSendContext } from 'pages/send/context';
-import { useCheckAddressError } from 'pages/send/hooks/useCheckAddressError';
-import { SelectChain } from 'pages/send/SelectRecipientSheet';
-import React, { forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
-import { AddressBook } from 'utils/addressbook';
-import { UserClipboard } from 'utils/clipboard';
-import { cn } from 'utils/cn';
-import { isSidePanel } from 'utils/isSidePanel';
-
+import { useSendContext } from '../../../send/context';
+import { useCheckAddressError } from '../../../send/hooks/useCheckAddressError';
+import { SelectChain } from '../../../send/SelectRecipientSheet';
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { AddressBook } from '../../../../utils/addressbook';
+import { UserClipboard } from '../../../../utils/clipboard';
 import NameServiceMatchList from './match-lists';
+
+import {
+  View,
+  TextInput,
+  Text,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  Platform,
+} from 'react-native';
 
 interface InputCardProps {
   setShowSelectRecipient: (show: boolean) => void;
@@ -38,7 +52,8 @@ interface InputCardProps {
 }
 
 const nameServiceMatcher = /^[a-zA-Z0-9_-]+\.[a-z]+$/;
-const InputCard = forwardRef<HTMLInputElement, InputCardProps>(
+
+const InputCard = forwardRef<any, InputCardProps>(
   (
     {
       setShowSelectRecipient,
@@ -49,7 +64,7 @@ const InputCard = forwardRef<HTMLInputElement, InputCardProps>(
       chainFeatureFlagsStore,
       selectedNetwork,
     },
-    ref,
+    ref
   ) => {
     const recipient = useQuery().get('recipient') ?? undefined;
     const {
@@ -73,7 +88,7 @@ const InputCard = forwardRef<HTMLInputElement, InputCardProps>(
             .sort((a, b) =>
               a.createdAt && b.createdAt
                 ? new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-                : a.name.localeCompare(b.name),
+                : a.name.localeCompare(b.name)
             )
         : [];
     }, [wallets]);
@@ -86,9 +101,10 @@ const InputCard = forwardRef<HTMLInputElement, InputCardProps>(
         if (ethAddress) {
           addresses.push(ethAddress);
         }
-        return addresses.some((address) => {
-          return recipientInputValue.toLowerCase() === address.toLowerCase();
-        });
+        return addresses.some(
+          (address) =>
+            recipientInputValue.toLowerCase() === address.toLowerCase()
+        );
       });
       if (res) return res;
     }, [recipientInputValue, walletsList]);
@@ -97,14 +113,9 @@ const InputCard = forwardRef<HTMLInputElement, InputCardProps>(
 
     const showNameServiceResults = useMemo(() => {
       const allowedTopLevelDomains = [
-        ...Object.keys(addressPrefixes), // for ibcdomains, icns, stargazenames
-        'arch', // for archId
-        'sol', // for injective .sol domains by SNS
-        ...['sei', 'pp'], // for degeNS
-        'core', // for bdd
-        'i', //for celestials.id
+        ...Object.keys(addressPrefixes),
+        'arch', 'sol', ...['sei', 'pp'], 'core', 'i',
       ];
-      // ex: leap.arch --> name = leap, domain = arch
       const [, domain] = recipientInputValue.split('.');
       const isValidDomain = allowedTopLevelDomains.indexOf(domain) !== -1;
       return nameServiceMatcher.test(recipientInputValue) && isValidDomain;
@@ -122,7 +133,9 @@ const InputCard = forwardRef<HTMLInputElement, InputCardProps>(
             _minitiaChains.push(chains[c as SupportedChain]);
           }
           const _chain = Object.values(chainInfoStore.chainInfos).find((chainInfo) =>
-            selectedNetwork === 'testnet' ? chainInfo?.testnetChainId === c : chainInfo?.chainId === c,
+            selectedNetwork === 'testnet'
+              ? chainInfo?.testnetChainId === c
+              : chainInfo?.chainId === c
           );
           if (_chain) {
             _minitiaChains.push(_chain);
@@ -142,7 +155,6 @@ const InputCard = forwardRef<HTMLInputElement, InputCardProps>(
     useEffect(() => {
       if (recipient) {
         setRecipientInputValue(recipient);
-        // setInputInProgress(true)
         if (
           !isValidAddress(recipientInputValue) &&
           !isEthAddress(recipientInputValue) &&
@@ -162,14 +174,11 @@ const InputCard = forwardRef<HTMLInputElement, InputCardProps>(
           emoji: undefined,
         });
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [recipient]);
+    }, [existingWalletMatch?.avatar, recipient, recipientInputValue, setRecipientInputValue, setSelectedAddress]);
 
     const handledSelectedAddress = useCallback(
       (address: string) => {
-        if (!address) {
-          return;
-        }
+        if (!address) return;
         setMemo('');
         try {
           if (address.length === 0) {
@@ -188,7 +197,7 @@ const InputCard = forwardRef<HTMLInputElement, InputCardProps>(
             } else if (address.startsWith('bc1q')) {
               chain = 'bitcoin';
             } else {
-              const { prefix } = bech32.decode(address);
+              const { prefix } = decode(address);
               chain = addressPrefixes[prefix] as SupportedChain;
               if (prefix === 'init') {
                 setShowSelectChain(true);
@@ -228,7 +237,7 @@ const InputCard = forwardRef<HTMLInputElement, InputCardProps>(
         setMemo,
         setSelectedAddress,
         setInputInProgress,
-      ],
+      ]
     );
 
     const handleSelectRecipient = useCallback(() => {
@@ -243,9 +252,7 @@ const InputCard = forwardRef<HTMLInputElement, InputCardProps>(
           setRecipientInputValue(text.trim());
           handledSelectedAddress(text.trim());
         })
-        .catch(() => {
-          //
-        });
+        .catch(() => {});
       if (ref && 'current' in ref) {
         ref.current?.focus();
       }
@@ -259,7 +266,13 @@ const InputCard = forwardRef<HTMLInputElement, InputCardProps>(
         setRecipientInputValue(s.address ?? '');
         setInputInProgress(false);
       },
-      [setAddressError, setEthAddress, setSelectedAddress, setRecipientInputValue, setInputInProgress],
+      [
+        setAddressError,
+        setEthAddress,
+        setSelectedAddress,
+        setRecipientInputValue,
+        setInputInProgress,
+      ]
     );
 
     const showError = !showNameServiceResults && addressError;
@@ -267,84 +280,80 @@ const InputCard = forwardRef<HTMLInputElement, InputCardProps>(
       recipientInputValue?.length > 0 &&
       debouncedRecipientInputValue?.length > 0 &&
       !addressError &&
-      !addressError &&
       !showNameServiceResults;
 
     return (
-      <div className='flex flex-col justify-start items-start'>
-        <div className='flex justify-between items-center w-full gap-2'>
-          <input
+      <View style={styles.container}>
+        <View style={styles.inputRow}>
+          <TextInput
             ref={ref}
-            className={cn(
-              'flex-1 h-8 bg-transparent text-[18px] text-monochrome placeholder:text-muted-foreground placeholder:text-[18px] placeholder:font-bold font-bold text-foreground ring-0 outline-none caret-accent-green',
-              isSidePanel() ? '!min-w-0' : '',
-            )}
-            placeholder={'Enter address'}
+            style={styles.input}
+            placeholder="Enter address"
             value={recipientInputValue}
-            onChange={(e) => {
+            onChangeText={(text) => {
               setInputInProgress(true);
-              setRecipientInputValue(e.target.value);
-              // should update the selected address if this value is modified
+              setRecipientInputValue(text);
             }}
+            autoCapitalize="none"
+            autoCorrect={false}
+            underlineColorAndroid="transparent"
+            placeholderTextColor="#A0A2B1"
           />
-          <div className='flex flex-row justify-end items-center shrink-0 gap-2'>
+          <View style={styles.actionButtons}>
             {!recipientInputValue && (
-              <button
-                key='paste'
-                className='rounded-lg font-bold text-sm py-2 tracking-normal px-[10px] !leading-[16px] bg-secondary-200 hover:bg-secondary-300 transition-colors duration-200 cursor-pointer'
-                onClick={actionPaste}
-              >
-                Paste
-              </button>
+              <TouchableOpacity style={styles.pasteBtn} onPress={actionPaste}>
+                <Text style={styles.pasteBtnText}>Paste</Text>
+              </TouchableOpacity>
             )}
             {!recipientInputValue && (
-              <button
-                className='p-1.5 rounded-lg bg-secondary-200 hover:bg-secondary-300 transition-colors duration-200 cursor-pointer'
-                onClick={() => {
-                  setShowSelectRecipient(true);
-                }}
-              >
-                <ContactCalenderIcon className='text-foreground p-[2px]' size={20} />
-              </button>
+              <TouchableOpacity style={styles.contactBtn} onPress={() => setShowSelectRecipient(true)}>
+                <ContactCalenderIcon size={20} color="#222" />
+              </TouchableOpacity>
             )}
-          </div>
-        </div>
+          </View>
+        </View>
 
-        {showError || showRecipientPlaceholder || showNameServiceResults ? (
-          <div className='w-full h-[1px] mt-5 bg-secondary-300' />
-        ) : null}
+        {(showError || showRecipientPlaceholder || showNameServiceResults) && (
+          <View style={styles.separator} />
+        )}
 
-        {showError ? (
-          <div className='text-sm text-destructive-100 font-medium leading-[19px] mt-5'>{addressError}</div>
-        ) : null}
+        {showError && (
+          <Text style={styles.errorText}>{addressError}</Text>
+        )}
 
-        {showRecipientPlaceholder ? (
-          <button className={'w-full flex items-center gap-3 cursor-pointer mt-5'} onClick={handleSelectRecipient}>
-            <div className='flex justify-between items-center w-full'>
-              <div className='flex items-center gap-4'>
-                <img
-                  className='h-11 w-11 rounded-full'
-                  src={existingWalletMatch?.avatar || Images.Misc.getWalletIconAtIndex(0)}
+        {showRecipientPlaceholder && (
+          <TouchableOpacity
+            style={styles.recipientCard}
+            onPress={handleSelectRecipient}
+          >
+            <View style={styles.recipientCardContent}>
+              <View style={styles.recipientInfo}>
+                <Image
+                  style={styles.avatar}
+                  source={{ uri: existingWalletMatch?.avatar ?? Images.Misc.getWalletIconAtIndex(0)}}
                 />
-                <div className='flex flex-col'>
+                <View>
                   {existingResult && (
-                    <p className='font-bold text-left text-monochrome text-sm capitalize'>{existingResult.name}</p>
+                    <Text style={styles.recipientName}>
+                      {existingResult.name}
+                    </Text>
                   )}
-                  {existingResult ? (
-                    <p className='text-sm text-muted-foreground text-left'>{sliceAddress(recipientInputValue)}</p>
-                  ) : (
-                    <p className='font-bold text-left text-monochrome text-sm'>{sliceAddress(recipientInputValue)}</p>
-                  )}
-                </div>
-              </div>
-              <CaretRight className='text-muted-foreground' size={16} />
-            </div>
-          </button>
-        ) : null}
+                  <Text style={styles.recipientAddress}>
+                    {sliceAddress(recipientInputValue)}
+                  </Text>
+                </View>
+              </View>
+              <CaretRight size={16} color="#A0A2B1" />
+            </View>
+          </TouchableOpacity>
+        )}
 
-        {showNameServiceResults ? (
-          <NameServiceMatchList address={recipientInputValue} handleContactSelect={handleContactSelect} />
-        ) : null}
+        {showNameServiceResults && (
+          <NameServiceMatchList
+            address={recipientInputValue}
+            handleContactSelect={handleContactSelect}
+          />
+        )}
 
         <SelectChain
           isOpen={showSelectChain}
@@ -359,11 +368,111 @@ const InputCard = forwardRef<HTMLInputElement, InputCardProps>(
           wallet={existingWalletMatch}
           chainList={minitiaChains.map((chain) => chain.key)}
         />
-      </div>
+      </View>
     );
-  },
+  }
 );
 
 InputCard.displayName = 'InputCard';
 
 export default observer(InputCard);
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    width: '100%',
+  },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    gap: 8,
+  },
+  input: {
+    flex: 1,
+    height: 44,
+    fontSize: 18,
+    backgroundColor: 'transparent',
+    color: '#18191A',
+    fontWeight: 'bold',
+    paddingHorizontal: 0,
+    paddingVertical: 8,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  pasteBtn: {
+    borderRadius: 8,
+    backgroundColor: '#F3F5FA',
+    paddingHorizontal: 10,
+    paddingVertical: Platform.OS === 'ios' ? 7 : 5,
+    marginLeft: 4,
+  },
+  pasteBtnText: {
+    fontWeight: 'bold',
+    fontSize: 14,
+    color: '#1877F2',
+  },
+  contactBtn: {
+    padding: 6,
+    borderRadius: 8,
+    backgroundColor: '#F3F5FA',
+    marginLeft: 4,
+  },
+  separator: {
+    width: '100%',
+    height: 1,
+    backgroundColor: '#DDE4EF',
+    marginTop: 16,
+    marginBottom: 4,
+  },
+  errorText: {
+    color: '#FF5555',
+    fontSize: 15,
+    fontWeight: '600',
+    marginTop: 12,
+  },
+  recipientCard: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    backgroundColor: '#F3F5FA',
+    borderRadius: 12,
+  },
+  recipientCardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    justifyContent: 'space-between',
+  },
+  recipientInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  avatar: {
+    height: 44,
+    width: 44,
+    borderRadius: 22,
+    marginRight: 10,
+    backgroundColor: '#F3F5FA',
+  },
+  recipientName: {
+    fontWeight: 'bold',
+    textAlign: 'left',
+    color: '#18191A',
+    fontSize: 15,
+    marginBottom: 2,
+  },
+  recipientAddress: {
+    fontSize: 13,
+    color: '#A0A2B1',
+    textAlign: 'left',
+  },
+});

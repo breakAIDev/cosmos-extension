@@ -29,40 +29,38 @@ import {
 } from '@leapwallet/cosmos-wallet-sdk';
 import { EvmBalanceStore, RootBalanceStore, RootDenomsStore } from '@leapwallet/cosmos-wallet-store';
 import { EthWallet } from '@leapwallet/leap-keychain';
-import { Avatar, Buttons, Header, ThemeName, useTheme } from '@leapwallet/leap-ui';
-import { captureException } from '@sentry/react';
+import { Avatar, Buttons, ThemeName, useTheme } from '@leapwallet/leap-ui';
+import { captureException } from '@sentry/react-native';
 import { useQuery } from '@tanstack/react-query';
 import BigNumber from 'bignumber.js';
-import classNames from 'classnames';
-import Tooltip from 'components/better-tooltip';
-import { ErrorCard } from 'components/ErrorCard';
-import GasPriceOptions, { useDefaultGasPrice } from 'components/gas-price-options';
-import PopupLayout from 'components/layout/popup-layout';
-import LedgerConfirmationModal from 'components/ledger-confirmation/confirmation-modal';
-import { LoaderAnimation } from 'components/loader/Loader';
-import { Tabs } from 'components/tabs';
-import { SEI_EVM_LEDGER_ERROR_MESSAGE } from 'config/constants';
-import { MessageTypes } from 'config/message-types';
-import { useSiteLogo } from 'hooks/utility/useSiteLogo';
-import { Wallet } from 'hooks/wallet/useWallet';
-import { Images } from 'images';
-import { GenericDark, GenericLight } from 'images/logos';
+import Tooltip from '../../../components/better-tooltip';
+import { ErrorCard } from '../../../components/ErrorCard';
+import GasPriceOptions, { useDefaultGasPrice } from '../../../components/gas-price-options';
+import PopupLayout from '../../../components/layout/popup-layout';
+import LedgerConfirmationModal from '../../../components/ledger-confirmation/confirmation-modal';
+import { LoaderAnimation } from '../../../components/loader/Loader';
+import { Tabs } from '../../../components/tabs';
+import Text from '../../../components/text';
+import { SEI_EVM_LEDGER_ERROR_MESSAGE } from '../../../services/config/constants';
+import { MessageTypes } from '../../../services/config/message-types';
+import { useSiteLogo } from '../../../hooks/utility/useSiteLogo';
+import { Wallet } from '../../../hooks/wallet/useWallet';
+import { Images } from '../../../../assets/images';
+import { GenericDark, GenericLight } from '../../../../assets/images/logos';
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { feeTokensStore } from 'stores/fee-store';
-import { Colors } from 'theme/colors';
-import { TransactionStatus } from 'types/utility';
-import { assert } from 'utils/assert';
-import { formatWalletName } from 'utils/formatWalletName';
-import { imgOnError } from 'utils/imgOnError';
-import { isSidePanel } from 'utils/isSidePanel';
-import { uiErrorTags } from 'utils/sentry';
-import { trim } from 'utils/strings';
-import Browser from 'webextension-polyfill';
+import { feeTokensStore } from '../../../context/fee-store';
+import { Colors, getChainColor } from '../../../theme/colors';
+import { TransactionStatus } from '../../../types/utility';
+import { assert } from '../../../utils/assert';
+import { formatWalletName } from '../../../utils/formatWalletName';
+import { uiErrorTags } from '../../../utils/sentry';
+import { trim } from '../../../utils/strings';
 
-import { handleRejectClick } from '../utils';
+import { useHandleRejectClick } from '../utils';
 import { Loading } from './index';
+import { useNavigation } from '@react-navigation/native';
+import { ScrollView, View, Image, StyleSheet, DeviceEventEmitter } from 'react-native';
 
 const useGetWallet = Wallet.useGetWallet;
 
@@ -88,6 +86,7 @@ export const SignTransaction = observer(
     activeChain,
     activeNetwork,
   }: SignTransactionProps) => {
+    const navigation = useNavigation();
     const getWallet = useGetWallet(activeChain);
     const { theme } = useTheme();
     const { addressLinkState } = useSeiLinkedAddressState(activeChain);
@@ -98,6 +97,7 @@ export const SignTransaction = observer(
     feeTokensStore.getStore(activeChain, activeNetwork, true);
 
     const [showLedgerPopup, setShowLedgerPopup] = useState(false);
+    const {setHandleRejectClick} = useHandleRejectClick();
 
     const assets = useMemo(() => {
       let _assets = allAssets;
@@ -122,7 +122,6 @@ export const SignTransaction = observer(
     const walletName = useMemo(() => {
       return formatWalletName(activeWallet.name);
     }, [activeWallet.name]);
-    const navigate = useNavigate();
 
     const address = useAddress(activeChain);
     const evmChainId = useChainId(activeChain, activeNetwork, true);
@@ -338,7 +337,7 @@ export const SignTransaction = observer(
 
         setTxStatus('success');
         try {
-          Browser.runtime.sendMessage({
+          DeviceEventEmitter.emit('signTransaction', {
             type: MessageTypes.signSeiEvmResponse,
             payloadId: txnData?.payloadId,
             payload: { status: 'success', data: result.hash },
@@ -348,12 +347,7 @@ export const SignTransaction = observer(
         }
 
         if (!donotClose) {
-          if (isSidePanel()) {
-            refetchData();
-            navigate('/home');
-          } else {
-            window.close();
-          }
+          navigation.goBack();
         } else {
           handleTxnListUpdate();
         }
@@ -384,53 +378,38 @@ export const SignTransaction = observer(
     const isApproveBtnDisabled =
       !!signingError || txStatus === 'loading' || !!gasPriceError || isLoadingGasLimit || gasPriceStatus === 'loading';
 
-    return (
-      <div
-        className={classNames(
-          'panel-width enclosing-panel h-full relative self-center justify-self-center flex justify-center items-center',
-        )}
-      >
-        <div
-          className={classNames(
-            'relative w-full overflow-clip rounded-md border border-gray-300 dark:border-gray-900',
-            { 'panel-height': isSidePanel() },
-          )}
-        >
+  return (
+      <View style={styles.root}>
+        <View style={styles.panel}>
           <PopupLayout
-            className='flex flex-col'
+            style={{ flex: 1 }}
             header={
-              <div className='w-[396px]'>
-                <Header
-                  imgSrc={chainInfo.chainSymbolImageUrl ?? (theme === ThemeName.DARK ? GenericDark : GenericLight)}
-                  // imgOnError={imgOnError(theme === ThemeName.DARK ? GenericDark : GenericLight)}
-                  title={<Buttons.Wallet title={trim(walletName, 10)} className='pr-4 cursor-default' />}
-                />
-              </div>
+              <View>
+                <Image source={{uri: chainInfo.chainSymbolImageUrl ?? (theme === ThemeName.DARK ? GenericDark : GenericLight)}}/>
+                <Buttons.Wallet title={trim(walletName, 10)} style={styles.pr4} />
+              </View>
             }
           >
-            <div className='px-7 py-3 overflow-y-auto relative max-h-[calc(100%-150px)]'>
-              <h2 className='text-center text-lg font-bold dark:text-white-100 text-gray-900 w-full'>
-                Approve Transaction
-              </h2>
-              <div className='flex items-center mt-3 rounded-2xl dark:bg-gray-900 bg-white-100 p-4'>
+            <ScrollView contentContainerStyle={styles.scrollView}>
+              <Text style={styles.title}>Approve Transaction</Text>
+              <View style={styles.siteRow}>
                 <Avatar
                   avatarImage={siteLogo}
-                  avatarOnError={imgOnError(Images.Misc.Globe)}
-                  size='sm'
-                  className='rounded-full overflow-hidden'
+                  size="sm"
+                  style={styles.avatar}
                 />
-                <div className='ml-3'>
-                  <p className='capitalize text-gray-900 dark:text-white-100 text-base font-bold'>{siteName}</p>
-                  <p className='lowercase text-gray-500 dark:text-gray-400 text-xs font-medium'>{siteOrigin}</p>
-                </div>
-              </div>
+                <View style={styles.siteInfo}>
+                  <Text style={styles.siteName}>{siteName}</Text>
+                  <Text style={styles.siteOrigin}>{siteOrigin}</Text>
+                </View>
+              </View>
 
               <GasPriceOptions
                 gasLimit={userPreferredGasLimit || recommendedGasLimit?.toString()}
-                setGasLimit={(value: string | number | BigNumber) => setUserPreferredGasLimit(value.toString())}
+                setGasLimit={value => setUserPreferredGasLimit(value.toString())}
                 recommendedGasLimit={recommendedGasLimit?.toString()}
                 gasPriceOption={gasPriceOption}
-                onGasPriceOptionChange={(value: any) => setGasPriceOption(value)}
+                onGasPriceOptionChange={setGasPriceOption}
                 error={gasPriceError}
                 setError={setGasPriceError}
                 considerGasAdjustment={false}
@@ -442,98 +421,206 @@ export const SignTransaction = observer(
                 rootBalanceStore={rootBalanceStore}
               >
                 <Tabs
-                  className='mt-3'
+                  style={{marginTop: 12}}
                   tabsList={[
                     { id: 'fees', label: 'Fees' },
                     { id: 'details', label: 'Details' },
                   ]}
                   tabsContent={{
                     fees: (
-                      <div className='rounded-2xl p-4 mt-3 dark:bg-gray-900 bg-white-100'>
-                        <div className='flex items-center'>
-                          <p className='text-gray-500 dark:text-gray-100 text-sm font-medium tracking-wide'>
-                            Gas Fees <span className='capitalize'>({gasPriceOption.option})</span>
-                          </p>
-                          <Tooltip
-                            content={
-                              <p className='text-gray-500 dark:text-gray-100 text-sm'>
-                                You can choose higher gas fees for faster transaction processing.
-                              </p>
-                            }
-                          >
-                            <div className='relative ml-2'>
-                              <img src={Images.Misc.InfoCircle} alt='Hint' />
-                            </div>
+                      <View style={styles.feeCard}>
+                        <View style={styles.feeRow}>
+                          <Text style={styles.feeLabel}>
+                            Gas Fees <Text style={{ textTransform: 'capitalize' }}>({gasPriceOption.option})</Text>
+                          </Text>
+                          <Tooltip content={<Text>You can choose higher gas fees for faster transaction processing.</Text>}>
+                            <View style={styles.infoIcon}>
+                              <Image source={{uri: Images.Misc.InfoCircle}} style={{ width: 18, height: 18 }} />
+                            </View>
                           </Tooltip>
-                        </div>
-
-                        <GasPriceOptions.Selector className='mt-2' />
-                        <div className='flex items-center justify-end'>
-                          <GasPriceOptions.AdditionalSettingsToggle className='p-0 mt-3' />
-                        </div>
+                        </View>
+                        <GasPriceOptions.Selector style={styles.mt2} />
+                        <View style={styles.mt3End}>
+                          <GasPriceOptions.AdditionalSettingsToggle style={{padding: 0, marginTop: 12}} />
+                        </View>
                         <GasPriceOptions.AdditionalSettings
-                          className='mt-2'
+                          style={styles.mt2}
                           showGasLimitWarning={true}
                           rootDenomsStore={rootDenomsStore}
                           rootBalanceStore={rootBalanceStore}
                         />
-
                         {gasPriceError ? (
-                          <p className='text-red-300 text-sm font-medium mt-2 px-1'>{gasPriceError}</p>
+                          <Text style={styles.gasPriceError}>{gasPriceError}</Text>
                         ) : null}
-                      </div>
+                      </View>
                     ),
                     details: (
-                      <pre className='text-xs text-gray-900 dark:text-white-100 dark:bg-gray-900 bg-white-100 p-4 w-full overflow-x-auto mt-3 rounded-2xl'>
-                        {JSON.stringify(
-                          txnData.signTxnData.details,
-                          (_, value) => (typeof value === 'bigint' ? value.toString() : value),
-                          2,
-                        )}
-                      </pre>
+                      <View style={styles.detailsCard}>
+                        <Text style={styles.detailsText}>
+                          {JSON.stringify(
+                            txnData.signTxnData.details,
+                            (_, value) => (typeof value === 'bigint' ? value.toString() : value),
+                            2,
+                          )}
+                        </Text>
+                      </View>
                     ),
                   }}
                 />
               </GasPriceOptions>
 
-              {signingError && txStatus === 'error' ? <ErrorCard text={signingError} className='mt-3' /> : null}
+              {signingError && txStatus === 'error' ? (
+                <ErrorCard text={signingError} style={styles.errorCard} />
+              ) : null}
 
               {txStatus !== 'error' && showLedgerPopup ? (
                 <LedgerConfirmationModal showLedgerPopup={showLedgerPopup} onClose={() => setShowLedgerPopup(false)} />
               ) : null}
-            </div>
+            </ScrollView>
 
-            <div className='py-3 px-7 dark:bg-black-100 bg-gray-50 w-full mt-auto'>
-              <div className='flex items-center justify-center w-full space-x-3'>
-                <Buttons.Generic
-                  title='Reject Button'
-                  color={Colors.gray900}
-                  onClick={() => {
-                    handleRejectClick(navigate, txnData?.payloadId, donotClose);
+            <View style={styles.actionBar}>
+              <Buttons.Generic
+                title="Reject"
+                color={Colors.gray900}
+                onClick={() => {
+                  setHandleRejectClick(txnData?.payloadId, donotClose);
+                  if (donotClose) {
+                    handleTxnListUpdate();
+                  }
+                }}
+                disabled={txStatus === 'loading'}
+              >
+                Reject
+              </Buttons.Generic>
 
-                    if (donotClose) {
-                      handleTxnListUpdate();
-                    }
-                  }}
-                  disabled={txStatus === 'loading'}
-                >
-                  Reject
-                </Buttons.Generic>
-
-                <Buttons.Generic
-                  title='Approve Button'
-                  color={Colors.getChainColor(activeChain)}
-                  onClick={handleApproveClick}
-                  disabled={isApproveBtnDisabled}
-                  className={`${isApproveBtnDisabled ? 'cursor-not-allowed opacity-50' : ''}`}
-                >
-                  {txStatus === 'loading' ? <LoaderAnimation color='white' /> : 'Approve'}
-                </Buttons.Generic>
-              </div>
-            </div>
+              <Buttons.Generic
+                title="Approve"
+                color={getChainColor(activeChain)}
+                onClick={handleApproveClick}
+                disabled={isApproveBtnDisabled}
+                style={isApproveBtnDisabled ? styles.disabledBtn : undefined}
+              >
+                {txStatus === 'loading' ? <LoaderAnimation color="white" /> : 'Approve'}
+              </Buttons.Generic>
+            </View>
           </PopupLayout>
-        </div>
-      </div>
+        </View>
+      </View>
     );
-  },
+  }
 );
+
+// Styles
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: '#fafbfc',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  panel: {
+    flex: 1,
+    width: '100%',
+    maxWidth: 480,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    overflow: 'hidden',
+    marginVertical: 16,
+    backgroundColor: '#fff',
+  },
+  pr4: { paddingRight: 16 },
+  scrollView: {
+    padding: 16,
+    paddingBottom: 120,
+  },
+  title: {
+    textAlign: 'center',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color: '#222',
+  },
+  siteRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 12,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+  },
+  avatar: {
+    borderRadius: 100,
+    overflow: 'hidden',
+  },
+  siteInfo: { marginLeft: 12 },
+  siteName: {
+    fontWeight: 'bold',
+    textTransform: 'capitalize',
+    color: '#222',
+    fontSize: 16,
+  },
+  siteOrigin: {
+    fontSize: 12,
+    color: '#888',
+    textTransform: 'lowercase',
+  },
+  feeCard: {
+    borderRadius: 12,
+    backgroundColor: '#fff',
+    marginTop: 12,
+    padding: 16,
+    marginBottom: 8,
+  },
+  feeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  feeLabel: {
+    color: '#555',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  infoIcon: {
+    marginLeft: 8,
+  },
+  mt2: { marginTop: 8 },
+  mt3End: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: 12 },
+  gasPriceError: {
+    color: '#f44',
+    fontSize: 13,
+    marginTop: 8,
+    paddingLeft: 2,
+  },
+  detailsCard: {
+    backgroundColor: '#fafbfc',
+    borderRadius: 12,
+    padding: 12,
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  detailsText: {
+    fontSize: 12,
+    color: '#333',
+    fontFamily: 'monospace',
+  },
+  actionBar: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    padding: 12,
+    backgroundColor: '#f5f5f5',
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderColor: '#eee',
+    position: 'absolute',
+    left: 0,
+    bottom: 0,
+    width: '100%',
+    zIndex: 1,
+  },
+  errorCard: { marginTop: 12 },
+  disabledBtn: {
+    opacity: 0.5,
+  },
+});

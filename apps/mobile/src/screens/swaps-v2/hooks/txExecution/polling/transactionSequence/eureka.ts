@@ -1,5 +1,5 @@
 import { EurekaTransferInfoJSON } from '@skip-go/client';
-import { EurekaTransferPacketTxnSeq } from 'types/swap';
+import { EurekaTransferPacketTxnSeq } from '../../../../../../types/swap';
 
 import { convertPacketFromJSON } from './convertPackageFromJson';
 

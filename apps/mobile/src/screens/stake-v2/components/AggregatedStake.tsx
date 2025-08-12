@@ -10,20 +10,20 @@ import {
   UndelegationsStore,
   ValidatorsStore,
 } from '@leapwallet/cosmos-wallet-store';
-import { CaretDown, CaretUp, X } from '@phosphor-icons/react';
+import { CaretDown, CaretUp, X } from 'phosphor-react-native';
 import BigNumber from 'bignumber.js';
-import { AggregatedLoadingList } from 'components/aggregated';
-import { EmptyCard } from 'components/empty-card';
-import { SearchInput } from 'components/ui/input/search-input';
+import { AggregatedLoadingList } from '../../../components/aggregated';
+import { EmptyCard } from '../../../components/empty-card';
+import { SearchInput } from '../../../components/ui/input/search-input';
 import currency from 'currency.js';
-import { decodeChainIdToChain } from 'extension-scripts/utils';
-import { useFormatCurrency } from 'hooks/settings/useCurrency';
-import { useSelectedNetwork } from 'hooks/settings/useNetwork';
-import useQuery from 'hooks/useQuery';
-import { Images } from 'images';
+import { decodeChainIdToChain } from '../../../context/utils';
+import { useFormatCurrency } from '../../../hooks/settings/useCurrency';
+import { useSelectedNetwork } from '../../../hooks/settings/useNetwork';
+import useQuery from '../../../hooks/useQuery';
+import { Images } from '../../../../assets/images';
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-
+import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { StakeHeader } from '../stake-header';
 import StakePage from '../StakePage';
 import { AggregatedValues } from './AggregatedValues';
@@ -197,6 +197,7 @@ export const AggregatedStake = observer(
 
     if (selectedChain) {
       return (
+        // Navigate to StakePage for selectedChain (not shown here)
         <StakePage
           forceChain={selectedChain}
           forceNetwork={NETWORK}
@@ -213,134 +214,128 @@ export const AggregatedStake = observer(
       );
     }
 
-    return (
-      <>
-        <StakeHeader setShowSearchInput={setShowSearchInput} />
-        <div className='flex flex-col pt-6 px-6 w-full h-full overflow-y-scroll bg-secondary-50'>
-          {showSearchInput ? (
-            <div className='flex gap-4 items-center mb-6'>
-              <SearchInput
-                value={searchedText}
-                placeholder='Search staked tokens'
-                onChange={(e) => setSearchedText(e.target.value)}
-                onClear={() => setSearchedText('')}
-              />
-              <X
-                size={24}
-                className='text-muted-foreground  cursor-pointer p-3.5 h-auto w-12 rounded-full bg-secondary-100 hover:bg-secondary-200'
-                onClick={() => {
-                  setShowSearchInput(false);
-                  setSearchedText('');
-                }}
-              />
-            </div>
-          ) : (
-            <div className='bg-white-100 dark:bg-gray-950 border-[1px] border-solid border-gray-200 dark:border-gray-850 rounded-xl flex p-3 mb-6'>
-              <AggregatedValues
-                label='Staked'
-                value={formatCurrency(totalCurrencyAmountDelegation)}
-                className='border-r-[1px] border-solid border-gray-200 dark:border-gray-850'
-              />
-              <AggregatedValues
-                label='Claimable'
-                value={formatCurrency(totalClaimRewardsAmount)}
-                className='border-r-[1px] border-solid border-gray-200 dark:border-gray-850'
-              />
-              <AggregatedValues label='Avg APR' value={averageAprValue} />
-            </div>
-          )}
+  return (
+    <View>
+      <StakeHeader setShowSearchInput={setShowSearchInput} />      
+      <View style={styles.container}>
+        {/* Header and search */}
+        {showSearchInput ? (
+          <View style={styles.searchContainer}>
+            <SearchInput
+              value={searchedText}
+              placeholder="Search staked tokens"
+              onChangeText={setSearchedText}
+              onClear={() => setSearchedText('')}
+            />
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => {
+                setShowSearchInput(false);
+                setSearchedText('');
+              }}
+            >
+              <X size={24} color="#9ca3af" />
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.aggregatedBar}>
+            <AggregatedValues label="Staked" value={formatCurrency(totalCurrencyAmountDelegation)} />
+            <AggregatedValues label="Claimable" value={formatCurrency(totalClaimRewardsAmount)} />
+            <AggregatedValues label="Avg APR" value={averageApr ? `${(averageApr * 100).toFixed(2)}%` : '-'} />
+          </View>
+        )}
 
-          {delegationsToConsider.length > 0 && (
-            <p className='text-gray-800 dark:text-gray-200 text-[12px] text-[500] flex items-center justify-between mb-2 px-[12px]'>
-              <span className='block w-[150px]'>Tokens</span>
-
-              <button
-                className='flex items-center justify-between gap-1'
-                onClick={() => {
-                  setShowAprInDescending(!showAprInDescending);
-                  setSortBy('apr');
-                }}
-              >
-                APR
-                {sortBy === 'apr' && (
-                  <>
-                    {showAprInDescending ? (
-                      <CaretDown size={16} className='text-black-100 dark:text-white-100' />
-                    ) : (
-                      <CaretUp size={16} className='text-black-100 dark:text-white-100' />
-                    )}
-                  </>
-                )}
-              </button>
-
-              <button
-                className='w-[90px] text-right flex items-center justify-end gap-1'
-                onClick={() => {
-                  setShowAmountInDescending(!showAmountInDescending);
-                  setSortBy('amount');
-                }}
-              >
-                Amount
-                {sortBy === 'amount' && (
-                  <>
-                    {showAmountInDescending ? (
-                      <CaretDown size={16} className='text-black-100 dark:text-white-100' />
-                    ) : (
-                      <CaretUp size={16} className='text-black-100 dark:text-white-100' />
-                    )}
-                  </>
-                )}
-              </button>
-            </p>
-          )}
-
-          <div className='h-full w-full overflow-y-scroll'>
-            <div className='flex flex-col gap-3 pb-6'>
-              {isEveryChainLoading ? <AggregatedLoadingList /> : null}
-
-              {!isEveryChainLoading ? (
-                delegationsToConsider.length > 0 ? (
-                  <>
-                    {delegationsToConsider.map((delegation) => {
-                      const { totalDelegationAmount, currencyAmountDelegation, stakingDenom, apr, chain } = delegation;
-
-                      const aprValue = apr
-                        ? `${currency((apr * 100).toString(), {
-                            precision: 2,
-                            symbol: '',
-                          }).format()} %`
-                        : '-';
-
-                      return (
-                        <StakeTokenCard
-                          key={chain}
-                          tokenName={stakingDenom}
-                          chainName={chains[chain as SupportedChain].chainName}
-                          chainLogo={chains[chain as SupportedChain].chainSymbolImageUrl ?? ''}
-                          apr={aprValue}
-                          dollarAmount={formatCurrency(new BigNumber(currencyAmountDelegation))}
-                          amount={totalDelegationAmount}
-                          onClick={() => handleTokenCardClick(chain)}
-                        />
-                      );
-                    })}
-                  </>
+        {/* List Header (Tokens, APR, Amount columns) */}
+        {delegationsToConsider.length > 0 && (
+          <View style={styles.listHeader}>
+            <Text style={styles.listHeaderText}>Tokens</Text>
+            <TouchableOpacity
+              style={styles.sortButton}
+              onPress={() => {
+                setShowAprInDescending(!showAprInDescending);
+                setSortBy('apr');
+              }}
+            >
+              <Text style={styles.listHeaderText}>APR</Text>
+              {sortBy === 'apr' &&
+                (showAprInDescending ? (
+                  <CaretDown size={16} color="#0f172a" />
                 ) : (
-                  <EmptyCard
-                    isRounded
-                    subHeading='Please try again with something else'
-                    heading={'No results for “' + sliceSearchWord(searchedText) + '”'}
-                    src={Images.Misc.Explore}
-                    classname='dark:!bg-gray-950'
-                    imgContainerClassname='dark:!bg-gray-900'
-                  />
-                )
-              ) : null}
-              {isSomeChainLoading && !showSearchInput ? <AggregatedLoadingList /> : null}
-            </div>
-          </div>
-        </div>
-      </>
-    );
+                  <CaretUp size={16} color="#0f172a" />
+                ))}
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.sortButton}
+              onPress={() => {
+                setShowAmountInDescending(!showAmountInDescending);
+                setSortBy('amount');
+              }}
+            >
+              <Text style={styles.listHeaderText}>Amount</Text>
+              {sortBy === 'amount' &&
+                (showAmountInDescending ? (
+                  <CaretDown size={16} color="#0f172a" />
+                ) : (
+                  <CaretUp size={16} color="#0f172a" />
+                ))}
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* List */}
+        {isEveryChainLoading && <AggregatedLoadingList />}
+        {!isEveryChainLoading && (
+          <FlatList
+            data={delegationsToConsider}
+            keyExtractor={(item) => item.chain}
+            contentContainerStyle={{ paddingBottom: 60 }}
+            renderItem={({ item }) => (
+              <StakeTokenCard
+                tokenName={item.stakingDenom}
+                chainName={chains[item.chain]?.chainName}
+                chainLogo={chains[item.chain]?.chainSymbolImageUrl ?? ''}
+                apr={item.apr ? `${(item.apr * 100).toFixed(2)}%` : '-'}
+                dollarAmount={formatCurrency(item.currencyAmountDelegation)}
+                amount={item.totalDelegationAmount}
+                onPress={() => handleTokenCardClick(item.chain)}
+              />
+            )}
+            ListEmptyComponent={
+              <EmptyCard
+                isRounded
+                subHeading="Please try again with something else"
+                heading={`No results for “${searchedText}”`}
+                // Add other props as needed
+              />
+            }
+          />
+        )}
+        {isSomeChainLoading && !showSearchInput && <AggregatedLoadingList />}
+      </View>
+    </View>
+  );
   },
 );
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#f5f6fa', paddingTop: 16 },
+  searchContainer: { flexDirection: 'row', alignItems: 'center', padding: 12 },
+  closeButton: { marginLeft: 8, backgroundColor: '#f3f4f6', borderRadius: 999, padding: 8 },
+  aggregatedBar: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 12,
+    margin: 12,
+    justifyContent: 'space-between',
+  },
+  listHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    marginBottom: 4,
+  },
+  listHeaderText: { color: '#334155', fontWeight: '600', fontSize: 13 },
+  sortButton: { flexDirection: 'row', alignItems: 'center' },
+});

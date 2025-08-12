@@ -10,28 +10,27 @@ import {
   RootDenomsStore,
   SelectedNetworkStore,
 } from '@leapwallet/cosmos-wallet-store';
-import { ExclamationMark } from '@phosphor-icons/react';
-import { InputComponent } from 'components/input-component/InputComponent';
-import Loader from 'components/loader/Loader';
-import Text from 'components/text';
-import { Button } from 'components/ui/button';
-import { Images } from 'images';
+import { ExclamationMark } from 'phosphor-react-native';
+import { InputComponent } from '../../components/input-component/InputComponent';
+import Loader from '../../components/loader/Loader';
+import { Button } from '../../components/ui/button';
 import { observer } from 'mobx-react-lite';
-import ManageTokensHeader from 'pages/manage-tokens/components/ManageTokensHeader';
-import React, { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { activeChainStore } from 'stores/active-chain-store';
+import ManageTokensHeader from '../../screens/manage-tokens/components/ManageTokensHeader';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { activeChainStore } from '../../context/active-chain-store';
 import {
   betaCW20DenomsStore,
   betaERC20DenomsStore,
   betaNativeDenomsStore,
   enabledCW20DenomsStore,
   rootDenomsStore,
-} from 'stores/denoms-store-instance';
-import { rootBalanceStore } from 'stores/root-store';
-import { selectedNetworkStore } from 'stores/selected-network-store';
-import { getContractInfo } from 'utils/getContractInfo';
-import { isNotValidNumber, isNotValidURL } from 'utils/regex';
+} from '../../context/denoms-store-instance';
+import { rootBalanceStore } from '../../context/root-store';
+import { selectedNetworkStore } from '../../context/selected-network-store';
+import { getContractInfo } from '../../utils/getContractInfo';
+import { isNotValidNumber, isNotValidURL } from '../../utils/regex';
+import { View, ScrollView, Text, StyleSheet } from 'react-native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 const AddTokenForm = observer(
   ({
@@ -53,8 +52,9 @@ const AddTokenForm = observer(
     rootBalanceStore: RootBalanceStore;
     enabledCW20DenomsStore: EnabledCW20DenomsStore;
   }) => {
-    const navigate = useNavigate();
-    const locationState = useLocation().state as null | { coinMinimalDenom: string };
+    const navigation = useNavigation()
+    const route = useRoute();
+    const locationState = route.params?.state as null | { coinMinimalDenom: string };
     const chains = useGetChains();
 
     const activeChain = activeChainStore.activeChain as SupportedChain;
@@ -85,8 +85,8 @@ const AddTokenForm = observer(
     const enabledCW20Tokens = enabledCW20DenomsStore.getEnabledCW20DenomsForChain(activeChain);
 
     const fetchTokenInfo = useCallback(
-      async (event: ChangeEvent<HTMLInputElement>) => {
-        let coinMinimalDenom = event.currentTarget.value.trim();
+      async (value: string) => {
+        let coinMinimalDenom = value.trim();
         if (!coinMinimalDenom && coinMinimalDenom.toLowerCase().startsWith('ibc/')) {
           return;
         }
@@ -209,8 +209,7 @@ const AddTokenForm = observer(
     );
 
     const handleChange = useCallback(
-      (event: ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = event.currentTarget;
+      (name: string, value: string) => {
 
         let error = '';
         if (value) {
@@ -248,12 +247,7 @@ const AddTokenForm = observer(
 
     useEffect(() => {
       if (locationState && locationState.coinMinimalDenom) {
-        handleChange({
-          currentTarget: {
-            name: 'coinMinimalDenom',
-            value: locationState.coinMinimalDenom,
-          },
-        } as ChangeEvent<HTMLInputElement>);
+        handleChange( 'coinMinimalDenom', locationState.coinMinimalDenom, );
       }
 
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -284,21 +278,8 @@ const AddTokenForm = observer(
 
       rootBalanceStore.refetchBalances();
       setLoading(false);
-      navigate('/');
-    }, [
-      activeChain,
-      betaCW20DenomsStore,
-      betaERC20DenomsStore,
-      betaNativeDenomsStore,
-      chain,
-      enabledCW20DenomsStore,
-      enabledCW20Tokens,
-      isAddingCw20Token,
-      isAddingErc20Token,
-      navigate,
-      rootBalanceStore,
-      tokenInfo,
-    ]);
+      navigation.navigate('Login');
+    }, [activeChain, betaCW20DenomsStore, betaERC20DenomsStore, betaNativeDenomsStore, chain, enabledCW20DenomsStore, enabledCW20Tokens, isAddingCw20Token, isAddingErc20Token, navigation, rootBalanceStore, tokenInfo]);
 
     const showWarning = useMemo(
       () => !fetchingTokenInfo && !foundAsset && coinMinimalDenom && !errors.coinMinimalDenom,
@@ -338,17 +319,23 @@ const AddTokenForm = observer(
 
     return (
       <>
-        <form className='mx-auto w-[344px] mb-5 pb-6 overflow-y-auto h-[calc(100%-66px)]'>
-          <div className='rounded-lg w-full flex items-center h-[56px] p-4 bg-secondary-100 my-6 gap-x-[10px]'>
-            <ExclamationMark className='text-secondary-100 bg-accent-yellow rounded-full h-5 w-5 p-[2px]' />
-            <div className='font-medium text-foreground text-sm !leading-[22px]'>Only add tokens you trust.</div>
-          </div>
-
+        <ScrollView
+          style={styles.form}
+          contentContainerStyle={{ flexGrow: 1 }}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.warningBox}>
+            <ExclamationMark style={styles.icon} />
+            <Text style={styles.warningText}>
+              Only add tokens you trust.
+            </Text>
+          </View>
+          
           <InputComponent
             placeholder={coinMinimalDenomPlaceholder}
             value={coinMinimalDenom}
-            name='coinMinimalDenom'
-            onChange={handleChange}
+            name="coinMinimalDenom"
+            onChange={(text) => handleChange('coinMinimalDenom', text)}
             error={errors.coinMinimalDenom}
             warning={
               showWarning
@@ -357,67 +344,65 @@ const AddTokenForm = observer(
                   } chain`
                 : ''
             }
-            onBlur={fetchTokenInfo}
-            ref={coinMinimalDenomRef}
+            onBlur={() => fetchTokenInfo(coinMinimalDenom)}
           />
 
           <InputComponent
             placeholder={coinDenomPlaceholder}
             value={coinDenom}
-            name='coinDenom'
-            onChange={handleChange}
+            name="coinDenom"
+            onChange={(text) => handleChange('coinDenom', text)}
             error={errors.coinDenom}
           />
 
           <InputComponent
-            placeholder='Coin decimals (ex: 6)'
+            placeholder="Coin decimals (ex: 6)"
             value={coinDecimals}
-            name='coinDecimals'
-            onChange={handleChange}
+            name="coinDecimals"
+            onChange={(text) => handleChange('coinDecimals', text)}
             error={errors.coinDecimals}
           />
 
           <InputComponent
-            placeholder='Token name (optional)'
+            placeholder="Token name (optional)"
             value={name}
-            name='name'
-            onChange={handleChange}
+            name="name"
+            onChange={(text) => handleChange('name', text)}
             error={errors.name}
           />
 
           <InputComponent
-            placeholder='Coin gecko id (optional)'
+            placeholder="Coin gecko id (optional)"
             value={coinGeckoId}
-            name='coinGeckoId'
-            onChange={handleChange}
+            name="coinGeckoId"
+            onChange={(text) => handleChange('coinGeckoId', text)}
             error={errors.coinGeckoId}
           />
 
           <InputComponent
-            placeholder='Icon url (optional)'
+            placeholder="Icon url (optional)"
             value={icon}
-            name='icon'
-            onChange={handleChange}
+            name="icon"
+            onChange={(text) => handleChange('icon', text)}
             error={errors.icon}
           />
-        </form>
-
-        <div className='absolute bottom-0 left-0 right-0 p-4 bg-secondary-100 backdrop-blur-xl'>
-          {fetchingTokenInfo || loading ? (
-            <div className='h-[44px]'>
+        </ScrollView>
+        
+        <View style={styles.buttonContainer}>
+          {(fetchingTokenInfo || loading) ? (
+            <View style={styles.loaderBox}>
               <Loader />
-            </div>
+            </View>
           ) : (
             <Button
-              className='rounded-full w-full font-bold text-sm !leading-5 text-gray-900 dark:text-white-100 h-11 !bg-primary'
-              type='submit'
+              style={styles.addButton}
               disabled={disableAddToken}
-              onClick={handleSubmit}
+              onPress={handleSubmit}
             >
               Add token
             </Button>
           )}
-        </div>
+        </View>
       </>
     );
   },
@@ -425,20 +410,106 @@ const AddTokenForm = observer(
 
 export default function AddToken() {
   return (
-    <div className='bg-secondary-50 flex flex-col h-full'>
-      <ManageTokensHeader title='Add Token' />
-      <div className='panel-width px-6 flex-1 overflow-y-hidden relative'>
-        <AddTokenForm
-          selectedNetworkStore={selectedNetworkStore}
-          betaCW20DenomsStore={betaCW20DenomsStore}
-          betaERC20DenomsStore={betaERC20DenomsStore}
-          betaNativeDenomsStore={betaNativeDenomsStore}
-          activeChainStore={activeChainStore}
-          rootDenomsStore={rootDenomsStore}
-          rootBalanceStore={rootBalanceStore}
-          enabledCW20DenomsStore={enabledCW20DenomsStore}
-        />
-      </div>
-    </div>
+    <View style={styles.container}>
+      <ManageTokensHeader title="Add Token" />
+      <View style={styles.formWrapper}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          <AddTokenForm
+            selectedNetworkStore={selectedNetworkStore}
+            betaCW20DenomsStore={betaCW20DenomsStore}
+            betaERC20DenomsStore={betaERC20DenomsStore}
+            betaNativeDenomsStore={betaNativeDenomsStore}
+            activeChainStore={activeChainStore}
+            rootDenomsStore={rootDenomsStore}
+            rootBalanceStore={rootBalanceStore}
+            enabledCW20DenomsStore={enabledCW20DenomsStore}
+          />
+        </ScrollView>
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  form: {
+    marginHorizontal: 'auto', // will center on web, ignored on mobile
+    width: 344,
+    marginBottom: 20,
+    paddingBottom: 24,
+    height: '100%', // For RN, set the parent height or use flex
+  },
+  warningBox: {
+    borderRadius: 8,
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 56,
+    padding: 16,
+    backgroundColor: '#F1F5F9', // secondary-100, update as needed
+    marginVertical: 24,
+    gap: 10, // Only works in RN >=0.71. Else, use marginRight on icon.
+  },
+  icon: {
+    color: '#F1F5F9', // secondary-100
+    backgroundColor: '#FFE066', // accent-yellow, update as needed
+    borderRadius: 999,
+    height: 20,
+    width: 20,
+    padding: 2,
+    marginRight: 10, // For gap in older RN
+  },
+  warningText: {
+    fontWeight: '500',
+    color: '#111', // text-foreground
+    fontSize: 14,
+    lineHeight: 22,
+    flex: 1,
+  },
+  buttonContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 16,
+    backgroundColor: '#F7F8FA', // bg-secondary-100
+    // Optionally: Add blur here if you use expo-blur
+    // overflow: 'hidden',
+  },
+  loaderBox: {
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  addButton: {
+    borderRadius: 999,
+    width: '100%',
+    fontWeight: 'bold',
+    fontSize: 16,
+    height: 44,
+    backgroundColor: '#3664F4', // !bg-primary
+    color: '#232323',           // text-gray-900 (adjust for dark mode)
+    // Add additional text styles if your Button supports them
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+    container: {
+    backgroundColor: '#F9FAFB', // bg-secondary-50
+    flex: 1,
+    flexDirection: 'column',
+    height: '100%',
+  },
+  formWrapper: {
+    flex: 1,
+    paddingHorizontal: 24, // px-6
+    position: 'relative',
+  },
+  scrollContent: {
+    flexGrow: 1,
+    alignSelf: 'center',
+    maxWidth: 420, // like panel-width
+  },
+});
+

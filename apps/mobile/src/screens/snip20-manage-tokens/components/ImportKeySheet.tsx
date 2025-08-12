@@ -1,16 +1,22 @@
-import { SecretToken, useAddress, useChainApis, useChainId } from '@leapwallet/cosmos-wallet-hooks';
-import { Buttons, GenericCard, Input } from '@leapwallet/leap-ui';
-import BottomModal from '../bottom-modal';
-import { ErrorCard } from 'components/ErrorCard';
-import { LoaderAnimation } from 'components/loader/Loader';
-import { useCreateViewingKey } from 'hooks/secret/useCreateViewingKey';
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { rootDenomsStore } from 'stores/denoms-store-instance';
-import { rootBalanceStore } from 'stores/root-store';
-import { Colors } from 'theme/colors';
-import { UserClipboard } from 'utils/clipboard';
-
+import {
+  View,
+  Image,
+  TextInput,
+  StyleSheet,
+  Keyboard,
+} from 'react-native';
+import { SecretToken, useAddress, useChainApis, useChainId } from '@leapwallet/cosmos-wallet-hooks';
+import { Buttons, GenericCard } from '@leapwallet/leap-ui';
+import BottomModal from '../../../components/bottom-modal';
+import { ErrorCard } from '../../../components/ErrorCard';
+import { LoaderAnimation } from '../../../components/loader/Loader';
+import { useCreateViewingKey } from '../../../hooks/secret/useCreateViewingKey';
+import { useDefaultTokenLogo } from '../../../hooks/utility/useDefaultTokenLogo';
+import { rootDenomsStore } from '../../../context/denoms-store-instance';
+import { rootBalanceStore } from '../../../context/root-store';
+import { Colors } from '../../../theme/colors';
+import { UserClipboard } from '../../../utils/clipboard';
 import { useSnip20ManageTokens } from '../context';
 import { CopyViewingKey, Fee } from './index';
 
@@ -22,7 +28,13 @@ type ImportKeySheetProps = {
   onSuccess: VoidFunction;
 };
 
-export function ImportKeySheet({ isVisible, onClose, type, token, onSuccess }: ImportKeySheetProps) {
+export function ImportKeySheet({
+  isVisible,
+  onClose,
+  type,
+  token,
+  onSuccess,
+}: ImportKeySheetProps) {
   const defaultLogo = useDefaultTokenLogo();
   const [viewingKeyLoader, setViewingKeyLoader] = useState(false);
   const [inputViewingKey, setInputViewingKey] = useState('');
@@ -32,22 +44,22 @@ export function ImportKeySheet({ isVisible, onClose, type, token, onSuccess }: I
   const address = useAddress();
   const { lcdUrl } = useChainApis('secret');
   const chainId = useChainId();
-  const inputEleRef = useRef<HTMLInputElement>(null);
+  const inputEleRef = useRef<TextInput>(null);
 
   const { setContractAddress, userPreferredGasLimit, userPreferredGasPrice } = useSnip20ManageTokens();
+
   useEffect(() => {
     if (token?.contractAddr) {
       setContractAddress(token.contractAddr);
     }
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token?.contractAddr]);
 
   useEffect(() => {
-    if (inputEleRef?.current) {
+    if (inputEleRef?.current && isVisible && !showCopyKey) {
       inputEleRef.current.focus();
     }
-  }, [inputEleRef]);
+  }, [inputEleRef, isVisible, showCopyKey]);
 
   const clearState = useCallback(() => {
     setViewingKeyLoader(false);
@@ -107,31 +119,43 @@ export function ImportKeySheet({ isVisible, onClose, type, token, onSuccess }: I
       onClose={clearState}
       title={type === 'import' ? 'Import viewing key' : 'Update viewing key'}
     >
-      <div>
+      <View style={styles.content}>
         <GenericCard
-          className='rounded-2xl mb-4 p-4'
+          style={styles.tokenCard}
           title={token?.symbol}
           subtitle={token?.name}
-          img={<img src={token?.icon === '' ? defaultLogo : token?.icon} className='w-[40px] h-[40px] mr-4' />}
+          img={
+            <Image
+              source={{ uri: token?.icon ?? defaultLogo}}
+              style={styles.tokenImg}
+            />
+          }
         />
 
-        <Input
-          onChange={(e) => {
-            setInputViewingKey(e.target.value);
+        <TextInput
+          ref={inputEleRef}
+          style={styles.input}
+          placeholder="enter key"
+          placeholderTextColor="#A1A1AA"
+          value={inputViewingKey}
+          onChangeText={(text) => {
+            setInputViewingKey(text);
             setError(null);
           }}
-          placeholder='enter key'
-          className='mb-4 w-[344px]'
-          ref={inputEleRef}
+          autoCapitalize="none"
+          autoCorrect={false}
+          editable={!showCopyKey && !viewingKeyLoader}
+          returnKeyType="done"
+          onSubmitEditing={Keyboard.dismiss}
         />
 
         {type !== 'import' && !showCopyKey ? (
           <Fee rootDenomsStore={rootDenomsStore} rootBalanceStore={rootBalanceStore} />
         ) : null}
         {error ? (
-          <div className='mb-2'>
-            <ErrorCard text={error} className='mb-4' />
-          </div>
+          <View style={{ marginBottom: 10 }}>
+            <ErrorCard text={error} style={{ marginBottom: 12 }} />
+          </View>
         ) : null}
 
         {showCopyKey ? (
@@ -145,20 +169,63 @@ export function ImportKeySheet({ isVisible, onClose, type, token, onSuccess }: I
 
         {!viewingKeyLoader ? (
           <Buttons.Generic
-            size='normal'
+            size="normal"
             color={'#E18881'}
             disabled={!inputViewingKey || !!error}
-            className='w-[344px]'
+            style={styles.button}
             onClick={handleConfirmClick}
           >
             {showCopyKey ? 'Done' : 'Confirm'}
           </Buttons.Generic>
         ) : (
-          <div className='flex justify-center w-[344px]'>
+          <View style={styles.loaderWrap}>
             <LoaderAnimation color={Colors.white100} />
-          </div>
+          </View>
         )}
-      </div>
+      </View>
     </BottomModal>
   );
 }
+
+const styles = StyleSheet.create({
+  content: {
+    width: '100%',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  tokenCard: {
+    borderRadius: 16,
+    marginBottom: 16,
+    padding: 16,
+    width: 344,
+  },
+  tokenImg: {
+    width: 40,
+    height: 40,
+    marginRight: 16,
+    borderRadius: 20,
+  },
+  input: {
+    marginBottom: 16,
+    width: 344,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    fontSize: 16,
+    color: '#27272A',
+    backgroundColor: '#fff',
+  },
+  button: {
+    width: 344,
+    marginTop: 12,
+  },
+  loaderWrap: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 344,
+    height: 48,
+    marginTop: 6,
+  },
+});

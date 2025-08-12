@@ -2,18 +2,17 @@ import { formatTokenAmount, sliceWord, Token, useGetChains } from '@leapwallet/c
 import { isAptosChain, isSolanaChain, isSuiChain, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { isBitcoinChain } from '@leapwallet/cosmos-wallet-store';
 import { useTheme } from '@leapwallet/leap-ui';
-import { ArrowsLeftRight, CaretDown } from '@phosphor-icons/react';
+import { ArrowsLeftRight, CaretDown } from 'phosphor-react-native';
 import { QueryStatus } from '@tanstack/react-query';
 import BigNumber from 'bignumber.js';
-import classNames from 'classnames';
-import { useFormatCurrency } from 'hooks/settings/useCurrency';
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { useFormatCurrency } from '../../../../hooks/settings/useCurrency';
+import { useDefaultTokenLogo } from '../../../../hooks/utility/useDefaultTokenLogo';
 import { observer } from 'mobx-react-lite';
-import { useSendContext } from 'pages/send/context';
+import { useSendContext } from '../../../send/context';
 import React, { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
-import Skeleton from 'react-loading-skeleton';
-import { hideAssetsStore } from 'stores/hide-assets-store';
-import { imgOnError } from 'utils/imgOnError';
+import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet } from 'react-native';
+
+import { hideAssetsStore } from '../../../../context/hide-assets-store';
 
 import { ErrorWarningTokenCard } from '../error-warning';
 
@@ -43,25 +42,22 @@ function TokenInputCardView({
   onTokenSelectSheet,
   amountError,
   sendActiveChain,
-  selectedChain,
   resetForm,
 }: TokenInputCardProps) {
   const [formatCurrency] = useFormatCurrency();
   const chains = useGetChains();
-  const { theme } = useTheme();
 
   const defaultTokenLogo = useDefaultTokenLogo();
-  const [isFocused, setIsFocused] = useState(false);
+  const [setIsFocused] = useState(false);
   const [textInputValue, setTextInputValue] = useState<string>(value?.toString());
 
-  const { pfmEnabled, isIbcUnwindingDisabled, allGasOptions, gasOption, selectedAddress, addressError, selectedToken } =
+  const { allGasOptions, gasOption, selectedAddress, addressError, selectedToken } =
     useSendContext();
 
   const selectedAssetUSDPrice = useMemo(() => {
     if (token && token.usdPrice && token.usdPrice !== '0') {
       return token.usdPrice;
     }
-
     return undefined;
   }, [token]);
 
@@ -69,7 +65,7 @@ function TokenInputCardView({
     if (!selectedAssetUSDPrice && isInputInUSDC) {
       setIsInputInUSDC(false);
     }
-  }, [selectedAssetUSDPrice, isInputInUSDC]);
+  }, [selectedAssetUSDPrice, isInputInUSDC, setIsInputInUSDC]);
 
   const { formattedDollarAmount } = useMemo(() => {
     let _dollarAmount = '0';
@@ -77,11 +73,9 @@ function TokenInputCardView({
     if (value === '' || (value && isNaN(parseFloat(value)))) {
       return { formattedDollarAmount: '' };
     }
-
     if (token && token.usdPrice && value) {
       _dollarAmount = String(parseFloat(token.usdPrice) * parseFloat(value));
     }
-
     return {
       formattedDollarAmount: hideAssetsStore.formatHideBalance(formatCurrency(new BigNumber(_dollarAmount))),
     };
@@ -91,28 +85,18 @@ function TokenInputCardView({
     return hideAssetsStore.formatHideBalance(
       formatTokenAmount(value ?? '0', sliceWord(token?.symbol ?? '', 4, 4), 3, 'en-US'),
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, token?.symbol]);
 
   const balanceAmount = useMemo(() => {
     return hideAssetsStore.formatHideBalance(
       formatTokenAmount(token?.amount ?? '0', sliceWord(token?.symbol ?? '', 4, 4), 3, 'en-US'),
     );
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token?.amount, token?.symbol]);
 
-  const isMaxAmount = useMemo(() => {
-    return token?.amount === value;
-  }, [token?.amount, value]);
-
-  const showMaxButton = useMemo(() => {
-    return token?.amount && token?.amount !== '0' && !isMaxAmount;
-  }, [isMaxAmount, token?.amount]);
-
-  const switchToUSDDisabled = useMemo(() => {
-    return !selectedAssetUSDPrice || new BigNumber(selectedAssetUSDPrice ?? 0).isLessThan(10 ** -6);
-  }, [selectedAssetUSDPrice]);
+  const switchToUSDDisabled = useMemo(
+    () => !selectedAssetUSDPrice || new BigNumber(selectedAssetUSDPrice ?? 0).isLessThan(10 ** -6),
+    [selectedAssetUSDPrice]
+  );
 
   useEffect(() => {
     if (!onChange) return;
@@ -127,8 +111,7 @@ function TokenInputCardView({
     } else {
       onChange(!isNaN(parseFloat(textInputValue)) ? textInputValue : '');
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [textInputValue, isInputInUSDC, selectedAssetUSDPrice]);
+  }, [textInputValue, isInputInUSDC, selectedAssetUSDPrice, onChange]);
 
   useEffect(() => {
     if (resetForm) {
@@ -139,23 +122,19 @@ function TokenInputCardView({
   const onMaxBtnClick = () => {
     if (isInputInUSDC) {
       if (!selectedAssetUSDPrice) throw 'USD price is not available';
-
       const usdAmount = new BigNumber(token?.amount ?? '0').multipliedBy(selectedAssetUSDPrice);
       setTextInputValue(usdAmount.toString());
     } else {
       const isNativeToken = !!chains[sendActiveChain].nativeDenoms[token?.coinMinimalDenom ?? ''];
       const decimals = token?.coinDecimals || 6;
-
       if (!allGasOptions || !gasOption) {
         return;
       }
-
       if (isNativeToken) {
         const feeValue = parseFloat(allGasOptions[gasOption]);
-
         if (new BigNumber(token?.amount ?? 0).isGreaterThan(new BigNumber(feeValue))) {
           setTextInputValue(
-            new BigNumber(token?.amount ?? 0).minus(new BigNumber(feeValue)).toFixed(decimals, BigNumber.ROUND_DOWN),
+            new BigNumber(token?.amount ?? 0).minus(new BigNumber(feeValue)).toFixed(decimals, BigNumber.ROUND_DOWN)
           );
         } else {
           setTextInputValue(new BigNumber(token?.amount ?? 0).toFixed(decimals, BigNumber.ROUND_DOWN));
@@ -169,7 +148,6 @@ function TokenInputCardView({
   const onHalfBtnClick = useCallback(() => {
     if (isInputInUSDC) {
       if (!selectedAssetUSDPrice) throw 'USD price is not available';
-
       const usdAmount = new BigNumber(token?.amount ?? '0').dividedBy(2).multipliedBy(selectedAssetUSDPrice);
       setTextInputValue(usdAmount.toString());
     } else {
@@ -182,7 +160,6 @@ function TokenInputCardView({
     if (!selectedAssetUSDPrice) {
       throw 'USD price is not available';
     }
-
     if (isInputInUSDC) {
       setIsInputInUSDC(false);
       const cryptoAmount = new BigNumber(textInputValue).dividedBy(selectedAssetUSDPrice);
@@ -192,7 +169,7 @@ function TokenInputCardView({
       const usdAmount = new BigNumber(textInputValue).multipliedBy(selectedAssetUSDPrice);
       setTextInputValue(usdAmount.toString());
     }
-  }, [isInputInUSDC, selectedAssetUSDPrice, textInputValue]);
+  }, [isInputInUSDC, selectedAssetUSDPrice, setIsInputInUSDC, textInputValue]);
 
   const tokenHolderChain = useMemo(() => {
     if (!token?.tokenBalanceOnChain) return null;
@@ -215,133 +192,301 @@ function TokenInputCardView({
   }, [sendActiveChain, chains]);
 
   return (
-    <>
-      <div className='w-full bg-secondary-100 rounded-xl flex flex-col' key={balanceAmount}>
-        <div className='flex flex-col p-5 gap-3'>
-          <p className='text-muted-foreground text-sm font-medium !leading-[22.4px]'>Send</p>
-          <div className='flex rounded-2xl justify-between w-full items-center gap-2 h-[34px] p-[2px]'>
-            {loadingAssets ? (
-              <Skeleton
-                width={75}
-                height={32}
-                containerClassName='block !leading-none overflow-hidden rounded-full ml-auto'
-              />
-            ) : (
-              <>
-                <div className='flex gap-1 w-full'>
-                  {isInputInUSDC && <span className='text-monochrome font-bold text-[24px]'>$</span>}
-                  <input
-                    type='number'
-                    className={classNames(
-                      'bg-transparent outline-none w-full text-left placeholder:font-bold placeholder:text-[24px] placeholder:text-monochrome font-bold !leading-[32.4px] caret-accent-green',
-                      {
-                        'text-destructive-100': amountError,
-                        'text-monochrome': !amountError,
-                        'text-[24px]': textInputValue.length < 12,
-                        'text-[22px]': textInputValue.length >= 12 && textInputValue.length < 15,
-                        'text-[20px]': textInputValue.length >= 15 && textInputValue.length < 18,
-                        'text-[18px]': textInputValue.length >= 18,
-                      },
-                    )}
-                    placeholder={'0'}
-                    value={isInputInUSDC ? textInputValue : value}
-                    onChange={(e) => setTextInputValue(e.target.value)}
-                  />
-                </div>
-
-                <button
-                  className={classNames(
-                    'flex justify-end items-center gap-2 shrink-0 py-1 px-1.5 rounded-[40px] bg-secondary-300 hover:bg-secondary-400',
-                  )}
-                  onClick={onTokenSelectSheet}
-                >
-                  <div className='relative w-[24px] h-[24px] shrink-0 flex flex-row items-center justify-center'>
-                    <img
-                      src={token?.img ?? defaultTokenLogo}
-                      className='w-[19.2px] h-[19.2px] rounded-full'
-                      onError={imgOnError(defaultTokenLogo)}
-                    />
-                    {tokenHolderChain && (
-                      <img
-                        src={tokenHolderChain.chainSymbolImageUrl}
-                        className='w-[8.4px] h-[8.4px] bg-secondary-200 rounded-full absolute bottom-0 right-0'
-                        onError={imgOnError(defaultTokenLogo)}
-                      />
-                    )}
-                  </div>
-                  <div className='flex items-center gap-1'>
-                    <p
-                      className={classNames('dark:text-white-100 text-[16px] font-medium', {
-                        'flex flex-col justify-between items-start': !!selectedChain,
-                      })}
-                    >
-                      {token?.symbol ? sliceWord(token?.symbol ?? '', 4, 4) : 'Select Token'}
-                    </p>
-                    <CaretDown size={20} className='dark:text-white-100 p-1' />
-                  </div>
-                </button>
-              </>
-            )}
-          </div>
-
-          <div className='flex flex-row items-center justify-between max-[399px]:!items-start text-gray-400 text-sm font-normal w-full min-h-[22px] mt-1'>
-            <div className='flex items-center gap-1'>
-              <span className='text-muted-foreground font-normal text-sm !leading-[22.4px]'>
-                {value === ''
-                  ? isInputInUSDC
-                    ? '0.00'
-                    : '$0.00'
-                  : isInputInUSDC
-                  ? formattedInputValue
-                  : formattedDollarAmount}
-              </span>
-
-              <button
-                disabled={switchToUSDDisabled}
-                onClick={handleInputTypeSwitchClick}
-                className={classNames(
-                  'rounded-full h-[22px] bg-secondary-200 hover:bg-secondary-300 items-center flex gap-1 justify-center shrink-0 text-gray-600 dark:text-gray-400 dark:hover:text-white-100 hover:text-black-100',
-                  {
-                    'opacity-50 pointer-events-none': switchToUSDDisabled,
-                  },
+    <View style={styles.container} key={balanceAmount}>
+      <View style={styles.innerBox}>
+        <Text style={styles.label}>Send</Text>
+        <View style={styles.inputRow}>
+          {loadingAssets ? (
+            <View style={styles.skeletonInput} />
+          ) : (
+            <>
+              <View style={styles.valueRow}>
+                {isInputInUSDC && (
+                  <Text style={styles.usdSign}>$</Text>
                 )}
+                <TextInput
+                  keyboardType="decimal-pad"
+                  style={[
+                    styles.input,
+                    amountError ? styles.inputError : styles.inputNormal,
+                    textInputValue.length < 12
+                      ? styles.inputXL
+                      : textInputValue.length < 15
+                      ? styles.inputLG
+                      : textInputValue.length < 18
+                      ? styles.inputMD
+                      : styles.inputSM,
+                  ]}
+                  placeholder="0"
+                  value={isInputInUSDC ? textInputValue : value}
+                  onChangeText={setTextInputValue}
+                />
+              </View>
+              <TouchableOpacity
+                style={styles.tokenBtn}
+                onPress={onTokenSelectSheet}
+                activeOpacity={0.8}
               >
-                <ArrowsLeftRight size={20} className='!leading-[12px] rotate-90 p-1' />
-              </button>
-            </div>
+                <View style={styles.tokenLogoWrap}>
+                  <Image
+                    source={{ uri: token?.img ?? defaultTokenLogo}}
+                    style={styles.tokenLogo}
+                    onError={() => {}}
+                  />
+                  {tokenHolderChain && (
+                    <Image
+                      source={{ uri: tokenHolderChain.chainSymbolImageUrl ?? defaultTokenLogo}}
+                      style={styles.chainLogo}
+                      onError={() => {}}
+                    />
+                  )}
+                </View>
+                <View style={styles.tokenNameRow}>
+                  <Text style={styles.tokenName}>
+                    {token?.symbol ? sliceWord(token?.symbol ?? '', 4, 4) : 'Select Token'}
+                  </Text>
+                  <CaretDown size={20} color="#222" style={{ marginLeft: 4 }} />
+                </View>
+              </TouchableOpacity>
+            </>
+          )}
+        </View>
 
-            <div className='flex justify-end items-center gap-2'>
-              <span className='text-sm font-medium !leading-[18.9px] text-muted-foreground'>
-                {!balanceStatus || balanceStatus === 'success' ? balanceAmount : <Skeleton width={50} />}
-              </span>
-              {!balanceStatus || balanceStatus === 'success' ? (
-                <>
-                  <button
-                    onClick={onHalfBtnClick}
-                    className='rounded-full bg-secondary-200 px-[6px] font-medium text-xs hover:bg-secondary-300 dark:hover:text-white-100 hover:text-black-100 !leading-[19.2px] text-muted-foreground'
-                  >
-                    50%
-                  </button>
-                  <button
-                    onClick={onMaxBtnClick}
-                    className='rounded-full bg-secondary-200 px-[6px] font-medium text-xs hover:bg-secondary-300 dark:hover:text-white-100 hover:text-black-100 !leading-[19.2px] text-muted-foreground'
-                  >
-                    Max
-                  </button>
-                </>
-              ) : null}
-            </div>
-          </div>
-          {!isIBCError && addressError && selectedAddress ? (
-            <div className='text-left text-xs text-destructive-100 font-medium !leading-[16px]'>
-              You can only send {selectedToken?.symbol} on {sendChainEcosystem}.
-            </div>
-          ) : null}
-        </div>
-        <ErrorWarningTokenCard />
-      </div>
-    </>
+        {/* Value / Fiat Switch Row */}
+        <View style={styles.amountRow}>
+          <View style={styles.fiatRow}>
+            <Text style={styles.fiatText}>
+              {value === ''
+                ? isInputInUSDC
+                  ? '0.00'
+                  : '$0.00'
+                : isInputInUSDC
+                ? formattedInputValue
+                : formattedDollarAmount}
+            </Text>
+            <TouchableOpacity
+              style={[
+                styles.switchBtn,
+                switchToUSDDisabled && styles.switchBtnDisabled,
+              ]}
+              disabled={switchToUSDDisabled}
+              onPress={handleInputTypeSwitchClick}
+              activeOpacity={0.7}
+            >
+              <ArrowsLeftRight size={20} color="#888" style={{ transform: [{ rotate: '90deg' }] }} />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.balanceRow}>
+            <Text style={styles.balanceText}>
+              {!balanceStatus || balanceStatus === 'success'
+                ? balanceAmount
+                : <View style={styles.skeletonBalance} />}
+            </Text>
+            {!balanceStatus || balanceStatus === 'success' ? (
+              <>
+                <TouchableOpacity style={styles.halfBtn} onPress={onHalfBtnClick}>
+                  <Text style={styles.halfBtnText}>50%</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.maxBtn} onPress={onMaxBtnClick}>
+                  <Text style={styles.maxBtnText}>Max</Text>
+                </TouchableOpacity>
+              </>
+            ) : null}
+          </View>
+        </View>
+        {!isIBCError && addressError && selectedAddress ? (
+          <Text style={styles.ibcWarnText}>
+            You can only send {selectedToken?.symbol} on {sendChainEcosystem}.
+          </Text>
+        ) : null}
+      </View>
+      <ErrorWarningTokenCard />
+    </View>
   );
 }
 
 export const TokenInputCard = observer(TokenInputCardView);
+
+const styles = StyleSheet.create({
+  container: {
+    width: '100%',
+    backgroundColor: '#F3F5FA',
+    borderRadius: 16,
+    marginVertical: 0,
+  },
+  innerBox: {
+    flexDirection: 'column',
+    padding: 20,
+    gap: 8,
+  },
+  label: {
+    color: '#A0A2B1',
+    fontSize: 14,
+    fontWeight: '500',
+    marginBottom: 8,
+  },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 16,
+    justifyContent: 'space-between',
+    minHeight: 34,
+    paddingVertical: 2,
+    gap: 12,
+  },
+  valueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    gap: 2,
+  },
+  usdSign: {
+    color: '#18191A',
+    fontWeight: 'bold',
+    fontSize: 24,
+    marginRight: 2,
+  },
+  input: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    textAlign: 'left',
+    fontWeight: 'bold',
+    paddingVertical: 0,
+    color: '#18191A',
+  },
+  inputError: {
+    color: '#F87171',
+  },
+  inputNormal: {
+    color: '#18191A',
+  },
+  inputXL: { fontSize: 24, lineHeight: 32 },
+  inputLG: { fontSize: 22, lineHeight: 32 },
+  inputMD: { fontSize: 20, lineHeight: 30 },
+  inputSM: { fontSize: 18, lineHeight: 28 },
+  tokenBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+    borderRadius: 40,
+    backgroundColor: '#E5E9F2',
+  },
+  tokenLogoWrap: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  tokenLogo: {
+    width: 19.2,
+    height: 19.2,
+    borderRadius: 9.6,
+  },
+  chainLogo: {
+    width: 8.4,
+    height: 8.4,
+    borderRadius: 4.2,
+    backgroundColor: '#E5E9F2',
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+  },
+  tokenNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  tokenName: {
+    color: '#18191A',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  amountRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 8,
+    marginBottom: 0,
+    minHeight: 22,
+  },
+  fiatRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  fiatText: {
+    color: '#A0A2B1',
+    fontSize: 14,
+    fontWeight: '400',
+    marginRight: 4,
+  },
+  switchBtn: {
+    borderRadius: 12,
+    height: 22,
+    backgroundColor: '#E5E9F2',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 6,
+    marginLeft: 6,
+  },
+  switchBtnDisabled: {
+    opacity: 0.5,
+  },
+  balanceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  balanceText: {
+    color: '#A0A2B1',
+    fontSize: 14,
+    fontWeight: '500',
+    marginRight: 2,
+  },
+  halfBtn: {
+    borderRadius: 12,
+    backgroundColor: '#E5E9F2',
+    paddingHorizontal: 6,
+    marginLeft: 2,
+  },
+  halfBtnText: {
+    color: '#888',
+    fontWeight: '500',
+    fontSize: 13,
+  },
+  maxBtn: {
+    borderRadius: 12,
+    backgroundColor: '#E5E9F2',
+    paddingHorizontal: 6,
+    marginLeft: 2,
+  },
+  maxBtnText: {
+    color: '#888',
+    fontWeight: '500',
+    fontSize: 13,
+  },
+  ibcWarnText: {
+    color: '#F87171',
+    textAlign: 'left',
+    fontSize: 12,
+    fontWeight: '500',
+    marginTop: 12,
+  },
+  skeletonInput: {
+    width: 75,
+    height: 32,
+    backgroundColor: '#E0E0E0',
+    borderRadius: 8,
+  },
+  skeletonBalance: {
+    width: 50,
+    height: 16,
+    backgroundColor: '#E0E0E0',
+    borderRadius: 8,
+  },
+});

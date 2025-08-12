@@ -1,25 +1,28 @@
-import { AggregatedLoadingList } from 'components/aggregated/AggregatedLoading';
-import { BottomNavLabel } from 'components/bottom-nav/bottom-nav-items';
-import { BottomNav } from 'components/bottom-nav/v2';
-import { Button } from 'components/ui/button';
-import { useWalletInfo } from 'hooks';
-import { SearchIcon } from 'icons/search-icon';
 import React from 'react';
-import Skeleton from 'react-loading-skeleton';
-import { cn } from 'utils/cn';
-
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import SkeletonPlaceholder from 'react-native-skeleton-placeholder'; // or your skeleton lib
 import { BalanceHeaderLoading } from './balance-header';
 import { GeneralHomeHeader } from './general-home-header';
 import { HomeButtons } from './index';
+import { Button } from '../../../components/ui/button';
+import { SearchIcon } from '../../../../assets/icons/search-icon';
+import { AggregatedLoadingList } from '../../../components/aggregated/AggregatedLoading';
+import { BottomNav } from '../../../components/bottom-nav/v2';
+import { BottomNavLabel } from '../../../components/bottom-nav/bottom-nav-items';
+import { useWalletInfo } from '../../../hooks';
 
 export function BannersLoading() {
   return (
-    <div className='flex flex-col px-6 w-full mb-5'>
-      <Skeleton className='w-full h-[64px]' containerClassName='block !leading-none rounded-xl overflow-hidden' />
-      <div className='flex w-full items-center px-4 justify-center mt-1 h-[17px]'>
-        <Skeleton containerClassName='block !leading-none h-[5px] rounded-full w-[20px] overflow-hidden' />
-      </div>
-    </div>
+    <View style={styles.bannersLoadingContainer}>
+      <SkeletonPlaceholder borderRadius={12}>
+        <SkeletonPlaceholder.Item width="100%" height={64} borderRadius={12} />
+      </SkeletonPlaceholder>
+      <View style={styles.skeletonNavDots}>
+        <SkeletonPlaceholder borderRadius={999}>
+          <SkeletonPlaceholder.Item width={20} height={5} borderRadius={999} />
+        </SkeletonPlaceholder>
+      </View>
+    </View>
   );
 }
 
@@ -32,43 +35,102 @@ export const HomeLoadingState = () => {
 
   return (
     <>
-      <div className='relative w-full overflow-auto panel-height'>
+      <View style={styles.container}>
         <GeneralHomeHeader disableWalletButton isLoading />
 
-        <div className={cn('w-full flex flex-col justify-center items-center mb-20 relative')}>
-          <div className='w-full p-8 flex flex-col items-center justify-center'>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          style={{ flex: 1 }}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.balanceHeaderWrapper}>
             <BalanceHeaderLoading watchWallet={activeWallet?.watchWallet} />
-          </div>
+          </View>
 
           {!activeWallet?.watchWallet && <HomeButtons skipVote />}
 
           <BannersLoading />
 
-          <header className='flex items-center justify-between mb-3 w-full px-5'>
-            <span className='text-sm font-bold'>Your tokens</span>
+          <View style={styles.tokensHeader}>
+            <Text style={styles.tokensHeaderText}>Your tokens</Text>
+            <Button
+              variant="secondary"
+              size="icon"
+              onPress={() => {
+                // Implement search trigger
+              }}
+              style={styles.searchButton}
+            >
+              <SearchIcon size={16} />
+            </Button>
+          </View>
 
-            <div className='flex items-center gap-3'>
-              <Button
-                variant='secondary'
-                size='icon'
-                onClick={() => {
-                  //
-                }}
-                className='p-1.5 h-auto bg-secondary-100 hover:bg-secondary-200'
-              >
-                <SearchIcon className='size-4' />
-                <span className='sr-only'>Search tokens</span>
-              </Button>
-            </div>
-          </header>
-
-          <div className='w-full px-5'>
+          <View style={styles.loadingListWrapper}>
             <AggregatedLoadingList />
-          </div>
-        </div>
-      </div>
+          </View>
+        </ScrollView>
+      </View>
 
       <BottomNav label={BottomNavLabel.Home} disableLottie />
     </>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff', // Or your themed background
+  },
+  scrollContent: {
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    paddingBottom: 80,
+  },
+  balanceHeaderWrapper: {
+    width: '100%',
+    padding: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bannersLoadingContainer: {
+    width: '100%',
+    marginBottom: 20,
+    paddingHorizontal: 24,
+    flexDirection: 'column',
+  },
+  skeletonNavDots: {
+    width: '100%',
+    alignItems: 'center',
+    marginTop: 8,
+    height: 17,
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  tokensHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 20,
+    marginBottom: 12,
+    marginTop: 8,
+  },
+  tokensHeaderText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#1A202C', // Tailwind text-foreground
+  },
+  searchButton: {
+    padding: 6,
+    borderRadius: 8,
+    backgroundColor: '#F3F4F6', // Tailwind bg-secondary-100
+    height: 32,
+    width: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingListWrapper: {
+    width: '100%',
+    paddingHorizontal: 20,
+  },
+});

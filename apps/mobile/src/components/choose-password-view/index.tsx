@@ -1,25 +1,20 @@
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { View, Text, StyleSheet, Linking, TextInput as RNTextInput } from 'react-native';
+import { AnimatePresence, MotiView } from 'moti';
+
 import { Button } from '../ui/button';
 import { Checkbox } from '../ui/check-box';
 import { Input } from '../ui/input';
 import { PasswordInput } from '../ui/input/password-input';
-import { AnimatePresence, motion, Variants } from 'framer-motion';
 import { PasswordLockIcon } from '../../../assets/icons/password-lock-icon';
 import { OnboardingWrapper } from '../../screens/onboarding/wrapper';
-import React, { useCallback, useEffect, useState } from 'react';
-import { errorVariants } from '../../utils/motion-variants';
-import { getPassScore } from '../../utils/passChecker';
-
 import { CreatingWalletLoader } from '../../screens/onboarding/create/creating-wallet-loader';
 import { PasswordStrengthIndicator } from './password-strength';
+import { getPassScore } from '../../utils/passChecker';
 
 type ViewProps = {
   readonly onProceed: (password: Uint8Array) => void;
   readonly entry?: 'left' | 'right';
-};
-
-const passwordErrorVariants: Variants = {
-  hidden: { height: 0 },
-  visible: { height: '2rem' },
 };
 
 export default function ChoosePasswordView({ onProceed, entry }: ViewProps) {
@@ -27,220 +22,238 @@ export default function ChoosePasswordView({ onProceed, entry }: ViewProps) {
   const [passScore, setPassScore] = useState<number | null>(null);
   const [termsOfUseAgreedCheck, setTermsOfUseAgreedCheck] = useState(true);
   const [error, setError] = useState('');
+  const [passwords, setPasswords] = useState({ pass1: '', pass2: '' });
+  const [errors, setErrors] = useState<{ pass1: string; pass2: string }>({ pass1: '', pass2: '' });
 
-  const [passwords, setPasswords] = useState({
-    pass1: '',
-    pass2: '',
-  });
+  // For field navigation (next on keyboard)
+  const pass1Ref = useRef<RNTextInput>(null);
+  const pass2Ref = useRef<RNTextInput>(null);
 
-  const [errors, setErrors] = useState({
-    pass1: '',
-    pass2: '',
-  });
-
+  // Validate length
   const validateLength = useCallback(() => {
-    setErrors({
-      pass1: '',
-      pass2: '',
-    });
     if (passwords.pass1.length < 8) {
       setErrors((e) => ({ ...e, pass1: 'Password must be at least 8 characters' }));
       return false;
     }
+    setErrors((e) => ({ ...e, pass1: '' }));
     return true;
   }, [passwords.pass1.length]);
 
+  // Validate password match
   const validatePasswordMatch = useCallback(() => {
-    if (passwords.pass1 != passwords.pass2) {
+    if (passwords.pass1 !== passwords.pass2) {
       setErrors((e) => ({ ...e, pass2: 'Passwords do not match' }));
       return false;
-    } else if (errors.pass1 || errors.pass2 || !validateLength()) {
+    } else if (!validateLength()) {
       return false;
     }
+    setErrors((e) => ({ ...e, pass2: '' }));
     return true;
-  }, [errors.pass1, errors.pass2, passwords.pass1, passwords.pass2, validateLength]);
+  }, [passwords.pass1, passwords.pass2, validateLength]);
 
-  /**
-   * Sets the state of passScore
-   *
-   * @description This function is used to update the password strength meter data
-   * @param password - user entered password string
-   * @returns null
-   *
-   */
-  const getPassCheckData = async (password: string) => {
-    if (password) {
-      const score = getPassScore(password);
-      setPassScore(score);
-    } else {
-      setPassScore(null);
-    }
+  // Password strength calculation
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (passwords.pass1) {
+        setPassScore(getPassScore(passwords.pass1));
+      } else {
+        setPassScore(null);
+      }
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, [passwords.pass1]);
+
+  // Handle input change (don't mutate state directly)
+  const handleInputChange = (name: 'pass1' | 'pass2', value: string) => {
+    setError('');
+    setPasswords((p) => ({ ...p, [name]: value }));
+    setErrors((e) => ({ ...e, [name]: '' }));
   };
 
+  // Submit logic
   const handleSubmit = () => {
+    setError('');
+    if (!validatePasswordMatch()) return;
     try {
       setLoading(true);
       const textEncoder = new TextEncoder();
-      const password = textEncoder.encode(passwords.pass1);
-      onProceed(password);
-    } catch (error: unknown) {
-      setError((error as Error)?.message);
+      onProceed(textEncoder.encode(passwords.pass1));
+    } catch (err: any) {
+      setError(err?.message || 'Unknown error');
     } finally {
       setLoading(false);
     }
   };
 
-  const onSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
-    e.preventDefault();
-    if (validatePasswordMatch()) {
-      handleSubmit();
-    }
+  // Keyboard navigation (next/done)
+  const handlePass1Submit = () => pass2Ref.current?.focus();
+  const handlePass2Submit = () => {
+    if (validatePasswordMatch()) handleSubmit();
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    error && setError('');
-
-    type ErrorsKey = 'pass1' | 'pass2';
-    if (errors[name as ErrorsKey]) {
-      delete errors[name as ErrorsKey];
-      setErrors(errors);
-    }
-
-    setPasswords({ ...passwords, [name]: value });
-  };
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key.toLowerCase() === 'enter') {
-      const target = event.target as HTMLInputElement;
-      if (target.name === 'pass2' && validatePasswordMatch()) {
-        handleSubmit();
-      }
-      const form = target.form as HTMLFormElement;
-      const index = Array.from(form.elements).indexOf(target);
-      (form.elements[index + 1] as HTMLInputElement).focus();
-      event.preventDefault();
-    }
-  };
-
-  const isSubmitDisabled = !!errors.pass1 || !!errors.pass2 || !passwords.pass1 || !passwords.pass2;
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      getPassCheckData(passwords.pass1);
-    }, 500);
-
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, [passwords.pass1]);
+  const isSubmitDisabled =
+    !!errors.pass1 ||
+    !!errors.pass2 ||
+    !passwords.pass1 ||
+    !passwords.pass2 ||
+    passwords.pass1.length < 8 ||
+    !termsOfUseAgreedCheck;
 
   if (isLoading) {
     return <CreatingWalletLoader />;
   }
 
   return (
-    <form onSubmit={onSubmit} className='flex flex-col h-full'>
+    <View style={{ flex: 1 }}>
       <OnboardingWrapper
-        headerIcon={<PasswordLockIcon className='size-6' />}
+        headerIcon={<PasswordLockIcon size={24} />}
         entry={entry}
-        heading='Create your password'
-        subHeading='Choose a password to secure & lock your wallet'
-        className='gap-0'
+        heading="Create your password"
+        subHeading="Choose a password to secure & lock your wallet"
+        style={{ gap: 0 }}
       >
-        <div className='flex flex-col gap-y-5 w-full mt-10'>
-          <div className='relative flex flex-col w-full'>
+        <View style={styles.inputContainer}>
+          <View style={styles.relativeCol}>
             <Input
+              ref={pass1Ref}
               autoFocus
-              placeholder='Enter password'
-              type='password'
-              name='pass1'
-              onKeyDown={handleKeyDown}
-              onBlur={validateLength}
-              status={errors.pass1 || errors.pass2 ? 'error' : undefined}
+              placeholder="Enter password"
+              secureTextEntry
               value={passwords.pass1}
-              onChange={handleInputChange}
-              data-testing-id='input-password'
-              className='h-[3.625rem]'
+              onChangeText={(text) => handleInputChange('pass1', text)}
+              onBlur={validateLength}
+              status={errors.pass1 ? 'error' : undefined}
+              testID="input-password"
+              style={styles.input}
               trailingElement={<PasswordStrengthIndicator score={passScore} />}
+              returnKeyType="next"
+              onSubmitEditing={handlePass1Submit}
             />
-
             <AnimatePresence>
-              {errors.pass1 && (
-                <motion.span
-                  className='flex items-end justify-center text-destructive-100 text-xs text-center font-medium overflow-hidden'
-                  variants={passwordErrorVariants}
-                  initial='hidden'
-                  animate='visible'
-                  exit='hidden'
+              {errors.pass1 ? (
+                <MotiView
+                  from={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 22 }}
+                  exit={{ opacity: 0, height: 0 }}
+                  style={styles.errorWrapper}
                 >
-                  {errors.pass1}
-                </motion.span>
-              )}
+                  <Text style={styles.errorText}>{errors.pass1}</Text>
+                </MotiView>
+              ) : null}
             </AnimatePresence>
-          </div>
+          </View>
 
-          <div className='relative flex flex-col gap-y-5 w-full'>
+          <View style={styles.relativeCol}>
             <PasswordInput
-              name='pass2'
+              ref={pass2Ref}
+              placeholder="Confirm password"
               value={passwords.pass2}
-              placeholder='Confirm password'
-              onKeyDown={handleKeyDown}
-              className='h-[3.625rem]'
-              onChange={handleInputChange}
+              onChangeText={(text) => handleInputChange('pass2', text)}
               status={errors.pass2 ? 'error' : undefined}
-              data-testing-id='input-confirm-password'
+              testID="input-confirm-password"
+              style={styles.input}
+              returnKeyType="done"
+              onSubmitEditing={handlePass2Submit}
             />
             <AnimatePresence>
-              {(errors.pass2 || error) && (
-                <motion.span
-                  className='text-destructive-100 text-xs text-center font-medium'
-                  data-testing-id='password-error-ele'
-                  variants={errorVariants}
-                  initial='hidden'
-                  animate='visible'
-                  exit='hidden'
+              {(errors.pass2 || error) ? (
+                <MotiView
+                  from={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 22 }}
+                  exit={{ opacity: 0, height: 0 }}
+                  style={styles.errorWrapper}
                 >
-                  {errors.pass2 || error}
-                </motion.span>
-              )}
+                  <Text style={styles.errorText} testID="password-error-ele">
+                    {errors.pass2 || error}
+                  </Text>
+                </MotiView>
+              ) : null}
             </AnimatePresence>
-          </div>
-        </div>
+          </View>
+        </View>
 
-        <label htmlFor='terms' className='flex flex-row justify-center items-center mt-auto'>
+        {/* Terms Checkbox */}
+        <View style={styles.checkboxRow}>
           <Checkbox
-            id='terms'
-            name='terms'
-            value='terms'
-            className='cursor-pointer mr-2 h-4 w-4 accent-accent-foreground'
             checked={termsOfUseAgreedCheck}
-            onCheckedChange={(e) => {
-              setTermsOfUseAgreedCheck(!!e);
-            }}
+            onChange={setTermsOfUseAgreedCheck}
+            style={styles.checkbox}
           />
-
-          <p className='text-xs text-muted-foreground text-center'>
+          <Text style={styles.termsText}>
             I agree to the{' '}
-            <a
-              href={'https://leapwallet.io/terms'}
-              target='_blank'
-              rel='noreferrer'
-              className={`text-accent-foreground hover:text-accent-foreground/80 transition-colors`}
+            <Text
+              style={styles.link}
+              onPress={() => Linking.openURL('https://leapwallet.io/terms')}
+              accessibilityRole="link"
             >
               Terms & Conditions
-            </a>
-          </p>
-        </label>
+            </Text>
+          </Text>
+        </View>
 
         <Button
-          className='w-full mt-5'
-          data-testing-id='btn-password-proceed'
-          disabled={isSubmitDisabled || isLoading || !termsOfUseAgreedCheck}
+          style={styles.submitBtn}
+          disabled={isSubmitDisabled || isLoading}
+          onPress={handleSubmit}
         >
           Set Password
         </Button>
       </OnboardingWrapper>
-    </form>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  inputContainer: {
+    flexDirection: 'column',
+    width: '100%',
+    marginTop: 40,
+    marginBottom: 0,
+  },
+  relativeCol: {
+    flexDirection: 'column',
+    width: '100%',
+    marginBottom: 20, // Replaces gap
+  },
+  input: {
+    height: 58, // h-[3.625rem] = 58px
+  },
+  errorWrapper: {
+    marginTop: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  errorText: {
+    color: '#E2655A', // destructive-100
+    fontSize: 12,
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  checkboxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 'auto',
+    marginBottom: 10,
+  },
+  checkbox: {
+    marginRight: 8,
+    height: 16,
+    width: 16,
+  },
+  termsText: {
+    fontSize: 12,
+    color: '#97A3B9', // muted-foreground
+    textAlign: 'center',
+    flexShrink: 1,
+  },
+  link: {
+    color: '#32DA6D', // accent-foreground
+    textDecorationLine: 'underline',
+  },
+  submitBtn: {
+    width: '100%',
+    marginTop: 20,
+  },
+});

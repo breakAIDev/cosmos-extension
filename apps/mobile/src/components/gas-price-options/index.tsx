@@ -29,12 +29,12 @@ import {
   SupportedChain,
 } from '@leapwallet/cosmos-wallet-sdk';
 import { RootBalanceStore, RootDenomsStore } from '@leapwallet/cosmos-wallet-store';
-import { CaretDown } from '@phosphor-icons/react';
-import * as Sentry from '@sentry/react';
+import { CaretDown } from 'phosphor-react-native';
+import * as Sentry from '@sentry/react-native';
 import { useQuery } from '@tanstack/react-query';
 import BigNumber from 'bignumber.js';
 import Text from '../text';
-import { TokenImageWithFallback } from '../token-image-with-fallback';
+import TokenImageWithFallback from '../token-image-with-fallback';
 import { useEnableEvmGasRefetch } from '../../hooks/cosm-wasm/use-enable-evm-gas-refetch';
 import { useFormatCurrency } from '../../hooks/settings/useCurrency';
 import { Images } from '../../../assets/images';
@@ -42,7 +42,7 @@ import { Images } from '../../../assets/images';
 import Long from 'long';
 import { observer } from 'mobx-react-lite';
 import React, { ChangeEvent, useEffect, useMemo, useState } from 'react';
-import { View, TouchableOpacity, StyleSheet, TextInput } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, TextInput, ViewStyle, StyleProp } from 'react-native';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 import { activeChainStore } from '../../context/active-chain-store';
 import { evmBalanceStore, solanaCoinDataStore, suiCoinDataStore } from '../../context/balance-store';
@@ -64,7 +64,6 @@ import { sliceWord } from '../../utils/strings';
 import { GasPriceOptionsContext, GasPriceOptionsContextType, useGasPriceContext } from './context';
 import { SelectTokenModal } from './select-token-modal';
 import { updateFeeTokenData } from './utils';
-import { Text } from 'react-native-gesture-handler';
 
 type ExtendedNativeDenom = NativeDenom & { ibcDenom?: string };
 
@@ -134,11 +133,11 @@ function tokenHasBalance(token: Token | undefined) {
 }
 
 export type GasPriceOptionsProps = React.PropsWithChildren<{
-  className?: string;
+  style?: StyleProp<ViewStyle>;
   hasUserTouchedFees?: boolean;
   recommendedGasLimit?: BigNumber | string;
   gasLimit: BigNumber | string;
-  setGasLimit: (gasLimit: number | string | BigNumber) => void;
+  setGasLimit: (gasLimit: string | BigNumber) => void;
   recommendedGasPrice?: GasPrice;
   gasPriceOption: GasPriceOptionsContextType['value'];
   onGasPriceOptionChange: GasPriceOptionsContextType['onChange'];
@@ -162,13 +161,13 @@ export type GasPriceOptionsProps = React.PropsWithChildren<{
 }>;
 
 interface GasPriceOptionsType extends React.FC<GasPriceOptionsProps> {
-  Selector: React.FC<{ className?: string; preSelected?: boolean }>;
+  Selector: React.FC<{ style?: StyleProp<ViewStyle>; preSelected?: boolean }>;
   AdditionalSettingsToggle: React.FC<{
     children?: (isOpen: boolean) => JSX.Element;
-    className?: string;
+    style?: StyleProp<ViewStyle>;
   }>;
   AdditionalSettings: React.FC<{
-    className?: string;
+    style?: StyleProp<ViewStyle>;
     showGasLimitWarning?: boolean;
     rootDenomsStore: RootDenomsStore;
     rootBalanceStore: RootBalanceStore;
@@ -184,7 +183,7 @@ const GasPriceOptions = observer(
     gasLimit,
     setGasLimit,
     recommendedGasLimit,
-    className,
+    style,
     children,
     error,
     setError,
@@ -601,7 +600,7 @@ const GasPriceOptions = observer(
     if (!feeTokenData) return null;
 
     return (
-      <View style={[className]}>
+      <View style={[style]}>
         <GasPriceOptionsContext.Provider
           value={{
             value: gasPriceOption,
@@ -690,7 +689,7 @@ export const calculateFeeAmount = ({
   } as const;
 };
 
-function Selector({ className, preSelected = true }: { className?: string; preSelected?: boolean }) {
+function Selector({ style, preSelected = true }: { style?: StyleProp<ViewStyle>; preSelected?: boolean }) {
   const {
     value,
     onChange,
@@ -749,7 +748,7 @@ function Selector({ className, preSelected = true }: { className?: string; preSe
   }, []);
   
   return (
-    <View style={[styles.gasGrid, className]}>
+    <View style={[styles.gasGrid, style]}>
       {Object.entries(feeTokenData?.gasPriceStep ?? {}).map(([level, gasPrice]) => {
         const isSelected = value.option === level;
         const gasPriceBN = new BigNumber(gasPrice);
@@ -771,7 +770,7 @@ function Selector({ className, preSelected = true }: { className?: string; preSe
         const handleChange = () => {
           onChange(
             {
-              option: level,
+              option: level as GasOptions,
               gasPrice: GasPrice.fromUserInput(
                 gasPrice?.toString() || '0',
                 feeTokenData.ibcDenom ?? feeTokenData.denom.coinMinimalDenom,
@@ -780,16 +779,16 @@ function Selector({ className, preSelected = true }: { className?: string; preSe
             feeTokenData,
           );
         };
-        const levelText = (level) => {
+        const levelText = (str: any) => {
           if (activeChain === 'bitcoin' || activeChain === 'bitcoinSignet') {
             const levelMap = {
               high: 'fast',
               medium: 'average',
               low: 'slow',
             };
-            return levelMap[level];
+            return levelMap[str];
           }
-          return level;
+          return str;
         };
 
         return (
@@ -834,11 +833,10 @@ GasPriceOptions.Selector = observer(Selector);
 
 GasPriceOptions.AdditionalSettingsToggle = function AdditionalSettingsToggle({
   children,
-  className,
+  style,
 }: {
-  
   children?: (isOpen: boolean) => JSX.Element;
-  className?: string;
+  style?: StyleProp<ViewStyle>;
 }) {
   const { viewAdditionalOptions, setViewAdditionalOptions } = useGasPriceContext();
 

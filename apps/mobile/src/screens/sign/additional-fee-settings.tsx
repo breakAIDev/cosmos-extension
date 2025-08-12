@@ -1,10 +1,11 @@
-import Tooltip from 'components/better-tooltip';
-import GasPriceOptions from 'components/gas-price-options';
-import { GasPriceOptionValue, useGasPriceContext } from 'components/gas-price-options/context';
-import { Images } from 'images';
+import Tooltip from '../../components/better-tooltip';
+import GasPriceOptions from '../../components/gas-price-options';
+import { GasPriceOptionValue, useGasPriceContext } from '../../components/gas-price-options/context';
+import { Images } from '../../../assets/images';
 import React from 'react';
-import { rootDenomsStore } from 'stores/denoms-store-instance';
-import { rootBalanceStore } from 'stores/root-store';
+import { rootDenomsStore } from '../../context/denoms-store-instance';
+import { rootBalanceStore } from '../../context/root-store';
+import { View, Text, Image, StyleSheet } from 'react-native';
 
 export const NotAllowSignTxGasOptions = ({
   gasPriceOption,
@@ -14,32 +15,87 @@ export const NotAllowSignTxGasOptions = ({
   gasPriceError: string | null;
 }) => {
   const { viewAdditionalOptions } = useGasPriceContext();
-  return viewAdditionalOptions ? (
-    <div className='rounded-2xl p-4 mt-3 dark:bg-[#141414] bg-white-100'>
-      <div className='flex items-center'>
-        <p className='text-gray-500 dark:text-gray-100 text-sm font-medium tracking-wide'>
-          Gas Fees <span className='capitalize'>({gasPriceOption.option})</span>
-        </p>
+  if (!viewAdditionalOptions) return null;
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.row}>
+        <Text style={styles.label}>
+          Gas Fees <Text style={styles.optionText}>({gasPriceOption.option})</Text>
+        </Text>
         <Tooltip
           content={
-            <p className='text-gray-500 dark:text-gray-100 text-sm'>
+            <Text style={styles.tooltipText}>
               You can choose higher gas fees for faster transaction processing.
-            </p>
+            </Text>
           }
         >
-          <div className='relative ml-2'>
-            <img src={Images.Misc.InfoCircle} alt='Hint' />
-          </div>
+          <View style={styles.iconWrap}>
+            <Image source={{uri: Images.Misc.InfoCircle}} style={styles.icon} resizeMode="contain" />
+          </View>
         </Tooltip>
-      </div>
-      <GasPriceOptions.Selector className='mt-2' preSelected={false} />
+      </View>
+      <GasPriceOptions.Selector style={styles.mt2} preSelected={false} />
       <GasPriceOptions.AdditionalSettings
-        className='mt-5 p-0'
+        style={styles.mt5}
         showGasLimitWarning={true}
         rootDenomsStore={rootDenomsStore}
         rootBalanceStore={rootBalanceStore}
       />
-      {gasPriceError ? <p className='text-red-300 text-sm font-medium mt-2 px-1'>{gasPriceError}</p> : null}
-    </div>
-  ) : null;
+      {gasPriceError ? (
+        <Text style={styles.errorText}>{gasPriceError}</Text>
+      ) : null}
+    </View>
+  );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    borderRadius: 16,
+    padding: 16,
+    marginTop: 12,
+    backgroundColor: '#fff', // Adjust for dark mode as needed
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  label: {
+    color: '#6B7280', // text-gray-500
+    fontSize: 14,
+    fontWeight: '500',
+    letterSpacing: 0.4,
+    flexShrink: 0,
+  },
+  optionText: {
+    textTransform: 'capitalize',
+  },
+  tooltipText: {
+    color: '#6B7280',
+    fontSize: 14,
+  },
+  iconWrap: {
+    position: 'relative',
+    marginLeft: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  icon: {
+    width: 18,
+    height: 18,
+  },
+  mt2: {
+    marginTop: 8,
+  },
+  mt5: {
+    marginTop: 20,
+    padding: 0,
+  },
+  errorText: {
+    color: '#F87171', // text-red-300
+    fontSize: 14,
+    fontWeight: '500',
+    marginTop: 8,
+    paddingHorizontal: 4,
+  },
+});

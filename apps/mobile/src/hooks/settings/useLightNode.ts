@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/react';
+import * as Sentry from '@sentry/react-native';
 import { useEffect } from 'react';
 import { LightNodeStore } from '../../context/light-node-store';
 

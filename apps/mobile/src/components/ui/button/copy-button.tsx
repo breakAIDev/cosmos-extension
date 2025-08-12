@@ -3,11 +3,11 @@
 </CopyButton> */}
 
 import React, { useEffect, useState } from 'react';
-import { View, Image, Text, StyleSheet } from 'react-native';
+import { Image, StyleSheet } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import { Button, ButtonProps } from '.'; // Your Button with types!
 import { CopyIcon } from '../../../../assets/icons/copy-icon'; // Should be an SVG or Image RN component
-import { Images } from '../../../../assets/images'; // Should use require() for RN
+import { Images } from '../../../../assets/images';
 
 export function CopyButton({
   children,
@@ -50,13 +50,13 @@ export function CopyButton({
       >
         {isCopied ? (
           <Image
-            source={Images.Misc.CheckGreenOutline} // Should be a require('...') or static import
+            source={{uri: Images.Misc.CheckGreenOutline}}
             style={{ width: 16, height: 16 }}
             resizeMode="contain"
           />
         ) : (
           // If CopyIcon is an SVG component, render it directly; else use <Image />
-          <CopyIcon width={16} height={16} color="#26c06f" />
+          <CopyIcon size={16} color="#26c06f" />
         )}
       </Animatable.View>
       {children || 'Copy'}

@@ -1,22 +1,20 @@
-import { BookmarkSimple, SealCheck } from '@phosphor-icons/react';
-import { Button } from 'components/ui/button';
-import { EventName, PageName } from 'config/analytics';
+import React, { useCallback, useMemo } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Linking } from 'react-native';
+import { MotiView } from 'moti';
+import { BookmarkSimple, SealCheck } from 'phosphor-react-native';
 import dayjs from 'dayjs';
-import { motion } from 'framer-motion';
-import { Raffle as RaffleType, RaffleStatus } from 'hooks/useAlphaOpportunities';
-import { useQueryParams } from 'hooks/useQuery';
-import { ExternalLinkIcon } from 'icons/external-link';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { cn } from 'utils/cn';
-import { queryParams } from 'utils/query-params';
-import { mixpanelTrack } from 'utils/tracking';
 
+import { Raffle as RaffleType, RaffleStatus } from '../../../hooks/useAlphaOpportunities';
+import { useQueryParams } from '../../../hooks/useQuery';
+import { Button } from '../../../components/ui/button';
+import { queryParams } from '../../../utils/query-params';
 import Tags from '../components/Tags';
 import { useChadBookmarks } from '../context/bookmark-context';
 import { useChadProvider } from '../context/chad-exclusives-context';
 import { useFilters } from '../context/filter-context';
+import { mixpanelTrack } from '../../../utils/tracking';
+import { EventName, PageName } from '../../../services/config/analytics';
 import { endsInUTC, startsInUTC } from '../utils';
-import { ALPHA_BOOKMARK_CLONE_ID, ALPHA_BOOKMARK_ID } from '../utils/constants';
 import ChadListingImage from './ChadListingImage';
 import { StatusFilter } from './ChadTimeline/filters';
 
@@ -27,63 +25,6 @@ export type RaffleListingProps = RaffleType & {
   highlight?: boolean;
   userWon?: boolean;
   bannerImage?: string;
-};
-
-export const getBookMarkCloneId = (id: string) => `cloned-bookmark-icon-${id}`;
-
-export const animateBookMark = (id: string, headerBookMarkIcon: HTMLElement, bookMarkIcon: SVGElement) => {
-  // first clone the bookmark icon
-  const clonedBookMarkIcon = document.getElementById(ALPHA_BOOKMARK_CLONE_ID)?.cloneNode(true) as HTMLElement;
-  clonedBookMarkIcon.id = getBookMarkCloneId(id);
-  clonedBookMarkIcon.style.zIndex = '999';
-  clonedBookMarkIcon.style.display = 'block';
-
-  // add the cloned bookmark icon to body
-  document.body.appendChild(clonedBookMarkIcon);
-
-  const clickedIconClientRect = bookMarkIcon.getBoundingClientRect();
-
-  // place the cloned bookmark icon at the original position of current bookmark icon
-  clonedBookMarkIcon.style.position = 'fixed';
-  clonedBookMarkIcon.style.left = `${clickedIconClientRect.left}px`;
-  clonedBookMarkIcon.style.top = `${clickedIconClientRect.top}px`;
-
-  // find the destination (headerBookMarkIcon) element position
-  const destinationElementClientRect = headerBookMarkIcon.getBoundingClientRect();
-
-  // animate the cloned bookmark icon to the destination element
-  const animation = clonedBookMarkIcon.animate(
-    [
-      {
-        top: `${clickedIconClientRect.top}px`,
-        left: `${clickedIconClientRect.left + 12}px`,
-      },
-      {
-        top: `${destinationElementClientRect.top}px`,
-        left: `${destinationElementClientRect.left}px`,
-      },
-    ],
-    {
-      duration: 750,
-      easing: 'ease-in-out',
-    },
-  );
-
-  animation.finished.then(() => {
-    clonedBookMarkIcon.remove();
-  });
-
-  return animation;
-};
-
-export const alphaCardVariants = {
-  initial: { opacity: 0, y: 10 },
-  animate: { opacity: 1, y: 0 },
-};
-
-export const alphaCardTransition = {
-  duration: 0.3,
-  ease: 'easeOut',
 };
 
 export default function RaffleListing(props: RaffleListingProps) {
@@ -101,6 +42,7 @@ export default function RaffleListing(props: RaffleListingProps) {
     userWon,
     redirectUrl,
   } = props;
+
   const params = useQueryParams();
   const { toggleBookmark, isBookmarked } = useChadBookmarks();
   const { setOpportunities, setEcosystems, selectedOpportunities, selectedEcosystems, openDetails, alphaUser } =
@@ -112,57 +54,6 @@ export default function RaffleListing(props: RaffleListingProps) {
     selectedOpportunities: selectedAllOpportunities,
     selectedEcosystems: selectedAllEcosystems,
   } = useFilters();
-
-  const bookMarkIconRef = useRef<SVGSVGElement>(null);
-  const bookMarkAnimationRef = useRef<Animation | null>(null);
-
-  const handleBookmarkClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-
-    const prevBookMarked = isBookmarked(id);
-    const headerBookMarkIcon = document.getElementById(ALPHA_BOOKMARK_ID);
-
-    if (!prevBookMarked && headerBookMarkIcon && bookMarkIconRef.current) {
-      bookMarkAnimationRef.current = animateBookMark(id, headerBookMarkIcon, bookMarkIconRef.current);
-    }
-
-    toggleBookmark(id);
-    mixpanelTrack(EventName.Bookmark, {
-      [!prevBookMarked ? 'bookmarkAdded' : 'bookmarkRemoved']: id,
-      name: title,
-      page: highlight ? PageName.Alpha : PageName.ChadExclusives,
-      isChad: alphaUser?.isChad ?? false,
-    });
-  };
-
-  const handleClick = () => {
-    if (redirectUrl) {
-      mixpanelTrack(EventName.PageView, {
-        pageName: highlight ? PageName.Alpha : PageName.ChadExclusives,
-        RaffleSelectSource: isSearched ? 'Search Results' : 'Default List',
-        id: id,
-        ChadEligibility: alphaUser?.isChad ? alphaUser.id : 'No',
-        ecosystem: [...(ecosystem ?? [])],
-        categories: [...(categories ?? [])],
-        raffleExternalURL: redirectUrl,
-        isChad: alphaUser?.isChad ?? false,
-      });
-
-      window.open(redirectUrl, '_blank');
-      return;
-    }
-
-    openDetails(props);
-    mixpanelTrack(EventName.PageView, {
-      pageName: highlight ? PageName.Alpha : PageName.ChadExclusives,
-      RaffleSelectSource: isSearched ? 'Search Results' : 'Default List',
-      id: id,
-      ChadEligibility: alphaUser?.isChad ? alphaUser.id : 'No',
-      ecosystem: [...(ecosystem ?? [])],
-      categories: [...(categories ?? [])],
-      isChad: alphaUser?.isChad ?? false,
-    });
-  };
 
   const handleEcosystemClick = useCallback(
     (ecosystem: string) => {
@@ -195,15 +86,7 @@ export default function RaffleListing(props: RaffleListingProps) {
     }
   }, [params]);
 
-  useEffect(() => {
-    return () => {
-      if (bookMarkAnimationRef.current) {
-        bookMarkAnimationRef.current.cancel();
-        document.getElementById(getBookMarkCloneId(id))?.remove();
-      }
-    };
-  }, [id]);
-
+  // Calculate time
   const diff = useMemo(() => {
     const daysjsStart = dayjs(startsAt);
     const now = dayjs();
@@ -214,7 +97,7 @@ export default function RaffleListing(props: RaffleListingProps) {
     if (diff < 0) {
       return `Starts in ${startsInUTC(startsAt)}`;
     }
-
+    
     const endIn = endsInUTC(endsAt);
     if (status === RaffleStatus.COMPLETED || endIn === 'Ended') {
       return `Ended on ${dayjs(endsAt).format('MMM D, YYYY')}`;
@@ -228,61 +111,207 @@ export default function RaffleListing(props: RaffleListingProps) {
     [diff, endsAt, status],
   );
 
-  const isEnded = useMemo(() => status === RaffleStatus.COMPLETED || endsInUTC(endsAt) === 'Ended', [endsAt, status]);
+  const isEnded = useMemo(
+    () => status === RaffleStatus.COMPLETED || endsInUTC(endsAt) === 'Ended',
+    [endsAt, status],
+  );
+
+  // Bookmark logic
+  const handleBookmarkPress = () => {
+    toggleBookmark(id);
+    mixpanelTrack(EventName.Bookmark, {
+      [!isBookmarked(id) ? 'bookmarkAdded' : 'bookmarkRemoved']: id,
+      name: title,
+      page: highlight ? PageName.Alpha : PageName.ChadExclusives,
+      isChad: alphaUser?.isChad ?? false,
+    });
+  };
+
+  // Card click
+  const handleCardPress = () => {
+    if (redirectUrl) {
+      mixpanelTrack(EventName.PageView, {
+        pageName: highlight ? PageName.Alpha : PageName.ChadExclusives,
+        RaffleSelectSource: isSearched ? 'Search Results' : 'Default List',
+        id: id,
+        ChadEligibility: alphaUser?.isChad ? alphaUser.id : 'No',
+        ecosystem: [...(ecosystem ?? [])],
+        categories: [...(categories ?? [])],
+        raffleExternalURL: redirectUrl,
+        isChad: alphaUser?.isChad ?? false,
+      });
+      Linking.openURL(redirectUrl);
+      return;
+    }
+    openDetails(props);
+    mixpanelTrack(EventName.PageView, {
+      pageName: highlight ? PageName.Alpha : PageName.ChadExclusives,
+      RaffleSelectSource: isSearched ? 'Search Results' : 'Default List',
+      id: id,
+      ChadEligibility: alphaUser?.isChad ? alphaUser.id : 'No',
+      ecosystem: [...(ecosystem ?? [])],
+      categories: [...(categories ?? [])],
+      isChad: alphaUser?.isChad ?? false,
+    });
+  };
+
+  // Styles for win/lose badge
+  const winBadge = (
+    <View style={styles.winBadge}>
+      <SealCheck weight='fill' size={16} color="#22c55e" />
+      <Text style={styles.winBadgeText}>You won</Text>
+    </View>
+  );
 
   return (
-    <motion.div
-      initial='initial'
-      animate='animate'
-      variants={alphaCardVariants}
-      transition={alphaCardTransition}
-      onClick={handleClick}
-      className={cn(
-        'flex items-start cursor-pointer p-5 transition-colors duration-200 ease-in-out gap-4 flex-col rounded-2xl border mb-4 border-secondary-300',
-        isEnded ? 'bg-secondary' : 'gradient-linear-mono',
-      )}
+    <MotiView
+      from={{ opacity: 0, translateY: 10 }}
+      animate={{ opacity: 1, translateY: 0 }}
+      transition={{ type: 'timing', duration: 300 }}
+      style={[
+        styles.card,
+        isEnded ? styles.endedCard : styles.activeCard
+      ]}
     >
-      <Tags
-        isLive={isLive}
-        ecosystemFilter={ecosystem ?? []}
-        categoryFilter={categories ?? []}
-        handleEcosystemClick={handleEcosystemClick}
-        handleCategoryClick={handleCategoryClick}
-        handleLiveClick={handleLiveClick}
-      />
+      <TouchableOpacity style={{ flex: 1 }} onPress={handleCardPress} activeOpacity={0.93}>
+        <Tags
+          isLive={isLive}
+          ecosystemFilter={ecosystem ?? []}
+          categoryFilter={categories ?? []}
+          handleEcosystemClick={handleEcosystemClick}
+          handleCategoryClick={handleCategoryClick}
+          handleLiveClick={handleLiveClick}
+        />
 
-      <div className='flex items-center gap-4 justify-between w-full'>
-        <div className='flex flex-col gap-1'>
-          <span className='font-bold leading-snug'>{title}</span>
-          <span className='text-secondary-800 text-sm'>{dateLabel}</span>
-        </div>
+        <View style={styles.row}>
+          <View style={styles.infoColumn}>
+            <Text style={styles.title}>{title}</Text>
+            <Text style={styles.dateLabel}>{dateLabel}</Text>
+          </View>
+          <View style={styles.imageContainer}>
+            <ChadListingImage image={image} alt={title} />
+          </View>
+        </View>
 
-        <div className='size-16 rounded-lg bg-secondary overflow-hidden shrink-0'>
-          <ChadListingImage image={image} alt={title} />
-        </div>
-      </div>
+        <View style={styles.bottomRow}>
+          <Button
+            size={'sm'}
+            style={styles.actionButton}
+            variant={'mono'}
+            onPress={handleCardPress}
+          >
+            <Text style={styles.actionButtonText}>{isLive ? 'Enter now' : 'Check details'}</Text>
+            {/* Example: <ExternalLinkIcon width={12} height={12} /> */}
+          </Button>
 
-      <div className='flex items-center justify-between gap-2 w-full'>
-        <Button size={'sm'} className='text-xs h-8 w-[9.375rem] gap-1' variant={'mono'}>
-          {isLive ? <>Enter now</> : <>Check details</>}
-          {!!redirectUrl && <ExternalLinkIcon className='size-3' />}
-        </Button>
-
-        {userWon ? (
-          <div className='flex items-center gap-1 text-accent-success py-1.5 pl-4 pr-5 rounded-l-full bg-accent-foreground/10 font-bold -mr-5'>
-            <SealCheck weight='fill' height={16} width={16} />
-            <span className='text-xs'>You won</span>
-          </div>
-        ) : (
-          <button onClick={handleBookmarkClick}>
-            <BookmarkSimple
-              ref={bookMarkIconRef}
-              weight={isBookmarked(id) ? 'fill' : 'regular'}
-              className={cn('size-6', isBookmarked(id) ? 'text-primary' : 'text- dark:text-gray-400')}
-            />
-          </button>
-        )}
-      </div>
-    </motion.div>
+          {userWon ? winBadge : (
+            <TouchableOpacity onPress={handleBookmarkPress} style={styles.bookmarkButton} hitSlop={10}>
+              <BookmarkSimple
+                weight={isBookmarked(id) ? 'fill' : 'regular'}
+                size={24}
+                color={isBookmarked(id) ? '#22c55e' : '#bbb'}
+              />
+            </TouchableOpacity>
+          )}
+        </View>
+      </TouchableOpacity>
+    </MotiView>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    borderRadius: 18,
+    padding: 20,
+    marginBottom: 14,
+    borderWidth: 1,
+    gap: 16,
+    backgroundColor: '#fff',
+    borderColor: '#e3e4e6',
+  },
+  endedCard: {
+    backgroundColor: '#f4f4f6',
+  },
+  activeCard: {
+    // You can implement gradients with react-native-linear-gradient if needed
+    backgroundColor: '#f7fafc',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  infoColumn: {
+    flexDirection: 'column',
+    gap: 2,
+    flex: 1,
+  },
+  title: {
+    fontWeight: 'bold',
+    fontSize: 17,
+    color: '#18181b',
+  },
+  dateLabel: {
+    color: '#475569',
+    fontSize: 13,
+  },
+  imageContainer: {
+    borderRadius: 8,
+    backgroundColor: '#f1f5f9',
+    width: 60,
+    height: 60,
+    overflow: 'hidden',
+    marginLeft: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  image: {
+    width: 60,
+    height: 60,
+    borderRadius: 8,
+    resizeMode: 'cover',
+  },
+  bottomRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+    width: '100%',
+    marginTop: 6,
+  },
+  actionButton: {
+    minHeight: 32,
+    minWidth: 150,
+    paddingHorizontal: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 6,
+  },
+  actionButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginRight: 4,
+  },
+  bookmarkButton: {
+    marginLeft: 14,
+    padding: 6,
+  },
+  winBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#e7faed',
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    borderRadius: 24,
+  },
+  winBadgeText: {
+    color: '#22c55e',
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginLeft: 4,
+  },
+});

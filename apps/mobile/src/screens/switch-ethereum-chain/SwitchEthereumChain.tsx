@@ -1,33 +1,30 @@
 import { useActiveWallet, useChainInfo, useGetChains } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { Buttons, Header, ThemeName, useTheme } from '@leapwallet/leap-ui';
-import { ArrowRight } from '@phosphor-icons/react';
+import { ArrowRight } from 'phosphor-react-native';
 import assert from 'assert';
-import PopupLayout from 'components/layout/popup-layout';
-import { LoaderAnimation } from 'components/loader/Loader';
-import { AGGREGATED_CHAIN_KEY } from 'config/constants';
+import PopupLayout from '../../components/layout/popup-layout';
+import { LoaderAnimation } from '../../components/loader/Loader';
+import { AGGREGATED_CHAIN_KEY } from '../../services/config/constants';
 import {
   ACTIVE_CHAIN,
   BG_RESPONSE,
   LAST_EVM_ACTIVE_CHAIN,
   REDIRECT_REQUEST,
   SELECTED_NETWORK,
-} from 'config/storage-keys';
-import { useChainPageInfo } from 'hooks';
-import { useActiveChain, useSetActiveChain } from 'hooks/settings/useActiveChain';
-import { useSetNetwork } from 'hooks/settings/useNetwork';
-import { Images } from 'images';
-import { GenericLight } from 'images/logos';
-import { addToConnections } from 'pages/ApproveConnection/utils';
+} from '../../services/config/storage-keys';
+import { useChainPageInfo } from '../../hooks';
+import { useActiveChain, useSetActiveChain } from '../../hooks/settings/useActiveChain';
+import { useSetNetwork } from '../../hooks/settings/useNetwork';
+import { Images } from '../../../assets/images';
+import { GenericLight } from '../../../assets/images/logos';
+import { addToConnections } from '../ApproveConnection/utils';
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { rootStore } from 'stores/root-store';
-import { Colors } from 'theme/colors';
-import { AggregatedSupportedChain } from 'types/utility';
-import { formatWalletName } from 'utils/formatWalletName';
-import { isSidePanel } from 'utils/isSidePanel';
-import { trim } from 'utils/strings';
-import Browser from 'webextension-polyfill';
+import { rootStore } from '../../context/root-store';
+import { Colors } from '../../theme/colors';
+import { AggregatedSupportedChain } from '../../types/utility';
+import { formatWalletName } from '../../utils/formatWalletName';
+import { trim } from '../../utils/strings';
 
 import { ChainDiv } from './components';
 
@@ -88,7 +85,7 @@ export default function SwitchEthereumChain() {
       await Browser.storage.local.remove([REDIRECT_REQUEST]);
       await Browser.storage.local.remove(BG_RESPONSE);
       if (isSidePanel()) {
-        navigate('/home');
+        navigate('Home');
       } else {
         window.close();
       }
@@ -130,7 +127,7 @@ export default function SwitchEthereumChain() {
 
       setIsLoading(false);
       if (isSidePanel()) {
-        navigate('/home');
+        navigate('Home');
       } else {
         window.close();
       }

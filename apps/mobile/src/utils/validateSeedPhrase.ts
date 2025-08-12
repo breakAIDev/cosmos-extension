@@ -1,8 +1,8 @@
 import { validateSuiPrivateKey } from '@leapwallet/cosmos-wallet-sdk';
 import * as secp256k1 from '@noble/secp256k1';
-import { SeedPhrase } from 'hooks/wallet/seed-phrase/useSeedPhrase';
+import { SeedPhrase } from '../hooks/wallet/seed-phrase/useSeedPhrase';
 
-import { validateSolanaPrivateKey } from '../extension-scripts/utils';
+import { validateSolanaPrivateKey } from '../context/utils';
 import correctMnemonic from './correct-mnemonic';
 
 type validateSeedPhraseParams = {

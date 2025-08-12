@@ -1,4 +1,4 @@
-import { Warning } from '@phosphor-icons/react';
+import { Warning } from 'phosphor-react-native';
 import { CustomCheckbox } from 'components/custom-checkbox';
 import React, { Dispatch, SetStateAction } from 'react';
 

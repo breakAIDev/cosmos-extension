@@ -1,18 +1,17 @@
-import { GenericCard, GenericCardProps, Toggle } from '@leapwallet/leap-ui';
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
-import { Images } from 'images';
 import React from 'react';
-import { cn } from 'utils/cn';
-import { imgOnError } from 'utils/imgOnError';
+import { View, Text, Image, TouchableOpacity, StyleSheet, ViewStyle, StyleProp, ImageStyle } from 'react-native';
+import { GenericCard, GenericCardProps, Toggle } from '@leapwallet/leap-ui';
+import { useDefaultTokenLogo } from '../../../hooks/utility/useDefaultTokenLogo';
+import { Images } from '../../../../assets/images';
 
 type CustomToggleCardProps = GenericCardProps & {
   imgSrc?: string;
   TokenType?: React.ReactNode;
   onToggleChange: (isEnabled: boolean) => void;
   isToggleChecked: boolean;
-  className?: string;
+  style?: StyleProp<ViewStyle>;
   onDeleteClick: () => void;
-  imageClassName?: string;
+  imageStyle?: StyleProp<ImageStyle>;
 };
 
 export function CustomToggleCard({
@@ -24,8 +23,8 @@ export function CustomToggleCard({
   onToggleChange,
   isToggleChecked,
   onDeleteClick,
-  className,
-  imageClassName,
+  style,
+  imageStyle,
 }: CustomToggleCardProps) {
   const defaultTokenLogo = useDefaultTokenLogo();
 
@@ -33,31 +32,55 @@ export function CustomToggleCard({
     <GenericCard
       title={title}
       subtitle={
-        <p>
-          {subtitle} {TokenType ?? null}
-        </p>
+        <Text>
+          {subtitle} {React.isValidElement(TokenType) ? TokenType : <View/>}
+        </Text>
       }
       isRounded={isRounded}
-      size='md'
+      size="md"
       img={
-        <img
-          src={imgSrc ?? defaultTokenLogo}
-          className={cn('h-8 w-8 mr-3', imageClassName)}
-          onError={imgOnError(defaultTokenLogo)}
+        <Image
+          source={{ uri: imgSrc ?? defaultTokenLogo}}
+          style={[styles.image, imageStyle]}
+          resizeMode="contain"
         />
       }
       icon={
-        <div className='flex items-center gap-[8px]'>
+        <View style={[styles.iconRow, style]}>
           <Toggle checked={isToggleChecked} onChange={onToggleChange} />
-
-          <div className='h-[36px] w-[0.25px] bg-gray-200 dark:bg-gray-600' />
-
-          <button className='cursor-pointer' onClick={onDeleteClick}>
-            <img className='invert dark:invert-0' src={Images.Misc.DeleteRed} alt='remove' />
-          </button>
-        </div>
+          <View style={styles.divider} />
+          <TouchableOpacity onPress={onDeleteClick} style={styles.deleteBtn}>
+            <Image source={{uri: Images.Misc.DeleteRed}} style={styles.deleteIcon} />
+          </TouchableOpacity>
+        </View>
       }
-      className={className}
     />
   );
 }
+
+const styles = StyleSheet.create({
+  image: {
+    height: 32,
+    width: 32,
+    marginRight: 12,
+  },
+  iconRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  divider: {
+    height: 36,
+    width: 1,
+    backgroundColor: '#e5e7eb', // gray-200, adjust if needed for dark mode
+    marginHorizontal: 8,
+  },
+  deleteBtn: {
+    padding: 6,
+  },
+  deleteIcon: {
+    width: 20,
+    height: 20,
+    // Optional: tintColor: 'red' if needed for theming
+  },
+});

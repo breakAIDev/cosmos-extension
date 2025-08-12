@@ -1,30 +1,60 @@
-import BottomModal from 'components/new-bottom-modal';
-import Text from 'components/text';
-import React from 'react';
+import React from 'react'
+import { View, StyleSheet } from 'react-native'
+import BottomModal from '../../../components/new-bottom-modal'
+import Text from '../../../components/text'
 
-export const VipRewardsInfo = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+export const VipRewardsInfo = ({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean
+  onClose: () => void
+}) => {
   return (
-    <BottomModal isOpen={isOpen} onClose={onClose} title='What are VIP rewards?'>
-      <div className='flex flex-col gap-7'>
-        <Text color='dark:text-gray-200 text-gray-800' size='sm' className='!leading-6'>
+    <BottomModal isOpen={isOpen} onClose={onClose} title="What are VIP rewards?">
+      <View style={styles.container}>
+        <Text color="text-gray-800" size="sm" style={styles.paragraph}>
           The Vested Interest Program (VIP) is Initia’s way to reward you for participating in their interwoven
           ecosystem. You get INIT rewards from two pools:
         </Text>
-        <div className='flex flex-col gap-5'>
-          <p className='!leading-6 dark:text-gray-200 text-gray-800 text-sm'>
-            <span className='font-bold !inline-block text-black-100 dark:text-white-100'>1. The Balance Pool:</span>{' '}
-            It’s the amount of opINIT held on the rollup which determines the share of esINIT balance pool reward.
-          </p>
-          <p className='!leading-6 dark:text-gray-200 text-gray-800 text-sm'>
-            <span className='font-bold !inline-block text-black-100 dark:text-white-100'>2. The Weight Pool:</span> If
-            you hold INIT and Enshrined Liquidity Tokens, you can vote in the gauge system to send emissions to a
+        <View style={styles.poolList}>
+          <Text style={styles.paragraph}>
+            <Text style={styles.bold}>1. The Balance Pool:</Text>
+            {' '}It’s the amount of opINIT held on the rollup which determines the share of esINIT balance pool reward.
+          </Text>
+          <Text style={styles.paragraph}>
+            <Text style={styles.bold}>2. The Weight Pool:</Text>
+            {' '}If you hold INIT and Enshrined Liquidity Tokens, you can vote in the gauge system to send emissions to a
             specific rollup.
-          </p>
-        </div>
-        <Text color='dark:text-gray-200 text-gray-800' size='sm' className='!leading-6'>
+          </Text>
+        </View>
+        <Text color="text-gray-800" size="sm" style={styles.paragraph}>
           VIP rewards you for being active in liquidity and governance. The more you participate, the more you earn.
         </Text>
-      </div>
+      </View>
     </BottomModal>
-  );
-};
+  )
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'column',
+    // mimic gap-7 (~28px), use marginBottom on children in RN
+  },
+  poolList: {
+    flexDirection: 'column',
+    marginBottom: 24,
+  },
+  paragraph: {
+    fontSize: 14,
+    lineHeight: 22,
+    color: '#2d3142', // fallback for gray-800
+    marginBottom: 14, // adjust to your preferred spacing
+  },
+  bold: {
+    fontWeight: 'bold',
+    color: '#101828', // fallback for black-100
+  },
+})
+
+export default VipRewardsInfo

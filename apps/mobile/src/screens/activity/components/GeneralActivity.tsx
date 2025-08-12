@@ -129,17 +129,17 @@ const GeneralActivity = observer(
     const renderShowView  = () => {
       if (!hasPendingSwapTxs && activity?.length === 0 && !txResponse?.loading) {
         return (
-          <div className='mt-4'>
+          <View style={styles.mt4}>
             <NoActivityView accountExplorerLink={accountExplorerLink} chain={selectedChain} />
-          </div>
+          </View>
         );
       }
 
       if (!hasPendingSwapTxs && txResponse?.error) {
         return (
-          <div className='mt-4'>
+          <View style={styles.mt4}>
             <ErrorActivityView accountExplorerLink={accountExplorerLink} chain={selectedChain} />
-          </div>
+          </View>
         );
       }
 
@@ -234,7 +234,7 @@ const GeneralActivity = observer(
                   onPress={() => setShowActivityChainSelector(true)}
                 >
                   <Image
-                    source={Images.Misc.TuneIcon}
+                    source={{uri: Images.Misc.TuneIcon}}
                     style={{ width: 16, height: 16, tintColor: '#000' }}
                     resizeMode="contain"
                   />

@@ -1,4 +1,4 @@
-import { CaretDown, CaretUp, GasPump } from '@phosphor-icons/react';
+import { CaretDown, CaretUp, GasPump } from 'phosphor-react-native';
 import BigNumber from 'bignumber.js';
 import classNames from 'classnames';
 import BottomModal from 'components/new-bottom-modal';

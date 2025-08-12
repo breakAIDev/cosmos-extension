@@ -1,30 +1,37 @@
 import { SelectedAddress, useAddressPrefixes, useGetChains } from '@leapwallet/cosmos-wallet-hooks';
 import {
-  getBlockChainFromAddress,
   isAptosAddress,
-  isAptosChain,
   isEthAddress,
   isSolanaAddress,
-  isSolanaChain,
   isValidAddress,
   SupportedChain,
 } from '@leapwallet/cosmos-wallet-sdk';
-import { Plus, TrashSimple } from '@phosphor-icons/react';
-import { bech32 } from 'bech32';
-import { CustomCheckbox } from 'components/custom-checkbox';
-import { LoaderAnimation } from 'components/loader/Loader';
-import BottomModal from 'components/new-bottom-modal/index';
-import Text from 'components/text';
-import { Button } from 'components/ui/button';
-import { useActiveChain } from 'hooks/settings/useActiveChain';
-import { useContacts } from 'hooks/useContacts';
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
-import { Images } from 'images';
-import React, { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
-import { Colors } from 'theme/colors';
-import { AddressBook } from 'utils/addressbook';
+import { Plus, TrashSimple } from 'phosphor-react-native';
+import { decode } from 'bech32';
+import { CustomCheckbox } from '../../../../components/custom-checkbox';
+import { LoaderAnimation } from '../../../../components/loader/Loader';
+import BottomModal from '../../../../components/new-bottom-modal/index';
+import Text from '../../../../components/text';
+import { Button } from '../../../../components/ui/button';
+import { useContacts } from '../../../../hooks/useContacts';
+import { useDefaultTokenLogo } from '../../../../hooks/utility/useDefaultTokenLogo';
+import { Images } from '../../../../../assets/images';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Colors } from '../../../../theme/colors';
+import { AddressBook } from '../../../../utils/addressbook';
 
 import { SendContextType, useSendContext } from '../../context';
+
+import {
+  View,
+  Image,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from 'react-native';
 
 type SaveAddressSheetProps = {
   title?: string;
@@ -33,7 +40,6 @@ type SaveAddressSheetProps = {
   ethAddress?: string;
   sendActiveChain?: SupportedChain;
   onClose: () => void;
-  
   onSave?: (s: SelectedAddress) => void;
   showDeleteBtn?: boolean;
 };
@@ -44,7 +50,6 @@ export default function SaveAddressSheet({
   address,
   ethAddress,
   onSave,
-  sendActiveChain,
   showDeleteBtn,
 }: SaveAddressSheetProps) {
   const [memo, setMemo] = useState<string>('');
@@ -62,14 +67,9 @@ export default function SaveAddressSheet({
   const { contacts: savedContacts, loading: savedContactsLoading } = useContacts();
   const addressPrefixes = useAddressPrefixes();
   const defaultTokenLogo = useDefaultTokenLogo();
-  const enterNameRef = useRef<HTMLInputElement | null>(null);
+  const enterNameRef = useRef<TextInput | null>(null);
 
   const chains = useGetChains();
-  const _activeChain = useActiveChain();
-
-  const activeChain = useMemo(() => {
-    return sendActiveChain ?? _activeChain;
-  }, [sendActiveChain, _activeChain]);
 
   const chain = useMemo(() => {
     try {
@@ -83,7 +83,7 @@ export default function SaveAddressSheet({
       } else if (address.startsWith('bc1q')) {
         chain = 'bitcoin';
       } else {
-        const { prefix } = bech32.decode(address);
+        const { prefix } = decode(address);
         chain = addressPrefixes[prefix] as SupportedChain;
       }
       return chain;
@@ -106,7 +106,12 @@ export default function SaveAddressSheet({
   }, [existingContact]);
 
   useEffect(() => {
-    if (isValidAddress(address) || isEthAddress(address) || isAptosAddress(address) || isSolanaAddress(address)) {
+    if (
+      isValidAddress(address) ||
+      isEthAddress(address) ||
+      isAptosAddress(address) ||
+      isSolanaAddress(address)
+    ) {
       setAddressValue(address);
     }
   }, [address]);
@@ -117,10 +122,8 @@ export default function SaveAddressSheet({
     }
   }, [isOpen]);
 
-  const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleNameChange = (value: string) => {
     nameError && setNameError('');
-    const value = event.target.value;
-
     if (value.length < 24) {
       if (
         value.length &&
@@ -136,14 +139,12 @@ export default function SaveAddressSheet({
           setNameError('');
         }
       }
-
       setName(value);
     }
   };
 
-  const handleAddressChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+  const handleAddressChange = (value: string) => {
     addressError && setAddressError('');
-    const value = event.target.value;
     setAddressValue(value);
     if (
       value.length > 0 &&
@@ -167,7 +168,6 @@ export default function SaveAddressSheet({
     if (addressError || nameError) {
       return;
     }
-
     if (name && addressValue && !isSaving) {
       setIsSaving(true);
       await AddressBook.save({
@@ -218,71 +218,73 @@ export default function SaveAddressSheet({
 
   return (
     <BottomModal
-      containerClassName='bg-secondary-50'
-      title={existingContact ? 'Edit Contact' : 'Add Contact'}
-      onClose={onClose}
       isOpen={isOpen}
-      className='!p-6'
+      onClose={onClose}
+      title={existingContact ? 'Edit Contact' : 'Add Contact'}
       fullScreen
       secondaryActionButton={
         showDeleteBtn ? (
-          <TrashSimple
-            size={48}
-            className='text-muted-foreground hover:text-foreground p-3.5 cursor-pointer'
-            weight='fill'
-            onClick={handleDelete}
-          />
+          <TouchableOpacity onPress={handleDelete} style={styles.deleteBtn}>
+            <TrashSimple size={32} color={Colors.gray900} weight="fill" />
+          </TouchableOpacity>
         ) : null
       }
+      contentStyle={styles.modalContent}
     >
-      <form
-        className='flex flex-col items-center w-full gap-y-4'
-        onSubmit={(event) => {
-          event.preventDefault();
-          handleSubmit();
-        }}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={{ flex: 1 }}
       >
-        <div className='flex flex-col gap-y-5 w-full items-center'>
-          <img src={Images.Misc.getWalletIconAtIndex(0)} width={80} height={80} className='mb-3' />
-          <textarea
-            placeholder={'enter address'}
+        <ScrollView contentContainerStyle={styles.formContent} keyboardShouldPersistTaps="handled">
+          <View style={styles.iconContainer}>
+            <Image
+              source={{uri: Images.Misc.getWalletIconAtIndex(0)}}
+              style={styles.icon}
+              resizeMode="contain"
+            />
+          </View>
+          <TextInput
+            style={styles.textarea}
+            placeholder="Enter address"
             value={addressValue}
-            onChange={handleAddressChange}
-            className='h-[90px] rounded-lg placeholder:text-muted-foreground text-monochrome font-medium outline-none border border-secondary-300 hover:border-secondary-400 focus-within:!border-monochrome  bg-secondary w-full resize-none py-3 px-4 text-base'
+            onChangeText={handleAddressChange}
+            multiline
+            numberOfLines={3}
+            textAlignVertical="top"
+            placeholderTextColor={Colors.gray400}
+            autoCapitalize="none"
           />
-          <input
-            placeholder={'enter recipient’s name'}
+          <TextInput
+            style={styles.input}
+            placeholder="Enter recipient’s name"
             value={name}
-            onChange={handleNameChange}
+            onChangeText={handleNameChange}
             ref={enterNameRef}
-            className='rounded-lg placeholder:text-muted-foreground text-monochrome font-medium outline-none border border-secondary-300 hover:border-secondary-400 focus-within:!border-monochrome  bg-secondary w-full resize-none py-3 px-4 text-base'
+            placeholderTextColor={Colors.gray400}
+            autoCapitalize="none"
           />
           {saveAsCEX && (
-            <div
-              className={
-                'p-5 rounded-xl bg-secondary-100 border border-secondary flex justify-between items-center dark:focus-within:border-white-100 hover:border-secondary-400 focus-within:border-black-100 w-full px-4 py-3'
-              }
-            >
-              <input
-                type='text'
+            <View style={styles.memoContainer}>
+              <TextInput
+                style={styles.memoInput}
                 value={memo}
-                placeholder='Add memo'
-                className='!leading-[22.4px] bg-transparent font-medium text-sm text-monochrome placeholder:text-muted-foreground outline-none w-full'
-                onChange={(e) => setMemo(e.target?.value)}
+                placeholder="Add memo"
+                onChangeText={setMemo}
+                placeholderTextColor={Colors.gray400}
               />
               {memo.length === 0 ? (
-                <Plus size={20} className='text-muted-foreground p-0.5' />
+                <Plus size={20} color={Colors.gray400} />
               ) : (
-                <div onClick={() => setMemo('')}>
-                  <Text size='xs' color='text-muted-foreground' className=' font-bold cursor-pointer ml-2'>
+                <TouchableOpacity onPress={() => setMemo('')}>
+                  <Text size="xs" color="text-muted-foreground" style={styles.clearMemo}>
                     Clear
                   </Text>
-                </div>
+                </TouchableOpacity>
               )}
-            </div>
+            </View>
           )}
           {(addressError || nameError) && (
-            <Text size='xs' color='text-red-300' className='font-bold'>
+            <Text size="xs" color="text-red-300" style={styles.errorText}>
               {addressError || nameError}
             </Text>
           )}
@@ -290,19 +292,133 @@ export default function SaveAddressSheet({
             <LoaderAnimation color={Colors.white100} />
           ) : (
             <Button
-              className='w-full mt-3'
-              disabled={!name || !addressValue || !!addressError || !!nameError || (saveAsCEX && memo.length === 0)}
-              title='Save contact'
+              style={styles.saveBtn}
+              disabled={
+                !name ||
+                !addressValue ||
+                !!addressError ||
+                !!nameError ||
+                (saveAsCEX && memo.length === 0)
+              }
+              onPress={handleSubmit}
             >
               Save contact
             </Button>
           )}
-          <div className='flex gap-1 w-full justify-center'>
-            <CustomCheckbox checked={saveAsCEX} onClick={() => setSaveAsCEX((prevValue) => !prevValue)} />
-            <p className='text-sm font-medium text-accent-green'>Save as centralized exchange</p>
-          </div>
-        </div>
-      </form>
+          <View style={styles.checkboxRow}>
+            <CustomCheckbox checked={saveAsCEX} onClick={() => setSaveAsCEX((prev) => !prev)} />
+            <Text style={styles.cexText}>Save as centralized exchange</Text>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </BottomModal>
   );
 }
+
+const styles = StyleSheet.create({
+  modalContent: {
+    backgroundColor: Colors.aggregatePrimary,
+    flex: 1,
+    padding: 24,
+  },
+  formContent: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    width: '100%',
+    paddingBottom: 24,
+  },
+  iconContainer: {
+    marginBottom: 12,
+    alignItems: 'center',
+    width: '100%',
+  },
+  icon: {
+    width: 80,
+    height: 80,
+    marginBottom: 12,
+  },
+  textarea: {
+    height: 90,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: Colors.aggregatePrimary,
+    backgroundColor: Colors.aggregatePrimary,
+    width: '100%',
+    fontSize: 16,
+    color: Colors.aggregatePrimary,
+    fontWeight: '500',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginBottom: 12,
+  },
+  input: {
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: Colors.aggregatePrimary,
+    backgroundColor: Colors.junoPrimary,
+    width: '100%',
+    fontSize: 16,
+    color: Colors.junoPrimary,
+    fontWeight: '500',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginBottom: 12,
+  },
+  memoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 12,
+    backgroundColor: Colors.gray50,
+    borderWidth: 1,
+    borderColor: Colors.gray50,
+    width: '100%',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    marginBottom: 12,
+    justifyContent: 'space-between',
+  },
+  memoInput: {
+    flex: 1,
+    fontSize: 14,
+    color: Colors.gray50,
+    backgroundColor: 'transparent',
+    fontWeight: '500',
+    marginRight: 10,
+  },
+  clearMemo: {
+    fontWeight: 'bold',
+    marginLeft: 8,
+  },
+  errorText: {
+    color: Colors.red300,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    alignSelf: 'flex-start',
+  },
+  saveBtn: {
+    width: '100%',
+    marginTop: 12,
+    borderRadius: 10,
+  },
+  checkboxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 14,
+    justifyContent: 'center',
+    width: '100%',
+  },
+  cexText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: Colors.gray50,
+    marginLeft: 8,
+  },
+  deleteBtn: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    zIndex: 10,
+    padding: 6,
+  },
+});

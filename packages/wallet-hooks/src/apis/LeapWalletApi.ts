@@ -7,6 +7,7 @@ import { useCallback, useMemo } from 'react';
 
 import { TX_LOG_COSMOS_BLOCKCHAIN_MAP } from '../config';
 import {
+  CosmosBlockchain,
   CosmosTxRequest,
   CosmosTxType,
   Currency,
@@ -270,7 +271,7 @@ export namespace LeapWalletApi {
     return entries.reduce((acc, [key, value]) => {
       return {
         ...acc,
-        [platformToChain[key as Platform]]: value,
+        [platformToChain[key as Platform] ?? 'DEFAULT']: value,
       };
     }, {});
   }
@@ -416,9 +417,9 @@ export namespace LeapWalletApi {
         _chainId = _chainId?.replace('aptos-', '');
 
         const txLogMap = await getTxLogCosmosBlockchainMapStoreSnapshot();
-        const blockchain = getCosmosNetwork(activeChain, txLogMap);
+        const blockchain = getCosmosNetwork(activeChain, txLogMap) as CosmosBlockchain | undefined;
 
-        const logReq = {
+        const logReq : V2TxRequest = {
           app: getPlatform(),
           txHash,
           isMainnet,
@@ -429,18 +430,12 @@ export namespace LeapWalletApi {
           feeDenomination,
           feeQuantity,
           chainId: isSolana ? activeChain : isSui ? 'sui' : _chainId ?? '',
-        } as V2TxRequest;
+        };
 
-        if (amount !== undefined) {
-          
-          
-          logReq.amount = amount;
-        }
+        let cosmosReq: CosmosTxRequest = { ...logReq };
 
         if (blockchain !== undefined) {
-          
-          
-          logReq.blockchain = blockchain;
+          cosmosReq = {...logReq, blockchain};
         }
 
         try {
@@ -458,9 +453,9 @@ export namespace LeapWalletApi {
             const txnLeapApi = new LeapApi(leapApiBaseUrl, customHeaders);
             await txnLeapApi.operateV2Tx(logReq, 'sui.tx' as V2TxOperation);
           } else if (isCompassWallet) {
-            await txnLeapApi.operateSeiTx(logReq as unknown as CosmosTxRequest);
+            await txnLeapApi.operateSeiTx(cosmosReq);
           } else {
-            await txnLeapApi.operateCosmosTx(logReq as unknown as CosmosTxRequest);
+            await txnLeapApi.operateCosmosTx(cosmosReq);
           }
         } catch (err) {
           console.error(err);
@@ -522,10 +517,10 @@ export namespace LeapWalletApi {
         _chainId = _chainId?.replace('aptos-', '');
 
         const txLogMap = await getTxLogCosmosBlockchainMapStoreSnapshot();
-        const blockchain = getCosmosNetwork(chain, txLogMap);
+        const blockchain = getCosmosNetwork(chain, txLogMap) as CosmosBlockchain | undefined;
 
         try {
-          const logReq = {
+          const logReq: V2TxRequest = {
             app: getPlatform(),
             txHash,
             isMainnet,
@@ -536,12 +531,12 @@ export namespace LeapWalletApi {
             feeDenomination,
             feeQuantity,
             chainId: isSolana ? 'solana' : isSui ? 'sui' : _chainId ?? '',
-          } as V2TxRequest;
+          };
+
+          let cosmosReq: CosmosTxRequest = { ...logReq };
 
           if (blockchain !== undefined) {
-            
-            
-            logReq.blockchain = blockchain;
+            cosmosReq = {...logReq, blockchain};
           }
 
           if (isAptos) {
@@ -558,9 +553,9 @@ export namespace LeapWalletApi {
             const txnLeapApi = new LeapApi(leapApiBaseUrl, customHeaders);
             await txnLeapApi.operateV2Tx(logReq, 'sui.tx' as V2TxOperation);
           } else if (isCompassWallet) {
-            await txnLeapApi.operateSeiTx(logReq as unknown as CosmosTxRequest);
+            await txnLeapApi.operateSeiTx(cosmosReq);
           } else {
-            await txnLeapApi.operateCosmosTx(logReq as unknown as CosmosTxRequest);
+            await txnLeapApi.operateCosmosTx(cosmosReq);
           }
         } catch (err) {
           console.error(err);

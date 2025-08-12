@@ -1,4 +1,16 @@
-import { isDeliverTxSuccess } from '@cosmjs/stargate';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { observer } from 'mobx-react-lite';
+import {
+  View,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  Linking,
+} from 'react-native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import Clipboard from '@react-native-clipboard/clipboard';
+import { ArrowSquareOut, CopySimple, CheckCircle } from 'phosphor-react-native';
 import {
   SelectedNetwork,
   sliceAddress,
@@ -8,31 +20,26 @@ import {
   useGetExplorerTxnUrl,
   usePendingTxState,
   useSelectedNetwork,
+  sliceWord,
 } from '@leapwallet/cosmos-wallet-hooks';
-import { sliceWord } from '@leapwallet/cosmos-wallet-hooks/dist/utils/strings';
 import { isBabylon, Provider, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { Validator } from '@leapwallet/cosmos-wallet-sdk/dist/browser/types/validators';
 import { RootBalanceStore, RootStakeStore } from '@leapwallet/cosmos-wallet-store';
 import { Buttons, GenericCard, Header, ThemeName, useTheme } from '@leapwallet/leap-ui';
-import { ArrowSquareOut, CopySimple } from '@phosphor-icons/react';
-import { CheckCircle } from '@phosphor-icons/react/dist/ssr';
-import PopupLayout from 'components/layout/popup-layout';
-import { LoaderAnimation } from 'components/loader/Loader';
-import Text from 'components/text';
-import { PageName } from 'config/analytics';
-import { useActiveChain } from 'hooks/settings/useActiveChain';
-import { Images } from 'images';
-import { GenericLight } from 'images/logos';
-import { observer } from 'mobx-react-lite';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Colors } from 'theme/colors';
-import { UserClipboard } from 'utils/clipboard';
-import { imgOnError } from 'utils/imgOnError';
-import { isSidePanel } from 'utils/isSidePanel';
+
+import PopupLayout from '../../components/layout/popup-layout';
+import { LoaderAnimation } from '../../components/loader/Loader';
+import Text from '../../components/text';
+import { PageName } from '../../services/config/analytics';
+import { useActiveChain } from '../../hooks/settings/useActiveChain';
+import { Images } from '../../../assets/images';
+import { GenericLight } from '../../../assets/images/logos';
+import { Colors } from '../../theme/colors';
 
 import { TxSuccessEpochDurationMessage } from './components/TxSuccessEpochDurationMessage';
+import { DeliverTxResponse, isDeliverTxSuccess } from '@cosmjs/stargate';
 
+// ------------ Types -------------
 export type StakeTxnPageState = {
   validator: Validator;
   provider: Provider;
@@ -41,35 +48,27 @@ export type StakeTxnPageState = {
   forceNetwork?: SelectedNetwork;
 };
 
-const txStatusStyles = {
-  loading: {
-    title: 'In Progress...',
-  },
-  success: {
-    title: 'Complete',
-  },
-  submitted: {
-    title: 'Submitted',
-  },
-  failed: {
-    title: 'Failed',
-  },
-};
-
 type StakeTxnPageProps = {
   rootBalanceStore: RootBalanceStore;
   rootStakeStore: RootStakeStore;
 };
 
+// ------------ Main Component -------------
 const StakeTxnPage = observer(({ rootBalanceStore, rootStakeStore }: StakeTxnPageProps) => {
-  const location = useLocation();
-  const { validator, mode, forceChain, forceNetwork, provider } = useMemo(() => {
-    const navigateStakePendingTxnState = JSON.parse(
-      sessionStorage.getItem('navigate-stake-pending-txn-state') ?? 'null',
-    );
+  // Navigation & Route
+  const navigation = useNavigation();
+  const route = useRoute<any>();
 
-    return (location?.state ?? navigateStakePendingTxnState) as StakeTxnPageState;
-  }, [location?.state]);
+  // Parse state from route params or fallback (session storage is web, not available)
+  const {
+    validator,
+    mode,
+    forceChain,
+    forceNetwork,
+    provider,
+  }: StakeTxnPageState = useMemo(() => {
+    return route.params as StakeTxnPageState;
+  }, [route.params]);
 
   const _activeChain = useActiveChain();
   const activeChain = useMemo(() => forceChain || _activeChain, [_activeChain, forceChain]);
@@ -78,7 +77,6 @@ const StakeTxnPage = observer(({ rootBalanceStore, rootStakeStore }: StakeTxnPag
   const selectedNetwork = useMemo(() => forceNetwork || _selectedNetwork, [_selectedNetwork, forceNetwork]);
 
   const { pendingTx, setPendingTx } = usePendingTxState();
-  const navigate = useNavigate();
   const [txHash, setTxHash] = useState<string | undefined>('');
   const [amount, setAmount] = useState<string | number | undefined>('');
   const [copied, setCopied] = useState(false);
@@ -96,6 +94,7 @@ const StakeTxnPage = observer(({ rootBalanceStore, rootStakeStore }: StakeTxnPag
   }, [activeChain, rootStakeStore, selectedNetwork]);
 
   const { theme } = useTheme();
+
   useEffect(() => {
     setTxHash(pendingTx?.txHash);
   }, [pendingTx?.txHash]);
@@ -105,9 +104,7 @@ const StakeTxnPage = observer(({ rootBalanceStore, rootStakeStore }: StakeTxnPag
       pendingTx.promise
         .then(
           (result) => {
-            
-            
-            if (result && isDeliverTxSuccess(result)) {
+            if (result && isDeliverTxSuccess(result as DeliverTxResponse)) {
               setPendingTx({ ...pendingTx, txStatus: 'success' });
             } else {
               setPendingTx({ ...pendingTx, txStatus: 'failed' });
@@ -129,46 +126,44 @@ const StakeTxnPage = observer(({ rootBalanceStore, rootStakeStore }: StakeTxnPag
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const txStatusText = useMemo(() => {
-    return {
-      CLAIM_REWARDS: {
-        loading: 'claiming rewards',
-        success: 'claimed successfully',
-        failed: 'failed claiming',
-        submitted: 'claim submitted',
-      },
-      DELEGATE: {
-        loading: 'staking',
-        success: 'staked successfully',
-        failed: 'failed staking',
-        submitted: 'stake submitted',
-      },
-      UNDELEGATE: {
-        loading: 'unstaking',
-        success: 'unstaked successfully',
-        failed: 'failed unstaking',
-        submitted: 'unstake submitted',
-      },
-      CANCEL_UNDELEGATION: {
-        loading: 'cancelling unstake',
-        success: 'unstake cancelled successfully',
-        failed: 'failed cancelling unstake',
-        submitted: 'cancel undelegation submitted',
-      },
-      REDELEGATE: {
-        loading: `switching ${provider ? 'provider' : 'validator'}`,
-        success: `${provider ? 'provider' : 'validator'} switched successfully`,
-        failed: `failed switching ${provider ? 'provider' : 'validator'}`,
-        submitted: 'redelegation submitted',
-      },
-      CLAIM_AND_DELEGATE: {
-        loading: 'claiming and staking rewards',
-        success: 'claimed and staked successfully',
-        failed: 'failed claiming and staking',
-        submitted: 'claim and delegate submitted',
-      },
-    };
-  }, [provider]);
+  const txStatusText = useMemo(() => ({
+    CLAIM_REWARDS: {
+      loading: 'claiming rewards',
+      success: 'claimed successfully',
+      failed: 'failed claiming',
+      submitted: 'claim submitted',
+    },
+    DELEGATE: {
+      loading: 'staking',
+      success: 'staked successfully',
+      failed: 'failed staking',
+      submitted: 'stake submitted',
+    },
+    UNDELEGATE: {
+      loading: 'unstaking',
+      success: 'unstaked successfully',
+      failed: 'failed unstaking',
+      submitted: 'unstake submitted',
+    },
+    CANCEL_UNDELEGATION: {
+      loading: 'cancelling unstake',
+      success: 'unstake cancelled successfully',
+      failed: 'failed cancelling unstake',
+      submitted: 'cancel undelegation submitted',
+    },
+    REDELEGATE: {
+      loading: `switching ${provider ? 'provider' : 'validator'}`,
+      success: `${provider ? 'provider' : 'validator'} switched successfully`,
+      failed: `failed switching ${provider ? 'provider' : 'validator'}`,
+      submitted: 'redelegation submitted',
+    },
+    CLAIM_AND_DELEGATE: {
+      loading: 'claiming and staking rewards',
+      success: 'claimed and staked successfully',
+      failed: 'failed claiming and staking',
+      submitted: 'claim and delegate submitted',
+    },
+  }), [provider]);
 
   const { explorerTxnUrl: txnUrl } = useGetExplorerTxnUrl({
     forceChain: activeChain,
@@ -186,139 +181,130 @@ const StakeTxnPage = observer(({ rootBalanceStore, rootStakeStore }: StakeTxnPag
   }, [mode, pendingTx?.receivedAmount, pendingTx?.receivedUsdValue, pendingTx?.sentAmount, pendingTx?.sentUsdValue]);
 
   const handleCopyClick = () => {
-    UserClipboard.copyText(txHash ?? '');
-    setCopied(true);
-
-    setTimeout(() => {
-      setCopied(false);
-    }, 2000);
+    if (txHash) {
+      Clipboard.setString(txHash);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
+  // --------- Main Render ---------
   return (
     <PopupLayout>
       <Header title={`Transaction ${txStatusStyles[pendingTx?.txStatus ?? 'loading'].title}`} />
-      <div className='flex flex-col justify-between p-6' style={{ height: 'calc(100% - 72px)' }}>
-        <div className='flex flex-col gap-y-4'>
-          <div className='bg-white-100 dark:bg-gray-950 rounded-2xl w-full flex flex-col gap-y-2 items-center p-4'>
-            <div className='flex items-center justify-center h-[100px] w-[100px]'>
-              {pendingTx?.txStatus === 'loading' && <LoaderAnimation color='#29a874' className='w-full h-full' />}
-              {pendingTx?.txStatus === 'success' && <img src={Images.Activity.TxSwapSuccess} width={75} height={75} />}
-              {pendingTx?.txStatus === 'failed' && <img src={Images.Activity.TxSwapFailure} width={75} height={75} />}
-            </div>
-
-            <div className='flex flex-col gap-y-1 items-center'>
-              <Text size='lg' className='font-bold' color='text-black-100 dark:text-white-100'>
-                {amount}
-              </Text>
-              <Text size='sm' color='text-black-100 dark:text-white-100' className='font-medium text-center'>
-                {txStatusText[mode]?.[pendingTx?.txStatus ?? 'loading']}
-              </Text>
-            </div>
-            <div className='flex gap-x-2'>
-              {validator && (
-                <div className='flex items-center pr-3 pl-2 py-1.5 rounded-full bg-gray-50 dark:bg-gray-900 gap-x-1.5'>
-                  <img
-                    className='rounded-full'
-                    width={20}
-                    height={20}
-                    src={imageUrl ?? validator?.image ?? Images.Misc.Validator}
-                    onError={imgOnError(GenericLight)}
-                  />
-                  <span className='text-sm font-bold text-black-100 dark:text-white-100 text-center'>
-                    {sliceWord(
-                      validator?.moniker,
-                      isSidePanel() ? 6 + Math.floor(((Math.min(window.innerWidth, 400) - 320) / 81) * 7) : 10,
-                      0,
-                    )}
-                  </span>
-                </div>
-              )}
-              {provider && (
-                <div className='flex items-center pr-3 pl-2 py-1.5 rounded-full bg-gray-50 dark:bg-gray-900 gap-x-1.5'>
-                  <img
-                    className='rounded-full'
-                    width={20}
-                    height={20}
-                    src={Images.Misc.Validator}
-                    onError={imgOnError(GenericLight)}
-                  />
-                  <span className='text-sm font-bold text-black-100 dark:text-white-100 text-center'>
-                    {sliceWord(
-                      provider.moniker,
-                      isSidePanel() ? 6 + Math.floor(((Math.min(window.innerWidth, 400) - 320) / 81) * 7) : 10,
-                      0,
-                    )}
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {txHash && (
-            <GenericCard
-              isRounded
-              title={
-                <Text size='sm' color='text-black-100 dark:text-white-100' className='font-bold mb-1'>
-                  Transaction ID
-                </Text>
-              }
-              subtitle={
-                <Text size='md' color='dark:text-gray-400 text-gray-600' className='font-medium'>
-                  {sliceAddress(txHash)}
-                </Text>
-              }
-              className='py-4 px-6 bg-white-100 dark:bg-gray-950'
-              size='md'
-              icon={
-                <div className='flex gap-x-2 items-center shrink-0'>
-                  <button
-                    onClick={handleCopyClick}
-                    disabled={copied}
-                    className='bg-gray-50 dark:bg-gray-900 rounded-full flex items-center justify-center h-8 w-8 disabled:opacity-80'
-                  >
-                    {copied ? (
-                      <CheckCircle size={18} weight='fill' className='text-green-500' />
-                    ) : (
-                      <CopySimple size={16} className='text-black-100 dark:text-white-100' />
-                    )}
-                  </button>
-
-                  {txnUrl && (
-                    <button
-                      className='h-8 w-8 rounded-full bg-gray-50 dark:bg-gray-900 flex items-center justify-center'
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        window.open(txnUrl, '_blank');
-                      }}
-                    >
-                      <ArrowSquareOut size={16} className='text-black-100 dark:text-white-100' />
-                    </button>
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.cardContainer}>
+          <View style={styles.iconWrapper}>
+            {pendingTx?.txStatus === 'loading' && <LoaderAnimation color='#29a874' style={styles.iconImage} />}
+            {pendingTx?.txStatus === 'success' && (
+              <Image source={{uri: Images.Activity.TxSwapSuccess}} style={styles.iconImage} resizeMode="contain" />
+            )}
+            {pendingTx?.txStatus === 'failed' && (
+              <Image source={{uri: Images.Activity.TxSwapFailure}} style={styles.iconImage} resizeMode="contain" />
+            )}
+          </View>
+          <View style={styles.amountStatusWrapper}>
+            <Text size="lg" style={styles.amountText}>{amount as string}</Text>
+            <Text size="sm" style={styles.statusText}>
+              {txStatusText[mode]?.[pendingTx?.txStatus ?? 'loading']}
+            </Text>
+          </View>
+          <View style={styles.chipRow}>
+            {validator && (
+              <View style={styles.chip}>
+                <Image
+                  source={{ uri: imageUrl ?? validator?.image ?? Images.Misc.Validator }}
+                  style={styles.avatar}
+                  onError={() => GenericLight}
+                />
+                <Text size="sm" style={styles.chipText}>
+                  {sliceWord(
+                    validator?.moniker,
+                    10, // adjust for screen size if needed
+                    0,
                   )}
-                </div>
-              }
-            />
-          )}
+                </Text>
+              </View>
+            )}
+            {provider && (
+              <View style={styles.chip}>
+                <Image
+                  source={{uri: Images.Misc.Validator}}
+                  style={styles.avatar}
+                  onError={() => GenericLight}
+                />
+                <Text size="sm" style={styles.chipText}>
+                  {sliceWord(
+                    provider.moniker,
+                    10,
+                    0,
+                  )}
+                </Text>
+              </View>
+            )}
+          </View>
+        </View>
 
-          {pendingTx?.txStatus === 'success' && isBabylon(activeChain) && (
-            <TxSuccessEpochDurationMessage mode={mode as STAKE_MODE} />
-          )}
-        </div>
+        {!!txHash && (
+          <GenericCard
+            isRounded
+            title={
+              <Text size="sm" style={styles.txIdTitle}>
+                Transaction ID
+              </Text>
+            }
+            subtitle={
+              <Text size="md" style={styles.txIdSubtitle}>
+                {sliceAddress(txHash)}
+              </Text>
+            }
+            style={styles.txCard}
+            size="md"
+            icon={
+              <View style={styles.txIcons}>
+                <TouchableOpacity
+                  onPress={handleCopyClick}
+                  disabled={copied}
+                  style={[styles.iconButton, copied && { opacity: 0.8 }]}
+                >
+                  {copied ? (
+                    <CheckCircle size={18} weight="fill" color={Colors.green500} />
+                  ) : (
+                    <CopySimple size={16} color={theme === ThemeName.DARK ? Colors.white100 : Colors.black100} />
+                  )}
+                </TouchableOpacity>
+                {txnUrl && (
+                  <TouchableOpacity
+                    style={styles.iconButton}
+                    onPress={() => Linking.openURL(txnUrl)}
+                  >
+                    <ArrowSquareOut size={16} color={theme === ThemeName.DARK ? Colors.white100 : Colors.black100} />
+                  </TouchableOpacity>
+                )}
+              </View>
+            }
+          />
+        )}
 
-        <div className='flex gap-x-4'>
+        {pendingTx?.txStatus === 'success' && isBabylon(activeChain) && (
+          <TxSuccessEpochDurationMessage mode={mode as STAKE_MODE} />
+        )}
+
+        <View style={styles.footerBtns}>
           <Buttons.Generic
-            onClick={() => navigate('/home')}
-            size='normal'
+            onClick={() => navigation.navigate('Home')}
+            size="normal"
             color={theme === ThemeName.DARK ? Colors.gray800 : Colors.gray200}
-            className='mt-auto w-full'
+            style={styles.footerBtn}
           >
-            <Text color='dark:text-white-100 text-black-100'>Home</Text>
+            <Text style={{ color: theme === ThemeName.DARK ? Colors.white100 : Colors.black100 }}>Home</Text>
           </Buttons.Generic>
           <Buttons.Generic
             onClick={() => {
               if (mode === 'DELEGATE') {
-                navigate(-1);
+                navigation.goBack();
               } else {
-                navigate(`/stake?pageSource=${PageName.StakeTxnPage}`);
+                navigation.navigate('Stake', { pageSource: PageName.StakeTxnPage });
               }
             }}
             color={
@@ -328,24 +314,154 @@ const StakeTxnPage = observer(({ rootBalanceStore, rootStakeStore }: StakeTxnPag
                 ? Colors.white100
                 : Colors.black100
             }
-            size='normal'
-            className='mt-auto w-full'
+            size="normal"
+            style={styles.footerBtn}
             disabled={pendingTx?.txStatus === 'loading'}
           >
             <Text
-              color={`${
-                pendingTx?.txStatus === 'failed' || mode === 'DELEGATE'
-                  ? 'text-white-100 dark:text-white-100'
-                  : 'text-white-100 dark:text-black-100'
-              }`}
+              style={{
+                color:
+                  pendingTx?.txStatus === 'failed' || mode === 'DELEGATE'
+                    ? Colors.white100
+                    : Colors.white100,
+              }}
             >
               {pendingTx?.txStatus === 'failed' ? 'Retry' : mode === 'DELEGATE' ? 'Stake Again' : 'Done'}
             </Text>
           </Buttons.Generic>
-        </div>
-      </div>
+        </View>
+      </ScrollView>
     </PopupLayout>
   );
 });
+
+// ------------ Styles -------------
+const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    justifyContent: 'space-between',
+    padding: 24,
+    paddingBottom: 40,
+  },
+  cardContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 24,
+    padding: 16,
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  iconWrapper: {
+    height: 100,
+    width: 100,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconImage: {
+    width: 75,
+    height: 75,
+    alignSelf: 'center',
+  },
+  amountStatusWrapper: {
+    alignItems: 'center',
+    marginVertical: 8,
+  },
+  amountText: {
+    fontWeight: 'bold',
+    fontSize: 22,
+    color: '#111',
+  },
+  statusText: {
+    fontSize: 15,
+    color: '#111',
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  chipRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 20,
+    marginRight: 8,
+    gap: 6,
+  },
+  avatar: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    marginRight: 4,
+  },
+  chipText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#222',
+    textAlign: 'center',
+  },
+  txCard: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    marginBottom: 16,
+  },
+  txIdTitle: {
+    fontWeight: 'bold',
+    marginBottom: 2,
+    color: '#222',
+  },
+  txIdSubtitle: {
+    color: '#888',
+    fontWeight: '500',
+    fontSize: 16,
+  },
+  txIcons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginLeft: 12,
+  },
+  iconButton: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: '#F5F5F5',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
+  },
+  footerBtns: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 24,
+    justifyContent: 'space-between',
+  },
+  footerBtn: {
+    flex: 1,
+    marginHorizontal: 4,
+  },
+});
+
+const txStatusStyles = {
+  loading: {
+    title: 'In Progress...',
+  },
+  success: {
+    title: 'Complete',
+  },
+  submitted: {
+    title: 'Submitted',
+  },
+  failed: {
+    title: 'Failed',
+  },
+};
 
 export default StakeTxnPage;

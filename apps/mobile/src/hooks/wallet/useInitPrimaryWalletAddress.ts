@@ -2,9 +2,9 @@ import { useSetPrimaryAddress, WALLETTYPE } from '@leapwallet/cosmos-wallet-hook
 import { pubKeyToEvmAddressToShow, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { KeyChain } from '@leapwallet/leap-keychain';
 import { useEffect } from 'react';
-import browser from 'webextension-polyfill';
 
 import { PRIMARY_WALLET_ADDRESS } from '../../services/config/storage-keys';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const getPrimaryWalletAddress = async (setPrimaryWalletAddress: (address: string) => void) => {
   KeyChain.getAllWallets<SupportedChain>().then((wallets) => {
@@ -36,9 +36,7 @@ export const getPrimaryWalletAddress = async (setPrimaryWalletAddress: (address:
           }
         }
         setPrimaryWalletAddress(primaryWalletAddress);
-        browser.storage.local.set({
-          [PRIMARY_WALLET_ADDRESS]: primaryWalletAddress,
-        });
+        AsyncStorage.setItem(PRIMARY_WALLET_ADDRESS, primaryWalletAddress);
       } else {
         let primaryWalletAddress = _wallets?.[0]?.addresses?.cosmos;
         if (!primaryWalletAddress) {
@@ -59,11 +57,11 @@ export const getPrimaryWalletAddress = async (setPrimaryWalletAddress: (address:
             }
           }
         }
-        browser.storage.local.set({ [PRIMARY_WALLET_ADDRESS]: primaryWalletAddress });
+        AsyncStorage.setItem(PRIMARY_WALLET_ADDRESS, primaryWalletAddress);
         setPrimaryWalletAddress(primaryWalletAddress);
       }
     } else {
-      browser.storage.local.remove(PRIMARY_WALLET_ADDRESS);
+      AsyncStorage.removeItem(PRIMARY_WALLET_ADDRESS);
     }
   });
 };
@@ -71,10 +69,10 @@ export function useInitPrimaryWalletAddress() {
   const setPrimaryWalletAddress = useSetPrimaryAddress();
 
   useEffect(() => {
-    browser.storage.local.get([PRIMARY_WALLET_ADDRESS]).then((storage) => {
-      const primaryWalletAddress = storage[PRIMARY_WALLET_ADDRESS];
+    AsyncStorage.getItem(PRIMARY_WALLET_ADDRESS).then((storage) => {
+      const primaryWalletAddress = storage ? JSON.parse(storage) : {};
       if (primaryWalletAddress) {
-        setPrimaryWalletAddress(storage[PRIMARY_WALLET_ADDRESS]);
+        setPrimaryWalletAddress(primaryWalletAddress);
       } else {
         getPrimaryWalletAddress(setPrimaryWalletAddress);
       }

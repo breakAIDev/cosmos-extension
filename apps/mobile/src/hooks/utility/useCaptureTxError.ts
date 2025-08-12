@@ -1,5 +1,5 @@
 import { useChainApis } from '@leapwallet/cosmos-wallet-hooks';
-import * as Sentry from '@sentry/react';
+import * as Sentry from '@sentry/react-native';
 import { useEffect } from 'react';
 import { uiErrorTags } from '../../utils/sentry';
 

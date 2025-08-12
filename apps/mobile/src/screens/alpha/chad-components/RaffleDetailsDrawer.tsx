@@ -1,21 +1,21 @@
-import { getLeapapiBaseUrl } from '@leapwallet/cosmos-wallet-hooks';
-import { X } from '@phosphor-icons/react';
-import { CheckCircle } from '@phosphor-icons/react/dist/ssr';
-import axios from 'axios';
-import BottomModal from 'components/new-bottom-modal';
-import Text from 'components/text';
-import { Button } from 'components/ui/button';
-import { Separator } from 'components/ui/separator';
-import { ButtonName, EventName, PageName } from 'config/analytics';
-import { VIEWED_RAFFLE_WINS } from 'config/storage-keys';
-import dayjs from 'dayjs';
-import { AnimatePresence, motion } from 'framer-motion';
-import { usePageView } from 'hooks/analytics/usePageView';
-import { RaffleStatus, useRaffleWins } from 'hooks/useAlphaOpportunities';
-import { useRaffleEntry } from 'hooks/useRaffleEntry';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { mixpanelTrack } from 'utils/tracking';
-import browser from 'webextension-polyfill';
+import { View, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import Text from '../../../components/text';
+import { X, CheckCircle } from 'phosphor-react-native';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import dayjs from 'dayjs';
+import { MotiView, AnimatePresence } from 'moti';
+
+import { getLeapapiBaseUrl } from '@leapwallet/cosmos-wallet-hooks';
+import BottomModal from '../../../components/new-bottom-modal';
+import { Button } from '../../../components/ui/button';
+import { Separator } from '../../../components/ui/separator';
+import { ButtonName, EventName, PageName } from '../../../services/config/analytics';
+import { VIEWED_RAFFLE_WINS } from '../../../services/config/storage-keys';
+import { usePageView } from '../../../hooks/analytics/usePageView';
+import { RaffleStatus, useRaffleWins } from '../../../hooks/useAlphaOpportunities';
+import { useRaffleEntry } from '../../../hooks/useRaffleEntry';
 
 import { ChadDescription } from '../components/AlphaDescription';
 import Tags from '../components/Tags';
@@ -31,6 +31,7 @@ import {
   SubscriptionCountdown,
 } from './RaffleEntry';
 import { RaffleListingProps } from './RaffleListing';
+import { mixpanelTrack } from '../../../utils/tracking';
 
 type RaffleDetailsDrawerProps = {
   isShown: boolean;
@@ -39,6 +40,7 @@ type RaffleDetailsDrawerProps = {
 };
 
 const now = dayjs();
+
 export default function RaffleDetailsDrawer({ isShown, onClose, raffle }: RaffleDetailsDrawerProps) {
   const { alphaUser } = useChadProvider();
   usePageView(PageName.ChadExclusivesDetail, isShown, {
@@ -72,7 +74,6 @@ export default function RaffleDetailsDrawer({ isShown, onClose, raffle }: Raffle
       const currentNow = dayjs();
       const isCurrentlyUpcoming = start.isAfter(currentNow);
       const currentDiff = raffle?.status === RaffleStatus.COMPLETED ? 0 : end.diff(currentNow, 'second');
-
       setIsUpcoming(isCurrentlyUpcoming);
       setDiff(currentDiff);
     };
@@ -94,17 +95,17 @@ export default function RaffleDetailsDrawer({ isShown, onClose, raffle }: Raffle
     }
   }, [toast]);
 
-  // adds winner raffle ID in storage to mark as viewed
   useEffect(() => {
     const markRaffleAsViewed = async () => {
       if (isShown && isWinner && raffle?.id) {
-        const result = await browser.storage.local.get(VIEWED_RAFFLE_WINS);
-        const viewedRaffles = result[VIEWED_RAFFLE_WINS] || [];
-
-        if (!viewedRaffles.includes(raffle.id)) {
-          const updatedViewedRaffles = [...viewedRaffles, raffle.id];
-          await browser.storage.local.set({ [VIEWED_RAFFLE_WINS]: updatedViewedRaffles });
-        }
+        try {
+          const viewedRafflesStr = await AsyncStorage.getItem(VIEWED_RAFFLE_WINS);
+          const viewedRaffles = viewedRafflesStr ? JSON.parse(viewedRafflesStr) : [];
+          if (!viewedRaffles.includes(raffle.id)) {
+            const updatedViewedRaffles = [...viewedRaffles, raffle.id];
+            await AsyncStorage.setItem(VIEWED_RAFFLE_WINS, JSON.stringify(updatedViewedRaffles));
+          }
+        } catch (e) {}
       }
     };
     markRaffleAsViewed();
@@ -127,7 +128,7 @@ export default function RaffleDetailsDrawer({ isShown, onClose, raffle }: Raffle
     } catch (err) {
       // gentle catch
     }
-  }, [alphaUser?.id, raffle?.id, refetch]);
+  }, [alphaUser?.id, alphaUser?.isChad, raffle?.id, refetch]);
 
   return (
     <>
@@ -136,102 +137,181 @@ export default function RaffleDetailsDrawer({ isShown, onClose, raffle }: Raffle
         title='Reward Details'
         isOpen={isShown}
         onClose={onClose}
-        className='px-6 pt-8 flex flex-col gap-6'
+        style={styles.modal}
         footerComponent={
           isWinner ? (
-            <Button className='w-full'>Claim now</Button>
+            <Button style={styles.fullWidth}>Claim now</Button>
           ) : raffleEntered ? (
-            <Button className='w-full' onClick={handleEnterRaffle} disabled>
+            <Button style={styles.fullWidth} onPress={handleEnterRaffle} disabled>
               <CheckCircle size={20} weight='bold' />
-              You have entered!
+              <Text style={styles.buttonText}>You have entered!</Text>
             </Button>
           ) : isLive ? (
-            <Button className='w-full'>Enter giveaway</Button>
+            <Button style={styles.fullWidth} onPress={handleEnterRaffle}>
+              <Text style={styles.buttonText}>Enter giveaway</Text>
+            </Button>
           ) : (
-            <Button className='w-full'>View more exclusives</Button>
+            <Button style={styles.fullWidth} onPress={onClose}>
+              <Text style={styles.buttonText}>View more exclusives</Text>
+            </Button>
           )
         }
       >
-        <header className='space-y-3'>
-          <h1 className='text-center text-xl font-bold'>{raffle?.title}</h1>
-
+        <View style={styles.header}>
+          <Text style={styles.title}>{raffle?.title}</Text>
           <Tags
-            className='justify-center'
+            style={{ alignSelf: 'center' }}
             ecosystemFilter={raffle?.ecosystem ?? []}
             categoryFilter={raffle?.categories ?? []}
           />
-        </header>
+        </View>
 
-        <img
-          src={raffle?.bannerImage ?? `https://placehold.co/40x40?text=${raffle?.secondaryTitle}`}
-          className='w-full h-[107px] rounded-lg object-cover'
+        <Image
+          source={{ uri: raffle?.bannerImage ?? `https://placehold.co/40x40?text=${raffle?.secondaryTitle}` }}
+          style={styles.bannerImage}
         />
 
         <Separator />
 
-        <AnimatePresence mode='wait'>
+        <AnimatePresence>
           {isLoading ? (
-            <RaffleEntrySkeleton key='loading' />
+            <MotiView
+              key='loading'
+              from={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <RaffleEntrySkeleton />
+            </MotiView>
           ) : isUpcoming ? (
-            <SubscriptionCountdown
-              title={'Stay tuned, starting in'}
-              key='subscription-countdown'
-              endDate={raffle?.startsAt ?? ''}
-              onExpire={() => {
-                setIsUpcoming(false);
-              }}
-            />
+            <MotiView key='subscription-countdown' from={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <SubscriptionCountdown
+                title={'Stay tuned, starting in'}
+                endDate={raffle?.startsAt ?? ''}
+                onExpire={() => setIsUpcoming(false)}
+              />
+            </MotiView>
           ) : !raffleEntered && alphaUser?.isChad && diff > 0 ? (
-            <SubscriptionCountdown
-              title={'Giveaway ends in'}
-              key='subscription-countdown'
-              endDate={raffle?.endsAt ?? ''}
-              onExpire={() => {
-                setDiff(0);
-              }}
-            />
+            <MotiView key='subscription-countdown' from={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <SubscriptionCountdown
+                title={'Giveaway ends in'}
+                endDate={raffle?.endsAt ?? ''}
+                onExpire={() => setDiff(0)}
+              />
+            </MotiView>
           ) : raffleEntered && raffle?.status !== RaffleStatus.COMPLETED ? (
-            <ResultSoon key='result-soon' />
+            <MotiView key='result-soon' from={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <ResultSoon />
+            </MotiView>
           ) : isWinner ? (
-            <RaffleWinner rewardUnit={raffle?.rewardUnitName} key='raffle-winner' />
+            <MotiView key='raffle-winner' from={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <RaffleWinner rewardUnit={raffle?.rewardUnitName} />
+            </MotiView>
           ) : raffleEntered && !isWinner ? (
-            <NotRaffleWinner key='not-winner' />
+            <MotiView key='not-winner' from={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <NotRaffleWinner />
+            </MotiView>
           ) : !alphaUser?.isChad && diff > 0 ? (
-            <IneligibleRaffle key='ineligible' />
+            <MotiView key='ineligible' from={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <IneligibleRaffle />
+            </MotiView>
           ) : diff <= 0 ? (
-            <RaffleClosed />
+            <MotiView key='raffle-closed' from={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <RaffleClosed />
+            </MotiView>
           ) : null}
         </AnimatePresence>
 
         <Separator />
 
-        {/* Description actions section */}
-        {raffle?.description ? <ChadDescription {...raffle} pageName={raffle.pageName} /> : null}
+        {raffle?.description ? (
+          <ChadDescription {...raffle} pageName={raffle.pageName} />
+        ) : null}
       </BottomModal>
 
-      {/* Toast outside all containers */}
+      {/* Toast using moti for animation */}
       {isShown && (
         <AnimatePresence>
           {toast && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              transition={{ duration: 0.2 }}
-              className='absolute bottom-24 left-0 right-0 mx-4 z-[9999] bg-green-600 dark:bg-green-600 rounded-full py-2.5 px-4 flex items-center justify-between shadow-lg'
+            <MotiView
+              from={{ opacity: 0, translateY: 20 }}
+              animate={{ opacity: 1, translateY: 0 }}
+              exit={{ opacity: 0, translateY: 20 }}
+              transition={{ type: 'timing', duration: 200 }}
+              style={styles.toastContainer}
             >
-              <Text size='xs' className='font-bold text-gray-900 dark:text-white-100'>
-                {toast}
-              </Text>
-              <X
-                size={12}
-                onClick={() => setToast('')}
-                className='cursor-pointer text-gray-900 dark:text-white-100 ml-2'
-              />
-            </motion.div>
+              <Text style={styles.toastText}>{toast}</Text>
+              <TouchableOpacity onPress={() => setToast('')}>
+                <X size={16} color="#fff" weight="bold" />
+              </TouchableOpacity>
+            </MotiView>
           )}
         </AnimatePresence>
       )}
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  modal: {
+    paddingHorizontal: 24,
+    paddingTop: 32,
+    flex: 1,
+    flexDirection: 'column',
+    gap: 24,
+  },
+  header: {
+    marginBottom: 16,
+    alignItems: 'center',
+    gap: 8,
+  },
+  title: {
+    textAlign: 'center',
+    fontSize: 22,
+    fontWeight: 'bold',
+  },
+  bannerImage: {
+    width: '100%',
+    height: 107,
+    borderRadius: 12,
+    resizeMode: 'cover',
+    marginBottom: 16,
+  },
+  fullWidth: {
+    width: '100%',
+    marginTop: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 8,
+  },
+  buttonText: {
+    marginLeft: 6,
+    fontWeight: 'bold',
+    fontSize: 15,
+  },
+  toastContainer: {
+    position: 'absolute',
+    left: 16,
+    right: 16,
+    bottom: 100,
+    backgroundColor: '#22C55E',
+    borderRadius: 24,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    zIndex: 9999,
+    justifyContent: 'space-between',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 8,
+  },
+  toastText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 13,
+  },
+});

@@ -1,32 +1,33 @@
+import React, { useMemo, useState, useCallback } from 'react';
 import {
-  SelectedNetwork,
-  sliceWord,
-  useActiveStakingDenom,
-  useSelectedNetwork,
-  useValidatorImage,
-} from '@leapwallet/cosmos-wallet-hooks';
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { Validator } from '@leapwallet/cosmos-wallet-sdk/dist/browser/types/validators';
+  View,
+  Text,
+  FlatList,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+} from 'react-native';
 import BigNumber from 'bignumber.js';
-import { EmptyCard } from 'components/empty-card';
-import BottomModal from 'components/new-bottom-modal';
-import ValidatorListSkeleton from 'components/Skeletons/ValidatorListSkeleton';
-import { Button } from 'components/ui/button';
-import { SearchInput } from 'components/ui/input/search-input';
 import currency from 'currency.js';
-import { useActiveChain } from 'hooks/settings/useActiveChain';
-import Sort from 'icons/sort';
-import { Images } from 'images';
-import { GenericLight } from 'images/logos';
+import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 import { observer } from 'mobx-react-lite';
-import React, { useCallback, useMemo, useState } from 'react';
-import Skeleton from 'react-loading-skeleton';
-import { Virtuoso } from 'react-virtuoso';
-import { rootDenomsStore } from 'stores/denoms-store-instance';
-import { cn } from 'utils/cn';
-import { imgOnError } from 'utils/imgOnError';
 
+import { useActiveStakingDenom, useSelectedNetwork, useValidatorImage, sliceWord, SelectedNetwork } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain, Validator } from '@leapwallet/cosmos-wallet-sdk';
+
+import { useActiveChain } from '../../../hooks/settings/useActiveChain';
+// Replace these with your React Native modal and button components:
+import BottomModal from '../../../components/new-bottom-modal';
+import { Button } from '../../../components/ui/button';
+import { Images } from '../../../../assets/images';
+import { rootDenomsStore } from '../../../context/denoms-store-instance';
+import { SearchInput } from '../../../components/ui/input/search-input';
+import Sort from '../../../../assets/icons/sort';
+import ValidatorListSkeleton from '../../../components/Skeletons/ValidatorListSkeleton';
 import SelectSortBySheet from './SelectSortBySheet';
+
+// ----------- Types -----------
+export type STAKE_SORT_BY = 'Amount staked' | 'APR' | 'Random';
 
 type SelectValidatorSheetProps = {
   isVisible: boolean;
@@ -39,103 +40,106 @@ type SelectValidatorSheetProps = {
   forceNetwork?: SelectedNetwork;
 };
 
-export type STAKE_SORT_BY = 'Amount staked' | 'APR' | 'Random';
-
-type ValidatorCardProps = {
+// ----------- ValidatorCard -----------
+const ValidatorCard = observer(({
+  validator,
+  onPress,
+  activeChain,
+  activeNetwork,
+  isSelected,
+}: {
   validator: Validator;
-  onClick: () => void;
+  onPress: () => void;
   activeChain?: SupportedChain;
   activeNetwork?: SelectedNetwork;
   isSelected?: boolean;
-};
+}) => {
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const [activeStakingDenom] = useActiveStakingDenom(rootDenomsStore.allDenoms, activeChain, activeNetwork);
+  const { data: validatorImage } = useValidatorImage(validator?.image ? undefined : validator);
+  const imageUrl = validator?.image || validatorImage || Images.Misc.Validator;
 
-export const ValidatorCard = observer(
-  ({ validator, onClick, activeChain, activeNetwork, isSelected }: ValidatorCardProps) => {
-    const [isImageLoaded, setIsImageLoaded] = useState(false);
-    const [activeStakingDenom] = useActiveStakingDenom(rootDenomsStore.allDenoms, activeChain, activeNetwork);
-    const { data: validatorImage } = useValidatorImage(validator?.image ? undefined : validator);
-    const imageUrl = validator?.image || validatorImage || Images.Misc.Validator;
+  const moniker = useMemo(
+    () => sliceWord(
+      validator.moniker,
+      26 + Math.floor(((Math.min(400, 400) - 320) / 81) * 7), // Static for RN, could adjust
+      0
+    ),
+    [validator.moniker]
+  );
+  const tokens = useMemo(
+    () => `${currency((validator.delegations?.total_tokens_display ?? validator.tokens ?? '') as string, {
+      symbol: '',
+      precision: 0,
+    }).format()} ${activeStakingDenom.coinDenom}`,
+    [activeStakingDenom.coinDenom, validator]
+  );
+  const commission = useMemo(
+    () => validator.commission?.commission_rates.rate
+      ? `${new BigNumber(validator.commission.commission_rates.rate).multipliedBy(100).toFixed(0)}%`
+      : 'N/A',
+    [validator]
+  );
+  const isPromoted = validator.custom_attributes?.priority !== undefined && validator.custom_attributes.priority >= 1;
 
-    const { commission, moniker, tokens } = useMemo(() => {
-      const moniker = sliceWord(
-        validator.moniker,
-        26 + Math.floor(((Math.min(window.innerWidth, 400) - 320) / 81) * 7),
-        0,
-      );
-      const tokens = `${currency((validator.delegations?.total_tokens_display ?? validator.tokens ?? '') as string, {
-        symbol: '',
-        precision: 0,
-      }).format()} ${activeStakingDenom.coinDenom}`;
-
-      const commission = validator.commission?.commission_rates.rate
-        ? `${new BigNumber(validator.commission.commission_rates.rate).multipliedBy(100).toFixed(0)}%`
-        : 'N/A';
-
-      return {
-        moniker,
-        tokens,
-        commission,
-      };
-    }, [activeStakingDenom.coinDenom, validator]);
-
-    const isPromoted = validator.custom_attributes?.priority !== undefined && validator.custom_attributes.priority >= 1;
-
-    return (
-      <button
-        onClick={onClick}
-        className={cn(
-          `relative flex items-center flex-grow gap-4 px-5 py-4 mb-4 cursor-pointer rounded-xl w-full bg-secondary-100 hover:bg-secondary-200 transition-colors`,
-          isPromoted && 'py-[22.5px]',
-          isSelected && 'border border-monochrome',
+  return (
+    <TouchableOpacity
+      style={[
+        styles.card,
+        isPromoted && styles.cardPromoted,
+        isSelected && styles.selectedCard,
+      ]}
+      onPress={onPress}
+      activeOpacity={0.8}
+    >
+      <View style={styles.avatarBox}>
+        <Image
+          source={{ uri: imageUrl }}
+          style={styles.avatar}
+          onLoadEnd={() => setIsImageLoaded(true)}
+        />
+        {!isImageLoaded && (
+          <SkeletonPlaceholder>
+            <SkeletonPlaceholder.Item width={36} height={36} borderRadius={18} />
+          </SkeletonPlaceholder>
         )}
-      >
-        <div className='relative shrink-0 h-9 w-9'>
-          <img
-            src={imageUrl}
-            onError={imgOnError(GenericLight)}
-            onLoadCapture={() => {
-              setIsImageLoaded(true);
-            }}
-            width={36}
-            height={36}
-            className='border rounded-full border-secondary-100'
-          />
-          {!isImageLoaded && <Skeleton circle className='absolute inset-0' />}
-        </div>
-        <div className='flex flex-col gap-0.5 justify-center items-start w-full'>
-          <span className='font-bold text-sm text-start'>{moniker}</span>
-          {isPromoted && <span className='text-xs text-accent-success font-medium'>Promoted</span>}
-        </div>
+      </View>
+      <View style={styles.middleCol}>
+        <Text style={styles.moniker}>{moniker}</Text>
+        {isPromoted && <Text style={styles.promoted}>Promoted</Text>}
+      </View>
+      <View style={styles.rightCol}>
+        <Text style={styles.tokens}>{tokens}</Text>
+        <Text style={styles.commission}>Commission: {commission}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+});
 
-        <div className='flex flex-col gap-0.5 items-end w-full'>
-          <span className='font-medium text-sm'>{tokens}</span>
-          <span className='font-medium text-xs text-muted-foreground'>Commission: {commission}</span>
-        </div>
-      </button>
-    );
-  },
-);
+// ----------- Main SelectValidatorSheet -----------
+const SelectValidatorSheet = observer((props: SelectValidatorSheetProps) => {
+  const {
+    isVisible,
+    onClose,
+    onValidatorSelect,
+    validators,
+    apr,
+    selectedValidator,
+    forceChain,
+    forceNetwork,
+  } = props;
 
-export default function SelectValidatorSheet({
-  isVisible,
-  onClose,
-  onValidatorSelect,
-  validators,
-  apr,
-  selectedValidator,
-  forceChain,
-  forceNetwork,
-}: SelectValidatorSheetProps) {
   const [searchedTerm, setSearchedTerm] = useState('');
-  const [showSortBy, setShowSortBy] = useState(false);
   const [sortBy, setSortBy] = useState<STAKE_SORT_BY>('Random');
+  const [isLoading, setIsLoading] = useState(false);
+  const [showSortBy, setShowSortBy] = useState(false);
 
   const _activeChain = useActiveChain();
   const _activeNetwork = useSelectedNetwork();
   const activeChain = forceChain ?? _activeChain;
   const activeNetwork = forceNetwork ?? _activeNetwork;
 
-  const [isLoading, setIsLoading] = useState(false);
+  // Sorting & Filtering
   const [activeValidators, inactiveValidators] = useMemo(() => {
     setIsLoading(true);
     const filteredValidators = validators.filter(
@@ -150,34 +154,17 @@ export default function SelectValidatorSheet({
         case 'APR':
           return apr ? (apr[a.address] < apr[b.address] ? 1 : -1) : 0;
         case 'Random':
+        default:
           return Math.random() - 0.5;
       }
     });
-    if (sortBy === 'Random') {
-      filteredValidators.sort((a, b) => {
-        const priorityA = a.custom_attributes?.priority;
-        const priorityB = b.custom_attributes?.priority;
-
-        if (priorityA !== undefined && priorityB !== undefined) {
-          if (priorityA !== priorityB) {
-            return priorityA - priorityB;
-          }
-          return Math.random() - 0.5;
-        } else if (priorityA !== undefined) {
-          return -1;
-        } else if (priorityB !== undefined) {
-          return 1;
-        } else {
-          return 0;
-        }
-      });
-    }
     const _activeValidators = filteredValidators.filter((validator) => validator.active !== false);
     const _inactiveValidators = filteredValidators.filter((validator) => validator.active === false);
     setIsLoading(false);
     return [_activeValidators, searchedTerm ? _inactiveValidators : []];
   }, [validators, searchedTerm, sortBy, apr]);
 
+  // List items: active then (optional) inactive
   const listItems = useMemo(() => {
     const items: (Validator | { itemType: 'inactiveHeader' })[] = [...activeValidators];
     if (inactiveValidators.length > 0) {
@@ -188,77 +175,173 @@ export default function SelectValidatorSheet({
   }, [activeValidators, inactiveValidators]);
 
   const renderItem = useCallback(
-    (_: number, item: Validator | { itemType: 'inactiveHeader' }) => {
+    ({ item }: { item: Validator | { itemType: 'inactiveHeader' } }) => {
       if ('itemType' in item) {
-        return null;
+        return (
+          <Text style={{ marginVertical: 8, color: '#aaa', fontSize: 13, fontWeight: '600' }}>
+            Inactive Validator
+          </Text>
+        );
       }
-
       return (
         <ValidatorCard
           validator={item}
-          onClick={() => onValidatorSelect(item)}
+          onPress={() => onValidatorSelect(item)}
           activeChain={activeChain}
           activeNetwork={activeNetwork}
           isSelected={selectedValidator?.address === item.address}
         />
       );
     },
-    [activeChain, activeNetwork, onValidatorSelect, selectedValidator?.address],
+    [onValidatorSelect, selectedValidator?.address, activeChain, activeNetwork]
   );
 
   return (
     <BottomModal
-      fullScreen
       isOpen={isVisible}
-      onClose={() => {
-        setSearchedTerm('');
-        onClose();
-      }}
-      title='Select Validator'
-      className='p-6 overflow-auto flex flex-col gap-7 h-full !pb-0'
+      onClose={onClose}
+      title="Select Validator"
     >
-      <div className='flex gap-x-2 justify-between items-center'>
-        <SearchInput
-          value={searchedTerm}
-          onChange={(e) => setSearchedTerm(e.target.value)}
-          data-testing-id='validator-input-search'
-          placeholder='Enter validator name'
-          onClear={() => setSearchedTerm('')}
-        />
-        <Button
-          size={'icon'}
-          variant={'secondary'}
-          className='text-muted-foreground h-12 w-14'
-          onClick={() => setShowSortBy(true)}
-        >
-          <Sort size={20} />
-        </Button>
-      </div>
+      <View style={styles.container}>
+        {/* Search Input & Sort */}
+        <View style={styles.searchRow}>
+          <SearchInput
+            value={searchedTerm}
+            onChangeText={setSearchedTerm}
+            style={styles.input}
+            placeholder="Enter validator name"
+            placeholderTextColor="#888"
+            onClear={() => setSearchedTerm('')}
+          />
+          <Button
+            onPress={() => setShowSortBy(true)}
+            style={styles.sortBtn} children={<Sort size={20} />} />
+        </View>
 
-      {isLoading && <ValidatorListSkeleton />}
-
-      {!isLoading && listItems.length === 0 && (
-        <EmptyCard
-          isRounded
-          subHeading='Try a different search term'
-          src={Images.Misc.Explore}
-          heading={`No validators found for '${searchedTerm}'`}
-          data-testing-id='select-validator-empty-card'
-        />
-      )}
-
-      {!isLoading && listItems.length > 0 && (
-        <Virtuoso data={listItems} itemContent={renderItem} className='flex-1 w-full overflow-auto pb-4' />
-      )}
-
-      <SelectSortBySheet
-        onClose={() => setShowSortBy(false)}
-        isVisible={showSortBy}
-        setVisible={setShowSortBy}
-        setSortBy={setSortBy}
-        sortBy={sortBy}
-        activeChain={activeChain}
-      />
+        {/* List */}
+        {isLoading ? (
+          <ValidatorListSkeleton />
+        ) : listItems.length === 0 ? (
+          <SelectSortBySheet
+            onClose={() => setShowSortBy(false)}
+            isVisible={showSortBy}
+            setVisible={setShowSortBy}
+            setSortBy={setSortBy}
+            sortBy={sortBy}
+            activeChain={activeChain}
+          />
+        ) : (
+          <FlatList
+            data={listItems}
+            renderItem={renderItem}
+            keyExtractor={(item, idx) => 'itemType' in item ? 'inactive' + idx : item.address}
+            contentContainerStyle={{ paddingVertical: 8 }}
+          />
+        )}
+      </View>
     </BottomModal>
   );
-}
+});
+
+export default SelectValidatorSheet;
+
+// ----------- Styles -----------
+const styles = StyleSheet.create({
+  container: {
+    padding: 18,
+    flex: 1,
+    backgroundColor: '#FFF',
+  },
+  searchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    gap: 10,
+  },
+  input: {
+    flex: 1,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    height: 44,
+    paddingHorizontal: 14,
+    backgroundColor: '#F7F8FA',
+    fontSize: 16,
+  },
+  sortBtn: {
+    marginLeft: 10,
+    minWidth: 64,
+  },
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: '#F3F4F6',
+    paddingVertical: 15,
+    paddingHorizontal: 18,
+    marginBottom: 10,
+    borderRadius: 16,
+  },
+  cardPromoted: {
+    borderWidth: 1,
+    borderColor: '#7ED957',
+    backgroundColor: '#f6fff5',
+  },
+  selectedCard: {
+    borderWidth: 2,
+    borderColor: '#2250C5',
+    backgroundColor: '#E9EEFB',
+  },
+  avatarBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    overflow: 'hidden',
+    marginRight: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#fff',
+  },
+  middleCol: {
+    flex: 1,
+    flexDirection: 'column',
+    gap: 2,
+  },
+  moniker: {
+    fontWeight: '700',
+    fontSize: 15,
+    color: '#222',
+  },
+  promoted: {
+    fontSize: 12,
+    color: '#1abc75',
+    fontWeight: '600',
+    marginTop: 2,
+  },
+  rightCol: {
+    minWidth: 85,
+    alignItems: 'flex-end',
+    flexDirection: 'column',
+    gap: 2,
+  },
+  tokens: {
+    fontWeight: '600',
+    fontSize: 15,
+    color: '#343b4f',
+  },
+  commission: {
+    fontSize: 12,
+    color: '#888',
+  },
+  emptyBox: {
+    alignItems: 'center',
+    marginTop: 30,
+    paddingVertical: 32,
+  },
+});
+

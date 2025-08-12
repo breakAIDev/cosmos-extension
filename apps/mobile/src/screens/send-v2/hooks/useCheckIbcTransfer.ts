@@ -8,7 +8,7 @@ import {
   SupportedChain,
 } from '@leapwallet/cosmos-wallet-sdk';
 import { useEffect } from 'react';
-import { ManageChainsStore } from 'stores/manage-chains-store';
+import { ManageChainsStore } from '../../../context/manage-chains-store';
 
 export type UseCheckIbcTransferParams = {
   sendActiveChain: SupportedChain;
@@ -109,20 +109,5 @@ export function useCheckIbcTransfer({
     } else {
       setAddressError(undefined);
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    activeChainInfo,
-    selectedAddress,
-    chains,
-    addressPrefixes,
-    skipSupportedDestinationChainsIDs,
-    manageChainsStore.chains,
-    isIbcUnwindingDisabled,
-    selectedToken?.symbol,
-    sendActiveChain,
-    sendSelectedNetwork,
-    associatedSeiAddress,
-    isBtcTx,
-  ]);
+  }, [activeChainInfo, selectedAddress, chains, addressPrefixes, skipSupportedDestinationChainsIDs, manageChainsStore.chains, isIbcUnwindingDisabled, selectedToken?.symbol, sendActiveChain, sendSelectedNetwork, associatedSeiAddress, isBtcTx, isAptosTx, isSolanaTx, isSuiTx, setAddressError]);
 }

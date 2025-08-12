@@ -5,7 +5,7 @@ import { TxClient } from '@leapwallet/cosmos-wallet-sdk/dist/browser/proto/injec
 import { MsgExecuteContract } from '@leapwallet/cosmos-wallet-sdk/dist/browser/proto/osmosis/cosmwasm/wasm/v1/tx';
 import BigNumber from 'bignumber.js';
 import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
-import { SourceChain } from 'types/swap';
+import { SourceChain } from '../../../types/swap';
 
 export async function handleInjectiveTx(
   wallet: LeapLedgerSignerEth,

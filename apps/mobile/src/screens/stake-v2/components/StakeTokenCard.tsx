@@ -1,5 +1,6 @@
-import { TokenImageWithFallback } from 'components/token-image-with-fallback';
 import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import TokenImageWithFallback from '../../../components/token-image-with-fallback';
 
 type StakeTokenCardProps = {
   tokenName: string;
@@ -8,7 +9,7 @@ type StakeTokenCardProps = {
   apr: string;
   amount: string;
   dollarAmount: string;
-  onClick: () => void;
+  onPress: () => void;  // Change to onPress for RN convention
 };
 
 export function StakeTokenCard({
@@ -18,37 +19,115 @@ export function StakeTokenCard({
   apr,
   amount,
   dollarAmount,
-  onClick,
+  onPress,
 }: StakeTokenCardProps) {
   return (
-    <div
-      className='bg-secondary-100 hover:bg-secondary-200 rounded-xl flex items-center justify-between px-4 py-3 cursor-pointer'
-      onClick={onClick}
+    <TouchableOpacity
+      style={styles.card}
+      activeOpacity={0.9}
+      onPress={onPress}
     >
-      <div className='flex items-center justify-start gap-2 w-[150px]'>
+      {/* Token + Chain name */}
+      <View style={styles.tokenRow}>
         <TokenImageWithFallback
           assetImg={chainLogo}
           text={tokenName}
-          altText={chainName + ' logo'}
-          imageClassName='w-[36px] h-[36px]'
-          containerClassName='w-[36px] h-[36px] rounded-full bg-gray-100 dark:bg-gray-850'
-          textClassName='text-[10px] !leading-[14px]'
+          altText={`${chainName} logo`}
+          imageStyle={styles.tokenImage}
+          containerStyle={styles.tokenImageContainer}
+          textStyle={styles.tokenImageText}
         />
-        <div className='flex flex-col'>
-          <p className='text-black-100 dark:text-white-100 font-[700]'>{tokenName}</p>
-          <p className='text-gray-600 dark:text-gray-400 text-[12px] font-[500]'>{chainName}</p>
-        </div>
-      </div>
+        <View style={styles.tokenLabelCol}>
+          <Text style={styles.tokenName}>{tokenName}</Text>
+          <Text style={styles.chainName}>{chainName}</Text>
+        </View>
+      </View>
 
-      <p className='text-black-100 dark:text-white-100 text-[14px]'>{apr}</p>
+      {/* APR */}
+      <Text style={styles.apr}>{apr}</Text>
 
-      <div className='flex flex-col items-end w-[90px]'>
+      {/* Amounts */}
+      <View style={styles.amountCol}>
         {dollarAmount !== '-' ? (
-          <p className='text-black-100 dark:text-white-100 font-[700] text-[14px] text-right'>{dollarAmount}</p>
+          <Text style={styles.dollarAmount}>{dollarAmount}</Text>
         ) : null}
-
-        <p className='text-gray-600 dark:text-gray-400 text-[12px] font-[500] text-right'>{amount}</p>
-      </div>
-    </div>
+        <Text style={styles.amount}>{amount}</Text>
+      </View>
+    </TouchableOpacity>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: '#F1F5F9', // secondary-100
+    borderRadius: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginVertical: 4,
+    // You may want to add a shadow if needed
+  },
+  tokenRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minWidth: 150,
+    gap: 8,
+  },
+  tokenImage: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+  },
+  tokenImageContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#F3F4F6', // gray-100
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tokenImageText: {
+    fontSize: 10,
+    lineHeight: 14,
+  },
+  tokenLabelCol: {
+    flexDirection: 'column',
+    marginLeft: 6,
+  },
+  tokenName: {
+    color: '#111827', // black-100
+    fontWeight: '700',
+    fontSize: 15,
+  },
+  chainName: {
+    color: '#6B7280', // gray-600
+    fontWeight: '500',
+    fontSize: 12,
+  },
+  apr: {
+    color: '#111827',
+    fontSize: 14,
+    fontWeight: '400',
+  },
+  amountCol: {
+    flexDirection: 'column',
+    alignItems: 'flex-end',
+    minWidth: 90,
+  },
+  dollarAmount: {
+    color: '#111827',
+    fontWeight: '700',
+    fontSize: 14,
+    textAlign: 'right',
+  },
+  amount: {
+    color: '#6B7280',
+    fontWeight: '500',
+    fontSize: 12,
+    textAlign: 'right',
+  },
+});
+
+export default StakeTokenCard;

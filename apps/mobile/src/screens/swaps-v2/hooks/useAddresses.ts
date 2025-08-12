@@ -1,6 +1,6 @@
 import { useActiveWallet, useGetChains } from '@leapwallet/cosmos-wallet-hooks';
 import { pubKeyToEvmAddressToShow } from '@leapwallet/cosmos-wallet-sdk';
-import { useUpdateKeyStore } from 'hooks/settings/useActiveWallet';
+import { useUpdateKeyStore } from '../../../hooks/settings/useActiveWallet';
 import { useEffect, useState } from 'react';
 
 export function useAddresses(chainIds: string[] | undefined = []) {

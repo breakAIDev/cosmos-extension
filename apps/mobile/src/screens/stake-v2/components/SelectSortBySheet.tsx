@@ -1,7 +1,9 @@
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { CheckCircle } from '@phosphor-icons/react';
-import BottomModal from 'components/new-bottom-modal';
+import { CheckCircle } from 'phosphor-react-native';
+import BottomModal from '../../../components/new-bottom-modal';
 import React from 'react';
+import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { MotiView, AnimatePresence } from 'moti';
 
 import { STAKE_SORT_BY } from './SelectValidatorSheet';
 
@@ -16,25 +18,78 @@ type SelectSortByProps = {
   activeChain: SupportedChain;
 };
 
-export default function SelectSortBySheet({ sortBy, setSortBy, isVisible, setVisible, onClose }: SelectSortByProps) {
+export default function SelectSortBySheet({
+  sortBy,
+  setSortBy,
+  isVisible,
+  setVisible,
+  onClose,
+}: SelectSortByProps) {
   return (
-    <BottomModal isOpen={isVisible} onClose={onClose} title='Sort By' className='p-6'>
-      <div className='flex flex-col gap-y-3'>
+    <BottomModal
+      isOpen={isVisible}
+      onClose={onClose}
+      title="Sort By"
+      contentStyle={styles.modalContent}
+    >
+      <View style={styles.list}>
         {stackSortBy.map((element) => (
-          <button
+          <TouchableOpacity
             key={element}
-            className='bg-secondary p-4 rounded-xl flex font-medium items-center justify-between gap-4 hover:bg-secondary-200 transition-colors'
-            onClick={() => {
+            style={[
+              styles.item,
+              sortBy === element && styles.selectedItem,
+            ]}
+            onPress={() => {
               setVisible(false);
               setSortBy(element);
             }}
+            activeOpacity={0.8}
           >
-            {element}
-
-            {sortBy === element && <CheckCircle size={24} weight='fill' />}
-          </button>
+            <Text style={styles.itemText}>{element}</Text>
+            <AnimatePresence>
+              {sortBy === element && (
+                <MotiView
+                  from={{ scale: 0.6, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.7, opacity: 0 }}
+                  transition={{ type: 'timing', duration: 200 }}
+                >
+                  <CheckCircle size={24} weight="fill" color="#22c55e" />
+                </MotiView>
+              )}
+            </AnimatePresence>
+          </TouchableOpacity>
         ))}
-      </div>
+      </View>
     </BottomModal>
   );
 }
+
+const styles = StyleSheet.create({
+  modalContent: {
+    padding: 24,
+  },
+  list: {
+    flexDirection: 'column',
+    gap: 12,
+  },
+  item: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f5f6fa',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderRadius: 14,
+    justifyContent: 'space-between',
+    marginBottom: 2,
+  },
+  selectedItem: {
+    backgroundColor: '#e9ffe6',
+  },
+  itemText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#23272f',
+  },
+});

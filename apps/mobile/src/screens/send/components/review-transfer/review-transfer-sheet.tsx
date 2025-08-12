@@ -1,5 +1,4 @@
 import {
-  formatTokenAmount,
   isERC20Token,
   sliceAddress,
   TxCallback,
@@ -18,28 +17,29 @@ import {
 } from '@leapwallet/cosmos-wallet-sdk';
 import { RootERC20DenomsStore } from '@leapwallet/cosmos-wallet-store';
 import { EthWallet } from '@leapwallet/leap-keychain';
-import { ArrowDown, Check } from '@phosphor-icons/react';
-import { captureException } from '@sentry/react';
+import { ArrowDown, Check } from 'phosphor-react-native';
+import { captureException } from '@sentry/react-native';
 import BigNumber from 'bignumber.js';
-import classNames from 'classnames';
-import { ErrorCard } from 'components/ErrorCard';
-import LedgerConfirmationPopup from 'components/ledger-confirmation/LedgerConfirmationPopup';
-import BottomModal from 'components/new-bottom-modal';
-import { Button } from 'components/ui/button';
-import { AnimatePresence, motion } from 'framer-motion';
-import { useCaptureTxError } from 'hooks/utility/useCaptureTxError';
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
-import { Wallet } from 'hooks/wallet/useWallet';
-import { CopyIcon } from 'icons/copy-icon';
-import { Images } from 'images';
-import loadingImage from 'lottie-files/swaps-btn-loading.json';
-import Lottie from 'lottie-react';
+import { ErrorCard } from '../../../../components/ErrorCard';
+import LedgerConfirmationPopup from '../../../../components/ledger-confirmation/LedgerConfirmationPopup';
+import BottomModal from '../../../../components/new-bottom-modal';
+import { Button } from '../../../../components/ui/button';
+import { useCaptureTxError } from '../../../../hooks/utility/useCaptureTxError';
+import { useDefaultTokenLogo } from '../../../../hooks/utility/useDefaultTokenLogo';
+import { Wallet } from '../../../../hooks/wallet/useWallet';
+import { CopyIcon } from '../../../../../assets/icons/copy-icon';
+import { Images } from '../../../../../assets/images';
+import loadingImage from '../../../../../assets/lottie-files/swaps-btn-loading.json';
 import { observer } from 'mobx-react-lite';
-import { useExecuteSkipTx } from 'pages/send/components/review-transfer/executeSkipTx';
-import { useSendContext } from 'pages/send/context';
+import { useExecuteSkipTx } from '../../../send/components/review-transfer/executeSkipTx';
+import { useSendContext } from '../../../send/context';
+import { UserClipboard } from '../../../../utils/clipboard';
+import { transition150 } from '../../../../utils/motion-variants';
+
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { UserClipboard } from 'utils/clipboard';
-import { opacityFadeInOut, transition150 } from 'utils/motion-variants';
+import { View, Text as RNText, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import LottieView from 'lottie-react-native'; // install: npm i lottie-react-native
+import { AnimatePresence, MotiText } from 'moti';
 
 type ReviewTransactionSheetProps = {
   isOpen: boolean;
@@ -90,17 +90,6 @@ export const ReviewTransferSheet = observer(
       () => formatCurrency(new BigNumber(inputAmount).multipliedBy(tokenFiatValue ?? 0)),
       [formatCurrency, inputAmount, tokenFiatValue],
     );
-
-    const receiverChainName = useMemo(() => {
-      return chains?.[selectedAddress?.chainName as SupportedChain]?.chainName;
-    }, [chains, selectedAddress?.chainName]);
-
-    const handleClose = useCallback(() => {
-      setError('');
-      onClose();
-
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
 
     const modifiedCallback: TxCallback = useCallback(
       (status) => {
@@ -263,128 +252,125 @@ export const ReviewTransferSheet = observer(
       return chains?.[selectedAddress?.chainName as SupportedChain]?.chainSymbolImageUrl;
     }, [chains, sendActiveChain, selectedAddress?.chainName]);
 
+    const handleClose = useCallback(() => {
+      setError('');
+      onClose();
+    }, [onClose, setError]);
+
+    // Copy address handler
+    const handleCopy = async () => {
+      await UserClipboard.copyText(selectedAddress?.ethAddress || selectedAddress?.address || '');
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    };
+
     return (
       <>
-        <BottomModal isOpen={isOpen} onClose={handleClose} title='Review transfer' className='p-6 !pt-8'>
-          <div className='flex flex-col items-center w-full gap-4 relative'>
-            <div className='bg-secondary-100 p-6 rounded-xl flex w-full justify-between items-center'>
-              <div className='flex flex-col gap-1'>
-                <p
-                  className='text-lg text-monochrome font-bold !leading-[27px]'
-                  data-testing-id='send-review-sheet-inputAmount-ele'
-                >
-                  {formatTokenAmount(inputAmount, selectedToken?.symbol ?? '')}
-                </p>
-
-                <p className='text-sm text-muted-foreground !leading-[18.9px]'>{fiatValue}</p>
-              </div>
-              <div className='relative flex flex-col items-center justify-center h-[48px] w-[48px] shrink-0'>
-                <img src={selectedToken?.img ?? defaultTokenLogo} width={42} height={42} />
-                {senderChainIcon ? (
-                  <img
-                    src={senderChainIcon}
-                    width={18}
-                    height={18}
-                    className='absolute bottom-0 right-0 rounded-full bg-secondary-50'
+        <BottomModal
+          isOpen={isOpen}
+          onClose={handleClose}
+          title="Review transfer"
+          containerStyle={{ padding: 24, paddingTop: 32 }}
+        >
+          <View style={styles.container}>
+            {/* Amount + Token Logo */}
+            <View style={styles.cardRow}>
+              <View>
+                <RNText style={styles.amountText}>
+                  {/* {formatTokenAmount(inputAmount, selectedToken?.symbol ?? '')} */}
+                  123.456 ATOM
+                </RNText>
+                <RNText style={styles.fiatText}>{fiatValue}</RNText>
+              </View>
+              <View style={styles.tokenLogoWrap}>
+                <Image
+                  source={{ uri: selectedToken?.img ?? defaultTokenLogo}}
+                  style={styles.tokenLogo}
+                />
+                {senderChainIcon ?
+                  <Image
+                    source={{ uri: senderChainIcon}}
+                    style={styles.chainLogo}
                   />
-                ) : null}
-              </div>
-            </div>
+                  : null
+                }
+              </View>
+            </View>
 
-            <ArrowDown
-              size={40}
-              className={classNames(
-                'absolute top-[108px] rounded-full bg-accent-green-200 flex items-center justify-center border-[5px] border-gray-50 dark:border-black-100 -mt-[18px] -mb-[18px] p-[5px]',
-              )}
-            />
+            {/* Arrow */}
+            <View style={styles.arrowDownWrap}>
+              <ArrowDown size={40} color="#23b26d" />
+            </View>
 
-            <div className='bg-secondary-200 p-6 rounded-xl flex w-full justify-between items-center'>
-              <div
-                className='flex items-center gap-1.5 cursor-pointer'
-                onClick={(e) => {
-                  e.stopPropagation();
-                  UserClipboard.copyText(selectedAddress?.ethAddress || selectedAddress?.address || '');
-                  setIsCopied(true);
-                }}
-              >
-                <p
-                  className='text-lg text-monochrome font-bold !leading-[27px]'
-                  data-testing-id='send-review-sheet-to-ele'
-                >
-                  {selectedAddress?.ethAddress
+            {/* To Address/Receiver */}
+            <View style={styles.cardRow}>
+              <TouchableOpacity style={styles.toRow} onPress={handleCopy}>
+                <RNText style={styles.toAddressText}>
+                    {selectedAddress?.ethAddress
                     ? sliceAddress(selectedAddress.ethAddress)
                     : selectedAddress?.selectionType === 'currentWallet'
                     ? selectedAddress?.name?.split('-')[0]
                     : sliceAddress(selectedAddress?.address)}
-                </p>
-
-                <AnimatePresence mode='wait'>
+                </RNText>
+                <AnimatePresence>
                   {isCopied ? (
-                    <motion.span
+                    <MotiText
                       key='copied'
                       transition={transition150}
-                      variants={opacityFadeInOut}
-                      initial='hidden'
                       animate='visible'
-                      exit='hidden'
-                      className='flex items-center gap-1 '
+                      style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
                     >
-                      <Check className='size-5 text-accent-green' />
-                    </motion.span>
+                      <Check size={20} color="#23b26d" style={{ marginLeft: 8 }} />
+                    </MotiText>
                   ) : (
-                    <motion.span
+                    <MotiText
                       key='address'
                       transition={transition150}
-                      variants={opacityFadeInOut}
-                      initial='hidden'
                       animate='visible'
-                      exit='hidden'
-                      className='flex items-center gap-1'
-                    >
-                      <CopyIcon className='size-5 text-muted-foreground' />
-                    </motion.span>
+                      style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
+                      >
+                      <CopyIcon size={20} style={{marginLeft: 8}} />
+                    </MotiText>
                   )}
                 </AnimatePresence>
-              </div>
-              <img
-                src={receiverChainIcon || selectedAddress?.avatarIcon || Images.Misc.getWalletIconAtIndex(0)}
-                width={48}
-                height={48}
-                className='rounded-full'
+              </TouchableOpacity>
+              <Image
+                source={{ uri: receiverChainIcon || selectedAddress?.avatarIcon || Images.Misc.getWalletIconAtIndex(0)}}
+                style={styles.tokenLogoLarge}
               />
-            </div>
+            </View>
 
-            {memo ? (
-              <div className='w-full flex items-baseline gap-2.5 p-5 rounded-xl bg-secondary-100 border border-secondary mt-0.5'>
-                <p className='text-sm text-muted-foreground font-medium'>Memo:</p>
-                <p className='font-medium text-sm text-monochrome !leading-[22.4px] overflow-auto break-words'>
-                  {memo}
-                </p>
-              </div>
-            ) : null}
+            {/* Memo */}
+            {!!memo && (
+              <View style={styles.memoBox}>
+                <RNText style={styles.memoLabel}>Memo:</RNText>
+                <RNText style={styles.memoText}>{memo}</RNText>
+              </View>
+            )}
 
-            {txError || error ? <ErrorCard text={txError || error} /> : null}
-            <Button
-              className='w-full mt-4'
-              onClick={handleSend}
-              disabled={showLedgerPopup || isSending || sendDisabled || txnProcessing}
-              data-testing-id='send-review-sheet-send-btn'
-            >
-              {isSending || txnProcessing ? (
-                <Lottie
-                  loop={true}
-                  autoplay={true}
-                  animationData={loadingImage}
-                  rendererSettings={{
-                    preserveAspectRatio: 'xMidYMid slice',
-                  }}
-                  className={'h-[24px] w-[24px]'}
-                />
-              ) : (
-                'Confirm Send'
-              )}
-            </Button>
-          </div>
+            {/* Error Card */}
+            {!!txError && <ErrorCard text={txError || error} />}
+
+            {/* Confirm Send Button */}
+            <View style={{ width: '100%', marginTop: 20 }}>
+              <Button
+                style={styles.confirmBtn}
+                onPress={handleSend}
+                disabled={showLedgerPopup || isSending || sendDisabled || txnProcessing}
+              >
+                {isSending || txnProcessing ? (
+                  <LottieView
+                    autoPlay
+                    loop
+                    source={loadingImage}
+                    style={{ width: 24, height: 24 }}
+                  />
+                ) : (
+                  <RNText style={styles.confirmBtnText}>Confirm Send</RNText>
+                )}
+              </Button>
+            </View>
+          </View>
         </BottomModal>
         <LedgerConfirmationPopup
           showLedgerPopup={(showLedgerPopup || showLedgerPopupSkipTx) && !txError}
@@ -392,5 +378,45 @@ export const ReviewTransferSheet = observer(
         />
       </>
     );
-  },
+  }
 );
+
+const styles = StyleSheet.create({
+  container: { width: '100%', gap: 18, alignItems: 'center' },
+  cardRow: {
+    width: '100%',
+    padding: 16,
+    backgroundColor: '#f6f8fa',
+    borderRadius: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  amountText: { fontSize: 22, fontWeight: 'bold', color: '#222' },
+  fiatText: { fontSize: 15, color: '#666', marginTop: 4 },
+  tokenLogoWrap: { position: 'relative', width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
+  tokenLogo: { width: 42, height: 42, borderRadius: 21 },
+  chainLogo: { width: 18, height: 18, borderRadius: 9, position: 'absolute', bottom: 0, right: 0, backgroundColor: '#fff' },
+  arrowDownWrap: {
+    marginTop: -20, marginBottom: -20, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: '#e8ffe0', borderRadius: 20, borderWidth: 4, borderColor: '#fff', padding: 2,
+  },
+  toRow: { flexDirection: 'row', alignItems: 'center' },
+  toAddressText: { fontSize: 18, fontWeight: 'bold', color: '#222' },
+  tokenLogoLarge: { width: 48, height: 48, borderRadius: 24 },
+  memoBox: {
+    width: '100%', flexDirection: 'row', alignItems: 'baseline', gap: 10,
+    backgroundColor: '#f6f8fa', borderRadius: 12, padding: 16, marginTop: 10,
+  },
+  memoLabel: { fontSize: 14, color: '#999', fontWeight: '500' },
+  memoText: { fontSize: 14, color: '#222', fontWeight: '600' },
+  confirmBtn: {
+    width: '100%',
+    backgroundColor: '#23b26d',
+    paddingVertical: 16,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  confirmBtnText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+});

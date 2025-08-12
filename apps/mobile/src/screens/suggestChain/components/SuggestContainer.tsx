@@ -1,12 +1,9 @@
 import { ChainTagsStore } from '@leapwallet/cosmos-wallet-store';
 import classNames from 'classnames';
-import { BG_RESPONSE, NEW_CHAIN_REQUEST } from 'config/storage-keys';
+import { BG_RESPONSE, NEW_CHAIN_REQUEST } from '../../../services/config/storage-keys';
 import { observer } from 'mobx-react-lite';
 import React, { ReactNode, useCallback, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Colors } from 'theme/colors';
-import { isSidePanel } from 'utils/isSidePanel';
-import Browser from 'webextension-polyfill';
+import { Colors } from '../../../theme/colors';
 
 export type ChildrenParams = {
   handleRejectBtnClick: () => Promise<void>;
@@ -32,7 +29,7 @@ export const SuggestContainer = observer(({ children, suggestKey, chainTagsStore
         await Browser.storage.local.remove(BG_RESPONSE);
 
         if (isSidePanel()) {
-          navigate('/home');
+          navigate('Home');
         } else {
           window.close();
         }

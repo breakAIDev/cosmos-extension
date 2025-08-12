@@ -1,15 +1,13 @@
-import { AnimatePresence, motion } from 'framer-motion';
-import { LedgerDriveIcon } from 'icons/ledger-icon';
-import { onboardingWrapperVariants } from 'pages/onboarding/wrapper';
 import React, { useCallback, useEffect, useState } from 'react';
-
+import { StyleSheet } from 'react-native';
+import { AnimatePresence, MotiView } from 'moti';
+import { LedgerDriveIcon } from '../../../../../assets/icons/ledger-icon';
 import { LEDGER_NETWORK, useImportWalletContext } from '../import-wallet-context';
 import { HoldState } from './hold-state';
 import { ledgerNetworkOptions } from './select-ledger-network';
 
 export const ImportingLedgerAccounts = () => {
   const [currentAppToImport, setCurrentAppToImport] = useState<LEDGER_NETWORK>();
-
   const [alreadyImported, setAlreadyImported] = useState<Set<LEDGER_NETWORK>>(new Set());
 
   const { moveToNextStep, ledgerNetworks, setCurrentStep, currentStep, prevStep } = useImportWalletContext();
@@ -17,39 +15,42 @@ export const ImportingLedgerAccounts = () => {
   useEffect(() => {
     const firstAppToImport = ledgerNetworkOptions.find((network) => ledgerNetworks.has(network.id));
     if (firstAppToImport) {
-      setAlreadyImported((prev) => prev.add(firstAppToImport.id));
+      setAlreadyImported((prev) => new Set(prev).add(firstAppToImport.id));
       setCurrentAppToImport(firstAppToImport.id);
     } else {
       setCurrentStep((prev) => prev - 1);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const moveToNextApp = useCallback(
     (appType: LEDGER_NETWORK) => {
       const nextAppToImport = ledgerNetworkOptions.find(
-        (network) => network.id !== appType && !alreadyImported.has(network.id) && ledgerNetworks.has(network.id),
+        (network) =>
+          network.id !== appType &&
+          !alreadyImported.has(network.id) &&
+          ledgerNetworks.has(network.id)
       );
       if (nextAppToImport) {
-        setAlreadyImported((prev) => prev.add(nextAppToImport.id));
+        setAlreadyImported((prev) => new Set(prev).add(nextAppToImport.id));
         setCurrentAppToImport(nextAppToImport.id);
       } else {
         setCurrentAppToImport(undefined);
         moveToNextStep();
       }
     },
-    [alreadyImported, ledgerNetworks, moveToNextStep],
+    [alreadyImported, ledgerNetworks, moveToNextStep]
   );
 
   if (ledgerNetworks.size > 0 && currentAppToImport) {
     return (
-      <motion.div
-        className='flex flex-col items-stretch w-full h-full gap-7'
-        variants={onboardingWrapperVariants}
-        initial={prevStep <= currentStep ? 'fromRight' : 'fromLeft'}
-        animate='animate'
-        exit='exit'
-      >
-        <AnimatePresence mode='wait' initial={false} presenceAffectsLayout>
+      <AnimatePresence>
+        <MotiView
+          from={{ opacity: 0, translateX: prevStep <= currentStep ? 48 : -48 }}
+          animate={{ opacity: 1, translateX: 0 }}
+          exit={{ opacity: 0, translateX: prevStep <= currentStep ? -48 : 48 }}
+          style={styles.wrapper}
+        >
           <HoldState
             key={`hold-state-${currentAppToImport}`}
             title={`Open ${currentAppToImport === LEDGER_NETWORK.ETH ? 'Ethereum' : 'Cosmos'} app on your ledger`}
@@ -57,8 +58,20 @@ export const ImportingLedgerAccounts = () => {
             appType={currentAppToImport}
             moveToNextApp={moveToNextApp}
           />
-        </AnimatePresence>
-      </motion.div>
+        </MotiView>
+      </AnimatePresence>
     );
   }
+
+  return null;
 };
+
+const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'stretch',
+    width: '100%',
+    gap: 28, // gap-7
+  },
+});

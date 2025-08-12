@@ -1,17 +1,24 @@
+import React, { useCallback, useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  TextInput,
+  Platform,
+  Keyboard,
+} from 'react-native';
 import { useAddCustomChannel, useChainsStore } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import classNames from 'classnames';
-import { CtaInput } from 'components/cta-input';
-import { useSendContext } from 'pages/send/context';
-import React, { CSSProperties, useCallback, useEffect, useState } from 'react';
+import { useSendContext } from '../../../send/context';
+
+type RadioOption = { title: string; subTitle?: string; value: string };
 
 type RadioGroupProps = {
-  options: { title: string; subTitle?: string; value: string }[];
+  options: RadioOption[];
   selectedOption: string;
-  
   onChange: (value: string) => void;
-  className?: string;
-  themeColor?: CSSProperties['color'];
+  themeColor?: string;
   isAddChannel?: boolean;
   targetChain: SupportedChain;
   hasChannelId: boolean;
@@ -21,11 +28,10 @@ const RadioGroupSend: React.FC<RadioGroupProps> = ({
   options,
   selectedOption,
   onChange,
-  className,
+  themeColor = '#2196F3',
   isAddChannel,
   hasChannelId,
   targetChain,
-  themeColor,
 }) => {
   const [value, setValue] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -69,118 +75,172 @@ const RadioGroupSend: React.FC<RadioGroupProps> = ({
       setStatus('idle');
       setMessage('');
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value]);
+  }, [value, handleAddChannel]);
 
   return (
-    <fieldset className={classNames('flex flex-col', className)}>
+    <View style={styles.container}>
       {options.map((option) => {
         const isSelected = selectedOption === option.value;
-
         return (
-          <label
+          <TouchableOpacity
             key={option.value}
-            className={`inline-flex items-center  ${
-              option.subTitle ? 'py-2 last-of-type:pb-0' : 'py-3 last-of-type:pb-0'
-            }`}
+            style={[
+              styles.option,
+              { paddingVertical: option.subTitle ? 8 : 12 }
+            ]}
+            activeOpacity={0.7}
+            onPress={() => {
+              onChange(option.value);
+              setValue('');
+              Keyboard.dismiss();
+            }}
           >
-            <input type='radio' value={option.value} checked={isSelected} readOnly className='hidden' />
-            <div
-              aria-label='radio-button'
-              className={classNames(
-                'w-5 h-5 rounded-full border-[2px] flex items-center justify-center cursor-pointer border-gray-300 transition-all',
-                {
-                  'shadow-sm': isSelected,
-                },
-              )}
-              style={{
-                borderColor: isSelected ? themeColor : undefined,
-              }}
-              tabIndex={0}
-              onClick={() => {
-                onChange(option.value);
-                setValue('');
-              }}
-              onKeyDown={(e) => {
-                if ((e.key === 'Enter' || e.key === ' ') && !isSelected) {
-                  onChange(option.value);
-                }
-              }}
+            <View
+              style={[
+                styles.radioOuter,
+                isSelected && { borderColor: themeColor, shadowOpacity: 0.1 }
+              ]}
             >
-              <div
-                className='w-[10px] h-[10px] rounded-full bg-gray-300 transition-all'
-                style={{
-                  backgroundColor: isSelected ? themeColor : undefined,
-                  opacity: isSelected ? 1 : 0,
-                }}
-              />
-            </div>
-            <div className='flex flex-col ml-3'>
-              <p className='text-foreground font-medium text-sm'>{option.title}</p>
-              {option.subTitle ? <p className='text-muted-foreground text-xs'>{option.subTitle}</p> : null}
-            </div>
-          </label>
+              {isSelected && <View style={[styles.radioInner, { backgroundColor: themeColor }]} />}
+            </View>
+            <View style={{ flex: 1, marginLeft: 12 }}>
+              <Text style={styles.optionTitle}>{option.title}</Text>
+              {!!option.subTitle && (
+                <Text style={styles.optionSubTitle}>{option.subTitle}</Text>
+              )}
+            </View>
+          </TouchableOpacity>
         );
       })}
+
       {(isAddChannel || !hasChannelId) && (
-        <label className={`inline-flex items-center py-1`}>
-          <div className='flex flex-col w-full'>
-            <div className='flex w-full items-center gap-3'>
-              <input type='radio' value={value} checked={isCustomSelected} readOnly className='hidden' />
-              <div
-                aria-label='radio-button'
-                className={classNames(
-                  'w-5 h-5 rounded-full border-[2px] flex items-center justify-center cursor-pointer border-gray-300 transition-all',
-                  {
-                    'shadow-sm': isCustomSelected,
-                  },
-                )}
-                style={{
-                  borderColor: isCustomSelected ? themeColor : undefined,
-                }}
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if ((e.key === 'Enter' || e.key === ' ') && !value) {
-                    setValue(value);
-                  }
-                }}
-              >
-                <div
-                  className='w-[10px] h-[10px] rounded-full bg-gray-300 transition-all'
-                  style={{
-                    backgroundColor: isCustomSelected ? themeColor : undefined,
-                    opacity: isCustomSelected ? 1 : 0,
-                  }}
-                />
-              </div>
-              <CtaInput
-                value={value}
-                onChange={(e) => {
-                  setValue(e.target.value);
-                  if (status === 'error') {
-                    setStatus('idle');
-                    setMessage('');
-                  }
-                }}
-                type='number'
-                onClear={() => setValue('')}
-                placeholder='Enter source channel ID'
-                divClassName='rounded-2xl flex-grow flex items-center gap-[10px] bg-gray-50 dark:bg-gray-900 py-3 pr-3 pl-4 dark:focus-within:border-white-100 hover:border-secondary-400 focus-within:border-black-100 border border-transparent'
-                inputClassName='flex flex-grow text-base text-gray-400 outline-none bg-white-0 font-bold dark:text-white-100 text-md placeholder:font-medium dark:placeholder:text-gray-400  !leading-[21px]'
-              />
-            </div>
-            <p className='text-xs mt-2 dark:text-gray-400 text-gray-600'>
-              You can enter <span className='font-medium dark:text-gray-200 text-gray-800'>24</span> for{' '}
-              <span className='font-medium dark:text-gray-200 text-gray-800'>channel-24</span> on{' '}
-              {activeChainInfo.chainName}
-            </p>
-            {status === 'error' ? <p className='text-xs mt-2 text-red-300 font-medium'>{message}</p> : null}
-            {status === 'success' ? <p className='text-xs mt-2 text-green-300 font-medium'>{message}</p> : null}
-          </div>
-        </label>
+        <View style={styles.customOptionContainer}>
+          <View style={styles.customRow}>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={[
+                styles.radioOuter,
+                isCustomSelected && { borderColor: themeColor, shadowOpacity: 0.1 }
+              ]}
+            >
+              {isCustomSelected && <View style={[styles.radioInner, { backgroundColor: themeColor }]} />}
+            </TouchableOpacity>
+            <TextInput
+              value={value}
+              onChangeText={(text) => {
+                setValue(text.replace(/[^0-9]/g, '')); // only allow numbers
+                if (status === 'error') {
+                  setStatus('idle');
+                  setMessage('');
+                }
+              }}
+              keyboardType={Platform.OS === 'ios' ? 'number-pad' : 'numeric'}
+              placeholder="Enter source channel ID"
+              style={styles.input}
+              placeholderTextColor="#A0A3B1"
+              onFocus={() => {
+                setStatus('idle');
+                setMessage('');
+              }}
+              clearButtonMode="while-editing"
+            />
+          </View>
+          <Text style={styles.infoText}>
+            You can enter <Text style={styles.infoHighlight}>24</Text> for{' '}
+            <Text style={styles.infoHighlight}>channel-24</Text> on {activeChainInfo.chainName}
+          </Text>
+          {status === 'error' && (
+            <Text style={styles.errorMsg}>{message}</Text>
+          )}
+          {status === 'success' && (
+            <Text style={styles.successMsg}>{message}</Text>
+          )}
+        </View>
       )}
-    </fieldset>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: { flexDirection: 'column', width: '100%' },
+  option: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingBottom: 0,
+  },
+  radioOuter: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#C5CAD4',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 2,
+    backgroundColor: '#fff',
+  },
+  radioInner: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#2196F3',
+    opacity: 1,
+  },
+  optionTitle: {
+    fontWeight: '500',
+    fontSize: 15,
+    color: '#232940',
+  },
+  optionSubTitle: {
+    fontSize: 12,
+    color: '#8C94A6',
+    marginTop: 2,
+  },
+  customOptionContainer: {
+    paddingVertical: 5,
+    marginTop: 8,
+    marginBottom: 0,
+  },
+  customRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 0,
+  },
+  input: {
+    flex: 1,
+    height: 40,
+    backgroundColor: '#F7F7FA',
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    color: '#232940',
+    borderWidth: 1,
+    borderColor: '#E8EAED',
+    marginLeft: 12,
+    fontWeight: '600',
+  },
+  infoText: {
+    fontSize: 12,
+    marginTop: 6,
+    color: '#8C94A6',
+  },
+  infoHighlight: {
+    fontWeight: '500',
+    color: '#232940',
+  },
+  errorMsg: {
+    fontSize: 12,
+    marginTop: 6,
+    color: '#E57373',
+    fontWeight: '500',
+  },
+  successMsg: {
+    fontSize: 12,
+    marginTop: 6,
+    color: '#4CAF50',
+    fontWeight: '500',
+  },
+});
 
 export default RadioGroupSend;

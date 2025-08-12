@@ -9,9 +9,9 @@ import { DenomsRecord, LedgerError, SupportedChain } from '@leapwallet/cosmos-wa
 import { TRANSFER_STATE, TXN_STATUS } from '@leapwallet/elements-core';
 import { RouteAggregator } from '@leapwallet/elements-hooks';
 import { TransferAssetRelease } from '@skip-go/client';
-import { TxPageProps } from 'pages/swaps-v2/components';
+import { TxPageProps } from '../../../swaps-v2/components';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { SourceChain, SwapFeeInfo, SwapTxnStatus, TransferSequence } from 'types/swap';
+import { SourceChain, SwapFeeInfo, SwapTxnStatus, TransferSequence } from '../../../../types/swap';
 
 import { useExecuteMosaicTransaction } from './useExecuteMosaicTransaction';
 import { useExecuteSkipTransaction } from './useExecuteSkipTransaction';

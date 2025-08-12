@@ -10,61 +10,78 @@ import {
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { WALLETTYPE } from '@leapwallet/cosmos-wallet-store';
 import BigNumber from 'bignumber.js';
-import { Button } from 'components/ui/button';
-import { AnimatePresence, motion } from 'framer-motion';
-import { useFormatCurrency } from 'hooks/settings/useCurrency';
+import { Button } from '../../../components/ui/button';
+import { useFormatCurrency } from '../../../hooks/settings/useCurrency';
 import { observer } from 'mobx-react-lite';
 import React, { useMemo } from 'react';
-import Skeleton from 'react-loading-skeleton';
-import { Link, useNavigate } from 'react-router-dom';
-import { rootDenomsStore } from 'stores/denoms-store-instance';
-import { hideAssetsStore } from 'stores/hide-assets-store';
-import { claimRewardsStore, delegationsStore, unDelegationsStore, validatorsStore } from 'stores/stake-store';
-import { cn } from 'utils/cn';
-import { opacityFadeInOut, transition150 } from 'utils/motion-variants';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { rootDenomsStore } from '../../../context/denoms-store-instance';
+import { hideAssetsStore } from '../../../context/hide-assets-store';
+import { claimRewardsStore, delegationsStore, unDelegationsStore, validatorsStore } from '../../../context/stake-store';
+import { ThemeName, useTheme } from '@leapwallet/leap-ui';
 
 import { StakeInputPageState } from '../StakeInputPage';
+import { AnimatePresence, MotiText, MotiView } from 'moti';
 
-interface StakeAmountCardProps {
+type StakeAmountCardProps = {
   onClaim: () => void;
   forceChain?: SupportedChain;
   forceNetwork?: SelectedNetwork;
-}
+};
 
-export const AmountCard = (props: { loading: boolean; title: string; children: React.ReactNode }) => {
+const AmountCard = ({
+  loading,
+  title,
+  children,
+}: {
+  loading: boolean;
+  title: string;
+  children: React.ReactNode;
+}) => {
   return (
-    <div className='flex flex-col gap-2'>
-      <span className='text-xs text-muted-foreground'>{props.title}</span>
-      <AnimatePresence mode='wait'>
-        {props.loading ? (
-          <motion.div
-            key='loading'
-            className='h-[1.875rem] flex flex-col justify-end'
-            transition={transition150}
-            variants={opacityFadeInOut}
-            initial='hidden'
-            animate='visible'
-            exit='hidden'
+    <View style={styles.amountCard}>
+      <Text style={styles.amountCardTitle}>{title}</Text>
+      <AnimatePresence>
+        {loading ? (
+          <MotiView
+            key="loading"
+            from={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{ marginTop: 6 }}
           >
-            <Skeleton className='w-24 h-5 grow-0' />
-          </motion.div>
+            <ActivityIndicator size="small" color="#888" />
+          </MotiView>
         ) : (
-          <motion.span
-            key='loaded'
-            className='flex gap-1 items-baseline'
-            transition={transition150}
-            variants={opacityFadeInOut}
-            initial='hidden'
-            animate='visible'
-            exit='hidden'
+          <MotiView
+            key="loaded"
+            from={{ opacity: 0, translateY: 14 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            exit={{ opacity: 0 }}
+            style={{ flexDirection: 'row', alignItems: 'baseline', gap: 3 }}
           >
-            {props.children}
-          </motion.span>
+            {children}
+          </MotiView>
         )}
       </AnimatePresence>
-    </div>
+    </View>
   );
 };
+
+function AnimatedNumber({ value, style }: { value: number; style?: any }) {
+  const rounded = Number(value?.toFixed(2) || '0');
+  return (
+    <MotiText
+      from={{ opacity: 0, translateY: 12 }}
+      animate={{ opacity: 1, translateY: 0 }}
+      transition={{ type: 'timing', duration: 700 }}
+      style={style}
+    >
+      {rounded}
+    </MotiText>
+  );
+}
 
 const StakeAmountCard = observer(({ onClaim, forceChain, forceNetwork }: StakeAmountCardProps) => {
   const _activeChain = useActiveChain();
@@ -73,6 +90,7 @@ const StakeAmountCard = observer(({ onClaim, forceChain, forceNetwork }: StakeAm
   const _activeNetwork = useSelectedNetwork();
   const activeNetwork = forceNetwork ?? _activeNetwork;
 
+  const { theme } = useTheme();
   const denoms = rootDenomsStore.allDenoms;
   const chainDelegations = delegationsStore.delegationsForChain(activeChain);
   const chainValidators = validatorsStore.validatorsForChain(activeChain);
@@ -99,7 +117,7 @@ const StakeAmountCard = observer(({ onClaim, forceChain, forceNetwork }: StakeAm
   );
   const [formatCurrency] = useFormatCurrency();
   const activeWallet = useActiveWallet();
-  const navigate = useNavigate();
+  const navigation = useNavigation();
 
   const formattedCurrencyAmountDelegation = useMemo(() => {
     if (currencyAmountDelegation && new BigNumber(currencyAmountDelegation).gt(0)) {
@@ -119,7 +137,6 @@ const StakeAmountCard = observer(({ onClaim, forceChain, forceNetwork }: StakeAm
     if (totalRewardsDollarAmt && new BigNumber(totalRewardsDollarAmt).gt(0)) {
       return hideAssetsStore.formatHideBalance(formatCurrency(new BigNumber(totalRewardsDollarAmt)));
     }
-
     const rewardsCount = rewards?.total?.length ?? 0;
     return hideAssetsStore.formatHideBalance(
       `${formatTokenAmount(nativeTokenReward?.amount ?? '', activeStakingDenom?.coinDenom)} ${
@@ -128,57 +145,109 @@ const StakeAmountCard = observer(({ onClaim, forceChain, forceNetwork }: StakeAm
     );
   }, [activeStakingDenom, formatCurrency, rewards, totalRewardsDollarAmt]);
 
+  // Card color
+  const cardColor = theme === ThemeName.DARK ? '#242438' : '#f4f5f8';
+
   return (
-    <div className='flex flex-col w-full bg-secondary-100 rounded-2xl p-5 gap-y-6'>
-      <div className='flex gap-x-2 [&>*]:flex-1'>
-        <AmountCard title='Deposited Amount' loading={loadingDelegations}>
-          <div className='flex flex-col'>
-            <span className='font-bold text-[18px]'>
-              {formattedCurrencyAmountDelegation &&
-                hideAssetsStore.formatHideBalance(formattedCurrencyAmountDelegation)}
-            </span>
-            <span className='text-sm text-muted-foreground'>
+    <MotiView
+      from={{ opacity: 0, translateY: 24 }}
+      animate={{ opacity: 1, translateY: 0 }}
+      exit={{ opacity: 0 }}
+      style={[styles.container, { backgroundColor: cardColor }]}
+      transition={{ type: 'timing', duration: 400 }}
+    >
+      <View style={styles.topRow}>
+        <AmountCard title="Deposited Amount" loading={loadingDelegations}>
+          <View style={{ flexDirection: 'column' }}>
+            <AnimatedNumber
+              value={Number(formattedCurrencyAmountDelegation?.replace(/[^0-9.]/g, '') || '0')}
+              style={styles.amountText}
+            />
+            <Text style={styles.amountSubText}>
               ({hideAssetsStore.formatHideBalance(totalDelegationAmount ?? '-')})
-            </span>
-          </div>
+            </Text>
+          </View>
         </AmountCard>
-
-        <AmountCard title='Total Earnings' loading={loadingRewards}>
-          <span className={cn('font-bold text-[18px]', formattedRewardAmount && 'text-accent-success')}>
-            {formattedRewardAmount || '-'}
-          </span>
+        <AmountCard title="Total Earnings" loading={loadingRewards}>
+          <AnimatedNumber
+            value={Number((formattedRewardAmount || '0').replace(/[^0-9.]/g, ''))}
+            style={[styles.amountText, { color: '#26ad6f' }]}
+          />
         </AmountCard>
-      </div>
+      </View>
 
-      <div className='flex gap-x-4 [&>*]:flex-1'>
+      <View style={styles.bottomRow}>
         <Button
-          size='md'
-          onClick={() => {
+          size="md"
+          onPress={() => {
             const state: StakeInputPageState = {
               mode: 'DELEGATE',
               forceChain: activeChain,
               forceNetwork: activeNetwork,
             };
-            sessionStorage.setItem('navigate-stake-input-state', JSON.stringify(state));
-            navigate('/stake/input', {
-              state,
-            });
+            navigation.navigate('StakeInput', { state });
           }}
         >
           Stake
         </Button>
         <Button
-          variant='secondary'
-          size='md'
-          className='bg-secondary-350 disabled:bg-secondary-350 hover:bg-secondary-300'
-          onClick={onClaim}
+          variant="secondary"
+          size="md"
+          style={styles.claimButton}
+          onPress={onClaim}
           disabled={isClaimDisabled}
         >
           Claim
         </Button>
-      </div>
-    </div>
+      </View>
+    </MotiView>
   );
+});
+
+const styles = StyleSheet.create({
+  container: {
+    borderRadius: 18,
+    width: '100%',
+    padding: 20,
+    gap: 24,
+    marginBottom: 16,
+  },
+  topRow: {
+    flexDirection: 'row',
+    gap: 14,
+    width: '100%',
+    marginBottom: 14,
+  },
+  bottomRow: {
+    flexDirection: 'row',
+    gap: 12,
+    width: '100%',
+    marginTop: 10,
+  },
+  amountCard: {
+    flex: 1,
+    flexDirection: 'column',
+    gap: 4,
+    marginRight: 4,
+  },
+  amountCardTitle: {
+    fontSize: 13,
+    color: '#999',
+    marginBottom: 3,
+  },
+  amountText: {
+    fontWeight: 'bold',
+    fontSize: 18,
+    color: '#222',
+  },
+  amountSubText: {
+    fontSize: 13,
+    color: '#999',
+    marginTop: 1,
+  },
+  claimButton: {
+    backgroundColor: '#e5e5e8',
+  },
 });
 
 export default StakeAmountCard;

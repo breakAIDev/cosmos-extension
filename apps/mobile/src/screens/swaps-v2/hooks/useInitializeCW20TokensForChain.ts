@@ -9,9 +9,9 @@ import {
   useGetStorageLayer,
 } from '@leapwallet/cosmos-wallet-hooks';
 import { useQueryClient } from '@tanstack/react-query';
-import { useFillBetaValuesFromStorage } from 'hooks/settings/useFillBetaValuesFromStorage';
+import { useFillBetaValuesFromStorage } from '../../../hooks/settings/useFillBetaValuesFromStorage';
 import { useEffect, useState } from 'react';
-import { SourceChain } from 'types/swap';
+import { SourceChain } from '../../../types/swap';
 
 export function useInitializeCW20TokensForChain(chain: SourceChain | undefined) {
   const queryClient = useQueryClient();

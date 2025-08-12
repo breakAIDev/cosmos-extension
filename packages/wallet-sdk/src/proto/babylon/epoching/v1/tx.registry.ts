@@ -8,20 +8,20 @@ import {
   MsgWrappedUndelegate,
 } from './tx';
 export const registry: ReadonlyArray<[string, GeneratedType]> = [
-  
-  
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   ['/babylon.epoching.v1.MsgWrappedDelegate', MsgWrappedDelegate],
-  
-  
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   ['/babylon.epoching.v1.MsgWrappedUndelegate', MsgWrappedUndelegate],
-  
-  
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   ['/babylon.epoching.v1.MsgWrappedBeginRedelegate', MsgWrappedBeginRedelegate],
-  
-  
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   ['/babylon.epoching.v1.MsgWrappedCancelUnbondingDelegation', MsgWrappedCancelUnbondingDelegation],
-  
-  
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   ['/babylon.epoching.v1.MsgUpdateParams', MsgUpdateParams],
 ];
 export const load = (protoRegistry: Registry) => {

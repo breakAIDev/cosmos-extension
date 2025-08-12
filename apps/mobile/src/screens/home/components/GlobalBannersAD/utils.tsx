@@ -1,10 +1,7 @@
 import { BannerAD } from '@leapwallet/cosmos-wallet-hooks';
 
-// session storage key for storing the numia banner impression info
 export const NUMIA_IMPRESSION_INFO = 'numia-impression-info';
-// session storage key for storing the mixpanel banner views info
 export const MIXPANEL_BANNER_VIEWS_INFO = 'mixpanel-banner-views-info';
-// seconds
 
 export type BannerADData = BannerAD & {
   logo?: string;
@@ -18,12 +15,23 @@ export const getMixpanelPositionId = (bannerId: string, banner?: BannerAD) => {
   return bannerId.includes('numia') ? banner?.attributes?.position_id : banner?.position_id;
 };
 
-export const getDisplayAds = (bannerAds: BannerAD[], disabledBannerAds: string[] | null) => {
+/**
+ * Filters out ads that are disabled or not in the valid time window.
+ * If disabledBannerAds is null/undefined, treat as empty array (show all valid-time ads).
+ */
+export const getDisplayAds = (
+  bannerAds: BannerAD[],
+  disabledBannerAds?: string[] | null
+) => {
+  const disabledSet = new Set(disabledBannerAds ?? []);
+  const now = Date.now();
+
   return bannerAds.filter((ad) => {
-    const date = new Date();
-    const startDate = new Date(ad.start_date);
-    const endDate = new Date(ad.end_date);
-    const isCorrectTime = date >= startDate && date <= endDate;
-    return disabledBannerAds !== null ? !disabledBannerAds.includes(ad.id) && isCorrectTime : false;
+    const startDate = new Date(ad.start_date).getTime();
+    const endDate = new Date(ad.end_date).getTime();
+    const isCorrectTime = now >= startDate && now <= endDate;
+    const isDisabled = disabledSet.has(ad.id);
+
+    return isCorrectTime && !isDisabled;
   });
 };

@@ -12,10 +12,9 @@ export function getAminoSignDoc({
   memo,
   isGasOptionSelected,
 }: {
-  
   signRequestData: Record<string, any>;
   gasPrice: GasPrice;
-  gasLimit: string;
+  gasLimit: string | BigNumber;
   memo: string;
   isAdr36?: boolean;
   isGasOptionSelected: boolean;
@@ -48,8 +47,6 @@ export function getAminoSignDoc({
               : 'gasLimit' in sortedSignDoc.fee
               ? sortedSignDoc.fee.gasLimit
               : sortedSignDoc.fee.gas,
-            
-            
             gasPrice,
           );
 

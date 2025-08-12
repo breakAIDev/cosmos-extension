@@ -1,27 +1,24 @@
-
-import { useInvestData } from '@leapwallet/cosmos-wallet-hooks';
-import { CardDivider } from '@leapwallet/leap-ui';
-import { CaretRight } from '@phosphor-icons/react';
-import { BigNumber } from 'bignumber.js';
-import Text from 'components/text';
-import { LEAPBOARD_URL } from 'config/constants';
 import React, { useMemo, useState } from 'react';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Linking } from 'react-native';
+import { useInvestData } from '@leapwallet/cosmos-wallet-hooks';
+import { BigNumber } from 'bignumber.js';
+import { CaretRight } from 'phosphor-react-native';
+import Text from '../../../../components/text'; // Ensure this is a React Native Text component
+import { LEAPBOARD_URL } from '../../../../services/config/constants';
 
 import DefiRow from '../DefiRow/DefiRow';
 import { SortingButton } from '../DefiRow/SortingButton';
+import { CardDivider } from '@leapwallet/leap-ui';
 
 function sortByDefiName(a: any, b: any) {
   return b?.productName?.toLowerCase() <= a?.productName?.toLowerCase() ? -1 : 1;
 }
-
 function sortByDefiType(a: any, b: any) {
   return b?.dappCategory?.toLowerCase() <= a?.dappCategory?.toLowerCase() ? -1 : 1;
 }
-
 function sortByDefiTvl(a: any, b: any) {
   return new BigNumber(b?.tvl ?? '0').comparedTo(a?.tvl);
 }
-
 function sortByDefiApr(a: any, b: any) {
   return new BigNumber(b?.apr ?? '0').comparedTo(a?.apr);
 }
@@ -30,14 +27,12 @@ function DefiList({ tokenName }: { tokenName: string }) {
   const [selectedSortBy, setSelectedSortBy] = useState<string>('apr');
   const [sortingDirection, setSortingDirection] = useState<string>('dsc');
   const [searchInput] = useState<string>(tokenName);
-  const [filterList] = useState<string>('all');
 
   const investData: any = useInvestData();
-
   const { products: _products } = investData?.data ?? { products: undefined };
 
   const data = useMemo(() => {
-    return Object.values(_products).filter((d: any) => d?.visible);
+    return Object.values(_products || {}).filter((d: any) => d?.visible);
   }, [_products]);
 
   const sortedTokens = useMemo(() => {
@@ -48,41 +43,25 @@ function DefiList({ tokenName }: { tokenName: string }) {
       ?.sort((a: any, b: any) => {
         let sortOrder = -1;
         switch (selectedSortBy) {
-          case 'dappCategory': {
-            sortOrder = sortByDefiType(a, b);
-            break;
-          }
-          case 'tvl': {
-            sortOrder = sortByDefiTvl(a, b);
-            break;
-          }
-          case 'apr': {
-            sortOrder = sortByDefiApr(a, b);
-            break;
-          }
+          case 'dappCategory': sortOrder = sortByDefiType(a, b); break;
+          case 'tvl': sortOrder = sortByDefiTvl(a, b); break;
+          case 'apr': sortOrder = sortByDefiApr(a, b); break;
           case 'productName':
-          default: {
-            sortOrder = sortByDefiName(a, b);
-            break;
-          }
+          default: sortOrder = sortByDefiName(a, b); break;
         }
         return sortingDirection === 'asc' ? -1 * sortOrder : sortOrder;
       });
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, filterList, searchInput, selectedSortBy, sortingDirection]);
+  }, [data, searchInput, selectedSortBy, sortingDirection]);
 
   if (!investData?.data || sortedTokens.length === 0) return null;
 
   return (
-    <div>
-      <div className='rounded-[16px] py-[12px] items-center'>
-        <Text size='sm' className='py-[4px] font-bold ' color='text-gray-600 dark:text-gray-200'>
-          {`Top ${tokenName.toUpperCase()} Yields`}
-        </Text>
-      </div>
-      <div className='flex w-full flex-col items-start justify-start rounded-[24px] border border-gray-100 bg-gray-50 shadow-[0px_7px_24px_0px_rgba(0,0,0,0.25)] dark:border-gray-900 dark:bg-gray-950'>
-        <div className='grid w-full grid-cols-[6fr_2fr_2fr_1fr] items-center justify-center rounded-t-[24px] bg-gray-50 dark:bg-gray-950'>
+    <View style={styles.container}>
+      <View style={styles.headerRow}>
+        <Text size='sm' style={styles.headerText}>{`Top ${tokenName.toUpperCase()} Yields`}</Text>
+      </View>
+      <View style={styles.defiListBox}>
+        <View style={styles.gridRow}>
           <SortingButton
             sortBy={selectedSortBy}
             sortDir={sortingDirection}
@@ -90,9 +69,7 @@ function DefiList({ tokenName }: { tokenName: string }) {
             setSortBy={setSelectedSortBy}
             label='Name'
             sortName='productName'
-            classNamesObj={{
-              outerContainer: 'h-[40px] sm:h-[55px] pl-6 pr-[24px] text-xs sm:!text-sm !font-medium sm:!font-bold',
-            }}
+            style={styles.sortBtn}
           />
           <SortingButton
             sortBy={selectedSortBy}
@@ -101,9 +78,7 @@ function DefiList({ tokenName }: { tokenName: string }) {
             setSortBy={setSelectedSortBy}
             label='TVL'
             sortName='tvl'
-            classNamesObj={{
-              outerContainer: 'h-[40px] sm:h-[55px] text-xs sm:!text-sm !font-medium sm:!font-bold',
-            }}
+            style={styles.sortBtn}
           />
           <SortingButton
             sortBy={selectedSortBy}
@@ -112,45 +87,69 @@ function DefiList({ tokenName }: { tokenName: string }) {
             setSortBy={setSelectedSortBy}
             label='APR'
             sortName='apr'
-            classNamesObj={{
-              outerContainer:
-                'h-[40px] sm:h-[55px] text-xs sm:!text-sm !font-medium sm:!font-bold gap-[4px] sm:gap-[10px] !justify-end sm:!justify-start',
-            }}
+            style={styles.sortBtn}
           />
-          <div></div>
-        </div>
-        {sortedTokens?.map((token: any) => {
-          return (
+          <View style={{ flex: 1 }} />
+        </View>
+        <ScrollView>
+          {sortedTokens?.map((token: any, i: number) => (
             <React.Fragment key={token?.productName + token?.chain}>
               <CardDivider />
               <DefiRow token={token} />
             </React.Fragment>
-          );
-        })}
-        <CardDivider />
-
-        <div className='flex pr-3 flex-row items-center justify-end mr-3 group z-0 w-full cursor-pointer transition'>
-          <div
-            onClick={() => {
-              window.open(`${LEAPBOARD_URL}/explore/defi`, '_blank');
-            }}
-            className='flex flex-row items-center justify-end gap-2'
-          >
-            <Text
-              size='sm'
-              className='py-[4px] font-bold !text-gray-500 group-hover:!text-black-100 dark:!text-gray-500 dark:group-hover:!text-white-100'
-            >
-              View All
-            </Text>
-          </div>
-          <CaretRight
-            size={20}
-            className='!text-gray-500 group-hover:!text-black-100 dark:!text-gray-500 dark:group-hover:!text-white-100'
-          />
-        </div>
-      </div>
-    </div>
+          ))}
+          <CardDivider />
+        </ScrollView>
+        <TouchableOpacity
+          style={styles.viewAllRow}
+          activeOpacity={0.7}
+          onPress={() => Linking.openURL(`${LEAPBOARD_URL}/explore/defi`)}
+        >
+          <Text size='sm' style={styles.viewAllText}>
+            View All
+          </Text>
+          <CaretRight size={20} color="#888" />
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { padding: 8 },
+  headerRow: { borderRadius: 16, paddingVertical: 12, alignItems: 'center' },
+  headerText: { fontWeight: 'bold', color: '#666' },
+  defiListBox: {
+    width: '100%',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#eee',
+    backgroundColor: '#f9f9f9',
+    shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 8,
+    marginBottom: 16,
+    paddingBottom: 8,
+  },
+  gridRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    backgroundColor: '#f9f9f9',
+    paddingHorizontal: 4,
+  },
+  sortBtn: { flex: 2, height: 40, justifyContent: 'center', alignItems: 'center' },
+  viewAllRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    padding: 12,
+    marginRight: 8,
+  },
+  viewAllText: {
+    fontWeight: 'bold',
+    color: '#888',
+    marginRight: 4,
+  },
+});
 
 export default DefiList;

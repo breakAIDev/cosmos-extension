@@ -1,7 +1,8 @@
 import { getMayaTxFee, getThorChainTxFee, useChainApis, useformatCurrency } from '@leapwallet/cosmos-wallet-hooks';
 import BigNumber from 'bignumber.js';
-import { useSendContext } from 'pages/send/context';
+import { useSendContext } from '../../../send/context';
 import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 
 export function FixedFee() {
   const [fee, setFee] = useState(new BigNumber(1));
@@ -21,14 +22,11 @@ export function FixedFee() {
         case 'mayachain': {
           const fee = await getMayaTxFee(lcdUrl ?? '');
           setFee(new BigNumber(fee).div(10 ** feeDenom.coinDecimals));
-
           break;
         }
-
         case 'thorchain': {
           const fee = await getThorChainTxFee(lcdUrl ?? '');
           setFee(new BigNumber(fee).div(10 ** feeDenom.coinDecimals));
-
           break;
         }
       }
@@ -36,14 +34,42 @@ export function FixedFee() {
   }, [feeDenom.coinDecimals, lcdUrl, sourceChain]);
 
   return (
-    <div className='flex items-center justify-center text-gray-600 dark:text-gray-400'>
-      <p className='font-semibold text-center text-sm'>Transaction fee: </p>
-      <p className='font-semibold text-center text-sm ml-1'>
-        <strong className='mr-1'>
+    <View style={styles.container}>
+      <Text style={styles.label}>Transaction fee: </Text>
+      <Text style={styles.value}>
+        <Text style={styles.bold}>
           {fee.toString()} {feeDenom.coinDenom}
-        </strong>
-        {feeTokenFiatValue ? `(${formatCurrency(fee.multipliedBy(feeTokenFiatValue))})` : null}
-      </p>
-    </div>
+        </Text>
+        {feeTokenFiatValue ? ` (${formatCurrency(fee.multipliedBy(feeTokenFiatValue))})` : ''}
+      </Text>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 8,
+  },
+  label: {
+    fontWeight: '600',
+    fontSize: 14,
+    color: '#70737a',
+    textAlign: 'center',
+  },
+  value: {
+    fontWeight: '600',
+    fontSize: 14,
+    color: '#70737a',
+    textAlign: 'center',
+    marginLeft: 4,
+  },
+  bold: {
+    fontWeight: 'bold',
+    marginRight: 3,
+  },
+});
+
+export default FixedFee;

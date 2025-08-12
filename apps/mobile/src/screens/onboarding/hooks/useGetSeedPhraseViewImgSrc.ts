@@ -1,4 +1,4 @@
-import { Images } from 'images';
+import { Images } from '../../../../assets/images';
 import { useMemo } from 'react';
 
 import { IMPORT_WALLET_DATA } from '../constants';
@@ -7,7 +7,7 @@ export function useGetSeedPhraseViewImgSrc(
   isPrivateKey: boolean,
   walletName: string,
   isMetamaskKey?: boolean,
-  isOtherEvmWallets?: boolean,
+  isOtherEvmWallets?: boolean
 ) {
   return useMemo(() => {
     if (isMetamaskKey) {

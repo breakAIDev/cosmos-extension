@@ -1,7 +1,8 @@
 import { getMayaTxFee, getThorChainTxFee, useChainApis, useformatCurrency } from '@leapwallet/cosmos-wallet-hooks';
 import BigNumber from 'bignumber.js';
-import { useSendContext } from 'pages/send-v2/context';
+import { useSendContext } from '../../../send-v2/context';
 import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 
 export function FixedFee() {
   const [fee, setFee] = useState(new BigNumber(1));
@@ -21,14 +22,11 @@ export function FixedFee() {
         case 'mayachain': {
           const fee = await getMayaTxFee(lcdUrl ?? '');
           setFee(new BigNumber(fee).div(10 ** feeDenom.coinDecimals));
-
           break;
         }
-
         case 'thorchain': {
           const fee = await getThorChainTxFee(lcdUrl ?? '');
           setFee(new BigNumber(fee).div(10 ** feeDenom.coinDecimals));
-
           break;
         }
       }
@@ -36,14 +34,44 @@ export function FixedFee() {
   }, [feeDenom.coinDecimals, lcdUrl, sourceChain]);
 
   return (
-    <div className='flex items-center justify-center text-gray-600 dark:text-gray-400'>
-      <p className='font-semibold text-center text-sm'>Transaction fee: </p>
-      <p className='font-semibold text-center text-sm ml-1'>
-        <strong className='mr-1'>
+    <View style={styles.feeWrap}>
+      <Text style={styles.feeLabel}>Transaction fee: </Text>
+      <Text style={styles.feeValue}>
+        <Text style={styles.feeStrong}>
           {fee.toString()} {feeDenom.coinDenom}
-        </strong>
-        {feeTokenFiatValue ? `(${formatCurrency(fee.multipliedBy(feeTokenFiatValue))})` : null}
-      </p>
-    </div>
+        </Text>
+        {feeTokenFiatValue
+          ? ` (${formatCurrency(fee.multipliedBy(feeTokenFiatValue))})`
+          : ''}
+      </Text>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  feeWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: '#6B7280', // text-gray-600
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  feeLabel: {
+    fontWeight: '600',
+    textAlign: 'center',
+    fontSize: 14,
+    color: '#6B7280', // text-gray-600
+  },
+  feeValue: {
+    fontWeight: '600',
+    textAlign: 'center',
+    fontSize: 14,
+    color: '#6B7280', // text-gray-600
+    marginLeft: 4,
+  },
+  feeStrong: {
+    fontWeight: 'bold',
+    marginRight: 4,
+  },
+});

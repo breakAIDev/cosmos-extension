@@ -1,16 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
-    "jsx": "react",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "Node",
-    "resolveJsonModule": true,
-    "noEmit": true,
-    "allowJs": true
+    "jsx": "react"
   },
-  "include": ["src", "App.tsx"]
+  "extends": "@react-native/typescript-config"
 }

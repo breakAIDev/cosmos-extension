@@ -1,7 +1,7 @@
-import { Buttons } from '@leapwallet/leap-ui';
-import classNames from 'classnames';
 import React, { ReactNode } from 'react';
-import { Colors } from 'theme/colors';
+import { View, StyleSheet } from 'react-native';
+import { Buttons } from '@leapwallet/leap-ui'; // kept as-is (shimmed below)
+import { Colors } from '../../../theme/colors';
 
 type FooterActionProps = {
   error?: string;
@@ -21,31 +21,40 @@ export function FooterAction({
   isConfirmBtnDisabled,
 }: FooterActionProps) {
   return (
-    <div
-      className={classNames('flex flex-row justify-between w-full', {
-        'mb-6': !!error,
-      })}
-    >
+    <View style={[styles.row, !!error && styles.mb6]}>
       <Buttons.Generic
-        style={{ height: '48px', background: Colors.gray900, color: Colors.white100 }}
+        style={[styles.btn, { backgroundColor: Colors.gray900 }]}
+        textStyle={{ color: Colors.white100 }}
         onClick={rejectBtnClick}
       >
         {rejectBtnText}
       </Buttons.Generic>
 
       <Buttons.Generic
-        style={{
-          height: '48px',
-          background: Colors.cosmosPrimary,
-          color: Colors.white100,
-          cursor: 'pointer',
-        }}
-        className='ml-3 bg-gray-800'
+        style={[styles.btn, styles.ml3, { backgroundColor: Colors.cosmosPrimary }]}
+        textStyle={{ color: Colors.white100 }}
         onClick={confirmBtnClick}
         disabled={isConfirmBtnDisabled}
       >
         {confirmBtnText}
       </Buttons.Generic>
-    </div>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  mb6: { marginBottom: 24 }, // matches tailwind mb-6
+  ml3: { marginLeft: 12 },   // tailwind ml-3
+  btn: {
+    height: 48,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});

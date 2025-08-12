@@ -1,7 +1,7 @@
-import { useInvestData } from '@leapwallet/cosmos-wallet-hooks';
-import { ErrorCard } from 'components/ErrorCard';
 import React from 'react';
-
+import { View } from 'react-native';
+import { useInvestData } from '@leapwallet/cosmos-wallet-hooks';
+import { ErrorCard } from '../../../components/ErrorCard';
 import { DisplaySettings } from '../types';
 import { InvestView } from './invest-view';
 
@@ -13,27 +13,30 @@ const InvestViewContainer: React.FC<InvestViewContainerProps> = ({ displaySettin
   const investData = useInvestData();
 
   if (investData.status === 'loading') {
+    // You can use ActivityIndicator or your custom skeleton loaders
     return (
-      <div>
-        <div>
-          <div className='inline-block !h-5 !w-20 rounded-md animate-pulse bg-gray-100 dark:bg-gray-900' />
-          <div className='mt-2 rounded-2xl overflow-hidden'>
-            <div className='h-11 w-full !m-0 rounded-t-2xl animate-pulse bg-gray-100 dark:bg-gray-900' />
-            <div className='border-t border-t-gray-900 !m-0' />
-            <div className='h-11 w-full !m-0 animate-pulse bg-gray-100 dark:bg-gray-900' />
-            <div className='border-t border-t-gray-900 !m-0' />
-            <div className='h-11 w-full !m-0 rounded-b-2xl animate-pulse bg-gray-100 dark:bg-gray-900' />
-          </div>
-        </div>
-        <div className='mt-4'>
-          <div className='inline-block !h-5 !w-20 rounded-md animate-pulse bg-gray-100 dark:bg-gray-900' />
-          <div className='mt-2 rounded-2xl overflow-hidden'>
-            <div className='h-11 w-full !m-0 rounded-t-2xl animate-pulse bg-gray-100 dark:bg-gray-900' />
-            <div className='border-t border-t-gray-900 !m-0' />
-            <div className='h-11 w-full !m-0 rounded-b-2xl animate-pulse bg-gray-100 dark:bg-gray-900' />
-          </div>
-        </div>
-      </div>
+      <View style={{ padding: 16 }}>
+        {/* First Section Skeleton */}
+        <View>
+          <View style={{ height: 20, width: 80, borderRadius: 6, backgroundColor: '#eee', marginBottom: 8 }} />
+          <View style={{ borderRadius: 16, overflow: 'hidden' }}>
+            <View style={{ height: 44, backgroundColor: '#eee', borderTopLeftRadius: 16, borderTopRightRadius: 16 }} />
+            <View style={{ height: 1, backgroundColor: '#ccc' }} />
+            <View style={{ height: 44, backgroundColor: '#eee' }} />
+            <View style={{ height: 1, backgroundColor: '#ccc' }} />
+            <View style={{ height: 44, backgroundColor: '#eee', borderBottomLeftRadius: 16, borderBottomRightRadius: 16 }} />
+          </View>
+        </View>
+        {/* Second Section Skeleton */}
+        <View style={{ marginTop: 16 }}>
+          <View style={{ height: 20, width: 80, borderRadius: 6, backgroundColor: '#eee', marginBottom: 8 }} />
+          <View style={{ borderRadius: 16, overflow: 'hidden' }}>
+            <View style={{ height: 44, backgroundColor: '#eee', borderTopLeftRadius: 16, borderTopRightRadius: 16 }} />
+            <View style={{ height: 1, backgroundColor: '#ccc' }} />
+            <View style={{ height: 44, backgroundColor: '#eee', borderBottomLeftRadius: 16, borderBottomRightRadius: 16 }} />
+          </View>
+        </View>
+      </View>
     );
   }
 
@@ -41,6 +44,7 @@ const InvestViewContainer: React.FC<InvestViewContainerProps> = ({ displaySettin
     return <ErrorCard text={investData.error.message} />;
   }
 
+  // Everything loaded
   return <InvestView data={investData.data} displaySettings={displaySettings} />;
 };
 

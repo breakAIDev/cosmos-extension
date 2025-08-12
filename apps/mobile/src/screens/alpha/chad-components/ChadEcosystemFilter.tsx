@@ -1,25 +1,27 @@
-import Text from 'components/text';
-import { EventName, PageName } from 'config/analytics';
-import { useDefaultTokenLogo, useNonNativeCustomChains } from 'hooks';
-import { useChainInfos } from 'hooks/useChainInfos';
-import { useCoingeckoChains } from 'hooks/useCoingeckoChains';
-import mixpanel from 'mixpanel-browser';
 import React, { useCallback } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import mixpanel from '../../../mixpanel';
 
+import { EventName, PageName } from '../../../services/config/analytics';
+import { useDefaultTokenLogo, useNonNativeCustomChains } from '../../../hooks';
+import { useChainInfos } from '../../../hooks/useChainInfos';
+import { useCoingeckoChains } from '../../../hooks/useCoingeckoChains';
 import FilterItem from '../components/FilterItem';
 import { useChadProvider } from '../context/chad-exclusives-context';
+
+type EcosystemFilterProps = {
+  ecosystemFilters: string[];
+  pageName: PageName;
+  isChad: boolean;
+  onClose: () => void;
+};
 
 export default function EcosystemFilter({
   ecosystemFilters,
   pageName,
   isChad,
   onClose,
-}: {
-  ecosystemFilters: string[];
-  pageName: PageName;
-  isChad: boolean;
-  onClose: () => void;
-}) {
+}: EcosystemFilterProps) {
   const { chains } = useCoingeckoChains();
   const nativeChains = useChainInfos();
   const nonNative = useNonNativeCustomChains();
@@ -52,10 +54,9 @@ export default function EcosystemFilter({
   );
 
   return (
-    <div className='flex flex-col gap-5'>
-      <span className='text-muted-foreground text-sm uppercase font-bold'>Ecosystem</span>
-
-      <div className='flex flex-col'>
+    <View style={styles.container}>
+      <Text style={styles.title}>Ecosystem</Text>
+      <View style={styles.list}>
         {ecosystemFilters
           ?.sort((a, b) => a.localeCompare(b))
           ?.map((ecosystem, index) => {
@@ -85,7 +86,26 @@ export default function EcosystemFilter({
               />
             );
           })}
-      </div>
-    </div>
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'column',
+    gap: 20,
+    marginBottom: 10,
+  },
+  title: {
+    color: '#97A3B9', // muted-foreground
+    fontSize: 13,
+    textTransform: 'uppercase',
+    fontWeight: 'bold',
+    marginBottom: 6,
+    letterSpacing: 1,
+  },
+  list: {
+    flexDirection: 'column',
+  },
+});

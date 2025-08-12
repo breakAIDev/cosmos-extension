@@ -1,5 +1,3 @@
-
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { AminoSignResponse, encodeSecp256k1Pubkey, StdSignDoc } from '@cosmjs/amino';
 import { Secp256k1 } from '@cosmjs/crypto';
 import { fromBase64, toBase64 } from '@cosmjs/encoding';
@@ -30,11 +28,12 @@ import {
   osmosisProtoRegistry,
 } from '@leapwallet/cosmos-wallet-sdk/dist/browser/proto/osmosis';
 import { strideAminoConverters } from '@leapwallet/cosmos-wallet-sdk/dist/browser/proto/stride/client';
-import { LEAPBOARD_URL, LEAPBOARD_URL_OLD } from 'config/constants';
+import { LEAPBOARD_URL, LEAPBOARD_URL_OLD } from '../../../services/config/constants';
 import { SignMode } from 'cosmjs-types/cosmos/tx/signing/v1beta1/signing';
 import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
 import Long from 'long';
 
+// --- Converters ---
 const osmosisAminoConverters: Record<
   keyof typeof originalOsmosisAminoConverters,
   {
@@ -44,21 +43,19 @@ const osmosisAminoConverters: Record<
   }
 > = {
   ...originalOsmosisAminoConverters,
-  //@ts-ignore
+  // @ts-ignore
   '/osmosis.concentratedliquidity.poolmodel.concentrated.v1beta1.MsgCreateConcentratedPool': {
-    //@ts-ignore
-    ...originalOsmosisAminoConverters[
-      '/osmosis.concentratedliquidity.poolmodel.concentrated.v1beta1.MsgCreateConcentratedPool'
-    ],
+    // @ts-ignore
+    ...originalOsmosisAminoConverters['/osmosis.concentratedliquidity.poolmodel.concentrated.v1beta1.MsgCreateConcentratedPool'],
     aminoType: 'osmosis/cl-create-pool',
   },
   '/osmosis.valsetpref.v1beta1.MsgDelegateToValidatorSet': {
-    //@ts-ignore
+    // @ts-ignore
     ...originalOsmosisAminoConverters['/osmosis.valsetpref.v1beta1.MsgDelegateToValidatorSet'],
     aminoType: 'osmosis/MsgDelegateToValidatorSet',
   },
   '/osmosis.valsetpref.v1beta1.MsgUndelegateFromValidatorSet': {
-    //@ts-ignore
+    // @ts-ignore
     ...originalOsmosisAminoConverters['/osmosis.valsetpref.v1beta1.MsgUndelegateFromValidatorSet'],
     aminoType: 'osmosis/MsgUndelegateFromValidatorSet',
   },
@@ -100,7 +97,7 @@ const ibcAminoConverters: Record<
       receiver,
       timeout_height,
       timeout_timestamp,
-      //@ts-ignore
+      // @ts-ignore
       memo = '',
     }: AminoMsgTransfer['value']): MsgTransfer => {
       return {
@@ -144,6 +141,7 @@ const registry = new Registry([
 
 import LogCosmosDappTx = LeapWalletApi.LogCosmosDappTx;
 
+// --- Utility ---
 const DAPPS_TO_SKIP_TXN_LOGGING = [LEAPBOARD_URL, LEAPBOARD_URL_OLD, 'swapfast.app'];
 
 function shouldSkipTxnLogging(origin: string): boolean {
@@ -164,7 +162,6 @@ export async function logDirectTx(
   data: DirectSignResponse,
   messages: any[],
   origin: string,
-  
   fee: any,
   chain: SupportedChain,
   address: string,
@@ -204,7 +201,7 @@ export function getTxHashFromAminoSignResponse(data: AminoSignResponse, pubkey: 
   const signedTxBody = {
     messages: data.signed.msgs.map((msg) => aminoTypes.fromAmino(msg)),
     memo: data.signed.memo,
-    //@ts-ignore
+    // @ts-ignore
     timeoutHeight: data.signed.timeout_height,
   };
 

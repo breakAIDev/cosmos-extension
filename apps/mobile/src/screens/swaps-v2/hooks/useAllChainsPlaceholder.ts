@@ -1,6 +1,6 @@
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { ThemeName, useTheme } from '@leapwallet/leap-ui';
-import { Images } from 'images';
+import { Images } from '../../../../assets/images';
 import { useMemo } from 'react';
 
 import { TokenAssociatedChain } from '../components/ChainsList';

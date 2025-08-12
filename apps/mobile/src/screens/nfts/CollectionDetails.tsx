@@ -1,16 +1,25 @@
 import { sliceWord } from '@leapwallet/cosmos-wallet-hooks';
 import { Collection } from '@leapwallet/cosmos-wallet-store';
-import { Heart } from '@phosphor-icons/react';
-import BottomModal from 'components/new-bottom-modal';
-import Text from 'components/text';
-import { Images } from 'images';
+import { Heart } from 'phosphor-react-native';
+import BottomModal from '../../components/new-bottom-modal';
+import Text from '../../components/text';
+import { Images } from '../../../assets/images';
 import { observer } from 'mobx-react-lite';
 import React, { useMemo } from 'react';
-import { favNftStore, hiddenNftStore } from 'stores/manage-nft-store';
-import { nftStore } from 'stores/nft-store';
-import { imgOnError } from 'utils/imgOnError';
-
+import { favNftStore, hiddenNftStore } from '../../context/manage-nft-store';
+import { nftStore } from '../../context/nft-store';
 import { useNftContext } from './context';
+
+import {
+  View,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  FlatList,
+  Dimensions,
+} from 'react-native';
+
+const ITEM_SIZE = (Dimensions.get('window').width - 64 - 16) / 2; // 64 = modal horizontal padding, 16 = grid gap
 
 const CollectionDetails = observer(() => {
   const { showCollectionDetailsFor, setShowCollectionDetailsFor, setNftDetails } = useNftContext();
@@ -28,8 +37,7 @@ const CollectionDetails = observer(() => {
       : [];
 
     return { collection, nfts: collectionNfts };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [collectionData?.collections, collectionData?.nfts, hiddenNftStore.hiddenNfts, showCollectionDetailsFor]);
+  }, [collectionData?.collections, collectionData?.nfts, showCollectionDetailsFor]);
 
   if (!nfts?.length) return null;
 
@@ -42,52 +50,123 @@ const CollectionDetails = observer(() => {
     <BottomModal
       onClose={() => setShowCollectionDetailsFor('')}
       isOpen={!!showCollectionDetailsFor}
-      className='!p-6'
+      style={styles.modal}
       title={sliceWord(collection.name, 20, 0)}
     >
-      <div className='grid grid-cols-2 gap-5'>
-        {nfts.map((nft) => {
+      <FlatList
+        data={nfts}
+        numColumns={2}
+        keyExtractor={(item, idx) =>
+          `${item?.collection.address ?? ''}-:-${item?.tokenId ?? item?.domain ?? ''}-${idx}`
+        }
+        columnWrapperStyle={{ gap: 16, marginBottom: 16 }}
+        renderItem={({ item: nft }) => {
           const nftIndex = `${nft?.collection.address ?? ''}-:-${nft?.tokenId ?? nft?.domain ?? ''}`;
           const isInFavNfts = favNftStore.favNfts.includes(nftIndex);
 
           return (
-            <div
-              key={nft.name}
-              className='flex flex-col gap-y-4 cursor-pointer'
-              onClick={() => {
+            <TouchableOpacity
+              activeOpacity={0.84}
+              style={styles.nftCard}
+              onPress={() => {
                 setNftDetails({ ...nft, chain: collection.chain });
                 setShowCollectionDetailsFor('');
               }}
             >
-              <div className='relative rounded-xl w-[166px] h-[166px] overflow-hidden'>
-                <img
-                  src={nft.image ?? Images.Logos.GenericNFT}
-                  onError={imgOnError(Images.Logos.GenericNFT)}
-                  width={166}
-                  height={166}
-                  className='hover:scale-110 duration-300 ease-out object-fill w-[166px] h-[166px]'
+              <View style={styles.nftImageContainer}>
+                <Image
+                  source={{ uri: nft.image ?? Images.Logos.GenericNFT}}
+                  style={styles.nftImage}
+                  resizeMode="cover"
                 />
                 {isInFavNfts && (
-                  <div>
-                    <Heart size={26} className='absolute top-[9px] right-[9px]' />
-                    <Heart size={24} weight='fill' color='#D0414F' className='absolute top-2.5 right-2.5' />
-                  </div>
+                  <>
+                    <Heart
+                      size={26}
+                      style={[styles.heartIcon, { position: 'absolute', top: 9, right: 9 }]}
+                    />
+                    <Heart
+                      size={24}
+                      weight="fill"
+                      color="#D0414F"
+                      style={[styles.heartFillIcon, { position: 'absolute', top: 14, right: 14 }]}
+                    />
+                  </>
                 )}
-              </div>
-              <div className='flex flex-col gap-y-0.5'>
-                <Text size='md' color='text-monochrome' className='font-bold !leading-[21.6px] break-all'>
+              </View>
+              <View style={styles.nftDetails}>
+                <Text size="md" style={styles.nftName}>
                   {sliceWord(nft.name, 12, 0)}
                 </Text>
-                <Text size='sm' color='text-muted-foreground' className='!leading-[18.9px]'>
+                <Text size="sm" style={styles.nftTokenId}>
                   #{sliceWord(nft.tokenId, 12, 3)}
                 </Text>
-              </div>
-            </div>
+              </View>
+            </TouchableOpacity>
           );
-        })}
-      </div>
+        }}
+        contentContainerStyle={{ paddingBottom: 32, paddingHorizontal: 0 }}
+        showsVerticalScrollIndicator={false}
+      />
     </BottomModal>
   );
+});
+
+const styles = StyleSheet.create({
+  modal: {
+    padding: 24,
+    paddingTop: 16,
+    flex: 1,
+  },
+  nftCard: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    marginBottom: 0,
+    alignItems: 'center',
+    gap: 12,
+  },
+  nftImageContainer: {
+    width: ITEM_SIZE,
+    height: ITEM_SIZE,
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: '#f4f6f8',
+    position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  nftImage: {
+    width: ITEM_SIZE,
+    height: ITEM_SIZE,
+    borderRadius: 16,
+    backgroundColor: '#eee',
+  },
+  heartIcon: {
+    zIndex: 2,
+  },
+  heartFillIcon: {
+    zIndex: 3,
+  },
+  nftDetails: {
+    alignItems: 'flex-start',
+    gap: 2,
+    width: ITEM_SIZE,
+    minHeight: 36,
+    paddingHorizontal: 2,
+  },
+  nftName: {
+    fontWeight: 'bold',
+    color: '#212121',
+    lineHeight: 22,
+    marginBottom: 2,
+  },
+  nftTokenId: {
+    color: '#999',
+    fontSize: 13,
+    lineHeight: 18,
+  },
 });
 
 export default CollectionDetails;

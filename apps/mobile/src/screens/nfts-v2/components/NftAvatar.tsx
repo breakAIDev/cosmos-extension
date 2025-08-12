@@ -1,30 +1,57 @@
-import classNames from 'classnames';
-import { Images } from 'images';
+import { Images } from '../../../../assets/images';
 import React from 'react';
-import { imgOnError } from 'utils/imgOnError';
-import { normalizeImageSrc } from 'utils/normalizeImageSrc';
+import { View, Image, StyleSheet } from 'react-native';
+import { ResizeMode, Video } from 'expo-av';
+import { normalizeImageSrc } from '../../../utils/normalizeImageSrc';
 
 type NftAvatarProps = {
   image?: string;
 };
 
 export function NftAvatar({ image }: NftAvatarProps) {
+  const isVideo = !!image && image.includes('mp4');
+  const imgSource = image
+    ? { uri: normalizeImageSrc(image) }
+    : {uri: Images.Misc.Sell};
+
   return (
-    <div className='w-10 h-10 rounded-lg bg-gray-50 dark:bg-black-100 flex'>
-      {image && image.includes('mp4') ? (
-        <video autoPlay loop playsInline muted className='rounded-lg w-full h-full object-cover object-top'>
-          <source type='video/mp4' src={normalizeImageSrc(image)} />
-          Your browser does not support this video player.
-        </video>
+    <View style={styles.root}>
+      {isVideo ? (
+        <Video
+          source={{ uri: normalizeImageSrc(image!) }}
+          shouldPlay
+          isMuted
+          isLooping
+          resizeMode={"cover" as ResizeMode}
+          style={styles.media}
+        />
       ) : (
-        <img
-          className={classNames('rounded-lg m-auto', {
-            'h-full w-full object-cover object-top': image,
-          })}
-          src={image ? normalizeImageSrc(image) ?? Images.Misc.Sell : Images.Misc.Sell}
-          onError={imgOnError(Images.Misc.Sell)}
+        <Image
+          source={imgSource}
+          style={styles.media}
+          resizeMode="cover"
+          onError={() => {
+            // Optionally show fallback if needed
+          }}
         />
       )}
-    </div>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: '#f9fafb', // bg-gray-50
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  media: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 10,
+  },
+});

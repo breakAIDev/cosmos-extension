@@ -1,4 +1,4 @@
-import { ChainInfo, getChainInfo, getUnbondingTime, SupportedChain, Validator } from '@leapwallet/cosmos-wallet-sdk';
+import { AllParams, ChainInfo, getChainInfo, getUnbondingTime, SupportedChain, Validator } from '@leapwallet/cosmos-wallet-sdk';
 import CosmosDirectory from '@leapwallet/cosmos-wallet-sdk/dist/browser/chains/cosmosDirectory';
 import { useEffect, useMemo } from 'react';
 
@@ -141,9 +141,7 @@ export function useFetchStakeValidators(forceChain?: SupportedChain, forceNetwor
           if (isCancelled) return;
           setStakeValidatorData({
             chainData: {
-              
-              
-              params: { ...(_chainData?.params ?? {}), calculated_apr: calculatedApr, unbonding_time },
+              params: { ...(_chainData?.params ?? {}), calculated_apr: calculatedApr, unbonding_time } as AllParams | undefined,
             },
             validators,
           });

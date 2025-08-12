@@ -1,11 +1,9 @@
-import { useAirdropsEligibilityData } from '@leapwallet/cosmos-wallet-hooks';
-import Loader from 'components/loader/Loader';
-import Text from 'components/text';
-import { motion } from 'framer-motion';
-import { Images } from 'images';
-import { createWalletLoaderVariants } from 'pages/onboarding/create/creating-wallet-loader';
 import React, { useEffect, useState } from 'react';
-import { transition } from 'utils/motion-variants';
+import { View, Image, ActivityIndicator, StyleSheet } from 'react-native';
+import { useAirdropsEligibilityData } from '@leapwallet/cosmos-wallet-hooks';
+import { Images } from '../../../assets/images';
+import { MotiView } from 'moti';
+import { transition } from '../../utils/motion-variants';
 
 import EligibleAirdrops from './components/EligibleAirdrops';
 import EmptyAirdrops from './components/EmptyAirdrops';
@@ -13,9 +11,10 @@ import FailedAirdrops from './components/FailedAirdrops';
 import InEligibleAirdrops from './components/InEligibleAirdrops';
 import MoreAirdrops from './components/MoreAirdrops';
 import WalletView from './components/WalletView';
+import { Colors } from '../../theme/colors';
 
 export default function AirdropsHome() {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState(true);
   const airdropsEligibilityData = useAirdropsEligibilityData();
   const isDataNull = airdropsEligibilityData === null;
 
@@ -23,9 +22,7 @@ export default function AirdropsHome() {
     let timeout: NodeJS.Timeout;
     if (isDataNull) {
       setIsLoading(true);
-      timeout = setTimeout(() => {
-        setIsLoading(false);
-      }, 10000);
+      timeout = setTimeout(() => setIsLoading(false), 10000);
     } else {
       setIsLoading(false);
     }
@@ -34,38 +31,37 @@ export default function AirdropsHome() {
 
   if (isLoading) {
     return (
-      <div className='flex flex-col items-center justify-center gap-8 flex-1 pb-[75px] h-full'>
-        <div className='relative'>
-          <img src={Images.Misc.WalletIconGreen} alt='wallet' className='size-6 absolute inset-0 mx-auto my-auto' />
-          <div className='loader-container'>
-            <div className='spinning-loader' />
-          </div>
-        </div>
-
-        <motion.span
-          className='text-secondary-foreground text-xl font-bold'
+      <View style={styles.loadingContainer}>
+        <View style={styles.iconLoaderWrapper}>
+          <Image
+            source={{uri: Images.Misc.WalletIconGreen}}
+            style={styles.walletIcon}
+            resizeMode="contain"
+          />
+          <ActivityIndicator size="large" color="#10B981" style={styles.spinner} />
+        </View>
+        <MotiView
+          style={{backgroundColor: Colors.secondary300}}
           transition={transition}
-          variants={createWalletLoaderVariants}
-          initial='hidden'
           animate='visible'
         >
           Loading Airdrops...
-        </motion.span>
-      </div>
+        </MotiView>
+      </View>
     );
   }
 
   return (
-    <div className='flex flex-col gap-4'>
+    <View style={styles.container}>
       <WalletView />
-
       {isDataNull ? (
         <EmptyAirdrops
-          className='h-[340px] justify-center'
-          title='Airdrops can’t be loaded'
+          style={styles.emptyAirdrops}
+          title="Airdrops can’t be loaded"
           subTitle={
             <>
-              Airdrops can’t be loaded due to a <br /> technical failure, Kindly try again later.
+              Airdrops can’t be loaded due to a{'\n'}
+              technical failure, Kindly try again later.
             </>
           }
           showRetryButton={true}
@@ -78,6 +74,57 @@ export default function AirdropsHome() {
           <MoreAirdrops />
         </>
       )}
-    </div>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 32,
+    paddingBottom: 75,
+    height: '100%',
+  },
+  iconLoaderWrapper: {
+    position: 'relative',
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  walletIcon: {
+    width: 24,
+    height: 24,
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    zIndex: 2,
+  },
+  spinner: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    width: 44,
+    height: 44,
+    zIndex: 1,
+  },
+  loadingText: {
+    color: '#374151', // text-secondary-foreground
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 16,
+  },
+  container: {
+    flex: 1,
+    flexDirection: 'column',
+    gap: 16,
+    padding: 0,
+  },
+  emptyAirdrops: {
+    height: 340,
+    justifyContent: 'center',
+  },
+});

@@ -1,10 +1,11 @@
 import { sortStringArr } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { useChainPageInfo } from 'hooks';
-import { useChainInfos } from 'hooks/useChainInfos';
-import { Images } from 'images';
+import { useChainPageInfo } from '../../../hooks';
+import { useChainInfos } from '../../../hooks/useChainInfos';
+import { Images } from '../../../../assets/images';
 import React from 'react';
-import { getChainName } from 'utils/getChainName';
+import { ScrollView, View, StyleSheet, TouchableOpacity } from 'react-native';
+import { getChainName } from '../../../utils/getChainName';
 
 import { Chip } from './index';
 
@@ -18,47 +19,97 @@ export function SelectedSortsByChips({ selectedSortsBy, setSelectedSortsBy }: Se
   const { topChainColor } = useChainPageInfo();
 
   return (
-    <div className='flex overflow-auto whitespace-nowrap scroll-smooth mb-4'>
+    <ScrollView horizontal style={styles.scroll} contentContainerStyle={styles.scrollContent} showsHorizontalScrollIndicator={false}>
       {sortStringArr(selectedSortsBy).map((chain) => {
         const chainInfo = chainInfos[chain as SupportedChain];
 
         return (
-          <Chip key={chain} className='bg-gray-100 dark:bg-gray-950 py-[8px] px-[14px] mr-3 min-w-[125px]'>
-            <Chip.Image
-              className='w-[15px] h-[15px] mr-2'
-              src={chainInfo.chainSymbolImageUrl}
-              alt={`${chainInfo.chainName.toLowerCase()} logo`}
-            />
-
-            <Chip.Text
-              className='text-gray-800 dark:text-gray-50 text-sm max-w-[90px] truncate'
-              title={getChainName(chainInfo.chainName)}
-            >
-              {getChainName(chainInfo.chainName)}
-            </Chip.Text>
-
-            <Chip.Image
-              className='w-[12px] h-[12px] ml-2 cursor-pointer'
-              src={Images.Misc.Cross}
-              alt='close'
-              onClick={() => setSelectedSortsBy((prevValue) => prevValue.filter((prevChain) => prevChain !== chain))}
-            />
-          </Chip>
+          <View key={chain} style={styles.chipWrap}>
+            <Chip style={styles.chip}>
+              <Chip.Image
+                source={{ uri: chainInfo.chainSymbolImageUrl }}
+                style={styles.logo}
+              />
+              <Chip.Text
+                style={styles.chainText}
+                numberOfLines={1}
+              >
+                {getChainName(chainInfo.chainName)}
+              </Chip.Text>
+              <TouchableOpacity
+                onPress={() =>
+                  setSelectedSortsBy((prevValue) => prevValue.filter((prevChain) => prevChain !== chain))
+                }
+              >
+                <Chip.Image
+                  source={{uri: Images.Misc.Cross}}
+                  style={styles.cross}
+                />
+              </TouchableOpacity>
+            </Chip>
+          </View>
         );
       })}
 
-      <Chip
-        onClick={() => setSelectedSortsBy([])}
-        className='cursor-pointer border border-gray-100 dark:border-gray-800 py-[8px] px-[14px]'
-      >
-        <Chip.Text
-          className='text-gray-800 dark:text-gray-50 text-sm font-bold'
-          title='Reset'
-          style={{ color: topChainColor }}
-        >
-          Reset
-        </Chip.Text>
-      </Chip>
-    </div>
+      <View style={styles.chipWrap}>
+        <TouchableOpacity onPress={() => setSelectedSortsBy([])}>
+          <Chip style={[styles.resetChip, { borderColor: topChainColor }]}>
+            <Chip.Text style={[styles.resetText, { color: topChainColor }]}>
+              Reset
+            </Chip.Text>
+          </Chip>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  scroll: {
+    marginBottom: 16,
+  },
+  scrollContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  chipWrap: {
+    marginRight: 12,
+  },
+  chip: {
+    backgroundColor: '#f3f4f6', // bg-gray-100
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 16,
+    minWidth: 125,
+  },
+  logo: {
+    width: 15,
+    height: 15,
+    marginRight: 8,
+    borderRadius: 8,
+  },
+  chainText: {
+    color: '#18181b',
+    fontSize: 14,
+    maxWidth: 90,
+    flexShrink: 1,
+  },
+  cross: {
+    width: 12,
+    height: 12,
+    marginLeft: 8,
+  },
+  resetChip: {
+    borderWidth: 1,
+    borderColor: '#f3f4f6',
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 16,
+  },
+  resetText: {
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+});

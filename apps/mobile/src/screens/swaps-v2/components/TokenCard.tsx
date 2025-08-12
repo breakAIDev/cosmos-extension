@@ -6,7 +6,7 @@ import {
   useGetChains,
   useGetExplorerAccountUrl,
 } from '@leapwallet/cosmos-wallet-hooks';
-import { ArrowSquareOut, CopySimple } from '@phosphor-icons/react';
+import { ArrowSquareOut, CopySimple } from 'phosphor-react-native';
 import BigNumber from 'bignumber.js';
 import classNames from 'classnames';
 import Text from 'components/text';

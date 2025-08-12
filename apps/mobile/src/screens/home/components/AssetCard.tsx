@@ -1,10 +1,11 @@
 import { isTerraClassic, Token, useActiveChain } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { ChainInfosStore, PercentageChangeDataStore } from '@leapwallet/cosmos-wallet-store';
-import { PageName } from 'config/analytics';
+import { PageName } from '../../../services/config/analytics';
 import { observer } from 'mobx-react-lite';
 import React, { useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigation } from '@react-navigation/native'; // <-- Your navigation system
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { AggregatedTokenCard } from './index';
 
@@ -17,11 +18,23 @@ type AssetCardProps = {
 
 export const AssetCard = observer(
   ({ asset, percentageChangeDataStore, chainInfosStore, isPlaceholder }: AssetCardProps) => {
-    const { symbol, amount, usdValue, img, ibcChainInfo, coinMinimalDenom, name, chain, isEvm, tokenBalanceOnChain } =
-      asset;
+    const {
+      symbol,
+      amount,
+      usdValue,
+      img,
+      ibcChainInfo,
+      coinMinimalDenom,
+      name,
+      chain,
+      isEvm,
+      tokenBalanceOnChain,
+    } = asset;
+
     const chains = chainInfosStore.chainInfos;
-    // const marketData = marketDataStore.data
     const percentageChangeData = percentageChangeDataStore.data;
+    const activeChain = useActiveChain();
+    const navigation = useNavigation();
 
     const percentageChangeDataForToken = useMemo(() => {
       let key = asset.coinGeckoId ?? asset.coinMinimalDenom;
@@ -36,24 +49,28 @@ export const AssetCard = observer(
       return percentageChangeData?.[key] ?? percentageChangeData?.[key?.toLowerCase()];
     }, [asset, percentageChangeData, chains]);
 
-    const navigate = useNavigate();
-    const activeChain = useActiveChain();
-
-    const handleCardClick = () => {
+    const handleCardClick = async () => {
       let tokenChain = chain?.replace('cosmoshub', 'cosmos');
       if (isTerraClassic(ibcChainInfo?.pretty_name ?? '') && coinMinimalDenom === 'uluna') {
         tokenChain = 'terra-classic';
       }
-
       if (!tokenChain) return;
 
-      sessionStorage.setItem('navigate-assetDetails-state', JSON.stringify(asset));
-      navigate(
-        `/assetDetails?assetName=${
-          coinMinimalDenom.length > 0 ? coinMinimalDenom : symbol
-        }&tokenChain=${tokenChain}&pageSource=${PageName.Home}`,
-        { state: asset },
-      );
+      try {
+        await AsyncStorage.setItem(
+          'navigate-assetDetails-state',
+          JSON.stringify(asset)
+        );
+      } catch (e) {
+        // Handle error if needed
+      }
+
+      navigation.navigate('AssetDetails', {
+        assetName: coinMinimalDenom.length > 0 ? coinMinimalDenom : symbol,
+        tokenChain,
+        pageSource: PageName.Home,
+        asset, // pass as param, for easier RN prop passing
+      });
     };
 
     return (
@@ -72,5 +89,5 @@ export const AssetCard = observer(
         percentChange24={percentageChangeDataForToken?.price_change_percentage_24h}
       />
     );
-  },
+  }
 );

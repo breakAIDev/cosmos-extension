@@ -1,16 +1,23 @@
 import { FeeTokenData } from '@leapwallet/cosmos-wallet-hooks';
 import { RootBalanceStore, RootDenomsStore } from '@leapwallet/cosmos-wallet-store';
 import BigNumber from 'bignumber.js';
-import GasPriceOptions, { useDefaultGasPrice } from 'components/gas-price-options';
-import { GasPriceOptionValue } from 'components/gas-price-options/context';
-import { DisplayFee } from 'components/gas-price-options/display-fee';
-import { FeesSettingsSheet } from 'components/gas-price-options/fees-settings-sheet';
+import GasPriceOptions, { useDefaultGasPrice } from '../../../../components/gas-price-options';
+import { GasPriceOptionValue } from '../../../../components/gas-price-options/context';
+import { DisplayFee } from '../../../../components/gas-price-options/display-fee';
+import { FeesSettingsSheet } from '../../../../components/gas-price-options/fees-settings-sheet';
 import { observer } from 'mobx-react-lite';
-import { useSendContext } from 'pages/send/context';
+import { useSendContext } from '../../../send/context';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { View, Text } from 'react-native';
 
 export const FeesView = observer(
-  ({ rootDenomsStore, rootBalanceStore }: { rootDenomsStore: RootDenomsStore; rootBalanceStore: RootBalanceStore }) => {
+  ({
+    rootDenomsStore,
+    rootBalanceStore,
+  }: {
+    rootDenomsStore: RootDenomsStore;
+    rootBalanceStore: RootBalanceStore;
+  }) => {
     const [showFeesSettingSheet, setShowFeesSettingSheet] = useState(false);
     const {
       userPreferredGasPrice,
@@ -57,7 +64,6 @@ export const FeesView = observer(
       [setFeeDenom],
     );
 
-    // initialize gasPriceOption with correct defaultGasPrice.gasPrice
     useEffect(() => {
       if (gasPriceSetFromGasPriceOptions.current) {
         return;
@@ -66,9 +72,7 @@ export const FeesView = observer(
         option: gasOption,
         gasPrice: defaultGasPrice.gasPrice,
       });
-
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [defaultGasPrice.gasPrice.amount.toString(), defaultGasPrice.gasPrice.denom]);
+    }, [defaultGasPrice.gasPrice, defaultGasPrice.gasPrice.denom, gasOption]);
 
     useEffect(() => {
       setGasOption(gasPriceOption.option);
@@ -76,7 +80,7 @@ export const FeesView = observer(
     }, [gasPriceOption, setGasOption, setUserPreferredGasPrice]);
 
     return (
-      <div>
+      <View>
         <GasPriceOptions
           recommendedGasLimit={gasEstimate.toString()}
           gasLimit={userPreferredGasLimit?.toString() ?? gasEstimate.toString()}
@@ -92,20 +96,34 @@ export const FeesView = observer(
           rootDenomsStore={rootDenomsStore}
           rootBalanceStore={rootBalanceStore}
         >
-          {addressWarning.type === 'link' ? null : <DisplayFee setShowFeesSettingSheet={setShowFeesSettingSheet} />}
+          {addressWarning.type === 'link' ? null : (
+            <DisplayFee setShowFeesSettingSheet={setShowFeesSettingSheet} />
+          )}
 
           {gasError && !showFeesSettingSheet ? (
-            <p className='text-red-300 text-sm font-medium mt-2 text-center'>{gasError}</p>
+            <Text
+              style={{
+                color: '#F87171',
+                fontSize: 14,
+                fontWeight: '500',
+                marginTop: 8,
+                textAlign: 'center',
+              }}
+            >
+              {gasError}
+            </Text>
           ) : null}
 
           <FeesSettingsSheet
             showFeesSettingSheet={showFeesSettingSheet}
             onClose={onClose}
             gasError={gasError}
-            hideAdditionalSettings={sendActiveChain === 'bitcoin' || sendActiveChain === 'bitcoinSignet'}
+            hideAdditionalSettings={
+              sendActiveChain === 'bitcoin' || sendActiveChain === 'bitcoinSignet'
+            }
           />
         </GasPriceOptions>
-      </div>
+      </View>
     );
   },
 );

@@ -1,18 +1,19 @@
 import { useGetChains } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { AggregatedChainsStore } from '@leapwallet/cosmos-wallet-store';
-import { MagnifyingGlassMinus } from '@phosphor-icons/react';
-import { AggregatedNullComponents } from 'components/aggregated';
-import { CopyAddressCard } from 'components/card';
-import BottomModal from 'components/new-bottom-modal';
-import { SearchInput } from 'components/ui/input/search-input';
-import { PriorityChains } from 'config/constants';
-import { useWalletInfo } from 'hooks';
-import { useGetWalletAddresses } from 'hooks/useGetWalletAddresses';
+import { MagnifyingGlassMinus } from 'phosphor-react-native';
+import { AggregatedNullComponents } from '../../../components/aggregated';
+import { CopyAddressCard } from '../../../components/card';
+import BottomModal from '../../../components/new-bottom-modal';
+import { SearchInput } from '../../../components/ui/input/search-input';
+import { PriorityChains } from '../../../services/config/constants';
+import { useWalletInfo } from '../../../hooks';
+import { useGetWalletAddresses } from '../../../hooks/useGetWalletAddresses';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { cn } from 'utils/cn';
+import { View, Text, ScrollView, Image, StyleSheet } from 'react-native';
 
 import { CopyAddressSheet } from './index';
+import { TextInput } from 'react-native-gesture-handler';
 
 type AggregatedWalletAddresses = {
   [chain: string]: string[];
@@ -57,7 +58,7 @@ type AggregatedCopyAddressSheetProps = {
 
 const AggregatedCopyAddressSheet = React.memo(
   ({ isVisible, onClose, aggregatedChainsStore }: AggregatedCopyAddressSheetProps) => {
-    const searchInputRef = useRef<HTMLInputElement>(null);
+    const searchInputRef = useRef<TextInput>(null); // React Native input ref
     const [walletAddresses, setWalletAddresses] = useState<AggregatedWalletAddresses>({});
     const { walletAvatar, walletName } = useWalletInfo();
     const chains = useGetChains();
@@ -65,17 +66,18 @@ const AggregatedCopyAddressSheet = React.memo(
     const [selectedChain, setSelectedChain] = useState<SupportedChain>('cosmos');
     const [searchQuery, setSearchQuery] = useState('');
 
-    const Title = useMemo(() => {
-      return (
-        <h3 className='flex items-center justify-center gap-2 h-10 bg-secondary-200 rounded-full px-5 py-2'>
-          <img className='w-[24px] h-[24px]' src={walletAvatar} alt='wallet avatar' />
-
-          <span className='text-foreground truncate text-md !leading-[22px] font-bold max-w-[196px]' title={walletName}>
-            {walletName}
-          </span>
-        </h3>
-      );
-    }, [walletAvatar, walletName]);
+    const Title = useMemo(() => (
+      <View style={styles.titleContainer}>
+        <Image source={{ uri: walletAvatar }} style={styles.avatar} />
+        <Text
+          style={styles.titleText}
+          numberOfLines={1}
+          ellipsizeMode="tail"
+        >
+          {walletName}
+        </Text>
+      </View>
+    ), [walletAvatar, walletName]);
 
     const handleCopyAddressSheetClose = useCallback(() => {
       setShowCopyAddressSheet(false);
@@ -113,7 +115,7 @@ const AggregatedCopyAddressSheet = React.memo(
     useEffect(() => {
       if (isVisible) {
         setTimeout(() => {
-          searchInputRef.current?.focus();
+          searchInputRef.current?.focus?.();
         }, 200);
       } else {
         setSearchQuery('');
@@ -138,26 +140,26 @@ const AggregatedCopyAddressSheet = React.memo(
           onClose={onClose}
           title={Title}
           fullScreen
-          headerClassName='h-[72px] shrink-0'
-          contentClassName='[&>div:first-child>div:last-child]:-mt-[2px]'
-          className='h-full p-6'
+          headerStyle={styles.header}
+          containerStyle={styles.lastChild}
+          style={styles.modalContent}
         >
           <SearchInput
             ref={searchInputRef}
             placeholder='Search by chain name'
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChangeText={setSearchQuery}
             onClear={() => setSearchQuery('')}
-            className='mb-7'
+            style={styles.searchInput}
           />
-          <div
-            className='flex flex-col items-center justify-start h-[calc(100%-75px)] w-full gap-4'
-            style={{ overflowY: 'scroll' }}
+          <ScrollView
+            contentContainerStyle={styles.scrollView}
+            style={{ flex: 1 }}
+            keyboardShouldPersistTaps="handled"
           >
             {filteredWalletAddresses?.length > 0 ? (
               filteredWalletAddresses.map(({ chain, addresses }, index) => {
                 const chainInfo = chains[chain];
-
                 if (addresses.length > 1) {
                   const sortedAddresses = addresses.sort((a, b) => {
                     const isEVM = a?.startsWith('0x');
@@ -168,12 +170,12 @@ const AggregatedCopyAddressSheet = React.memo(
                   });
                   return (
                     <React.Fragment key={`${addresses[0]}-${index}`}>
-                      {sortedAddresses.map((address, index) => {
+                      {sortedAddresses.map((address, idx) => {
                         const isEVM = address?.startsWith('0x');
                         return (
                           <CopyAddressCard
                             address={address}
-                            key={`${address}-${index}`}
+                            key={`${address}-${idx}`}
                             forceChain={chain}
                             forceName={`${chainInfo.chainName}${isEVM ? ` (EVM)` : ''}`}
                           />
@@ -182,31 +184,24 @@ const AggregatedCopyAddressSheet = React.memo(
                     </React.Fragment>
                   );
                 }
-
                 return (
-                  <React.Fragment key={`${addresses[0]}-${index}`}>
-                    <CopyAddressCard
-                      address={addresses[0]}
-                      key={`${addresses[0]}-${index}`}
-                      forceChain={chain}
-                      forceName={chainInfo.chainName}
-                    />
-                  </React.Fragment>
+                  <CopyAddressCard
+                    address={addresses[0]}
+                    key={`${addresses[0]}-${index}`}
+                    forceChain={chain}
+                    forceName={chainInfo.chainName}
+                  />
                 );
               })
             ) : (
-              <div
-                className={cn('w-full flex items-center justify-center rounded-2xl border border-secondary-200 h-full')}
-              >
-                <div className='flex items-center justify-center flex-col gap-4'>
-                  <div className='p-5 bg-secondary-200 rounded-full flex items-center justify-center'>
-                    <MagnifyingGlassMinus size={24} className='text-foreground' />
-                  </div>
-                  <p className='text-[18px] !leading-[24px] font-bold text-foreground text-center'>No results found</p>
-                </div>
-              </div>
+              <View style={styles.noResultBox}>
+                <View style={styles.noResultIcon}>
+                  <MagnifyingGlassMinus size={24} color="#888" />
+                </View>
+                <Text style={styles.noResultText}>No results found</Text>
+              </View>
             )}
-          </div>
+          </ScrollView>
         </BottomModal>
 
         <CopyAddressSheet
@@ -219,6 +214,75 @@ const AggregatedCopyAddressSheet = React.memo(
     );
   },
 );
+
+const styles = StyleSheet.create({
+  header: {
+    height: 72,
+    flexShrink: 0,
+  },
+  lastChild: {
+    marginTop: -2,
+  },
+  modalContent: {
+    flex: 1,
+    padding: 24,
+  },
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    height: 40,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    marginBottom: 8,
+  },
+  avatar: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    marginRight: 8,
+  },
+  titleText: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    color: '#222',
+    maxWidth: 196,
+  },
+  searchInput: {
+    marginBottom: 16,
+  },
+  scrollView: {
+    alignItems: 'center',
+    paddingBottom: 24,
+    flexGrow: 1,
+  },
+  noResultBox: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    padding: 32,
+    marginTop: 24,
+  },
+  noResultIcon: {
+    padding: 16,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  noResultText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#222',
+    textAlign: 'center',
+  },
+});
 
 AggregatedCopyAddressSheet.displayName = 'AggregatedCopyAddressSheet';
 export { AggregatedCopyAddressSheet };

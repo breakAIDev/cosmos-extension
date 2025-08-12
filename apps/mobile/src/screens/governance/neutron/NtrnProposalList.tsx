@@ -1,29 +1,24 @@
-import { useActiveChain } from '@leapwallet/cosmos-wallet-hooks';
-import { ChainTagsStore } from '@leapwallet/cosmos-wallet-store';
-import { CardDivider, Header, HeaderActionType } from '@leapwallet/leap-ui';
-import { CheckCircle } from '@phosphor-icons/react';
-import classNames from 'classnames';
-import { TestnetAlertStrip } from 'components/alert-strip';
-import BottomModal from '../bottom-modal';
-import { EmptyCard } from 'components/empty-card';
-import PopupLayout from 'components/layout/popup-layout';
-import { LoaderAnimation } from 'components/loader/Loader';
-import GovCardSkeleton from 'components/Skeletons/GovCardSkeleton';
-import { SearchInput } from 'components/ui/input/search-input';
-import { useChainInfos } from 'hooks/useChainInfos';
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
-import Sort from 'icons/sort';
-import { Images } from 'images';
+import React, { useMemo, useState } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import { observer } from 'mobx-react-lite';
-import SelectChain from 'pages/home/SelectChain';
-import React, { Fragment, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { isSidePanel } from 'utils/isSidePanel';
-import { sliceSearchWord } from 'utils/strings';
 
+import { useActiveChain } from '@leapwallet/cosmos-wallet-hooks';
+import { useChainInfos } from '../../../hooks/useChainInfos';
+import { useDefaultTokenLogo } from '../../../hooks/utility/useDefaultTokenLogo';
+import { CardDivider, Header, HeaderActionType } from '@leapwallet/leap-ui';
+import { CheckCircle } from 'phosphor-react-native';
+
+import PopupLayout from '../../../components/layout/popup-layout';
+import BottomModal from '../../../components/bottom-modal';
+import { EmptyCard } from '../../../components/empty-card';
+import GovCardSkeleton from '../../../components/Skeletons/GovCardSkeleton';
+import { SearchInput } from '../../../components/ui/input/search-input';
+import SelectChain from '../../home/SelectChain';
 import { NtrnStatus } from './index';
 import { NtrnProposalStatus } from './NtrnStatus';
 import { getId, getStatus, getTitle } from './utils';
+import { ChainTagsStore } from '@leapwallet/cosmos-wallet-store';
+import { TestnetAlertStrip } from '../../../components/alert-strip';
 
 const FILTERS = [
   { key: 'all', label: 'All Proposals' },
@@ -42,199 +37,264 @@ type NtrnProposalListProps = {
   shouldPreferFallback?: boolean;
 };
 
-export const NtrnProposalList = observer(
-  ({
-    proposalList: _proposalList,
-    proposalListStatus,
-    onClick,
-    shouldPreferFallback,
-    fetchMore,
-    chainTagsStore,
-  }: NtrnProposalListProps) => {
-    const [showChainSelector, setShowChainSelector] = useState(false);
-    const [showFilter, setShowFilter] = useState(false);
-    const [propFilter, setPropFilter] = useState<string>('');
-    const [filter, setFilter] = useState('all');
+export const NtrnProposalList = observer(({
+  proposalList: _proposalList,
+  proposalListStatus,
+  onClick,
+  shouldPreferFallback,
+  fetchMore,
+  chainTagsStore,
+}: NtrnProposalListProps) => {
+  const [showChainSelector, setShowChainSelector] = useState(false);
+  const [showFilter, setShowFilter] = useState(false);
+  const [propFilter, setPropFilter] = useState('');
+  const [filter, setFilter] = useState('all');
 
-    const chainInfos = useChainInfos();
-    const activeChain = useActiveChain();
-    const defaultTokenLogo = useDefaultTokenLogo();
-    const navigate = useNavigate();
+  const chainInfos = useChainInfos();
+  const activeChain = useActiveChain();
+  const defaultTokenLogo = useDefaultTokenLogo();
 
-    const loading = proposalListStatus === 'loading';
-    const activeChainInfo = chainInfos[activeChain];
+  const loading = proposalListStatus === 'loading';
+  const activeChainInfo = chainInfos[activeChain];
 
-    const filteredProposalList = useMemo(() => {
-      return _proposalList?.reduce((acc, curr) => {
-        if (filter === 'all') {
-          if (!propFilter) acc.push(curr);
-          else if (
-            getTitle(curr, shouldPreferFallback ?? false)
-              .toLowerCase()
-              .includes(propFilter) ||
-            String(curr.id) === propFilter
-          ) {
-            acc.push(curr);
-          }
-        } else {
-          if (!propFilter && getStatus(curr, shouldPreferFallback ?? false) === filter) {
-            acc.push(curr);
-          } else if (
-            getStatus(curr, shouldPreferFallback ?? false) === filter &&
-            (getTitle(curr, shouldPreferFallback ?? false)
-              .toLowerCase()
-              .includes(propFilter) ||
-              String(curr.id) === propFilter)
-          ) {
-            acc.push(curr);
-          }
+  // Filtering logic
+  const filteredProposalList = useMemo(() => {
+    return _proposalList?.reduce((acc, curr) => {
+      if (filter === 'all') {
+        if (!propFilter) acc.push(curr);
+        else if (
+          getTitle(curr, shouldPreferFallback ?? false)
+            .toLowerCase()
+            .includes(propFilter) ||
+          String(curr.id) === propFilter
+        ) {
+          acc.push(curr);
         }
-
-        return acc;
-      }, []);
-    }, [_proposalList, filter, propFilter, shouldPreferFallback]);
-
-    useEffect(() => {
-      const bottom = document.querySelector('#bottom');
-      if (!bottom || filteredProposalList?.length === 0 || proposalListStatus !== 'success') return;
-      const handleIntersection = (entries: IntersectionObserverEntry[]) => {
-        if (entries[0].isIntersecting) {
-          fetchMore();
+      } else {
+        if (!propFilter && getStatus(curr, shouldPreferFallback ?? false) === filter) {
+          acc.push(curr);
+        } else if (
+          getStatus(curr, shouldPreferFallback ?? false) === filter &&
+          (getTitle(curr, shouldPreferFallback ?? false)
+            .toLowerCase()
+            .includes(propFilter) ||
+            String(curr.id) === propFilter)
+        ) {
+          acc.push(curr);
         }
-      };
-      const observer = new IntersectionObserver(handleIntersection, {
-        root: null,
-        rootMargin: '0px',
-        threshold: 1.0,
-      });
-      observer.observe(bottom);
-      return () => {
-        observer.disconnect();
-      };
-    }, [fetchMore, filteredProposalList?.length, proposalListStatus]);
+      }
+      return acc;
+    }, []);
+  }, [_proposalList, filter, propFilter, shouldPreferFallback]);
 
-    return (
-      <div className='relative w-full overflow-clip panel-height enclosing-panel'>
-        <PopupLayout
-          header={
-            <Header
-              action={{
-                onClick: () => navigate(-1),
-                type: HeaderActionType.BACK,
-              }}
-              imgSrc={activeChainInfo.chainSymbolImageUrl ?? defaultTokenLogo}
-              onImgClick={() => setShowChainSelector(true)}
-              title='Governance'
+  // Infinite scroll handler (for FlatList)
+  const handleEndReached = () => {
+    if (proposalListStatus === 'success') fetchMore();
+  };
+
+  return (
+    <View style={styles.root}>
+      {/* Custom PopupLayout/Header */}
+      <PopupLayout
+        header={
+          <Header
+            action={{
+              onClick: () => {/* handle go back with navigation */},
+              type: HeaderActionType.BACK,
+            }}
+            imgSrc={activeChainInfo?.chainSymbolImageUrl ?? defaultTokenLogo}
+            onImgClick={() => setShowChainSelector(true)}
+            title='Governance'
+          />
+        }
+      >
+        {<TestnetAlertStrip />}
+
+        <View style={styles.headerSection}>
+          <Text style={styles.proposalsTitle}>Proposals</Text>
+          <Text style={styles.chainName}>List of proposals in {activeChain.toUpperCase()}</Text>
+          <View style={styles.searchFilterRow}>
+            <SearchInput
+              placeholder='Search proposals...'
+              onChangeText={text => setPropFilter(text.toLowerCase())}
+              value={propFilter}
+              onClear={() => setPropFilter('')}
             />
-          }
-        >
-          <TestnetAlertStrip />
+            <TouchableOpacity
+              style={styles.sortBtn}
+              onPress={() => setShowFilter(true)}
+            >
+              {/* Replace with your Sort icon */}
+              <Text>Sort</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
 
-          <div className='w-full flex flex-col pt-6 pb-2 px-7 '>
-            <div className='text-[28px] text-black-100 dark:text-white-100 font-bold'>Proposals</div>
-            <div className='text-sm text-gray-600 font-bold'>List of proposals in {activeChain.toUpperCase()}</div>
-
-            <div className='flex items-center justify-between mt-6 mb-4'>
-              <SearchInput
-                placeholder='Search proposals...'
-                onChange={(event) => setPropFilter(event.currentTarget.value.toLowerCase())}
-                value={propFilter}
-                onClear={() => setPropFilter('')}
-              />
-
-              <button
-                className='flex items-center justify-center h-10 bg-white-100 dark:bg-gray-900 rounded-full w-10 m-w-10 ml-3'
-                style={{ minWidth: 40 }}
-                onClick={() => setShowFilter(true)}
-              >
-                <Sort size={20} className='dark:text-white-100 text-gray-800' />
-              </button>
-            </div>
-          </div>
-
-          <div id='governance-list' className='pb-20 px-7'>
-            <div className='rounded-2xl flex flex-col items-center w-full m-auto justify-center dark:bg-gray-900 bg-white-100'>
-              {loading ? (
-                Array.from({ length: 5 }).map((_, index) => <GovCardSkeleton key={index} isLast={index === 4} />)
-              ) : (filteredProposalList?.length ?? 0) === 0 ? (
-                <EmptyCard
-                  isRounded
-                  subHeading={propFilter ? 'Please try again with something else' : ''}
-                  heading={propFilter ? 'No results for “' + sliceSearchWord(propFilter) + '”' : 'No Proposals'}
-                  src={Images.Misc.Explore}
-                />
-              ) : (
-                
-                filteredProposalList?.map((proposal: any, index: number) => {
-                  return (
-                    <div key={getId(proposal, shouldPreferFallback ?? false)} className='w-full'>
-                      <div
-                        className='p-4 cursor-pointer'
-                        onClick={() => onClick(getId(proposal, shouldPreferFallback ?? false))}
-                      >
-                        <div className='flex items-center justify-between'>
-                          <div
-                            className={classNames('w-[272px]', {
-                              '!w-[calc(100%-40px)]': isSidePanel(),
-                            })}
-                          >
-                            <div className='flex flex-col'>
-                              <div className='text-black-100 dark:text-white-100 font-bold text-base break-words'>
-                                {getTitle(proposal, shouldPreferFallback ?? false)}
-                              </div>
-                              <div className='text-gray-600 dark:text-gray-200 text-xs'>
-                                #{getId(proposal, shouldPreferFallback ?? false)} ·{' '}
-                                <NtrnStatus status={getStatus(proposal, shouldPreferFallback ?? false)} />
-                              </div>
-                            </div>
-                          </div>
-                          <img className='ml-5' src={Images.Misc.RightArrow} />
-                        </div>
-                      </div>
-
-                      {index < filteredProposalList.length - 1 ? <CardDivider /> : null}
-                    </div>
-                  );
-                })
+        <View style={styles.listSection}>
+          {loading ? (
+            Array.from({ length: 5 }).map((_, i) => <GovCardSkeleton key={i} isLast={i === 4} />)
+          ) : (filteredProposalList?.length ?? 0) === 0 ? (
+            <EmptyCard
+              isRounded
+              subHeading={propFilter ? 'Please try again with something else' : ''}
+              heading={propFilter ? `No results for “${propFilter}”` : 'No Proposals'}
+              src={'../../../../assets/images/explore.png'}
+            />
+          ) : (
+            <FlatList
+              data={filteredProposalList}
+              keyExtractor={item => String(getId(item, shouldPreferFallback ?? false))}
+              onEndReached={handleEndReached}
+              onEndReachedThreshold={0.8}
+              renderItem={({ item, index }) => (
+                <View key={getId(item, shouldPreferFallback ?? false)}>
+                  <TouchableOpacity
+                    style={styles.proposalRow}
+                    onPress={() => onClick(getId(item, shouldPreferFallback ?? false))}
+                  >
+                    <View style={styles.proposalTextCol}>
+                      <Text style={styles.proposalTitle}>{getTitle(item, shouldPreferFallback ?? false)}</Text>
+                      <Text style={styles.proposalSubtitle}>
+                        #{getId(item, shouldPreferFallback ?? false)} ·
+                        <NtrnStatus status={getStatus(item, shouldPreferFallback ?? false)} />
+                      </Text>
+                    </View>
+                    {/* Right arrow, replace with your asset */}
+                    <Image style={styles.arrowImg} source={{uri: '../../../../assets/images/right-arrow.png'}} />
+                  </TouchableOpacity>
+                  {index < filteredProposalList.length - 1 && <CardDivider />}
+                </View>
               )}
-            </div>
+              ListFooterComponent={proposalListStatus === 'fetching-more' ? (
+                <View style={styles.loaderRow}>
+                  <ActivityIndicator size="small" color="#000" />
+                </View>
+              ) : null}
+            />
+          )}
+        </View>
+      </PopupLayout>
 
-            <div id='bottom' className='my-1' />
+      {/* Chain selector modal */}
+      <SelectChain
+        isVisible={showChainSelector}
+        onClose={() => setShowChainSelector(false)}
+        chainTagsStore={chainTagsStore}
+      />
 
-            {proposalListStatus === 'fetching-more' ? (
-              <div className='px-7 flex items-center justify-center'>
-                <LoaderAnimation color='white' />
-              </div>
-            ) : null}
-          </div>
-        </PopupLayout>
+      {/* Filter modal */}
+      <BottomModal isOpen={showFilter} onClose={() => setShowFilter(false)} title="Filter by">
+        <View style={styles.filterModal}>
+          {FILTERS.map((_filter, idx) => (
+            <React.Fragment key={_filter.label}>
+              <TouchableOpacity
+                style={styles.filterRow}
+                onPress={() => {
+                  setFilter(_filter.key);
+                  setShowFilter(false);
+                }}
+              >
+                <Text style={styles.filterLabel}>{_filter.label}</Text>
+                {filter === _filter.key ? (
+                  <CheckCircle size={24} weight="fill" color="#E18881" />
+                ) : null}
+              </TouchableOpacity>
+              {idx < FILTERS.length - 1 && <CardDivider />}
+            </React.Fragment>
+          ))}
+        </View>
+      </BottomModal>
+    </View>
+  );
+});
 
-        <SelectChain
-          isVisible={showChainSelector}
-          onClose={() => setShowChainSelector(false)}
-          chainTagsStore={chainTagsStore}
-        />
-
-        <BottomModal isOpen={showFilter} onClose={() => setShowFilter(false)} title='Filter by'>
-          <div className='rounded-2xl flex flex-col items-center w-full justify-center dark:bg-gray-900 bg-white-100'>
-            {FILTERS.map((_filter, index) => (
-              <Fragment key={_filter.label}>
-                <button
-                  className='flex items-center justify-between text-md font-bold p-4 w-full text-gray-800 dark:text-white-100'
-                  onClick={() => {
-                    setFilter(_filter.key);
-                    setShowFilter(false);
-                  }}
-                >
-                  <span>{_filter.label}</span>
-                  {filter === _filter.key ? <CheckCircle size={24} weight='fill' className='text-[#E18881]' /> : null}
-                </button>
-                {index === FILTERS.length - 1 ? null : <CardDivider />}
-              </Fragment>
-            ))}
-          </div>
-        </BottomModal>
-      </div>
-    );
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: '#FAFAFA',
   },
-);
+  headerSection: {
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 12,
+  },
+  proposalsTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#111',
+  },
+  chainName: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#666',
+    marginTop: 2,
+  },
+  searchFilterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
+    marginBottom: 10,
+  },
+  sortBtn: {
+    width: 40,
+    height: 40,
+    marginLeft: 12,
+    borderRadius: 20,
+    backgroundColor: '#FFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  listSection: {
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingBottom: 20,
+  },
+  proposalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 16,
+  },
+  proposalTextCol: {
+    flex: 1,
+  },
+  proposalTitle: {
+    color: '#222',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  proposalSubtitle: {
+    color: '#666',
+    fontSize: 12,
+    marginTop: 4,
+  },
+  arrowImg: {
+    marginLeft: 20,
+    width: 18,
+    height: 18,
+    tintColor: '#888',
+  },
+  loaderRow: {
+    padding: 16,
+    alignItems: 'center',
+  },
+  filterModal: {
+    borderRadius: 18,
+    backgroundColor: '#FFF',
+    paddingVertical: 8,
+    width: '100%',
+  },
+  filterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+  },
+  filterLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+});
+
+export default NtrnProposalList;

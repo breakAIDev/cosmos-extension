@@ -1,31 +1,43 @@
-import classNames from 'classnames';
 import React from 'react';
+import { TouchableOpacity, View, Text, StyleSheet, GestureResponderEvent, ViewStyle, StyleProp } from 'react-native';
 
 type SecondaryActionButtonProps = {
-  
-  onClick: (e: React.MouseEvent) => void;
+  onPress: (e?: GestureResponderEvent) => void;
   leftIcon?: React.ReactNode;
-  className?: string;
-  actionLabel: string;
-  
+  style?: StyleProp<ViewStyle>;
+  actionLabel?: string;
 } & React.PropsWithChildren<any>;
 
 export const SecondaryActionButton: React.FC<SecondaryActionButtonProps> = ({
   leftIcon = null,
-  onClick,
+  onPress,
+  style,
   children,
-  className,
 }) => {
   return (
-    <button
-      className={classNames(
-        className,
-        'flex gap-1 items-center rounded-full px-[10px] py-1 bg-gray-50 dark:bg-gray-900 focus:bg-gray-400 dark:focus:bg-gray-500 outline-none',
-      )}
-      onClick={onClick}
-    >
-      {leftIcon}
-      <span>{children}</span>
-    </button>
+    <TouchableOpacity style={[styles.button, style]} onPress={onPress} activeOpacity={0.7}>
+      {React.isValidElement(leftIcon) ? leftIcon : <View/>}
+      <Text style={styles.label}>
+        {children}
+      </Text>
+    </TouchableOpacity>
   );
 };
+
+const styles = StyleSheet.create({
+  button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    backgroundColor: '#F8FAFC', // gray-50
+  },
+  icon: {
+    marginRight: 4,
+  },
+  label: {
+    color: '#1A202C', // text-black-100 or adjust as needed
+    fontSize: 16,
+  },
+});

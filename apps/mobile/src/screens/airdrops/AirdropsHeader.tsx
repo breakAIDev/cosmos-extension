@@ -1,11 +1,11 @@
-import { ArrowLeft, Info } from '@phosphor-icons/react';
-import { WalletButtonV2 } from 'components/button';
-import { PageHeader } from 'components/header/PageHeaderV2';
-import { useWalletInfo } from 'hooks/useWalletInfo';
-import SelectWallet from 'pages/home/SelectWallet/v2';
 import React, { useCallback, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { ArrowLeft, Info } from 'phosphor-react-native';
+import { WalletButtonV2 } from '../../components/button';
+import { PageHeader } from '../../components/header/PageHeaderV2';
+import { useWalletInfo } from '../../hooks/useWalletInfo';
+import SelectWallet from '../../screens/home/SelectWallet/v2';
 import { AboutAirdropsSheet } from './components/about-airdrops-sheet';
 
 export const AirdropsHeader = ({
@@ -13,49 +13,94 @@ export const AirdropsHeader = ({
   onBackClick,
 }: {
   disableWalletButton?: boolean;
-  setShowSearchInput?: React.Dispatch<React.SetStateAction<boolean>>;
   onBackClick?: () => void;
 }) => {
-  const navigate = useNavigate();
+  const navigation = useNavigation();
   const walletInfo = useWalletInfo();
-  const [showSelectWallet, setShowSelectWallet] = useState<boolean>(false);
-  const [showAboutAirdrops, setshowAboutAirdrops] = useState<boolean>(false);
+  const [showSelectWallet, setShowSelectWallet] = useState(false);
+  const [showAboutAirdrops, setShowAboutAirdrops] = useState(false);
 
-  const handleShowAboutAirdropsSheet = useCallback(() => setshowAboutAirdrops(true), []);
+  const handleShowAboutAirdropsSheet = useCallback(() => setShowAboutAirdrops(true), []);
 
   return (
     <>
-      <PageHeader className='bg-secondary-50/75'>
-        <ArrowLeft
-          size={36}
-          className='text-muted-foreground hover:text-foreground cursor-pointer p-2'
-          onClick={() => {
+      <PageHeader style={styles.header}>
+        <TouchableOpacity
+          onPress={() => {
             if (onBackClick) {
               onBackClick();
             } else {
-              navigate(-1);
+              navigation.goBack();
             }
-          }}
-        />
+          }}>
+          <ArrowLeft
+            size={36}
+            color="#A1A1AA"
+            style={styles.iconLeft}
+          />
+        </TouchableOpacity>
 
-        <WalletButtonV2
-          showDropdown
-          showWalletAvatar
-          className='absolute top-1/2 right-1/2 translate-x-1/2 -translate-y-1/2'
-          walletName={walletInfo.walletName}
-          walletAvatar={walletInfo.walletAvatar}
-          handleDropdownClick={() => setShowSelectWallet(true && !disableWalletButton)}
-        />
+        <View style={styles.centeredWalletButton}>
+          <WalletButtonV2
+            showDropdown
+            showWalletAvatar
+            walletName={walletInfo.walletName}
+            walletAvatar={walletInfo.walletAvatar}
+            handleDropdownClick={() => setShowSelectWallet(!disableWalletButton)}
+          />
+        </View>
 
-        <Info
-          size={20}
-          className='text-muted-foreground hover:text-foreground cursor-pointer shrink-0 mr-2'
-          onClick={handleShowAboutAirdropsSheet}
-        />
+        <TouchableOpacity onPress={handleShowAboutAirdropsSheet}>
+          <Info
+            size={20}
+            color="#A1A1AA"
+            style={styles.iconRight}
+            
+          />
+        </TouchableOpacity>
       </PageHeader>
 
-      <SelectWallet isVisible={showSelectWallet} onClose={() => setShowSelectWallet(false)} title='Your Wallets' />
-      <AboutAirdropsSheet isOpen={showAboutAirdrops} onClose={() => setshowAboutAirdrops(false)} />
+      <SelectWallet
+        isVisible={showSelectWallet}
+        onClose={() => setShowSelectWallet(false)}
+        title="Your Wallets"
+      />
+      <AboutAirdropsSheet
+        isOpen={showAboutAirdrops}
+        onClose={() => setShowAboutAirdrops(false)}
+      />
     </>
   );
 };
+
+const styles = StyleSheet.create({
+  header: {
+    backgroundColor: 'rgba(249,250,251,0.75)', // secondary-50/75
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 64,
+    position: 'relative',
+    zIndex: 2,
+    // paddingHorizontal: 16,
+  },
+  iconLeft: {
+    padding: 4,
+    marginLeft: 6,
+  },
+  iconRight: {
+    position: 'absolute',
+    right: 18,
+    top: 22,
+    padding: 2,
+  },
+  centeredWalletButton: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: [
+      { translateX: -60 }, // tweak as needed depending on button width
+      { translateY: -24 },
+    ],
+    zIndex: 1,
+  },
+});

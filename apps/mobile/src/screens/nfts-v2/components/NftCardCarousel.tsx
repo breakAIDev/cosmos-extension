@@ -1,6 +1,6 @@
-import { CaretLeft, CaretRight } from '@phosphor-icons/react';
-import classNames from 'classnames';
-import React, { useState } from 'react';
+import { CaretLeft, CaretRight } from 'phosphor-react-native';
+import React, { useState, useRef } from 'react';
+import { View, StyleSheet, Animated, TouchableOpacity, Dimensions } from 'react-native';
 
 import { NftCard, NftCardProps } from './index';
 
@@ -8,67 +8,114 @@ type NftCardCarouselProps = NftCardProps & {
   images: string[];
 };
 
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
 export function NftCardCarousel({ images, ...nftCardProps }: NftCardCarouselProps) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const translateX = useRef(new Animated.Value(0)).current;
 
   const handleArrowClick = (direction: 'left' | 'right') => {
-    switch (direction) {
-      case 'left':
-        setActiveIndex((prevIndex) => {
-          if (prevIndex === 0) {
-            return images.length - 1;
-          }
-
-          return prevIndex - 1;
-        });
-        break;
-
-      case 'right':
-        setActiveIndex((prevIndex) => {
-          if (prevIndex === images.length - 1) {
-            return 0;
-          }
-
-          return prevIndex + 1;
-        });
-        break;
+    let newIndex = activeIndex;
+    if (direction === 'left') {
+      newIndex = activeIndex === 0 ? images.length - 1 : activeIndex - 1;
+    } else {
+      newIndex = activeIndex === images.length - 1 ? 0 : activeIndex + 1;
     }
+    setActiveIndex(newIndex);
+    Animated.spring(translateX, {
+      toValue: -newIndex * SCREEN_WIDTH,
+      useNativeDriver: true,
+    }).start();
   };
 
+  // When activeIndex changes from outside, animate to the new index
+  React.useEffect(() => {
+    Animated.spring(translateX, {
+      toValue: -activeIndex * SCREEN_WIDTH,
+      useNativeDriver: true,
+    }).start();
+  }, [activeIndex, translateX]);
+
   return (
-    <div className={classNames('relative overflow-hidden', nftCardProps.imgClassName)}>
-      <div className='w-full'>
-        {images.map((image, index) => (
-          <div
-            key={`${image}-${index}`}
-            className='absolute w-full'
-            style={{
-              transform: `translateX(${(index - activeIndex) * 100}%)`,
-              transition: 'transform 0.5s ease-in-out',
-            }}
-          >
-            <NftCard {...nftCardProps} imgSrc={image} />
-          </div>
-        ))}
-      </div>
+    <View style={[styles.container, nftCardProps.style && { /* handle custom styles here */ }]}>
+      <View style={styles.carouselContainer}>
+        <Animated.View
+          style={[
+            styles.animatedRow,
+            { width: images.length * SCREEN_WIDTH, transform: [{ translateX }] },
+          ]}
+        >
+          {images.map((image, index) => (
+            <View key={`${image}-${index}`} style={{ width: SCREEN_WIDTH }}>
+              <NftCard {...nftCardProps} imgSrc={image} />
+            </View>
+          ))}
+        </Animated.View>
+      </View>
 
-      {images.length > 1 ? (
+      {images.length > 1 && (
         <>
-          <button
-            className='rounded-full w-[25px] h-[25px] absolute top-1/2 -translate-y-1/2 left-2 bg-gray-200 dark:bg-gray-900 flex items-center justify-center'
-            onClick={() => handleArrowClick('left')}
+          <TouchableOpacity
+            style={styles.arrowLeft}
+            onPress={() => handleArrowClick('left')}
+            activeOpacity={0.7}
           >
-            <CaretLeft size={16} className='dark:text-gray-300 text-gray-800' />
-          </button>
-
-          <button
-            className='rounded-full w-[25px] h-[25px] absolute top-1/2 -translate-y-1/2 right-2 bg-gray-200 dark:bg-gray-900 flex items-center justify-center'
-            onClick={() => handleArrowClick('right')}
+            <CaretLeft size={16} color="#18181b" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.arrowRight}
+            onPress={() => handleArrowClick('right')}
+            activeOpacity={0.7}
           >
-            <CaretRight size={16} className='dark:text-gray-300 text-gray-800' />
-          </button>
+            <CaretRight size={16} color="#18181b" />
+          </TouchableOpacity>
         </>
-      ) : null}
-    </div>
+      )}
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    position: 'relative',
+    overflow: 'hidden',
+    width: SCREEN_WIDTH,
+    height: SCREEN_WIDTH, // Keep square, adjust as needed for aspect
+  },
+  carouselContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    width: SCREEN_WIDTH,
+    height: SCREEN_WIDTH,
+  },
+  animatedRow: {
+    flexDirection: 'row',
+    height: '100%',
+  },
+  arrowLeft: {
+    position: 'absolute',
+    left: 12,
+    top: '50%',
+    marginTop: -12.5,
+    width: 25,
+    height: 25,
+    borderRadius: 25,
+    backgroundColor: '#e5e7eb',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
+  },
+  arrowRight: {
+    position: 'absolute',
+    right: 12,
+    top: '50%',
+    marginTop: -12.5,
+    width: 25,
+    height: 25,
+    borderRadius: 25,
+    backgroundColor: '#e5e7eb',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
+  },
+});

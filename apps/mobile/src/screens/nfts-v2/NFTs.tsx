@@ -1,9 +1,9 @@
 import { NftPage, useAddress } from '@leapwallet/cosmos-wallet-hooks';
-import { PageName } from 'config/analytics';
-import { usePageView } from 'hooks/analytics/usePageView';
 import React, { useState } from 'react';
-import { chainTagsStore } from 'stores/chain-infos-store';
-import { nftStore } from 'stores/nft-store';
+import { View } from 'react-native'; // Import View for React Native
+
+import { chainTagsStore } from '../../context/chain-infos-store';
+import { nftStore } from '../../context/nft-store';
 
 import { ChainNftsDetails, CollectionDetails, NftContextProvider, NftDetails, ShowNfts } from './index';
 
@@ -15,14 +15,15 @@ export default function NFTs() {
   const value = { activePage, setActivePage };
 
   return (
-    <></>
-    // <NftContextProvider value={value} key={address}>
-    //   {activePage === 'ShowNfts' && (
-    //     <ShowNfts nftStore={nftStore} chainTagsStore={chainTagsStore} />
-    //   )}
-    //   {activePage === 'CollectionDetails' && <CollectionDetails nftStore={nftStore} />}
-    //   {activePage === 'NftDetails' && <NftDetails />}
-    //   {activePage === 'ChainNftsDetails' && <ChainNftsDetails nftStore={nftStore} />}
-    // </NftContextProvider>
+    <View style={{ flex: 1 }}>
+      <NftContextProvider value={value} key={address}>
+        {activePage === 'ShowNfts' && (
+          <ShowNfts nftStore={nftStore} chainTagsStore={chainTagsStore} />
+        )}
+        {activePage === 'CollectionDetails' && <CollectionDetails nftStore={nftStore} />}
+        {activePage === 'NftDetails' && <NftDetails />}
+        {activePage === 'ChainNftsDetails' && <ChainNftsDetails nftStore={nftStore} />}
+      </NftContextProvider>
+    </View>
   );
 }

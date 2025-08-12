@@ -1,10 +1,10 @@
 import { sleep } from '@leapwallet/cosmos-wallet-sdk';
-import { useOnboarding } from 'hooks/onboarding/useOnboarding';
-import { usePrevious } from 'hooks/utility/usePrevious';
+import { useOnboarding } from '../../../hooks/onboarding/useOnboarding';
+import { usePrevious } from '../../../hooks/utility/usePrevious';
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { passwordStore } from 'stores/password-store';
-import browser from 'webextension-polyfill';
+import { passwordStore } from '../../../context/password-store';
+import { useNavigation } from '@react-navigation/native';
+import { DeviceEventEmitter } from 'react-native';
 
 export type CreateWalletContextType = {
   mnemonic: string;
@@ -27,7 +27,7 @@ export const CreateWalletProvider = ({ children }: { children: React.ReactNode }
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const prevStep = usePrevious(currentStep) || 1;
-  const navigate = useNavigate();
+  const navigation = useNavigation();
 
   const onOnboardingCompleted = async (password: Uint8Array) => {
     setLoading(true);
@@ -35,12 +35,12 @@ export const CreateWalletProvider = ({ children }: { children: React.ReactNode }
     await onOnboardingComplete(mnemonic, password, { 0: true }, 'create');
 
     const passwordBase64 = Buffer.from(password).toString('base64');
-    browser.runtime.sendMessage({ type: 'unlock', data: { password: passwordBase64 } });
+    DeviceEventEmitter.emit('unlock',{ password: passwordBase64 });
     passwordStore.setPassword(password);
 
     await sleep(2_000);
 
-    navigate('/onboardingSuccess');
+    navigation.navigate('OnboardingSuccess');
     setLoading(false);
   };
 
@@ -51,7 +51,7 @@ export const CreateWalletProvider = ({ children }: { children: React.ReactNode }
     }
 
     if (step < 1) {
-      navigate(-1);
+      navigation.goBack();
       return;
     }
 

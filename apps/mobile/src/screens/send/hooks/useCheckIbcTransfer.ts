@@ -21,10 +21,10 @@ import {
   SupportedChain,
 } from '@leapwallet/cosmos-wallet-sdk';
 import { isBitcoinChain } from '@leapwallet/cosmos-wallet-store';
-import { SHOW_ETH_ADDRESS_CHAINS } from 'config/constants';
-import { isValidSuiAddress } from 'pages/send-v2/hooks/useCheckAddressError';
+import { SHOW_ETH_ADDRESS_CHAINS } from '../../../services/config/constants';
+import { isValidSuiAddress } from '../..//send-v2/hooks/useCheckAddressError';
 import { useEffect } from 'react';
-import { ManageChainsStore } from 'stores/manage-chains-store';
+import { ManageChainsStore } from '../../../context/manage-chains-store';
 
 export type UseCheckIbcTransferParams = {
   sendActiveChain: SupportedChain;

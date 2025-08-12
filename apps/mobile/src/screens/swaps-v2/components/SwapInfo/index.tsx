@@ -1,7 +1,7 @@
 import { capitalize, GasOptions } from '@leapwallet/cosmos-wallet-hooks';
 import { RootDenomsStore } from '@leapwallet/cosmos-wallet-store';
 import { RouteAggregator } from '@leapwallet/elements-hooks';
-import { CaretDown, GasPump, Info } from '@phosphor-icons/react';
+import { CaretDown, GasPump, Info } from 'phosphor-react-native';
 import { useDefaultGasPrice } from 'components/gas-price-options';
 import Text from 'components/text';
 import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';

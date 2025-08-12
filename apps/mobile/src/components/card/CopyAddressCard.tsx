@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
 // Use your own SVG/icon components for Check and CopySvg
-import { CheckCircle } from '@phosphor-icons/react'; // Replace with react-native icon
+import { CheckCircle } from 'phosphor-react-native'; // Replace with react-native icon
 import { CopySvg } from '../../../assets/images/misc';    // Replace with your RN-compatible SVG/icon
 import { sliceAddress, useActiveChain, useGetChains } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';

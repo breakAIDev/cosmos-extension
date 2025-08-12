@@ -1,8 +1,9 @@
-import { EyeSlash } from '@phosphor-icons/react';
-import { EventName, PageName } from 'config/analytics';
-import { Images } from 'images';
-import mixpanel from 'mixpanel-browser';
+import { EyeSlash } from 'phosphor-react-native';
+import { EventName, PageName } from '../../../services/config/analytics';
+import { Images } from '../../../../assets/images';
+import mixpanel from '../../../mixpanel';
 import React, { useCallback } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 
 import { useFilters } from '../context/filter-context';
 import { CategoryIcon } from '../utils/filters';
@@ -37,10 +38,9 @@ export default function CategoryFilter({
   );
 
   return (
-    <div className='flex flex-col gap-5'>
-      <span className='text-muted-foreground text-sm uppercase font-bold'>Category</span>
-
-      <div className='flex flex-col'>
+    <View style={styles.root}>
+      <Text style={styles.title}>Category</Text>
+      <View>
         {categoryFilters
           ?.sort((a, b) => a.localeCompare(b))
           ?.map((category) => (
@@ -57,9 +57,9 @@ export default function CategoryFilter({
         <FilterItem
           key={'hidden'}
           icon={
-            <div className='flex items-center justify-center bg-secondary-400 rounded-full size-8'>
-              <EyeSlash size={20} />
-            </div>
+            <View style={styles.hiddenIconContainer}>
+              <EyeSlash size={20} color="#334155" />
+            </View>
           }
           label={'Hidden'}
           isLast={true}
@@ -67,7 +67,29 @@ export default function CategoryFilter({
           onSelect={() => handleCategoryToggle('hidden')}
           onRemove={() => handleCategoryToggle('hidden')}
         />
-      </div>
-    </div>
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flexDirection: 'column',
+    gap: 20,
+  },
+  title: {
+    color: '#888',
+    fontSize: 14,
+    textTransform: 'uppercase',
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  hiddenIconContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#f1f5f9',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});

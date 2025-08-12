@@ -1,28 +1,25 @@
-import { GasOptions, getErrorMsg, useActiveChain, VoteOptions } from '@leapwallet/cosmos-wallet-hooks';
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { Memo } from '@leapwallet/leap-ui';
-import { ThumbsUp } from '@phosphor-icons/react';
-import classNames from 'classnames';
-import { ErrorCard } from 'components/ErrorCard';
-import LedgerConfirmationPopup from 'components/ledger-confirmation/LedgerConfirmationPopup';
-import { LoaderAnimation } from 'components/loader/Loader';
-import BottomModal from 'components/new-bottom-modal';
-import Text from 'components/text';
-import { Button } from 'components/ui/button';
-import { useCaptureTxError } from 'hooks/utility/useCaptureTxError';
 import React, { useMemo } from 'react';
-import { Colors } from 'theme/colors';
+import { View, StyleSheet, TextInput } from 'react-native';
+import { GasOptions, getErrorMsg, VoteOptions } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { ThumbsUp } from 'phosphor-react-native';
+import { ErrorCard } from '../../../components/ErrorCard';
+import LedgerConfirmationPopup from '../../../components/ledger-confirmation/LedgerConfirmationPopup';
+import { LoaderAnimation } from '../../../components/loader/Loader';
+import BottomModal from '../../../components/new-bottom-modal';
+import Text from '../../../components/text';
+import { Button } from '../../../components/ui/button';
+import { useCaptureTxError } from '../../../hooks/utility/useCaptureTxError';
+import { Colors } from '../../../theme/colors';
 
 export type ReviewVoteCastProps = {
   isOpen: boolean;
   onCloseHandler: () => void;
-  
   onSubmitVote: (option: VoteOptions) => Promise<boolean>;
   loading: boolean;
   error?: string;
   selectedVote: VoteOptions | undefined;
   memo: string;
-  
   setMemo: (memo: string) => void;
   feeText: string;
   proposalId: string;
@@ -44,54 +41,53 @@ export function ReviewVoteCast({
   memo,
   setMemo,
   proposalId,
-  refetchCurrVote,
   showLedgerPopup,
   ledgerError,
   gasOption,
   forceChain,
 }: ReviewVoteCastProps): React.ReactElement {
-  const _activeChain = useActiveChain();
-  const activeChain = useMemo(() => forceChain || _activeChain, [_activeChain, forceChain]);
 
   useCaptureTxError(error);
+
   if (showLedgerPopup) {
     return <LedgerConfirmationPopup showLedgerPopup={showLedgerPopup} />;
   }
 
   return (
-    <BottomModal isOpen={isOpen} onClose={onCloseHandler} title='Review Transaction' className='p-6 !pt-8'>
-      <div className='flex flex-col items-center gap-5'>
-        <div className={classNames('flex p-4 w-full bg-gray-50 dark:bg-gray-900 rounded-2xl')}>
-          <div className='h-10 w-10 bg-green-600 rounded-full flex items-center justify-center'>
-            <ThumbsUp size={20} className='text-foreground' />
-          </div>
-          <div className='flex flex-col justify-center items-start px-3'>
-            <div className='text-sm text-muted-foreground text-left'>Vote message</div>
-            <div className='text-[18px] text-foreground font-bold'>
-              Vote <b>{selectedVote}</b> on <b>Proposal #{proposalId}</b>
-            </div>
-          </div>
-        </div>
-
-        <Memo
+    <BottomModal isOpen={isOpen} onClose={onCloseHandler} title="Review Transaction">
+      <View style={styles.container}>
+        <View style={styles.voteMsgBox}>
+          <View style={styles.iconCircle}>
+            <ThumbsUp size={20} color="#fff" />
+          </View>
+          <View style={styles.voteMsgTextCol}>
+            <Text style={styles.voteMsgLabel}>Vote message</Text>
+            <Text style={styles.voteMsgTitle}>
+              Vote <Text style={styles.bold}>{selectedVote}</Text> on <Text style={styles.bold}>Proposal #{proposalId}</Text>
+            </Text>
+          </View>
+        </View>
+        <TextInput
+          style={styles.memoInput}
           value={memo}
-          onChange={(e) => {
-            setMemo(e.target.value);
-          }}
+          onChangeText={setMemo}
+          placeholder="Memo (optional)"
+          placeholderTextColor="#aaa"
+          multiline
         />
 
-        {feeText && (
-          <Text size='sm' className='text-gray-400 dark:text-gray-600 justify-center'>
-            {feeText}
-          </Text>
+        {feeText ? (
+          <Text style={styles.feeText}>{feeText}</Text>
+        ) : null}
+
+        {(error ?? ledgerError) && (
+          <ErrorCard text={getErrorMsg(error ?? ledgerError ?? '', gasOption, 'vote')} />
         )}
 
-        {(error ?? ledgerError) && <ErrorCard text={getErrorMsg(error ?? ledgerError ?? '', gasOption, 'vote')} />}
-
         <Button
-          className='w-full mt-1'
+          style={styles.approveBtn}
           disabled={showLedgerPopup || loading}
-          onClick={async () => {
+          onPress={async () => {
             if (selectedVote !== undefined) {
               const txSuccess = await onSubmitVote(selectedVote);
               if (txSuccess) {
@@ -102,7 +98,63 @@ export function ReviewVoteCast({
         >
           {loading ? <LoaderAnimation color={Colors.white100} /> : 'Approve'}
         </Button>
-      </div>
+      </View>
     </BottomModal>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { alignItems: 'center', padding: 10, gap: 20 },
+  voteMsgBox: {
+    flexDirection: 'row',
+    width: '100%',
+    backgroundColor: '#f5f6fa',
+    borderRadius: 18,
+    alignItems: 'center',
+    padding: 12,
+    marginBottom: 10,
+  },
+  iconCircle: {
+    height: 40,
+    width: 40,
+    backgroundColor: '#29A874',
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  voteMsgTextCol: {
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    marginLeft: 14,
+  },
+  voteMsgLabel: {
+    fontSize: 13,
+    color: '#8e99af',
+    marginBottom: 4,
+  },
+  voteMsgTitle: {
+    fontSize: 16,
+    color: '#22272e',
+    fontWeight: 'bold',
+  },
+  bold: { fontWeight: 'bold', color: '#22272e' },
+  memoInput: {
+    width: '100%',
+    minHeight: 48,
+    borderRadius: 10,
+    backgroundColor: '#f6f6f6',
+    padding: 12,
+    fontSize: 14,
+    color: '#22272e',
+    borderWidth: 0,
+    marginTop: 10,
+  },
+  feeText: {
+    fontSize: 13,
+    color: '#8e99af',
+    alignSelf: 'center',
+    marginVertical: 6,
+  },
+  approveBtn: { width: '100%', marginTop: 8 },
+});

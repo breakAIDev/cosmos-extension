@@ -1,16 +1,22 @@
+// src/screens/.../SuggestErc20.tsx (React Native)
+
+import React, { useEffect, useState } from 'react';
+import { View, StyleSheet } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { observer } from 'mobx-react-lite';
+import { useNavigation } from '@react-navigation/native';
+
 import { useActiveChain } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { LoaderAnimation } from 'components/loader/Loader';
-import { TokenImageWithFallback } from 'components/token-image-with-fallback';
-import { BG_RESPONSE, SUGGEST_TOKEN } from 'config/storage-keys';
-import { observer } from 'mobx-react-lite';
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { betaERC20DenomsStore, enabledCW20DenomsStore } from 'stores/denoms-store-instance';
-import { rootBalanceStore } from 'stores/root-store';
-import { Colors } from 'theme/colors';
-import { isSidePanel } from 'utils/isSidePanel';
-import Browser from 'webextension-polyfill';
+
+import { LoaderAnimation } from '../../components/loader/Loader';
+import TokenImageWithFallback from '../../components/token-image-with-fallback';
+
+import { BG_RESPONSE, SUGGEST_TOKEN } from '../../services/config/storage-keys';
+
+import { betaERC20DenomsStore, enabledCW20DenomsStore } from '../../context/denoms-store-instance';
+import { rootBalanceStore } from '../../context/root-store';
+import { Colors } from '../../theme/colors';
 
 import {
   ChildrenParams,
@@ -23,9 +29,24 @@ import {
   TokenContractInfo,
 } from './components';
 
+// ---- small helpers for JSON storage ----
+async function getJSON<T>(key: string, fallback: T): Promise<T> {
+  try {
+    const raw = await AsyncStorage.getItem(key);
+    if (!raw) return fallback;
+    return JSON.parse(raw) as T;
+  } catch {
+    return fallback;
+  }
+}
+async function setJSON(key: string, value: unknown) {
+  return AsyncStorage.setItem(key, JSON.stringify(value));
+}
+
 const SuggestErc20 = observer(({ handleRejectBtnClick }: ChildrenParams) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const navigation = useNavigation<any>();
   const _activeChain = useActiveChain();
+  const [isLoading, setIsLoading] = useState(false);
   const [activeChain, setActiveChain] = useState<SupportedChain>(_activeChain);
   const [contractInfo, setContractInfo] = useState({
     address: '',
@@ -36,59 +57,60 @@ const SuggestErc20 = observer(({ handleRejectBtnClick }: ChildrenParams) => {
   });
 
   const enabledCW20Tokens = enabledCW20DenomsStore.getEnabledCW20DenomsForChain(activeChain);
-  const navigate = useNavigate();
 
   useEffect(() => {
-    Browser.storage.local.get([SUGGEST_TOKEN]).then(async function initializeContractInfo(response) {
-      const payload = response[SUGGEST_TOKEN];
-      setContractInfo({
-        ...payload.params.options,
-      });
+    (async () => {
+      const payload = await getJSON<any>(SUGGEST_TOKEN, null);
+      if (payload?.params?.options) {
+        setContractInfo({ ...payload.params.options });
+      }
       if (payload?.activeChain) {
         setActiveChain(payload.activeChain);
       }
-    });
+    })();
   }, []);
 
   const handleApproveBtn = async () => {
     setIsLoading(true);
-    const erc20Token = {
-      coinDenom: contractInfo.symbol,
-      coinMinimalDenom: contractInfo.address,
-      coinDecimals: contractInfo.decimals,
-      coinGeckoId: contractInfo.coinGeckoId ?? '',
-      icon: contractInfo.image ?? '',
-      chain: activeChain,
-    };
 
-    await betaERC20DenomsStore.setBetaERC20Denoms(contractInfo.address, erc20Token, activeChain);
-    const _enabledCW20Tokens = [...enabledCW20Tokens, contractInfo.address];
-    await enabledCW20DenomsStore.setEnabledCW20Denoms(_enabledCW20Tokens, activeChain);
-    rootBalanceStore.refetchBalances(activeChain);
+    try {
+      const erc20Token = {
+        coinDenom: contractInfo.symbol,
+        coinMinimalDenom: contractInfo.address,
+        coinDecimals: contractInfo.decimals,
+        coinGeckoId: contractInfo.coinGeckoId ?? '',
+        icon: contractInfo.image ?? '',
+        chain: activeChain,
+      };
 
-    window.removeEventListener('beforeunload', handleRejectBtnClick);
-    await Browser.storage.local.set({
-      [BG_RESPONSE]: { data: 'Approved' },
-    });
+      await betaERC20DenomsStore.setBetaERC20Denoms(contractInfo.address, erc20Token, activeChain);
+      const _enabledCW20Tokens = [...enabledCW20Tokens, contractInfo.address];
+      await enabledCW20DenomsStore.setEnabledCW20Denoms(_enabledCW20Tokens, activeChain);
+      rootBalanceStore.refetchBalances(activeChain);
 
-    setTimeout(async () => {
-      await Browser.storage.local.remove([SUGGEST_TOKEN]);
-      await Browser.storage.local.remove(BG_RESPONSE);
+      await setJSON(BG_RESPONSE, { data: 'Approved' });
 
+      setTimeout(async () => {
+        await AsyncStorage.removeItem(SUGGEST_TOKEN);
+        await AsyncStorage.removeItem(BG_RESPONSE);
+        setIsLoading(false);
+
+        // No window.close in RN; go back or to Home
+        if (navigation.canGoBack()) navigation.goBack();
+        else navigation.navigate('Home');
+      }, 50);
+    } catch (e) {
+      // If you want, we can surface errors via a toast/snackbar here.
       setIsLoading(false);
-      if (isSidePanel()) {
-        navigate('/home');
-      } else {
-        window.close();
-      }
-    }, 50);
+    }
   };
 
   return (
     <>
-      <div className='flex flex-col items-center'>
-        <Heading text='Add Token' />
-        <SubHeading text={`This will allow this token to be viewed within Leap Wallet`} />
+      <View style={styles.centerCol}>
+        <Heading text="Add Token" />
+        <SubHeading text="This will allow this token to be viewed within Leap Wallet" />
+
         <TokenContractAddress
           address={contractInfo.address}
           img={
@@ -96,19 +118,24 @@ const SuggestErc20 = observer(({ handleRejectBtnClick }: ChildrenParams) => {
               assetImg={contractInfo.image}
               text={contractInfo.symbol}
               altText={contractInfo.symbol + ' logo'}
-              imageClassName='w-[36px] h-[36px] rounded-full'
-              containerClassName='w-[36px] h-[36px] rounded-full mr-2'
-              textClassName='text-[10px] !leading-[14px]'
+              imageStyle={{width: 36, height: 36, borderRadius: 18}}
+              containerStyle={{width: 36, height: 36, borderRadius: 18, marginRight: 8}}
+              textStyle={{fontSize: 10}}
             />
           }
         />
-        <TokenContractInfo name={contractInfo.symbol} symbol={contractInfo.symbol} decimals={contractInfo.decimals} />
-      </div>
+
+        <TokenContractInfo
+          name={contractInfo.symbol}
+          symbol={contractInfo.symbol}
+          decimals={contractInfo.decimals}
+        />
+      </View>
 
       <Footer>
         <FooterAction
           rejectBtnClick={handleRejectBtnClick}
-          rejectBtnText='Reject'
+          rejectBtnText="Reject"
           confirmBtnText={isLoading ? <LoaderAnimation color={Colors.white100} /> : 'Approve'}
           confirmBtnClick={handleApproveBtn}
           isConfirmBtnDisabled={isLoading}
@@ -125,3 +152,10 @@ export default function SuggestErc20Wrapper() {
     </SuggestContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  centerCol: {
+    alignItems: 'center',
+    flexDirection: 'column',
+  },
+});

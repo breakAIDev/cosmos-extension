@@ -1,15 +1,17 @@
-import { NativeDenom } from '@leapwallet/cosmos-wallet-sdk';
-import { motion } from 'framer-motion';
 import React from 'react';
+import { View, Text, TouchableOpacity, Animated, StyleSheet, Dimensions } from 'react-native';
 
 import { ManuallyAddedTokensTab } from './ManuallyAddedTokensTab';
-import { SupportedToken } from './SupportedTokens';
 import { SupportedTokensTab } from './SupportedTokensTab';
+import { SupportedToken } from './SupportedTokens';
+import { NativeDenom } from '@leapwallet/cosmos-wallet-sdk';
 
 const tabs = [
   { label: 'Supported', value: 'supported' },
   { label: 'Manually added', value: 'manually-added' },
 ];
+
+const TAB_WIDTH = Dimensions.get('window').width / tabs.length;
 
 export const ManageTokensTabs = ({
   activeTab,
@@ -34,33 +36,51 @@ export const ManageTokensTabs = ({
   searchedText: string;
   fetchingContract: boolean;
 }) => {
+  const indicatorPosition = React.useRef(new Animated.Value(tabs.findIndex(t => t.value === activeTab) * TAB_WIDTH)).current;
+
+  React.useEffect(() => {
+    Animated.timing(indicatorPosition, {
+      toValue: tabs.findIndex(t => t.value === activeTab) * TAB_WIDTH,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+  }, [activeTab, indicatorPosition]);
+
   return (
-    <>
-      <div className='h-[33px] border-b shrink-0 px-6 border-secondary-300 flex flex-row justify-start items-center gap-5'>
+    <View>
+      {/* Tab Header */}
+      <View style={styles.tabHeader}>
         {tabs.map((tab) => (
-          <button
+          <TouchableOpacity
             key={tab.value}
-            className={`font-medium text-center text-sm !leading-[22px] h-full transition-colors duration-200 flex justify-center items-center ${
-              tab.value === activeTab ? 'text-accent-green' : 'text-muted-foreground'
-            }`}
-            onClick={() => {
-              setActiveTab(tab.value);
-            }}
+            style={styles.tabBtn}
+            activeOpacity={0.7}
+            onPress={() => setActiveTab(tab.value)}
           >
-            <div className='relative w-fit px-2 pb-3'>
-              {tab.label}
-
-              {tab.value === activeTab && (
-                <motion.div
-                  className='absolute bottom-0 left-0 right-0 h-0.5 bg-primary z-10'
-                  layoutId='active-tab-indicator'
-                />
-              )}
-            </div>
-          </button>
+            <View style={{ width: TAB_WIDTH, alignItems: 'center', paddingBottom: 8 }}>
+              <Text
+                style={[
+                  styles.tabLabel,
+                  activeTab === tab.value && styles.tabLabelActive,
+                ]}
+              >
+                {tab.label}
+              </Text>
+            </View>
+          </TouchableOpacity>
         ))}
-      </div>
+        <Animated.View
+          style={[
+            styles.tabIndicator,
+            {
+              left: indicatorPosition,
+              width: TAB_WIDTH,
+            },
+          ]}
+        />
+      </View>
 
+      {/* Tab Content */}
       {activeTab === 'supported' ? (
         <SupportedTokensTab
           filteredSupportedTokens={filteredSupportedTokens}
@@ -80,6 +100,40 @@ export const ManageTokensTabs = ({
           searchedText={searchedText}
         />
       )}
-    </>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  tabHeader: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb', // secondary-300
+    position: 'relative',
+    height: 44,
+    marginBottom: 8,
+    backgroundColor: '#fff',
+  },
+  tabBtn: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  tabLabel: {
+    color: '#64748b', // muted-foreground
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  tabLabelActive: {
+    color: '#16a34a', // accent-green
+    fontWeight: '700',
+  },
+  tabIndicator: {
+    position: 'absolute',
+    bottom: 0,
+    height: 3,
+    backgroundColor: '#22d3ee', // primary
+    borderRadius: 2,
+  },
+});
+

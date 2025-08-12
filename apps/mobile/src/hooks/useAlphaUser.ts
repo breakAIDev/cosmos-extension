@@ -17,7 +17,6 @@ export function useAlphaUser(cosmosAddress: string) {
     queryFn: () => getAlphaUserDetails(cosmosAddress),
     enabled: !!cosmosAddress,
     staleTime: 7 * 60 * 1000, // 7 minutes
-    cacheTime: 10 * 60 * 1000, // 10 minutes
     retry: false,
   });
 

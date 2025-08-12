@@ -1,9 +1,7 @@
 import { Buttons } from '@leapwallet/leap-ui';
-import { ArrowsLeftRight } from '@phosphor-icons/react';
-import { useSelectedNetwork } from 'hooks/settings/useNetwork';
+import { ArrowsLeftRight } from 'phosphor-react-native';
+import { useSelectedNetwork } from '../../hooks/settings/useNetwork';
 import React from 'react';
-import Skeleton from 'react-loading-skeleton';
-import { cn } from 'utils/cn';
 
 import { InterchangeButton } from './components';
 import { SwapHeader } from './components/swap-header';

@@ -1,9 +1,10 @@
 import { useActiveChain } from '@leapwallet/cosmos-wallet-hooks';
-import { CardDivider } from '@leapwallet/leap-ui';
-import { CheckCircle } from '@phosphor-icons/react';
-import BottomModal from '../bottom-modal';
+import { CardDivider } from '@leapwallet/leap-ui'; // Make sure this is React Native compatible, or replace with a View
+import { CheckCircle } from 'phosphor-react-native';
+import BottomModal from '../../components/bottom-modal';
 import React from 'react';
-import { Colors } from 'theme/colors';
+import { getChainColor } from '../../theme/colors';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 import { DisplaySettings, infoField } from './types';
 
@@ -16,7 +17,6 @@ type DisplaySettingsModalProps = {
   isOpen: boolean;
   onClose: () => void;
   settings: DisplaySettings;
-  
   onSettingsChange: (_: DisplaySettings) => void;
 };
 
@@ -30,25 +30,62 @@ export const DisplaySettingsModal: React.FC<DisplaySettingsModalProps> = ({
   const activeChain = useActiveChain();
 
   return (
-    <BottomModal isOpen={isOpen} onClose={onClose} title={'Sort by'} closeOnBackdropClick={true}>
-      <div className='rounded-2xl flex flex-col items-center w-full justify-center dark:bg-gray-900 bg-white-100'>
+    <BottomModal isOpen={isOpen} onClose={onClose} title="Sort by" closeOnBackdropClick>
+      <View style={styles.container}>
         {options.map(([key, label], index) => (
           <React.Fragment key={key}>
-            <button
-              className='flex items-center justify-between text-md font-bold p-4 w-full text-gray-800 dark:text-white-100'
-              onClick={() => {
+            <TouchableOpacity
+              style={styles.optionButton}
+              activeOpacity={0.7}
+              onPress={() => {
                 onSettingsChange({ ...settings, sortBy: key as infoField });
               }}
             >
-              <span>{label}</span>
+              <Text style={styles.optionText}>{label}</Text>
               {settings.sortBy === key ? (
-                <CheckCircle weight='fill' size={24} style={{ color: Colors.getChainColor(activeChain) }} />
+                <CheckCircle
+                  weight="fill"
+                  size={24}
+                  color={getChainColor(activeChain)}
+                />
               ) : null}
-            </button>
-            {index === options.length - 1 ? null : <CardDivider />}
+            </TouchableOpacity>
+            {index !== options.length - 1 && (
+              typeof CardDivider === "function"
+                ? <CardDivider />
+                : <View style={styles.divider} />
+            )}
           </React.Fragment>
         ))}
-      </div>
+      </View>
     </BottomModal>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    borderRadius: 16,
+    alignItems: 'center',
+    width: '100%',
+    backgroundColor: '#fff', // replace with dark mode value if needed
+    overflow: 'hidden',
+  },
+  optionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    width: '100%',
+  },
+  optionText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#1f2937', // gray-800
+  },
+  divider: {
+    width: '100%',
+    height: 1,
+    backgroundColor: '#e5e7eb', // gray-200
+  },
+});

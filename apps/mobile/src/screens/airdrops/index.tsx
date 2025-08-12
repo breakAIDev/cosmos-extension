@@ -1,6 +1,7 @@
-import { PageName } from 'config/analytics';
-import { usePageView } from 'hooks/analytics/usePageView';
 import React from 'react';
+import { PageName } from '../../services/config/analytics';
+import { usePageView } from '../../hooks/analytics/usePageView';
+import { View, StyleSheet } from 'react-native';
 
 import { AirdropsHeader } from './AirdropsHeader';
 import AirdropsHome from './AirdropsHome';
@@ -9,11 +10,27 @@ export default function Airdrops() {
   // usePageView(PageName.Airdrops)
 
   return (
-    <div className='relative h-full w-full enclosing-panel bg-secondary-50 overflow-y-auto'>
+    <View style={styles.root}>
       <AirdropsHeader />
-      <div className='p-7 h-[calc(100%-64px)]'>
+      <View style={styles.content}>
         <AirdropsHome />
-      </div>
-    </div>
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: '#F9FAFB', // secondary-50
+    position: 'relative',
+    width: '100%',
+    height: '100%',
+  },
+  content: {
+    flex: 1,
+    padding: 28,
+    // Height: subtracting 64px header height if needed
+    // Use flex for better compatibility across devices
+  },
+});

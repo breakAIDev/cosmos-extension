@@ -1,4 +1,3 @@
-
 import { useActiveChain } from '@leapwallet/cosmos-wallet-hooks';
 import { captureException } from '@sentry/react';
 import BottomModal from 'components/new-bottom-modal';

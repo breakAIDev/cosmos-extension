@@ -1,40 +1,24 @@
-import {
-  SelectedAddress,
-  useActiveWallet,
-  useAddress,
-  useAddressPrefixes,
-  useChainsStore,
-  WALLETTYPE,
-} from '@leapwallet/cosmos-wallet-hooks';
-import {
-  getBlockChainFromAddress,
-  isValidAddress,
-  pubKeyToEvmAddressToShow,
-  SupportedChain,
-} from '@leapwallet/cosmos-wallet-sdk';
-import { bech32 } from 'bech32';
-import { ActionInputWithPreview } from 'components/action-input-with-preview';
-import { LoaderAnimation } from 'components/loader/Loader';
-import Text from 'components/text';
-import { SEI_EVM_LEDGER_ERROR_MESSAGE } from 'config/constants';
-import { motion } from 'framer-motion';
-import { useContactsSearch } from 'hooks/useContacts';
-import { Images } from 'images';
-import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Colors } from 'theme/colors';
-import { AddressBook } from 'utils/addressbook';
-import { UserClipboard } from 'utils/clipboard';
-import { sliceAddress } from 'utils/strings';
-
-import { IBCSettings } from '../ibc-banner';
-import { SecondaryActionButton } from '../secondary-action-button';
+import { View, Text, StyleSheet } from 'react-native';
+import { MotiView } from 'moti';
+import { SelectedAddressPreview } from './selected-address-preview';
+import Clipboard from '@react-native-clipboard/clipboard'; // npm install @react-native-clipboard/clipboard
+import { SelectedAddress, useActiveWallet, useAddress, useAddressPrefixes, useChainsStore, WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks';
+import { getBlockChainFromAddress, isValidAddress, pubKeyToEvmAddressToShow, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { decode } from 'bech32';
+import { AddressBook } from '../../../../utils/addressbook';
+import { useContactsSearch } from '../../../../hooks/useContacts';
 import { useSendNftCardContext } from '../send-nft';
-import { ContactsSheet } from './contacts-sheet';
+import { Images } from '../../../../../assets/images';
+import { SEI_EVM_LEDGER_ERROR_MESSAGE } from '../../../../services/config/constants';
+import { sliceAddress } from '../../../../utils/strings';
+import { ActionInputWithPreview } from '../../../../components/action-input-with-preview';
+import { SecondaryActionButton } from '../secondary-action-button';
 import { ContactsMatchList, NameServiceMatchList } from './match-lists';
+import { ContactsSheet } from './contacts-sheet';
 import { MyWalletSheet } from './my-wallet-sheet';
 import SaveAddressSheet from './save-address-sheet';
-import { SelectedAddressPreview } from './selected-address-preview';
+import { IBCSettings } from '../ibc-banner';
 
 type RecipientCardProps = {
   themeColor: string;
@@ -49,7 +33,7 @@ type RecipientCardProps = {
 
 const nameServiceMatcher = /^[a-zA-Z0-9_-]+\.[a-z]+$/;
 
-const RecipientCardView: React.FC<RecipientCardProps> = ({
+export const RecipientCard = ({
   themeColor,
   selectedAddress,
   setSelectedAddress,
@@ -58,8 +42,8 @@ const RecipientCardView: React.FC<RecipientCardProps> = ({
   collectionAddress,
   associatedSeiAddress,
   setAssociatedSeiAddress,
-}) => {
-  const inputRef = useRef<HTMLInputElement | null>(null);
+}: RecipientCardProps) => {
+  const inputRef = useRef(null);
   const {
     fetchAccountDetails,
     fetchAccountDetailsData,
@@ -70,12 +54,12 @@ const RecipientCardView: React.FC<RecipientCardProps> = ({
     nftSendNetwork: activeNetwork,
   } = useSendNftCardContext();
 
-  const [isContactsSheetVisible, setIsContactsSheetVisible] = useState<boolean>(false);
-  const [isMyWalletSheetVisible, setIsMyWalletSheetVisible] = useState<boolean>(false);
-  const [isAddContactSheetVisible, setIsAddContactSheetVisible] = useState<boolean>(false);
-  const [recipientInputValue, setRecipientInputValue] = useState<string>('');
+  const [isContactsSheetVisible, setIsContactsSheetVisible] = useState(false);
+  const [isMyWalletSheetVisible, setIsMyWalletSheetVisible] = useState(false);
+  const [isAddContactSheetVisible, setIsAddContactSheetVisible] = useState(false);
+  const [recipientInputValue, setRecipientInputValue] = useState('');
 
-  const [customIbcChannelId, setCustomIbcChannelId] = useState<string>();
+  const [customIbcChannelId, setCustomIbcChannelId] = useState<string | undefined>();
 
   const { ibcSupportData, isIBCTransfer } = {
     ibcSupportData: {},
@@ -92,31 +76,22 @@ const RecipientCardView: React.FC<RecipientCardProps> = ({
   const existingContactMatch = AddressBook.useGetContact(recipientInputValue);
   const ownWalletMatch = selectedAddress?.selectionType === 'currentWallet';
 
-  const handleOnChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setRecipientInputValue(e.target.value);
-    },
-    [setRecipientInputValue],
-  );
-
-  const actionHandler = useCallback(
-    (e: React.MouseEvent, _action: string) => {
-      switch (_action) {
-        case 'paste':
-          UserClipboard.pasteText().then((text) => {
-            if (!text) return;
-            setRecipientInputValue(text.trim());
-          });
-          break;
-        case 'clear':
-          setRecipientInputValue('');
-          setSelectedAddress(null);
-          break;
-        default:
-          break;
+  const handleCustomIbcChannelId = useCallback(
+    (value: string | undefined) => {
+      if (selectedAddress?.chainName) {
+        setCustomIbcChannelId(undefined);
+      } else {
+        setCustomIbcChannelId(value);
       }
     },
-    [setSelectedAddress],
+    [selectedAddress?.chainName]
+  );
+
+  const handleOnChange = useCallback(
+    (value: string) => {
+      setRecipientInputValue(value);
+    },
+    [setRecipientInputValue]
   );
 
   const handleContactSelect = useCallback(
@@ -127,7 +102,7 @@ const RecipientCardView: React.FC<RecipientCardProps> = ({
         setIsContactsSheetVisible(false);
       }
     },
-    [isContactsSheetVisible, setRecipientInputValue, setSelectedAddress],
+    [isContactsSheetVisible, setRecipientInputValue, setSelectedAddress]
   );
 
   const handleWalletSelect = useCallback(
@@ -135,12 +110,12 @@ const RecipientCardView: React.FC<RecipientCardProps> = ({
       setRecipientInputValue(s.address ?? '');
       setSelectedAddress(s);
     },
-    [setRecipientInputValue, setSelectedAddress],
+    [setRecipientInputValue, setSelectedAddress]
   );
 
   const handleAddContact = useCallback(() => {
     try {
-      const { prefix } = bech32.decode(recipientInputValue);
+      const { prefix } = decode(recipientInputValue);
       const chainName = addressPrefixes[prefix];
       if (!chainName) {
         setAddressError('Unsupported Chain');
@@ -168,52 +143,23 @@ const RecipientCardView: React.FC<RecipientCardProps> = ({
 
   const showNameServiceResults = useMemo(() => {
     const allowedTopLevelDomains = [
-      ...Object.keys(addressPrefixes), // for ibcdomains, icns, stargazenames
-      'arch', // for archId
-      'sol', // for injective .sol domains by SNS
-      ...['sei', 'pp'], // for degeNS
-      'core', // for bdd
-      'i', //for celestials.id
+      ...Object.keys(addressPrefixes),
+      'arch',
+      'sol',
+      ...['sei', 'pp'],
+      'core',
+      'i',
     ];
-    // ex: leap.arch --> name = leap, domain = arch
     const [, domain] = recipientInputValue.split('.');
     const isValidDomain = allowedTopLevelDomains.indexOf(domain) !== -1;
     return nameServiceMatcher.test(recipientInputValue) && isValidDomain;
   }, [recipientInputValue, addressPrefixes]);
 
-  const preview = useMemo(() => {
-    if (selectedAddress) {
-      return (
-        <SelectedAddressPreview
-          selectedAddress={selectedAddress}
-          showEditMenu={false}
-          onDelete={() => {
-            setSelectedAddress(null);
-            setRecipientInputValue('');
-          }}
-        />
-      );
-    }
-    if (recipientInputValue.length > 0) {
-      try {
-        bech32.decode(recipientInputValue);
-        return (
-          <Text size='md' className='text-gray-800 dark:text-gray-200'>
-            {sliceAddress(recipientInputValue)}
-          </Text>
-        );
-      } catch (err) {
-        return undefined;
-      }
-    }
-    return undefined;
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [existingContactMatch, recipientInputValue, selectedAddress, setSelectedAddress]);
-
-  const showContactsList = recipientInputValue.trim().length > 0 && contactsToShow.length > 0;
+  const showContactsList =
+    recipientInputValue.trim().length > 0 && contactsToShow.length > 0;
   const isSavedContactSelected =
-    selectedAddress?.address === recipientInputValue && selectedAddress?.selectionType === 'saved';
+    selectedAddress?.address === recipientInputValue &&
+    selectedAddress?.selectionType === 'saved';
   const showAddToContacts =
     !showContactsList &&
     recipientInputValue.length > 0 &&
@@ -237,47 +183,42 @@ const RecipientCardView: React.FC<RecipientCardProps> = ({
     activeNetwork === 'mainnet' &&
     false;
 
-  const showSecondaryActions = showContactsButton || showMyWalletButton || showAddToContacts;
+  const showSecondaryActions =
+    showContactsButton || showMyWalletButton || showAddToContacts;
 
   useEffect(() => {
     switch (fetchAccountDetailsStatus) {
       case 'loading': {
         setAddressWarning(
-          <>
-            Recipient will receive this on address:{' '}
-            <LoaderAnimation color={Colors.white100} className='w-[20px] h-[20px]' />
-          </>,
+          `Recipient will receive this on address: (loading...)`
         );
-
         break;
       }
-
       case 'success': {
         if (fetchAccountDetailsData?.pubKey.key) {
-          const recipient0xAddress = pubKeyToEvmAddressToShow(fetchAccountDetailsData.pubKey.key);
+          const recipient0xAddress = pubKeyToEvmAddressToShow(
+            fetchAccountDetailsData.pubKey.key
+          );
           if (recipient0xAddress.toLowerCase().startsWith('0x')) {
-            setAddressWarning(`Recipient will receive the NFT on associated EVM address: ${recipient0xAddress}`);
+            setAddressWarning(
+              `Recipient will receive the NFT on associated EVM address: ${recipient0xAddress}`
+            );
           } else {
             setAddressError('You can only send this NFT to an EVM address.');
           }
         }
-
         break;
       }
-
       case 'error': {
         setAddressError('You can only send this NFT to an EVM address.');
         break;
       }
-
       default: {
         setAddressWarning('');
         setAddressError('');
       }
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchAccountDetailsData?.pubKey.key, fetchAccountDetailsStatus]);
+  }, [fetchAccountDetailsData?.pubKey.key, fetchAccountDetailsStatus, setAddressError, setAddressWarning]);
 
   useEffect(() => {
     (async function () {
@@ -285,34 +226,33 @@ const RecipientCardView: React.FC<RecipientCardProps> = ({
 
       if (currentWalletAddress === recipientInputValue) {
         setAddressError('Cannot send to self');
-      } else if (collectionAddress.toLowerCase().startsWith('0x') && recipientInputValue) {
+      } else if (
+        collectionAddress.toLowerCase().startsWith('0x') &&
+        recipientInputValue
+      ) {
         if (activeWallet?.walletType === WALLETTYPE.LEDGER) {
           setAddressError(SEI_EVM_LEDGER_ERROR_MESSAGE);
           return;
         }
 
-        if (!recipientInputValue.toLowerCase().startsWith('0x') && recipientInputValue.length >= 42) {
+        if (
+          !recipientInputValue.toLowerCase().startsWith('0x') &&
+          recipientInputValue.length >= 42
+        ) {
           await fetchAccountDetails(recipientInputValue);
         }
-      } else if (recipientInputValue && !isValidAddress(recipientInputValue) && !showNameServiceResults) {
+      } else if (
+        recipientInputValue &&
+        !isValidAddress(recipientInputValue) &&
+        !showNameServiceResults
+      ) {
         setAddressError('Invalid address');
       } else {
         setAddressError('');
         setAddressWarning('');
       }
     })();
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    collectionAddress,
-    currentWalletAddress,
-    recipientInputValue,
-    setAddressError,
-    showNameServiceResults,
-    activeWallet?.walletType,
-    activeChain,
-    activeNetwork,
-  ]);
+  }, [collectionAddress, currentWalletAddress, recipientInputValue, setAddressError, showNameServiceResults, activeWallet?.walletType, activeChain, activeNetwork, setAssociatedSeiAddress, fetchAccountDetails, setAddressWarning]);
 
   useEffect(() => {
     if (recipientInputValue === selectedAddress?.address) {
@@ -327,7 +267,8 @@ const RecipientCardView: React.FC<RecipientCardProps> = ({
       if (
         cleanInputValue.toLowerCase().startsWith('0x') &&
         (collectionAddress.toLowerCase().startsWith('0x') ||
-          (!collectionAddress.toLowerCase().startsWith('0x') && associatedSeiAddress))
+          (!collectionAddress.toLowerCase().startsWith('0x') &&
+            associatedSeiAddress))
       ) {
         setSelectedAddress({
           address: cleanInputValue,
@@ -341,7 +282,7 @@ const RecipientCardView: React.FC<RecipientCardProps> = ({
         return;
       }
 
-      const { prefix } = bech32.decode(cleanInputValue);
+      const { prefix } = decode(cleanInputValue);
       const _chain = addressPrefixes[prefix] as SupportedChain;
       const img = chains[_chain].chainSymbolImageUrl;
 
@@ -355,7 +296,7 @@ const RecipientCardView: React.FC<RecipientCardProps> = ({
         selectionType: 'notSaved',
       });
     } catch (err) {
-      //
+      // swallow error
     }
   }, [
     activeChainInfo.chainSymbolImageUrl,
@@ -405,12 +346,11 @@ const RecipientCardView: React.FC<RecipientCardProps> = ({
     if (!destinationChainKey) {
       return null;
     }
-    // we are sure that the key is there in the chains object due to previous checks
     return chains[destinationChainKey];
   }, [addressPrefixes, chains, selectedAddress?.address]);
 
   useEffect(() => {
-    let destinationChain: string | undefined;
+    let destinationChain;
     if (
       (selectedAddress?.address ?? '').toLowerCase().startsWith('0x') &&
       (collectionAddress.toLowerCase().startsWith('0x') ||
@@ -437,13 +377,11 @@ const RecipientCardView: React.FC<RecipientCardProps> = ({
       return;
     }
 
-    // ibc not supported on testnet
     if (isIBC && activeNetwork === 'testnet') {
       setAddressError(`IBC not supported on testnet`);
       return;
     }
 
-    // check if destination chain is supported
     if (destinationChain && ibcSupportData !== undefined) {
       if (customIbcChannelId) {
         setAddressError('');
@@ -451,7 +389,7 @@ const RecipientCardView: React.FC<RecipientCardProps> = ({
         setAddressError(
           `IBC not supported between ${chains[destinationChain as SupportedChain].chainName} and ${
             chains[activeChain].chainName
-          }`,
+          }`
         );
       }
     }
@@ -470,27 +408,61 @@ const RecipientCardView: React.FC<RecipientCardProps> = ({
     associatedSeiAddress,
   ]);
 
-  useEffect(() => {
-    if (selectedAddress?.chainName) {
-      setCustomIbcChannelId(undefined);
-    }
-  }, [selectedAddress?.chainName, setCustomIbcChannelId]);
 
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
+  const preview = useMemo(() => {
+    if (selectedAddress) {
+      return (
+        <SelectedAddressPreview
+          selectedAddress={selectedAddress}
+          showEditMenu={false}
+          onDelete={() => {
+            setSelectedAddress(null);
+            setRecipientInputValue('');
+          }}
+        />
+      );
+    }
+    if (recipientInputValue.length > 0) {
+      try {
+        decode(recipientInputValue);
+        return (
+          <Text style={styles.previewText}>
+            {sliceAddress(recipientInputValue)}
+          </Text>
+        );
+      } catch (err) {
+        return null;
+      }
+    }
+    return null;
+  }, [selectedAddress, recipientInputValue, setSelectedAddress]);
+
+  const actionHandler = useCallback(
+    async (_action: string) => {
+      switch (_action) {
+        case 'paste':
+          const text = await Clipboard.getString();
+          if (!text) return;
+          setRecipientInputValue(text.trim());
+          break;
+        case 'clear':
+          setRecipientInputValue('');
+          setSelectedAddress(null);
+          break;
+        default:
+          break;
+      }
+    },
+    [setRecipientInputValue, setSelectedAddress]
+  );
 
   return (
-    <div>
-      <motion.div className={`card-container ${isIBCTransfer ? '!rounded-b-none' : ''}`}>
-        <Text
-          size='sm'
-          className='text-gray-600 dark:text-gray-200 font-bold mb-3'
-          data-testing-id='send-recipient-card'
-        >
-          Recipient
-        </Text>
+    <View>
+      <MotiView
+      style={[styles.cardContainer, isIBCTransfer && styles.roundedBottomNone]}>
+        <Text style={styles.label}>Recipient</Text>
 
+        {/* Adapt ActionInputWithPreview for RN, see note below */}
         <ActionInputWithPreview
           invalid={!!addressError}
           warning={!!addressWarning}
@@ -500,79 +472,59 @@ const RecipientCardView: React.FC<RecipientCardProps> = ({
           icon={inputButtonIcon}
           value={recipientInputValue}
           onAction={actionHandler}
-          onChange={handleOnChange}
-          placeholder='Enter name or address'
-          autoComplete='off'
-          spellCheck='false'
-          className='rounded-lg'
+          onChangeText={handleOnChange}
+          placeholder="Enter name or address"
+          autoComplete="off"
+          spellCheck={false}
+          style={styles.input}
           preview={preview}
           ref={inputRef}
         />
 
         {addressError ? (
-          <Text
-            size='xs'
-            color='text-red-300'
-            className='mt-2 ml-1 font-bold'
-            data-testing-id='send-recipient-address-error-ele'
-          >
-            {addressError}
-          </Text>
+          <Text style={styles.errorText}>{addressError}</Text>
         ) : null}
-
         {addressWarning ? (
-          <Text
-            size='xs'
-            color='text-yellow-600'
-            className='mt-2 ml-1 font-bold'
-            data-testing-id='send-recipient-address-error-ele'
-          >
-            {addressWarning}
-          </Text>
+          <Text style={styles.warningText}>{addressWarning}</Text>
         ) : null}
 
+        {/* Secondary actions as buttons */}
         {showSecondaryActions ? (
-          <div className='flex flex-wrap space-x-1 gap-2 mt-4'>
+          <View style={styles.secondaryActions}>
             {showContactsButton ? (
               <SecondaryActionButton
                 leftIcon={Images.Misc.Contacts}
-                onClick={() => setIsContactsSheetVisible(true)}
-                actionLabel='Open Contacts Sheet'
+                onPress={() => setIsContactsSheetVisible(true)}
+                actionLabel="Open Contacts Sheet"
               >
-                <Text size='sm' className='text-gray-600 dark:text-gray-200 whitespace-nowrap'>
-                  Contacts
-                </Text>
+                <Text style={styles.secondaryButtonText}>Contacts</Text>
               </SecondaryActionButton>
             ) : null}
             {showMyWalletButton ? (
               <SecondaryActionButton
                 leftIcon={Images.Misc.WalletIcon2}
-                onClick={() => setIsMyWalletSheetVisible(true)}
-                actionLabel='Show My Wallets on Other Chains'
+                onPress={() => setIsMyWalletSheetVisible(true)}
+                actionLabel="Show My Wallets on Other Chains"
               >
-                <Text size='sm' className='text-gray-600 dark:text-gray-200 whitespace-nowrap'>
-                  My Wallet
-                </Text>
+                <Text style={styles.secondaryButtonText}>My Wallet</Text>
               </SecondaryActionButton>
             ) : null}
             {showAddToContacts ? (
               <SecondaryActionButton
                 leftIcon={Images.Misc.AddContact}
-                onClick={handleAddContact}
-                actionLabel='Add Contact to Address Book'
+                onPress={handleAddContact}
+                actionLabel="Add Contact to Address Book"
               >
-                <Text size='sm' className='text-gray-600 dark:text-gray-200 whitespace-nowrap'>
-                  Add Contact
-                </Text>
+                <Text style={styles.secondaryButtonText}>Add Contact</Text>
               </SecondaryActionButton>
             ) : null}
-          </div>
+          </View>
         ) : null}
 
+        {/* Contacts/Name Service lists, modals, etc., should also be RN components */}
         {showContactsList ? (
           <ContactsMatchList contacts={contactsToShow} handleContactSelect={handleContactSelect} />
         ) : null}
-
         {showNameServiceResults ? (
           <NameServiceMatchList address={recipientInputValue} handleContactSelect={handleContactSelect} />
         ) : null}
@@ -595,17 +547,77 @@ const RecipientCardView: React.FC<RecipientCardProps> = ({
           onClose={() => setIsAddContactSheetVisible(false)}
           address={recipientInputValue}
         />
-      </motion.div>
-
+      </MotiView>
       {isIBCTransfer && activeNetwork === 'mainnet' && destChainInfo ? (
         <IBCSettings
-          className='rounded-b-2xl'
+          style={styles.roundedBottom2xl}
           targetChain={destChainInfo.key}
-          onSelectChannel={setCustomIbcChannelId}
+          onSelectChannel={handleCustomIbcChannelId}
         />
       ) : null}
-    </div>
+    </View>
   );
 };
 
-export const RecipientCard = observer(RecipientCardView);
+const styles = StyleSheet.create({
+  cardContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 18,
+    padding: 18,
+    marginVertical: 12,
+    // add more style as needed
+  },
+  roundedBottomNone: {
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+  },
+  roundedBottom2xl: {
+    borderBottomLeftRadius: 24,  // 2xl in Tailwind is 1.5rem = 24px
+    borderBottomRightRadius: 24,
+  },
+  label: {
+    color: '#374151',
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginBottom: 6,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    fontSize: 16,
+    marginBottom: 4,
+  },
+  previewText: {
+    color: '#222',
+    fontSize: 16,
+    marginTop: 4,
+  },
+  errorText: {
+    color: '#ef4444',
+    fontSize: 12,
+    marginTop: 4,
+    marginLeft: 2,
+    fontWeight: 'bold',
+  },
+  warningText: {
+    color: '#f59e42',
+    fontSize: 12,
+    marginTop: 4,
+    marginLeft: 2,
+    fontWeight: 'bold',
+  },
+  secondaryActions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 10,
+    gap: 8,
+  },
+  secondaryButtonText: {
+    color: '#374151',
+    fontSize: 14,
+    marginLeft: 4,
+  },
+});

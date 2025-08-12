@@ -21,7 +21,6 @@ import {
   ethSign,
   ethSignEip712,
   GasPrice,
-  LedgerError,
   NativeDenom,
   sleep,
   SupportedChain,
@@ -31,47 +30,40 @@ import { EvmBalanceStore, RootBalanceStore, RootDenomsStore, RootStakeStore } fr
 import { EthWallet } from '@leapwallet/leap-keychain';
 import { Avatar, Buttons, Header, ThemeName, useTheme } from '@leapwallet/leap-ui';
 import { MessageParser, parfait, ParsedMessage, ParsedMessageType } from '@leapwallet/parser-parfait';
-import { CheckSquare, Square } from '@phosphor-icons/react';
-import { captureException } from '@sentry/react';
+import { CheckSquare, Square } from 'phosphor-react-native';
+import { captureException } from '@sentry/react-native';
 import BigNumber from 'bignumber.js';
-import classNames from 'classnames';
-import Tooltip from 'components/better-tooltip';
-import { ErrorCard } from 'components/ErrorCard';
-import GasPriceOptions, { useDefaultGasPrice } from 'components/gas-price-options';
-import PopupLayout from 'components/layout/popup-layout';
-import LedgerConfirmationModal from 'components/ledger-confirmation/confirmation-modal';
-import { LoaderAnimation } from 'components/loader/Loader';
-import { Tabs } from 'components/tabs';
-import Text from 'components/text';
-import { MessageTypes } from 'config/message-types';
-import { BG_RESPONSE } from 'config/storage-keys';
+import Tooltip from '../../components/better-tooltip';
+import { ErrorCard } from '../../components/ErrorCard';
+import GasPriceOptions, { useDefaultGasPrice } from '../../components/gas-price-options';
+import PopupLayout from '../../components/layout/popup-layout';
+import LedgerConfirmationModal from '../../components/ledger-confirmation/confirmation-modal';
+import { LoaderAnimation } from '../../components/loader/Loader';
+import { Tabs } from '../../components/tabs';
+import Text from '../../components/text';
+import { MessageTypes } from '../../services/config/message-types';
+import { BG_RESPONSE } from '../../services/config/storage-keys';
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
-import { decodeChainIdToChain } from 'extension-scripts/utils';
-import { usePerformanceMonitor } from 'hooks/perf-monitoring/usePerformanceMonitor';
-import { useSiteLogo } from 'hooks/utility/useSiteLogo';
-import { Wallet } from 'hooks/wallet/useWallet';
-import { Images } from 'images';
-import { GenericDark, GenericLight } from 'images/logos';
+import { decodeChainIdToChain } from '../../context/utils';
+import { usePerformanceMonitor } from '../../hooks/perf-monitoring/usePerformanceMonitor';
+import { useSiteLogo } from '../../hooks/utility/useSiteLogo';
+import { Wallet } from '../../hooks/wallet/useWallet';
+import { Images } from '../../../assets/images';
+import { GenericDark, GenericLight } from '../../../assets/images/logos';
 import Long from 'long';
-import mixpanel from 'mixpanel-browser';
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { evmBalanceStore } from 'stores/balance-store';
-import { rootDenomsStore } from 'stores/denoms-store-instance';
-import { dappDefaultFeeStore, feeTokensStore } from 'stores/fee-store';
-import { rootBalanceStore, rootStakeStore } from 'stores/root-store';
-import { Colors } from 'theme/colors';
-import { assert } from 'utils/assert';
-import { formatWalletName } from 'utils/formatWalletName';
-import { imgOnError } from 'utils/imgOnError';
-import { isSidePanel } from 'utils/isSidePanel';
-import { uiErrorTags } from 'utils/sentry';
-import { trim } from 'utils/strings';
-import { uint8ArrayToBase64 } from 'utils/uint8Utils';
-import browser from 'webextension-polyfill';
+import { evmBalanceStore } from '../../context/balance-store';
+import { rootDenomsStore } from '../../context/denoms-store-instance';
+import { dappDefaultFeeStore, feeTokensStore } from '../../context/fee-store';
+import { rootBalanceStore, rootStakeStore } from '../../context/root-store';
+import { Colors, getChainColor } from '../../theme/colors';
+import { assert } from '../../utils/assert';
+import { formatWalletName } from '../../utils/formatWalletName';
+import { uiErrorTags } from '../../utils/sentry';
+import { trim } from '../../utils/strings';
+import { uint8ArrayToBase64 } from '../../utils/uint8Utils';
 
-import { EventName } from '../../config/analytics';
 import { NotAllowSignTxGasOptions } from './additional-fee-settings';
 import { useFeeValidation } from './fee-validation';
 import { MemoInput } from './memo-input';
@@ -80,7 +72,7 @@ import MessageList from './message-list';
 import StaticFeeDisplay from './static-fee-display';
 import TransactionDetails from './transaction-details';
 import { isGenericOrSendAuthzGrant } from './utils/is-generic-or-send-authz-grant';
-import { mapWalletTypeToMixpanelWalletType, mixpanelTrackOptions } from './utils/mixpanel-config';
+import { mapWalletTypeToMixpanelWalletType } from './utils/mixpanel-config';
 import { getAminoSignDoc } from './utils/sign-amino';
 import { getDirectSignDoc, getProtoSignDocDecoder } from './utils/sign-direct';
 import {
@@ -90,6 +82,18 @@ import {
   logSignAmino,
   logSignAminoInj,
 } from './utils/tx-logger';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  View,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+  SafeAreaView,
+  useWindowDimensions,
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import DeviceInfo from 'react-native-device-info';
 
 const useGetWallet = Wallet.useGetWallet;
 
@@ -132,14 +136,14 @@ const SignTransaction = observer(
     const [ledgerError, setLedgerError] = useState<string>();
     const [signingError, setSigningError] = useState<string | null>(null);
     const [gasPriceError, setGasPriceError] = useState<string | null>(null);
-    const [userPreferredGasLimit, setUserPreferredGasLimit] = useState<string>('');
+    const [userPreferredGasLimit, setUserPreferredGasLimit] = useState<string | BigNumber>('');
     const [userMemo, setUserMemo] = useState<string>('');
 
     const [checkedGrantAuthBox, setCheckedGrantAuthBox] = useState(false);
     const chainInfo = useChainInfo(activeChain);
     const activeWallet = useActiveWallet();
     const getWallet = useGetWallet(activeChain);
-    const navigate = useNavigate();
+    const navigation = useNavigation();
 
     const selectedNetwork = useMemo(() => {
       return !!chainInfo?.testnetChainId && chainInfo?.testnetChainId === chainId ? 'testnet' : 'mainnet';
@@ -292,8 +296,6 @@ const SignTransaction = observer(
           },
         });
 
-        
-        
         const parsedMessages = docDecoder.txMsgs.map((msg: { unpacked: any; typeUrl: string }) => {
           if (msg instanceof UnknownMessage) {
             const raw = msg.toJSON();
@@ -386,7 +388,7 @@ const SignTransaction = observer(
         //     walletType: mapWalletTypeToMixpanelWalletType(activeWallet.walletType),
         //     chainId: chainInfo.chainId,
         //     chainName: chainInfo.chainName,
-        //     productVersion: browser.runtime.getManifest().version,
+        //     productVersion: DeviceInfo.getVersion(),
         //     time: Date.now() / 1000,
         //   },
         //   mixpanelTrackOptions,
@@ -395,28 +397,8 @@ const SignTransaction = observer(
         captureException(e);
       }
 
-      browser.runtime.sendMessage({
-        type: MessageTypes.signResponse,
-        payload: { status: 'error', data: 'Transaction cancelled by the user.' },
-      });
-      if (isSidePanel()) {
-        navigate('/home');
-      } else {
-        await sleep(100);
-
-        setTimeout(async () => {
-          window.close();
-        }, 10);
-      }
-    }, [
-      siteOrigin,
-      transactionTypes,
-      isAmino,
-      activeWallet.walletType,
-      chainInfo.chainId,
-      chainInfo.chainName,
-      navigate,
-    ]);
+      navigation.goBack();
+    }, [navigation]);
 
     const recommendedGasLimit: string = useMemo(() => {
       if (defaultFee) {
@@ -521,7 +503,7 @@ const SignTransaction = observer(
             //     txHash,
             //     chainId: chainInfo.chainId,
             //     chainName: chainInfo.chainName,
-            //     productVersion: browser.runtime.getManifest().version,
+            //     productVersion: DeviceInfo.getVersion(),
             //     time: Date.now() / 1000,
             //   },
             //   mixpanelTrackOptions,
@@ -529,29 +511,13 @@ const SignTransaction = observer(
           } catch (e) {
             captureException(e);
           }
-
+          
           await sleep(100);
 
-          try {
-            browser.runtime.sendMessage({
-              type: MessageTypes.signResponse,
-              payload: { status: 'success', data },
-            });
-          } catch {
-            throw new Error('Could not send transaction to the dApp');
-          }
-          if (isSidePanel()) {
-            refetchData();
-            navigate('/home');
-          } else {
-            setTimeout(async () => {
-              window.close();
-            }, 10);
-          }
+          navigation.goBack();
         } catch (e) {
           if (e instanceof Error) {
             if (e.message === transactionDeclinedError) {
-              handleCancel();
             } else {
               setSigningError(e.message);
             }
@@ -662,7 +628,7 @@ const SignTransaction = observer(
               walletType: mapWalletTypeToMixpanelWalletType(activeWallet.walletType),
               chainId: chainInfo.chainId,
               chainName: chainInfo.chainName,
-              productVersion: browser.runtime.getManifest().version,
+              productVersion: DeviceInfo.getVersion(),
               time: Date.now() / 1000,
             };
 
@@ -672,8 +638,6 @@ const SignTransaction = observer(
             } catch (_) {
               //
             }
-
-            // mixpanel.track(EventName.DappTxnApproved, trackingData, mixpanelTrackOptions)
           } catch (e) {
             captureException(e);
           }
@@ -681,32 +645,10 @@ const SignTransaction = observer(
           isApprovedRef.current = true;
           await sleep(100);
 
-          try {
-            browser.runtime.sendMessage({
-              type: MessageTypes.signResponse,
-              payload: { status: 'success', data },
-            });
-          } catch {
-            throw new Error('Could not send transaction to the dApp');
-          }
-
-          if (isSidePanel()) {
-            refetchData();
-            navigate('/home');
-          } else {
-            setTimeout(async () => {
-              //await browser.storage.local.remove(SIGN_REQUEST)
-              window.close();
-            }, 10);
-          }
+          navigation.goBack();
         } catch (e) {
           if (e instanceof Error) {
-            if (e instanceof LedgerError) {
-              setLedgerError(e.message);
-              e.message === transactionDeclinedError && handleCancel();
-            } else {
-              e.message === transactionDeclinedError ? handleCancel() : setSigningError(e.message);
-            }
+            setLedgerError(e.message);
           }
         } finally {
           setShowLedgerPopup(false);
@@ -725,7 +667,6 @@ const SignTransaction = observer(
       siteOrigin,
       fee,
       txPostToDb,
-      handleCancel,
       ethSignType,
     ]);
 
@@ -737,34 +678,14 @@ const SignTransaction = observer(
     }, [defaultFee]);
 
     useEffect(() => {
-      window.addEventListener('beforeunload', handleCancel);
-      browser.storage.local.remove(BG_RESPONSE);
-      return () => {
-        window.removeEventListener('beforeunload', handleCancel);
-      };
-    }, [handleCancel]);
+      AsyncStorage.removeItem(BG_RESPONSE);
+    }, []);
 
     useEffect(() => {
       if (!siteOrigin || !transactionTypes) return;
-
       if (isDappTxnInitEventLogged.current) return;
 
       try {
-        // mixpanel.track(
-        //   EventName.DappTxnInit,
-        //   {
-        //     dAppURL: siteOrigin,
-        //     transactionTypes,
-        //     signMode: isAmino ? 'sign-amino' : 'sign-direct',
-        //     walletType: mapWalletTypeToMixpanelWalletType(activeWallet.walletType),
-        //     chainId: chainInfo.chainId,
-        //     chainName: chainInfo.chainName,
-        //     productVersion: browser.runtime.getManifest().version,
-        //     time: Date.now() / 1000,
-        //   },
-        //   mixpanelTrackOptions,
-        // )
-
         isDappTxnInitEventLogged.current = true;
       } catch (e) {
         captureException(e);
@@ -798,322 +719,431 @@ const SignTransaction = observer(
       !!gasPriceError ||
       (!!hasToShowCheckbox && checkedGrantAuthBox === false) ||
       (isFeesValid === false && !highFeeAccepted);
+    
+    const isDark = theme === ThemeName.DARK;
+    const windowHeight = useWindowDimensions().height;
+    const calcHeight = windowHeight - 72 - (hasToShowCheckbox ? 152 : 72);
 
     return (
-      <div
-        className={classNames(
-          'panel-width enclosing-panel h-full relative self-center justify-self-center flex justify-center items-center',
-        )}
-      >
-        <div
-          className={classNames(
-            'relative w-full overflow-clip rounded-md border border-gray-300 dark:border-gray-900',
-            { 'panel-height': isSidePanel() },
+      <SafeAreaView style={styles.safeRoot}>
+        <PopupLayout
+          style={{flex: 1, flexDirection: 'column'}}
+          header={(
+            <View style={{ width: 396 }}>
+              <Image source={{uri: chainInfo.chainSymbolImageUrl ?? (isDark ? GenericDark : GenericLight)}}/>
+              <View style={{ paddingRight: 16 }}>
+                <Buttons.Wallet title={trim(walletName, 10)} />
+              </View>
+            </View>
           )}
         >
-          <PopupLayout
-            className='flex flex-col'
-            header={
-              <div className='w-[396px]'>
-                <Header
-                  imgSrc={chainInfo.chainSymbolImageUrl ?? (theme === ThemeName.DARK ? GenericDark : GenericLight)}
-                  // imgOnError={imgOnError(theme === ThemeName.DARK ? GenericDark : GenericLight)}
-                  title={<Buttons.Wallet title={trim(walletName, 10)} className='pr-4 cursor-default' />}
-                />
-              </div>
-            }
+          <ScrollView
+            style={{
+              width: '100%',
+              paddingHorizontal: 28,
+              paddingVertical: 12,
+              position: 'relative',
+              height: calcHeight,
+            }}
+            contentContainerStyle={{ flexGrow: 1 }}
+            showsVerticalScrollIndicator={false}
           >
-            <div
-              className='px-7 py-3 overflow-y-auto relative'
+            <Text
               style={{
-                height: `calc(100% - 72px - ${hasToShowCheckbox ? '152px' : '72px'})`,
+                textAlign: 'center',
+                fontSize: 20, // 'text-lg'
+                fontWeight: 'bold',
+                color: isDark ? '#F1F5F9' : '#111827', // dark:text-white-100, text-gray-900
+                width: '100%',
               }}
             >
-              <h2 className='text-center text-lg font-bold dark:text-white-100 text-gray-900 w-full'>
-                Approve Transaction
-              </h2>
-              <div className='flex items-center mt-3 rounded-2xl dark:bg-gray-900 bg-white-100 p-4'>
-                <Avatar
-                  avatarImage={siteLogo}
-                  avatarOnError={imgOnError(Images.Misc.Globe)}
-                  size='sm'
-                  className='rounded-full overflow-hidden'
-                />
-                <div className='ml-3'>
-                  <p className='capitalize text-gray-900 dark:text-white-100 text-base font-bold'>{siteName}</p>
-                  <p className='lowercase text-gray-500 dark:text-gray-400 text-xs font-medium'>{siteOrigin}</p>
-                </div>
-              </div>
-
-              {!ethSignType && !isSignArbitrary && (
-                <TransactionDetails
-                  activeChain={activeChain}
-                  selectedNetwork={selectedNetwork}
-                  parsedMessages={Array.isArray(messages) ? messages?.map((msg) => msg.parsed) : null}
-                />
-              )}
-
-              {!ethSignType && !isSignArbitrary ? (
-                <GasPriceOptions
-                  initialFeeDenom={dappFeeDenom}
-                  gasLimit={userPreferredGasLimit || recommendedGasLimit}
-                  setGasLimit={(value: string | BigNumber | number) => setUserPreferredGasLimit(value.toString())}
-                  recommendedGasLimit={recommendedGasLimit}
-                  gasPriceOption={
-                    selectedGasOptionRef.current || allowSetFee
-                      ? gasPriceOption
-                      : { ...gasPriceOption, option: '' as GasOptions }
-                  }
-                  onGasPriceOptionChange={(value: any) => {
-                    selectedGasOptionRef.current = true;
-                    setGasPriceOption(value);
+              Approve Transaction
+            </Text>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginTop: 12,
+                borderRadius: 16,
+                backgroundColor: isDark ? '#111827' : '#fff',
+                padding: 16,
+              }}
+            >
+              <Avatar
+                avatarImage={siteLogo}
+                avatarOnError={() => {}}
+                size="sm"
+                style={{ borderRadius: 999, overflow: 'hidden' }}
+              />
+              <View style={{ marginLeft: 12 }}>
+                <Text
+                  style={{
+                    textTransform: 'capitalize',
+                    color: isDark ? '#F1F5F9' : '#111827',
+                    fontSize: 16,
+                    fontWeight: 'bold',
                   }}
-                  error={gasPriceError}
-                  setError={setGasPriceError}
-                  considerGasAdjustment={false}
-                  disableBalanceCheck={disableBalanceCheck}
-                  fee={fee}
-                  chain={activeChain}
-                  network={selectedNetwork}
-                  validateFee={!isAdr36}
-                  onInvalidFees={(feeTokenData: NativeDenom, isFeesValid: boolean | null) => {
-                    try {
-                      if (isFeesValid === false) {
-                        setIsFeesValid(false);
-                      }
-                    } catch (e) {
-                      captureException(e);
-                    }
-                  }}
-                  hasUserTouchedFees={!!selectedGasOptionRef?.current}
-                  notUpdateInitialGasPrice={!allowSetFee}
-                  rootDenomsStore={rootDenomsStore}
-                  rootBalanceStore={rootBalanceStore}
                 >
-                  <Tabs
-                    className='mt-3'
-                    tabsList={[
-                      { id: 'fees', label: 'Fees' },
-                      //Hiding  memo for now.
-                      //{ id: 'memo', label: 'Memo' },
-                      {
-                        id: 'messages',
-                        label: `Messages${messages?.length ? ` (${messages.length})` : ''}`,
-                      },
-                      { id: 'data', label: 'Data' },
-                    ]}
-                    tabsContent={{
-                      fees: allowSetFee ? (
-                        <div className='rounded-2xl p-4 mt-3 dark:bg-gray-900 bg-white-100'>
-                          <div className='flex items-center'>
-                            <p className='text-gray-500 dark:text-gray-100 text-sm font-medium tracking-wide'>
-                              Gas Fees <span className='capitalize'>({gasPriceOption.option})</span>
-                            </p>
-                            <Tooltip
-                              content={
-                                <p className='text-gray-500 dark:text-gray-100 text-sm'>
-                                  You can choose higher gas fees for faster transaction processing.
-                                </p>
-                              }
-                            >
-                              <div className='relative ml-2'>
-                                <img src={Images.Misc.InfoCircle} alt='Hint' />
-                              </div>
-                            </Tooltip>
-                          </div>
+                  {siteName}
+                </Text>
+                <Text
+                  style={{
+                    textTransform: 'lowercase',
+                    color: isDark ? '#9CA3AF' : '#6B7280',
+                    fontSize: 12,
+                    fontWeight: '500',
+                  }}
+                >
+                  {siteOrigin}
+                </Text>
+              </View>
+            </View>
+            {!ethSignType && !isSignArbitrary && (
+              <TransactionDetails
+                activeChain={activeChain}
+                selectedNetwork={selectedNetwork}
+                parsedMessages={Array.isArray(messages) ? messages?.map((msg) => msg.parsed) : null}
+              />
+            )}
+            {!ethSignType && !isSignArbitrary ? (
+              <GasPriceOptions
+                initialFeeDenom={dappFeeDenom}
+                gasLimit={userPreferredGasLimit || recommendedGasLimit}
+                setGasLimit={(value: string | BigNumber | number) => setUserPreferredGasLimit(value.toString())}
+                recommendedGasLimit={recommendedGasLimit}
+                gasPriceOption={
+                  selectedGasOptionRef.current || allowSetFee
+                    ? gasPriceOption
+                    : { ...gasPriceOption, option: '' as GasOptions }
+                }
+                onGasPriceOptionChange={(value: any) => {
+                  selectedGasOptionRef.current = true;
+                  setGasPriceOption(value);
+                }}
+                error={gasPriceError}
+                setError={setGasPriceError}
+                considerGasAdjustment={false}
+                disableBalanceCheck={disableBalanceCheck}
+                fee={fee}
+                chain={activeChain}
+                network={selectedNetwork}
+                validateFee={!isAdr36}
+                onInvalidFees={(feeTokenData: NativeDenom, isFeesValid: boolean | null) => {
+                  try {
+                    if (isFeesValid === false) {
+                      setIsFeesValid(false);
+                    }
+                  } catch (e) {
+                    captureException(e);
+                  }
+                }}
+                hasUserTouchedFees={!!selectedGasOptionRef?.current}
+                notUpdateInitialGasPrice={!allowSetFee}
+                rootDenomsStore={rootDenomsStore}
+                rootBalanceStore={rootBalanceStore}
+              >
+                <Tabs
+                  style={{marginTop: 12}}
+                  tabsList={[
+                    { id: 'fees', label: 'Fees' },
+                    //{ id: 'memo', label: 'Memo' }, //Hiding  memo for now.
+                    {
+                      id: 'messages',
+                      label: `Messages${messages?.length ? ` (${messages.length})` : ''}`,
+                    },
+                    { id: 'data', label: 'Data' },
+                  ]}
+                  tabsContent={{
+                    fees: allowSetFee ? (
+                      <View style={{
+                        borderRadius: 16,
+                        padding: 16,
+                        marginTop: 12,
+                        backgroundColor: isDark ? '#111827' : '#f9fafb', // gray-900 : white-100
+                      }}>
+                        <View style={styles.rowCenter}>
+                          <Text style={[styles.feeTitle, isDark && styles.feeTitleDark]}>
+                            Gas Fees 
+                          </Text>
+                          <Text style={{ textTransform: 'capitalize' }}>({gasPriceOption.option})</Text>
+                          <Tooltip
+                            content={
+                              <Text style={[styles.tooltipText, isDark && styles.tooltipTextDark]}>
+                                You can choose higher gas fees for faster transaction processing.
+                              </Text>
+                            }
+                          >
+                            <View style={styles.tooltipIcon}>
+                              <Image source={{uri: Images.Misc.InfoCircle}} alt={'Hint'} style={{width: 20, height: 20}} />
+                            </View>
+                          </Tooltip>
+                        </View>
 
-                          <GasPriceOptions.Selector className='mt-2' />
-                          <div className='flex items-center justify-end'>
-                            <GasPriceOptions.AdditionalSettingsToggle className='p-0 mt-3' />
-                          </div>
-                          <GasPriceOptions.AdditionalSettings
-                            className='mt-2'
-                            showGasLimitWarning={true}
-                            rootDenomsStore={rootDenomsStore}
+                        <GasPriceOptions.Selector style={styles.mt2} />
+
+                        <View style={styles.rowEnd}>
+                          <GasPriceOptions.AdditionalSettingsToggle style={styles.mt3} />
+                        </View>
+
+                        <GasPriceOptions.AdditionalSettings
+                          style={styles.mt2}
+                          showGasLimitWarning={true}
+                          rootDenomsStore={rootDenomsStore}
+                          rootBalanceStore={rootBalanceStore}
+                        />
+
+                        {gasPriceError ? (
+                          <Text style={styles.errorText}>{gasPriceError}</Text>
+                        ) : null}
+                      </View>
+                    ) : (
+                      <>
+                        <View style={{
+                          borderRadius: 16,
+                          padding: 16,
+                          marginTop: 12,
+                          backgroundColor: isDark ? '#111827' : '#f9fafb', // gray-900 : white-100
+                        }}>
+                          <StaticFeeDisplay
+                            fee={fee}
+                            error={gasPriceError}
+                            setError={setGasPriceError}
+                            disableBalanceCheck={disableBalanceCheck}
                             rootBalanceStore={rootBalanceStore}
+                            activeChain={activeChain}
+                            selectedNetwork={selectedNetwork}
+                            feeTokensList={feeTokens}
                           />
-
-                          {gasPriceError ? (
-                            <p className='text-red-300 text-sm font-medium mt-2 px-1'>{gasPriceError}</p>
-                          ) : null}
-                        </div>
-                      ) : (
-                        <>
-                          <div className='rounded-2xl p-4 mt-3 dark:bg-gray-900 bg-white-100'>
-                            <StaticFeeDisplay
-                              fee={fee}
-                              error={gasPriceError}
-                              setError={setGasPriceError}
-                              disableBalanceCheck={disableBalanceCheck}
-                              rootBalanceStore={rootBalanceStore}
-                              activeChain={activeChain}
-                              selectedNetwork={selectedNetwork}
-                              feeTokensList={feeTokens}
-                            />
-                            <div className='flex items-center justify-end'>
-                              <GasPriceOptions.AdditionalSettingsToggle className='p-0 mt-3' />
-                            </div>
-                            <NotAllowSignTxGasOptions gasPriceOption={gasPriceOption} gasPriceError={gasPriceError} />
-                          </div>
-                        </>
-                      ),
-                      memo: (
-                        <div className='mt-3'>
+                          <View style={styles.rowEnd}>
+                            <GasPriceOptions.AdditionalSettingsToggle style={styles.mt3} />
+                          </View>
+                          <NotAllowSignTxGasOptions gasPriceOption={gasPriceOption} gasPriceError={gasPriceError} />
+                        </View>
+                      </>
+                    ),
+                    memo: (
+                      <View style={{ marginTop: 12 }}>
+                        {defaultMemo || userMemo ? (
                           <MemoInput
                             disabled={!!defaultMemo}
                             memo={defaultMemo ? defaultMemo : userMemo}
-                            setMemo={(memo) => {
-                              setUserMemo(memo);
-                            }}
+                            setMemo={setUserMemo}
                             activeChain={activeChain}
                           />
-                          ) : (
-                          <div>
-                            <p className='text-gray-500 dark:text-gray-100 text-sm'>
+                        ) : (
+                          <View>
+                            <Text style={{ color: isDark ? '#f3f4f6' : '#6b7280', fontSize: 14 }}>
                               No information available. The transaction can still be approved.
-                            </p>
-                          </div>
-                          )
-                        </div>
-                      ),
-                      messages: (
-                        <div className='mt-3'>
-                          {messages ? (
-                            <MessageList
-                              parsedMessages={messages.map((msg) => msg.parsed)}
-                              onMessageSelect={(msg, index) => {
-                                setSelectedMessage({
-                                  index,
-                                  parsed: messages[index].parsed,
-                                  raw: messages[index].raw,
-                                });
-                                setShowMessageDetailsSheet(true);
-                              }}
-                            />
-                          ) : (
-                            <div>
-                              <p className='text-gray-500 dark:text-gray-100 text-sm'>
-                                No information available. The transaction can still be approved.
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      ),
-                      data: (
-                        <pre className='text-xs text-gray-900 dark:text-white-100 dark:bg-gray-900 bg-white-100 p-4 w-full overflow-x-auto mt-3 rounded-2xl'>
-                          {JSON.stringify(
-                            txnDoc,
-                            (_, value) => (typeof value === 'bigint' ? value.toString() : value),
-                            2,
-                          )}
-                        </pre>
-                      ),
-                    }}
-                  />
-                </GasPriceOptions>
-              ) : (
-                <pre
-                  className={classNames(
-                    'text-xs text-gray-900 dark:text-white-100 dark:bg-gray-900 bg-white-100 p-4 w-full overflow-x-auto mt-3 rounded-2xl',
-                    {
-                      'whitespace-pre-line break-words': isSignArbitrary,
-                    },
-                  )}
-                >
-                  {isSignArbitrary && typeof messages === 'string'
-                    ? (messages as unknown as string)
-                    : JSON.stringify(
-                        
-                        
-                        JSON.parse(Array.isArray(messages) ? messages?.[0].parsed?.message : null),
-                        null,
-                        2,
-                      )}
-                </pre>
-              )}
-
-              <div className='mt-3'>
-                {signingError ?? ledgerError ? <ErrorCard text={signingError ?? ledgerError} /> : null}
-              </div>
-
-              <LedgerConfirmationModal
-                showLedgerPopup={showLedgerPopup}
-                onClose={() => {
-                  setShowLedgerPopup(false);
+                            </Text>
+                          </View>
+                        )}
+                      </View>
+                    ),
+                    messages: (
+                      <View style={{ marginTop: 12 }}>
+                        {messages && messages.length > 0 ? (
+                          <MessageList
+                            parsedMessages={messages.map((msg) => msg.parsed)}
+                            onMessageSelect={(msg, index) => {
+                              setSelectedMessage({
+                                index,
+                                parsed: messages[index].parsed,
+                                raw: messages[index].raw,
+                              });
+                              setShowMessageDetailsSheet(true);
+                            }}
+                          />
+                        ) : (
+                          <View>
+                            <Text style={{ color: isDark ? '#f3f4f6' : '#6b7280', fontSize: 14 }}>
+                              No information available. The transaction can still be approved.
+                            </Text>
+                          </View>
+                        )}
+                      </View>
+                    ),
+                    data: (
+                      <View style={{ marginTop: 12, borderRadius: 16, backgroundColor: isDark ? '#111827' : '#fff', padding: 16 }}>
+                        <ScrollView horizontal style={{ width: '100%' }}>
+                          <Text
+                            style={{
+                              fontFamily: 'monospace',
+                              fontSize: 12,
+                              color: isDark ? '#f3f4f6' : '#111827',
+                            }}
+                          >
+                            {JSON.stringify(
+                              txnDoc,
+                              (_, value) => (typeof value === 'bigint' ? value.toString() : value),
+                              2
+                            )}
+                          </Text>
+                        </ScrollView>
+                      </View>
+                    ),
+                  }}
+                />
+              </GasPriceOptions>
+            ) : (
+              <View
+                style={{
+                  marginTop: 12,
+                  borderRadius: 16,
+                  backgroundColor: isDark ? '#111827' : '#fff',
+                  padding: 16,
+                  width: '100%',
                 }}
-              />
-
-              <MessageDetailsSheet
-                isOpen={showMessageDetailsSheet}
-                setIsOpen={setShowMessageDetailsSheet}
-                onClose={() => setSelectedMessage(null)}
-                message={selectedMessage}
-                activeChain={activeChain}
-                selectedNetwork={selectedNetwork}
-              />
-              {isFeesValid === false && (
-                <div
-                  ref={errorMessageRef}
-                  className='flex dark:bg-gray-900 bg-white-100 px-4 py-3 w-full rounded-2xl items-center mt-3'
+              >
+                <ScrollView
+                  horizontal
+                  style={{ width: '100%' }}
+                  contentContainerStyle={{ flexGrow: 1 }}
                 >
-                  <div className='mr-3' onClick={() => setHighFeeAccepted(!highFeeAccepted)}>
-                    {!highFeeAccepted ? (
-                      <Square size={16} className='text-gray-700 cursor-pointer' />
-                    ) : (
-                      <CheckSquare size={16} className='cursor-pointer' color={Colors.getChainColor(activeChain)} />
-                    )}
-                  </div>
-
-                  <Text size='sm' color='text-gray-400'>
-                    The selected fee amount is unusually high.
-                    <br />I confirm and agree to proceed
+                  <Text
+                    style={{
+                      fontFamily: 'monospace',
+                      fontSize: 12,
+                      color: isDark ? '#f3f4f6' : '#111827',
+                      // Add line break support if needed
+                    }}
+                    selectable
+                  >
+                    {isSignArbitrary && typeof messages === 'string'
+                      ? messages
+                      : JSON.stringify(
+                          (() => {
+                            try {
+                              return JSON.parse(Array.isArray(messages) ? messages?.[0].parsed?.message : null);
+                            } catch (e) {
+                              return {};
+                            }
+                          })(),
+                          null,
+                          2
+                        )}
                   </Text>
-                </div>
-              )}
-            </div>
+                </ScrollView>
+              </View>
+            )}
 
-            <div className='py-3 px-7 dark:bg-black-100 bg-gray-50 w-full mt-auto'>
-              {hasToShowCheckbox && (
-                <div className='flex flex-row items-start mb-3 border border-yellow-600 rounded-lg p-[4px]'>
-                  <div className='mr-2' onClick={() => setCheckedGrantAuthBox(!checkedGrantAuthBox)}>
-                    {!checkedGrantAuthBox ? (
-                      <Square size={16} className='text-gray-900 cursor-pointer relative'>
-                        <span className='absolute w-[10px] h-[6px] bg-gray-900 top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2' />
-                      </Square>
-                    ) : (
-                      <CheckSquare size={16} className='cursor-pointer' color={Colors.getChainColor(activeChain)} />
-                    )}
-                  </div>
+            <View style={{marginTop: 12}}>
+              {signingError ?? ledgerError ? <ErrorCard text={signingError ?? ledgerError} /> : null}
+            </View>
 
-                  <Text color='text-gray-400 text-[15px]'>{hasToShowCheckbox}</Text>
-                </div>
-              )}
+            <LedgerConfirmationModal
+              showLedgerPopup={showLedgerPopup}
+              onClose={() => {
+                setShowLedgerPopup(false);
+              }}
+            />
 
-              <div className='flex items-center justify-center w-full space-x-3 mt-2'>
-                <Buttons.Generic title={'Reject Button'} color={Colors.gray900} onClick={handleCancel}>
-                  Reject
-                </Buttons.Generic>
-                <Buttons.Generic
-                  title={'Approve Button'}
-                  color={Colors.getChainColor(activeChain)}
-                  onClick={approveTransaction}
-                  disabled={isApproveBtnDisabled}
-                  className={`${isApproveBtnDisabled ? 'cursor-not-allowed opacity-50' : ''}`}
+            <MessageDetailsSheet
+              isOpen={showMessageDetailsSheet}
+              setIsOpen={setShowMessageDetailsSheet}
+              onClose={() => setSelectedMessage(null)}
+              message={selectedMessage}
+              activeChain={activeChain}
+              selectedNetwork={selectedNetwork}
+            />
+            
+            {isFeesValid === false && (
+              <View
+                ref={errorMessageRef}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  backgroundColor: isDark ? '#111827' : '#fff',
+                  paddingHorizontal: 16,
+                  paddingVertical: 12,
+                  borderRadius: 16,
+                  width: '100%',
+                  marginTop: 12,
+                }}
+              >
+                <TouchableOpacity
+                  style={{ marginRight: 12 }}
+                  onPress={() => setHighFeeAccepted(!highFeeAccepted)}
+                  hitSlop={{ top: 6, left: 6, right: 6, bottom: 6 }}
                 >
-                  Approve
-                </Buttons.Generic>
-              </div>
-            </div>
-          </PopupLayout>
-        </div>
-      </div>
+                  {!highFeeAccepted ? (
+                    <Square size={16} color={isDark ? '#d1d5db' : '#374151'} />
+                  ) : (
+                    <CheckSquare size={16} color={getChainColor(activeChain)} />
+                  )}
+                </TouchableOpacity>
+
+                <Text size='sm' color='text-gray-400'>
+                  The selected fee amount is unusually high.{"\n"}
+                  I confirm and agree to proceed
+                </Text>
+              </View>
+            )}
+          </ScrollView>
+
+          <View style={{
+            paddingVertical: 12,         // py-3
+            paddingHorizontal: 28,       // px-7
+            backgroundColor: darkMode ? Colors.black100 : Colors.gray50, // dark:bg-black-100 bg-gray-50
+            width: '100%',
+            marginTop: 'auto',
+          }}>
+            {hasToShowCheckbox ? (
+              <View style={{
+                flexDirection: 'row',
+                alignItems: 'flex-start',
+                marginBottom: 12,       // mb-3
+                borderWidth: 1,
+                borderColor: '#eab308', // border-yellow-600
+                borderRadius: 8,        // rounded-lg
+                padding: 4,
+              }}>
+                <TouchableOpacity
+                  style={{ marginRight: 8 }} // mr-2
+                  onPress={() => setCheckedGrantAuthBox(!checkedGrantAuthBox)}
+                  activeOpacity={0.8}
+                >
+                  {!checkedGrantAuthBox ? (
+                    <Square size={16} color={Colors.gray900} />
+                  ) : (
+                    <CheckSquare size={16} color={getChainColor(activeChain)} />
+                  )}
+                </TouchableOpacity>
+                <Text style={{ color: Colors.gray400, fontSize: 15 }}>
+                  {hasToShowCheckbox}
+                </Text>
+              </View>
+            ) : null}
+
+            <View style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+              gap: 12, // RN 0.71+, else use marginRight on left button
+              marginTop: 8, // mt-2
+            }}>
+              <Buttons.Generic
+                title={'Reject'}
+                color={Colors.gray900}
+                onClick={handleCancel}
+                // No children in RN unless you need them
+                // style can be passed if needed
+              />
+              <Buttons.Generic
+                title={'Approve'}
+                color={getChainColor(activeChain)}
+                onClick={approveTransaction}
+                disabled={isApproveBtnDisabled}
+                style={isApproveBtnDisabled ? { opacity: 0.5 } : {}}
+              />
+            </View>
+          </View>
+        </PopupLayout>
+      </SafeAreaView>
     );
   },
 );
 
-/**
- * This HOC helps makes sure that the txn signing request is decoded and the chain is set
- */
 const withTxnSigningRequest = (Component: React.FC<any>) => {
   const Wrapped = () => {
     const [chain, setChain] = useState<SupportedChain>();
@@ -1122,56 +1152,16 @@ const withTxnSigningRequest = (Component: React.FC<any>) => {
 
     const [txnData, setTxnData] = useState<any | null>(null);
     const [chainId, setChainId] = useState<string>();
-    const [error] = useState<{
-      message: string;
-      code: string;
-    } | null>(null);
-
-    const navigate = useNavigate();
+    const [error] = useState<{ message: string; code: string } | null>(null);
+    const navigation = useNavigation();
 
     useEffect(() => {
-      decodeChainIdToChain().then(setChainIdToChain).catch(captureException);
+      decodeChainIdToChain()
+        .then(setChainIdToChain)
+        .catch(captureException);
     }, []);
 
-    const signTxEventHandler = (message: any, sender: any) => {
-      if (sender.id !== browser.runtime.id) return;
-      if (message.type === MessageTypes.signTransaction) {
-        const txnData = message.payload;
-        const chainId = txnData.chainId ? txnData.chainId : txnData.signDoc?.chainId;
-        const chain = chainId ? (_chainIdToChain[chainId] as SupportedChain) : undefined;
-        if (!chain) {
-          browser.runtime.sendMessage({
-            type: MessageTypes.signResponse,
-            payload: { status: 'error', data: `Invalid chainId ${chainId}` },
-          });
-          if (isSidePanel()) {
-            navigate('/home');
-          } else {
-            setTimeout(async () => {
-              window.close();
-            }, 10);
-          }
-          return;
-        }
-        if (txnData.signOptions.isSignArbitrary) {
-          setIsSignArbitrary(true);
-        }
-        setChain(chain);
-        setChainId(chainId);
-        setTxnData(txnData);
-      }
-    };
-
-    useEffect(() => {
-      browser.runtime.sendMessage({ type: MessageTypes.signingPopupOpen });
-      browser.runtime.onMessage.addListener(signTxEventHandler);
-      return () => {
-        browser.runtime.onMessage.removeListener(signTxEventHandler);
-      };
-
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
+    // --- Render ---
     if (chain && txnData && chainId) {
       return (
         <Component
@@ -1188,51 +1178,115 @@ const withTxnSigningRequest = (Component: React.FC<any>) => {
     }
 
     if (error) {
-      const heading = ((code) => {
-        switch (code) {
-          case 'no-data':
-            return 'No Transaction Data';
-          default:
-            return 'Something Went Wrong';
-        }
-      })(error.code);
+      const heading =
+        error.code === 'no-data' ? 'No Transaction Data' : 'Something Went Wrong';
 
       return (
-        <PopupLayout className='self-center justify-self-center' header={<Header title='Sign Transaction' />}>
-          <div className='h-full w-full flex flex-col gap-4 items-center justify-center'>
-            <h1 className='text-red-300 text-2xl font-bold px-4 text-center'>{heading}</h1>
-            <p className='text-black-100 dark:text-white-100 text-sm font-medium px-4 text-center'>{error.message}</p>
-            <button
-              className='mt-8 py-1 px-4 text-center text-sm font-medium dark:text-white-100 text-black-100 bg-indigo-300 rounded-full'
-              onClick={() => {
-                if (isSidePanel()) {
-                  navigate('/home');
-                } else {
-                  window.close();
-                }
-              }}
-            >
-              Close Wallet
-            </button>
-          </div>
-        </PopupLayout>
+        <SafeAreaView style={{ flex: 1 }}>
+          <PopupLayout
+            header={<Header title="Sign Transaction" />}
+            style={styles.popupLayout}
+          >
+            <View style={styles.centered}>
+              <Text style={styles.errorHeading}>{heading}</Text>
+              <Text style={styles.errorMsg}>{error.message}</Text>
+              <TouchableOpacity
+                style={styles.closeBtn}
+                onPress={() => {
+                  navigation.goBack();
+                }}
+              >
+                <Text style={styles.closeBtnText}>Close Wallet</Text>
+              </TouchableOpacity>
+            </View>
+          </PopupLayout>
+        </SafeAreaView>
       );
     }
 
+    // Loading state
     return (
-      <PopupLayout className='self-center justify-self-center' header={<Header title='Sign Transaction' />}>
-        <div className='h-full w-full flex flex-col gap-4 items-center justify-center'>
-          <LoaderAnimation color='white' />
-        </div>
-      </PopupLayout>
+      <SafeAreaView style={{ flex: 1 }}>
+        <PopupLayout
+          header={<Header title="Sign Transaction" />}
+          style={styles.popupLayout}
+        >
+          <View style={styles.centered}>
+            <LoaderAnimation color="white" />
+          </View>
+        </PopupLayout>
+      </SafeAreaView>
     );
   };
 
   Wrapped.displayName = `withTxnSigningRequest(${Component.displayName})`;
-
   return Wrapped;
 };
 
 const signTx = withTxnSigningRequest(React.memo(SignTransaction));
 
 export default signTx;
+
+const styles = StyleSheet.create({
+  popupLayout: { flex: 1, backgroundColor: '#fff' },
+  centered: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
+  errorHeading: { color: '#db2777', fontSize: 22, fontWeight: 'bold', textAlign: 'center', marginBottom: 12 },
+  errorMsg: { color: '#333', fontSize: 14, textAlign: 'center', marginBottom: 28 },
+  closeBtn: { backgroundColor: '#818cf8', borderRadius: 20, paddingHorizontal: 28, paddingVertical: 10 },
+  closeBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+  safeRoot: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignSelf: 'center',       // self-center
+    justifyContent: 'center',  // justify-center
+    alignItems: 'center',      // items-center
+    width: '100%',             // panel-width - adjust as needed
+    position: 'relative',      // relative
+    overflow: 'hidden',        // overflow-clip
+    borderRadius: 12,          // rounded-md (adjust px as needed)
+    borderWidth: 1,
+    borderColor: '#D1D5DB',    // gray-300, use dynamic theme for dark
+  },
+  rowCenter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  feeTitle: {
+    color: '#6b7280', // gray-500
+    fontSize: 14,
+    fontWeight: '500',
+    letterSpacing: 0.5,
+  },
+  feeTitleDark: {
+    color: '#f3f4f6', // gray-100
+  },
+  tooltipText: {
+    color: '#6b7280', // gray-500
+    fontSize: 14,
+  },
+  tooltipTextDark: {
+    color: '#f3f4f6', // gray-100
+  },
+  tooltipIcon: {
+    marginLeft: 8,
+    position: 'relative',
+  },
+  mt2: {
+    marginTop: 8,
+  },
+  mt3: {
+    marginTop: 12,
+  },
+  rowEnd: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  errorText: {
+    color: '#fca5a5', // red-300
+    fontSize: 14,
+    fontWeight: '500',
+    marginTop: 8,
+    paddingHorizontal: 4,
+  },
+});

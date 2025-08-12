@@ -1,10 +1,10 @@
 import { useAddCustomChannel, useChainsStore } from '@leapwallet/cosmos-wallet-hooks';
-import { useSendContext } from 'pages/send-v2/context';
+import { useSendContext } from '../../../send-v2/context';
 import React, { useCallback, useState } from 'react';
+import { View, TextInput, Text, StyleSheet, Keyboard } from 'react-native';
 
 type AddIBCChannelProps = {
   targetChain: string;
-  
   onAddComplete: (value: string) => void;
 };
 
@@ -23,6 +23,7 @@ const AddIBCChannel: React.FC<AddIBCChannelProps> = ({ targetChain, onAddComplet
 
   const handleAddChannel = useCallback(
     async (channelId: string) => {
+      if (!channelId) return;
       setStatus('loading');
       try {
         const result = await addCustomChannel(channelId);
@@ -31,6 +32,7 @@ const AddIBCChannel: React.FC<AddIBCChannelProps> = ({ targetChain, onAddComplet
           setValue('');
           setStatus('success');
           setMessage(result.message);
+          Keyboard.dismiss();
         } else {
           setStatus('error');
           setMessage(result.message);
@@ -44,29 +46,68 @@ const AddIBCChannel: React.FC<AddIBCChannelProps> = ({ targetChain, onAddComplet
   );
 
   return (
-    <>
-      <input
-        type='number'
+    <View>
+      <TextInput
         value={value}
-        placeholder='Source channel ID'
-        className='w-full h-12 rounded-2xl px-4 py-1 font-medium placeholder:text-gray-600 dark:placeholder:text-gray-400 placeholder:text-left text-right text-black-100 dark:text-white-100 outline-none border border-[transparent] focus-within:border-green-600 bg-gray-50 dark:bg-gray-900'
-        onChange={(e) => {
-          setValue(e.target.value);
+        keyboardType="numeric"
+        placeholder="Source channel ID"
+        placeholderTextColor="#6B7280"
+        style={styles.input}
+        onChangeText={(text) => {
+          setValue(text);
           if (status === 'error') {
             setStatus('idle');
             setMessage('');
           }
         }}
-        onKeyUp={() => handleAddChannel(value)}
+        onSubmitEditing={() => handleAddChannel(value)}
+        returnKeyType="done"
+        textAlign="right"
       />
-      <p className='text-xs mt-2 dark:text-gray-400 text-gray-600'>
-        You can enter <span className='font-medium dark:text-gray-200 text-gray-800'>24</span> for{' '}
-        <span className='font-medium dark:text-gray-200 text-gray-800'>channel-24</span> on {activeChainInfo.chainName}
-      </p>
-      {status === 'error' ? <p className='text-xs mt-2 text-red-300 font-medium'>{message}</p> : null}
-      {status === 'success' ? <p className='text-xs mt-2 text-green-300 font-medium'>{message}</p> : null}
-    </>
+      <Text style={styles.hint}>
+        You can enter <Text style={styles.hintHighlight}>24</Text> for <Text style={styles.hintHighlight}>channel-24</Text> on {activeChainInfo.chainName}
+      </Text>
+      {status === 'error' && <Text style={styles.errorMsg}>{message}</Text>}
+      {status === 'success' && <Text style={styles.successMsg}>{message}</Text>}
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  input: {
+    width: '100%',
+    height: 48,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    fontWeight: '500',
+    fontSize: 16,
+    backgroundColor: '#F9FAFB', // bg-gray-50
+    color: '#111827',           // text-black-100
+    borderWidth: 1,
+    borderColor: 'transparent',
+    marginBottom: 6,
+  },
+  hint: {
+    fontSize: 12,
+    marginTop: 8,
+    color: '#6B7280', // text-gray-600
+  },
+  hintHighlight: {
+    fontWeight: '500',
+    color: '#1F2937', // text-gray-800
+  },
+  errorMsg: {
+    fontSize: 12,
+    marginTop: 8,
+    color: '#F87171', // text-red-300
+    fontWeight: '500',
+  },
+  successMsg: {
+    fontSize: 12,
+    marginTop: 8,
+    color: '#86EFAC', // text-green-300
+    fontWeight: '500',
+  },
+});
 
 export default AddIBCChannel;

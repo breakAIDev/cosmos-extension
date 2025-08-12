@@ -1,20 +1,20 @@
-import { CaretDown } from '@phosphor-icons/react';
-import { WalletButtonV2 } from 'components/button';
-import { PageHeader } from 'components/header/PageHeaderV2';
-import { SideNavMenuOpen } from 'components/header/sidenav-menu';
-import { useDefaultTokenLogo } from 'hooks';
-import { useActiveChain } from 'hooks/settings/useActiveChain';
-import useQuery from 'hooks/useQuery';
-import { useWalletInfo } from 'hooks/useWalletInfo';
-import { useChainPageInfo } from 'hooks/utility/useChainPageInfo';
-import { observer } from 'mobx-react-lite';
 import React, { useEffect, useState } from 'react';
-import Skeleton from 'react-loading-skeleton';
-import { useNavigate } from 'react-router';
-import { earnFeatureShowStore } from 'stores/earn-feature-show';
-import { globalSheetsStore } from 'stores/global-sheets-store';
-import { imgOnError } from 'utils/imgOnError';
-
+import { TouchableOpacity, Image } from 'react-native';
+import { CaretDown } from 'phosphor-react-native';
+import { WalletButtonV2 } from '../../../components/button';
+import { PageHeader } from '../../../components/header/PageHeaderV2';
+import { SideNavMenuOpen } from '../../../components/header/sidenav-menu';
+import { useDefaultTokenLogo } from '../../../hooks';
+import { useActiveChain } from '../../../hooks/settings/useActiveChain';
+import useQuery from '../../../hooks/useQuery';
+import { useWalletInfo } from '../../../hooks/useWalletInfo';
+import { useChainPageInfo } from '../../../hooks/utility/useChainPageInfo';
+import { observer } from 'mobx-react-lite';
+// Skeleton replacement:
+import { ActivityIndicator as Skeleton } from 'react-native';
+import { useNavigation } from '@react-navigation/native'; // React Native Navigation or react-navigation
+import { earnFeatureShowStore } from '../../../context/earn-feature-show';
+import { globalSheetsStore } from '../../../context/global-sheets-store';
 import SelectChain from '../SelectChain';
 import SelectWallet from '../SelectWallet/v2';
 import EarnUSDNSheet from './EarnUSDNSheet';
@@ -23,77 +23,87 @@ const GeneralHomeHeaderView = (props: { disableWalletButton?: boolean; isLoading
   const [showSelectWallet, setShowSelectWallet] = useState(false);
   const [defaultFilter, setDefaultFilter] = useState<string | undefined>(undefined);
   const [showEarnUSDN, setShowEarnUSDN] = useState(false);
+
   const walletInfo = useWalletInfo();
   const query = useQuery();
-  const navigate = useNavigate();
+  const navigation = useNavigation();
   const activeChain = useActiveChain();
-
   const { headerChainImgSrc } = useChainPageInfo();
   const defaultTokenLogo = useDefaultTokenLogo();
 
+  // Equivalent to web's useEffect for setting filter
   useEffect(() => {
     if (!globalSheetsStore.isChainSelectorOpen) setDefaultFilter('Popular');
-  }, [globalSheetsStore.isChainSelectorOpen]);
+  }, []);
 
-  // Handle deep links
+  // Deep links
   useEffect(() => {
     if (query.get('openChainSwitch')) {
       const _defaultFilter = query.get('defaultFilter');
-      navigate('/home');
+      navigation.navigate('Home'); // Or navigation.replace('Home');
       globalSheetsStore.toggleChainSelector();
-      if (_defaultFilter) {
-        setDefaultFilter(_defaultFilter);
-      }
-
+      if (_defaultFilter) setDefaultFilter(_defaultFilter);
       return;
     }
-
     if (query.get('openLightNode')) {
-      navigate('/home');
-      globalSheetsStore.toggleSideNav({
-        openLightNodePage: true,
-      });
-
+      navigation.navigate('Home');
+      globalSheetsStore.toggleSideNav({ openLightNodePage: true });
       return;
     }
-
     if (query.get('openEarnUSDN')) {
-      earnFeatureShowStore.show !== 'false' ? setShowEarnUSDN(true) : navigate('/earn-usdn', { replace: true });
-
+      earnFeatureShowStore.show !== 'false'
+        ? setShowEarnUSDN(true)
+        : navigation.navigate('EarnUsdn', { replace: true });
       return;
     }
-  }, [navigate, query]);
+  }, [navigation, query]);
 
   return (
     <>
       <PageHeader>
-        <SideNavMenuOpen className='py-2 pr-1.5 pl-2.5 text-foreground/75 hover:text-foreground transition-colors' />
+        <SideNavMenuOpen
+          style={{ paddingVertical: 8, paddingLeft: 10, paddingRight: 6, color: '#6b7280' }}
+        />
 
         <WalletButtonV2
           showDropdown
           showWalletAvatar
-          className='absolute top-1/2 right-1/2 translate-x-1/2 -translate-y-1/2'
+          style={{
+            position: 'absolute',
+            top: '50%',
+            right: '50%',
+            transform: [{ translateY: -0.5 }, { translateX: 0.5 }],
+          }}
           walletName={walletInfo.walletName}
           walletAvatar={walletInfo.walletAvatar}
-          handleDropdownClick={() => setShowSelectWallet(true && !props.disableWalletButton)}
+          handleDropdownClick={() => setShowSelectWallet(!props.disableWalletButton)}
         />
 
-        <button
-          className='bg-secondary-200 hover:bg-secondary-300 rounded-full px-3 py-2 transition-colors flex items-center gap-1'
-          onClick={() => globalSheetsStore.toggleChainSelector()}
+        <TouchableOpacity
+          style={{
+            backgroundColor: '#F3F4F6',
+            borderRadius: 999,
+            paddingHorizontal: 12,
+            paddingVertical: 8,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 4,
+          }}
+          onPress={() => globalSheetsStore.toggleChainSelector()}
           key={activeChain}
         >
           {!props.isLoading ? (
-            <img
-              src={headerChainImgSrc}
-              className={'size-5 rounded-full overflow-hidden object-cover'}
-              onError={imgOnError(defaultTokenLogo)}
+            <Image
+              source={{ uri: headerChainImgSrc || defaultTokenLogo }}
+              style={{ width: 20, height: 20, borderRadius: 10, overflow: 'hidden' }}
+              defaultSource={{ uri: defaultTokenLogo }}
+              onError={() => {}}
             />
           ) : (
-            <Skeleton circle className='size-5 shrink-0' containerClassName='block shrink-0 size-5 !leading-none' />
+            <Skeleton size="small" color="#e5e7eb" />
           )}
-          <CaretDown weight='fill' className='size-3 fill-muted-foreground' />
-        </button>
+          <CaretDown weight="fill" size={12} color="#9ca3af" />
+        </TouchableOpacity>
       </PageHeader>
 
       <SelectWallet isVisible={showSelectWallet} onClose={() => setShowSelectWallet(false)} />
@@ -108,8 +118,9 @@ const GeneralHomeHeaderView = (props: { disableWalletButton?: boolean; isLoading
         <EarnUSDNSheet
           onClose={() => {
             setShowEarnUSDN(false);
-            navigate('/home', { replace: true });
-          }}
+            navigation.navigate('Home', { replace: true });
+          } }
+          visible={false}
         />
       )}
     </>

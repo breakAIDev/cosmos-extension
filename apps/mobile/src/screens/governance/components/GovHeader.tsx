@@ -1,25 +1,63 @@
-import { ArrowLeft } from '@phosphor-icons/react';
-import { PageHeader } from 'components/header/PageHeaderV2';
-import Text from 'components/text';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { ArrowLeft } from 'phosphor-react-native';
+import { PageHeader } from '../../../components/header/PageHeaderV2';
+import Text from '../../../components/text';
+import { useNavigation } from '@react-navigation/native';
 
-const GovHeader = ({ title, onBack }: { title?: string; onBack?: () => void }) => {
-  const navigate = useNavigate();
+type GovHeaderProps = {
+  title?: string;
+  onBack?: () => void;
+};
+
+const GovHeader: React.FC<GovHeaderProps> = ({ title, onBack }) => {
+  const navigation = useNavigation();
+
   return (
-    <PageHeader>
-      <ArrowLeft
-        className='size-9 p-2 cursor-pointer text-muted-foreground hover:text-foreground'
-        onClick={() => {
-          onBack ? onBack() : navigate(-1);
+    <PageHeader style={styles.header}>
+      <TouchableOpacity
+        style={styles.iconWrapper}
+        onPress={() => {
+          if (onBack) {
+            onBack();
+          } else {
+            navigation.goBack();
+          }
         }}
-      />
-      <Text className='text-[18px] font-bold !leading-6' color='text-monochrome'>
+        activeOpacity={0.7}
+      >
+        <ArrowLeft size={28} color="#888" weight="bold" />
+      </TouchableOpacity>
+      <Text style={styles.title} color="text-monochrome">
         {title ?? 'Governance'}
       </Text>
-      <div className='w-9 h-9' />
+      {/* Empty space for right-aligned symmetry */}
+      <View style={styles.iconWrapper} />
     </PageHeader>
   );
 };
+
+const styles = StyleSheet.create({
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 56,
+    paddingHorizontal: 12,
+    justifyContent: 'space-between',
+  },
+  iconWrapper: {
+    width: 36,
+    height: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    lineHeight: 24,
+    textAlign: 'center',
+    flex: 1,
+  },
+});
 
 export default GovHeader;

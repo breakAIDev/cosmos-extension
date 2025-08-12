@@ -1,4 +1,5 @@
-
+import React, { useMemo, useState } from 'react';
+import { View, TouchableOpacity, StyleSheet, Image, Linking, ScrollView, Platform } from 'react-native';
 import {
   useActiveChain,
   useAddress,
@@ -9,29 +10,23 @@ import {
 } from '@leapwallet/cosmos-wallet-hooks';
 import { axiosWrapper, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { GovStore, Proposal, ProposalApi } from '@leapwallet/cosmos-wallet-store';
-import { Header, HeaderActionType, LineDivider } from '@leapwallet/leap-ui';
-import { ArrowSquareOut } from '@phosphor-icons/react';
-import { captureException } from '@sentry/react';
+import { ArrowSquareOut } from 'phosphor-react-native';
+import { captureException } from '@sentry/react-native';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import PopupLayout from 'components/layout/popup-layout';
-import { ProposalDescription } from 'components/proposal-description';
-import Text from 'components/text';
-import { Button } from 'components/ui/button';
-import { useChainPageInfo } from 'hooks';
-import useActiveWallet from 'hooks/settings/useActiveWallet';
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
-import Vote from 'icons/vote';
+import { ProposalDescription } from '../../../components/proposal-description';
+import Text from '../../../components/text';
+import { Button } from '../../../components/ui/button';
+import { useChainPageInfo } from '../../../hooks';
+import useActiveWallet from '../../../hooks/settings/useActiveWallet';
+import { useDefaultTokenLogo } from '../../../hooks/utility/useDefaultTokenLogo';
+import Vote from '../../../../assets/icons/vote';
 import { observer } from 'mobx-react-lite';
-import React, { useMemo, useState } from 'react';
-import Skeleton from 'react-loading-skeleton';
-import { PieChart } from 'react-minimal-pie-chart';
-import { importWatchWalletSeedPopupStore } from 'stores/import-watch-wallet-seed-popup-store';
-import { delegationsStore } from 'stores/stake-store';
-import { cn } from 'utils/cn';
-import { imgOnError } from 'utils/imgOnError';
-import { uiErrorTags } from 'utils/sentry';
-
+// Use a React Native skeleton and chart library!
+import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
+import { PieChart } from 'react-native-svg-charts';
+import { importWatchWalletSeedPopupStore } from '../../../context/import-watch-wallet-seed-popup-store';
+import { delegationsStore } from '../../../context/stake-store';
 import { getPercentage } from '../utils';
 import GovHeader from './GovHeader';
 import { CastVote, RequireMinStaking, ShowVotes, Turnout, VoteDetails } from './index';
@@ -70,7 +65,6 @@ export const ProposalDetails = observer(
       if (activeChain === 'cosmos' || activeChainInfo.chainId === 'atomone-1') {
         return delegationInfo?.totalDelegation?.gte(1);
       }
-
       return true;
     }, [activeChain, delegationInfo?.totalDelegation, activeChainInfo.chainId]);
 
@@ -119,16 +113,13 @@ export const ProposalDetails = observer(
                 1,
                 'proposals-votes',
               );
-
               const voteOption = data.data.vote.options[0].option;
               return voteOption.replace('VOTE_OPTION_', '');
             } catch (error: any) {
               if (error.response.data.code === 3 || error.response.data.error?.code === -32700) {
                 return 'NO_VOTE';
               } else {
-                captureException(error, {
-                  tags: uiErrorTags,
-                });
+                captureException(error);
                 throw new Error(error);
               }
             }
@@ -136,14 +127,11 @@ export const ProposalDetails = observer(
         }
       },
       {
-        retry: (failureCount) => {
-          return failureCount !== 2;
-        },
+        retry: (failureCount) => failureCount !== 2,
         enabled: isProposalInVotingPeriod,
       },
     );
 
-    // eslint-disable-next-line prefer-const
     let { data: _proposalVotes, status } = useGetProposal(
       proposal.proposal_id,
       shouldUseFallback,
@@ -250,15 +238,17 @@ export const ProposalDetails = observer(
     ]);
 
     return (
-      <>
-        <GovHeader onBack={onBack} title='Proposal' />
-        <div className='flex flex-col p-6 overflow-y-scroll'>
-          <div className='text-muted-foreground text-sm mb-2 font-medium'>
-            #{proposal.proposal_id} · <ProposalStatus status={proposal.status as ProposalStatusEnum} />
-          </div>
-          <div className='text-foreground font-bold text-lg break-words'>
+      <View style={styles.container}>
+        <GovHeader onBack={onBack} title="Proposal" />
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <View style={styles.headerRow}>
+            <Text style={styles.statusText}>
+              #{proposal.proposal_id} · <ProposalStatus status={proposal.status as ProposalStatusEnum} />
+            </Text>
+          </View>
+          <Text style={styles.proposalTitle}>
             {proposal?.title ?? proposal?.content?.title}
-          </div>
+          </Text>
 
           {proposal.status === ProposalStatusEnum.PROPOSAL_STATUS_VOTING_PERIOD && !hasMinAmountStaked && (
             <RequireMinStaking forceChain={activeChain} forceNetwork={selectedNetwork} />
@@ -279,91 +269,74 @@ export const ProposalDetails = observer(
             hasMinStaked={hasMinAmountStaked}
           />
 
-          <div className='my-5'></div>
-
-          {proposal.status !== ProposalStatusEnum.PROPOSAL_STATUS_DEPOSIT_PERIOD && totalVotes && (
+          {/* Pie Chart and voting details */}
+          {proposal.status !== ProposalStatusEnum.PROPOSAL_STATUS_DEPOSIT_PERIOD && totalVotes ? (
             <>
-              <div className='w-full h-full flex items-center justify-center mb-8'>
-                <div className='w-[180px] h-[180px] flex items-center justify-center relative'>
-                  {status !== 'success' ? (
-                    <Skeleton circle={true} count={1} width='180px' height='180px' />
-                  ) : (
-                    <PieChart data={dataMock} lineWidth={20} />
-                  )}
-
-                  <p className='text-md dark:text-white-100 text-dark-gray font-bold absolute'>Current Status</p>
-                </div>
-              </div>
-
+              <View style={styles.pieChartContainer}>
+                {status !== 'success' ? (
+                  <SkeletonPlaceholder>
+                    <SkeletonPlaceholder.Item width={180} height={180} borderRadius={90} />
+                  </SkeletonPlaceholder>
+                ) : (
+                  <PieChart style={{ height: 180, width: 180 }} data={dataMock} innerRadius={70} />
+                )}
+                <Text style={styles.currentStatusLabel}>Current Status</Text>
+              </View>
               <ShowVotes dataMock={dataMock} chain={activeChainInfo} />
               <Turnout tallying={tallying} />
             </>
-          )}
+          ) : null}
 
+          {/* Proposer section */}
           {activeProposalStatusTypes.includes(proposal.status) && proposer?.address && (
-            <div
-              className={`rounded-2xl ${
-                ProposalStatusEnum.PROPOSAL_STATUS_DEPOSIT_PERIOD === proposal.status ? '' : 'mt-7'
-              } h-20 w-full p-5 flex items-center justify-between roundex-xxl bg-secondary-100`}
-            >
-              <div className='flex items-center'>
-                <div
-                  style={{ backgroundColor: '#FFECA8', lineHeight: 28 }}
-                  className='relative h-10 w-10 rounded-full flex items-center justify-center text-lg'
-                >
-                  <span className='leading-none'>👤</span>
-                  <img
-                    src={activeChainInfo.chainSymbolImageUrl ?? defaultTokenLogo}
-                    onError={imgOnError(defaultTokenLogo)}
-                    alt='chain logo'
-                    width='16'
-                    height='16'
-                    className='rounded-full absolute bottom-0 right-0'
+            <View style={[styles.proposerCard, proposal.status !== ProposalStatusEnum.PROPOSAL_STATUS_DEPOSIT_PERIOD && { marginTop: 28 }]}>
+              <View style={styles.proposerInfoRow}>
+                <View style={styles.avatarContainer}>
+                  <Text style={{ fontSize: 22 }}>👤</Text>
+                  <Image
+                    source={{ uri: activeChainInfo.chainSymbolImageUrl ?? defaultTokenLogo }}
+                    onError={() => {}} // Add your imgOnError logic
+                    style={styles.chainLogo}
                   />
-                </div>
-
-                <div className='flex flex-col ml-3'>
-                  <Text size='sm' color='text-foreground' className='font-bold'>
-                    Proposer
-                  </Text>
+                </View>
+                <View style={styles.proposerTextCol}>
+                  <Text style={styles.proposerTitle}>Proposer</Text>
                   {proposer ? (
-                    <Text size='xs' color='text-muted-foreground'>
+                    <Text style={styles.proposerAddress}>
                       {`${proposer.address.slice(0, 5)}...${proposer.address.slice(-6)}`}
                     </Text>
                   ) : (
-                    <Skeleton count={1} height='16px' width='150px' className='z-0' />
+                    <SkeletonPlaceholder>
+                      <SkeletonPlaceholder.Item width={150} height={16} />
+                    </SkeletonPlaceholder>
                   )}
-                </div>
-              </div>
-
+                </View>
+              </View>
               {proposer?.url && (
-                <button
-                  className='flex items-center justify-center px-1'
-                  onClick={() => window.open(proposer?.url, '_blank')}
-                >
-                  <ArrowSquareOut size={18} className='text-muted-foreground' />
-                </button>
+                <TouchableOpacity style={styles.linkIcon} onPress={() => Linking.openURL(proposer.url)}>
+                  <ArrowSquareOut size={18} color="#8e99af" />
+                </TouchableOpacity>
               )}
-            </div>
+            </View>
           )}
 
-          <div className='mt-7'></div>
-
+          {/* Description */}
           {(proposal?.description || proposal?.content?.description) && (
             <ProposalDescription
               description={proposal?.description || proposal?.content?.description}
-              title='Description'
+              title="Description"
               btnColor={topChainColor}
               forceChain={activeChain}
             />
           )}
-        </div>
+        </ScrollView>
 
+        {/* Sticky Vote Button */}
         {(proposal as Proposal | ProposalApi).status === ProposalStatusEnum.PROPOSAL_STATUS_VOTING_PERIOD && (
-          <div className='w-full p-4 mt-auto sticky bottom-0 bg-secondary-100 '>
+          <View style={styles.stickyFooter}>
             <Button
-              className={cn('w-full')}
-              onClick={() => {
+              style={styles.voteButton}
+              onPress={() => {
                 if (activeWallet?.watchWallet) {
                   importWatchWalletSeedPopupStore.setShowPopup(true);
                 } else {
@@ -372,14 +345,15 @@ export const ProposalDetails = observer(
               }}
               disabled={!hasMinAmountStaked}
             >
-              <div className={'flex justify-center text-white-100 items-center'}>
-                <Vote size={20} className='mr-2' />
-                <span>Vote</span>
-              </div>
+              <View style={styles.voteButtonContent}>
+                <Vote size={20} style={styles.voteIcon} />
+                <Text style={styles.voteText}>Vote</Text>
+              </View>
             </Button>
-          </div>
+          </View>
         )}
 
+        {/* Cast Vote Sheet */}
         <CastVote
           refetchVote={refetch}
           proposalId={proposal.proposal_id}
@@ -389,7 +363,75 @@ export const ProposalDetails = observer(
           forceChain={activeChain}
           forceNetwork={selectedNetwork}
         />
-      </>
+      </View>
     );
   },
 );
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#fff' },
+  scrollContainer: { padding: 20 },
+  headerRow: { marginBottom: 8 },
+  statusText: { color: '#8e99af', fontSize: 14, fontWeight: '500' },
+  proposalTitle: { color: '#22272e', fontWeight: 'bold', fontSize: 18, marginBottom: 12 },
+  pieChartContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
+    marginTop: 12,
+    position: 'relative',
+  },
+  currentStatusLabel: {
+    position: 'absolute',
+    bottom: 8,
+    alignSelf: 'center',
+    fontWeight: 'bold',
+    color: '#22272e',
+  },
+  proposerCard: {
+    borderRadius: 24,
+    height: 80,
+    width: '100%',
+    padding: 20,
+    backgroundColor: '#f2f4fa',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 8,
+  },
+  proposerInfoRow: { flexDirection: 'row', alignItems: 'center' },
+  avatarContainer: {
+    backgroundColor: '#FFECA8',
+    height: 40,
+    width: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  chainLogo: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+  },
+  proposerTextCol: { marginLeft: 12, flexDirection: 'column' },
+  proposerTitle: { fontWeight: 'bold', color: '#22272e', fontSize: 14 },
+  proposerAddress: { color: '#8e99af', fontSize: 12 },
+  linkIcon: { padding: 8 },
+  stickyFooter: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: Platform.OS === 'ios' ? 24 : 0,
+    backgroundColor: '#f2f4fa',
+    padding: 16,
+  },
+  voteButton: { width: '100%', borderRadius: 12 },
+  voteButtonContent: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
+  voteIcon: { marginRight: 8 },
+  voteText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+});
+

@@ -1,27 +1,23 @@
-
+import React, { useMemo, useState } from 'react';
+import { View, Text, ScrollView, StyleSheet, useColorScheme, DeviceEventEmitter } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { useActiveChain, useActiveWallet, useChainInfo, WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks';
 import { BtcTx } from '@leapwallet/cosmos-wallet-sdk';
 import { BtcWallet } from '@leapwallet/leap-keychain';
 import { Avatar, Buttons, Header } from '@leapwallet/leap-ui';
 import assert from 'assert';
-import { ErrorCard } from 'components/ErrorCard';
-import PopupLayout from 'components/layout/popup-layout';
-import { LoaderAnimation } from 'components/loader/Loader';
-import { MessageTypes } from 'config/message-types';
-import { useSiteLogo } from 'hooks/utility/useSiteLogo';
-import { Wallet } from 'hooks/wallet/useWallet';
-import { Images } from 'images';
-import React, { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Colors } from 'theme/colors';
-import { TransactionStatus } from 'types/utility';
-import { formatWalletName } from 'utils/formatWalletName';
-import { imgOnError } from 'utils/imgOnError';
-import { isSidePanel } from 'utils/isSidePanel';
-import { trim } from 'utils/strings';
-import Browser from 'webextension-polyfill';
-
-import { handleRejectClick } from '../utils';
+import { ErrorCard } from '../../../components/ErrorCard';
+import PopupLayout from '../../../components/layout/popup-layout';
+import { LoaderAnimation } from '../../../components/loader/Loader';
+import { MessageTypes } from '../../../services/config/message-types';
+import { useSiteLogo } from '../../../hooks/utility/useSiteLogo';
+import { Wallet } from '../../../hooks/wallet/useWallet';
+import { Images } from '../../../../assets/images';
+import { Colors, getChainColor } from '../../../theme/colors';
+import { TransactionStatus } from '../../../types/utility';
+import { formatWalletName } from '../../../utils/formatWalletName';
+import { trim } from '../../../utils/strings';
+import { useHandleRejectClick } from '../utils';  // Implement RN version
 
 const useGetWallet = Wallet.useGetWallet;
 
@@ -31,22 +27,29 @@ type SignMessageProps = {
 
 export function SignMessage({ txnData }: SignMessageProps) {
   const getWallet = useGetWallet();
-  const navigate = useNavigate();
+  const navigation = useNavigation();
   const activeChain = useActiveChain();
   const chainInfo = useChainInfo(activeChain);
   const activeWallet = useActiveWallet();
+  const {setHandleRejectClick} = useHandleRejectClick();
 
   assert(activeWallet !== null, 'activeWallet is null');
-  const walletName = useMemo(() => {
-    return formatWalletName(activeWallet.name);
-  }, [activeWallet.name]);
-
+  const walletName = useMemo(() => formatWalletName(activeWallet.name), [activeWallet.name]);
   const siteOrigin = txnData?.origin as string | undefined;
   const siteName = siteOrigin?.split('//')?.at(-1)?.split('.')?.at(-2);
   const siteLogo = useSiteLogo(siteOrigin);
 
   const [txStatus, setTxStatus] = useState<TransactionStatus>('idle');
   const [signingError, setSigningError] = useState<string | null>(null);
+
+  const isDark = useColorScheme() === 'dark';
+  const textColor = isDark ? '#F9FAFB' : '#111827';
+  const subTextColor = isDark ? '#D1D5DB' : '#6B7280';
+  const bgColor = isDark ? '#18181b' : '#fff';
+
+  // Responsive height
+  const baseHeight = 600;
+  const messagePanelHeight = baseHeight - 150;
 
   const handleSignClick = async () => {
     try {
@@ -67,21 +70,13 @@ export function SignMessage({ txnData }: SignMessageProps) {
         signature = await BtcTx.SignECDSA(txnData.signTxnData.message, wallet);
       }
 
-      try {
-        Browser.runtime.sendMessage({
-          type: MessageTypes.signBitcoinResponse,
-          payloadId: txnData?.payloadId,
-          payload: { status: 'success', data: signature },
-        });
-      } catch {
-        throw new Error('Could not send transaction to the dApp');
-      }
+      DeviceEventEmitter.emit(
+        MessageTypes.signBitcoinResponse,
+        {payloadId: txnData?.payloadId,status: 'success', data: signature  }
+      );
 
-      if (isSidePanel()) {
-        navigate('/home');
-      } else {
-        window.close();
-      }
+      setTxStatus('success');
+      navigation.goBack();
     } catch (error) {
       setTxStatus('error');
       setSigningError((error as Error).message);
@@ -91,74 +86,183 @@ export function SignMessage({ txnData }: SignMessageProps) {
   const isApproveBtnDisabled = !!signingError || txStatus === 'loading';
 
   return (
-    <div className='w-[400px] h-full relative self-center justify-self-center flex justify-center items-center mt-2'>
-      <div className='relative w-full overflow-clip rounded-md border border-gray-300 dark:border-gray-900'>
+    <View style={styles.outer}>
+      <View style={styles.inner}>
         <PopupLayout
           header={
-            <div className='w-[396px]'>
+            <View style={styles.headerWrap}>
               <Header
                 imgSrc={chainInfo.chainSymbolImageUrl || Images.Logos.GenericLight}
-                title={<Buttons.Wallet title={trim(walletName, 10)} className='pr-4 cursor-default' />}
+                title={
+                  <Buttons.Wallet title={trim(walletName, 10)} style={{ paddingRight: 16 }} />
+                }
               />
-            </div>
+            </View>
           }
         >
-          <div
-            className='px-7 py-3 overflow-y-auto relative'
-            style={{ height: (isSidePanel() ? window.innerHeight : 600) - 150 }}
+          <ScrollView
+            style={[styles.scroll, { height: messagePanelHeight }]}
+            contentContainerStyle={{ flexGrow: 1 }}
           >
-            <h2 className='text-center text-lg font-bold dark:text-white-100 text-gray-900 w-full'>
-              Signature request
-            </h2>
-
-            <p className='text-center text-sm dark:text-gray-300 text-gray-500 w-full'>
+            <Text style={[styles.title, { color: textColor }]}>Signature request</Text>
+            <Text style={[styles.desc, { color: subTextColor }]}>
               Only sign this message if you fully understand the content and trust the requesting site
-            </p>
+            </Text>
 
-            <div className='flex items-center mt-3 rounded-2xl dark:bg-gray-900 bg-white-100 p-4'>
+            <View style={[styles.sitePanel, { backgroundColor: bgColor }]}>
               <Avatar
                 avatarImage={siteLogo}
-                avatarOnError={imgOnError(Images.Misc.Globe)}
+                avatarOnError={() => {}}
                 size='sm'
-                className='rounded-full overflow-hidden'
+                style={styles.avatar}
               />
-              <div className='ml-3'>
-                <p className='capitalize text-gray-900 dark:text-white-100 text-base font-bold'>{siteName}</p>
-                <p className='lowercase text-gray-500 dark:text-gray-400 text-xs font-medium'>{siteOrigin}</p>
-              </div>
-            </div>
+              <View style={{ marginLeft: 12 }}>
+                <Text style={[styles.siteName, { color: textColor }]}>{siteName}</Text>
+                <Text style={[styles.siteOrigin, { color: subTextColor }]}>{siteOrigin}</Text>
+              </View>
+            </View>
 
-            <p className='text-sm break-words text-gray-900 dark:text-white-100 dark:bg-gray-900 bg-white-100 p-4 w-full overflow-x-auto mt-3 rounded-2xl whitespace-break-spaces'>
-              {txnData.signTxnData.message}
-            </p>
+            <ScrollView
+              horizontal
+              style={styles.messageBlock}
+              contentContainerStyle={{ flexGrow: 1 }}
+              showsHorizontalScrollIndicator
+            >
+              <Text
+                style={[styles.messageText, { color: textColor, backgroundColor: bgColor }]}
+                selectable
+              >
+                {txnData.signTxnData.message}
+              </Text>
+            </ScrollView>
 
-            {signingError && txStatus === 'error' ? <ErrorCard text={signingError} className='mt-3' /> : null}
-          </div>
+            {signingError && txStatus === 'error' ? (
+              <ErrorCard text={signingError} style={{ marginTop: 12 }} />
+            ) : null}
+          </ScrollView>
 
-          <div className='absolute bottom-0 left-0 py-3 px-7 dark:bg-black-100 bg-gray-50 w-full'>
-            <div className='flex items-center justify-center w-full space-x-3'>
+          <View style={[styles.footerPanel, { backgroundColor: isDark ? '#18181b' : '#F9FAFB' }]}>
+            <View style={styles.buttonRow}>
               <Buttons.Generic
                 title='Reject Button'
                 color={Colors.gray900}
-                onClick={() => handleRejectClick(navigate, txnData?.payloadId)}
+                onClick={() => setHandleRejectClick(txnData?.payloadId)}
                 disabled={txStatus === 'loading'}
+                style={styles.button}
               >
                 Reject
               </Buttons.Generic>
-
               <Buttons.Generic
                 title='Approve Button'
-                color={Colors.getChainColor(activeChain)}
+                color={getChainColor(activeChain)}
                 onClick={handleSignClick}
                 disabled={isApproveBtnDisabled}
-                className={`${isApproveBtnDisabled ? 'cursor-not-allowed opacity-50' : ''}`}
+                style={[
+                  styles.button,
+                  isApproveBtnDisabled && styles.disabledButton,
+                ]}
               >
                 {txStatus === 'loading' ? <LoaderAnimation color='white' /> : 'Sign'}
               </Buttons.Generic>
-            </div>
-          </div>
+            </View>
+          </View>
         </PopupLayout>
-      </div>
-    </div>
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  outer: {
+    width: 400,
+    height: '100%',
+    position: 'relative',
+    alignSelf: 'center',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  inner: {
+    position: 'relative',
+    width: '100%',
+    overflow: 'hidden',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    backgroundColor: '#fff',
+  },
+  headerWrap: {
+    width: 396,
+  },
+  scroll: {
+    paddingHorizontal: 28,
+    paddingVertical: 12,
+    position: 'relative',
+    flexGrow: 1,
+  },
+  title: {
+    textAlign: 'center',
+    fontSize: 18,
+    fontWeight: 'bold',
+    width: '100%',
+    marginBottom: 4,
+  },
+  desc: {
+    textAlign: 'center',
+    fontSize: 14,
+    width: '100%',
+    marginBottom: 8,
+  },
+  sitePanel: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 12,
+    borderRadius: 16,
+    padding: 16,
+  },
+  avatar: {
+    borderRadius: 999,
+    overflow: 'hidden',
+  },
+  siteName: {
+    textTransform: 'capitalize',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  siteOrigin: {
+    textTransform: 'lowercase',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  messageBlock: {
+    backgroundColor: '#fff',
+    padding: 16,
+    width: '100%',
+    borderRadius: 16,
+    marginTop: 12,
+  },
+  messageText: {
+    fontSize: 14,
+    fontFamily: 'monospace',
+    flexWrap: 'wrap',
+  },
+  footerPanel: {
+    position: 'absolute',
+    left: 0,
+    bottom: 0,
+    paddingVertical: 12,
+    paddingHorizontal: 28,
+    width: '100%',
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    gap: 12,
+  },
+  button: {},
+  disabledButton: {
+    opacity: 0.5,
+  },
+});

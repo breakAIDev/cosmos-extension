@@ -1,5 +1,5 @@
 import { TransferInfoJSON } from '@skip-go/client';
-import { IBCPacketTxnSeq } from 'types/swap';
+import { IBCPacketTxnSeq } from '../../../../../../types/swap';
 
 import { convertPacketFromJSON } from './convertPackageFromJson';
 

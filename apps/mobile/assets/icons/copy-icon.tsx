@@ -1,4 +1,4 @@
-import { IconProps } from '@phosphor-icons/react';
+import { IconProps } from 'phosphor-react-native';
 import React from 'react';
 export const CopyIcon = (props: IconProps) => (
   <svg width='17' height='16' viewBox='0 0 17 16' fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>

@@ -13,6 +13,7 @@
     "prettier:write": "prettier -w ./src",
     "prepublish": "yarn build"
   },
+  "react-native": "dist/browser/index.js",
   "types": "dist/browser/index.d.ts",
   "browser": "dist/browser/index.js",
   "files": [
@@ -26,7 +27,7 @@
     "registry": "https://npm.pkg.github.com"
   },
   "dependencies": {
-    "@aptos-labs/ts-sdk": "^1.39.0",
+    "@aptos-labs/ts-sdk": "1.33.1",
     "@babel/helper-string-parser": "7.22.5",
     "@cosmjs/amino": "0.29.5",
     "@cosmjs/cosmwasm-stargate": "0.29.5",
@@ -60,7 +61,7 @@
     "@scure/btc-signer": "1.4.0",
     "@sentry/react": "7.120.3",
     "@solana/web3.js": "1.98.2",
-    "@zondax/ledger-cosmos-js": "^4.0.1",
+    "@zondax/ledger-cosmos-js": "3.0.3",
     "@zondax/ledger-sei": "1.0.2",
     "axios": "1.6.4",
     "bech32": "2.0.0",
@@ -75,9 +76,9 @@
     "elliptic": "^6.6.1",
     "eth-sig-util": "3.0.1",
     "ethereumjs-util": "7.1.5",
-    "ethers": "^5.8.0",
+    "ethers": "5.7.0",
     "futoin-hkdf": "1.5.1",
-    "joi": "17.9.2",
+    "joi": "17.13.3",
     "lerna": "8.2.3",
     "long": "5.2.1",
     "parse-duration": "^2.1.4",
@@ -96,12 +97,11 @@
     "@types/crypto-js": "4.1.1",
     "@types/elliptic": "6.4.14",
     "@types/jest": "27.5.1",
-    "@types/joi": "17.2.3",
     "@types/lodash": "4.14.182",
     "@types/secure-random": "1.1.0",
     "babel-plugin-transform-import-meta": "2.2.1",
     "cross-env": "7.0.3",
-    "eslint-plugin-jsdoc": "39.3.0",
+    "eslint-plugin-jsdoc": "^46.9.1",
     "jest": "28.1.0",
     "tslib": "2.4.0",
     "typescript": "5.2.2"

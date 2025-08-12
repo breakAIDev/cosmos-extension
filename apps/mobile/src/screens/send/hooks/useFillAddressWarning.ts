@@ -1,20 +1,18 @@
 import { AddressWarning, INITIAL_ADDRESS_WARNING, useActiveWallet, WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks';
 import { AccountDetails, pubKeyToEvmAddressToShow } from '@leapwallet/cosmos-wallet-sdk';
 import { FetchStatus, QueryStatus } from '@tanstack/react-query';
-import { ReactElement, useEffect } from 'react';
+import { ReactNode, useEffect } from 'react';
 
 export type UseFillAddressWarningParams = {
   fetchAccountDetailsData: AccountDetails | undefined;
   fetchAccountDetailsStatus: QueryStatus | FetchStatus;
-
-  addressWarningElementError: ReactElement;
+  addressWarningElementError: ReactNode;
   setAddressWarning: React.Dispatch<React.SetStateAction<AddressWarning>>;
 };
 
 export function useFillAddressWarning({
   fetchAccountDetailsData,
   fetchAccountDetailsStatus,
-
   addressWarningElementError,
   setAddressWarning,
 }: UseFillAddressWarningParams) {
@@ -28,7 +26,6 @@ export function useFillAddressWarning({
             type: 'erc20',
             message: addressWarningElementError,
           });
-
           break;
         }
 
@@ -53,7 +50,6 @@ export function useFillAddressWarning({
               message: 'You can only transfer EVM tokens to an EVM address.',
             });
           }
-
           break;
         }
 
@@ -71,6 +67,6 @@ export function useFillAddressWarning({
       }
     })();
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchAccountDetailsData?.pubKey?.key, fetchAccountDetailsStatus]);
+    // dependencies
+  }, [activeWallet?.walletType, addressWarningElementError, fetchAccountDetailsData?.pubKey.key, fetchAccountDetailsStatus, setAddressWarning]);
 }

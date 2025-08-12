@@ -26,7 +26,7 @@ export interface ValidatorSetSDKType {
 }
 export interface Validator {
   address: Uint8Array;
-  pubKey: PublicKey;
+  pubKey: PublicKey | undefined;
   votingPower: bigint;
   proposerPriority: bigint;
 }
@@ -217,7 +217,6 @@ export const Validator = {
   fromPartial(object: Partial<Validator>): Validator {
     const message = createBaseValidator();
     message.address = object.address ?? new Uint8Array();
-    
     
     message.pubKey =
       object.pubKey !== undefined && object.pubKey !== null ? PublicKey.fromPartial(object.pubKey) : undefined;

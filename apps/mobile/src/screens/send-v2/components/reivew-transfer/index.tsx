@@ -1,25 +1,41 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-import { useAddress, useChainsStore, useFeatureFlags, useGetAptosGasPrices } from '@leapwallet/cosmos-wallet-hooks';
-import { isAptosChain, isSuiChain, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { RootBalanceStore, RootDenomsStore, RootERC20DenomsStore } from '@leapwallet/cosmos-wallet-store';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { View, StyleSheet } from 'react-native';
+import { observer } from 'mobx-react-lite';
+import {
+  useAddress,
+  useChainsStore,
+  useFeatureFlags,
+  useGetAptosGasPrices,
+} from '@leapwallet/cosmos-wallet-hooks';
+import {
+  isAptosChain,
+  SupportedChain,
+} from '@leapwallet/cosmos-wallet-sdk';
+import {
+  RootBalanceStore,
+  RootDenomsStore,
+  RootERC20DenomsStore,
+} from '@leapwallet/cosmos-wallet-store';
 import { SkipSupportedAsset } from '@leapwallet/elements-core';
-import { useAllSkipAssets, useDebouncedValue, useSkipSupportedChains, useTransfer } from '@leapwallet/elements-hooks';
+import {
+  useAllSkipAssets,
+  useDebouncedValue,
+  useSkipSupportedChains,
+  useTransfer,
+} from '@leapwallet/elements-hooks';
 import { useTransferReturnType } from '@leapwallet/elements-hooks/dist/use-transfer';
 import { Buttons } from '@leapwallet/leap-ui';
-import { AutoAdjustAmountSheet } from 'components/auto-adjust-amount-sheet';
-import { FIXED_FEE_CHAINS } from 'config/constants';
-import useActiveWallet from 'hooks/settings/useActiveWallet';
-import { useEffectiveAmountValue } from 'hooks/useEffectiveAmountValue';
-import { useWalletClient } from 'hooks/useWalletClient';
-import { observer } from 'mobx-react-lite';
-import { useSendContext } from 'pages/send-v2/context';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { importWatchWalletSeedPopupStore } from 'stores/import-watch-wallet-seed-popup-store';
-import { Colors } from 'theme/colors';
-
+import { AutoAdjustAmountSheet } from '../../../../components/auto-adjust-amount-sheet';
+import { FIXED_FEE_CHAINS } from '../../../../services/config/constants';
+import useActiveWallet from '../../../../hooks/settings/useActiveWallet';
+import { useEffectiveAmountValue } from '../../../../hooks/useEffectiveAmountValue';
+import { useWalletClient } from '../../../../hooks/useWalletClient';
+import { importWatchWalletSeedPopupStore } from '../../../../context/import-watch-wallet-seed-popup-store';
+import { Colors } from '../../../../theme/colors';
 import { FeesView } from '../fees-view';
 import { FixedFee } from '../fees-view/FixedFee';
 import { ReviewTransferSheet } from './review-transfer-sheet';
+import { useSendContext } from '../../../send-v2/context';
 
 export const ReviewTransfer = observer(
   ({
@@ -56,9 +72,11 @@ export const ReviewTransfer = observer(
       hasToUseCw20PointerLogic,
       feeDenom,
     } = useSendContext();
-    const { status: aptosGasPriceStatus } = useGetAptosGasPrices(sendActiveChain, sendSelectedNetwork);
+    const { status: aptosGasPriceStatus } = useGetAptosGasPrices(
+      sendActiveChain,
+      sendSelectedNetwork,
+    );
     const isAptosTx = isAptosChain(sendActiveChain);
-    const isSuiTx = isSuiChain(sendActiveChain);
 
     const { chains } = useChainsStore();
     const userAddress = useAddress(sendActiveChain);
@@ -88,7 +106,6 @@ export const ReviewTransfer = observer(
         if (selectedToken?.ibcDenom) {
           return skipDenom === selectedToken.ibcDenom;
         }
-
         return skipDenom === selectedToken?.coinMinimalDenom;
       });
 
@@ -109,7 +126,9 @@ export const ReviewTransfer = observer(
       }
       return {
         ...skipAsset,
-        trace: selectedToken?.ibcChainInfo ? `transfer/${selectedToken.ibcChainInfo?.channelId}` : skipAsset.trace,
+        trace: selectedToken?.ibcChainInfo
+          ? `transfer/${selectedToken.ibcChainInfo?.channelId}`
+          : skipAsset.trace,
       };
     }, [selectedToken, skipAssets]);
 
@@ -123,7 +142,6 @@ export const ReviewTransfer = observer(
         const asset = allSkipAssets?.[chain?.chainId]?.find(
           (asset) => asset.denom === Object.values(chain?.nativeDenoms)[0]?.coinMinimalDenom,
         );
-
         return asset;
       }
       return undefined;
@@ -169,12 +187,10 @@ export const ReviewTransfer = observer(
           gasFeesError: undefined,
         });
       }
-
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
       selectedToken?.coinMinimalDenom,
       selectedAddress?.chainName,
-      
       transferData?.messages,
     ]);
 
@@ -185,13 +201,10 @@ export const ReviewTransfer = observer(
             ? chains[selectedAddress?.chainName as SupportedChain]?.chainId
             : chains[selectedAddress?.chainName as SupportedChain]?.testnetChainId;
         if (
-          
           !transferData?.isLoadingMessages &&
-          
           !transferData?.isLoadingRoute &&
           selectedAddress?.chainName &&
           selectedAddressChainId !== sourceChainId &&
-          
           !transferData?.messages
         ) {
           setRouteError(true);
@@ -204,11 +217,8 @@ export const ReviewTransfer = observer(
       isInitiaTxn,
       selectedAddress?.chainName,
       sendActiveChain,
-      
       transferData?.isLoadingMessages,
-      
       transferData?.messages,
-      
       transferData?.isLoadingRoute,
       sourceChainId,
       sendSelectedNetwork,
@@ -259,13 +269,10 @@ export const ReviewTransfer = observer(
           : chains[selectedAddress?.chainName as SupportedChain]?.testnetChainId;
       if (
         isInitiaTxn &&
-        
         (transferData?.isLoadingRoute ||
-          
           transferData?.isLoadingMessages ||
           (selectedAddress?.chainName &&
             selectedAddressChainId !== sourceChainId &&
-            
             !transferData?.messages))
       ) {
         return true;
@@ -274,7 +281,6 @@ export const ReviewTransfer = observer(
       if (isAptosTx && aptosGasPriceStatus === 'loading') {
         return true;
       }
-
       // if (isSuiTx) {
       //   return true
       // }
@@ -282,30 +288,10 @@ export const ReviewTransfer = observer(
       return (
         sendDisabled ||
         (!pfmEnabled && !isIbcUnwindingDisabled) ||
-        (['error', 'loading'].includes(fetchAccountDetailsStatus) && !hasToUseCw20PointerLogic)
+        (['error', 'loading'].includes(fetchAccountDetailsStatus) &&
+          !hasToUseCw20PointerLogic)
       );
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [
-      isInitiaTxn,
-      
-      transferData?.isLoadingRoute,
-      
-      transferData?.isLoadingMessages,
-      
-      transferData?.messages,
-      selectedAddress?.chainName,
-      chains,
-      sendActiveChain,
-      sendDisabled,
-      pfmEnabled,
-      isIbcUnwindingDisabled,
-      fetchAccountDetailsStatus,
-      hasToUseCw20PointerLogic,
-      aptosGasPriceStatus,
-      sendSelectedNetwork,
-      sourceChainId,
-      isAptosTx,
-    ]);
+    }, [isInitiaTxn, transferData?.isLoadingRoute, transferData?.isLoadingMessages, transferData?.messages, selectedAddress?.chainName, chains, sendDisabled, pfmEnabled, isIbcUnwindingDisabled, fetchAccountDetailsStatus, hasToUseCw20PointerLogic, aptosGasPriceStatus, sendSelectedNetwork, sourceChainId, isAptosTx]);
 
     const feeValue = {
       amount: fee?.amount[0].amount.toString() ?? '',
@@ -313,30 +299,37 @@ export const ReviewTransfer = observer(
     };
 
     if (isAptosTx && aptosGasPriceStatus === 'loading') {
-      return <></>;
+      return null;
     }
 
     return (
       <>
-        <div className='absolute w-[calc(100%-4px)] flex flex-col gap-4 p-4 !pr-[14px] bottom-0 left-0 dark:bg-black-100 bg-gray-50'>
+        <View style={styles.absoluteView}>
           {inputAmount &&
             (FIXED_FEE_CHAINS.includes(sendActiveChain) ? (
               <FixedFee />
             ) : (
-              <FeesView rootDenomsStore={rootDenomsStore} rootBalanceStore={rootBalanceStore} />
+              <FeesView
+                rootDenomsStore={rootDenomsStore}
+                rootBalanceStore={rootBalanceStore}
+              />
             ))}
 
           <Buttons.Generic
-            size='normal'
-            color={addressError || amountError || routeError ? Colors.red300 : Colors.green600}
+            size="normal"
+            color={
+              addressError || amountError || routeError
+                ? Colors.red300
+                : Colors.green600
+            }
             onClick={showAdjustmentSheet}
             disabled={isReviewDisabled}
-            data-testing-id='send-review-transfer-btn'
-            className='w-full'
+            data-testing-id="send-review-transfer-btn"
+            style={styles.reviewBtn}
           >
             {btnText}
           </Buttons.Generic>
-        </div>
+        </View>
 
         {selectedToken && fee && checkForAutoAdjust ? (
           <AutoAdjustAmountSheet
@@ -364,3 +357,24 @@ export const ReviewTransfer = observer(
     );
   },
 );
+
+const styles = StyleSheet.create({
+  absoluteView: {
+    position: 'absolute',
+    left: 0,
+    bottom: 0,
+    width: '100%',
+    padding: 16,
+    paddingRight: 14,
+    backgroundColor: '#fafafa',
+    flexDirection: 'column',
+    gap: 16,
+    zIndex: 100,
+  },
+  reviewBtn: {
+    width: '100%',
+    marginTop: 4,
+  },
+});
+
+export default ReviewTransfer;

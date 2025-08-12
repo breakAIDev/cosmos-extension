@@ -1,36 +1,35 @@
 import { NftStore } from '@leapwallet/cosmos-wallet-store';
-import classNames from 'classnames';
 import { observer } from 'mobx-react-lite';
-import React, { ReactNode, useLayoutEffect, useMemo } from 'react';
-import { favNftStore, hiddenNftStore } from 'stores/manage-nft-store';
-import { nftStore } from 'stores/nft-store';
-
+import React, { useLayoutEffect, useMemo } from 'react';
+import { favNftStore, hiddenNftStore } from '../../../context/manage-nft-store';
+import { nftStore } from '../../../context/nft-store';
 import { useNftContext } from '../context';
-import { Chip } from './index';
+import { Chip } from './Chip';
+import { ScrollView, StyleSheet, View } from 'react-native';
 
 type ChainChipProps = {
   title: string;
   isActive: boolean;
-  onClick: VoidFunction;
-  children?: ReactNode;
+  onPress: (selectedTab: string) => void;
+  children?: React.ReactNode;
 };
 
-function ChainChip({ isActive, title, children, onClick }: ChainChipProps) {
+function ChainChip({ isActive, title, children, onPress }: ChainChipProps) {
   return (
     <Chip
-      className={classNames('cursor-pointer border border-gray-100 dark:border-gray-800 py-[8px] px-[14px] mr-3', {
-        'bg-gray-100 dark:bg-white-100': isActive,
-        'px-[18px]': children,
-      })}
-      onClick={onClick}
+      style={[
+        styles.chip,
+        isActive && styles.chipActive,
+        !!children && styles.chipWithChildren,
+      ]}
     >
-      {children}
-
+      {React.isValidElement(children) ? children : <View/>}
       <Chip.Text
-        className={classNames('text-gray-800 text-sm', {
-          'dark:text-black-100': isActive,
-          'dark:text-gray-300': !isActive,
-        })}
+        style={[
+          styles.chipText,
+          isActive ? styles.chipTextActive : styles.chipTextInactive,
+        ]}
+        onChangeText={onPress}
       >
         {title}
       </Chip.Text>
@@ -39,7 +38,6 @@ function ChainChip({ isActive, title, children, onClick }: ChainChipProps) {
 }
 
 type ChainChipsProps = {
-  
   handleTabClick: (selectedTab: string) => void;
   nftStore: NftStore;
 };
@@ -50,19 +48,11 @@ export const ChainChips = observer(({ handleTabClick }: ChainChipsProps) => {
 
   const chips = useMemo(() => {
     const _chips = ['All'];
-
     if (_collectionData?.collections?.length) {
-      if (favNftStore.favNfts.length) {
-        _chips.push('Favorites');
-      }
-
+      if (favNftStore.favNfts.length) _chips.push('Favorites');
       _chips.push('Collections');
-
-      if (hiddenNftStore.hiddenNfts.length) {
-        _chips.push('Hidden');
-      }
+      if (hiddenNftStore.hiddenNfts.length) _chips.push('Hidden');
     }
-
     return _chips;
   }, [_collectionData?.collections]);
 
@@ -70,17 +60,61 @@ export const ChainChips = observer(({ handleTabClick }: ChainChipsProps) => {
     if (!chips.includes(activeTab)) {
       setActiveTab('All');
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, chips]);
+  }, [activeTab, chips, setActiveTab]);
 
   return (
-    <div className='flex overflow-auto whitespace-nowrap scroll-smooth mb-4'>
-      {chips.map((title) => {
-        return (
-          <ChainChip key={title} isActive={activeTab === title} title={title} onClick={() => handleTabClick(title)} />
-        );
-      })}
-    </div>
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={styles.chipsScrollView}
+      contentContainerStyle={styles.chipsContainer}
+    >
+      {chips.map((title) => (
+        <ChainChip
+          key={title}
+          isActive={activeTab === title}
+          title={title}
+          onPress={() => handleTabClick(title)}
+        />
+      ))}
+    </ScrollView>
   );
+});
+
+const styles = StyleSheet.create({
+  chipsScrollView: {
+    marginBottom: 16,
+    flexGrow: 0,
+  },
+  chipsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 2,
+  },
+  chip: {
+    borderWidth: 1,
+    borderColor: '#f3f4f6', // border-gray-100
+    backgroundColor: 'transparent',
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 18,
+    marginRight: 12,
+  },
+  chipActive: {
+    backgroundColor: '#f3f4f6', // bg-gray-100
+    borderColor: '#fff', // white-100
+  },
+  chipWithChildren: {
+    paddingHorizontal: 18,
+  },
+  chipText: {
+    fontSize: 14,
+    color: '#1f2937', // text-gray-800
+  },
+  chipTextActive: {
+    color: '#111', // text-black-100
+  },
+  chipTextInactive: {
+    color: '#9ca3af', // text-gray-300
+  },
 });

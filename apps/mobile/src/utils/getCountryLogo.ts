@@ -1,4 +1,4 @@
-import { Images } from 'images';
+import { Images } from '../../assets/images';
 
 export enum Countries {
   USD = 'USD',

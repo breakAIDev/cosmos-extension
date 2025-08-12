@@ -1,8 +1,8 @@
 import { useAddress } from '@leapwallet/cosmos-wallet-hooks';
-import { useAlphaUser } from 'hooks/useAlphaUser';
-import { NftCollection, useChadNftCollections } from 'hooks/useChadNftCollections';
+import { useAlphaUser } from '../../../hooks/useAlphaUser';
+import { NftCollection, useChadNftCollections } from '../../../hooks/useChadNftCollections';
 import React, { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-native';
 
 import { RaffleListingProps } from '../chad-components/RaffleListing';
 import { AlphaUser } from '../types';

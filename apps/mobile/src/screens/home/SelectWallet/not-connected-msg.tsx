@@ -1,9 +1,10 @@
 import { Key } from '@leapwallet/cosmos-wallet-hooks';
-import Text from 'components/text';
-import { useSiteLogo } from 'hooks/utility/useSiteLogo';
-import { Images } from 'images';
-import { addToConnections } from 'pages/ApproveConnection/utils';
-import React from 'react';
+import Text from '../../../components/text';
+import { useSiteLogo } from '../../../hooks/utility/useSiteLogo';
+import { Images } from '../../../../assets/images';
+import { addToConnections } from '../../ApproveConnection/utils';
+import React, { useState } from 'react';
+import { View, Image, TouchableOpacity, StyleSheet } from 'react-native';
 
 export const WalletNotConnectedMsg = ({
   currentWalletInfo,
@@ -18,11 +19,14 @@ export const WalletNotConnectedMsg = ({
 }) => {
   const walletName = currentWalletInfo?.wallets?.[0]?.name;
   const walletColorIndex = currentWalletInfo?.wallets?.[0]?.colorIndex;
+  const watchWallet = currentWalletInfo?.wallets?.[0]?.watchWallet;
   const siteName =
     currentWalletInfo?.origin?.split('//')?.at(-1)?.split('.')?.at(-2) ||
     currentWalletInfo?.origin?.split('//')?.at(-1);
 
   const siteLogo = useSiteLogo(currentWalletInfo?.origin);
+
+  const [logoSource, setLogoSource] = useState(siteLogo);
 
   const handleConnectWalletClick = async () => {
     const walletIds = currentWalletInfo?.wallets.map((wallet) => wallet.id);
@@ -35,35 +39,99 @@ export const WalletNotConnectedMsg = ({
   };
 
   return (
-    <div className='flex flex-col rounded-2xl bg-white-100 dark:bg-gray-900 min-h-[100px] justify-center items-center p-2 mb-4'>
-      <div className='pt-8 pb-2 flex flex-row'>
-        <img
-          src={Images.Misc.getWalletIconAtIndex(
-            walletColorIndex as number,
-            currentWalletInfo?.wallets?.[0]?.watchWallet,
-          )}
-          className='z-10 border-2 border-gray-900 rounded-full relative left-2'
+    <View style={styles.container}>
+      <View style={styles.logoRow}>
+        <Image
+          source={{ uri: Images.Misc.getWalletIconAtIndex(walletColorIndex as number, watchWallet) }}
+          style={styles.walletIcon}
         />
-        <object data={siteLogo} type='image' className='relative -left-2 z-0'>
-          <img src={Images.Misc.DefaultWebsiteIcon} alt='Website default icon' />
-        </object>
-      </div>
-      <Text size='md' color='text-green-600' className='font-bold my-2'>
+        <Image
+          source={{ uri: logoSource }}
+          style={styles.siteLogo}
+          onError={() => setLogoSource(Images.Misc.DefaultWebsiteIcon)}
+        />
+      </View>
+      <Text size="md" color="text-green-600" style={styles.siteName}>
         {siteName}
       </Text>
-      <Text size='xl' className='my-0 font-extrabold'>
+      <Text size="xl" style={styles.walletStatus}>
         {walletName} not Connected
       </Text>
-      <Text size='xs' style={{ textAlign: 'center' }} className='mb-2' color='text-gray-400'>
+      <Text size="xs" style={styles.infoText} color="text-gray-400">
         You can connect this wallet, or can switch to an already connected wallet.
       </Text>
-      <div
-        onClick={handleConnectWalletClick}
-        style={{ background: 'rgba(225, 136, 129, 0.1)', color: '#E18881' }}
-        className='font-bold p-1 px-2 rounded-2xl cursor-pointer my-2'
+      <TouchableOpacity
+        onPress={handleConnectWalletClick}
+        style={styles.connectBtn}
+        activeOpacity={0.85}
       >
-        Connect {walletName}
-      </div>
-    </div>
+        <Text style={styles.connectBtnText}>Connect {walletName}</Text>
+      </TouchableOpacity>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'column',
+    borderRadius: 20,
+    backgroundColor: '#fff',
+    minHeight: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 8,
+    marginBottom: 16,
+  },
+  logoRow: {
+    paddingTop: 32,
+    paddingBottom: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  walletIcon: {
+    zIndex: 10,
+    borderWidth: 2,
+    borderColor: '#111827',
+    borderRadius: 999,
+    width: 48,
+    height: 48,
+    marginRight: -16,
+    backgroundColor: '#fff',
+  },
+  siteLogo: {
+    zIndex: 1,
+    width: 48,
+    height: 48,
+    borderRadius: 999,
+    marginLeft: -16,
+    backgroundColor: '#fff',
+  },
+  siteName: {
+    fontWeight: 'bold',
+    marginVertical: 8,
+    color: '#22C55E', // text-green-600
+  },
+  walletStatus: {
+    marginVertical: 0,
+    fontWeight: 'bold',
+    fontSize: 20,
+  },
+  infoText: {
+    textAlign: 'center',
+    marginBottom: 8,
+    color: '#9CA3AF', // text-gray-400
+  },
+  connectBtn: {
+    backgroundColor: 'rgba(225, 136, 129, 0.1)',
+    borderRadius: 20,
+    paddingVertical: 4,
+    paddingHorizontal: 16,
+    marginVertical: 8,
+  },
+  connectBtnText: {
+    color: '#E18881',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+});

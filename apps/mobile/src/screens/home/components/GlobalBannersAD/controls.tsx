@@ -1,53 +1,103 @@
-import { ArrowLeft, ArrowRight } from '@phosphor-icons/react';
 import React from 'react';
-import { cn } from 'utils/cn';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { ArrowLeft, ArrowRight } from 'phosphor-react-native';
 
-export const BannerControls = (props: {
+type BannerControlsProps = {
   activeBannerIndex: number;
   activeBannerId: string;
   totalItems: number;
   handleContainerScroll: (index: number) => void;
-  handleMouseEnter: () => void;
-  handleMouseLeave: () => void;
-}) => {
-  const { activeBannerIndex, totalItems, handleContainerScroll, handleMouseEnter, handleMouseLeave } = props;
+};
 
+export const BannerControls = ({
+  activeBannerIndex,
+  totalItems,
+  handleContainerScroll,
+}: BannerControlsProps) => {
   return (
-    <div className='flex w-full items-center px-4 justify-between mt-1'>
-      <button>
+    <View style={styles.controlsRow}>
+      <TouchableOpacity
+        disabled={activeBannerIndex === 0}
+        onPress={() => handleContainerScroll(activeBannerIndex - 1)}
+        style={[
+          styles.arrowBtn,
+          activeBannerIndex === 0 && styles.arrowBtnDisabled,
+        ]}
+      >
         <ArrowLeft
           size={17}
-          onClick={() => handleContainerScroll(activeBannerIndex - 1)}
-          className={`text-muted-foreground hover:text-foreground cursor-pointer transition-[colors,opacity] duration-300 ${
-            activeBannerIndex === 0 ? 'invisible opacity-0' : 'opacity-100'
-          }`}
+          color={activeBannerIndex === 0 ? '#C0C5CB' : '#222'} // muted-foreground vs foreground
         />
-      </button>
+      </TouchableOpacity>
 
-      <div className='flex gap-1' onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+      <View style={styles.dotsRow}>
         {Array.from({ length: totalItems }).map((_, i) => {
           const isActive = activeBannerIndex === i;
-
           return (
-            <button
-              role='button'
+            <TouchableOpacity
               key={i}
-              className={cn(
-                'h-[5px] rounded-full cursor-pointer transition-all duration-300',
-                isActive ? 'w-[20px] bg-foreground' : 'w-[5px] bg-muted-foreground',
-              )}
-              onClick={() => handleContainerScroll(i)}
+              style={[
+                styles.dot,
+                isActive ? styles.dotActive : styles.dotInactive,
+              ]}
+              onPress={() => handleContainerScroll(i)}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel={`Go to banner ${i + 1}`}
             />
           );
         })}
-      </div>
-      <ArrowRight
-        size={17}
-        onClick={() => handleContainerScroll(activeBannerIndex + 1)}
-        className={`text-muted-foreground hover:text-foreground cursor-pointer transition-[colors,opacity] duration-300 ${
-          activeBannerIndex === totalItems - 1 ? 'pointer-events-none opacity-0' : 'opacity-100'
-        }`}
-      />
-    </div>
+      </View>
+
+      <TouchableOpacity
+        disabled={activeBannerIndex === totalItems - 1}
+        onPress={() => handleContainerScroll(activeBannerIndex + 1)}
+        style={[
+          styles.arrowBtn,
+          activeBannerIndex === totalItems - 1 && styles.arrowBtnDisabled,
+        ]}
+      >
+        <ArrowRight
+          size={17}
+          color={activeBannerIndex === totalItems - 1 ? '#C0C5CB' : '#222'}
+        />
+      </TouchableOpacity>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  controlsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 16,
+    marginTop: 4,
+  },
+  arrowBtn: {
+    padding: 8,
+    opacity: 1,
+  },
+  arrowBtnDisabled: {
+    opacity: 0.3,
+  },
+  dotsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6, // if your React Native version supports gap; otherwise use margin
+  },
+  dot: {
+    height: 5,
+    borderRadius: 3,
+    marginHorizontal: 2,
+  },
+  dotActive: {
+    width: 20,
+    backgroundColor: '#222', // foreground
+  },
+  dotInactive: {
+    width: 5,
+    backgroundColor: '#C0C5CB', // muted-foreground
+  },
+});

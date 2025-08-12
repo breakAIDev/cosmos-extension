@@ -1,35 +1,33 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, GestureResponderEvent } from 'react-native';
+import React, { forwardRef } from 'react';
+import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 
-type ClickableIconProps = {
+interface ClickableIconProps {
   disabled?: boolean;
   label: string;
   icon: React.ElementType;
-  onPress?: (event: GestureResponderEvent) => void;
+  onPress?: () => void;
   style?: any;
-  iconProps?: any; // Pass props to your icon component
-};
+  testID?: string;
+}
 
-const ClickableIcon = React.forwardRef<TouchableOpacity, ClickableIconProps>(
-  ({ disabled, icon: Icon, label, onPress, style, iconProps, ...rest }, ref) => {
+const ClickableIcon = forwardRef(
+  ({ disabled, icon: Icon, label, style, onPress, testID }: ClickableIconProps,
+     ref: React.Ref<View>) => {
     return (
-      <View style={[styles.container, disabled && styles.disabled, style]}>
+      <View style={[styles.iconWrapper, disabled && styles.disabled]}>
         <TouchableOpacity
           ref={ref}
-          activeOpacity={0.7}
+          style={[styles.button, style]}
           disabled={disabled}
-          style={styles.button}
           onPress={onPress}
-          {...rest}
+          activeOpacity={0.7}
+          testID={testID}
         >
-          {/* If using react-native-vector-icons, pass iconProps as needed */}
-          <Icon width={22} height={22} color="#222B45" {...iconProps} />
+          <Icon width={22} height={22} /> {/* Pass size as needed */}
         </TouchableOpacity>
-        {label ? (
-          <Text style={styles.label} numberOfLines={1}>
-            {label}
-          </Text>
-        ) : null}
+        {!!label && (
+          <Text style={styles.label}>{label}</Text>
+        )}
       </View>
     );
   }
@@ -37,14 +35,11 @@ const ClickableIcon = React.forwardRef<TouchableOpacity, ClickableIconProps>(
 
 ClickableIcon.displayName = 'ClickableIcon';
 
-export default ClickableIcon;
-
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'column',
+  iconWrapper: {
     alignItems: 'center',
+    justifyContent: 'center',
     opacity: 1,
-    minWidth: 60,
   },
   disabled: {
     opacity: 0.4,
@@ -53,20 +48,20 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: '#F5F7FB', // secondary-100
+    backgroundColor: '#F3F4F6', // Adjust to your secondary-100
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 4,
-    // Optionally: Add shadow for iOS/Android
-    // shadowColor: '#000', shadowOffset: {width:0, height:1}, shadowOpacity:0.04, elevation:2
   },
   label: {
+    fontSize: 14,
     marginTop: 8,
-    textAlign: 'center',
-    fontSize: 15,
     fontWeight: '500',
-    color: '#222B45',
-    letterSpacing: 0.2,
-    minHeight: 22,
+    letterSpacing: 0.5,
+    lineHeight: 22,
+    textAlign: 'center',
+    color: '#222', // Adjust as needed
   },
 });
+
+export default ClickableIcon;

@@ -1,21 +1,21 @@
-import { Key, useChainInfo, useGetChains, WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks';
-import { CheckCircle } from '@phosphor-icons/react';
-import BottomModal from '../bottom-modal';
-import Text from 'components/text';
-import { WALLET_NAME_SLICE_LENGTH } from 'config/constants';
-import { useChainPageInfo } from 'hooks';
-import { Wallet } from 'hooks/wallet/useWallet';
-import { Images } from 'images';
-import { useSendContext } from 'pages/send-v2/context';
 import React, { useMemo } from 'react';
-import { formatWalletName } from 'utils/formatWalletName';
-import { isLedgerEnabled } from 'utils/isLedgerEnabled';
-import { sliceAddress } from 'utils/strings';
-
+import { View, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { Key, useChainInfo, useGetChains, WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks';
+import { CheckCircle } from 'phosphor-react-native';
+import BottomModal from '../../../../components/bottom-modal';
+import Text from '../../../../components/text';
+import { WALLET_NAME_SLICE_LENGTH } from '../../../../services/config/constants';
+import { useChainPageInfo } from '../../../../hooks';
+import { Wallet } from '../../../../hooks/wallet/useWallet';
+import { Images } from '../../../../../assets/images';
+import { useSendContext } from '../../../send-v2/context';
+import { formatWalletName } from '../../../../utils/formatWalletName';
+import { isLedgerEnabled } from '../../../../utils/isLedgerEnabled';
+import { sliceAddress } from '../../../../utils/strings';
 import useWallets = Wallet.useWallets;
 import { pubKeyToEvmAddressToShow } from '@leapwallet/cosmos-wallet-sdk';
-import { getDerivationPathToShow } from 'utils';
-import { getLedgerEnabledEvmChainsKey } from 'utils/getLedgerEnabledEvmChains';
+import { getDerivationPathToShow } from '../../../../utils';
+import { getLedgerEnabledEvmChainsKey } from '../../../../utils/getLedgerEnabledEvmChains';
 
 type SelectWalletSheetProps = {
   isOpen: boolean;
@@ -55,21 +55,18 @@ export const SelectWalletSheet: React.FC<SelectWalletSheetProps> = ({
 
   return (
     <BottomModal
-      title='Wallets'
+      title="Wallets"
       onClose={onClose}
       isOpen={isOpen}
-      closeOnBackdropClick={true}
-      contentClassName='!bg-white-100 dark:!bg-gray-950'
-      className='pt-3 px-6 pb-6'
+      containerStyle={styles.modalContainer}
     >
-      <div>
+      <View>
         {walletsList.map((wallet, index, array) => {
           const isLast = index === array.length - 1;
           let walletLabel = '';
 
           if (wallet.walletType === WALLETTYPE.LEDGER) {
             const path = wallet.path ? getDerivationPathToShow(wallet.path) : `0'/0/${wallet.addressIndex}`;
-
             walletLabel = ` · /${path}`;
           }
 
@@ -85,9 +82,6 @@ export const SelectWalletSheet: React.FC<SelectWalletSheetProps> = ({
             walletName.length > WALLET_NAME_SLICE_LENGTH
               ? walletName.slice(0, WALLET_NAME_SLICE_LENGTH) + '...'
               : walletName;
-          const walletAddress = activeChainInfo?.evmOnlyChain
-            ? pubKeyToEvmAddressToShow(wallet?.pubKeys?.[activeChainInfo?.key], true)
-            : wallet?.addresses?.[activeChainInfo?.key];
 
           const addressValue = activeChainInfo?.evmOnlyChain
             ? pubKeyToEvmAddressToShow(wallet?.pubKeys?.[activeChainInfo?.key])
@@ -112,47 +106,114 @@ export const SelectWalletSheet: React.FC<SelectWalletSheetProps> = ({
           }
 
           return (
-            <div className='relative min-h-[56px]' key={wallet.id}>
-              <button
-                className='w-full flex items-center gap-3 py-3 cursor-pointer'
-                onClick={() => {
+            <View key={wallet.id} style={styles.walletRow}>
+              <TouchableOpacity
+                style={styles.walletButton}
+                activeOpacity={0.7}
+                onPress={() => {
                   setSelectedWallet(wallet);
                   onClose();
                 }}
               >
-                <img
-                  src={wallet?.avatar ?? Images.Misc.getWalletIconAtIndex(wallet.colorIndex, wallet.watchWallet)}
-                  alt={`wallet icon`}
-                  className='rounded-full border border-white-30 h-10 w-10'
+                <Image
+                  source={{ uri: wallet.avatar ?? Images.Misc.getWalletIconAtIndex(wallet.colorIndex, wallet.watchWallet)}}
+                  style={styles.walletIcon}
+                  resizeMode="cover"
                 />
 
-                <div className='flex-1 flex flex-col items-start'>
-                  <p className='flex text-left items-center gap-1 font-bold dark:text-white-100 text-gray-700 capitalize'>
-                    {shortenedWalletName}
+                <View style={styles.walletInfo}>
+                  <View style={styles.walletNameRow}>
+                    <Text style={styles.walletName}>{shortenedWalletName}</Text>
                     {wallet.walletType === WALLETTYPE.LEDGER && (
-                      <Text
-                        className='bg-gray-900 font-normal rounded-2xl justify-center items-center px-2 ml-1 h-[18px]'
-                        color='text-gray-400'
-                        size='xs'
-                      >
+                      <Text style={styles.ledgerTag} color="text-gray-400" size="xs">
                         Ledger
                       </Text>
                     )}
-                  </p>
+                  </View>
 
-                  <p className='text-sm font-medium dark:text-gray-400 text-gray-600'>{addressText}</p>
-                </div>
+                  <Text style={styles.walletAddress}>{addressText}</Text>
+                </View>
 
                 {selectedWallet?.id === wallet.id ? (
-                  <CheckCircle weight='fill' size={24} className='ml-2' style={{ color: topChainColor }} />
+                  <CheckCircle weight="fill" size={24} style={{ marginLeft: 8 }} color={ topChainColor } />
                 ) : null}
-              </button>
+              </TouchableOpacity>
 
-              {!isLast && <div className='border-b w-full border-gray-100 dark:border-gray-850' />}
-            </div>
+              {!isLast && <View style={styles.divider} />}
+            </View>
           );
         })}
-      </div>
+      </View>
     </BottomModal>
   );
 };
+
+const styles = StyleSheet.create({
+  modalContainer: {
+    paddingTop: 12,
+    paddingHorizontal: 24,
+    paddingBottom: 24,
+    backgroundColor: '#fff',
+    borderRadius: 24,
+  },
+  walletRow: {
+    minHeight: 56,
+    justifyContent: 'center',
+  },
+  walletButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    width: '100%',
+  },
+  walletIcon: {
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.13)',
+    height: 40,
+    width: 40,
+    marginRight: 12,
+  },
+  walletInfo: {
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+  },
+  walletNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  walletName: {
+    fontWeight: 'bold',
+    color: '#252525',
+    fontSize: 15,
+    marginRight: 2,
+    textTransform: 'capitalize',
+  },
+  ledgerTag: {
+    backgroundColor: '#191a24',
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    marginLeft: 4,
+    height: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    fontWeight: 'normal',
+    color: '#888',
+    fontSize: 11,
+    overflow: 'hidden',
+  },
+  walletAddress: {
+    fontSize: 13,
+    color: '#888',
+    marginTop: 2,
+    fontWeight: '500',
+  },
+  divider: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#ededed',
+    width: '100%',
+  },
+});
+
+export default SelectWalletSheet;

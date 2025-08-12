@@ -1,69 +1,51 @@
-import { BOOKMARKED_ALPHAS, BOOKMARKED_CHAD_LISTINGS } from 'config/storage-keys';
+import { BOOKMARKED_ALPHAS, BOOKMARKED_CHAD_LISTINGS } from '../../../services/config/storage-keys';
 import dayjs from 'dayjs';
-import { Raffle, RaffleStatus } from 'hooks/useAlphaOpportunities';
-import browser from 'webextension-polyfill';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // <-- React Native storage
+import { Raffle } from '../../../hooks/useAlphaOpportunities';
 
-/**
- * @description collection of utility functions for the alpha page
- */
-
-/**
- * @description handling bookmarking alphas:
- * - get bookmarked alphas
- * - check if an alpha is bookmarked
- * - toggle an alpha's bookmark status
- */
-export const getBookmarkedAlphas = async (): Promise<string[]> => {
+// ---- Bookmarking Alphas ----
+export const getBookmarkedAlphas = async () => {
   try {
-    const { [BOOKMARKED_ALPHAS]: stored } = await browser.storage.local.get(BOOKMARKED_ALPHAS);
+    const stored = await AsyncStorage.getItem(BOOKMARKED_ALPHAS);
     return stored ? JSON.parse(stored) : [];
   } catch {
-    await browser.storage.local.remove(BOOKMARKED_ALPHAS);
+    await AsyncStorage.removeItem(BOOKMARKED_ALPHAS);
     return [];
   }
 };
 
-export const getBookmarkedChadListings = async (): Promise<string[]> => {
+export const getBookmarkedChadListings = async () => {
   try {
-    const { [BOOKMARKED_CHAD_LISTINGS]: stored } = await browser.storage.local.get(BOOKMARKED_CHAD_LISTINGS);
+    const stored = await AsyncStorage.getItem(BOOKMARKED_CHAD_LISTINGS);
     return stored ? JSON.parse(stored) : [];
   } catch {
-    await browser.storage.local.remove(BOOKMARKED_CHAD_LISTINGS);
+    await AsyncStorage.removeItem(BOOKMARKED_CHAD_LISTINGS);
     return [];
   }
 };
 
-export const isAlphaBookmarked = async (id: string): Promise<boolean> => {
+export const isAlphaBookmarked = async (id) => {
   const bookmarks = await getBookmarkedAlphas();
   return bookmarks.includes(id);
 };
 
-export const toggleAlphaBookmark = async (id: string): Promise<void> => {
+export const toggleAlphaBookmark = async (id) => {
   const bookmarks = await getBookmarkedAlphas();
   const newBookmarks = bookmarks.includes(id)
-    ? bookmarks.filter((bookmarkId) => bookmarkId !== id)
+    ? bookmarks.filter((bookmarkId: number) => bookmarkId !== id)
     : [...bookmarks, id];
-  await browser.storage.local.set({
-    [BOOKMARKED_ALPHAS]: JSON.stringify(newBookmarks),
-  });
+  await AsyncStorage.setItem(BOOKMARKED_ALPHAS, JSON.stringify(newBookmarks));
 };
 
-export const toggleChadListingBookmark = async (id: string): Promise<void> => {
+export const toggleChadListingBookmark = async (id) => {
   const bookmarks = await getBookmarkedChadListings();
   const newBookmarks = bookmarks.includes(id)
-    ? bookmarks.filter((bookmarkId) => bookmarkId !== id)
+    ? bookmarks.filter((bookmarkId: number) => bookmarkId !== id)
     : [...bookmarks, id];
-  await browser.storage.local.set({
-    [BOOKMARKED_CHAD_LISTINGS]: JSON.stringify(newBookmarks),
-  });
+  await AsyncStorage.setItem(BOOKMARKED_CHAD_LISTINGS, JSON.stringify(newBookmarks));
 };
 
-/**
- * @description sort raffles by status: ongoing first, then upcoming, then ended
- * - Ongoing: start date has passed, end date not reached yet
- * - Upcoming: start date is in the future
- * - Ended: end date is in the past
- */
+// ---- Sorting and Formatting (No changes needed) ----
 export const sortRafflesByStatus = (raffles: Raffle[]) => {
   return [...raffles].sort((a, b) => {
     const now = dayjs();
@@ -72,39 +54,29 @@ export const sortRafflesByStatus = (raffles: Raffle[]) => {
     const bStartsAt = dayjs(b.startsAt);
     const bEndsAt = dayjs(b.endsAt);
 
-    // Define status categories: 1 = ongoing, 2 = upcoming, 3 = ended
     const getStatusPriority = (raffle: Raffle, startsAt: dayjs.Dayjs, endsAt: dayjs.Dayjs) => {
-      if (raffle.status === RaffleStatus.COMPLETED) return 3; // ended if status is Completed
-      if (startsAt.isBefore(now) && now.isBefore(endsAt)) return 1; // ongoing
-      if (startsAt.isAfter(now)) return 2; // upcoming
-      return 3; // ended
+      if (raffle.status === 'COMPLETED') return 3;
+      if (startsAt.isBefore(now) && now.isBefore(endsAt)) return 1;
+      if (startsAt.isAfter(now)) return 2;
+      return 3;
     };
 
     const aPriority = getStatusPriority(a, aStartsAt, aEndsAt);
     const bPriority = getStatusPriority(b, bStartsAt, bEndsAt);
 
-    // First sort by status priority
     if (aPriority !== bPriority) {
       return aPriority - bPriority;
     }
-
-    // Within the same status group, sort by most recent first
     if (aPriority === 3) {
-      // For ended: most recently ended first
       return bEndsAt.unix() - aEndsAt.unix();
     } else if (aPriority === 2) {
-      // For upcoming: soonest to start first
       return aStartsAt.unix() - bStartsAt.unix();
     } else {
-      // For ongoing: closest to ending first
       return aEndsAt.unix() - bEndsAt.unix();
     }
   });
 };
 
-/**
- * @description misc utilities for UI, sorting, formatting, etc.
- */
 export const sortOpportunitiesByDate = <T extends { additionDate: string }>(opportunities: T[]): T[] => {
   return opportunities.sort((a, b) => {
     const [monthA, dayA, yearA] = a.additionDate.split('/').map(Number);
@@ -117,11 +89,6 @@ export const sortOpportunitiesByDate = <T extends { additionDate: string }>(oppo
   });
 };
 
-/**
- * @description format a date string recieved from raffle.createdAt
- * to MM/DD/YYYY format, so it is compatible with date format for
- * alpha-timeline sorting
- */
 export const formatRaffleDate = (dateStr: string) => {
   const date = new Date(dateStr);
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -140,7 +107,6 @@ export const getHostname = (url: string) => {
 };
 
 export const parseDate = (dateStr: string) => {
-  // For MM/DD/YYYY format
   const [month, day, year] = dateStr.split('/').map((num) => parseInt(num, 10));
   return new Date(year, month - 1, day);
 };
@@ -148,7 +114,6 @@ export const parseDate = (dateStr: string) => {
 export const formatTimeDiff = (timeDiff: number, pastSuffix = false) => {
   const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
   const months = Math.floor(timeDiff / (1000 * 60 * 60 * 24 * 30));
-
   if (months > 0) return `${months} month${months > 1 ? 's' : ''}`;
   if (days > 0) return `${days} day${days > 1 ? 's' : ''}`;
   return 'Today';
@@ -158,7 +123,6 @@ export const endsIn = (endDate: string) => {
   const parsedDate = parseDate(endDate);
   const now = new Date();
 
-  // set both dates to midnight to compare only the date part
   parsedDate.setHours(0, 0, 0, 0);
   now.setHours(0, 0, 0, 0);
   if (now.getTime() === parsedDate.getTime()) {
@@ -175,35 +139,21 @@ export const endsIn = (endDate: string) => {
 
 export const addedAt = (additionDate: string) => {
   const parsedDate = parseDate(additionDate);
-
   if (new Date().toDateString() === parsedDate.toDateString()) {
     return 'Today';
   }
-
   const day = parsedDate.getDate();
   const month = parsedDate.toLocaleString('en-US', { month: 'short' });
-
   return `${day} ${month}`;
 };
 
-/**
- * Formats a datetime string (YYYY-MM-DD HH:MM:SS) from UTC to a readable format
- * @param dateTimeString - datetime string in format "YYYY-MM-DD HH:MM:SS" (UTC)
- * @param includeTime - whether to include the time in the output
- * @returns Formatted date string
- */
-export const formatDateTime = (dateTimeString: string, includeTime = true): string => {
-  // Parse the UTC datetime string
+export const formatDateTime = (dateTimeString: string, includeTime = true) => {
   const date = new Date(`${dateTimeString.replace(' ', 'T')}Z`);
-
-  // Options for date formatting
   const dateOptions: Intl.DateTimeFormatOptions = {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
   };
-
-  // Add time options if includeTime is true
   if (includeTime) {
     Object.assign(dateOptions, {
       hour: '2-digit',
@@ -211,8 +161,6 @@ export const formatDateTime = (dateTimeString: string, includeTime = true): stri
       hour12: true,
     });
   }
-
-  // Format the date according to user's locale
   return date.toLocaleString(undefined, dateOptions);
 };
 
@@ -229,14 +177,9 @@ export const RaffleEndsIn = (endDate: string) => {
   return timeLeft === 'Today' ? 'Ends today' : `Ends in ${timeLeft}`;
 };
 
-/**
- * @note the UTC standard is used to avoid timezone issues
- * in raffle duration calculations
- */
 export const endsInUTC = (endDateUTC: string): string => {
   const endDate = new Date(endDateUTC);
   const nowUTC = new Date();
-
   const timeDiff = endDate.getTime() - nowUTC.getTime();
 
   if (timeDiff <= 0) return 'Ended';
@@ -252,14 +195,9 @@ export const endsInUTC = (endDateUTC: string): string => {
   return timeLeft === 'Today' ? 'Ends today' : `Ends in ${timeLeft}`;
 };
 
-/**
- * @note the UTC standard is used to avoid timezone issues
- * in raffle start time calculations
- */
 export const startsInUTC = (startDateUTC: string): string => {
   const startDate = new Date(startDateUTC);
   const nowUTC = new Date();
-
   const timeDiff = startDate.getTime() - nowUTC.getTime();
 
   if (timeDiff <= 0) return 'Started';

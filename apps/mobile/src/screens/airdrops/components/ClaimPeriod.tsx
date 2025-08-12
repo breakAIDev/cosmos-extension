@@ -1,7 +1,8 @@
-import { CalendarBlank } from '@phosphor-icons/react';
-import Text from 'components/text';
-import { format } from 'date-fns';
 import React from 'react';
+import { View, StyleSheet } from 'react-native';
+import { CalendarBlank } from 'phosphor-react-native'; // Replace with RN icon if needed
+import Text from '../../../components/text';
+import { format } from 'date-fns';
 
 interface ClaimPeriodProps {
   claimStartDate: Date | null;
@@ -9,25 +10,73 @@ interface ClaimPeriodProps {
   isClaimPeriodOver: boolean;
 }
 
-export default function ClaimPeriod({ claimStartDate, claimEndDate, isClaimPeriodOver }: ClaimPeriodProps) {
+export default function ClaimPeriod({
+  claimStartDate,
+  claimEndDate,
+  isClaimPeriodOver,
+}: ClaimPeriodProps) {
   return (
-    <div className='flex flex-col gap-2 mb-6 bg-secondary-100 rounded-xl p-4'>
-      <Text size='md' className='font-bold gap-2'>
-        <CalendarBlank size={20} className='text-black-100 dark:text-white-100' />
-        Claim period
-      </Text>
-      <div>
+    <View style={styles.container}>
+      <View style={styles.headerRow}>
+        {/* If you use RN vector icons, replace this with e.g. Feather/FontAwesome */}
+        <CalendarBlank size={20} color="#222" style={styles.icon} />
+        <Text style={styles.headerText}>Claim period</Text>
+      </View>
+
+      <View style={styles.infoBox}>
         {isClaimPeriodOver && (
-          <Text size='sm' color='text-muted-foreground' className='font-medium'>
+          <Text style={styles.periodOverText}>
             Claim period of this Airdrop has passed.
           </Text>
         )}
-        <Text size='sm' color='text-muted-foreground' className='font-medium'>
+        <Text style={styles.periodDateText}>
           {!claimStartDate
-            ? 'The claim period of this airdrop hasn’t been announced yet. Stay tuned for more details.'
-            : `${format(claimStartDate, 'dd MMM, yyyy')} - ${claimEndDate && format(claimEndDate, 'dd MMM, yyyy')}`}
+            ? "The claim period of this airdrop hasn’t been announced yet. Stay tuned for more details."
+            : `${format(claimStartDate, 'dd MMM, yyyy')} - ${
+                claimEndDate ? format(claimEndDate, 'dd MMM, yyyy') : ''
+              }`}
         </Text>
-      </div>
-    </div>
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    marginBottom: 24,
+    backgroundColor: '#F7F8FA', // secondary-100
+    borderRadius: 16,
+    padding: 16,
+    flexDirection: 'column',
+    gap: 8,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  icon: {
+    marginRight: 6,
+  },
+  headerText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#222', // black-100
+  },
+  infoBox: {
+    flexDirection: 'column',
+    gap: 4,
+  },
+  periodOverText: {
+    fontSize: 14,
+    color: '#8A94A6', // muted-foreground
+    fontWeight: '500',
+    marginBottom: 2,
+  },
+  periodDateText: {
+    fontSize: 14,
+    color: '#8A94A6', // muted-foreground
+    fontWeight: '500',
+  },
+});

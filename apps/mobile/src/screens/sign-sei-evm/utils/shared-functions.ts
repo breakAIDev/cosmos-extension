@@ -1,20 +1,21 @@
-import { MessageTypes } from 'config/message-types';
-import { NavigateFunction } from 'react-router-dom';
-import { isSidePanel } from 'utils/isSidePanel';
-import Browser from 'webextension-polyfill';
+import { useNavigation } from '@react-navigation/native';
+import { MessageTypes } from '../../../services/config/message-types';
+import { DeviceEventEmitter } from 'react-native';
 
-export async function handleRejectClick(navigate: NavigateFunction, payloadId?: number, donotClose?: boolean) {
-  await Browser.runtime.sendMessage({
-    type: MessageTypes.signSeiEvmResponse,
-    payloadId,
-    payload: { status: 'error', data: 'User rejected the transaction' },
-  });
+export function useHandleRejectClick() {
+  const navigation = useNavigation();
 
-  if (!donotClose) {
-    if (isSidePanel()) {
-      navigate('/home');
-    } else {
-      window.close();
+  const handleRejectClick = async ( payloadId?: number, donotClose?: boolean) => {
+    DeviceEventEmitter.emit('seiEvmSignEvent', {
+      type: MessageTypes.signSeiEvmResponse,
+      payloadId,
+      payload: { status: 'error', data: 'User rejected the transaction' },
+    });
+
+    if (!donotClose) {
+      navigation.goBack(); // Or navigation.navigate('Home'), depending on your UX
     }
   }
+
+  return { setHandleRejectClick: handleRejectClick };
 }

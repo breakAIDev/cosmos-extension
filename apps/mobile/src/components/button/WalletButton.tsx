@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet, Animated } from 'react-native';
-import { CheckCircle } from '@phosphor-icons/react'; // Or use a compatible RN icon
+import { CheckCircle } from 'phosphor-react-native'; // Or use a compatible RN icon
 import { CopySvg, FilledDownArrowSvg } from '../../../assets/images/misc'; // Use RN SVG or Image equivalents
 import { sliceWord } from '../../utils/strings';
 

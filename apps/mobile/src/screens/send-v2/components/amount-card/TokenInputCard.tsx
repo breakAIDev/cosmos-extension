@@ -1,18 +1,18 @@
 import { formatTokenAmount, sliceWord, Token, useGetChains } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { ArrowsLeftRight, CaretDown } from '@phosphor-icons/react';
+import { ArrowsLeftRight, CaretDown } from 'phosphor-react-native';
 import { QueryStatus } from '@tanstack/react-query';
 import BigNumber from 'bignumber.js';
-import classNames from 'classnames';
-import { TokenImageWithFallback } from 'components/token-image-with-fallback';
-import { useFormatCurrency } from 'hooks/settings/useCurrency';
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { useFormatCurrency } from '../../../../hooks/settings/useCurrency';
+import { useDefaultTokenLogo } from '../../../../hooks/utility/useDefaultTokenLogo';
 import { observer } from 'mobx-react-lite';
-import { useSendContext } from 'pages/send-v2/context';
+import { useSendContext } from '../../../send-v2/context';
 import React, { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
-import Skeleton from 'react-loading-skeleton';
-import { hideAssetsStore } from 'stores/hide-assets-store';
-import { imgOnError } from 'utils/imgOnError';
+import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
+import TokenImageWithFallback from '../../../../components/token-image-with-fallback';
+
+import { hideAssetsStore } from '../../../../context/hide-assets-store';
+import { useTheme } from '@leapwallet/leap-ui';
 
 type TokenInputCardProps = {
   isInputInUSDC: boolean;
@@ -43,6 +43,8 @@ function TokenInputCardView({
 }: TokenInputCardProps) {
   const [formatCurrency] = useFormatCurrency();
   const chains = useGetChains();
+  const theme = useTheme();
+  const isDarkMode = theme.theme === 'dark';
 
   const defaultTokenLogo = useDefaultTokenLogo();
   const [textInputValue, setTextInputValue] = useState<string>(value?.toString());
@@ -53,7 +55,6 @@ function TokenInputCardView({
     if (token && token.usdPrice && token.usdPrice !== '0') {
       return token.usdPrice;
     }
-
     return undefined;
   }, [token]);
 
@@ -61,19 +62,16 @@ function TokenInputCardView({
     if (!selectedAssetUSDPrice && isInputInUSDC) {
       setIsInputInUSDC(false);
     }
-  }, [selectedAssetUSDPrice, isInputInUSDC]);
+  }, [selectedAssetUSDPrice, isInputInUSDC, setIsInputInUSDC]);
 
   const { formattedDollarAmount } = useMemo(() => {
     let _dollarAmount = '0';
-
     if (value === '' || (value && isNaN(parseFloat(value)))) {
       return { formattedDollarAmount: '' };
     }
-
     if (token && token.usdPrice && value) {
       _dollarAmount = String(parseFloat(token.usdPrice) * parseFloat(value));
     }
-
     return {
       formattedDollarAmount: hideAssetsStore.formatHideBalance(formatCurrency(new BigNumber(_dollarAmount))),
     };
@@ -83,15 +81,12 @@ function TokenInputCardView({
     return hideAssetsStore.formatHideBalance(
       formatTokenAmount(value ?? '0', sliceWord(token?.symbol ?? '', 4, 4), 3, 'en-US'),
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, token?.symbol]);
 
   const balanceAmount = useMemo(() => {
     return hideAssetsStore.formatHideBalance(
       formatTokenAmount(token?.amount ?? '0', sliceWord(token?.symbol ?? '', 4, 4), 3, 'en-US'),
     );
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token?.amount, token?.symbol]);
 
   const isMaxAmount = useMemo(() => {
@@ -125,7 +120,6 @@ function TokenInputCardView({
   const onMaxBtnClick = () => {
     if (isInputInUSDC) {
       if (!selectedAssetUSDPrice) throw 'USD price is not available';
-
       const usdAmount = new BigNumber(token?.amount ?? '0').multipliedBy(selectedAssetUSDPrice);
       setTextInputValue(usdAmount.toString());
     } else {
@@ -138,7 +132,6 @@ function TokenInputCardView({
 
       if (isNativeToken) {
         const feeValue = parseFloat(allGasOptions[gasOption]);
-
         if (new BigNumber(token?.amount ?? 0).isGreaterThan(new BigNumber(feeValue))) {
           setTextInputValue(
             new BigNumber(token?.amount ?? 0).minus(new BigNumber(feeValue)).toFixed(decimals, BigNumber.ROUND_DOWN),
@@ -156,7 +149,6 @@ function TokenInputCardView({
     if (!selectedAssetUSDPrice) {
       throw 'USD price is not available';
     }
-
     if (isInputInUSDC) {
       setIsInputInUSDC(false);
       const cryptoAmount = new BigNumber(textInputValue).dividedBy(selectedAssetUSDPrice);
@@ -166,122 +158,290 @@ function TokenInputCardView({
       const usdAmount = new BigNumber(textInputValue).multipliedBy(selectedAssetUSDPrice);
       setTextInputValue(usdAmount.toString());
     }
-  }, [isInputInUSDC, selectedAssetUSDPrice, textInputValue]);
+  }, [isInputInUSDC, selectedAssetUSDPrice, setIsInputInUSDC, textInputValue]);
 
   return (
-    <div className='w-full bg-white-100 dark:bg-gray-950 rounded-2xl p-4 flex flex-col gap-3' key={balanceAmount}>
-      <div
-        className={classNames(
-          'flex rounded-2xl justify-between w-full items-center bg-gray-50 dark:bg-gray-900 gap-2 pl-4 h-[48px] p-[2px] border border-transparent transition-colors',
+    <View style={styles.cardWrap} key={balanceAmount}>
+      {/* Input Section */}
+      <View
+        style={[
+          styles.inputRow,
           amountError
-            ? 'border-red-300'
+            ? styles.inputRowError
             : !pfmEnabled && !isIbcUnwindingDisabled
-            ? 'border-[#FFC770]'
-            : 'focus-within:border-green-600',
-        )}
+            ? styles.inputRowWarning
+            : styles.inputRowFocus,
+        ]}
       >
         {loadingAssets ? (
-          <Skeleton width={71} height={24} containerClassName='block !leading-none overflow-hidden rounded-lg' />
+          <View style={{ width: 71, height: 24, backgroundColor: '#E5E7EB', borderRadius: 8 }} />
         ) : (
           <>
-            <div className='flex gap-1 w-full'>
-              {isInputInUSDC && <span className='dark:text-white-100 font-bold text-md'>$</span>}
-              <input
-                type='number'
-                className='bg-transparent outline-none w-full text-left dark:text-white-100 placeholder:font-bold placeholder:text-md placeholder:text-gray-600 dark:placeholder:text-gray-400 font-bold text-md'
-                placeholder={'0'}
+            <View style={styles.amountInputBox}>
+              {isInputInUSDC && (
+                <Text style={styles.inputDollar}>$</Text>
+              )}
+              <TextInput
+                keyboardType="decimal-pad"
+                placeholder="0"
+                style={styles.amountInput}
                 value={isInputInUSDC ? textInputValue : value}
-                onChange={(e) => setTextInputValue(e.target.value)}
+                onChangeText={setTextInputValue}
+                placeholderTextColor="#6B7280"
               />
-            </div>
-
-            <button className={'flex justify-end items-center gap-2 shrink-0 py-2 pr-2'} onClick={onTokenSelectSheet}>
-              <div className='relative'>
-                <TokenImageWithFallback
-                  assetImg={token?.img}
-                  text={token?.symbol ?? ''}
-                  altText={token?.symbol ?? ''}
-                  imageClassName='w-[24px] h-[24px] rounded-full'
-                  containerClassName='w-[24px] h-[24px] rounded-full !bg-gray-200 dark:!bg-gray-800'
-                  textClassName='text-[7px] !leading-[9px]'
-                  key={token?.img}
+            </View>
+            <TouchableOpacity style={styles.tokenSelectorBtn} onPress={onTokenSelectSheet} activeOpacity={0.7}>
+              <TokenImageWithFallback
+                assetImg={token?.img}
+                text={token?.symbol ?? ''}
+                key={token?.img}
+                imageStyle={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: 12,
+                }}
+                containerStyle={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: 12,
+                  backgroundColor: isDarkMode ? '#1a1a1a' : '#e5e5e5', // Example for dark/light
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+                textStyle={{
+                  fontSize: 7,
+                  lineHeight: 9,
+                  color: isDarkMode ? '#fff' : '#111', // Example for dark/light
+                }}
+              />
+              {selectedChain && (
+                <Image
+                  source={{ uri: chains[selectedChain]?.chainSymbolImageUrl ?? defaultTokenLogo }}
+                  style={styles.chainIcon}
+                  onError={() => {/* fallback logic */}}
                 />
+              )}
+              <View style={{ marginLeft: 8 }}>
+                <Text style={styles.tokenSymbol}>
+                  {token?.symbol ? sliceWord(token?.symbol ?? '', 4, 4) : 'Select Token'}
+                </Text>
                 {selectedChain ? (
-                  <img
-                    src={chains[selectedChain]?.chainSymbolImageUrl ?? defaultTokenLogo}
-                    className='w-[14px] h-[14px] rounded-full absolute bottom-[-2px] right-[-2px]'
-                    onError={imgOnError(defaultTokenLogo)}
-                  />
-                ) : null}
-              </div>
-              <p
-                className={classNames('dark:text-white-100 text-sm font-bold', {
-                  'flex flex-col justify-between items-start text-xs border-r border-gray-800 pl-1 pr-2':
-                    !!selectedChain,
-                })}
-              >
-                {token?.symbol ? sliceWord(token?.symbol ?? '', 4, 4) : 'Select Token'}
-                {selectedChain ? (
-                  <span className='text-gray-400 font-medium mt[-4px]'>
+                  <Text style={styles.chainName}>
                     {chains[selectedChain]?.chainName ?? 'Unknown'}
-                  </span>
+                  </Text>
                 ) : null}
-              </p>
-              <CaretDown size={14} className='dark:text-white-100' />
-            </button>
+              </View>
+              <CaretDown size={14} color="#fff" style={{ marginLeft: 4 }} />
+            </TouchableOpacity>
           </>
         )}
-      </div>
+      </View>
 
-      <div className='flex flex-row items-center justify-between text-gray-200 text-xs font-medium w-full h-[24px]'>
-        <div className='flex items-center gap-1'>
+      {/* Value, Switch, and Max Button Row */}
+      <View style={styles.balanceRow}>
+        <View style={styles.leftBalanceCol}>
           {value !== '' && (
-            <span className='text-gray-800 dark:text-gray-200 font-normal text-xs'>
+            <Text style={styles.inputValueText}>
               {isInputInUSDC ? formattedInputValue : formattedDollarAmount}
-            </span>
+            </Text>
           )}
-          <button
+          <TouchableOpacity
+            style={[
+              styles.switchBtn,
+              switchToUSDDisabled && styles.switchBtnDisabled,
+              value === '' ? styles.switchBtnPadded : styles.switchBtnSquare,
+            ]}
             disabled={switchToUSDDisabled}
-            onClick={handleInputTypeSwitchClick}
-            className={classNames(
-              'rounded-full h-6 bg-gray-50 dark:bg-gray-900 items-center flex gap-1 justify-center',
-              {
-                'opacity-50 pointer-events-none': switchToUSDDisabled,
-                'w-6': value !== '',
-                'px-[10px]': value === '',
-              },
-            )}
+            onPress={handleInputTypeSwitchClick}
+            activeOpacity={switchToUSDDisabled ? 1 : 0.7}
           >
             {value === '' && (
-              <span className='text-gray-800 dark:text-gray-200 font-normal text-xs'>
+              <Text style={styles.switchBtnText}>
                 Switch to {isInputInUSDC ? 'Token' : 'USD'}
-              </span>
+              </Text>
             )}
-            <ArrowsLeftRight size={12} className='text-black-100 dark:text-white-100 !leading-[12px] rotate-90' />
-          </button>
-        </div>
-
-        <div className='flex justify-end items-center gap-2'>
-          <span
-            className={classNames({
-              'text-red-400 dark:text-red-300': (amountError || '').includes('Insufficient balance'),
-              'text-gray-600 dark:text-gray-400': !amountError,
-            })}
+            <ArrowsLeftRight size={12} color="#111827" style={{ transform: [{ rotate: '90deg' }] }} />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.rightBalanceCol}>
+          <Text
+            style={[
+              styles.balanceText,
+              (amountError || '').includes('Insufficient balance') ? styles.balanceError : styles.balanceNormal,
+            ]}
           >
-            Bal: {!balanceStatus || balanceStatus === 'success' ? balanceAmount : <Skeleton width={50} />}
-          </span>
+            Bal: {!balanceStatus || balanceStatus === 'success' ? balanceAmount : <ActivityIndicator size="small" color="#9CA3AF" />}
+          </Text>
           {showMaxButton && (
-            <button
-              onClick={onMaxBtnClick}
-              className='rounded-full bg-[#29A87433] py-1 px-[10px] font-medium text-xs text-green-600'
-            >
-              Max
-            </button>
+            <TouchableOpacity style={styles.maxBtn} onPress={onMaxBtnClick}>
+              <Text style={styles.maxBtnText}>Max</Text>
+            </TouchableOpacity>
           )}
-        </div>
-      </div>
-    </div>
+        </View>
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  cardWrap: {
+    width: '100%',
+    backgroundColor: '#F3F4F6',
+    borderRadius: 18,
+    padding: 16,
+    flexDirection: 'column',
+    gap: 12,
+    marginBottom: 8,
+  },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 18,
+    backgroundColor: '#F9FAFB',
+    borderWidth: 1,
+    borderColor: 'transparent',
+    paddingLeft: 16,
+    minHeight: 48,
+    height: 48,
+    padding: 2,
+    marginBottom: 6,
+    justifyContent: 'space-between',
+  },
+  inputRowError: {
+    borderColor: '#F87171',
+  },
+  inputRowWarning: {
+    borderColor: '#FFC770',
+  },
+  inputRowFocus: {
+    borderColor: '#16A34A',
+  },
+  amountInputBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  inputDollar: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+    marginRight: 4,
+  },
+  amountInput: {
+    backgroundColor: 'transparent',
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+    flex: 1,
+    textAlign: 'left',
+  },
+  tokenSelectorBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 4,
+    paddingRight: 8,
+  },
+  tokenImage: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    marginRight: 2,
+  },
+  chainIcon: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
+    backgroundColor: '#F3F4F6',
+  },
+  tokenSymbol: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  chainName: {
+    color: '#9CA3AF',
+    fontSize: 11,
+    fontWeight: '500',
+    marginTop: -4,
+  },
+  balanceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    minHeight: 24,
+    width: '100%',
+    marginTop: 8,
+  },
+  leftBalanceCol: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  inputValueText: {
+    color: '#111827',
+    fontSize: 12,
+    marginRight: 6,
+  },
+  switchBtn: {
+    borderRadius: 999,
+    backgroundColor: '#F9FAFB',
+    height: 24,
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 2,
+    marginLeft: 6,
+    justifyContent: 'center',
+  },
+  switchBtnSquare: {
+    width: 24,
+    paddingHorizontal: 0,
+  },
+  switchBtnPadded: {
+    paddingHorizontal: 10,
+  },
+  switchBtnDisabled: {
+    opacity: 0.5,
+  },
+  switchBtnText: {
+    color: '#111827',
+    fontSize: 12,
+    fontWeight: '400',
+    marginRight: 2,
+  },
+  rightBalanceCol: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  balanceText: {
+    fontSize: 12,
+    fontWeight: '500',
+    marginRight: 6,
+  },
+  balanceNormal: {
+    color: '#6B7280',
+  },
+  balanceError: {
+    color: '#F87171',
+  },
+  maxBtn: {
+    borderRadius: 999,
+    backgroundColor: '#29A87433',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    marginLeft: 6,
+  },
+  maxBtnText: {
+    color: '#16A34A',
+    fontWeight: '500',
+    fontSize: 12,
+  },
+});
 
 export const TokenInputCard = observer(TokenInputCardView);

@@ -1,4 +1,4 @@
-import { Dict } from 'types/utility';
+import { Dict } from '../../types/utility';
 
 export type SelectedAddress = {
   avatarIcon: string | undefined;

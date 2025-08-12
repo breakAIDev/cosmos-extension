@@ -1,37 +1,31 @@
-import {
-  useActiveChain,
-  useChainInfo,
-  useFeatureFlags,
-  useGetChains,
-  useSelectedNetwork,
-  WALLETTYPE,
-} from '@leapwallet/cosmos-wallet-hooks';
+import React from 'react';
+import { View, StyleSheet } from 'react-native';
+import { useActiveChain, useChainInfo, useFeatureFlags, useGetChains, useSelectedNetwork, WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks';
 import { isAptosChain, isSolanaChain } from '@leapwallet/cosmos-wallet-sdk';
 import { isBitcoinChain } from '@leapwallet/cosmos-wallet-store/dist/utils';
-import { ArrowDown, Parachute } from '@phosphor-icons/react';
-import ClickableIcon from 'components/clickable-icons';
-import { useHardCodedActions } from 'components/search-modal';
-import useActiveWallet from 'hooks/settings/useActiveWallet';
-import { useQueryParams } from 'hooks/useQuery';
-import { BuyIcon } from 'icons/buy-icon';
-import { EarnIcon } from 'icons/earn-icon';
-import { SendIcon } from 'icons/send-icon';
-import { StakeIcon } from 'icons/stake-icon';
-import { SwapIcon } from 'icons/swap-icon';
-import Vote from 'icons/vote';
+import { ArrowDown, Parachute } from 'phosphor-react-native'; // or your own icon lib!
+import ClickableIcon from '../../../components/clickable-icons';
+import { useHardCodedActions } from '../../../components/search-modal';
+import useActiveWallet from '../../../hooks/settings/useActiveWallet';
+import { useQueryParams } from '../../../hooks/useQuery';
+import { BuyIcon } from '../../../../assets/icons/buy-icon';
+import { EarnIcon } from '../../../../assets/icons/earn-icon';
+import { SendIcon } from '../../../../assets/icons/send-icon';
+import { StakeIcon } from '../../../../assets/icons/stake-icon';
+import { SwapIcon } from '../../../../assets/icons/swap-icon';
+import Vote from '../../../../assets/icons/vote';
 import { observer } from 'mobx-react-lite';
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { AggregatedSupportedChain } from 'types/utility';
-import { isLedgerEnabled } from 'utils/isLedgerEnabled';
+// react-native-navigation:
+import { useNavigation } from '@react-navigation/native';
+import { AggregatedSupportedChain } from '../../../types/utility';
+import { isLedgerEnabled } from '../../../utils/isLedgerEnabled';
 
 export const HomeButtons = observer(({ skipVote = false }: { skipVote?: boolean }) => {
   const query = useQueryParams();
-
   const isTestnet = useSelectedNetwork() === 'testnet';
   const activeChain = useActiveChain();
   const { activeWallet } = useActiveWallet();
-  const navigate = useNavigate();
+  const navigation = useNavigation();
   const { data: featureFlags } = useFeatureFlags();
 
   const chains = useGetChains();
@@ -60,83 +54,128 @@ export const HomeButtons = observer(({ skipVote = false }: { skipVote?: boolean 
     isSolanaChain(chain?.key) ||
     skipVote;
 
+  // Helper navigation (adapt as per your navigation setup)
+  const navigate = (route: string) => {
+    navigation.navigate(route); // or navigation.navigate('AirdropsScreen'), etc.
+  };
+
   if (activeChain === 'initia') {
     return (
-      <div className='flex flex-row justify-evenly mb-5 px-7 w-full'>
-        {/* Buy Button */}
+      <View style={styles.buttonRow}>
         <ClickableIcon
-          label='Receive'
+          label="Receive"
           icon={ArrowDown}
-          onClick={() => query.set('receive', 'true')}
+          onPress={() => query.set('receive', 'true')}
           disabled={walletCtaDisabled}
         />
 
-        {/* Send Button */}
-        <ClickableIcon label='Send' icon={SendIcon} onClick={() => onSendClick()} disabled={walletCtaDisabled} />
+        <ClickableIcon
+          label="Send"
+          icon={SendIcon}
+          onPress={() => onSendClick()}
+          disabled={walletCtaDisabled}
+        />
 
-        {/* Vote Button */}
-        <ClickableIcon label='Vote' icon={Vote} onClick={() => handleVoteClick()} />
+        <ClickableIcon
+          label="Vote"
+          icon={Vote}
+          onPress={() => handleVoteClick()}
+        />
 
-        {/* Airdrops Icon */}
         {featureFlags?.airdrops.extension !== 'disabled' && (
-          <ClickableIcon label='Airdrops' icon={Parachute} onClick={() => navigate('/airdrops')} />
+          <ClickableIcon
+            label="Airdrops"
+            icon={Parachute}
+            onPress={() => navigate('AirdropsScreen')}
+          />
         )}
-      </div>
+      </View>
     );
   }
 
   if (isTestnet) {
     return (
-      <div className='flex flex-row justify-evenly mb-5 px-7 w-full'>
-        {/* Send Button */}
+      <View style={styles.buttonRow}>
         <ClickableIcon
-          label='Send'
+          label="Send"
           icon={SendIcon}
-          onClick={() => onSendClick()}
+          onPress={() => onSendClick()}
           disabled={walletCtaDisabled}
-          data-testing-id='home-generic-send-btn'
+          testID="home-generic-send-btn"
         />
 
-        {/* Receive Button */}
         <ClickableIcon
-          label='Receive'
+          label="Receive"
           icon={ArrowDown}
-          onClick={() => query.set('receive', 'true')}
+          onPress={() => query.set('receive', 'true')}
           disabled={walletCtaDisabled}
         />
 
-        {/* Airdrops Icon */}
         {featureFlags?.airdrops.extension !== 'disabled' ? (
-          <ClickableIcon label='Airdrops' icon={Parachute} onClick={() => navigate('/airdrops')} />
+          <ClickableIcon
+            label="Airdrops"
+            icon={Parachute}
+            onPress={() => navigate('AirdropsScreen')}
+          />
         ) : null}
-      </div>
+      </View>
     );
   }
 
   return (
-    <div className='flex flex-row justify-evenly mb-8 px-7 w-full'>
-      {/* Buy Button */}
-      <ClickableIcon label='Buy' icon={BuyIcon} onClick={() => handleBuyClick()} disabled={walletCtaDisabled} />
-
-      {/* Send Button */}
-      <ClickableIcon label='Send' icon={SendIcon} onClick={() => onSendClick()} disabled={walletCtaDisabled} />
+    <View style={styles.buttonRow}>
+      <ClickableIcon
+        label="Buy"
+        icon={BuyIcon}
+        onPress={() => handleBuyClick()}
+        disabled={walletCtaDisabled}
+      />
 
       <ClickableIcon
-        label='Swap'
+        label="Send"
+        icon={SendIcon}
+        onPress={() => onSendClick()}
+        disabled={walletCtaDisabled}
+      />
+
+      <ClickableIcon
+        label="Swap"
         icon={SwapIcon}
-        onClick={() => handleSwapClick()}
+        onPress={() => handleSwapClick()}
         disabled={featureFlags?.all_chains?.swap === 'disabled' || walletCtaDisabled}
       />
 
       {!isStakeHidden && (
-        <ClickableIcon label='Stake' icon={StakeIcon} onClick={() => navigate('/stake')} disabled={walletCtaDisabled} />
+        <ClickableIcon
+          label="Stake"
+          icon={StakeIcon}
+          onPress={() => navigate('StakeScreen')}
+          disabled={walletCtaDisabled}
+        />
       )}
 
       {!isVoteHidden ? (
-        <ClickableIcon label='Vote' icon={Vote} onClick={() => handleVoteClick()} disabled={walletCtaDisabled} />
+        <ClickableIcon
+          label="Vote"
+          icon={Vote}
+          onPress={() => handleVoteClick()}
+          disabled={walletCtaDisabled}
+        />
       ) : null}
 
-      {activeChain === 'noble' && <ClickableIcon label='Earn' icon={EarnIcon} onClick={handleNobleEarnClick} />}
-    </div>
+      {activeChain === 'noble' && (
+        <ClickableIcon label="Earn" icon={EarnIcon} onPress={handleNobleEarnClick} />
+      )}
+    </View>
   );
+});
+
+const styles = StyleSheet.create({
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    marginBottom: 24,
+    paddingHorizontal: 28,
+    width: '100%',
+  },
 });

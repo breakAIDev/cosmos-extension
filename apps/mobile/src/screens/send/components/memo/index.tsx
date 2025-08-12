@@ -1,12 +1,12 @@
 import { useGetChains } from '@leapwallet/cosmos-wallet-hooks';
 import { BTC_CHAINS, isAptosChain, isSolanaChain, isSuiChain } from '@leapwallet/cosmos-wallet-sdk';
-import { Plus } from '@phosphor-icons/react';
-import classNames from 'classnames';
-import Text from 'components/text';
-import { useSendContext } from 'pages/send/context';
+import { Plus } from 'phosphor-react-native';
+import Text from '../../../../components/text';
+import { useSendContext } from '../../../send/context';
 import React from 'react';
+import { View, TextInput, TouchableOpacity, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 
-export const Memo = ({ containerClassname }: { containerClassname?: string }) => {
+export const Memo = ({ containerStyle }: { containerStyle?: StyleProp<ViewStyle> }) => {
   const { memo, setMemo, addressWarning, sendActiveChain } = useSendContext();
   const chains = useGetChains();
 
@@ -21,28 +21,55 @@ export const Memo = ({ containerClassname }: { containerClassname?: string }) =>
   }
 
   return (
-    <div
-      className={classNames(
-        'mx-6 p-5 rounded-xl border border-secondary-100 flex justify-between items-center focus-within:border-secondary-400 hover:border-secondary-400',
-        containerClassname,
-      )}
-    >
-      <input
-        type='text'
+    <View style={[styles.container, containerStyle]}>
+      <TextInput
         value={memo}
-        placeholder='Add memo'
-        className='!leading-[22.4px] bg-transparent font-medium text-sm text-monochrome placeholder:text-muted-foreground outline-none w-full'
-        onChange={(e) => setMemo(e.target?.value)}
+        placeholder="Add memo"
+        style={styles.input}
+        onChangeText={setMemo}
+        placeholderTextColor="#A0A2B1"
       />
       {memo.length === 0 ? (
-        <Plus className='w-5 h-5 p-[2px] shrink-0 text-muted-foreground' />
+        <Plus size={20} color="#A0A2B1" style={styles.plusIcon} />
       ) : (
-        <div onClick={() => setMemo('')}>
-          <Text size='xs' color='text-muted-foreground' className=' font-bold cursor-pointer ml-2'>
+        <TouchableOpacity onPress={() => setMemo('')}>
+          <Text size="xs" color="text-muted-foreground" style={styles.clearText}>
             Clear
           </Text>
-        </div>
+        </TouchableOpacity>
       )}
-    </div>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    marginHorizontal: 24,
+    padding: 20,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#E5E9F2', // replace with Colors.secondary100 if you have it
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 0,
+    marginTop: 0,
+  },
+  input: {
+    flex: 1,
+    fontSize: 14,
+    color: '#18191A', // Colors.monochrome if you have it
+    backgroundColor: 'transparent',
+    fontWeight: '500',
+    padding: 0,
+    margin: 0,
+  },
+  plusIcon: {
+    marginLeft: 8,
+  },
+  clearText: {
+    fontWeight: 'bold',
+    marginLeft: 8,
+    color: '#A0A2B1',
+  },
+});

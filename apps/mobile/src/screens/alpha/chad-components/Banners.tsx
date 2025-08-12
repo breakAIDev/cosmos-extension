@@ -1,40 +1,86 @@
-import { useTheme } from '@leapwallet/leap-ui';
-import { useQueryParams } from 'hooks/useQuery';
-import { Images } from 'images';
 import React from 'react';
-import { queryParams } from 'utils/query-params';
-
-const chadHighlightBannerGradient = {
-  background: 'linear-gradient(180deg, #053F27 0%, #022718 100%)',
-};
-
-const chadHighlightBannerGradientLight = {
-  background: 'linear-gradient(rgb(115 151 136) 0%, rgb(24 97 68) 100%)',
-};
+import { Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient'; // npm install react-native-linear-gradient
+import { useTheme } from '@leapwallet/leap-ui';
+import { useQueryParams } from '../../../hooks/useQuery';
+import { Images } from '../../../../assets/images';
+import { queryParams } from '../../../utils/query-params';
 
 export function YouAreNotChadBanner() {
   const params = useQueryParams();
   const { theme } = useTheme();
 
-  const bannerGradient = theme === 'light' ? chadHighlightBannerGradientLight : chadHighlightBannerGradient;
+  // Define gradient colors for light/dark
+  const gradientColors = theme === 'light'
+    ? ['rgb(115,151,136)', 'rgb(24,97,68)']
+    : ['#053F27', '#022718'];
 
   return (
-    <div
-      className='px-4 pt-6 pb-5 border border-primary overflow-hidden rounded-xl shrink-0 flex flex-col gap-1 relative isolate'
-      style={bannerGradient}
+    <LinearGradient
+      colors={gradientColors}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 0, y: 1 }}
+      style={styles.container}
     >
-      <span className='font-bold text-white-100 text-shad'>You&apos;re not a Leap Chad, yet</span>
-      <span className='text-white-100 text-xs'>
-        The more you use Leap, the closer <br />
+      <Text style={styles.title}>You're not a Leap Chad, yet</Text>
+      <Text style={styles.subtitle}>
+        The more you use Leap, the closer{'\n'}
         to Chad status!{' '}
-        <button
-          className='text-accent-success font-medium underline underline-offset-4 decoration-dashed hover:text-primary transition-colors'
-          onClick={() => params.set(queryParams.chadEligibility, 'true')}
+        <TouchableOpacity
+          onPress={() => params.set(queryParams.chadEligibility, 'true')}
+          activeOpacity={0.8}
         >
-          Learn more
-        </button>
-      </span>
-      <img src={Images.Alpha.chadHighlightBanner} className='h-[5.375rem] w-[11rem] absolute top-0 right-0 -z-10' />
-    </div>
+          <Text style={styles.learnMore}>Learn more</Text>
+        </TouchableOpacity>
+      </Text>
+      <Image
+        source={{uri: Images.Alpha.chadHighlightBanner}}
+        style={styles.bannerImage}
+        resizeMode="contain"
+      />
+    </LinearGradient>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 16, // px-4
+    paddingTop: 24, // pt-6
+    paddingBottom: 20, // pb-5
+    borderWidth: 1,
+    borderColor: '#3664F4', // primary color (customize)
+    overflow: 'hidden',
+    borderRadius: 16,
+    flexDirection: 'column',
+    gap: 4,
+    position: 'relative',
+    marginBottom: 12,
+  },
+  title: {
+    fontWeight: 'bold',
+    color: '#fff',
+    fontSize: 16,
+    marginBottom: 2,
+  },
+  subtitle: {
+    color: '#fff',
+    fontSize: 12,
+    marginBottom: 4,
+    fontWeight: '400',
+    lineHeight: 18,
+  },
+  learnMore: {
+    color: '#32DA6D', // accent-success
+    fontWeight: '500',
+    textDecorationLine: 'underline',
+    textDecorationStyle: 'dashed',
+  },
+  bannerImage: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    height: 86,   // h-[5.375rem]
+    width: 176,   // w-[11rem]
+    zIndex: -1,
+  },
+});

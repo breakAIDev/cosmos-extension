@@ -1,5 +1,7 @@
-import Text from 'components/text';
 import React from 'react';
+import Text from '../../../components/text';
+import { StyleSheet } from 'react-native';
+import { Colors } from '../../../theme/colors';
 
 type SubHeadingProps = {
   text: string;
@@ -8,11 +10,21 @@ type SubHeadingProps = {
 export function SubHeading({ text }: SubHeadingProps) {
   return (
     <Text
-      size='xs'
-      className='font-bold text-center mt-[2px] max-w-[250px]'
-      color='text-gray-800 dark:text-gray-600 mb-2'
+      size="xs"
+      style={styles.subHeading}
+      color={Colors.gray800} // You can swap based on theme
     >
       {text}
     </Text>
   );
 }
+
+const styles = StyleSheet.create({
+  subHeading: {
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 2, // mt-[2px]
+    maxWidth: 250,
+    marginBottom: 8, // mb-2
+  },
+});

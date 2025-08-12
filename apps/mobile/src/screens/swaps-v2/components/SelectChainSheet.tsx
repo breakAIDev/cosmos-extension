@@ -1,12 +1,13 @@
-import BottomModal from 'components/new-bottom-modal';
-import { EventName } from 'config/analytics';
-import { PriorityChains } from 'config/constants';
-import mixpanel from 'mixpanel-browser';
+import BottomModal from '../../../components/new-bottom-modal';
+import { EventName } from '../../../services/config/analytics';
+import { PriorityChains } from '../../../services/config/constants';
+import mixpanel from '../../../mixpanel';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { SourceChain, SourceToken } from 'types/swap';
+import { SourceChain, SourceToken } from '../../../types/swap';
 
 import { useAllChainsPlaceholder } from '../hooks/useAllChainsPlaceholder';
 import { ChainsList, TokenAssociatedChain } from './ChainsList';
+import { TextInput } from 'react-native';
 
 type SelectChainSheetProps = {
   title?: string;
@@ -16,7 +17,7 @@ type SelectChainSheetProps = {
   selectedChain: SourceChain | undefined;
   selectedToken: SourceToken | null;
   loadingChains: boolean;
-  
+
   onChainSelect: (chain: TokenAssociatedChain) => void;
   destinationAssets?: SourceToken[];
   showAllChainsOption?: boolean;
@@ -38,7 +39,7 @@ export function SelectChainSheet({
 }: SelectChainSheetProps) {
   const [searchedChain, setSearchedChain] = useState('');
   const allChainsPlaceholder = useAllChainsPlaceholder();
-  const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchInputRef = useRef<TextInput>(null);
   const sortedChainsToShow = useMemo(() => {
     const priorityChains: TokenAssociatedChain[] = [];
     (priorityChainsIds ?? PriorityChains).forEach((chain) => {
@@ -59,6 +60,7 @@ export function SelectChainSheet({
     return sortedChains;
   }, [allChainsPlaceholder, chainsToShow, priorityChainsIds, showAllChainsOption]);
 
+  // TODO: Change to 'mixpanel-react-native' (web SDK won't work on native)
   const emitMixpanelDropdownCloseEvent = useCallback(
     (tokenSelected?: string) => {
       try {
@@ -88,8 +90,12 @@ export function SelectChainSheet({
   useEffect(() => {
     if (isOpen) {
       setSearchedChain('');
+      // React Native: Focus must be called differently (see below)
       setTimeout(() => {
-        searchInputRef.current?.focus();
+        // Only works if ChainsList passes a TextInput ref via forwardRef
+        if (searchInputRef.current && typeof searchInputRef.current.focus === 'function') {
+          searchInputRef.current.focus();
+        }
       }, 200);
     }
   }, [isOpen]);
@@ -103,8 +109,8 @@ export function SelectChainSheet({
       }}
       fullScreen={true}
       isOpen={isOpen}
-      contentClassName='!overflow-hidden'
-      className='p-0'
+      // Remove web-only className/contentClassName props
+      // Pass styling via style prop if BottomModal is RN-native
     >
       <ChainsList
         ref={searchInputRef}

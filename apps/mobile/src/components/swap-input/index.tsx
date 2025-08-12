@@ -2,7 +2,7 @@ import React, { useEffect, useState, forwardRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Platform } from 'react-native';
 import BigNumber from 'bignumber.js';
 import { useformatCurrency } from '@leapwallet/cosmos-wallet-hooks'; // Update as per mobile SDK
-import { CaretDoubleDown, CaretRight } from '@phosphor-icons/react';
+import { CaretDoubleDown, CaretRight } from 'phosphor-react-native';
 import { DEFAULT_SWAP_FEE } from '../../services/config/config'; // Update import path
 import {Images} from '../../../assets/images'; // Update with your assets
 

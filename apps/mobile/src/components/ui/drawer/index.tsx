@@ -1,166 +1,195 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, GestureResponderEvent, ViewProps } from 'react-native';
-import Modal from 'react-native-modal';
+import React, {
+  useRef,
+  useEffect,
+  forwardRef,
+  useImperativeHandle,
+  PropsWithChildren,
+} from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Platform,
+  StyleProp,
+  ViewStyle,
+  TextStyle,
+} from 'react-native';
+import BottomSheet, { BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 
-type DrawerProps = {
-  visible: boolean;
-  onClose: () => void;
-  children: React.ReactNode;
-  showHandle?: boolean;
-  overlayStyle?: object;
-  contentStyle?: object;
-  hideOverlay?: boolean;
-};
+// Drawer Root
+type DrawerProps = PropsWithChildren<{
+  open: boolean;
+  onClose?: () => void;
+  snapPoints?: (string | number)[];
+  enablePanDownToClose?: boolean;
+  containerStyle?: StyleProp<ViewStyle>;
+}>;
 
-export function Drawer({
-  visible,
-  onClose,
-  children,
-  showHandle = true,
-  overlayStyle,
-  contentStyle,
-  hideOverlay,
-}: DrawerProps) {
-  return (
-    <Modal
-      isVisible={visible}
-      onBackdropPress={onClose}
-      onSwipeComplete={onClose}
-      swipeDirection={['down']}
-      backdropTransitionOutTiming={0}
-      style={styles.modal}
-      backdropOpacity={hideOverlay ? 0 : 0.4}
-      backdropColor="#000"
-      animationIn="slideInUp"
-      animationOut="slideOutDown"
-      useNativeDriver
-      propagateSwipe
-      avoidKeyboard
-    >
-      <View style={[styles.drawerContent, contentStyle]}>
-        {showHandle && (
-          <View style={styles.handleContainer}>
-            <View style={styles.handleBar} />
-          </View>
+const Drawer = forwardRef<any, DrawerProps>(
+  ({ open, onClose, snapPoints = [Platform.OS === 'ios' ? '60%' : '80%'], children, enablePanDownToClose = true, containerStyle }, ref) => {
+    const bottomSheetRef = useRef<BottomSheet>(null);
+
+    useImperativeHandle(ref, () => bottomSheetRef.current);
+
+    useEffect(() => {
+      if (open) {
+        bottomSheetRef.current?.expand();
+      } else {
+        bottomSheetRef.current?.close();
+      }
+    }, [open]);
+
+    return (
+      <BottomSheet
+        ref={bottomSheetRef}
+        index={open ? 0 : -1}
+        snapPoints={snapPoints}
+        enablePanDownToClose={enablePanDownToClose}
+        onClose={onClose}
+        backdropComponent={props => (
+          <BottomSheetBackdrop
+            {...props}
+            opacity={0.4}
+            appearsOnIndex={0}
+            disappearsOnIndex={-1}
+            pressBehavior="close"
+          />
         )}
-        {children}
-      </View>
-    </Modal>
-  );
-}
+        backgroundStyle={styles.sheetBg}
+      >
+        <View style={[styles.sheetContainer, containerStyle]}>{React.isValidElement(children) ? children : <View/>}</View>
+      </BottomSheet>
+    );
+  }
+);
+Drawer.displayName = 'Drawer';
 
-type DrawerHeaderProps = {
-  children: React.ReactNode;
-  style?: object;
-};
-export function DrawerHeader({ children, style }: DrawerHeaderProps) {
-  return <View style={[styles.header, style]}>{children}</View>;
-}
+// DrawerTrigger: Not really applicable for RN, but you can use TouchableOpacity outside Drawer
 
-type DrawerFooterProps = {
-  children: React.ReactNode;
-  style?: object;
-};
-export function DrawerFooter({ children, style }: DrawerFooterProps) {
-  return <View style={[styles.footer, style]}>{children}</View>;
-}
-
-type DrawerTitleProps = {
-  children: React.ReactNode;
-  style?: object;
-};
-export function DrawerTitle({ children, style }: DrawerTitleProps) {
-  return <Text style={[styles.title, style]}>{children}</Text>;
-}
-
-type DrawerDescriptionProps = {
-  children: React.ReactNode;
-  style?: object;
-};
-export function DrawerDescription({ children, style }: DrawerDescriptionProps) {
-  return <Text style={[styles.description, style]}>{children}</Text>;
-}
-
-type DrawerCloseProps = {
-  onPress: (e: GestureResponderEvent) => void;
+// DrawerClose
+export const DrawerClose = ({
+  onPress,
+  children,
+  style,
+}: {
+  onPress?: () => void;
   children?: React.ReactNode;
-  style?: object;
-};
-export function DrawerClose({ onPress, children, style }: DrawerCloseProps) {
-  return (
-    <TouchableOpacity style={[styles.closeButton, style]} onPress={onPress}>
-      {children || <Text style={styles.closeButtonText}>Close</Text>}
-    </TouchableOpacity>
-  );
-}
+  style?: StyleProp<ViewStyle>;
+}) => (
+  <TouchableOpacity onPress={onPress} style={[styles.closeBtn, style]}>
+    {React.isValidElement(children) ? children : <Text style={styles.closeText}>Close</Text>}
+  </TouchableOpacity>
+);
+
+// DrawerOverlay: Handled by BottomSheetBackdrop, not needed explicitly
+
+// DrawerContent
+export const DrawerContent = ({
+  children,
+  style,
+  showHandle = true,
+}: PropsWithChildren<{ style?: StyleProp<ViewStyle>; showHandle?: boolean }>) => (
+  <View style={[styles.content, style]}>
+    {showHandle && <View style={styles.handle} />}
+    {React.isValidElement(children) ? children : <View/>}
+  </View>
+);
+
+// DrawerHeader
+export const DrawerHeader = ({
+  children,
+  style,
+}: PropsWithChildren<{ style?: StyleProp<ViewStyle> }>) => (
+  <View style={[styles.header, style]}>{React.isValidElement(children) ? children : <View/>}</View>
+);
+
+// DrawerFooter
+export const DrawerFooter = ({
+  children,
+  style,
+}: PropsWithChildren<{ style?: StyleProp<ViewStyle> }>) => (
+  <View style={[styles.footer, style]}>{React.isValidElement(children) ? children : <View/>}</View>
+);
+
+// DrawerTitle
+export const DrawerTitle = ({
+  children,
+  style,
+}: PropsWithChildren<{ style?: StyleProp<TextStyle> }>) => (
+  <Text style={[styles.title, style]}>{React.isValidElement(children) ? children : <View/>}</Text>
+);
+
+// DrawerDescription
+export const DrawerDescription = ({
+  children,
+  style,
+}: PropsWithChildren<{ style?: StyleProp<TextStyle> }>) => (
+  <Text style={[styles.description, style]}>{React.isValidElement(children) ? children : <View/>}</Text>
+);
 
 const styles = StyleSheet.create({
-  modal: {
-    justifyContent: 'flex-end',
-    margin: 0,
-  },
-  drawerContent: {
-    backgroundColor: '#fff',
+  sheetBg: {
+    backgroundColor: '#fafbfc',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    paddingBottom: 24,
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    minHeight: 80,
-    maxHeight: '90%',
-    shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowRadius: 10,
-    elevation: 10,
   },
-  handleContainer: {
-    alignItems: 'center',
-    marginBottom: 8,
+  sheetContainer: {
+    flex: 1,
+    paddingHorizontal: 0,
+    paddingVertical: 0,
   },
-  handleBar: {
-    width: 48,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#e0e0e0',
-    marginTop: 4,
-    marginBottom: 10,
+  content: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    backgroundColor: 'transparent',
+  },
+  handle: {
+    alignSelf: 'center',
+    width: 40,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: '#d4d4d4',
+    marginVertical: 8,
   },
   header: {
-    paddingVertical: 8,
-    paddingHorizontal: 2,
+    paddingBottom: 8,
     alignItems: 'center',
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#eee',
-    marginBottom: 8,
+    borderBottomColor: '#e0e0e0',
   },
   footer: {
-    paddingTop: 12,
+    paddingVertical: 12,
     alignItems: 'center',
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#eee',
-    marginTop: 8,
+    borderTopColor: '#e0e0e0',
   },
   title: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: 'bold',
+    color: '#222',
     textAlign: 'center',
-    marginVertical: 6,
+    marginBottom: 4,
   },
   description: {
     fontSize: 14,
-    color: '#888',
+    color: '#666',
     textAlign: 'center',
-    marginVertical: 2,
+    marginBottom: 6,
   },
-  closeButton: {
+  closeBtn: {
     position: 'absolute',
-    top: 14,
-    right: 20,
-    zIndex: 2,
-    padding: 6,
+    top: 10,
+    right: 10,
+    zIndex: 99,
+    padding: 8,
   },
-  closeButtonText: {
-    color: '#3664F4',
-    fontSize: 15,
+  closeText: {
+    color: '#007aff',
+    fontSize: 16,
+    fontWeight: '500',
   },
 });
+
+export { Drawer };

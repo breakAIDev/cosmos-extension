@@ -133,39 +133,54 @@ export async function fetchERC20Balances(evmJsonRpc: string, ethWalletAddress: s
 }
 
 export class TransferQueryClient {
-  private static queryClient: QueryClientImpl;
+  // cache one client per normalized rpc url
+  private static cache = new Map<string, QueryClientImpl>();
 
-  static async getTransferQueryClient(
-    rpcUrl: string,
-    chainInfos?: Record<SupportedChain, ChainInfo>,
-  ): Promise<QueryClientImpl> {
-    const isJunoRpc = rpcUrl === `${(chainInfos ?? ChainInfos).juno.apis.rpc}/`;
-    const junoRpc = (chainInfos ?? ChainInfos).juno.apis.alternateRpc ?? '';
+  private static normalize(url: string) {
+    return url.trim().replace(/\/+$/, ''); // strip trailing slash
+  }
+
+  private static async makeClient(rpcUrl: string, chainInfos?: Record<SupportedChain, ChainInfo>) {
+    const infos = chainInfos ?? ChainInfos;
+    const isJunoRpc = rpcUrl === (infos.juno.apis.rpc ?? '');
+    const junoAlt = infos.juno.apis.alternateRpc ?? '';
+
     try {
-      const tmClient = await Tendermint34Client.connect(isJunoRpc ? junoRpc : rpcUrl);
-      const queryClient = QueryClient.withExtensions(tmClient);
-      const rpc = createProtobufRpcClient(queryClient);
+      const tm = await Tendermint34Client.connect(isJunoRpc ? junoAlt : rpcUrl);
+      const qc = QueryClient.withExtensions(tm);
+      const rpc = createProtobufRpcClient(qc);
       return new QueryClientImpl(rpc);
     } catch (e) {
       if (isJunoRpc) {
-        return TransferQueryClient.getTransferQueryClient((chainInfos ?? ChainInfos).juno.apis.rpc ?? '');
+        const tm = await Tendermint34Client.connect(infos.juno.apis.rpc ?? '');
+        const qc = QueryClient.withExtensions(tm);
+        const rpc = createProtobufRpcClient(qc);
+        return new QueryClientImpl(rpc);
       }
       throw e;
     }
   }
 
+  static async getTransferQueryClient(
+    rpcUrl: string,
+    chainInfos?: Record<SupportedChain, ChainInfo>,
+  ): Promise<QueryClientImpl> {
+    const key = this.normalize(rpcUrl);
+    const existing = this.cache.get(key);
+    if (existing) return existing;
+
+    const client = await this.makeClient(rpcUrl, chainInfos);
+    this.cache.set(key, client);
+    return client;
+  }
+
   static async getDenomTrace(hash: string, rpcUrl: string, chainInfos?: Record<SupportedChain, ChainInfo>) {
-    
-    
-    if (!TransferQueryClient.queryClient || TransferQueryClient.queryClient.rpc.url !== rpcUrl) {
-      TransferQueryClient.queryClient = await TransferQueryClient.getTransferQueryClient(rpcUrl, chainInfos);
-    }
-
-    const denomTrace = await TransferQueryClient.queryClient.DenomTrace({ hash });
-
+    const client = await this.getTransferQueryClient(rpcUrl, chainInfos);
+    const denomTrace = await client.DenomTrace({ hash });
     return { denomTrace };
   }
 }
+
 
 export async function getIbcDenomTrace(lcdUrl: string, hash: string) {
   const response = await axiosWrapper<{ denom_trace: { base_denom: string; path: string } }>({

@@ -1,11 +1,11 @@
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { NftInfo } from '@leapwallet/cosmos-wallet-store';
-import classNames from 'classnames';
-import { useChainPageInfo } from 'hooks';
-import { useChainInfos } from 'hooks/useChainInfos';
+import { useChainPageInfo } from '../../../hooks';
+import { useChainInfos } from '../../../hooks/useChainInfos';
 import React from 'react';
-import { normalizeImageSrc } from 'utils/normalizeImageSrc';
-import { sessionStoreItem } from 'utils/sessionStorage';
+import { View, Text as RNText, StyleSheet, TouchableOpacity, FlatList, Dimensions } from 'react-native';
+import { normalizeImageSrc } from '../../../utils/normalizeImageSrc';
+import { sessionStoreItem } from '../../../utils/sessionStorage';
 
 import { useNftContext } from '../context';
 import { NftCard, Text, ViewAllButton } from './index';
@@ -15,6 +15,8 @@ type TextHeaderCollectionCardProps = {
   headerTitle: string;
   noChip?: boolean;
 };
+
+const CARD_WIDTH = (Dimensions.get('window').width - 48) / 2 - 8; // padding + gap
 
 export function TextHeaderCollectionCard({ nfts, headerTitle, noChip }: TextHeaderCollectionCardProps) {
   const chainInfos = useChainInfos();
@@ -28,76 +30,145 @@ export function TextHeaderCollectionCard({ nfts, headerTitle, noChip }: TextHead
     }
   };
 
+  // Render 2-column grid (up to 6 NFTs, then ViewAllButton if 'Favorites')
+  const renderItem = ({ item, index }: { item: NftInfo & { chain: SupportedChain }, index: number }) => {
+    if (isFavoriteHeaderTitle && index === 6) {
+      return (
+        <View style={styles.cardWrap}>
+          <ViewAllButton onPress={handleOnClick} />
+        </View>
+      );
+    }
+    if (isFavoriteHeaderTitle && index > 6) return null;
+
+    return (
+      <TouchableOpacity
+        style={styles.cardWrap}
+        key={`${item.tokenId}-${index}`}
+        activeOpacity={0.8}
+        onPress={() => {
+          sessionStoreItem('nftLastActivePage', activePage);
+          setActivePage('NftDetails');
+          setNftDetails({ ...item, chain: item?.chain ?? '' });
+        }}
+      >
+        <NftCard
+          mediaType={item.media_type}
+          chain={item.chain}
+          imgSrc={normalizeImageSrc(item.image ?? '', item.collection?.address ?? '')}
+          textNft={{
+            name: item?.domain ?? '',
+            description: item.extension?.description ?? `${item.collection?.name ?? ''} - ${item.name}`,
+          }}
+          chainName={noChip ? undefined : chainInfos[item.chain].chainName}
+          chainLogo={noChip ? undefined : chainInfos[item.chain].chainSymbolImageUrl}
+          style={{height: 150, width: 150, alignSelf: 'center'}}
+        />
+        <Text style={styles.nftName}>
+          {item.collection?.name ?? item.name ?? ''}
+        </Text>
+        {(item.tokenId ?? item.name) && (
+          <Text style={styles.nftId}>
+            #{item.tokenId ?? item.name}
+          </Text>
+        )}
+      </TouchableOpacity>
+    );
+  };
+
   return (
-    <div className='rounded-2xl border dark:border-gray-900 mb-4'>
-      <div className='flex items-center p-4 border-b dark:border-gray-900'>
-        <h2
-          className={classNames('text-gray-800 dark:text-white-100 max-w-[160px] truncate font-bold', {
-            'border dark:border-gray-900 rounded-md py-[3px] px-[6px] text-[14px]': !isFavoriteHeaderTitle,
-          })}
-          style={isFavoriteHeaderTitle ? {} : { color: topChainColor }}
+    <View style={styles.cardContainer}>
+      <View style={styles.headerRow}>
+        <RNText
+          style={[
+            styles.headerTitle,
+            !isFavoriteHeaderTitle && { color: topChainColor, borderColor: topChainColor },
+          ]}
+          numberOfLines={1}
         >
           {headerTitle}
-        </h2>
-
+        </RNText>
         {isFavoriteHeaderTitle && (
-          <div className='ml-auto'>
-            <div
-              className='border dark:border-gray-900 rounded-md py-[3px] px-[6px] text-[14px] font-bold'
-              style={{ color: topChainColor }}
-            >
+          <View style={styles.headerCountBox}>
+            <RNText style={[styles.headerCountText, { color: topChainColor }]}>
               {nfts.length} item{nfts.length > 1 ? 's' : ''}
-            </div>
-          </div>
+            </RNText>
+          </View>
         )}
-      </div>
+      </View>
 
-      <div className='grid grid-cols-2 gap-4 p-4'>
-        {nfts.map((nft, index) => {
-          if (isFavoriteHeaderTitle) {
-            if (index === 6) {
-              return <ViewAllButton key={`${nft.tokenId}-${index}`} onClick={handleOnClick} />;
-            }
-
-            if (index > 6) return null;
-          }
-
-          return (
-            <div
-              key={`${nft.tokenId}-${index}`}
-              onClick={() => {
-                sessionStoreItem('nftLastActivePage', activePage);
-                setActivePage('NftDetails');
-                setNftDetails({ ...nft, chain: nft?.chain ?? '' });
-              }}
-              className='cursor-pointer'
-            >
-              <NftCard
-                mediaType={nft.media_type}
-                chain={nft.chain}
-                imgSrc={normalizeImageSrc(nft.image ?? '', nft.collection?.address ?? '')}
-                textNft={{
-                  name: nft?.domain ?? '',
-                  description: nft.extension?.description ?? `${nft.collection?.name ?? ''} - ${nft.name}`,
-                }}
-                chainName={noChip ? undefined : chainInfos[nft.chain].chainName}
-                chainLogo={noChip ? undefined : chainInfos[nft.chain].chainSymbolImageUrl}
-                imgClassName='h-[150px] w-[150px] object-contain'
-              />
-
-              <Text className='text-gray-800 dark:text-white-100 mt-2' title={nft.collection?.name ?? nft.name ?? ''}>
-                {nft.collection?.name ?? nft.name ?? ''}
-              </Text>
-
-              {(nft.tokenId ?? nft.name) && (
-                <Text className='text-gray-300 text-sm' title={nft.tokenId ?? nft.name}>
-                  #{nft.tokenId ?? nft.name}
-                </Text>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    </div>
+      <FlatList
+        data={nfts.slice(0, isFavoriteHeaderTitle ? 7 : undefined)} // max 7: 6 NFTs + ViewAll
+        renderItem={renderItem}
+        keyExtractor={(_, idx) => `nft-${idx}`}
+        numColumns={2}
+        contentContainerStyle={styles.grid}
+        columnWrapperStyle={styles.columnWrapper}
+      />
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  cardContainer: {
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#18181b', // fallback, override with dark
+    marginBottom: 16,
+    backgroundColor: '#fff',
+    overflow: 'hidden',
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderColor: '#18181b', // fallback, override with dark
+    backgroundColor: '#fff',
+  },
+  headerTitle: {
+    color: '#18181b',
+    fontWeight: 'bold',
+    maxWidth: 160,
+    fontSize: 16,
+    flexShrink: 1,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+  },
+  headerCountBox: {
+    marginLeft: 'auto',
+    borderWidth: 1,
+    borderColor: '#18181b', // fallback, override with dark
+    borderRadius: 6,
+    paddingVertical: 3,
+    paddingHorizontal: 6,
+    backgroundColor: '#fff',
+  },
+  headerCountText: {
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  grid: {
+    padding: 16,
+    gap: 16,
+  },
+  columnWrapper: {
+    justifyContent: 'space-between',
+  },
+  cardWrap: {
+    width: CARD_WIDTH,
+    marginBottom: 16,
+    alignItems: 'center',
+  },
+  nftName: {
+    color: '#18181b',
+    fontSize: 15,
+    marginTop: 8,
+    fontWeight: '500',
+  },
+  nftId: {
+    color: '#d1d5db',
+    fontSize: 13,
+    marginTop: 2,
+  },
+});

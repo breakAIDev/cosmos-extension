@@ -11,7 +11,7 @@ import {
 } from '@leapwallet/cosmos-wallet-store';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { SourceChain, SourceToken } from 'types/swap';
+import { SourceChain, SourceToken } from '../../../types/swap';
 
 import { SWAP_NETWORK } from './useSwapsTx';
 

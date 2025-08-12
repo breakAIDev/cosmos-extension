@@ -1,16 +1,17 @@
-import { Key } from '@leapwallet/cosmos-wallet-hooks';
-import { CaretDown } from '@phosphor-icons/react';
-import Text from 'components/text';
-import { Images } from 'images';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { formatWalletName } from 'utils/formatWalletName';
-import { trim } from 'utils/strings';
+import { View, TextInput, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { Key } from '@leapwallet/cosmos-wallet-hooks';
+import { CaretDown } from 'phosphor-react-native';
+import Text from '../../../../components/text';
+import { Images } from '../../../../../assets/images';
+import { formatWalletName } from '../../../../utils/formatWalletName';
+import { trim } from '../../../../utils/strings';
 
 import { SelectWalletSheet } from './SelectWalletSheet';
 
 type SearchChainWithWalletFilterProps = {
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (text: string) => void;
   setSelectedWallet: (val: Key) => void;
   selectedWallet: Key;
 };
@@ -21,8 +22,9 @@ export default function SearchChainWithWalletFilter({
   setSelectedWallet,
   selectedWallet,
 }: SearchChainWithWalletFilterProps) {
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const [isWalletSheetVisible, setisWalletSheetVisible] = useState<boolean>(false);
+  const inputRef = useRef<TextInput | null>(null);
+  const [isWalletSheetVisible, setIsWalletSheetVisible] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
 
   useEffect(() => {
     if (inputRef.current) {
@@ -35,49 +37,96 @@ export default function SearchChainWithWalletFilter({
   const walletName = formatWalletName(selectedWallet?.name || '');
   const walletAvatar = useMemo(() => {
     if (selectedWallet?.avatar) {
-      return selectedWallet.avatar;
+      return { uri: selectedWallet.avatar };
     } else {
       return Images.Misc.getWalletIconAtIndex(selectedWallet.colorIndex, selectedWallet.watchWallet);
     }
   }, [selectedWallet.avatar, selectedWallet.colorIndex, selectedWallet.watchWallet]);
 
   return (
-    <div
-      className={
-        'rounded-2xl w-full flex gap-[10px] bg-gray-50 dark:bg-gray-900 py-3 pr-3 pl-4 focus-within:border-green-600 border border-transparent'
-      }
+    <View
+      style={[
+        styles.container,
+        isFocused && { borderColor: '#16a34a' }, // green-600 border on focus
+      ]}
     >
-      <input
-        placeholder={'Search chain'}
-        className={
-          'flex flex-1 min-[400px]:min-w-[160px] w-[50px] text-base outline-none bg-white-0 font-bold text-black-100 dark:text-white-100 text-md placeholder:font-medium dark:placeholder:text-gray-400 !leading-[21px]'
-        }
-        value={value}
-        onChange={onChange}
+      <TextInput
         ref={inputRef}
+        style={styles.input}
+        placeholder="Search chain"
+        placeholderTextColor="#888"
+        value={value}
+        onChangeText={onChange}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
       />
 
-      <div
-        className='flex items-center gap-2 bg-gray-50 dark:bg-gray-900 cursor-pointer border-l-2 border-gray-200 dark:border-gray-800 pl-4 pr-1 shrink-0'
-        onClick={() => setisWalletSheetVisible(true)}
+      <TouchableOpacity
+        style={styles.walletSelector}
+        onPress={() => setIsWalletSheetVisible(true)}
+        activeOpacity={0.7}
       >
-        {walletAvatar ? (
-          <img className='w-5 h-5 rounded-full' src={walletAvatar} alt='wallet-avatar' />
-        ) : (
-          <img className='w-5 h-5' src={Images.Logos.LeapLogo28} alt='wallet-avatar' />
-        )}
-        <Text size='sm' className='font-bold'>
+        <Image
+          style={styles.walletAvatar}
+          source={{uri: walletAvatar as string ?? Images.Logos.LeapLogo28}}
+        />
+        <Text size="sm" style={styles.walletName}>
           {trim(walletName, 8)}
         </Text>
-        <CaretDown size={16} className='dark:text-white-100' />
-      </div>
+        <CaretDown size={16} style={{ marginLeft: 2}} color={'#111'}  />
+      </TouchableOpacity>
 
       <SelectWalletSheet
         isOpen={isWalletSheetVisible}
-        onClose={() => setisWalletSheetVisible(false)}
+        onClose={() => setIsWalletSheetVisible(false)}
         setSelectedWallet={setSelectedWallet}
         selectedWallet={selectedWallet}
       />
-    </div>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    borderRadius: 16,
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: '#1a1a1a10', // gray-50
+    paddingVertical: 12,
+    paddingLeft: 16,
+    paddingRight: 12,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  input: {
+    flex: 1,
+    minWidth: 160,
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#111',
+    backgroundColor: 'transparent',
+    padding: 0,
+  },
+  walletSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#1a1a1a10', // gray-50
+    borderLeftWidth: 2,
+    borderLeftColor: '#e5e5e5',
+    paddingLeft: 16,
+    paddingRight: 4,
+  },
+  walletAvatar: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    marginRight: 4,
+  },
+  walletName: {
+    fontWeight: 'bold',
+  },
+});
+

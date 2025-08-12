@@ -11,18 +11,18 @@ import {
   usePendingTxState,
   useSelectedNetwork,
 } from '@leapwallet/cosmos-wallet-hooks';
-import { CaretRight } from '@phosphor-icons/react';
+import { CaretRight } from 'phosphor-react-native';
 import BigNumber from 'bignumber.js';
-import classNames from 'classnames';
-import BottomModal from 'components/new-bottom-modal';
-import Text from 'components/text';
-import { Button } from 'components/ui/button';
-import { Images } from 'images';
+import BottomModal from '../../../components/new-bottom-modal';
+import Text from '../../../components/text';
+import { Button } from '../../../components/ui/button';
+import { Images } from '../../../../assets/images';
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { rootBalanceStore } from 'stores/root-store';
-import { formatTokenAmount, sliceWord } from 'utils/strings';
+import { useNavigation } from '@react-navigation/native';
+import { rootBalanceStore } from '../../../context/root-store';
+import { formatTokenAmount, sliceWord } from '../../../utils/strings';
+import { View, Image, TouchableOpacity, Linking, StyleSheet, Platform } from 'react-native';
 
 export enum TxType {
   SEND = 'Send',
@@ -31,7 +31,7 @@ export enum TxType {
 
 const TxPage = observer(
   ({ isOpen, onClose, txType }: { isOpen: boolean; onClose: (clear?: boolean) => void; txType: TxType }) => {
-    const navigate = useNavigate();
+    const navigation = useNavigation();
     const [txHash, setTxHash] = useState('');
     const { pendingTx, setPendingTx } = usePendingTxState();
     const txPostToDB = LeapWalletApi.useOperateCosmosTx();
@@ -49,10 +49,8 @@ const TxPage = observer(
 
     const _activeChain = useActiveChain();
     const activeChain = useMemo(() => sourceChain || _activeChain, [_activeChain, sourceChain]);
-
     const _selectedNetwork = useSelectedNetwork();
     const selectedNetwork = useMemo(() => sourceNetwork || _selectedNetwork, [_selectedNetwork, sourceNetwork]);
-
     const activeChainId = useChainId(activeChain, selectedNetwork);
     const address = useAddress(activeChain);
 
@@ -102,7 +100,7 @@ const TxPage = observer(
                 : '',
           };
       }
-    }, [sentAmount, toAddress, txStatus, txType]);
+    }, [sentAmount, sentTokenInfo?.coinDenom, toAddress, txStatus, txType]);
 
     useEffect(() => {
       const invalidateQueries = () => {
@@ -152,12 +150,10 @@ const TxPage = observer(
             if (pendingTx.txType === 'cw20TokenTransfer') {
               setPendingTx({ ...pendingTx, txStatus: 'failed' });
             }
-
             invalidateQueries();
           });
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [activeChain, address, selectedNetwork, activeChainId]);
+    }, [activeChain, address, selectedNetwork, activeChainId, pendingTx, invalidateBalances, invalidateActivity, setPendingTx, txPostToDB]);
 
     useEffect(() => {
       if (_txHash) setTxHash(_txHash);
@@ -169,86 +165,164 @@ const TxPage = observer(
       forceNetwork: selectedNetwork,
     });
 
+    const handleHome = () => {
+      // navigation to Home (adapt as needed)
+      navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
+    };
+
+    const handleAgain = () => {
+      onClose(txStatus !== 'failed');
+    };
+
+    const handleOpenTxnUrl = () => {
+      if (txnUrl) {
+        Linking.openURL(txnUrl);
+      }
+    };
+
+    // Helper to get image source (require or remote uri)
+    const getImageSrc = (img: any) => {
+      if (typeof img === 'string') return { uri: img };
+      return img;
+    };
+
+    // Select animation/image for status
+    let statusBgColor = '#edf3f3';
+    let statusImage = Images.Swap.rotate;
+    if (txStatus === 'loading') {
+      statusBgColor = '#e5e8ef';
+      statusImage = Images.Swap.rotate;
+    }
+    if (txStatus === 'success' || txStatus === 'submitted') {
+      statusBgColor = '#5df2b7';
+      statusImage = Images.Swap.check_green;
+    }
+    if (txStatus === 'failed') {
+      statusBgColor = Platform.OS === 'ios' ? '#e6555a' : '#e6555a';
+      statusImage = Images.Swap.failed_circle_red;
+    }
+
     return (
       <BottomModal
         title={''}
         fullScreen={true}
         onClose={onClose}
         isOpen={isOpen}
-        containerClassName='h-full'
-        headerClassName='dark:bg-gray-950 bg-white-100'
-        className='dark:bg-gray-950 bg-white-100 !p-0 min-h-[calc(100%-65px)]'
+        style={styles.modal}
       >
-        <div className='flex flex-col gap-y-8 justify-center items-center px-10 mt-[75px]'>
-          <div className='h-[100px] w-[100px]'>
-            {txStatus === 'loading' && (
-              <div className='h-[100px] w-[100px] p-8 rounded-full bg-secondary-200 animate-spin'>
-                <img src={Images.Swap.Rotate} />
-              </div>
-            )}
-            {(txStatus === 'success' || txStatus === 'submitted') && (
-              <div className='h-[100px] w-[100px] p-8 rounded-full bg-green-400'>
-                <img src={Images.Swap.CheckGreen} />
-              </div>
-            )}
-            {txStatus === 'failed' && (
-              <div className='h-[100px] w-[100px] p-8 rounded-full bg-red-600 dark:bg-red-400'>
-                <img src={Images.Swap.FailedRed} />
-              </div>
-            )}
-          </div>
-          <div className='flex flex-col items-center gap-y-6'>
-            <div className='flex flex-col items-center gap-y-3'>
-              <Text size='xl' color='text-monochrome' className='font-bold'>
-                {copies.title}
+        <View style={styles.centerContainer}>
+          <View style={[styles.statusCircle, { backgroundColor: statusBgColor }]}>
+            <Image
+              source={getImageSrc(statusImage)}
+              style={{ width: 48, height: 48, alignSelf: 'center' }}
+              resizeMode="contain"
+            />
+          </View>
+          <View style={styles.textBlock}>
+            <Text size="xl" style={styles.titleText}>
+              {copies.title}
+            </Text>
+            {copies.subtite ? (
+              <Text size="sm" style={styles.subtitleText}>
+                {copies.subtite}
               </Text>
-              {copies.subtite ? (
-                <Text size='sm' color='text-secondary-800' className='font-normal text-center'>
-                  {copies.subtite}
-                </Text>
-              ) : null}
-            </div>
-
-            {txnUrl ? (
-              <a
-                target='_blank'
-                rel='noreferrer'
-                href={txnUrl}
-                className='flex font-medium items-center gap-1 text-sm text-accent-green hover:text-accent-green-200 transition-colors'
-              >
-                View transaction
-                <CaretRight size={12} />
-              </a>
             ) : null}
-          </div>
-        </div>
-        <div className=' flex flex-row items-center justify-between gap-4 absolute bottom-0 left-0 right-0 p-6 max-[350px]:!px-4 !z-[1000]'>
+            {txnUrl ? (
+              <TouchableOpacity style={styles.txnLinkRow} onPress={handleOpenTxnUrl} activeOpacity={0.8}>
+                <Text size="sm" style={styles.txnLinkText}>View transaction</Text>
+                <CaretRight size={14} color="#5df2b7" />
+              </TouchableOpacity>
+            ) : null}
+          </View>
+        </View>
+        <View style={styles.bottomActions}>
           <Button
-            className='flex-1'
-            variant='mono'
-            style={{ boxShadow: 'none' }}
-            onClick={() => {
-              navigate('/home');
-            }}
+            style={[styles.flex1, { marginRight: 8 }]}
+            variant="mono"
+            onPress={handleHome}
           >
             Home
           </Button>
           <Button
-            className={classNames(`flex-1`, {
-              'cursor-no-drop': txStatus !== 'success' && txStatus !== 'submitted',
-            })}
-            style={{ boxShadow: 'none' }}
-            onClick={() => {
-              onClose(txStatus !== 'failed');
-            }}
+            style={styles.flex1}
             disabled={txStatus !== 'success' && txStatus !== 'submitted'}
+            onPress={handleAgain}
           >
             {txStatus === 'failed' ? 'Try Again' : 'Transfer Again'}
           </Button>
-        </div>
+        </View>
       </BottomModal>
     );
   },
 );
+
+const styles = StyleSheet.create({
+  modal: {
+    flex: 1,
+    padding: 0,
+    backgroundColor: '#fff',
+    justifyContent: 'flex-start',
+  },
+  centerContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 60,
+    paddingHorizontal: 36,
+  },
+  statusCircle: {
+    height: 100,
+    width: 100,
+    borderRadius: 50,
+    padding: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  textBlock: {
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 8,
+    marginBottom: 36,
+  },
+  titleText: {
+    fontWeight: 'bold',
+    color: '#212121',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  subtitleText: {
+    fontWeight: '400',
+    color: '#2d333a',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  txnLinkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 12,
+  },
+  txnLinkText: {
+    color: '#5df2b7',
+    fontWeight: '500',
+    textDecorationLine: 'underline',
+    marginRight: 2,
+  },
+  bottomActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 24,
+    borderTopWidth: 1,
+    borderColor: '#eee',
+    backgroundColor: '#fff',
+    zIndex: 100,
+  },
+  flex1: {
+    flex: 1,
+    minWidth: 0,
+  },
+});
 
 export default TxPage;

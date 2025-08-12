@@ -1,28 +1,31 @@
-import { DropResult } from '@hello-pangea/dnd';
-import { Key } from '@leapwallet/cosmos-wallet-hooks';
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { Buttons, Header, HeaderActionType } from '@leapwallet/leap-ui';
-import { MinusCircle } from '@phosphor-icons/react';
-import BottomModal from '../bottom-modal';
-import DraggableContainer from 'components/draggable';
-import { ManageChainDraggables, ManageChainNonDraggables } from 'components/draggable/manage-chains';
-import PopupLayout from 'components/layout/popup-layout';
-import NoSearchResults from 'components/no-search-results';
-import Text from 'components/text';
-import { BETA_CHAINS } from 'config/storage-keys';
-import { useSetActiveChain } from 'hooks/settings/useActiveChain';
-import useActiveWallet, { useUpdateKeyStore } from 'hooks/settings/useActiveWallet';
-import { useChainInfos, useSetChainInfos } from 'hooks/useChainInfos';
-import { Images } from 'images';
+import React, { useState } from 'react';
+import { View, Image, TextInput, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { observer } from 'mobx-react-lite';
-import React, { ReactElement } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { deleteChainStore } from 'stores/delete-chain-store';
-import { ManageChainSettings, manageChainsStore } from 'stores/manage-chains-store';
-import { Colors } from 'theme/colors';
-import browser from 'webextension-polyfill';
+import { MinusCircle } from 'phosphor-react-native'; // This works on RN too
+import DraggableContainer from '../../components/draggable'; // Updated to RN version above
+import { ManageChainDraggables, ManageChainNonDraggables } from '../../components/draggable/manage-chains';
+import PopupLayout from '../../components/layout/popup-layout';
+import NoSearchResults from '../../components/no-search-results';
+import { BETA_CHAINS } from '../../services/config/storage-keys';
+import { useSetActiveChain } from '../../hooks/settings/useActiveChain';
+import useActiveWallet, { useUpdateKeyStore } from '../../hooks/settings/useActiveWallet';
+import { useChainInfos, useSetChainInfos } from '../../hooks/useChainInfos';
+import { Images } from '../../../assets/images';
+import { deleteChainStore } from '../../context/delete-chain-store';
+import { ManageChainSettings, manageChainsStore } from '../../context/manage-chains-store';
+import { Colors } from '../../theme/colors';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // For storage
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { Key } from '@leapwallet/cosmos-wallet-hooks';
+import BottomModal from '../../components/bottom-modal';
+import Text from '../../components/text';
+import { Button } from '../../components/ui/button';
+import { HeaderActionType } from '../../types/components';
+import { Header } from '@leapwallet/leap-ui';
 
-// a function to help us with reordering the result
+
+// Helper for reordering
 const reorder = (list: ManageChainSettings[], startIndex: number, endIndex: number): ManageChainSettings[] => {
   const result: ManageChainSettings[] = Array.from(list);
   const [removed] = result.splice(startIndex, 1);
@@ -38,148 +41,156 @@ const RemoveChain = observer(({ defaultChain }: { defaultChain: SupportedChain }
   const { activeWallet, setActiveWallet } = useActiveWallet();
 
   const updateKeyStore = useUpdateKeyStore();
+
   const handleRemove = async () => {
-    await browser.storage.local.get([BETA_CHAINS]).then(async (resp) => {
-      const _betaChains = JSON.parse(resp['beta-chains']);
-      delete _betaChains[deleteChainStore.chainInfo?.chainName as string];
-      await browser.storage.local.set({ [BETA_CHAINS]: JSON.stringify(_betaChains) });
+    const resp = await AsyncStorage.getItem(BETA_CHAINS);
+    const _betaChains = resp ? JSON.parse(resp) : {};
+    delete _betaChains[deleteChainStore.chainInfo?.chainName as string];
+    await AsyncStorage.setItem(BETA_CHAINS, JSON.stringify(_betaChains));
 
-      const _newChains = { ...chainInfos };
-      delete _newChains[deleteChainStore.chainInfo?.chainName as keyof typeof _newChains];
-      setChainInfos(_newChains);
+    const _newChains = { ...chainInfos };
+    delete _newChains[deleteChainStore.chainInfo?.chainName as keyof typeof _newChains];
+    setChainInfos(_newChains);
 
-      const updatedKeystore = await updateKeyStore(
-        activeWallet as Key,
-        deleteChainStore.chainInfo?.chainName as unknown as SupportedChain,
-        'DELETE',
-      );
-      await setActiveWallet(updatedKeystore[activeWallet?.id as string] as Key);
-      setActiveChain(defaultChain);
-      deleteChainStore.setChainInfo(null);
-    });
+    const updatedKeystore = await updateKeyStore(
+      activeWallet as Key,
+      deleteChainStore.chainInfo?.chainName as unknown as SupportedChain,
+      'DELETE'
+    );
+    await setActiveWallet(updatedKeystore[activeWallet?.id as string] as Key);
+    setActiveChain(defaultChain);
+    deleteChainStore.setChainInfo(null);
   };
+
   return (
     <BottomModal
       isOpen={!!deleteChainStore.chainInfo}
       onClose={() => deleteChainStore.setChainInfo(null)}
       title={'Remove Chain?'}
     >
-      <div className='flex flex-col gap-y-1'>
-        <div className='text-center px-5'>
-          <div className='rounded-2xl bg-white-100 dark:bg-gray-800 p-[12px] w-[48px] h-[48px] text-red-300 mb-4'>
-            <MinusCircle size={24} className='text-red-300' />
-          </div>
-          <Text size='md' color='text-gray-800 dark:text-gray-200 font-medium'>
-            Are you sure you want to remove {deleteChainStore.chainInfo?.chainName}?
-          </Text>
-        </div>
-        <div className='flex flex-col justify-between w-full mt-7'>
-          <Buttons.Generic
-            style={{ height: '48px', background: Colors.gray900, color: Colors.white100 }}
-            className='w-full'
-            onClick={handleRemove}
-          >
-            Remove
-          </Buttons.Generic>
-          <Buttons.Generic
-            style={{
-              height: '48px',
-              background: Colors.cosmosPrimary,
-              color: Colors.white100,
-            }}
-            className='mt-3 bg-gray-800 w-full'
-            onClick={() => deleteChainStore.setChainInfo(null)}
-          >
-            Don’t Remove
-          </Buttons.Generic>
-        </div>
-      </div>
+      <View style={{ alignItems: 'center', padding: 16 }}>
+        <View style={{
+          borderRadius: 24, backgroundColor: Colors.white100, padding: 12, width: 48, height: 48, justifyContent: 'center', alignItems: 'center', marginBottom: 16
+        }}>
+          <MinusCircle size={24} color={Colors.red300} />
+        </View>
+        <Text style={{ color: Colors.gray800, fontWeight: '500', fontSize: 16, textAlign: 'center', marginBottom: 24 }}>
+          Are you sure you want to remove {deleteChainStore.chainInfo?.chainName as string}?
+        </Text>
+        <Button
+          style={{ height: 48, backgroundColor: Colors.gray900, width: '100%', marginBottom: 12 }}
+          onPress={handleRemove}
+        >
+          Remove
+        </Button>
+        <Button
+          style={{ height: 48, backgroundColor: Colors.cosmosPrimary, width: '100%' }}
+          onPress={() => deleteChainStore.setChainInfo(null)}
+        >
+          Don’t Remove
+        </Button>
+      </View>
     </BottomModal>
   );
 });
 
-export default observer(function ManageChain(): ReactElement {
-  const [searchQuery, setSearchQuery] = React.useState('');
-  const navigate = useNavigate();
+const ManageChain = observer(() => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const navigation = useNavigation();
 
   const _chains = manageChainsStore.chains.filter((chain) => !chain.beta);
   const _betaChains = manageChainsStore.chains.filter((chain) => chain.beta);
   const _filteredBetaChains = _betaChains.filter((chain) =>
-    chain.chainName.toLowerCase().includes(searchQuery.toLowerCase()),
+    chain.chainName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // function that defines what happens when a draggable is dropped
-  const onDragEnd = async (result: DropResult) => {
-    // dropped outside the list
-    if (!result.destination) {
-      return;
-    }
-    const items: ManageChainSettings[] = reorder(_chains, result.source.index, result.destination.index);
+  // For DraggableFlatList, data and renderItem are required
+  const renderChainItem = ({ item, drag, isActive }: any) => (
+    // Assuming ManageChainDraggables is adjusted for RN, or inline render here
+    <ManageChainDraggables
+      chains={item}
+      drag={drag}
+      isActive={isActive}
+      updateChainFunction={(chain: any) => manageChainsStore.toggleChain(chain)}
+    />
+  );
 
-    manageChainsStore.updatePreferenceOrder(items);
+  const onDragEnd = ({ data }: { data: ManageChainSettings[] }) => {
+    manageChainsStore.updatePreferenceOrder(data);
   };
 
   return (
-    <div className='relative'>
+    <View style={{ flex: 1 }}>
       <PopupLayout
         header={
           <Header
             title={'Manage chains'}
             action={{
-              onClick: () => {
-                navigate(-1);
-              },
+              onClick: () => navigation.goBack(),
               type: HeaderActionType.BACK,
             }}
           />
         }
       >
-        <div className='pt-[28px]'>
-          <div className='mx-auto w-[344px] flex h-10 bg-white-100 dark:bg-gray-900 rounded-[30px] py-2 pl-5 pr-[10px]'>
-            <input
+        <View style={{ paddingTop: 28 }}>
+          <View style={{
+            marginHorizontal: 'auto',
+            width: 344,
+            flexDirection: 'row',
+            height: 40,
+            backgroundColor: Colors.white100,
+            borderRadius: 30,
+            alignItems: 'center',
+            paddingHorizontal: 16
+          }}>
+            <TextInput
               placeholder='search chains...'
-              className='flex flex-grow text-base text-gray-400 outline-none bg-white-0'
+              style={{
+                flex: 1,
+                fontSize: 16,
+                color: Colors.gray400,
+                backgroundColor: Colors.white100,
+                padding: 0,
+                margin: 0,
+              }}
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChangeText={setSearchQuery}
             />
             {searchQuery.length === 0 ? (
-              <img src={Images.Misc.Search} />
+              <Image source={{uri: Images.Misc.Search}} width={24} height={24} />
             ) : (
-              <img className='cursor-pointer' src={Images.Misc.CrossFilled} onClick={() => setSearchQuery('')} />
+              <TouchableOpacity onPress={() => setSearchQuery('')}>
+                <Image source={{uri: Images.Misc.CrossFilled}} width={24} height={24} />
+              </TouchableOpacity>
             )}
-          </div>
-          <div className='align-middle flex flex-col items-center justify-center mt-[20px] mb-10'>
-            <DraggableContainer onDragEnd={onDragEnd}>
-              {_chains.filter((chain) => chain.chainName.toLowerCase().includes(searchQuery.toLowerCase())).length ===
-                0 && <NoSearchResults searchQuery={searchQuery} />}
-              {searchQuery.length === 0 ? (
-                <ManageChainDraggables
-                  chains={_chains}
-                  searchQuery={searchQuery}
-                  updateChainFunction={(chain) => manageChainsStore.toggleChain(chain)}
-                />
-              ) : (
-                <ManageChainNonDraggables
-                  chains={_chains}
-                  searchQuery={searchQuery}
-                  updateChainFunction={(chain) => manageChainsStore.toggleChain(chain)}
-                />
-              )}
-            </DraggableContainer>
+          </View>
+          <View style={{ alignItems: 'center', marginTop: 20, marginBottom: 40 }}>
+            <DraggableContainer
+              data={_chains.filter((chain) => chain.chainName.toLowerCase().includes(searchQuery.toLowerCase()))}
+              renderItem={renderChainItem}
+              keyExtractor={(item, index) => `${item.chainName}_${index}`}
+              onDragEnd={onDragEnd}
+            />
+            {searchQuery.length > 0 &&
+              _chains.filter((chain) => chain.chainName.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 &&
+              <NoSearchResults searchQuery={searchQuery} />
+            }
             {_filteredBetaChains.length > 0 ? (
-              <div className='mt-[16px]'>
+              <View style={{ marginTop: 16 }}>
                 <ManageChainNonDraggables
                   chains={_filteredBetaChains}
                   searchQuery={searchQuery}
-                  updateChainFunction={(chain) => manageChainsStore.toggleChain(chain)}
+                  updateChainFunction={(chain: any) => manageChainsStore.toggleChain(chain)}
                   title='Recently added (Beta)'
                 />
-              </div>
+              </View>
             ) : null}
-          </div>
-        </div>
+          </View>
+        </View>
       </PopupLayout>
       <RemoveChain defaultChain={manageChainsStore.chains[0].chainName} />
-    </div>
+    </View>
   );
 });
+
+export default ManageChain;

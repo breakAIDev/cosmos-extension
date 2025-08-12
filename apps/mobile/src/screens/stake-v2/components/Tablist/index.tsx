@@ -9,20 +9,21 @@ import {
   useStaking,
 } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, MotiView } from 'moti';
 import { observer } from 'mobx-react-lite';
-import ProviderList from 'pages/stake-v2/restaking/ProviderList';
+import ProviderList from '../../../stake-v2/restaking/ProviderList';
 import React, { useMemo, useState } from 'react';
-import { rootDenomsStore } from 'stores/denoms-store-instance';
-import { stakeEpochStore } from 'stores/epoch-store';
-import { rootBalanceStore } from 'stores/root-store';
-import { claimRewardsStore, delegationsStore, unDelegationsStore, validatorsStore } from 'stores/stake-store';
-import { transition150 } from 'utils/motion-variants';
-import { slideVariants } from 'utils/motion-variants/global-layout-motions';
+import { rootDenomsStore } from '../../../../context/denoms-store-instance';
+import { stakeEpochStore } from '../../../../context/epoch-store';
+import { rootBalanceStore } from '../../../../context/root-store';
+import { claimRewardsStore, delegationsStore, unDelegationsStore, validatorsStore } from '../../../../context/stake-store';
+import { transition150 } from '../../../../utils/motion-variants';
+import { slideVariants } from '../../../../utils/motion-variants/global-layout-motions';
 
 import PendingUnstakeList from '../PendingUnstakeList';
 import ValidatorList from '../ValidatorList';
 import { TabSelectors } from './tab-list-selector';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 
 export enum TabElements {
   YOUR_DELEGATIONS = 'Your delegations',
@@ -104,70 +105,71 @@ const TabList = observer(
     }
 
     return (
-      <div className='flex flex-col gap-6'>
-        <div className='flex gap-x-2 border-b border-border-bottom -mx-6 px-6'>
+      <View style={styles.container}>
+        <View style={styles.tabSelectorContainer}>
           <TabSelectors
-            buttons={tabs}
-            setSelectedTab={setSelectedTab}
-            selectedIndex={tabs.findIndex(({ label }) => label === selectedTab?.label)}
+            buttons={tabs.map(label => ({ label }))}
+            setSelectedTab={tab => setSelectedTab(tab.label as TabElements)}
+            selectedIndex={tabs.findIndex(label => label === selectedTab)}
           />
-        </div>
+        </View>
 
-        <AnimatePresence mode='wait' initial={false}>
-          {selectedTab?.label === TabElements.YOUR_DELEGATIONS && (
-            <motion.div
-              key={TabElements.YOUR_DELEGATIONS}
-              transition={transition150}
-              variants={slideVariants}
-              initial='exit'
-              animate='animate'
-              exit='exit'
-              className='relative'
-            >
-              <ValidatorList
-                rootDenomsStore={rootDenomsStore}
-                rootBalanceStore={rootBalanceStore}
-                delegationsStore={delegationsStore}
-                validatorsStore={validatorsStore}
-                unDelegationsStore={unDelegationsStore}
-                claimRewardsStore={claimRewardsStore}
-                forceChain={activeChain}
-                forceNetwork={activeNetwork}
-                setClaimTxMode={setClaimTxMode}
-              />
-            </motion.div>
-          )}
+        <ScrollView style={{ flex: 1 }}>
+          <AnimatePresence>
+            {selectedTab?.label === TabElements.YOUR_DELEGATIONS && (
+              <MotiView
+                key={TabElements.YOUR_DELEGATIONS}
+                transition={transition150}
+                animate='animate'
+                style={{position: 'relative'}}
+              >
+                <ValidatorList
+                  rootDenomsStore={rootDenomsStore}
+                  rootBalanceStore={rootBalanceStore}
+                  delegationsStore={delegationsStore}
+                  validatorsStore={validatorsStore}
+                  unDelegationsStore={unDelegationsStore}
+                  claimRewardsStore={claimRewardsStore}
+                  forceChain={activeChain}
+                  forceNetwork={activeNetwork}
+                  setClaimTxMode={setClaimTxMode}
+                />
+              </MotiView>
+            )}
 
-          {selectedTab?.label === TabElements.PENDING_UNSTAKE && (
-            <motion.div
-              key={TabElements.PENDING_UNSTAKE}
-              transition={transition150}
-              variants={slideVariants}
-              initial='enter'
-              animate='animate'
-              exit='enter'
-              className='relative'
-            >
-              <PendingUnstakeList
-                rootDenomsStore={rootDenomsStore}
-                delegationsStore={delegationsStore}
-                validatorsStore={validatorsStore}
-                unDelegationsStore={unDelegationsStore}
-                claimRewardsStore={claimRewardsStore}
-                forceChain={activeChain}
-                forceNetwork={activeNetwork}
-                rootBalanceStore={rootBalanceStore}
-                setClaimTxMode={setClaimTxMode}
-              />
-            </motion.div>
-          )}
-          {selectedTab?.label === TabElements.YOUR_PROVIDERS && (
-            <ProviderList forceChain={activeChain} forceNetwork={activeNetwork} />
-          )}
-        </AnimatePresence>
-      </div>
+            {selectedTab?.label === TabElements.PENDING_UNSTAKE && (
+              <MotiView
+                key={TabElements.PENDING_UNSTAKE}
+                transition={transition150}
+                animate='animate'
+                style={{position: 'relative'}}
+              >
+                <PendingUnstakeList
+                  rootDenomsStore={rootDenomsStore}
+                  delegationsStore={delegationsStore}
+                  validatorsStore={validatorsStore}
+                  unDelegationsStore={unDelegationsStore}
+                  claimRewardsStore={claimRewardsStore}
+                  forceChain={activeChain}
+                  forceNetwork={activeNetwork}
+                  rootBalanceStore={rootBalanceStore}
+                  setClaimTxMode={setClaimTxMode}
+                />
+              </MotiView>
+            )}
+            {selectedTab?.label === TabElements.YOUR_PROVIDERS && (
+              <ProviderList forceChain={activeChain} forceNetwork={activeNetwork} />
+            )}
+          </AnimatePresence>
+        </ScrollView>
+      </View>
     );
   },
 );
 
 export default TabList;
+
+const styles = StyleSheet.create({
+  container: { flex: 1, paddingHorizontal: 0, paddingTop: 0, backgroundColor: '#fff' },
+  tabSelectorContainer: { flexDirection: 'row', borderBottomWidth: 1, borderColor: '#e5e7eb', paddingHorizontal: 16 },
+});

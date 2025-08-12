@@ -33,13 +33,13 @@ export const CopyButton: React.FC<ButtonProps> = ({ onPress, style, ...rest }) =
         <Animatable.Image
           animation="zoomIn"
           duration={150}
-          source={Images.Misc.CheckGreenOutline}
+          source={{uri: Images.Misc.CheckGreenOutline}}
           style={styles.icon}
           resizeMode="contain"
         />
       ) : (
         <Animatable.View animation="zoomIn" duration={150}>
-          <CopyIcon width={20} height={20} />
+          <CopyIcon size={20} />
         </Animatable.View>
       )}
     </Button>

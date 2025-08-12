@@ -1,24 +1,26 @@
 import { useAddCustomChannel, useChainsStore } from '@leapwallet/cosmos-wallet-hooks';
-import { useSendContext } from 'pages/send/context';
+import { useSendContext } from '../../../send/context';
 import React, { useCallback, useState } from 'react';
+import { View, Text, TextInput, StyleSheet, Platform } from 'react-native';
 
 type AddIBCChannelProps = {
   targetChain: string;
-  
   onAddComplete: (value: string) => void;
   value: string;
   setValue: (value: string) => void;
 };
 
-const AddIBCChannel: React.FC<AddIBCChannelProps> = ({ targetChain, onAddComplete, value, setValue }) => {
+const AddIBCChannel: React.FC<AddIBCChannelProps> = ({
+  targetChain,
+  onAddComplete,
+  value,
+  setValue,
+}) => {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState<string>('');
 
   const { sendActiveChain } = useSendContext();
-  const addCustomChannel = useAddCustomChannel({
-    targetChain,
-  });
-
+  const addCustomChannel = useAddCustomChannel({ targetChain });
   const { chains } = useChainsStore();
   const activeChainInfo = chains[sendActiveChain];
 
@@ -41,33 +43,80 @@ const AddIBCChannel: React.FC<AddIBCChannelProps> = ({ targetChain, onAddComplet
         setMessage('Something went wrong');
       }
     },
-    [addCustomChannel, onAddComplete],
+    [addCustomChannel, onAddComplete, setValue],
   );
 
   return (
-    <>
-      <input
-        type='number'
+    <View style={{ width: '100%' }}>
+      <TextInput
         value={value}
-        placeholder='Source channel ID'
-        className='w-full h-12 rounded-2xl px-4 py-1 font-medium placeholder:text-gray-600 dark:placeholder:text-gray-400 placeholder:text-left text-right text-black-100 dark:text-white-100 outline-none border border-[transparent] focus-within:border-green-600 bg-gray-50 dark:bg-gray-900'
-        onChange={(e) => {
-          setValue(e.target.value);
+        placeholder="Source channel ID"
+        onChangeText={(text) => {
+          setValue(text.replace(/[^0-9]/g, ''));
           if (status === 'error') {
             setStatus('idle');
             setMessage('');
           }
         }}
-        onKeyUp={() => handleAddChannel(value)}
+        keyboardType={Platform.OS === 'ios' ? 'number-pad' : 'numeric'}
+        style={styles.input}
+        placeholderTextColor="#A0A3B1"
+        onKeyPress={() => value && handleAddChannel(value)}
+        // onSubmitEditing will fire when enter is pressed
+        onSubmitEditing={() => value && handleAddChannel(value)}
+        returnKeyType="done"
       />
-      <p className='text-xs mt-2 dark:text-gray-400 text-gray-600'>
-        You can enter <span className='font-medium dark:text-gray-200 text-gray-800'>24</span> for{' '}
-        <span className='font-medium dark:text-gray-200 text-gray-800'>channel-24</span> on {activeChainInfo.chainName}
-      </p>
-      {status === 'error' ? <p className='text-xs mt-2 text-red-300 font-medium'>{message}</p> : null}
-      {status === 'success' ? <p className='text-xs mt-2 text-green-300 font-medium'>{message}</p> : null}
-    </>
+      <Text style={styles.info}>
+        You can enter{' '}
+        <Text style={styles.infoStrong}>24</Text> for{' '}
+        <Text style={styles.infoStrong}>channel-24</Text> on {activeChainInfo.chainName}
+      </Text>
+      {status === 'error' ? (
+        <Text style={styles.error}>{message}</Text>
+      ) : null}
+      {status === 'success' ? (
+        <Text style={styles.success}>{message}</Text>
+      ) : null}
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  input: {
+    width: '100%',
+    height: 48,
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    fontWeight: '500',
+    backgroundColor: '#F7F7FA',
+    color: '#232940',
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#E8EAED',
+    marginBottom: 6,
+    textAlign: 'right',
+  },
+  info: {
+    fontSize: 12,
+    marginTop: 2,
+    color: '#8C94A6',
+  },
+  infoStrong: {
+    fontWeight: '500',
+    color: '#232940',
+  },
+  error: {
+    fontSize: 12,
+    marginTop: 6,
+    color: '#E57373',
+    fontWeight: '500',
+  },
+  success: {
+    fontSize: 12,
+    marginTop: 6,
+    color: '#4CAF50',
+    fontWeight: '500',
+  },
+});
 
 export default AddIBCChannel;

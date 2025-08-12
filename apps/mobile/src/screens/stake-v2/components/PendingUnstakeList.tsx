@@ -22,11 +22,11 @@ import {
   UndelegationsStore,
   ValidatorsStore,
 } from '@leapwallet/cosmos-wallet-store';
-import { ValidatorItemSkeleton } from 'components/Skeletons/StakeSkeleton';
+import { ValidatorItemSkeleton } from '../../../components/Skeletons/StakeSkeleton';
 import { observer } from 'mobx-react-lite';
 import React, { useMemo, useState } from 'react';
-import { timeLeft } from 'utils/timeLeft';
-
+import { timeLeft } from '../../../utils/timeLeft';
+import { View, Text, FlatList, TouchableOpacity, Modal, StyleSheet, ActivityIndicator } from 'react-native';
 import UnstakedValidatorDetails from './UnstakedValidatorDetails';
 import { ValidatorCard } from './ValidatorCard';
 
@@ -99,28 +99,24 @@ const PendingUnstakeList = observer(
     return (
       <>
         {isLoading && (
-          <div className='flex flex-col w-full gap-4'>
-            <div className='flex justify-between'>
-              <span className='text-xs text-muted-foreground'>Validator</span>
-              <span className='text-xs text-muted-foreground'>Amount Staked</span>
-            </div>
-
+          <View style={styles.section}>
+            <View style={styles.headerRow}>
+              <Text style={styles.headerText}>Validator</Text>
+              <Text style={styles.headerText}>Amount Staked</Text>
+            </View>
             <ValidatorItemSkeleton count={5} />
-          </div>
+          </View>
         )}
 
         {!isLoading && validators && unboundingDelegationsInfo && (
-          <div className='flex flex-col w-full gap-4'>
-            <div className='flex justify-between'>
-              <span className='text-xs text-muted-foreground'>Validator</span>
-              <span className='text-xs text-muted-foreground'>Amount Staked</span>
-            </div>
-
-            {Object.values(unboundingDelegationsInfo ?? {}).map((uds) => {
+          <View style={styles.section}>
+            <View style={styles.headerRow}>
+              <Text style={styles.headerText}>Validator</Text>
+              <Text style={styles.headerText}>Amount Staked</Text>
+            </View>
+            {Object.values(unboundingDelegationsInfo).map((uds) => {
               const validator = validators[uds?.validator_address];
-              if (!validator) {
-                return null;
-              }
+              if (!validator) return null;
               return uds.entries.map((ud, idx) => {
                 return (
                   <ValidatorCard
@@ -129,7 +125,7 @@ const PendingUnstakeList = observer(
                     isCancleUnstakeSupported={isCancleUnstakeSupported}
                     validator={validator}
                     subText={isBabylon(activeChain) ? undefined : timeLeft(ud.completion_time)}
-                    onClick={() => {
+                    onPress={() => {
                       if (isCancleUnstakeSupported) {
                         setShowUnstakeValidatorDetails(true);
                         setSelectedUnbondingDelegation(uds);
@@ -140,7 +136,7 @@ const PendingUnstakeList = observer(
                 );
               });
             })}
-          </div>
+          </View>
         )}
 
         {selectedUnbondingDelegation && selectedDelegationEntry && validators && (
@@ -167,3 +163,20 @@ const PendingUnstakeList = observer(
 );
 
 export default PendingUnstakeList;
+
+const styles = StyleSheet.create({
+  section: {
+    width: '100%',
+    padding: 16,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 14,
+  },
+  headerText: {
+    fontSize: 13,
+    color: '#8F99A3',
+    fontWeight: '500',
+  },
+})

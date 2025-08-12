@@ -2,7 +2,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { ThemeName, useTheme } from '@leapwallet/leap-ui';
-import { ArrowsLeftRight, CurrencyDollar, Pulse, Wallet } from '@phosphor-icons/react';
+import { ArrowsLeftRight, CurrencyDollar, Pulse, Wallet } from 'phosphor-react-native';
 import { useActiveChain } from '../../hooks/settings/useActiveChain';
 import { observer } from 'mobx-react-lite';
 import BottomNavIcon from '../../screens/alpha/components/BottomNavIcon';

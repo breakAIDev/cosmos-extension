@@ -1,8 +1,8 @@
 export const preloadOnboardingRoutes = () => {
   return Promise.all([
-    import('pages/onboarding'),
-    import('pages/onboarding/create'),
-    import('pages/onboarding/import'),
-    import('pages/onboarding/success'),
+    import('../screens/onboarding'),
+    import('../screens/onboarding/create'),
+    import('../screens/onboarding/import'),
+    import('../screens/onboarding/success'),
   ]);
 };

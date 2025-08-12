@@ -1,10 +1,11 @@
 import { useCustomChains } from '@leapwallet/cosmos-wallet-hooks';
 import { ChainInfo, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { useChainInfos } from 'hooks/useChainInfos';
-import { GenericLight } from 'images/logos';
+import { useChainInfos } from '../../hooks/useChainInfos';
+import { GenericLight } from '../../../assets/images/logos';
 import React from 'react';
-import { ManageChainSettings } from 'stores/manage-chains-store';
-import { AggregatedSupportedChain } from 'types/utility';
+import { View, StyleSheet } from 'react-native';
+import { ManageChainSettings } from '../../context/manage-chains-store';
+import { AggregatedSupportedChain } from '../../types/utility';
 
 import { ChainCard } from './components';
 
@@ -40,7 +41,7 @@ export function ChainCardWrapper({
   const chainName = chainInfo?.chainName ?? chain.formattedName ?? chain.chainName;
 
   return (
-    <div key={chain.chainName + index} className='bg-secondary-100 hover:bg-secondary-200 rounded-xl w-full mb-3'>
+    <View key={chain.chainName + index} style={styles.cardContainer}>
       <ChainCard
         handleClick={handleClick}
         handleDeleteClick={handleDeleteClick}
@@ -52,6 +53,16 @@ export function ChainCardWrapper({
         onPage={onPage}
         showStars
       />
-    </div>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  cardContainer: {
+    backgroundColor: '#F3F4F6', // bg-secondary-100
+    borderRadius: 16,           // rounded-xl
+    width: '100%',
+    marginBottom: 12,           // mb-3
+    // Use a "pressable" or hover style for bg-secondary-200 if desired
+  },
+});

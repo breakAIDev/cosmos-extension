@@ -1,6 +1,6 @@
 import { Buttons } from '@leapwallet/leap-ui';
 import React, { ReactNode } from 'react';
-import { Colors } from 'theme/colors';
+import { Colors } from '../../../theme/colors';
 
 type FooterActionProps = {
   rejectBtnClick: () => void;

@@ -5,7 +5,7 @@ import {
 } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { AggregatedChainsStore } from '@leapwallet/cosmos-wallet-store';
-import { AggregatedNullComponents } from 'components/aggregated';
+import { AggregatedNullComponents } from '../../../components/aggregated';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
 

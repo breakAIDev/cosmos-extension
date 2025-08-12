@@ -1,11 +1,10 @@
 import React from 'react';
 import { View, StyleSheet, Image } from 'react-native';
 import SkeletonContent from 'react-native-skeleton-content';
+import { RightArrow } from '../../../assets/images/misc';
 
-export default function GovCardSkeleton({ isLast, aggregatedView }) {
+export default function GovCardSkeleton({ isLast, aggregatedView }: { isLast: boolean; aggregatedView?: boolean }) {
   // Replace with your actual image asset
-  const rightArrow = require('../../../assets/images/right-arrow.png');
-
   if (aggregatedView) {
     return (
       <View style={styles.aggregatedContainer}>
@@ -38,7 +37,7 @@ export default function GovCardSkeleton({ isLast, aggregatedView }) {
           />
         </View>
         <Image
-          source={rightArrow}
+          source={{uri: RightArrow}}
           style={styles.arrow}
           resizeMode="contain"
         />

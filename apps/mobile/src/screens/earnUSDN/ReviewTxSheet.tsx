@@ -1,14 +1,14 @@
 import { Token } from '@leapwallet/cosmos-wallet-store';
 import { formatTokenAmount } from '@leapwallet/cosmos-wallet-store/dist/utils';
-import { ArrowRight } from '@phosphor-icons/react';
-import classNames from 'classnames';
-import LedgerConfirmationPopup from 'components/ledger-confirmation/LedgerConfirmationPopup';
-import BottomModal from 'components/new-bottom-modal';
-import Text from 'components/text';
-import loadingImage from 'lottie-files/swaps-btn-loading.json';
-import Lottie from 'lottie-react';
+import { ArrowRight } from 'phosphor-react-native';
+import LedgerConfirmationPopup from '../../components/ledger-confirmation/LedgerConfirmationPopup';
+import BottomModal from '../../components/new-bottom-modal';
+import Text from '../../components/text';
+import loadingImage from '../../../assets/lottie-files/swaps-btn-loading.json';
+import LottieView from 'lottie-react-native';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
+import { View, TouchableOpacity, Image, StyleSheet } from 'react-native';
 
 type Props = {
   isOpen: boolean;
@@ -38,55 +38,56 @@ const ReviewTxSheet = observer(
   }: Props) => {
     return (
       <>
-        <BottomModal title='Confirm transaction' isOpen={isOpen} onClose={onClose} className='p-6 z-10'>
-          <div className='flex flex-col gap-4 w-full'>
-            <div className='w-full bg-gray-50 dark:bg-gray-900 flex items-center justify-between p-4 gap-2 rounded-2xl'>
-              <div className='flex flex-col items-center w-full max-w-[140px] max-[399px]:!max-w-[calc(min(140px,45%))] gap-4 max-[399px]:overflow-visible'>
-                <img src={source.img} className='w-11 h-11' />
-                <Text color='text-black-100 dark:text-white-100' size='sm' className='font-bold'>
-                  {formatTokenAmount(amountIn, source.symbol, 4)}
-                </Text>
-              </div>
-              <ArrowRight
-                size={24}
-                className='p-1.5 text-black-100 dark:text-white-100 rounded-full bg-gray-100 dark:bg-gray-850'
-              />
-              <div className='flex flex-col items-center w-full max-w-[140px] max-[399px]:!max-w-[calc(min(140px,45%))] gap-4 max-[399px]:overflow-visible'>
-                <img src={destination.img} className='w-11 h-11' />
-                <Text color='text-black-100 dark:text-white-100' size='sm' className='font-bold'>
-                  {formatTokenAmount(amountOut, destination.symbol, 4)}
-                </Text>
-              </div>
-            </div>
+        <BottomModal title="Confirm transaction" isOpen={isOpen} onClose={onClose} style={{ zIndex: 10 }}>
+          <View style={styles.container}>
+            <View style={styles.tokenRow}>
+              <View style={styles.tokenBox}>
+                <Image
+                  source={{ uri: source.img ?? '../../../assets/images/default-token.png'}}
+                  style={styles.tokenImg}
+                  resizeMode="contain"
+                />
+                <Text style={styles.tokenAmt}>{formatTokenAmount(amountIn, source.symbol, 4)}</Text>
+              </View>
+              <View style={styles.arrowContainer}>
+                <ArrowRight
+                  size={24}
+                  color="#222"
+                  style={styles.arrow}
+                />
+              </View>
+              <View style={styles.tokenBox}>
+                <Image
+                  source={{ uri: destination.img ?? '../../../assets/images/default-token.png'}}
+                  style={styles.tokenImg}
+                  resizeMode="contain"
+                />
+                <Text style={styles.tokenAmt}>{formatTokenAmount(amountOut, destination.symbol, 4)}</Text>
+              </View>
+            </View>
 
-            {error && <p className='text-sm font-bold text-red-600 px-2 mt-2'>{error}</p>}
+            {error ? (
+              <Text style={styles.errorText}>{error}</Text>
+            ) : null}
 
-            <button
-              className={classNames(
-                'w-full mt-4 text-md font-bold text-white-100 h-12 rounded-full cursor-pointer bg-green-600',
-                {
-                  'hover:bg-green-500 ': !isProcessing,
-                  'opacity-40': isProcessing,
-                },
-              )}
-              onClick={onConfirm}
+            <TouchableOpacity
+              style={[styles.confirmBtn, isProcessing && styles.confirmBtnDisabled]}
+              onPress={onConfirm}
               disabled={isProcessing}
+              activeOpacity={0.8}
             >
               {isProcessing ? (
-                <Lottie
-                  loop={true}
-                  autoplay={true}
-                  animationData={loadingImage}
-                  rendererSettings={{
-                    preserveAspectRatio: 'xMidYMid slice',
-                  }}
-                  className={'h-[24px] w-[24px]'}
+                <LottieView
+                  source={loadingImage}
+                  autoPlay
+                  loop
+                  style={{ height: 24, width: 24 }}
                 />
               ) : (
-                'Confirm Swap'
+                <Text style={styles.confirmBtnText}>Confirm Swap</Text>
               )}
-            </button>
-          </div>
+            </TouchableOpacity>
+          </View>
         </BottomModal>
         {showLedgerPopup && <LedgerConfirmationPopup showLedgerPopup={showLedgerPopup} />}
       </>
@@ -95,3 +96,78 @@ const ReviewTxSheet = observer(
 );
 
 export default ReviewTxSheet;
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'column',
+    gap: 16,
+    width: '100%',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 0,
+  },
+  tokenRow: {
+    width: '100%',
+    backgroundColor: '#f3f4f6',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 18,
+    borderRadius: 18,
+    marginBottom: 8,
+  },
+  tokenBox: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    maxWidth: 140,
+    width: '40%',
+  },
+  tokenImg: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#fff',
+    marginBottom: 6,
+  },
+  tokenAmt: {
+    fontWeight: 'bold',
+    color: '#222',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  arrowContainer: {
+    width: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  arrow: {
+    padding: 6,
+    borderRadius: 12,
+    backgroundColor: '#e5e7eb',
+  },
+  errorText: {
+    color: '#dc2626',
+    fontSize: 15,
+    fontWeight: 'bold',
+    marginTop: 8,
+    marginBottom: 2,
+    textAlign: 'center',
+  },
+  confirmBtn: {
+    width: '100%',
+    marginTop: 18,
+    height: 48,
+    borderRadius: 9999,
+    backgroundColor: '#22c55e',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  confirmBtnText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  confirmBtnDisabled: {
+    opacity: 0.4,
+  },
+});

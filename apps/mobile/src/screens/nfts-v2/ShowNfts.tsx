@@ -1,14 +1,17 @@
+import React, { useMemo, useState } from 'react';
+import { View, Text, TouchableOpacity, Image, StyleSheet, ScrollView } from 'react-native';
+import { observer } from 'mobx-react-lite';
+import { useNavigation } from '@react-navigation/native';
+
 import { useDisabledNFTsCollections } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { ChainTagsStore, NftStore } from '@leapwallet/cosmos-wallet-store';
+// Assume LineDivider is compatible with RN or replaced with View style.
 import { LineDivider } from '@leapwallet/leap-ui';
-import PopupLayout from 'components/layout/popup-layout';
-import { useChainPageInfo } from 'hooks';
-import { Images } from 'images';
-import { observer } from 'mobx-react-lite';
-import React, { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { hiddenNftStore } from 'stores/manage-nft-store';
+import PopupLayout from '../../components/layout/popup-layout'; // Your custom RN-compatible layout
+import { useChainPageInfo } from '../../hooks';
+import { Images } from '../../../assets/images';
+import { hiddenNftStore } from '../../context/manage-nft-store';
 
 import {
   AddCollection,
@@ -34,7 +37,7 @@ type ShowNftsProps = {
 };
 
 export const ShowNfts = observer(({ nftStore, chainTagsStore }: ShowNftsProps) => {
-  const navigate = useNavigate();
+  const navigation = useNavigation();
   const { setActiveTab, activeTab } = useNftContext();
   const [searchedText, setSearchedText] = useState('');
   const [showSelectSortBy, setShowSelectSortBy] = useState(false);
@@ -53,35 +56,37 @@ export const ShowNfts = observer(({ nftStore, chainTagsStore }: ShowNftsProps) =
 
   const hasToShowNetworkErrorView = useMemo(() => {
     return (
-      _isLoading === false && Object.values(collectionData?.nfts ?? {}).length === 0 && nftStore.nftDetails.networkError
+      _isLoading === false &&
+      Object.values(collectionData?.nfts ?? {}).length === 0 &&
+      nftStore.nftDetails.networkError
     );
   }, [_isLoading, collectionData?.nfts, nftStore.nftDetails.networkError]);
 
   return (
-    <div className='relative w-full overflow-clip panel-height'>
+    <View style={styles.container}>
       <PopupLayout
         header={
-          <div className='relative h-[72px] w-[400px] overflow-hidden flex items-center justify-between py-3 px-6'>
-            <h1 className='text-black-100 dark:text-white-100 text-xl font-medium'>NFT Collections</h1>
-            <button
-              className='cursor-pointer'
-              onClick={() => {
-                navigate('/home');
+          <View style={styles.header}>
+            <Text style={styles.headerTitle}>NFT Collections</Text>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate('Home'); // Use the correct route name
               }}
+              style={styles.closeBtn}
             >
-              <img src={Images.Misc.Cross} alt='close' className='invert dark:invert-0' />
-            </button>
-            <div className='flex absolute bottom-0 left-0'>
+              <Image source={Images.Misc.Cross} style={styles.closeImg} />
+            </TouchableOpacity>
+            <View style={styles.lineDividerWrap}>
               <LineDivider />
-            </div>
-            <div className='absolute w-full h-1 left-0 top-0' style={{ backgroundColor: topChainColor }} />
-          </div>
+            </View>
+            <View style={[styles.headerBar, { backgroundColor: topChainColor }]} />
+          </View>
         }
       >
         {hasToShowNetworkErrorView ? (
           <NetworkErrorInNft
-            title='NFTs can’t be loaded'
-            subTitle={<>NFTs can’t be loaded due to a technical failure, Kindly try again later.</>}
+            title="NFTs can’t be loaded"
+            subTitle="NFTs can’t be loaded due to a technical failure, Kindly try again later."
             showRetryButton={true}
             nftStore={nftStore}
             setShowAddCollectionSheet={setShowAddCollectionSheet}
@@ -95,7 +100,7 @@ export const ShowNfts = observer(({ nftStore, chainTagsStore }: ShowNftsProps) =
                 nftStore={nftStore}
               />
             ) : (
-              <div className='px-6 pt-4 pb-8'>
+              <ScrollView contentContainerStyle={styles.content}>
                 {activeTab === 'All' && sortedCollectionChains.length > 0 && (
                   <Filter
                     searchedText={searchedText}
@@ -130,13 +135,13 @@ export const ShowNfts = observer(({ nftStore, chainTagsStore }: ShowNftsProps) =
                     {_isLoading === false ? (
                       <CantSeeNfts
                         openAddCollectionSheet={() => setShowAddCollectionSheet(true)}
-                        className='w-full'
+                        style={styles.fullWidth}
                         nftStore={nftStore}
                       />
                     ) : null}
                   </>
                 )}
-              </div>
+              </ScrollView>
             )}
           </>
         )}
@@ -149,18 +154,75 @@ export const ShowNfts = observer(({ nftStore, chainTagsStore }: ShowNftsProps) =
         setSelectedSortsBy={setSelectedSortsBy}
         nftStore={nftStore}
       />
-      {/* <ManageCollections
+      {/* 
+      <ManageCollections
         isVisible={showManageCollections}
         onClose={() => setShowManageCollections(false)}
         openAddCollectionSheet={() => setShowAddCollectionSheet(true)}
         nftStore={nftStore}
-      /> */}
+      />
+      */}
       <AddCollection
         chainTagsStore={chainTagsStore}
         isVisible={showAddCollectionSheet}
         onClose={() => setShowAddCollectionSheet(false)}
-        // nftStore={nftStore}
       />
-    </div>
+    </View>
   );
 });
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    position: 'relative',
+    width: '100%',
+    backgroundColor: '#fff', // Update as needed for dark mode
+  },
+  header: {
+    position: 'relative',
+    height: 72,
+    width: 400,
+    overflow: 'hidden',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+  },
+  headerTitle: {
+    color: '#171717',
+    fontSize: 20,
+    fontWeight: '500',
+    // Add dark mode logic if needed
+  },
+  closeBtn: {
+    // Style as needed
+  },
+  closeImg: {
+    width: 20,
+    height: 20,
+    tintColor: '#171717', // Invert for dark mode if needed
+  },
+  lineDividerWrap: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    width: '100%',
+  },
+  headerBar: {
+    position: 'absolute',
+    width: '100%',
+    height: 4,
+    left: 0,
+    top: 0,
+  },
+  content: {
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingBottom: 32,
+  },
+  fullWidth: {
+    width: '100%',
+  },
+});
+

@@ -9,7 +9,7 @@ import {
 import { RouteAggregator, RouteError, SkipSupportedChainData } from '@leapwallet/elements-hooks';
 import { useQuery } from '@tanstack/react-query';
 import BigNumber from 'bignumber.js';
-import { Wallet } from 'hooks/wallet/useWallet';
+import { Wallet } from '../../../hooks/wallet/useWallet';
 
 import { MergedAsset } from './useAssets';
 

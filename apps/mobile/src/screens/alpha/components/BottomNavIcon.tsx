@@ -1,12 +1,13 @@
-import { RewardsIcon } from 'icons/rewards-icon';
+import { RewardsIcon } from '../../../../assets/icons/rewards-icon';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
+import { View } from 'react-native';
 
 const BottomNavIcon = observer(() => {
   return (
-    <div className='relative'>
-      <RewardsIcon height={24} width={24} className='text-muted-foreground' />
-    </div>
+    <View style={{ position: 'relative' }}>
+      <RewardsIcon size={24} color="#888" /* or use your theme color here */ />
+    </View>
   );
 });
 

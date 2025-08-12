@@ -1,4 +1,4 @@
-import { IconProps } from '@phosphor-icons/react';
+import { IconProps } from 'phosphor-react-native';
 import React from 'react';
 
 export const LockIcon = (props: IconProps) => {

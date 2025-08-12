@@ -17,8 +17,9 @@ export type IconButtonProps = {
   style?: ViewStyle | ViewStyle[];
 };
 
-const IconButton = forwardRef<TouchableOpacity, IconButtonProps>(
-  ({ image, isFilled, onPress, testID, style }, ref) => {
+const IconButton = forwardRef(
+  ({ image, isFilled, onPress, testID, style }: IconButtonProps,
+     ref: React.Ref<View>) => {
     return (
       <TouchableOpacity
         ref={ref}

@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { TouchableOpacity, StyleSheet } from 'react-native';
 import Text from '../text';
-import { X } from 'lucide-react-native'; // or use react-native-vector-icons
 
 type AlertStripProps = {
   message: React.ReactNode;
@@ -65,7 +64,7 @@ export const AlertStrip: React.FC<AlertStripProps> = ({
       </Text>
       {showCloseButton && (
         <TouchableOpacity style={styles.closeBtn} onPress={handleClose}>
-          <X size={16} color="#fff" />
+          X
         </TouchableOpacity>
       )}
     </TouchableOpacity>

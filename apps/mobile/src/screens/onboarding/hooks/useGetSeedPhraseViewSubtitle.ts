@@ -18,3 +18,4 @@ export function useGetSeedPhraseViewSubtitle(
     return `To import an existing ${walletName} wallet, please enter the recovery phrase here:`;
   }, [isMetamaskKey, isOtherEvmWallets, isPrivateKey, walletName]);
 }
+

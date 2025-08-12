@@ -18,6 +18,7 @@ interface PropTypes {
   
   updateChainFunction: (chainName: SupportedChain) => void;
   title?: string;
+  drag?: any;
 }
 
 const BetaCard = ({ chain }: { chain: ManageChainSettings }) => {
@@ -27,7 +28,7 @@ const BetaCard = ({ chain }: { chain: ManageChainSettings }) => {
   return (
     <View style={styles.betaCardContainer}>
       <Image
-        source={img ? { uri: img } : GenericLight}
+        source={{ uri: img ?? GenericLight}}
         style={styles.chainImage}
       />
       <View style={styles.infoCol}>
@@ -45,7 +46,7 @@ const BetaCard = ({ chain }: { chain: ManageChainSettings }) => {
   );
 };
 
-const ManageChainDraggables = ({ chains, searchQuery, updateChainFunction }: PropTypes) => {
+const ManageChainDraggables = ({ drag, chains, searchQuery, updateChainFunction }: PropTypes) => {
   const [errorSwitch, setErrorSwitch] = useState(false);
   const [data, setData] = useState(chains);
 

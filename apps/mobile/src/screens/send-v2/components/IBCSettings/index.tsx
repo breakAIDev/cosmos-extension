@@ -2,29 +2,27 @@ import { useChainsStore, useCustomChannels, useDefaultChannelId } from '@leapwal
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { SkipMsg, SkipMsgV2, UseRouteResponse, useTransactions } from '@leapwallet/elements-hooks';
 import { Buttons } from '@leapwallet/leap-ui';
-import { Info, MinusCircle, PlusCircle, Question, Warning } from '@phosphor-icons/react';
-import classNames from 'classnames';
-import Tooltip from 'components/better-tooltip';
-import BottomModal from '../bottom-modal';
-import { CustomCheckbox } from 'components/custom-checkbox';
-import { LoaderAnimation } from 'components/loader/Loader';
-import RadioGroup from 'components/radio-group';
-import Text from 'components/text';
-import { useSendContext } from 'pages/send-v2/context';
+import { Info, MinusCircle, PlusCircle, Question, Warning } from 'phosphor-react-native';
+import Tooltip from '../../../../components/better-tooltip';
+import BottomModal from '../../../../components/bottom-modal';
+import { CustomCheckbox } from '../../../../components/custom-checkbox';
+import { LoaderAnimation } from '../../../../components/loader/Loader';
+import RadioGroup from '../../../../components/radio-group';
+import Text from '../../../../components/text';
+import { useSendContext } from '../../../send-v2/context';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Colors } from 'theme/colors';
+import { Colors } from '../../../../theme/colors';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 
 import AddIBCChannel from './AddIBCChannel';
 
 type IBCSettingsProps = {
-  className?: string;
   targetChain: SupportedChain;
   sourceChain: SupportedChain;
 };
 
 const IBCSettings: React.FC<IBCSettingsProps> = ({ targetChain, sourceChain }) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  // this will be null when data is loading
   const [defaultChannelId, setDefaultChannelId] = useState<string | undefined | null>(null);
   const [sendViaUnverifiedChannel, setSendViaUnverifiedChannel] = useState<boolean>(false);
   const [isAddChannel, setIsAddChannel] = useState<boolean>(false);
@@ -50,8 +48,7 @@ const IBCSettings: React.FC<IBCSettingsProps> = ({ targetChain, sourceChain }) =
             messages: [],
             sourceAsset: { denom: null },
           },
-    
-    //@ts-ignore
+    // @ts-ignore
     [transferData?.isSkipTransfer, transferData?.messages, transferData?.routeResponse],
   );
 
@@ -59,10 +56,9 @@ const IBCSettings: React.FC<IBCSettingsProps> = ({ targetChain, sourceChain }) =
     routeWithMessages as (UseRouteResponse & { messages?: SkipMsg[] | SkipMsgV2[] }) | null,
   );
 
+  // Path composition (unused but kept for parity)
   const path: string[] = [];
-  
   Object.values(groupedTransactions)?.forEach((d: any[], index1: number) => {
-    
     d.forEach((f: any, index2: number) => {
       if (index1 == 0 && index2 == 0) {
         path.push(f.sourceChain);
@@ -81,7 +77,7 @@ const IBCSettings: React.FC<IBCSettingsProps> = ({ targetChain, sourceChain }) =
 
   const handleClick = useCallback(() => {
     setIsSettingsOpen((prev) => !prev);
-  }, [setIsSettingsOpen]);
+  }, []);
 
   const handleSelectChannel = useCallback(
     (value: string) => {
@@ -91,7 +87,7 @@ const IBCSettings: React.FC<IBCSettingsProps> = ({ targetChain, sourceChain }) =
         setCustomChannelId(value);
       }
     },
-    [customChannelId, setCustomChannelId],
+    [customChannelId],
   );
 
   const customChannelsForTargetChain = useMemo(
@@ -128,7 +124,7 @@ const IBCSettings: React.FC<IBCSettingsProps> = ({ targetChain, sourceChain }) =
       setIsAddChannel((prev) => !prev);
       setCustomChannelId(undefined);
     }
-  }, [hasChannelId, setIsAddChannel]);
+  }, [hasChannelId]);
 
   const onProceed = () => {
     setIsIbcUnwindingDisabled(true);
@@ -138,87 +134,90 @@ const IBCSettings: React.FC<IBCSettingsProps> = ({ targetChain, sourceChain }) =
 
   return (
     <>
-      <div
-        className={classNames('p-4 rounded-2xl bg-red-100 dark:bg-red-900 items-center flex gap-2', {
-          'bg-orange-200 dark:bg-orange-900': customIbcChannelId,
-        })}
+      <View
+        style={[
+          styles.warningBar,
+          customIbcChannelId && styles.warningBarCustom,
+        ]}
       >
         {customIbcChannelId ? (
-          <Info size={16} className={classNames('text-[#FFB33D] dark:text-orange-300 self-start')} />
+          <Info size={16} color="#FFB33D" style={{ alignSelf: 'flex-start' }} />
         ) : (
-          <Warning size={16} className={classNames('text-red-400 dark:text-red-300 self-start')} />
+          <Warning size={16} color="#F87171" style={{ alignSelf: 'flex-start' }} />
         )}
-        <div className='flex-1'>
-          <Text size='xs' className='font-bold mb-2'>
+        <View style={{ flex: 1 }}>
+          <Text size="xs" style={styles.boldText}>
             {customIbcChannelId ? 'Unverified Channel' : 'No verified routes available.'}
           </Text>
-          <Text size='xs' color='text-gray-800 dark:text-gray-200' className='font-medium'>
+          <Text size="xs" style={styles.infoSubText}>
             {customIbcChannelId
               ? customIbcChannelId
               : hasChannelId
               ? 'You can select channels from an unverified list to transfer.'
               : 'You can add a custom channel to transfer.'}
           </Text>
-        </div>
-        <button
-          title={`${hasChannelId ? 'Select' : 'Add'} channel`}
-          onClick={handleClick}
-          className='text-xs font-bold text-black-100 bg-white-100 py-2 px-4 rounded-3xl'
+        </View>
+        <TouchableOpacity
+          onPress={handleClick}
+          style={styles.selectBtn}
+          activeOpacity={0.7}
         >
-          {customIbcChannelId ? 'Edit selection' : hasChannelId ? 'Select channel' : 'Add channel'}
-        </button>
-      </div>
+          <Text size="xs" style={styles.selectBtnText}>
+            {customIbcChannelId ? 'Edit selection' : hasChannelId ? 'Select channel' : 'Add channel'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
       <BottomModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
-        title='Advanced IBC Settings'
+        title="Advanced IBC Settings"
         closeOnBackdropClick={true}
-        containerClassName='!max-panel-height'
-        contentClassName='!bg-white-100 dark:!bg-gray-950'
-        className='p-6'
+        containerStyle={{ maxHeight: '90%' }}
+        style={{ padding: 24 }}
       >
-        <div className='p-4 rounded-2xl bg-gray-50 dark:bg-gray-900 justify-center items-center'>
-          <div className='flex items-center mb-4 justify-between'>
-            <div className='flex gap-2 items-center'>
-              <Text className='font-bold'>Select channels</Text>
+        <View style={styles.panelContainer}>
+          <View style={styles.channelsHeaderRow}>
+            <View style={styles.headerLeftRow}>
+              <Text style={styles.boldText}>Select channels</Text>
               <Tooltip
                 content={
-                  <p className='text-gray-500 dark:text-gray-100 text-sm'>
-                    ID of the channel that will relay your tokens from {sourceChainInfo.chainName} to{' '}
-                    {targetChainInfo?.chainName}.
-                  </p>
+                  <Text style={{ color: '#6B7280', fontSize: 14 }}>
+                    ID of the channel that will relay your tokens from {sourceChainInfo.chainName} to {targetChainInfo?.chainName}.
+                  </Text>
                 }
               >
-                <div className='relative flex'>
-                  <Question size={20} className='text-gray-600 dark:text-gray-400' />
-                </div>
+                <View style={{ marginLeft: 6 }}>
+                  <Question size={20} color="#6B7280" />
+                </View>
               </Tooltip>
-            </div>
-            <div
-              className='bg-gray-100 dark:bg-gray-850 rounded-3xl px-[10px] py-1 flex gap-1 items-center cursor-pointer'
-              onClick={handleAddChannel}
+            </View>
+            <TouchableOpacity
+              style={styles.addChannelBtn}
+              onPress={handleAddChannel}
+              activeOpacity={0.7}
             >
               {!isAddChannel && hasChannelId ? (
-                <PlusCircle size={16} weight='bold' className='text-black-100 dark:text-white-100' />
+                <PlusCircle size={16} weight="bold" color="#111827" />
               ) : (
-                <MinusCircle size={16} weight='bold' className='text-black-100 dark:text-white-100' />
+                <MinusCircle size={16} weight="bold" color="#111827" />
               )}
-              <Text size='xs' className='font-medium'>
+              <Text size="xs" style={styles.addChannelText}>
                 Add Channel
               </Text>
-            </div>
-          </div>
+            </TouchableOpacity>
+          </View>
 
-          <div className='bg-gray-100 dark:bg-gray-850 rounded-2xl p-4 gap-4'>
+          <View style={styles.channelsOptionsBlock}>
             {!isAddChannel && hasChannelId ? (
               <>
-                <Text size='sm' className='text-gray-800 dark:text-gray-200 font-bold capitalize'>
+                <Text size="sm" style={styles.channelsListTitle}>
                   {sourceChainInfo.chainName} to {targetChainInfo?.chainName} channels
                 </Text>
                 {defaultChannelId === null ? (
-                  <div className='flex justify-center items-center my-3'>
-                    <LoaderAnimation color='white' />
-                  </div>
+                  <View style={styles.loaderBox}>
+                    <LoaderAnimation color="white" />
+                  </View>
                 ) : (
                   <RadioGroup
                     themeColor={Colors.green600}
@@ -231,34 +230,32 @@ const IBCSettings: React.FC<IBCSettingsProps> = ({ targetChain, sourceChain }) =
             ) : (
               <AddIBCChannel targetChain={targetChain} onAddComplete={handleSelectChannel} />
             )}
-          </div>
-        </div>
+          </View>
+        </View>
 
-        <div className='p-4 rounded-2xl bg-red-100 dark:bg-red-900 my-4'>
-          <div className='items-center flex gap-2'>
-            <Warning size={24} weight='bold' className='text-red-400 dark:text-red-300 self-start' />
-            <Text size='sm' className='font-bold mb-2'>
-              Sending via unverified channel.
-            </Text>
-          </div>
-          <div className='items-start flex gap-2'>
-            <div className='ml-[1px]'>
+        <View style={styles.unverifiedWarnBox}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <Warning size={24} weight="bold" color="#F87171" style={{ alignSelf: 'flex-start' }} />
+            <Text size="sm" style={styles.boldText}>Sending via unverified channel.</Text>
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginTop: 8, gap: 8 }}>
+            <View style={{ marginRight: 6 }}>
               <CustomCheckbox
                 checked={sendViaUnverifiedChannel}
                 onClick={() => setSendViaUnverifiedChannel((prevValue) => !prevValue)}
               />
-            </div>
-            <Text size='xs' color='text-gray-800 dark:text-gray-200' className='font-medium'>
+            </View>
+            <Text size="xs" style={styles.infoSubText}>
               Usability of tokens sent via unverified channels is not guaranteed. I understand and wish to proceed.
             </Text>
-          </div>
-        </div>
+          </View>
+        </View>
 
         <Buttons.Generic
           color={Colors.green600}
-          size='normal'
-          className='w-full'
-          title='Proceed'
+          size="normal"
+          style={{ width: '100%' }}
+          title="Proceed"
           disabled={!sendViaUnverifiedChannel || !customChannelId}
           onClick={onProceed}
         >
@@ -268,5 +265,96 @@ const IBCSettings: React.FC<IBCSettingsProps> = ({ targetChain, sourceChain }) =
     </>
   );
 };
+
+const styles = StyleSheet.create({
+  warningBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#FEE2E2', // bg-red-100
+    borderRadius: 18,
+    padding: 16,
+    marginBottom: 16,
+  },
+  warningBarCustom: {
+    backgroundColor: '#FFEDD5', // bg-orange-200
+  },
+  boldText: {
+    fontWeight: 'bold',
+  },
+  infoSubText: {
+    color: '#1F2937',
+    fontWeight: '500',
+    marginTop: 2,
+  },
+  selectBtn: {
+    backgroundColor: '#F3F4F6',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 24,
+    marginLeft: 8,
+  },
+  selectBtnText: {
+    color: '#111827',
+    fontWeight: 'bold',
+    fontSize: 12,
+  },
+  panelContainer: {
+    backgroundColor: '#F9FAFB', // bg-gray-50
+    borderRadius: 18,
+    padding: 16,
+    marginBottom: 12,
+    justifyContent: 'center',
+  },
+  channelsHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    justifyContent: 'space-between',
+  },
+  headerLeftRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  addChannelBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 24,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  addChannelText: {
+    fontWeight: '500',
+    color: '#111827',
+    fontSize: 12,
+    marginLeft: 4,
+  },
+  channelsOptionsBlock: {
+    backgroundColor: '#F3F4F6', // bg-gray-100
+    borderRadius: 18,
+    padding: 16,
+    gap: 16,
+  },
+  channelsListTitle: {
+    color: '#1F2937',
+    fontWeight: 'bold',
+    textTransform: 'capitalize',
+    marginBottom: 8,
+  },
+  loaderBox: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 12,
+  },
+  unverifiedWarnBox: {
+    backgroundColor: '#FEE2E2', // bg-red-100
+    borderRadius: 18,
+    padding: 16,
+    marginVertical: 16,
+  },
+});
 
 export default IBCSettings;

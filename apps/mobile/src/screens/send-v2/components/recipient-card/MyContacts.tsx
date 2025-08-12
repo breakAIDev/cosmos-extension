@@ -1,15 +1,16 @@
+import React, { useState } from 'react';
+import { View, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { SelectedAddress, sliceAddress } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { Avatar } from '@leapwallet/leap-ui';
-import { UserList } from '@phosphor-icons/react';
-import { SearchInput } from 'components/ui/input/search-input';
-import { useChainInfos } from 'hooks/useChainInfos';
-import { useContactsSearch } from 'hooks/useContacts';
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
-import React, { useState } from 'react';
-import { AddressBook } from 'utils/addressbook';
-
+import { UserList } from 'phosphor-react-native';
+import { SearchInput } from '../../../../components/ui/input/search-input';
+import { useChainInfos } from '../../../../hooks/useChainInfos';
+import { useContactsSearch } from '../../../../hooks/useContacts';
+import { useDefaultTokenLogo } from '../../../../hooks/utility/useDefaultTokenLogo';
+import { AddressBook } from '../../../../utils/addressbook';
 import { useSendContext } from '../../context';
+import Text from '../../../../components/text';
 
 interface MyContactsProps {
   handleContactSelect: (contact: SelectedAddress) => void;
@@ -40,60 +41,126 @@ function MyContacts({ handleContactSelect }: MyContactsProps) {
     <>
       <SearchInput
         value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
+        onChangeText={setSearchQuery}
         onClear={() => setSearchQuery('')}
-        placeholder='Search your contacts...'
+        placeholder="Search your contacts..."
       />
 
-      <div className='mt-4 w-full h-[calc(100%-300px)]] overflow-auto'>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
         {contacts.length > 0 ? (
           contacts.map((contact, index) => {
-            const chainImage = chainInfos[contact.blockchain]?.chainSymbolImageUrl ?? defaultTokenLogo;
+            const chainImage =
+              chainInfos[contact.blockchain as SupportedChain]?.chainSymbolImageUrl ?? defaultTokenLogo;
             const isLast = index === contacts.length - 1;
 
             return (
               <React.Fragment key={contact.address}>
-                <button
-                  className='w-full flex items-center gap-3 py-3'
-                  onClick={() => handleAvatarClick(contact, chainImage)}
+                <TouchableOpacity
+                  style={styles.contactRow}
+                  onPress={() => handleAvatarClick(contact, chainImage)}
+                  activeOpacity={0.7}
                 >
                   <Avatar chainIcon={chainImage} emoji={contact.emoji ?? 0} />
-
-                  <div>
-                    <p className='font-bold text-left dark:text-white-100 text-gray-700 capitalize'>{contact.name}</p>
-
-                    <p className='text-sm font-medium dark:text-gray-400 text-gray-600'>
+                  <View>
+                    <Text style={styles.contactName}>{contact.name}</Text>
+                    <Text style={styles.contactAddress}>
                       {sliceAddress(contact.ethAddress ? contact.ethAddress : contact.address)}
-                    </p>
-                  </div>
-                </button>
-
-                {!isLast && <div className='border-b w-full border-gray-100 dark:border-gray-850' />}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+                {!isLast && <View style={styles.divider} />}
               </React.Fragment>
             );
           })
         ) : (
-          <div className='py-[88px] w-full flex-col flex  justify-center items-center gap-4'>
-            <UserList size={40} className='text-black-100 dark:text-white-100 !leading-[40px]' />
-
-            <div className='flex flex-col justify-start items-center w-full gap-1'>
-              <div className='text-md text-center font-bold !leading-[21.5px] dark:text-white-100'>
+          <View style={styles.emptyWrap}>
+            <UserList size={40} color="#1A202C" style={styles.emptyIcon} />
+            <View style={styles.emptyTextWrap}>
+              <Text style={styles.emptyTitle}>
                 {trimmedSearchQuery.length > 0
                   ? `No contacts found for "${trimmedSearchQuery}"`
                   : `No contacts to show`}
-              </div>
-
-              <div className='text-sm font-normal !leading-[22.4px] text-gray-400 dark:text-gray-400'>
+              </Text>
+              <Text style={styles.emptySub}>
                 {trimmedSearchQuery.length > 0
                   ? `Try searching for a different term `
                   : `Add a contact see them appear here`}
-              </div>
-            </div>
-          </div>
+              </Text>
+            </View>
+          </View>
         )}
-      </div>
+      </ScrollView>
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  scroll: {
+    marginTop: 16,
+    flex: 1,
+    maxHeight: 320, // as per h-[calc(100%-300px)]
+  },
+  scrollContent: {
+    paddingBottom: 16,
+  },
+  contactRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 12,
+    width: '100%',
+  },
+  contactName: {
+    fontWeight: 'bold',
+    color: '#1F2937', // text-gray-700
+    textAlign: 'left',
+    textTransform: 'capitalize',
+    fontSize: 16,
+  },
+  contactAddress: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#6B7280', // text-gray-600
+    textAlign: 'left',
+  },
+  divider: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+    width: '100%',
+  },
+  emptyWrap: {
+    paddingVertical: 40,
+    width: '100%',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 16,
+  },
+  emptyIcon: {
+    marginBottom: 10,
+  },
+  emptyTextWrap: {
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    gap: 4,
+    width: '100%',
+  },
+  emptyTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    lineHeight: 21.5,
+    color: '#1A202C',
+    marginBottom: 2,
+  },
+  emptySub: {
+    fontSize: 14,
+    fontWeight: '400',
+    lineHeight: 22.4,
+    color: '#9CA3AF',
+    textAlign: 'center',
+  },
+});
 
 export default MyContacts;

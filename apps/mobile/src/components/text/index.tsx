@@ -1,32 +1,38 @@
-import React from 'react';
-import { Text as RNText, StyleSheet, TextProps as RNTextProps } from 'react-native';
+import React, { PropsWithChildren } from 'react';
+import { Text as RNText, StyleSheet, TextStyle, StyleProp } from 'react-native';
 
 export type TextProps = {
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'jumbo';
-  children?: React.ReactNode;
-  color?: string; // You can use color names or HEX
-  style?: any;    // Accept any extra style object/array
-} & RNTextProps;
-
-const sizeMap = {
-  xs: 12,
-  sm: 14,
-  md: 16,
-  lg: 20,
-  xl: 24,
-  xxl: 32,
-  jumbo: 48,
+  readonly size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'jumbo';
+  readonly children?: string;
+  readonly color?: string; // Accepts hex or named color string
+  readonly style?: StyleProp<TextStyle>;
 };
 
-export default function Text(props: TextProps) {
-  const { size, children, color, style, ...rest } = props;
+/**
+ * Text component for React Native
+ *
+ * @param props {('xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'jumbo')} - size - xs 12, sm 14, md 16, lg 20, xl 24, xxl 32, jumbo 48
+ */
+export default function Text(props: PropsWithChildren<TextProps>) {
+  const { size = 'md', children, color, style, ...rest } = props;
+
+  // Font sizes mapped to your requirements
+  const sizeToStyle: Record<NonNullable<TextProps['size']>, TextStyle> = {
+    xs: { fontSize: 12 },
+    sm: { fontSize: 14 },
+    md: { fontSize: 16 },
+    lg: { fontSize: 20 },
+    xl: { fontSize: 24 },
+    xxl: { fontSize: 32 },
+    jumbo: { fontSize: 48 },
+  };
 
   return (
     <RNText
       style={[
         styles.base,
-        { fontSize: size ? sizeMap[size] : sizeMap['md'] }, // default 'md' = 16
-        { color: color || '#0C0C0D' }, // default text-black-100 (customize as needed)
+        sizeToStyle[size],
+        { color: color ?? '#111' }, // Default to black if no color
         style,
       ]}
       {...rest}
@@ -38,7 +44,7 @@ export default function Text(props: TextProps) {
 
 const styles = StyleSheet.create({
   base: {
-    fontFamily: 'Satoshi-Regular', // Set your font family if available, or use system default
+    fontFamily: 'Satoshi', // If you use custom fonts, otherwise remove
     flexShrink: 1,
   },
 });

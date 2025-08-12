@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { Image, View, Text, StyleSheet, ImageStyle, ViewStyle, TextStyle } from 'react-native';
+import { Image, View, Text, StyleSheet, ImageStyle, ViewStyle, TextStyle, StyleProp } from 'react-native';
 
 type Props = {
   assetImg?: string;
   text: string;
   altText?: string;
-  containerStyle?: ViewStyle;
-  textStyle?: TextStyle;
-  imageStyle?: ImageStyle;
+  style?: StyleProp<ViewStyle>
+  containerStyle?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
+  imageStyle?: StyleProp<ImageStyle>;
 };
 
 export default function TokenImageWithFallback({

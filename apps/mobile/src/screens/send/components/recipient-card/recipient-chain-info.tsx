@@ -1,9 +1,10 @@
 import { useGetChains } from '@leapwallet/cosmos-wallet-hooks';
 import { isAptosChain, isSolanaChain, isSuiChain, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { Info } from '@phosphor-icons/react';
-import { SHOW_ETH_ADDRESS_CHAINS } from 'config/constants';
-import { useSendContext } from 'pages/send/context';
+import { Info } from 'phosphor-react-native';
+import { SHOW_ETH_ADDRESS_CHAINS } from '../../../../services/config/constants';
+import { useSendContext } from '../../../send/context';
 import React, { useMemo } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 
 export function RecipientChainInfo() {
   const { sendActiveChain, addressError, selectedAddress } = useSendContext();
@@ -35,14 +36,45 @@ export function RecipientChainInfo() {
   }
 
   return (
-    <div className='flex flex-col gap-3 mb-3'>
-      <div className='bg-secondary-300 h-[1px] w-full' />
-      <div className='flex flex-row gap-2 items-center justify-start px-4'>
-        <Info height={16} width={16} className='text-accent-blue min-w-4 shrink-0' />
-        <div className='text-xs text-accent-blue font-medium !leading-[19px]'>
-          This token will be sent to &ldquo;{sendChainEcosystem}&rdquo;
-        </div>
-      </div>
-    </div>
+    <View style={styles.container}>
+      <View style={styles.separator} />
+      <View style={styles.infoRow}>
+        <Info size={16} color="#1877F2" style={styles.infoIcon} />
+        <Text style={styles.infoText}>
+          This token will be sent to “{sendChainEcosystem}”
+        </Text>
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    marginBottom: 12,
+    flexDirection: 'column',
+    gap: 12,
+  },
+  separator: {
+    backgroundColor: '#DDE4EF', // You can replace with Colors.secondary300 if you have it
+    height: 1,
+    width: '100%',
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 16,
+    marginTop: 8,
+  },
+  infoIcon: {
+    minWidth: 16,
+    marginRight: 8,
+  },
+  infoText: {
+    fontSize: 12,
+    color: '#1877F2', // You can replace with Colors.accentBlue
+    fontWeight: '500',
+    lineHeight: 19,
+    flexShrink: 1,
+  },
+});

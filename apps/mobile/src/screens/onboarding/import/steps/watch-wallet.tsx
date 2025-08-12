@@ -1,20 +1,14 @@
-import { isValidWalletAddress } from '@leapwallet/cosmos-wallet-sdk';
-import { Button } from 'components/ui/button';
-import { Input } from 'components/ui/input';
-import { TextareaWithPaste } from 'components/ui/input/textarea-with-paste';
-import { LEDGER_NAME_EDITED_SUFFIX_REGEX } from 'config/config';
-import { AnimatePresence, motion, Variants } from 'framer-motion';
-import { EyeIcon } from 'icons/eye-icon';
-import { OnboardingWrapper } from 'pages/onboarding/wrapper';
 import React, { useState } from 'react';
-import { transition150 } from 'utils/motion-variants';
-
+import { View, Text, StyleSheet } from 'react-native';
+import { MotiView, AnimatePresence } from 'moti';
+import { isValidWalletAddress } from '@leapwallet/cosmos-wallet-sdk';
+import { Button } from '../../../../components/ui/button';
+import { Input } from '../../../../components/ui/input';
+import { TextareaWithPaste } from '../../../../components/ui/input/textarea-with-paste';
+import { LEDGER_NAME_EDITED_SUFFIX_REGEX } from '../../../../services/config/config';
+import { EyeIcon } from '../../../../../assets/icons/eye-icon';
+import { OnboardingWrapper } from '../../../onboarding/wrapper';
 import { useImportWalletContext } from '../import-wallet-context';
-
-const errorVariants: Variants = {
-  hidden: { opacity: 0, y: -10, height: 0 },
-  visible: { opacity: 1, y: 0, height: 'auto' },
-};
 
 export const ImportWatchWallet = () => {
   const {
@@ -33,76 +27,106 @@ export const ImportWatchWallet = () => {
       setError('');
       return;
     }
-
     if (!isValidWalletAddress(watchWalletAddress)) {
       setError('Invalid public address, please enter a valid address');
       return;
     }
-
     setError('');
     moveToNextStep();
   };
 
   return (
     <OnboardingWrapper
-      headerIcon={<EyeIcon className='size-6' />}
+      headerIcon={<EyeIcon size={24} />}
       heading={'Watch wallet'}
       subHeading={`Add a wallet address you'd like to watch.`}
       entry={prevStep <= currentStep ? 'right' : 'left'}
-      className='gap-10'
+      style={styles.gap10}
     >
-      <div className='flex flex-col gap-4'>
-        <div className='flex flex-col'>
+      <View style={styles.flexColGap4}>
+        <View style={styles.flexCol}>
           <TextareaWithPaste
             autoFocus
-            onChange={(value: string) => {
+            onChangeText={(value) => {
               setError('');
               setWatchWalletAddress(value);
             }}
             value={watchWalletAddress}
             error={error}
-            placeholder='Public address'
-            data-testing-id='enter-watch-address'
+            placeholder="Public address"
+            data-testing-id="enter-watch-address"
           />
 
           <AnimatePresence>
-            {error && (
-              <motion.span
-                className='text-xs font-medium text-destructive-100 block text-center'
-                data-testing-id='error-text-ele'
-                transition={transition150}
-                variants={errorVariants}
-                initial='hidden'
-                animate='visible'
-                exit='hidden'
+            {error ? (
+              <MotiView
+                from={{ opacity: 0, translateY: -10, height: 0 }}
+                animate={{ opacity: 1, translateY: 0, height: 18 }}
+                exit={{ opacity: 0, translateY: -10, height: 0 }}
+                transition={{ type: 'timing', duration: 150 }}
+                style={styles.errorBox}
               >
-                <span className='mt-2 block'>{error}</span>
-              </motion.span>
-            )}
+                <Text style={styles.errorText}>{error}</Text>
+              </MotiView>
+            ) : null}
           </AnimatePresence>
-        </div>
+        </View>
 
         <Input
-          placeholder='Name your wallet (optional)'
+          placeholder="Name your wallet (optional)"
           maxLength={24}
           value={watchWalletName?.replace(LEDGER_NAME_EDITED_SUFFIX_REGEX, '')}
-          onChange={(e) => setWatchWalletName(e.target.value)}
+          onChangeText={setWatchWalletName}
           trailingElement={
             watchWalletName?.length > 0 ? (
-              <span className='text-muted-foreground text-sm font-medium'>{`${watchWalletName?.length}/24`}</span>
+              <Text style={styles.trailingText}>{`${watchWalletName?.length}/24`}</Text>
             ) : null
           }
         />
-      </div>
+      </View>
 
       <Button
-        data-testing-id='btn-import-wallet'
-        className='mt-auto w-full'
+        data-testing-id="btn-import-wallet"
+        style={styles.mtAutoFull}
         disabled={!!error || !watchWalletAddress || !watchWalletName}
-        onClick={onImportWallet}
+        onPress={onImportWallet}
       >
         Start watching
       </Button>
     </OnboardingWrapper>
   );
 };
+
+const styles = StyleSheet.create({
+  gap10: {
+    gap: 40,
+  },
+  flexColGap4: {
+    flexDirection: 'column',
+    gap: 16,
+  },
+  flexCol: {
+    flexDirection: 'column',
+  },
+  errorBox: {
+    minHeight: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  errorText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#EF4444', // text-destructive-100
+    textAlign: 'center',
+  },
+  trailingText: {
+    color: '#94A3B8',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  mtAutoFull: {
+    marginTop: 'auto',
+    width: '100%',
+  },
+});

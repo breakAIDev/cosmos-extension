@@ -1,10 +1,9 @@
+import React, { useCallback, useState } from 'react';
+import { View, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { sliceWord } from '@leapwallet/cosmos-wallet-hooks';
 import { ThemeName, useTheme } from '@leapwallet/leap-ui';
-import Text from 'components/text';
-import { ImgNotAvailableDark, ImgNotAvailableLight } from 'images/logos';
-import React, { useCallback } from 'react';
-import { cn } from 'utils/cn';
-import { imgOnError } from 'utils/imgOnError';
+import Text from '../../../components/text';
+import { ImgNotAvailableDark, ImgNotAvailableLight } from '../../../../assets/images/logos';
 
 export type AssetCardProps = {
   id?: string;
@@ -25,42 +24,109 @@ export default function AssetCard({
   isSelected,
 }: AssetCardProps) {
   const { theme } = useTheme();
+  const [imgSource, setImgSource] = useState(
+    assetImg
+      ? { uri: assetImg }
+      : theme === ThemeName.DARK
+      ? ImgNotAvailableDark
+      : ImgNotAvailableLight
+  );
 
   const handleAssetSelect = useCallback(() => {
     if (isSelected) return;
     onClick();
   }, [isSelected, onClick]);
+
   return (
-    <div
-      className={cn(
-        'flex gap-x-3 items-center px-4 py-3 rounded-xl mt-3 cursor-pointer border border-transparent',
+    <TouchableOpacity
+      activeOpacity={isSelected ? 1 : 0.7}
+      style={[
+        styles.container,
         isSelected
-          ? 'bg-secondary-200 hover:bg-secondary-200 cursor-not-allowed border-secondary-600'
-          : 'cursor-pointer bg-secondary-100 hover:bg-secondary-200',
-      )}
-      onClick={handleAssetSelect}
+          ? styles.selected
+          : styles.unselected,
+      ]}
+      onPress={handleAssetSelect}
+      disabled={isSelected}
     >
-      <div className='relative'>
-        <img
-          src={assetImg ?? (theme === ThemeName.DARK ? ImgNotAvailableDark : ImgNotAvailableLight)}
-          onError={imgOnError(theme === ThemeName.DARK ? ImgNotAvailableDark : ImgNotAvailableLight)}
-          className='rounded-full'
+      <View style={styles.imageWrap}>
+        <Image
+          source={imgSource}
+          onError={() =>
+            setImgSource(
+              theme === ThemeName.DARK
+                ? ImgNotAvailableDark
+                : ImgNotAvailableLight
+            )
+          }
+          style={styles.assetImg}
           width={36}
           height={36}
         />
-        <img
-          src={chainSymbolImageUrl}
-          className='w-[15px] h-[15px] absolute -bottom-0.5 -right-0.5 rounded-full bg-background'
-        />
-      </div>
-      <div className='flex flex-col'>
-        <Text size='md' color='text-monochrome' className='font-bold'>
+        {chainSymbolImageUrl ? (
+          <Image
+            source={{ uri: chainSymbolImageUrl }}
+            style={styles.chainIcon}
+            width={15}
+            height={15}
+          />
+        ) : null}
+      </View>
+      <View style={styles.textWrap}>
+        <Text size="md" color="text-monochrome" style={{ fontWeight: 'bold' }}>
           {sliceWord(symbol)}
         </Text>
-        <Text size='xs' color='text-secondary-800'>
+        <Text size="xs" color="text-secondary-800">
           {sliceWord(chainName)}
         </Text>
-      </div>
-    </div>
+      </View>
+    </TouchableOpacity>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    gap: 12,
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 16,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  selected: {
+    backgroundColor: '#E0E7EF', // bg-secondary-200
+    borderColor: '#4B6EAF',     // border-secondary-600
+  },
+  unselected: {
+    backgroundColor: '#F6F8FA', // bg-secondary-100
+  },
+  imageWrap: {
+    position: 'relative',
+    width: 36,
+    height: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  assetImg: {
+    borderRadius: 18,
+    width: 36,
+    height: 36,
+  },
+  chainIcon: {
+    position: 'absolute',
+    width: 15,
+    height: 15,
+    borderRadius: 7.5,
+    backgroundColor: '#FFF', // bg-background
+    bottom: -2,
+    right: -2,
+    borderWidth: 1,
+    borderColor: '#E0E7EF',
+  },
+  textWrap: {
+    flexDirection: 'column',
+  },
+});

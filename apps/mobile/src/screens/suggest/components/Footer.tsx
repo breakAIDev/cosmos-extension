@@ -1,7 +1,7 @@
-import classNames from 'classnames';
-import { ErrorCard } from 'components/ErrorCard';
-import { LoaderAnimation } from 'components/loader/Loader';
 import React, { ReactNode } from 'react';
+import { View, StyleSheet } from 'react-native';
+import { ErrorCard } from '../../../components/ErrorCard';
+import { LoaderAnimation } from '../../../components/loader/Loader';
 
 type FooterProps = {
   children: ReactNode;
@@ -11,19 +11,33 @@ type FooterProps = {
 
 export function Footer({ children, error, isFetching }: FooterProps) {
   return (
-    <div
-      className={classNames(
-        'w-full flex flex-col flex-1 items-center box-border',
-        isFetching ? 'h-full justify-center' : 'justify-end',
-      )}
-    >
+    <View style={[styles.container, isFetching ? styles.center : styles.end]}>
       {error ? (
-        <div className='my-2'>
+        <View style={styles.errorWrap}>
           <ErrorCard text={error} />
-        </div>
+        </View>
       ) : null}
 
-      {!isFetching ? <>{children}</> : <LoaderAnimation color='#E18881' />}
-    </div>
+      {!isFetching ? children : <LoaderAnimation color="#E18881" />}
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    width: '100%',
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'center',
+    // box-sizing doesn't exist in RN; omitted by design.
+  },
+  center: {
+    justifyContent: 'center',
+  },
+  end: {
+    justifyContent: 'flex-end',
+  },
+  errorWrap: {
+    marginVertical: 8, // Tailwind 'my-2'
+  },
+});

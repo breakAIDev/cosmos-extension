@@ -1,8 +1,10 @@
-import BottomModal from 'components/new-bottom-modal';
-import Text from 'components/text';
-import { Button } from 'components/ui/button';
 import React from 'react';
-import { rootDenomsStore } from 'stores/denoms-store-instance';
+import { View, StyleSheet } from 'react-native';
+
+import BottomModal from '../../../components/new-bottom-modal';
+import Text from '../../../components/text';
+import { Button } from '../../../components/ui/button';
+import { rootDenomsStore } from '../../../context/denoms-store-instance';
 
 import { SelectProviderCard } from './SelectProviderCard';
 
@@ -20,21 +22,42 @@ export default function SuggestSelectProviderSheet({
   onReviewStake,
 }: SuggestSelectProviderSheetProps) {
   return (
-    <BottomModal isOpen={isVisible} onClose={onClose} title='Restake with a Provider' className='p-6'>
-      <div className='flex flex-col gap-y-6'>
-        <Text className='text-gray-400 dark:text-gray-600 text-center' size='sm'>
-          You&apos;re missing out on increased rewards. Select a provider to restake with for increased APR.
+    <BottomModal isOpen={isVisible} onClose={onClose} title="Restake with a Provider" contentStyle={styles.modalContent}>
+      <View style={styles.container}>
+        <Text style={styles.tipText} size="sm">
+          {"You're missing out on increased rewards. Select a provider to restake with for increased APR."}
         </Text>
         <SelectProviderCard
           selectDisabled={false}
-          title='Provider'
+          title="Provider"
           setShowSelectProviderSheet={setShowSelectProviderSheet}
           rootDenomsStore={rootDenomsStore}
         />
-        <Button onClick={onReviewStake} className='w-full'>
+        <Button onPress={onReviewStake} style={styles.reviewBtn}>
           Review Stake
         </Button>
-      </div>
+      </View>
     </BottomModal>
   );
 }
+
+const styles = StyleSheet.create({
+  modalContent: {
+    padding: 24,
+  },
+  container: {
+    flexDirection: 'column',
+    gap: 24,
+    width: '100%',
+  },
+  tipText: {
+    color: '#888', // or theme-based
+    textAlign: 'center',
+    marginBottom: 12,
+    fontSize: 15,
+  },
+  reviewBtn: {
+    width: '100%',
+    marginTop: 16,
+  },
+});

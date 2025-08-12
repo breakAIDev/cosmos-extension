@@ -1,5 +1,3 @@
-import { Key, useDisabledNFTsCollections, useSetDisabledNFTsInStorage } from '@leapwallet/cosmos-wallet-hooks';
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import {
   ArrowFatLineUp,
   ArrowLeft,
@@ -10,36 +8,39 @@ import {
   Heart,
   Smiley,
   X,
-} from '@phosphor-icons/react';
-import classNames from 'classnames';
-import Text from 'components/text';
-import { Button } from 'components/ui/button';
-import useActiveWallet from 'hooks/settings/useActiveWallet';
-import { Wallet } from 'hooks/wallet/useWallet';
-import { Images } from 'images';
+} from 'phosphor-react-native';
+import Text from '../../components/text';
+import { Button } from '../../components/ui/button';
+import useActiveWallet from '../../hooks/settings/useActiveWallet';
+import { Wallet } from '../../hooks/wallet/useWallet';
+import { Images } from '../../../assets/images';
 import { observer } from 'mobx-react-lite';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { favNftStore } from 'stores/manage-nft-store';
-import { AddressBook } from 'utils/addressbook';
-import { imgOnError } from 'utils/imgOnError';
-import { normalizeImageSrc } from 'utils/normalizeImageSrc';
-import { sliceWord } from 'utils/strings';
-
+import React, { useEffect, useMemo, useState } from 'react';
+import { favNftStore } from '../../context/manage-nft-store';
+import { normalizeImageSrc } from '../../utils/normalizeImageSrc';
+import { sliceWord } from '../../utils/strings';
 import { useNftContext } from './context';
-import { SelectNFTRecipient } from './SelectNFTRecipient';
-import { ReviewNFTTransferSheet } from './send-nft/review-transfer-sheet';
+
+import {
+  View,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  Modal,
+  ScrollView,
+  Linking,
+  Dimensions,
+} from 'react-native';
+import { Key, useDisabledNFTsCollections, useSetDisabledNFTsInStorage } from '@leapwallet/cosmos-wallet-hooks';
+
+const ITEM_SIZE = Math.min(Dimensions.get('window').width, 400) - 40;
 
 export const NftDetails = observer(() => {
   const [showSelectRecipient, setShowSelectRecipient] = useState(false);
-  const [selectedContact, setSelectedContact] = useState<AddressBook.SavedAddress | undefined>();
-  const [isAddContactSheetVisible, setIsAddContactSheetVisible] = useState(false);
-  const [showReviewSheet, setShowReviewSheet] = useState(false);
   const { activeWallet, setActiveWallet } = useActiveWallet();
   const [toast, setToast] = useState('');
   const [showImage, setShowImage] = useState(false);
   const { nftDetails, setNftDetails } = useNftContext();
-  const containerRef = useRef<HTMLDivElement | null>(null);
 
   const disabledNFTsCollections = useDisabledNFTsCollections();
   const setDisabledNFTsCollections = useSetDisabledNFTsInStorage();
@@ -97,7 +98,7 @@ export const NftDetails = observer(() => {
     }
   };
 
-  const handleToggleClick = async (isEnabled: boolean, collectionAddress: string, chain: SupportedChain) => {
+  const handleToggleClick = async (isEnabled: boolean, collectionAddress: string, chain: string) => {
     let _disabledNFTsCollections: string[] = [];
 
     if (isEnabled) {
@@ -113,224 +114,333 @@ export const NftDetails = observer(() => {
     await setDisabledNFTsCollections(_disabledNFTsCollections);
   };
 
-  const editContact = (savedAddress?: AddressBook.SavedAddress) => {
-    if (savedAddress) {
-      setSelectedContact(savedAddress);
-    }
-    setIsAddContactSheetVisible(true);
-    setShowSelectRecipient(false);
-  };
-
   useEffect(() => {
     if (toast) {
-      setTimeout(() => setToast(''), 3000);
+      const timeout = setTimeout(() => setToast(''), 3000);
+      return () => clearTimeout(timeout);
     }
   }, [toast]);
 
-  useEffect(() => {
-    if (containerRef && containerRef.current) {
-      document.getElementById('popup-layout')?.scroll({ top: 0 });
-    }
-  }, []);
-
-  if (showImage) {
-    return createPortal(
-      <div
-        className='absolute top-0 z-10 flex items-center justify-center panel-width panel-height rounded-lg overflow-hidden bg-secondary'
-        onClick={() => setShowImage(false)}
-      >
-        <X
-          size={28}
-          onClick={() => setShowImage(false)}
-          className='absolute top-3 right-3 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white cursor-pointer transition'
-        />
-        <img
-          src={nftDetails?.image ?? Images.Logos.GenericNFT}
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
-          onError={imgOnError(Images.Logos.GenericNFT)}
-          className='w-[352px] h-[352px] overflow-hidden object-contain'
-        />
-      </div>,
-      document.getElementById('popup-layout')?.parentNode as HTMLElement,
-    );
-  }
+  if (!nftDetails) return null;
 
   return (
-    <div ref={containerRef} className='relative overflow-scroll mb-20'>
-      <div className='flex justify-between items-center px-5 py-[14px]'>
-        <ArrowLeft
-          size={24}
-          className='text-muted-foreground hover:text-monochrome cursor-pointer'
-          onClick={() => setNftDetails(null)}
+    <View style={{ flex: 1 }}>
+      {/* Full-screen image modal */}
+      <Modal
+        visible={showImage}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowImage(false)}
+      >
+        <TouchableOpacity
+          activeOpacity={1}
+          style={styles.imageModalBackdrop}
+          onPress={() => setShowImage(false)}
+        >
+          <X
+            size={28}
+            color="#777"
+            weight="regular"
+            style={styles.imageModalClose}
+          />
+        </TouchableOpacity>
+        <Image
+          source={{ uri: nftDetails.image ?? Images.Logos.GenericNFT}}
+          style={styles.fullImage}
+          resizeMode="contain"
         />
-        <div className='flex gap-x-0.5'>
-          <Text className='text-[18px] font-bold' color='text-monochrome'>
-            {sliceWord(nftDetails?.collection.name ?? '', 15, 0)}
-          </Text>
-          <Text className='text-[18px] font-bold' color='text-muted-foreground'>
-            #{sliceWord(nftDetails?.tokenId ?? '', 5, 0)}
-          </Text>
-        </div>
-        <div></div>
-      </div>
-      <div className='flex flex-col px-6 py-4 gap-y-8'>
-        <div className='relative'>
-          <img
-            src={nftDetails?.image ?? Images.Logos.GenericNFT}
-            onError={imgOnError(Images.Logos.GenericNFT)}
-            className='rounded-2xl w-[352px] h-[352px] overflow-hidden object-contain'
-          />
-          <ArrowsOutSimple
-            size={32}
-            onClick={() => setShowImage(true)}
-            className='rounded-lg bg-secondary text-monochrome p-2 absolute bottom-[14px] right-[14px] cursor-pointer'
-          />
-        </div>
-        <div className='flex flex-col gap-y-7'>
-          <div className='px-2.5 flex gap-x-7 justify-center'>
-            <div className='flex flex-col gap-y-2.5 items-center'>
-              <Heart
-                size={62}
-                weight='fill'
-                className={classNames('p-5 rounded-full bg-secondary-200 hover:bg-secondary-400 cursor-pointer', {
-                  'text-monochrome': !isInFavNfts,
-                  'text-[#D0414F]': isInFavNfts,
-                })}
-                onClick={handleFavNftClick}
-              />
-              <Text size='sm' className='font-medium text-monochrome'>
-                Favorite
-              </Text>
-            </div>
-            {giveSendOption && (
-              <div className='flex flex-col gap-y-2.5 items-center'>
-                <ArrowFatLineUp
-                  size={62}
-                  weight='fill'
-                  className='text-monochrome p-5 rounded-full bg-secondary-200 hover:bg-secondary-400 cursor-pointer'
-                  onClick={() => setShowSelectRecipient(true)}
-                />
-                <Text size='sm' className='font-medium text-monochrome'>
-                  Send
-                </Text>
-              </div>
-            )}
-            <div className='flex flex-col gap-y-2.5 items-center'>
-              <Smiley
-                size={62}
-                className={classNames('p-5 rounded-full bg-secondary-200 hover:bg-secondary-400 cursor-pointer', {
-                  'text-monochrome': !isInProfile,
-                  'text-[#D0414F]': isInProfile,
-                })}
-                onClick={handleProfileClick}
-              />
-              <Text size='sm' className='font-medium text-monochrome'>
-                Avatar
-              </Text>
-            </div>
-            <div className='flex flex-col gap-y-2.5 items-center'>
-              {isInHiddenNfts ? (
-                <Eye
-                  size={62}
-                  weight='fill'
-                  className='text-monochrome p-5 rounded-full bg-secondary-200 hover:bg-secondary-400 cursor-pointer'
-                  onClick={() => {
-                    if (nftDetails) {
-                      handleToggleClick(true, nftDetails.collection.address, nftDetails.chain);
-                    }
-                  }}
-                />
-              ) : (
-                <EyeSlash
-                  size={62}
-                  weight='fill'
-                  className='text-monochrome p-5 rounded-full bg-secondary-200 hover:bg-secondary-400 cursor-pointer'
-                  onClick={() => {
-                    if (nftDetails) {
-                      handleToggleClick(false, nftDetails.collection.address, nftDetails.chain);
-                    }
-                  }}
-                />
-              )}
-              <Text size='sm' className='font-medium text-monochrome'>
-                {isInHiddenNfts ? 'Unhide' : 'Hide'}
-              </Text>
-            </div>
-          </div>
-          <Button
-            className='w-full'
-            onClick={() =>
-              window.open(
-                normalizeImageSrc(nftDetails?.tokenUri ?? '', nftDetails?.collection?.address ?? ''),
-                '_blank',
-              )
-            }
-            disabled={!nftDetails?.tokenUri}
-          >
-            <div className='flex items-center gap-x-1.5'>
-              <ArrowSquareOut size={20} className='text-monochrome' />
-              <Text size='md' className='font-bold text-monochrome'>
-                View on marketplaca
-              </Text>
-            </div>
-          </Button>
-        </div>
-        {nftDetails?.description || (nftDetails?.attributes && nftDetails.attributes.length > 0) ? (
-          <div className='mt-2 flex flex-col gap-y-6'>
-            {nftDetails?.description && (
-              <div className='flex flex-col gap-y-3'>
-                <Text size='sm' className='font-medium' color='text-muted-foreground'>
-                  Description
-                </Text>
-                <Text size='sm' color='text-monochrome' className='break-words' style={{ wordBreak: 'break-word' }}>
-                  {nftDetails?.description}
-                </Text>
-              </div>
-            )}
-            {nftDetails?.attributes && nftDetails.attributes.some((item) => !!item.trait_type || !!item.value) ? (
-              <>
-                <div className='h-[1px] w-full bg-secondary-300' />
-                <div className='flex flex-col gap-y-3'>
-                  <Text size='sm' className='font-medium' color='text-muted-foreground'>
-                    Features
-                  </Text>
-                  <div className='flex flex-wrap gap-3 break-words'>
-                    {nftDetails?.attributes?.map((attribute) => {
-                      if (!attribute.trait_type || !attribute.value) {
-                        return null;
-                      }
+      </Modal>
 
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 40 }}>
+        {/* Header */}
+        <View style={styles.headerRow}>
+          <TouchableOpacity
+            activeOpacity={1}
+            style={styles.imageModalBackdrop}
+            onPress={() => setNftDetails(null)}
+          >
+            <ArrowLeft
+              size={28}
+              color="#aaa"
+              weight="regular"
+              style={styles.headerBack}
+            />
+          </TouchableOpacity>
+          <View style={styles.headerTitleRow}>
+            <Text style={styles.headerTitle}>
+              {sliceWord(nftDetails?.collection.name ?? '', 15, 0)}
+            </Text>
+            <Text style={styles.headerTitleMuted}>#{sliceWord(nftDetails?.tokenId ?? '', 5, 0)}</Text>
+          </View>
+          <View style={{ width: 28 }} />
+        </View>
+
+        <View style={styles.nftImageBlock}>
+          <Image
+            source={{ uri: nftDetails.image ?? Images.Logos.GenericNFT}}
+            style={styles.nftImage}
+            resizeMode="contain"
+          />
+          <TouchableOpacity style={styles.expandIcon} onPress={() => setShowImage(true)}>
+            <ArrowsOutSimple size={32} color="#222" weight="regular" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Controls */}
+        <View style={styles.controlsRow}>
+          <View style={styles.controlBlock}>
+            <TouchableOpacity onPress={handleFavNftClick}>
+              <Heart
+                size={54}
+                weight="fill"
+                color={isInFavNfts ? "#D0414F" : "#222"}
+                style={[styles.controlIcon, isInFavNfts && { backgroundColor: "#ffe6ea" }]}
+              />
+            </TouchableOpacity>
+            <Text size="sm" style={styles.controlLabel}>Favorite</Text>
+          </View>
+          {giveSendOption && (
+            <View style={styles.controlBlock}>
+              <TouchableOpacity onPress={() => setShowSelectRecipient(true)}>
+                <ArrowFatLineUp size={54} color="#222" weight="fill" style={styles.controlIcon} />
+              </TouchableOpacity>
+              <Text size="sm" style={styles.controlLabel}>Send</Text>
+            </View>
+          )}
+          <View style={styles.controlBlock}>
+            <TouchableOpacity onPress={handleProfileClick}>
+              <Smiley
+                size={54}
+                color={isInProfile ? "#D0414F" : "#222"}
+                style={[styles.controlIcon, isInProfile && { backgroundColor: "#ffe6ea" }]}
+              />
+            </TouchableOpacity>
+            <Text size="sm" style={styles.controlLabel}>Avatar</Text>
+          </View>
+          <View style={styles.controlBlock}>
+            {isInHiddenNfts ? (
+              <TouchableOpacity onPress={() => {
+                if (nftDetails) {
+                  handleToggleClick(true, nftDetails.collection.address, nftDetails.chain);
+                }
+              }}>
+                <Eye size={54} color="#222" weight="fill" style={styles.controlIcon} />
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity onPress={() => {
+                if (nftDetails) {
+                  handleToggleClick(false, nftDetails.collection.address, nftDetails.chain);
+                }
+              }}>
+                <EyeSlash size={54} color="#222" weight="fill" style={styles.controlIcon} />
+              </TouchableOpacity>
+            )}
+            <Text size="sm" style={styles.controlLabel}>{isInHiddenNfts ? 'Unhide' : 'Hide'}</Text>
+          </View>
+        </View>
+
+        {/* Marketplace button */}
+        <Button
+          style={{ width: '100%', marginTop: 16 }}
+          onPress={() => {
+            if (nftDetails?.tokenUri) {
+              Linking.openURL(
+                normalizeImageSrc(nftDetails.tokenUri, nftDetails.collection?.address ?? '')
+              );
+            }
+          }}
+          disabled={!nftDetails?.tokenUri}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <ArrowSquareOut size={20} color="#222" />
+            <Text size="md" style={{ fontWeight: 'bold', color: '#222' }}>
+              View on marketplace
+            </Text>
+          </View>
+        </Button>
+
+        {/* Description and attributes */}
+        {(nftDetails?.description || (nftDetails?.attributes && nftDetails.attributes.length > 0)) && (
+          <View style={{ marginTop: 20, gap: 16 }}>
+            {nftDetails?.description && (
+              <View style={{ gap: 6 }}>
+                <Text size="sm" style={{ fontWeight: '600', color: '#888' }}>Description</Text>
+                <Text size="sm" style={{ color: '#222' }}>{nftDetails?.description}</Text>
+              </View>
+            )}
+            {nftDetails?.attributes && nftDetails.attributes.some(item => !!item.trait_type || !!item.value) && (
+              <>
+                <View style={{ height: 1, width: '100%', backgroundColor: '#eee', marginVertical: 10 }} />
+                <View>
+                  <Text size="sm" style={{ fontWeight: '600', color: '#888' }}>Features</Text>
+                  <View style={styles.attributeWrap}>
+                    {nftDetails?.attributes?.map((attribute, idx) => {
+                      if (!attribute.trait_type || !attribute.value) return null;
                       return (
-                        <div
-                          key={attribute.trait_type}
-                          className='p-2.5 rounded-lg flex flex-col gap-y-2.5 max-w-fit border-secondary-300 border'
+                        <View
+                          key={attribute.trait_type + idx}
+                          style={styles.attributeBox}
                         >
-                          <Text size='sm' color='text-muted-foreground'>
-                            {attribute.trait_type}
-                          </Text>
-                          <Text size='sm' className='font-bold' color='text-monochrome'>
+                          <Text size="sm" style={{ color: '#888' }}>{attribute.trait_type}</Text>
+                          <Text size="sm" style={{ fontWeight: 'bold', color: '#222' }}>
                             {attribute.value}
                           </Text>
-                        </div>
+                        </View>
                       );
                     })}
-                  </div>
-                </div>
+                  </View>
+                </View>
               </>
-            ) : null}
-          </div>
-        ) : null}
-        {toast && (
-          <div className='sticky bottom-5 bg-primary hover:bg-primary-hover rounded-xl py-2.5 pr-[14px] pl-5 w-[352px] max-w-[352px] flex items-center justify-between'>
-            <Text size='sm' className='font-medium'>
-              {toast}
-            </Text>
-            <X size={16} onClick={() => setToast('')} className='cursor-pointer' />
-          </div>
+            )}
+          </View>
         )}
-      </div>
-    </div>
+
+        {/* Toast */}
+        {!!toast && (
+          <View style={styles.toastContainer}>
+            <Text size="sm" style={{ fontWeight: '500', color: '#fff', flex: 1 }}>{toast}</Text>
+            <TouchableOpacity onPress={() => setToast('')}>
+              <X size={18} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        )}
+      </ScrollView>
+    </View>
   );
 });
+
+const styles = StyleSheet.create({
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingTop: 14,
+    paddingBottom: 10,
+  },
+  headerBack: {
+    alignSelf: 'center',
+  },
+  headerTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  headerTitle: {
+    fontWeight: 'bold',
+    fontSize: 18,
+    color: '#222',
+    marginRight: 4,
+  },
+  headerTitleMuted: {
+    fontWeight: 'bold',
+    fontSize: 18,
+    color: '#999',
+  },
+  nftImageBlock: {
+    alignItems: 'center',
+    marginVertical: 6,
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  nftImage: {
+    width: ITEM_SIZE,
+    height: ITEM_SIZE,
+    borderRadius: 20,
+    backgroundColor: '#f2f2f2',
+  },
+  expandIcon: {
+    position: 'absolute',
+    bottom: 18,
+    right: 18,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 4,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    shadowOffset: { width: 1, height: 2 },
+  },
+  controlsRow: {
+    flexDirection: 'row',
+    gap: 24,
+    justifyContent: 'space-around',
+    marginTop: 20,
+    marginBottom: 10,
+  },
+  controlBlock: {
+    alignItems: 'center',
+    gap: 8,
+  },
+  controlIcon: {
+    backgroundColor: '#edf3f3',
+    borderRadius: 50,
+    padding: 12,
+  },
+  controlLabel: {
+    fontWeight: '500',
+    color: '#222',
+    marginTop: 2,
+  },
+  attributeWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 6,
+  },
+  attributeBox: {
+    padding: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#eee',
+    marginRight: 6,
+    marginBottom: 6,
+    backgroundColor: '#fafbfc',
+    maxWidth: 140,
+    alignItems: 'flex-start',
+    gap: 2,
+  },
+  toastContainer: {
+    position: 'absolute',
+    left: 20,
+    right: 20,
+    bottom: 18,
+    backgroundColor: '#222',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    zIndex: 100,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  imageModalBackdrop: {
+    flex: 1,
+    backgroundColor: '#222c',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  imageModalClose: {
+    position: 'absolute',
+    top: 24,
+    right: 28,
+    zIndex: 10,
+  },
+  fullImage: {
+    width: ITEM_SIZE,
+    height: ITEM_SIZE,
+    borderRadius: 20,
+    backgroundColor: '#fff',
+    marginTop: 20,
+    alignSelf: 'center',
+  },
+});
+
+export default NftDetails;

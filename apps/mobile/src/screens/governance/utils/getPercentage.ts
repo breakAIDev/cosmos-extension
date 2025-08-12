@@ -1,4 +1,5 @@
-export function getPercentage(a: number, b: number) {
-  if (b === 0) return '0%';
-  return `${Number((a / b) * 100).toFixed(2)}%`;
+export function getPercentage(a: number, b: number): string {
+  if (!b) return '0%';
+  const percent = (a / b) * 100;
+  return `${percent.toFixed(2)}%`;
 }

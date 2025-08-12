@@ -1,3 +1,5 @@
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import {
   SelectedAddress,
   useActiveWallet,
@@ -9,7 +11,6 @@ import {
 } from '@leapwallet/cosmos-wallet-hooks';
 import {
   BTC_CHAINS,
-  ChainInfo,
   getBech32Address,
   getBlockChainFromAddress,
   isAptosChain,
@@ -31,27 +32,25 @@ import {
   useSkipSupportedChains,
 } from '@leapwallet/elements-hooks';
 import { ThemeName, useTheme } from '@leapwallet/leap-ui';
-import { AddressBook as AddressBookIcon, CaretDown, UserPlus, Wallet as WalletIcon } from '@phosphor-icons/react';
-import { bech32 } from 'bech32';
-import { ActionInputWithPreview } from 'components/action-input-with-preview';
-import { LoaderAnimation } from 'components/loader/Loader';
-import Text from 'components/text';
-import { motion } from 'framer-motion';
-import { useContactsSearch } from 'hooks/useContacts';
-import useQuery from 'hooks/useQuery';
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
-import { Images } from 'images';
+import { AddressBook as AddressBookIcon, CaretDown, UserPlus, Wallet as WalletIcon } from 'phosphor-react-native';
+import { decode } from 'bech32';
+import { ActionInputWithPreview } from '../../../../components/action-input-with-preview';
+import { LoaderAnimation } from '../../../../components/loader/Loader';
+import Text from '../../../../components/text';
+import { useContactsSearch } from '../../../../hooks/useContacts';
+import useQuery from '../../../../hooks/useQuery';
+import { useDefaultTokenLogo } from '../../../../hooks/utility/useDefaultTokenLogo';
+import { Images } from '../../../../../assets/images';
 import * as sol from 'micro-sol-signer';
 import { observer } from 'mobx-react-lite';
-import { useSendContext } from 'pages/send-v2/context';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { chainInfoStore } from 'stores/chain-infos-store';
-import { manageChainsStore } from 'stores/manage-chains-store';
-import { Colors } from 'theme/colors';
-import { AddressBook } from 'utils/addressbook';
-import { UserClipboard } from 'utils/clipboard';
-import { isLedgerEnabled } from 'utils/isLedgerEnabled';
-import { sliceAddress } from 'utils/strings';
+import { useSendContext } from '../../../send-v2/context';
+import { chainInfoStore } from '../../../../context/chain-infos-store';
+import { manageChainsStore } from '../../../../context/manage-chains-store';
+import { Colors } from '../../../../theme/colors';
+import { AddressBook } from '../../../../utils/addressbook';
+import { UserClipboard } from '../../../../utils/clipboard';
+import { isLedgerEnabled } from '../../../../utils/isLedgerEnabled';
+import { sliceAddress } from '../../../../utils/strings';
 
 import { useCheckAddressError } from '../../hooks/useCheckAddressError';
 import { useCheckIbcTransfer } from '../../hooks/useCheckIbcTransfer';
@@ -62,6 +61,7 @@ import { SecondaryActionButton } from './secondary-action-button';
 import { DestinationType, SelectDestinationSheet } from './select-destination-sheet';
 import { SelectedAddressPreview } from './selected-address-preview';
 import { SelectInitiaChainSheet } from './SelectInitiaChainSheet';
+import { MotiView } from 'moti';
 
 type RecipientCardProps = {
   themeColor: string;
@@ -74,10 +74,7 @@ type RecipientCardProps = {
 const nameServiceMatcher = /^[a-zA-Z0-9_-]+\.[a-z]+$/;
 
 export const RecipientCard = observer(
-  ({ rootERC20DenomsStore, rootCW20DenomsStore, chainTagsStore, chainFeatureFlagsStore }: RecipientCardProps) => {
-    /**
-     * Local States
-     */
+  ({ rootERC20DenomsStore, rootCW20DenomsStore, chainFeatureFlagsStore }: RecipientCardProps) => {
     const recipient = useQuery().get('recipient') ?? undefined;
     const [isAddContactSheetVisible, setIsAddContactSheetVisible] = useState<boolean>(false);
     const [recipientInputValue, setRecipientInputValue] = useState<string>(recipient ?? '');
@@ -160,10 +157,6 @@ export const RecipientCard = observer(
     const isSavedContactSelected =
       selectedAddress?.address === recipientInputValue && selectedAddress?.selectionType === 'saved';
 
-    /**
-     * Memoized Values
-     */
-
     const recipientValueToShow = useMemo(() => {
       if (ethAddress) {
         return ethAddress;
@@ -219,9 +212,9 @@ export const RecipientCard = observer(
 
       if (recipientValueToShow.length > 0) {
         try {
-          bech32.decode(recipientValueToShow);
+          decode(recipientValueToShow);
           return (
-            <Text size='md' className='text-gray-800 dark:text-gray-200'>
+            <Text size='md' style={{ color: isDark ? '#e5e7eb' : '#1f2937' }}>
               {sliceAddress(recipientValueToShow)}
             </Text>
           );
@@ -231,14 +224,7 @@ export const RecipientCard = observer(
       }
 
       return undefined;
-    }, [
-      existingContactMatch?.address,
-      existingContactMatch?.ethAddress,
-      recipientValueToShow,
-      selectedAddress,
-      setEthAddress,
-      setSelectedAddress,
-    ]);
+    }, [existingContactMatch?.address, existingContactMatch?.ethAddress, isDark, recipientValueToShow, selectedAddress, setEthAddress, setSelectedAddress]);
 
     const skipSupportedDestinationChainsIDs: string[] = useMemo(() => {
       return (
@@ -308,10 +294,6 @@ export const RecipientCard = observer(
       return _minitiaChains;
     }, [chainFeatureFlags, chains, sendSelectedNetwork]);
 
-    /**
-     * --------
-     */
-
     const showContactsList = recipientInputValue.trim().length > 0 && contactsToShow.length > 0;
 
     const showAddToContacts =
@@ -340,10 +322,6 @@ export const RecipientCard = observer(
       sendSelectedNetwork === 'mainnet';
 
     const showSecondaryActions = showContactsButton || showMyWalletButton || showAddToContacts;
-
-    /**
-     * Memoized Callbacks
-     */
 
     const fillRecipientInputValue = useCallback(
       (value: string) => {
@@ -382,15 +360,14 @@ export const RecipientCard = observer(
     );
 
     const handleOnChange = useCallback(
-      (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value.trim();
+      (value: string) => {
         fillRecipientInputValue(value);
       },
       [fillRecipientInputValue],
     );
 
     const actionHandler = useCallback(
-      (e: React.MouseEvent, _action: string) => {
+      (value: string, _action: string) => {
         switch (_action) {
           case 'paste':
             UserClipboard.pasteText().then((text) => {
@@ -409,8 +386,7 @@ export const RecipientCard = observer(
         }
       },
 
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [fillRecipientInputValue, setEthAddress, setMemo, setSelectedAddress],
+      [setEthAddress, setMemo, setSelectedAddress],
     );
 
     const handleContactSelect = useCallback(
@@ -483,7 +459,7 @@ export const RecipientCard = observer(
       addressWarningElementError: (
         <>
           Recipient will receive this on address:{' '}
-          <LoaderAnimation color={Colors.white100} className='w-[20px] h-[20px]' />
+          <LoaderAnimation color={Colors.white100} style={{height: 20, width: 20}} />
         </>
       ),
       setAddressWarning,
@@ -505,7 +481,7 @@ export const RecipientCard = observer(
       addressWarningElementError: (
         <>
           Checking the Ox and Sei address link status{' '}
-          <LoaderAnimation color={Colors.white100} className='w-[20px] h-[20px]' />
+          <LoaderAnimation color={Colors.white100} style={{height: 20, width: 20}} />
         </>
       ),
       showNameServiceResults,
@@ -615,7 +591,7 @@ export const RecipientCard = observer(
           return;
         }
 
-        const { prefix } = isBtcTx ? { prefix: '' } : bech32.decode(cleanInputValue);
+        const { prefix } = isBtcTx ? { prefix: '' } : decode(cleanInputValue);
         let _chain = addressPrefixes[prefix] as SupportedChain;
 
         if (_chain !== 'noble' && selectedToken?.coinMinimalDenom === 'uusdn') {
@@ -652,20 +628,7 @@ export const RecipientCard = observer(
           setAddressError('Invalid Address');
         }
       }
-
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [
-      addressPrefixes,
-      chains,
-      currentWalletAddress,
-      recipientInputValue,
-      selectedAddress,
-      setSelectedAddress,
-      showNameServiceResults,
-      sendActiveChain,
-      selectedInitiaChain,
-      selectedToken,
-    ]);
+    }, [addressPrefixes, chains, currentWalletAddress, recipientInputValue, selectedAddress, setSelectedAddress, showNameServiceResults, sendActiveChain, selectedInitiaChain, selectedToken, setAddressError, isSuiTx, isAptosTx, isSolanaTx, isBtcTx, defaultTokenLogo, ethAddress, activeChainInfo.chainSymbolImageUrl, activeChainInfo.key]);
 
     useEffect(() => {
       if (existingContactMatch && selectedAddress && !selectedInitiaChain) {
@@ -731,157 +694,231 @@ export const RecipientCard = observer(
     }, [minitiaChains, sendActiveChain]);
 
     const isNotIBCError = addressError ? !addressError.includes('IBC transfers are not supported') : false;
-    /**
-     * Return Component
-     */
 
     return (
-      <div>
-        <motion.div className='p-4 rounded-2xl bg-white-100 dark:bg-gray-950'>
-          <ActionInputWithPreview
-            autoFocus
-            invalid={!!isNotIBCError}
-            warning={!!addressWarning.message}
-            action={action}
-            buttonText={action}
-            icon={inputButtonIcon}
-            value={recipientValueToShow}
-            onAction={actionHandler}
-            onChange={handleOnChange}
-            placeholder='Enter recipient address or contact'
-            autoComplete='off'
-            spellCheck='false'
-            className={`border-transparent rounded-xl h-12 pl-4 py-[2px] text-md font-medium placeholder:text-gray-600 dark:placeholder:text-gray-400 text-black-100 dark:text-white-100 bg-gray-50 dark:bg-gray-900 ${
-              !isNotIBCError && !addressWarning.message && 'focus-within:!border-green-600'
-            }`}
-            preview={preview}
-          />
+      <MotiView style={styles.cardOuter}>
+        {/* Action Input */}
+        <ActionInputWithPreview
+          invalid={!!isNotIBCError}
+          warning={!!addressWarning.message}
+          action={action}
+          buttonText={action}
+          icon={inputButtonIcon}
+          value={recipientValueToShow}
+          onAction={actionHandler}
+          onChangeText={handleOnChange}
+          placeholder="Enter recipient address or contact"
+          autoComplete="off"
+          spellCheck={false}
+          style={[
+            styles.input,
+            !isNotIBCError && !addressWarning.message && styles.inputActive,
+          ]}
+          preview={preview}
+        />
 
-          {isNotIBCError ? (
-            <Text
-              size='xs'
-              color='text-red-300'
-              className='mt-2 ml-1 font-bold'
-              data-testing-id='send-recipient-address-error-ele'
-            >
-              {addressError}
-            </Text>
-          ) : null}
+        {/* Error/Warning Text */}
+        {isNotIBCError ? (
+          <Text size="xs" style={styles.errorText}>
+            {addressError}
+          </Text>
+        ) : null}
+        {addressWarning.message ? (
+          <Text size="xs" style={styles.warningText}>
+            {addressWarning.message}
+          </Text>
+        ) : null}
 
-          {addressWarning.message ? (
-            <Text
-              size='xs'
-              color='text-yellow-600'
-              className='mt-2 ml-1 font-bold'
-              data-testing-id='send-recipient-address-error-ele'
-            >
-              {addressWarning.message}
-            </Text>
-          ) : null}
-
-          <div className='flex w-full items-center justify-between mt-3'>
-            <div className='flex flex-wrap gap-2 w-full'>
-              {showSecondaryActions ? (
-                <>
-                  {showContactsButton ? (
-                    <SecondaryActionButton
-                      leftIcon={<AddressBookIcon size={12} className='text-gray-800 dark:text-gray-200' />}
-                      onClick={() => setIsDestinationSheetVisible('My Contacts')}
-                      actionLabel='Open Contacts Sheet'
-                    >
-                      <Text size='xs' className='text-gray-800 dark:text-gray-200 whitespace-nowrap font-medium'>
-                        Contacts
-                      </Text>
-                    </SecondaryActionButton>
-                  ) : null}
-
-                  {showMyWalletButton ? (
-                    <SecondaryActionButton
-                      leftIcon={<WalletIcon size={12} className='text-gray-800 dark:text-gray-200' />}
-                      onClick={() => setIsDestinationSheetVisible('My Wallets')}
-                      actionLabel='Show My Wallets on Other Chains'
-                      iconClassName='!text-sm !text-gray-800 dark:!text-gray-200'
-                    >
-                      <Text size='xs' className='text-gray-800 dark:text-gray-200 whitespace-nowrap font-medium'>
-                        My Wallets
-                      </Text>
-                    </SecondaryActionButton>
-                  ) : null}
-
-                  {showAddToContacts ? (
-                    <SecondaryActionButton
-                      leftIcon={<UserPlus size={12} className='text-gray-800 dark:text-gray-200' />}
-                      onClick={handleAddContact}
-                      actionLabel='Add Contact to Address Book'
-                    >
-                      <Text size='xs' className='text-gray-800 dark:text-gray-200 whitespace-nowrap font-medium'>
-                        Add Contact
-                      </Text>
-                    </SecondaryActionButton>
-                  ) : null}
-                </>
-              ) : null}
-
-              {isIBCTransfer && sendSelectedNetwork === 'mainnet' && destChainInfo ? (
-                <div className='flex flex-1 justify-end'>
-                  <div className='flex w-fit gap-1 py-1 px-[10px] bg-[#F7EDFC] dark:bg-[#290939] rounded-3xl h-8 items-center'>
-                    <Images.Misc.IbcProtocol color={isDark ? '#E0B9F4' : '#A22CDD'} />
-                    <Text
-                      size='xs'
-                      color='text-[#A22CDD] dark:text-[#E0B9F4]'
-                      className='whitespace-nowrap font-medium'
-                    >
-                      IBC Transfer
+        {/* Secondary Action Buttons */}
+        <View style={styles.actionsRow}>
+          <View style={styles.actionsWrap}>
+            {showSecondaryActions && (
+              <>
+                {showContactsButton && (
+                  <SecondaryActionButton
+                    leftIcon={
+                      <AddressBookIcon size={12} color="#444" style={{ marginRight: 4 }} />
+                    }
+                    onPress={() => setIsDestinationSheetVisible('My Contacts')}
+                    actionLabel="Open Contacts Sheet"
+                  >
+                    <Text size="xs" style={styles.actionLabel}>
+                      Contacts
                     </Text>
-                  </div>
-                </div>
-              ) : null}
-
-              {destChainInfo && minitiaChains.includes(destChainInfo.key) && minitiaChains.includes(sendActiveChain) ? (
-                <div onClick={handleSelectInitiaClick} className='flex ml-auto justify-end cursor-pointer'>
-                  <div className='flex w-fit gap-x-1.5 py-1.5 px-3 bg-gray-100 dark:bg-gray-800 rounded-3xl items-center'>
-                    <Text size='xs' color='text-gray-800 dark:text-white-100' className='whitespace-nowrap font-medium'>
-                      {destChainInfo.chainName}
+                  </SecondaryActionButton>
+                )}
+                {showMyWalletButton && (
+                  <SecondaryActionButton
+                    leftIcon={
+                      <WalletIcon size={12} color="#444" style={{ marginRight: 4 }} />
+                    }
+                    onPress={() => setIsDestinationSheetVisible('My Wallets')}
+                    actionLabel="Show My Wallets on Other Chains"
+                  >
+                    <Text size="xs" style={styles.actionLabel}>
+                      My Wallets
                     </Text>
-                    <CaretDown size={10} className='text-gray-800 dark:text-white-100' />
-                  </div>
-                </div>
-              ) : null}
-            </div>
-          </div>
+                  </SecondaryActionButton>
+                )}
+                {showAddToContacts && (
+                  <SecondaryActionButton
+                    leftIcon={
+                      <UserPlus size={12} color="#444" style={{ marginRight: 4 }} />
+                    }
+                    onPress={handleAddContact}
+                    actionLabel="Add Contact to Address Book"
+                  >
+                    <Text size="xs" style={styles.actionLabel}>
+                      Add Contact
+                    </Text>
+                  </SecondaryActionButton>
+                )}
+              </>
+            )}
+            {/* IBC Transfer Badge */}
+            {isIBCTransfer && sendSelectedNetwork === 'mainnet' && destChainInfo && (
+              <View style={styles.ibcTag}>
+                <Images.Misc.IbcProtocol color={isDark ? '#E0B9F4' : '#A22CDD'} />
+                <Text
+                  size="xs"
+                  style={{
+                    color: isDark ? '#E0B9F4' : '#A22CDD',
+                    fontWeight: '500',
+                    marginLeft: 4,
+                  }}
+                >
+                  IBC Transfer
+                </Text>
+              </View>
+            )}
+            {/* Initia Chain Selection */}
+            {destChainInfo &&
+              minitiaChains.includes(destChainInfo.key) &&
+              minitiaChains.includes(sendActiveChain) && (
+                <TouchableOpacity
+                  onPress={handleSelectInitiaClick}
+                  style={styles.initiaSelector}
+                  activeOpacity={0.7}
+                >
+                  <Text size="xs" style={styles.initiaText}>
+                    {destChainInfo.chainName}
+                  </Text>
+                  <CaretDown size={10} color="#222" style={{ marginLeft: 6 }} />
+                </TouchableOpacity>
+              )}
+          </View>
+        </View>
 
-          {showNameServiceResults ? (
-            <NameServiceMatchList address={recipientInputValue} handleContactSelect={handleContactSelect} />
-          ) : null}
+        {/* Name Service Results */}
+        {showNameServiceResults ? (
+          <NameServiceMatchList address={recipientInputValue} handleContactSelect={handleContactSelect} />
+        ) : null}
 
-          <SelectDestinationSheet
-            isOpenType={isDestinationSheetVisible}
-            setSelectedAddress={handleWalletSelect}
-            handleContactSelect={handleContactSelect}
-            onClose={() => setIsDestinationSheetVisible(null)}
-            skipSupportedDestinationChainsIDs={skipSupportedDestinationChainsIDs}
-            showOnlyMyWallets={selectedToken?.coinMinimalDenom === 'uusdn' && selectedToken?.chain === 'noble'}
-          />
-
-          <SelectInitiaChainSheet
-            isOpen={isSelectInitiaChainSheetVisible}
-            setSelectedInitiaChain={setSelectedInitiaChain}
-            onClose={() => setIsSelectInitiaChainSheetVisible(false)}
-            chainFeatureFlagsStore={chainFeatureFlagsStore}
-            chainInfoStore={chainInfoStore}
-            selectedNetwork={sendSelectedNetwork}
-          />
-
-          <SaveAddressSheet
-            isOpen={isAddContactSheetVisible}
-            onSave={handleContactSelect}
-            onClose={() => setIsAddContactSheetVisible(false)}
-            address={recipientInputValue}
-            ethAddress={ethAddress}
-            sendActiveChain={sendActiveChain}
-          />
-        </motion.div>
-      </div>
+        {/* Bottom Sheets/Modals */}
+        <SelectDestinationSheet
+          isOpenType={isDestinationSheetVisible}
+          setSelectedAddress={handleWalletSelect}
+          handleContactSelect={handleContactSelect}
+          onClose={() => setIsDestinationSheetVisible(null)}
+          skipSupportedDestinationChainsIDs={skipSupportedDestinationChainsIDs}
+          showOnlyMyWallets={selectedToken?.coinMinimalDenom === 'uusdn' && selectedToken?.chain === 'noble'}
+        />
+        <SelectInitiaChainSheet
+          isOpen={isSelectInitiaChainSheetVisible}
+          setSelectedInitiaChain={setSelectedInitiaChain}
+          onClose={() => setIsSelectInitiaChainSheetVisible(false)}
+          chainFeatureFlagsStore={chainFeatureFlagsStore}
+          chainInfoStore={chainInfoStore}
+          selectedNetwork={sendSelectedNetwork}
+        />
+        <SaveAddressSheet
+          isOpen={isAddContactSheetVisible}
+          onSave={handleContactSelect}
+          onClose={() => setIsAddContactSheetVisible(false)}
+          address={recipientInputValue}
+          ethAddress={ethAddress}
+          sendActiveChain={sendActiveChain}
+        />
+      </MotiView>
     );
   },
 );
+
+const styles = StyleSheet.create({
+  cardOuter: {
+    padding: 16,
+    borderRadius: 16,
+    backgroundColor: '#fff', // you may add dynamic dark color
+    marginBottom: 12,
+  },
+  input: {
+    borderColor: 'transparent',
+    borderRadius: 12,
+    height: 48,
+    paddingLeft: 16,
+    paddingVertical: 4,
+    fontSize: 16,
+    backgroundColor: '#F6F6F7',
+    fontWeight: '500',
+    color: '#18181B',
+  },
+  inputActive: {
+    borderColor: '#16a34a',
+  },
+  errorText: {
+    fontSize: 12,
+    color: '#F87171',
+    fontWeight: 'bold',
+    marginTop: 8,
+    marginLeft: 4,
+  },
+  warningText: {
+    fontSize: 12,
+    color: '#facc15',
+    fontWeight: 'bold',
+    marginTop: 8,
+    marginLeft: 4,
+  },
+  actionsRow: {
+    width: '100%',
+    marginTop: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  actionsWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    width: '100%',
+    alignItems: 'center',
+  },
+  actionLabel: {
+    color: '#444',
+    fontWeight: '500',
+    marginLeft: 2,
+  },
+  ibcTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F7EDFC',
+    borderRadius: 20,
+    height: 32,
+    paddingHorizontal: 12,
+    marginLeft: 10,
+  },
+  initiaSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#eee',
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 5,
+    marginLeft: 'auto',
+  },
+  initiaText: {
+    color: '#111',
+    fontWeight: '500',
+  },
+});
+
+export default RecipientCard;

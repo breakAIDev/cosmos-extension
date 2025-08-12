@@ -4,15 +4,16 @@ import {
   useSetDisabledNFTsInStorage,
 } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { MagnifyingGlassMinus } from '@phosphor-icons/react';
-import BottomModal from 'components/new-bottom-modal';
-import Text from 'components/text';
-import { SearchInput } from 'components/ui/input/search-input';
-import { Images } from 'images';
+import { MagnifyingGlassMinus } from 'phosphor-react-native';
+import BottomModal from '../../../components/new-bottom-modal';
+import Text from '../../../components/text';
+import { SearchInput } from '../../../components/ui/input/search-input';
+import { Images } from '../../../../assets/images';
 import React, { useMemo, useState } from 'react';
-import { nftStore } from 'stores/nft-store';
-import { imgOnError } from 'utils/imgOnError';
-import { sliceWord } from 'utils/strings';
+import { nftStore } from '../../../context/nft-store';
+import { sliceWord } from '../../../utils/strings';
+
+import { View, Image, Switch, ScrollView, StyleSheet } from 'react-native';
 
 export type ManageCollectionsProps = {
   isVisible: boolean;
@@ -51,7 +52,7 @@ export function ManageCollections({ isVisible, onClose }: ManageCollectionsProps
           const nameB = collectionB.name.toUpperCase();
 
           if (nameA < nameB) return -1;
-          if (nameA < nameB) return 1;
+          if (nameA > nameB) return 1;
           return 0;
         }) ?? []
     );
@@ -62,18 +63,22 @@ export function ManageCollections({ isVisible, onClose }: ManageCollectionsProps
     setSearchedText('');
   };
 
-  const handleToggleClick = async (isEnabled: boolean, collectionAddress: string, chain: SupportedChain) => {
+  const handleToggleClick = async (
+    isEnabled: boolean,
+    collectionAddress: string,
+    chain: SupportedChain
+  ) => {
     let _disabledNFTsCollections: string[] = [];
-    const _enabledNftsCollections: string[] = [];
 
     if (isEnabled) {
       _disabledNFTsCollections = disabledNFTsCollections.filter((collection) => collection !== collectionAddress);
     } else {
-      if (!_disabledNFTsCollections.includes(collectionAddress)) {
+      if (!disabledNFTsCollections.includes(collectionAddress)) {
         _disabledNFTsCollections = [...disabledNFTsCollections, collectionAddress];
+      } else {
+        _disabledNFTsCollections = disabledNFTsCollections;
       }
     }
-
     await setDisabledNFTsCollections(_disabledNFTsCollections);
   };
 
@@ -81,77 +86,154 @@ export function ManageCollections({ isVisible, onClose }: ManageCollectionsProps
 
   return (
     <BottomModal
-      className='!p-6 !pb-0 h-full'
       isOpen={isVisible}
       onClose={handleBottomSheetClose}
       title={'Manage Collections'}
       fullScreen
+      style={styles.modal}
     >
-      <div className='flex flex-col h-full items-center w-full gap-y-7'>
-        <div className='flex flex-col items-center w-full'>
+      <View style={styles.container}>
+        <View style={styles.searchContainer}>
           <SearchInput
             value={searchedText}
-            onChange={(e) => setSearchedText(e.target.value)}
-            placeholder='Search by collection or name'
+            onChangeText={setSearchedText}
+            placeholder="Search by collection or name"
             onClear={() => setSearchedText('')}
           />
-        </div>
-
+        </View>
         {filteredCollections.length === 0 ? (
-          <div className='h-[calc(100%-140px)] w-full flex-col flex  justify-center items-center gap-4'>
+          <View style={styles.noResultsContainer}>
             <MagnifyingGlassMinus
               size={64}
-              className='dark:text-gray-50 text-gray-900 p-5 rounded-full bg-secondary-200'
+              color="#111"
+              style={styles.iconBackground}
             />
-            <div className='flex flex-col justify-start items-center w-full gap-3'>
-              <div className='text-lg text-center font-bold !leading-[21.5px] text-monochrome'>
+            <View style={styles.noResultsTextGroup}>
+              <Text size="lg" style={styles.noResultsMainText}>
                 {`No results for “${sliceSearchWord(searchedText)}”`}
-              </div>
-              <div className='text-sm font-normal !leading-[22.4px] text-secondary-800 text-center'>
+              </Text>
+              <Text size="sm" style={styles.noResultsSubText}>
                 Please try again with something else
-              </div>
-            </div>
-          </div>
+              </Text>
+            </View>
+          </View>
         ) : (
-          <div
-            style={{
-              overflowY: 'scroll',
-            }}
-            className='w-full h-full'
-          >
-            {filteredCollections.map((filteredCollection, index, array) => {
-              const isLast = index === array.length - 1;
+          <ScrollView style={styles.scrollList}>
+            {filteredCollections.map((filteredCollection, index) => {
+              const isLast = index === filteredCollections.length - 1;
               const { name, address, image, chain } = filteredCollection;
 
               return (
-                <>
-                  <div key={`${address}-${index}`} className='py-5 flex justify-between items-center'>
-                    <div className='flex items-center gap-3'>
-                      <img
-                        src={image ?? Images.Logos.GenericNFT}
-                        className='w-10 h-10 rounded-lg'
-                        onError={imgOnError(Images.Logos.GenericNFT)}
+                <View key={`${address}-${index}`}>
+                  <View style={styles.collectionRow}>
+                    <View style={styles.collectionInfo}>
+                      <Image
+                        source={{ uri: image ?? Images.Logos.GenericNFT}}
+                        style={styles.collectionImage}
                       />
-                      <Text size='md' className='font-bold' color='text-monochrome'>
+                      <Text size="md" style={styles.collectionName}>
                         {name ? sliceWord(name, 26, 0) : '-'}
                       </Text>
-                    </div>
-
-                    <input
-                      type='checkbox'
-                      id='toggle-switch4'
-                      checked={!disabledNFTsCollections.includes(address)}
-                      onChange={({ target }) => handleToggleClick(target.checked, address, chain)}
-                      className='h-5 w-9 appearance-none rounded-full cursor-pointer bg-gray-600/30 transition duration-200 checked:bg-accent-green-200 relative'
+                    </View>
+                    <Switch
+                      value={!disabledNFTsCollections.includes(address)}
+                      onValueChange={(checked) => handleToggleClick(checked, address, chain)}
+                      thumbColor={disabledNFTsCollections.includes(address) ? '#666' : '#5df2b7'}
+                      trackColor={{ false: '#eee', true: '#d1ffe7' }}
                     />
-                  </div>
-                  {!isLast && <div className='border-b w-full border-gray-100 dark:border-gray-850' />}
-                </>
+                  </View>
+                  {!isLast && <View style={styles.divider} />}
+                </View>
               );
             })}
-          </div>
+          </ScrollView>
         )}
-      </div>
+      </View>
     </BottomModal>
   );
 }
+
+const styles = StyleSheet.create({
+  modal: {
+    padding: 24,
+    paddingBottom: 0,
+    flex: 1,
+  },
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    width: '100%',
+    gap: 24,
+  },
+  searchContainer: {
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  noResultsContainer: {
+    flex: 1,
+    height: '70%',
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 16,
+  },
+  iconBackground: {
+    backgroundColor: '#edf3f3',
+    padding: 20,
+    borderRadius: 32,
+  },
+  noResultsTextGroup: {
+    alignItems: 'center',
+    gap: 8,
+  },
+  noResultsMainText: {
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#212121',
+    fontSize: 18,
+    lineHeight: 22,
+  },
+  noResultsSubText: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+  },
+  scrollList: {
+    width: '100%',
+    flex: 1,
+  },
+  collectionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 18,
+    justifyContent: 'space-between',
+    width: '100%',
+    gap: 16,
+  },
+  collectionInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flexShrink: 1,
+    minWidth: 0,
+  },
+  collectionImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    marginRight: 12,
+  },
+  collectionName: {
+    fontWeight: 'bold',
+    color: '#222',
+    flexShrink: 1,
+    maxWidth: 170,
+  },
+  divider: {
+    height: 1,
+    width: '100%',
+    backgroundColor: '#eee',
+    marginVertical: 2,
+  },
+});

@@ -1,18 +1,11 @@
 
-import { useActiveChain, useIsFeatureExistForChain } from '@leapwallet/cosmos-wallet-hooks';
 import { QueryStatus } from '@tanstack/react-query';
-import { BottomNavLabel } from 'components/bottom-nav/BottomNav';
-import { ComingSoon } from 'components/coming-soon';
-import { PageName } from 'config/analytics';
-import { AGGREGATED_CHAIN_KEY } from 'config/constants';
-import { usePageView } from 'hooks/analytics/usePageView';
-import { usePerformanceMonitor } from 'hooks/perf-monitoring/usePerformanceMonitor';
+import { usePerformanceMonitor } from '../../hooks/perf-monitoring/usePerformanceMonitor';
 import { observer } from 'mobx-react-lite';
 import React, { useEffect, useMemo, useState } from 'react';
-import { chainTagsStore } from 'stores/chain-infos-store';
-import { governanceStore } from 'stores/governance-store';
-import { claimRewardsStore, delegationsStore, unDelegationsStore, validatorsStore } from 'stores/stake-store';
-import { AggregatedSupportedChain } from 'types/utility';
+import { chainTagsStore } from '../../context/chain-infos-store';
+import { governanceStore } from '../../context/governance-store';
+import { claimRewardsStore, delegationsStore, unDelegationsStore, validatorsStore } from '../../context/stake-store';
 
 import { AggregatedGovernance, ProposalDetails, ProposalList, ProposalsProps, ProposalStatusEnum } from './components';
 import { NtrnProposalDetails, NtrnProposalList, NtrnProposalStatus } from './neutron';

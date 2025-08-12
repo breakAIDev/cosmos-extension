@@ -1,7 +1,8 @@
-import { SeedPhraseInput } from 'components/seed-phrase-input';
-import { Button } from 'components/ui/button';
 import React, { useEffect, useState } from 'react';
-import { validateSeedPhrase } from 'utils/validateSeedPhrase';
+import { View, Text, StyleSheet } from 'react-native';
+import { SeedPhraseInput } from '../../../../components/seed-phrase-input';
+import { Button } from '../../../../components/ui/button';
+import { validateSeedPhrase } from '../../../../utils/validateSeedPhrase';
 
 import { OnboardingWrapper } from '../../wrapper';
 import { useImportWalletContext } from '../import-wallet-context';
@@ -34,7 +35,9 @@ export const SeedPhrase = () => {
   };
 
   const handleImportWalletClick = async () => {
-    if (validateSeedPhrase({ phrase: secret, isPrivateKey, setError, setSecret })) {
+    if (
+      validateSeedPhrase({ phrase: secret, isPrivateKey, setError, setSecret })
+    ) {
       setIsLoading(true);
       await new Promise((resolve) => setTimeout(resolve, 100));
       await importWalletFromSeedPhrase();
@@ -48,24 +51,46 @@ export const SeedPhrase = () => {
       subHeading={'Type or paste your 12 or 24-word recovery phrase'}
       entry={prevStep <= currentStep ? 'right' : 'left'}
     >
-      <div className='w-full space-y-6 flex-1'>
+      <View style={styles.inputContainer}>
         <SeedPhraseInput onChangeHandler={onChangeHandler} isError={!!error} />
-
-        {error && (
-          <span className='text-xs font-medium text-destructive-100 block text-center' data-testing-id='error-text-ele'>
+        {error ? (
+          <Text
+            style={styles.errorText}
+            testID="error-text-ele"
+          >
             {error}
-          </span>
-        )}
-      </div>
+          </Text>
+        ) : null}
+      </View>
 
       <Button
-        data-testing-id='btn-import-wallet'
-        className='mt-4 w-full'
+        testID="btn-import-wallet"
+        style={styles.button}
         disabled={!!error || !secret || isLoading}
-        onClick={handleImportWalletClick}
+        onPress={handleImportWalletClick}
       >
         Continue
       </Button>
     </OnboardingWrapper>
   );
 };
+
+const styles = StyleSheet.create({
+  inputContainer: {
+    width: '100%',
+    flex: 1,
+    justifyContent: 'flex-start',
+    marginBottom: 12,
+  },
+  errorText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#FF5A5F', // destructive-100 color
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  button: {
+    marginTop: 16,
+    width: '100%',
+  },
+});

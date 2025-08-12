@@ -5,29 +5,29 @@ export function filterSearchedProposal(
   proposal: Proposal | ProposalApi,
   searchedText: string,
   chains: Record<SupportedChain, { chainName: string }>,
-) {
-  if (!searchedText) {
-    return true;
-  }
+): boolean {
+  if (!searchedText) return true;
 
-  const formattedSearchedText = searchedText.trim().toLowerCase();
-  const chainName = proposal.chain ? chains[proposal.chain as SupportedChain].chainName : '';
-  if (chainName.toLowerCase().includes(formattedSearchedText)) {
-    return true;
-  }
+  const formatted = searchedText.trim().toLowerCase();
 
-  const proposalTitle = (proposal as ProposalApi)?.title ?? (proposal as Proposal)?.content?.title ?? '';
-  if (proposalTitle.toLowerCase().includes(formattedSearchedText)) {
-    return true;
-  }
+  // 1. Match chain name
+  const chainName = proposal.chain
+    ? chains[proposal.chain as SupportedChain]?.chainName ?? ''
+    : '';
+  if (chainName.toLowerCase().includes(formatted)) return true;
 
-  if (proposal.proposal_id.toString().includes(formattedSearchedText)) {
-    return true;
-  }
+  // 2. Match proposal title
+  const proposalTitle =
+    (proposal as ProposalApi)?.title ??
+    (proposal as Proposal)?.content?.title ??
+    '';
+  if (proposalTitle.toLowerCase().includes(formatted)) return true;
 
-  if (proposal.status.toLowerCase().includes(formattedSearchedText)) {
-    return true;
-  }
+  // 3. Match proposal_id
+  if (proposal?.proposal_id?.toString().includes(formatted)) return true;
+
+  // 4. Match status
+  if ((proposal?.status ?? '').toString().toLowerCase().includes(formatted)) return true;
 
   return false;
 }

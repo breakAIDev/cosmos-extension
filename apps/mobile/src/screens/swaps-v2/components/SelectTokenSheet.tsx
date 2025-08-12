@@ -380,7 +380,7 @@ export function SelectTokenSheet({
           <SearchInput
             value={searchQuery}
             ref={searchInputRef}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChangeText={(e: string) => setSearchQuery(e)}
             data-testing-id='switch-token-input-search'
             placeholder={isChainAbstractionView ? 'Search by token name or address' : 'Search Token'}
             onClear={() => setSearchQuery('')}

@@ -7,7 +7,7 @@ import { base64, bech32 } from '@scure/base';
 import { PublicKey } from '@solana/web3.js';
 import * as bip39 from 'bip39';
 import { mnemonicToSeedSync } from 'bip39';
-import { validateSolanaPrivateKey } from 'extension-scripts/utils';
+import { validateSolanaPrivateKey } from '../context/utils';
 import slip10, { HDKey } from 'micro-key-producer/slip10.js';
 
 export function sanitizeMovePath(path: string) {

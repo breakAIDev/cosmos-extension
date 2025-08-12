@@ -7,7 +7,7 @@ import {
 import { GasPrice, NativeDenom } from '@leapwallet/cosmos-wallet-sdk';
 import { RootCW20DenomsStore, RootDenomsStore } from '@leapwallet/cosmos-wallet-store';
 import { TRANSFER_STATE, TXN_STATUS } from '@leapwallet/elements-core';
-import { CaretRight } from '@phosphor-icons/react';
+import { CaretRight } from 'phosphor-react-native';
 import LedgerConfirmationPopup from 'components/ledger-confirmation/LedgerConfirmationPopup';
 import Loader from 'components/loader/Loader';
 import BottomModal from 'components/new-bottom-modal';
@@ -296,7 +296,7 @@ export const TxPage = observer(
       }
       onClose();
       handleClose();
-      navigate('/home');
+      navigate('Home');
     }, [isHomeButtonDisabled, onClose, handleClose, navigate]);
 
     const handleSwapAgainClick = useCallback(() => {

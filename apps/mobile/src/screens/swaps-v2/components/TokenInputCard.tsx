@@ -1,5 +1,5 @@
 import { formatTokenAmount, sliceWord, useGetChains } from '@leapwallet/cosmos-wallet-hooks';
-import { ArrowsLeftRight, CaretDown } from '@phosphor-icons/react';
+import { ArrowsLeftRight, CaretDown } from 'phosphor-react-native';
 import { QueryStatus } from '@tanstack/react-query';
 import BigNumber from 'bignumber.js';
 import classNames from 'classnames';

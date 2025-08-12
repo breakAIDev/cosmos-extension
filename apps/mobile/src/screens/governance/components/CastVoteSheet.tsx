@@ -1,18 +1,24 @@
-/* eslint-disable no-unused-vars */
-import { useActiveChain, useChainInfo, useSelectedNetwork, useSimulateVote } from '@leapwallet/cosmos-wallet-hooks';
-import { GasPrice, getSimulationFee, NativeDenom, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { Buttons } from '@leapwallet/leap-ui';
-import { Prohibit, ThumbsDown, ThumbsUp } from '@phosphor-icons/react';
-import { captureException } from '@sentry/react';
-import classNames from 'classnames';
-import { DisplayFee } from 'components/gas-price-options/display-fee';
-import { LoaderAnimation } from 'components/loader/Loader';
-import { Button } from 'components/ui/button';
+import {
+  useActiveChain,
+  useChainInfo,
+  useSelectedNetwork,
+  useSimulateVote,
+} from '@leapwallet/cosmos-wallet-hooks';
+import {
+  GasPrice,
+  getSimulationFee,
+  NativeDenom,
+  SupportedChain,
+} from '@leapwallet/cosmos-wallet-sdk';
+import { Prohibit, ThumbsDown, ThumbsUp } from 'phosphor-react-native';
+import { captureException } from '@sentry/react-native';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Colors } from 'theme/colors';
-import { cn } from 'utils/cn';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
-import { ProposalStatusEnum } from './ProposalStatus';
+import { Colors } from '../../../theme/colors';
+import { DisplayFee } from '../../../components/gas-price-options/display-fee';
+import { LoaderAnimation } from '../../../components/loader/Loader';
+import { Button } from '../../../components/ui/button';
 
 export enum VoteOptions {
   YES = 'Yes',
@@ -60,26 +66,26 @@ export function CastVoteSheet({
     const data = [
       {
         label: VoteOptions.YES,
-        icon: <ThumbsUp size={20} />,
-        selectedCSS: 'text-white-100 bg-green-600',
+        icon: <ThumbsUp size={20} color="#22c55e" />,
+        selectedStyle: styles.yesSelected,
       },
       {
         label: VoteOptions.NO,
-        icon: <ThumbsDown size={20} />,
-        selectedCSS: 'text-white-100 bg-red-300',
+        icon: <ThumbsDown size={20} color="#ef4444" />,
+        selectedStyle: styles.noSelected,
       },
     ];
     if (activeChainInfo.chainId !== 'atomone-1') {
       data.push({
         label: VoteOptions.NO_WITH_VETO,
-        icon: <ThumbsDown size={20} />,
-        selectedCSS: 'text-white-100 bg-indigo-300',
+        icon: <ThumbsDown size={20} color="#6366f1" />,
+        selectedStyle: styles.vetoSelected,
       });
     }
     data.push({
       label: VoteOptions.ABSTAIN,
-      icon: <Prohibit size={20} />,
-      selectedCSS: 'text-white-100 bg-yellow-600',
+      icon: <Prohibit size={20} color="#eab308" />,
+      selectedStyle: styles.abstainSelected,
     });
     return data;
   }, [activeChainInfo.chainId]);
@@ -118,51 +124,120 @@ export function CastVoteSheet({
     return () => {
       cancelled = true;
     };
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [feeDenom.coinMinimalDenom, proposalId, simulateVote, isProposalInVotingPeriod]);
 
   return (
-    <>
-      <div className='flex flex-col items-center gap-3'>
-        {VoteOptionsList.map((option) => (
-          <button
-            key={option.label}
-            onClick={() => setSelectedOption(option.label)}
-            className={classNames('flex items-center w-full px-5 py-4 rounded-xl cursor-pointer border', {
-              'bg-secondary-100 text-foreground hover:bg-secondary-200 border-transparent':
-                selectedOption !== option.label,
-              'text-green-600 bg-green-500/10 border-green-600': selectedOption === option.label,
-            })}
-          >
-            <span className='mr-3'>{option.icon}</span>
-            <span
-              className={cn('text-base font-bold', {
-                'text-foreground': selectedOption !== option.label,
-                'text-green-600': selectedOption === option.label,
-              })}
+    <View style={styles.sheetContainer}>
+      <View style={styles.voteOptionsWrapper}>
+        {VoteOptionsList.map((option) => {
+          const isSelected = selectedOption === option.label;
+          return (
+            <TouchableOpacity
+              key={option.label}
+              style={[
+                styles.voteOption,
+                isSelected ? option.selectedStyle : styles.voteOptionUnselected,
+              ]}
+              activeOpacity={0.8}
+              onPress={() => setSelectedOption(option.label)}
             >
-              {option.label}
-            </span>
-          </button>
-        ))}
-      </div>
+              <View style={styles.iconWrap}>{option.icon}</View>
+              <Text
+                style={[
+                  styles.voteOptionText,
+                  isSelected ? styles.voteOptionTextSelected : {},
+                ]}
+              >
+                {option.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
 
       {!simulating ? (
-        <DisplayFee className='mt-4' setShowFeesSettingSheet={setShowFeesSettingSheet} />
+        <View style={{ width: '100%', marginTop: 16 }}>
+          <DisplayFee setShowFeesSettingSheet={setShowFeesSettingSheet} />
+        </View>
       ) : (
-        <div className='flex justify-center'>
+        <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 16 }}>
           <LoaderAnimation color={Colors.green600} />
-        </div>
+        </View>
       )}
 
       <Button
-        className='w-full mt-6'
+        style={styles.submitBtn}
         disabled={!selectedOption || simulating}
-        onClick={() => onSubmitVote(selectedOption as VoteOptions)}
+        onPress={() => onSubmitVote(selectedOption as VoteOptions)}
       >
         Submit
       </Button>
-    </>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  sheetContainer: {
+    width: '100%',
+    paddingVertical: 24,
+    paddingHorizontal: 18,
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 24,
+  },
+  voteOptionsWrapper: {
+    flexDirection: 'column',
+    width: '100%',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 4,
+  },
+  voteOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    marginBottom: 10,
+  },
+  voteOptionUnselected: {
+    backgroundColor: '#f3f4f6', // secondary-100
+    borderColor: 'transparent',
+  },
+  yesSelected: {
+    backgroundColor: '#22c55e',
+    borderColor: '#22c55e',
+  },
+  noSelected: {
+    backgroundColor: '#fca5a5',
+    borderColor: '#ef4444',
+  },
+  vetoSelected: {
+    backgroundColor: '#c7d2fe',
+    borderColor: '#6366f1',
+  },
+  abstainSelected: {
+    backgroundColor: '#fde68a',
+    borderColor: '#eab308',
+  },
+  iconWrap: {
+    marginRight: 12,
+  },
+  voteOptionText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#1e293b', // default
+  },
+  voteOptionTextSelected: {
+    color: '#fff',
+  },
+  submitBtn: {
+    width: '100%',
+    marginTop: 24,
+    borderRadius: 12,
+    backgroundColor: '#22c55e',
+  },
+});

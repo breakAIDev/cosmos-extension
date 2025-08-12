@@ -1,4 +1,4 @@
-import { MagnifyingGlass } from '@phosphor-icons/react';
+import { MagnifyingGlass } from 'phosphor-react-native';
 import classNames from 'classnames';
 import Text from '../text';
 import React, { useEffect, useRef } from 'react';

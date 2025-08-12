@@ -1,5 +1,5 @@
 import { formatTokenAmount, sliceWord } from '@leapwallet/cosmos-wallet-hooks';
-import { ArrowRight } from '@phosphor-icons/react';
+import { ArrowRight } from 'phosphor-react-native';
 import classNames from 'classnames';
 import { TokenImageWithFallback } from 'components/token-image-with-fallback';
 import { observer } from 'mobx-react-lite';

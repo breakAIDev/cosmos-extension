@@ -1,28 +1,61 @@
-import classNames from 'classnames';
-import React, { ComponentPropsWithoutRef, ReactNode } from 'react';
+import React from 'react';
+import { View, Text, Image, StyleSheet, ViewProps, ImageProps, ViewStyle, StyleProp, ImageStyle, TextStyle, TextInputProps } from 'react-native';
 
-type ChipProps = ComponentPropsWithoutRef<'div'> & {
-  children: ReactNode;
+// Main Chip
+type ChipProps = React.PropsWithChildren<ViewProps> & {
+  style?: StyleProp<ViewStyle>;
 };
 
-export function Chip({ children, className, ...rest }: ChipProps) {
+export function Chip({ children, style, ...rest }: ChipProps) {
   return (
-    <div {...rest} className={classNames('rounded-full flex items-center justify-center', className)}>
+    <View style={[styles.chip, style]} {...rest}>
       {children}
-    </div>
+    </View>
   );
 }
 
-type ChipTextProps = ComponentPropsWithoutRef<'p'> & {
-  children: ReactNode;
+// Chip.Text
+type ChipTextProps = React.PropsWithChildren<TextInputProps> & {
+  style?: StyleProp<TextStyle>;
+};
+Chip.Text = function ChipText({ children, style, ...rest }: ChipTextProps) {
+  return (
+    <Text style={[styles.chipText, style]} {...rest}>
+      {children}
+    </Text>
+  );
 };
 
-Chip.Text = function Text({ children, ...rest }: ChipTextProps) {
-  return <p {...rest}>{children}</p>;
+// Chip.Image
+type ChipImageProps = ImageProps & {
+  style?: StyleProp<ImageStyle>;
+};
+Chip.Image = function ChipImage({ source, style, ...rest }: ChipImageProps) {
+  return (
+    <Image
+      source={source}
+      style={[styles.chipImage, style]}
+      {...rest}
+    />
+  );
 };
 
-type ChipImageProps = ComponentPropsWithoutRef<'img'>;
-
-Chip.Image = function Image({ src, alt, className, ...rest }: ChipImageProps) {
-  return <img src={src} alt={alt} className={classNames('rounded-full mr-1', className)} {...rest} />;
-};
+const styles = StyleSheet.create({
+  chip: {
+    borderRadius: 999,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  chipText: {
+    fontSize: 14,
+    color: '#222',
+  },
+  chipImage: {
+    borderRadius: 999,
+    marginRight: 4,
+    width: 20,
+    height: 20,
+    resizeMode: 'cover',
+  },
+});

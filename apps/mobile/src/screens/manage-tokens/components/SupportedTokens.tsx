@@ -1,117 +1,148 @@
-import { capitalize, sliceWord, useGetExplorerAccountUrl } from '@leapwallet/cosmos-wallet-hooks';
-import { NativeDenom } from '@leapwallet/cosmos-wallet-sdk';
-import { ActiveChainStore, AutoFetchedCW20DenomsStore, CW20DenomsStore } from '@leapwallet/cosmos-wallet-store';
-import { CardDivider, GenericCard, ThemeName, Toggle, useTheme } from '@leapwallet/leap-ui';
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
-import { Images } from 'images';
+import React from 'react';
+import { View, Text, Image, StyleSheet } from 'react-native';
+import { GenericCard, CardDivider } from '@leapwallet/leap-ui';
+import { Toggle } from '@leapwallet/leap-ui'; // or your own Toggle
+import { useDefaultTokenLogo } from '../../../hooks/utility/useDefaultTokenLogo';
+import { Images } from '../../../../assets/images';
+import { useTheme, ThemeName } from '@leapwallet/leap-ui';
 import { observer } from 'mobx-react-lite';
-import React, { useMemo } from 'react';
-import { imgOnError } from 'utils/imgOnError';
 
 import { TokenTitle } from './TokenTitle';
+import { NativeDenom } from '@leapwallet/cosmos-wallet-sdk';
 
 export type SupportedToken = NativeDenom & { enabled: boolean; verified: boolean };
 
 type SupportedTokensProps = {
   tokens: SupportedToken[];
   handleToggleChange: (isEnabled: boolean, coinMinimalDenom: string) => Promise<void>;
-  activeChainStore: ActiveChainStore;
-  cw20DenomsStore: CW20DenomsStore;
-  autoFetchedCW20DenomsStore: AutoFetchedCW20DenomsStore;
+  activeChainStore: any;
+  cw20DenomsStore: any;
+  autoFetchedCW20DenomsStore: any;
 };
 
-export const SupportedTokens = observer(
-  ({
-    tokens,
-    handleToggleChange,
-    activeChainStore,
-    cw20DenomsStore,
-    autoFetchedCW20DenomsStore,
-  }: SupportedTokensProps) => {
-    const { activeChain } = activeChainStore;
-    const { denoms: allCW20Denoms } = cw20DenomsStore;
-    const cw20Denoms = allCW20Denoms?.[activeChain];
-    const { autoFetchedCW20Denoms } = autoFetchedCW20DenomsStore;
+export const SupportedTokens = observer(({
+  tokens,
+  handleToggleChange,
+}: SupportedTokensProps) => {
+  const defaultTokenLogo = useDefaultTokenLogo();
+  const { theme } = useTheme();
 
-    const defaultTokenLogo = useDefaultTokenLogo();
-    const { theme } = useTheme();
-    const { getExplorerAccountUrl } = useGetExplorerAccountUrl({});
-    const combinedCW20Denoms = useMemo(
-      () => ({ ...cw20Denoms, ...autoFetchedCW20Denoms }),
-      [cw20Denoms, autoFetchedCW20Denoms],
-    );
+  return (
+    <View style={{ marginBottom: 20 }}>
+      <Text style={styles.heading}>Supported tokens</Text>
+      <View style={styles.tokensContainer}>
+        {tokens.map((token, index, array) => {
+          const isLast = index === array.length - 1;
 
-    return (
-      <div>
-        <div className='font-bold text-sm text-gray-600 dark:text-gray-200 mb-2'>Supported tokens</div>
+          // If you have your own sliceWord/capitalize utility, use them here
+          const title = token?.name ?? token.coinDenom;
+          const subTitle = token.coinDenom;
 
-        <div className='rounded-2xl flex flex-col items-center justify-center dark:bg-gray-900 bg-white-100 overflow-hidden'>
-          {tokens.map((token, index, array) => {
-            const isLast = index === array.length - 1;
+          // If you have getExplorerAccountUrl RN, use it here
+          // Otherwise, explorerURL is a string (optional)
+          // You can pass explorerURL as a prop if needed
+          // const explorerURL = getExplorerAccountUrl(token.coinMinimalDenom);
 
-            const title = sliceWord(token?.name ?? capitalize(token.coinDenom.toLowerCase()), 7, 4);
-            const subTitle = sliceWord(token.coinDenom, 4, 4);
+          const handleRedirectionClick = () => {
+            // Implement your deep-link or Linking logic here for RN
+            // Example: Linking.openURL(explorerURL);
+          };
 
-            const explorerURL = getExplorerAccountUrl(token.coinMinimalDenom);
-            const handleRedirectionClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-              e.stopPropagation();
-              window.open(explorerURL, '_blank');
-            };
-
-            return (
-              <React.Fragment key={`${token.coinMinimalDenom}-${index}`}>
-                <GenericCard
-                  title={
-                    <TokenTitle
-                      title={title}
-                      showRedirection={!!combinedCW20Denoms?.[token?.coinMinimalDenom] && !!explorerURL}
-                      handleRedirectionClick={handleRedirectionClick}
+          return (
+            <React.Fragment key={`${token.coinMinimalDenom}-${index}`}>
+              <GenericCard
+                title={
+                  <TokenTitle
+                    title={title}
+                    showRedirection={false}
+                    handleRedirectionClick={handleRedirectionClick}
+                  />
+                }
+                subtitle={subTitle}
+                isRounded={isLast}
+                size="md"
+                img={
+                  <View style={styles.imgWrapper}>
+                    <Image
+                      source={{ uri: token.icon ?? defaultTokenLogo}}
+                      style={styles.tokenIcon}
+                      resizeMode="contain"
+                      // onError not directly available, handle with Image fallback libs if needed
                     />
-                  }
-                  subtitle={subTitle}
-                  isRounded={isLast}
-                  size='md'
-                  img={
-                    <div className='relative mr-3'>
-                      <img
-                        src={token.icon ?? defaultTokenLogo}
-                        className='h-7 w-7'
-                        onError={imgOnError(defaultTokenLogo)}
-                      />
-                      {token.verified && (
-                        <div className='absolute group -bottom-[5px] -right-[5px]'>
-                          <img
-                            src={
-                              theme === ThemeName.DARK
-                                ? Images.Misc.VerifiedWithBgStarDark
-                                : Images.Misc.VerifiedWithBgStar
-                            }
-                            alt='verified-token'
-                            className='h-4 w-4'
-                          />
-                          <div className='group-hover:!block hidden absolute bottom-0 right-0 translate-x-full bg-gray-200 dark:bg-gray-800 px-3 py-2 rounded-lg text-xs dark:text-white-100'>
-                            Whitelisted
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  }
-                  icon={
-                    <div className='flex items-center gap-[8px]'>
-                      <Toggle
-                        checked={token.enabled}
-                        onChange={(isEnabled) => handleToggleChange(isEnabled, token.coinMinimalDenom)}
-                      />
-                    </div>
-                  }
-                />
+                    {token.verified && (
+                      <View style={styles.verifiedBadgeWrapper}>
+                        <Image
+                          source={
+                            theme === ThemeName.DARK
+                              ? Images.Misc.VerifiedWithBgStarDark
+                              : Images.Misc.VerifiedWithBgStar
+                          }
+                          style={styles.verifiedBadge}
+                          resizeMode="contain"
+                        />
+                      </View>
+                    )}
+                  </View>
+                }
+                icon={
+                  <View style={styles.toggleWrapper}>
+                    <Toggle
+                      checked={token.enabled}
+                      onChange={(isEnabled: boolean) => handleToggleChange(isEnabled, token.coinMinimalDenom)}
+                    />
+                  </View>
+                }
+              />
+              {!isLast ? <CardDivider /> : null}
+            </React.Fragment>
+          );
+        })}
+      </View>
+    </View>
+  );
+});
 
-                {!isLast ? <CardDivider /> : null}
-              </React.Fragment>
-            );
-          })}
-        </div>
-      </div>
-    );
+const styles = StyleSheet.create({
+  heading: {
+    fontWeight: 'bold',
+    fontSize: 14,
+    color: '#64748b',
+    marginBottom: 8,
   },
-);
+  tokensContainer: {
+    borderRadius: 18,
+    backgroundColor: '#fff',
+    paddingBottom: 4,
+    overflow: 'hidden',
+  },
+  imgWrapper: {
+    marginRight: 10,
+    position: 'relative',
+    height: 32,
+    width: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tokenIcon: {
+    height: 28,
+    width: 28,
+    borderRadius: 14,
+  },
+  verifiedBadgeWrapper: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    zIndex: 2,
+    backgroundColor: 'transparent',
+  },
+  verifiedBadge: {
+    height: 16,
+    width: 16,
+  },
+  toggleWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+});
+

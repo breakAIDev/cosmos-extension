@@ -1,13 +1,14 @@
-import { CaretDown } from '@phosphor-icons/react';
-import { Button } from 'components/ui/button';
-import { PageName } from 'config/analytics';
-import { useAlphaOpportunities } from 'hooks/useAlphaOpportunities';
-import { useQueryParams } from 'hooks/useQuery';
-import { SquareGridIcon } from 'icons/square-grid';
-import { TuneIcon } from 'icons/tune-icon';
-import { FilterButton, Searchbar, SearchToggleIcon } from 'pages/alpha/chad-components/ChadTimeline/filters';
 import React, { useEffect, useMemo, useState } from 'react';
-
+import { View, StyleSheet } from 'react-native';
+import { CaretDown } from 'phosphor-react-native';
+import { Button } from '../../../../components/ui/button'; // RN Button or TouchableOpacity
+import Text from '../../../../components/text'; // RN Button or TouchableOpacity
+import { PageName } from '../../../../services/config/analytics';
+import { useAlphaOpportunities } from '../../../../hooks/useAlphaOpportunities';
+import { useQueryParams } from '../../../../hooks/useQuery';
+import { SquareGridIcon } from '../../../../../assets/icons/square-grid'; // Must be RN SVG or icon
+import { TuneIcon } from '../../../../../assets/icons/tune-icon';         // Must be RN SVG or icon
+import { FilterButton, Searchbar, SearchToggleIcon } from '../../../../screens/alpha/chad-components/ChadTimeline/filters';
 import { EcosystemFilterDrawer } from '../FilterDrawer';
 
 export const AlphaTimelineFilters = ({
@@ -24,23 +25,30 @@ export const AlphaTimelineFilters = ({
   }, [showSearch, setSearchedTerm]);
 
   return (
-    <div className='flex flex-col gap-2'>
-      <div className='flex items-center gap-3 justify-between '>
+    <View style={styles.container}>
+      <View style={styles.row}>
         <EcosystemFilter />
 
-        <FilterButton className='ml-auto size-8' size='sm' onClick={() => setShowSearch(!showSearch)}>
-          <SearchToggleIcon showSearch={showSearch} className='size-5' />
-          <span className='sr-only'>Search</span>
+        <FilterButton
+          style={styles.iconButton}
+          size="sm"
+          onPress={() => setShowSearch(!showSearch)}
+        >
+          <Text>Search</Text>
+          <SearchToggleIcon showSearch={showSearch} style={styles.icon} />
         </FilterButton>
 
-        <FilterButton className='size-8' onClick={() => setIsFilterDrawerOpen(true)}>
-          <TuneIcon className='size-5 shrink-0' />
-          <span className='sr-only'>Filters</span>
+        <FilterButton
+          style={styles.iconButton}
+          onPress={() => setIsFilterDrawerOpen(true)}
+        >
+          <Text>Filters</Text>
+          <TuneIcon style={styles.icon} />
         </FilterButton>
-      </div>
+      </View>
 
       <Searchbar showSearch={showSearch} setSearch={setSearchedTerm} />
-    </div>
+    </View>
   );
 };
 
@@ -53,7 +61,6 @@ const EcosystemFilter = () => {
 
   const selectedEcosystems = useMemo(() => {
     if (!ecosystems?.length) return 'All ecosystem';
-
     const ecosystemArr = ecosystems.split(',');
     return ecosystemArr.length > 1 ? `${ecosystemArr.length} ecosystems` : ecosystemArr[0];
   }, [ecosystems]);
@@ -61,14 +68,16 @@ const EcosystemFilter = () => {
   return (
     <>
       <Button
-        variant='ghost'
-        className='border border-secondary-200 h-[2.375rem] '
-        size='sm'
-        onClick={() => setIsShown(true)}
+        variant="ghost"
+        style={styles.filterButton}
+        size="sm"
+        onPress={() => setIsShown(true)}
       >
-        <SquareGridIcon />
-        {selectedEcosystems}
-        <CaretDown weight='bold' className='size-3 fill-muted-foreground' />
+        <SquareGridIcon style={styles.icon} />
+        <View style={{ marginHorizontal: 8 }}>
+          <Text style={styles.filterButtonText}>{selectedEcosystems}</Text>
+        </View>
+        <CaretDown weight="bold" size={14} color="#AAA" />
       </Button>
 
       <EcosystemFilterDrawer
@@ -80,3 +89,43 @@ const EcosystemFilter = () => {
     </>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'column',
+    gap: 10,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    justifyContent: 'space-between',
+  },
+  iconButton: {
+    marginLeft: 8,
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  icon: {
+    width: 20,
+    height: 20,
+  },
+  filterButton: {
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    height: 38,
+    paddingHorizontal: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    marginRight: 8,
+  },
+  filterButtonText: {
+    fontSize: 15,
+    color: '#222',
+  },
+});
+

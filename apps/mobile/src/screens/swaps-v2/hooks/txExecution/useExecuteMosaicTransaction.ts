@@ -13,9 +13,9 @@ import {
 import { AptosTx, NativeDenom, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { TRANSFER_STATE, TXN_STATUS } from '@leapwallet/elements-core';
 import { TransferAssetRelease } from '@skip-go/client';
-import { Wallet } from 'hooks/wallet/useWallet';
+import { Wallet } from '../../../../hooks/wallet/useWallet';
 import React, { useCallback } from 'react';
-import { SourceChain, SourceToken, SwapFeeInfo, SwapTxnStatus, TransferSequence } from 'types/swap';
+import { SourceChain, SourceToken, SwapFeeInfo, SwapTxnStatus, TransferSequence } from '../../../../types/swap';
 
 import { useGetChainsToShow } from '../useGetChainsToShow';
 import { MosaicRouteQueryResponse } from '../useMosaicRoute';

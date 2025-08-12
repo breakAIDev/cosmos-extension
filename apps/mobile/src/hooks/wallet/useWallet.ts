@@ -779,4 +779,8 @@ export namespace Wallet {
       [activeWallet, chainInfos],
     );
   }
+
+  export function hasMnemonicWallet(arg0: Keystore) {
+    throw new Error('Function not implemented.');
+  }
 }

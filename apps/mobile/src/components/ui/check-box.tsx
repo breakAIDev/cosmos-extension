@@ -29,7 +29,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
       accessibilityState={{ checked, disabled }}
     >
       {checked && (
-        <Check size={16} weight="bold" color="#F3F7F6" /> {/* White/secondary-300 */}
+        <Check size={16} weight="bold" color="#F3F7F6" />
       )}
     </Pressable>
   );

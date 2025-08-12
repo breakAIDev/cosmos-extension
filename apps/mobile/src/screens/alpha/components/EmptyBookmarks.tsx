@@ -1,41 +1,66 @@
-import { motion } from 'framer-motion';
-import { HappyFrog } from 'icons/frog';
 import React from 'react';
-import { cn } from 'utils/cn';
+import { View, Text, StyleSheet } from 'react-native';
+import { MotiView } from 'moti';
+import { HappyFrog } from '../../../../assets/icons/frog';
 
 interface EmptyBookmarksProps {
   title: string;
   subTitle: string | React.ReactNode;
-  className?: string;
+  style?: any;
   showRetryButton?: boolean;
 }
 
-const variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 },
-};
-
-const transition = {
-  duration: 0.3,
-  ease: 'easeOut',
-};
-
-export default function EmptyBookmarks({ title, subTitle, className }: EmptyBookmarksProps) {
+export default function EmptyBookmarks({ title, subTitle, style }: EmptyBookmarksProps) {
   return (
-    <motion.div
-      initial='hidden'
-      animate='visible'
-      variants={variants}
-      transition={transition}
-      className={cn(
-        'bg-secondary-100 flex flex-col gap-2 items-center justify-center pt-[3.375rem] pb-[3.75rem] px-5 text-center rounded-2xl',
-        className,
-      )}
+    <MotiView
+      from={{ opacity: 0, translateY: 20 }}
+      animate={{ opacity: 1, translateY: 0 }}
+      transition={{ type: 'timing', duration: 300 }}
+      style={[styles.container, style]}
     >
-      <HappyFrog className='size-20 ' />
+      <HappyFrog style={styles.frogIcon} />
 
-      <span className='font-bold text-mdl mb-1'>{title}</span>
-      <span className='text-sm font-medium text-center text-muted-foreground !leading-5 px-11'>{subTitle}</span>
-    </motion.div>
+      <Text style={styles.title}>{title}</Text>
+      {typeof subTitle === 'string' ? (
+        <Text style={styles.subTitle}>{subTitle}</Text>
+      ) : (
+        React.isValidElement(subTitle) ? subTitle : null
+      )}
+    </MotiView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: '#F3F4F6', // secondary-100
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 54,   // 3.375rem
+    paddingBottom: 60, // 3.75rem
+    paddingHorizontal: 20, // px-5
+    borderRadius: 20,
+    textAlign: 'center',
+    gap: 8,
+  },
+  frogIcon: {
+    width: 80, // size-20
+    height: 80,
+    marginBottom: 8,
+  },
+  title: {
+    fontWeight: 'bold',
+    fontSize: 18,
+    marginBottom: 4,
+    textAlign: 'center',
+    color: '#222',
+  },
+  subTitle: {
+    fontSize: 14,
+    fontWeight: '500',
+    textAlign: 'center',
+    color: '#97A3B9', // muted-foreground
+    lineHeight: 20,
+    paddingHorizontal: 32, // px-11 (approximate)
+  },
+});

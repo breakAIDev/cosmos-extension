@@ -1,4 +1,3 @@
-
 import { useActiveChain, useActiveWallet, useAddress, useChainInfo, WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks';
 import { BtcTx } from '@leapwallet/cosmos-wallet-sdk';
 import { RootDenomsStore } from '@leapwallet/cosmos-wallet-store';
@@ -7,26 +6,23 @@ import { Avatar, Buttons, Header } from '@leapwallet/leap-ui';
 import { hex } from '@scure/base';
 import { NETWORK, TEST_NETWORK } from '@scure/btc-signer';
 import assert from 'assert';
-import classNames from 'classnames';
-import { ErrorCard } from 'components/ErrorCard';
-import PopupLayout from 'components/layout/popup-layout';
-import { LoaderAnimation } from 'components/loader/Loader';
-import { MessageTypes } from 'config/message-types';
-import { useSiteLogo } from 'hooks/utility/useSiteLogo';
-import { Wallet } from 'hooks/wallet/useWallet';
-import { Images } from 'images';
+import { ErrorCard } from '../../../components/ErrorCard';
+import PopupLayout from '../../../components/layout/popup-layout';
+import { LoaderAnimation } from '../../../components/loader/Loader';
+import { MessageTypes } from '../../../services/config/message-types';
+import { useSiteLogo } from '../../../hooks/utility/useSiteLogo';
+import { Wallet } from '../../../hooks/wallet/useWallet';
+import { Images } from '../../../../assets/images';
 import { observer } from 'mobx-react-lite';
 import React, { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Colors } from 'theme/colors';
-import { TransactionStatus } from 'types/utility';
-import { formatWalletName } from 'utils/formatWalletName';
-import { imgOnError } from 'utils/imgOnError';
-import { isSidePanel } from 'utils/isSidePanel';
-import { sliceAddress, trim } from 'utils/strings';
-import Browser from 'webextension-polyfill';
+import { useNavigation } from '@react-navigation/native';
+import { Colors, getChainColor } from '../../../theme/colors';
+import { TransactionStatus } from '../../../types/utility';
+import { formatWalletName } from '../../../utils/formatWalletName';
+import { sliceAddress, trim } from '../../../utils/strings';
+import { DeviceEventEmitter, View, Text, Image, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 
-import { handleRejectClick } from '../utils';
+import { useHandleRejectClick } from '../utils/shared-functions';
 import { SignPsbt } from './SignPsbt';
 
 const useGetWallet = Wallet.useGetWallet;
@@ -38,25 +34,26 @@ type SignPsbtsProps = {
 
 export const SignPsbts = observer(({ txnData, rootDenomsStore }: SignPsbtsProps) => {
   const getWallet = useGetWallet();
-  const navigate = useNavigate();
+  const navigation = useNavigation();
   const activeChain = useActiveChain();
   const chainInfo = useChainInfo(activeChain);
   const activeWallet = useActiveWallet();
+  const { setHandleRejectClick } = useHandleRejectClick();
 
   assert(activeWallet !== null, 'activeWallet is null');
-  const walletName = useMemo(() => {
-    return formatWalletName(activeWallet.name);
-  }, [activeWallet.name]);
+  const walletName = useMemo(() => formatWalletName(activeWallet.name), [activeWallet.name]);
 
   const siteOrigin = txnData?.origin as string | undefined;
   const siteName = siteOrigin?.split('//')?.at(-1)?.split('.')?.at(-2);
   const siteLogo = useSiteLogo(siteOrigin);
 
-  const details = useMemo(() => {
-    return txnData.signTxnData.psbtsHexes.map((psbtHex: string) =>
-      BtcTx.GetPsbtHexDetails(psbtHex, activeChain === 'bitcoinSignet' ? TEST_NETWORK : NETWORK),
-    );
-  }, [activeChain, txnData.signTxnData.psbtsHexes]);
+  const details = useMemo(
+    () =>
+      txnData.signTxnData.psbtsHexes.map((psbtHex: string) =>
+        BtcTx.GetPsbtHexDetails(psbtHex, activeChain === 'bitcoinSignet' ? TEST_NETWORK : NETWORK),
+      ),
+    [activeChain, txnData.signTxnData.psbtsHexes],
+  );
 
   const address = useAddress();
   const [txStatus, setTxStatus] = useState<TransactionStatus>('idle');
@@ -76,22 +73,17 @@ export const SignPsbts = observer(({ txnData, rootDenomsStore }: SignPsbtsProps)
       const signedTxHexes: string[] = [];
 
       for (const txDetails of details) {
-        txDetails.inputs.forEach((_: any, index: number) => {
-          
-          
-          wallet.signIdx(address, txDetails.tx, index);
-        });
-
         for (let i = 0; i < txDetails.inputs.length; i++) {
-          details.tx.finalizeIdx(i);
+          await wallet.signIdx(address, txDetails.tx, i);
+          txDetails.tx.finalizeIdx(i);
         }
-
         signedTxHexes.push(hex.encode(txDetails.tx.extract()));
       }
 
       setTxStatus('success');
       try {
-        Browser.runtime.sendMessage({
+        // RN: use event emitter for app-level communication
+        DeviceEventEmitter.emit('bitcoinSignEvent', {
           type: MessageTypes.signBitcoinResponse,
           payloadId: txnData?.payloadId,
           payload: { status: 'success', data: signedTxHexes },
@@ -100,11 +92,8 @@ export const SignPsbts = observer(({ txnData, rootDenomsStore }: SignPsbtsProps)
         throw new Error('Could not send transaction to the dApp');
       }
 
-      if (isSidePanel()) {
-        navigate('/home');
-      } else {
-        window.close();
-      }
+      // Navigate home or back (choose what makes sense for your app)
+      navigation.goBack();
     } catch (error) {
       setTxStatus('error');
       setSigningError((error as Error).message);
@@ -113,113 +102,178 @@ export const SignPsbts = observer(({ txnData, rootDenomsStore }: SignPsbtsProps)
 
   const isApproveBtnDisabled = !!signingError || txStatus === 'loading';
 
-  return showDetailsForIdx !== null ? (
-    <SignPsbt
-      txnData={{
-        ...txnData,
-        signTxnData: { psbtHex: txnData.signTxnData.psbtsHexes[showDetailsForIdx] },
-      }}
-      rootDenomsStore={rootDenomsStore}
-      isRedirected={true}
-      handleBack={() => setShowDetailsForIdx(null)}
-    />
-  ) : (
-    <div
-      className={classNames(
-        'panel-width enclosing-panel h-full relative self-center justify-self-center flex justify-center items-center',
-        { 'mt-2': !isSidePanel() },
-      )}
+  if (showDetailsForIdx !== null) {
+    return (
+      <SignPsbt
+        txnData={{
+          ...txnData,
+          signTxnData: { psbtHex: txnData.signTxnData.psbtsHexes[showDetailsForIdx] },
+        }}
+        rootDenomsStore={rootDenomsStore}
+        isRedirected={true}
+        handleBack={() => setShowDetailsForIdx(null)}
+      />
+    );
+  }
+
+  return (
+    <PopupLayout
+      header={
+        <View>
+          <Image source={{uri: chainInfo.chainSymbolImageUrl ?? Images.Logos.GenericLight}}/>
+          <Buttons.Wallet title={trim(walletName, 10)} style={styles.pr4} />
+        </View>
+      }
     >
-      <div
-        className={classNames('relative w-full overflow-clip rounded-md border border-gray-300 dark:border-gray-900', {
-          'panel-height': isSidePanel(),
-        })}
-      >
-        <PopupLayout
-          header={
-            <div className='w-[396px]'>
-              <Header
-                imgSrc={chainInfo.chainSymbolImageUrl ?? Images.Logos.GenericLight}
-                title={<Buttons.Wallet title={trim(walletName, 10)} className='pr-4 cursor-default' />}
-              />
-            </div>
-          }
+      <ScrollView contentContainerStyle={styles.scrollView}>
+        <Text style={styles.title}>Sign Multiple Transactions</Text>
+        <Text style={styles.desc}>
+          Only sign these transactions if you fully understand the content and trust the requesting site
+        </Text>
+
+        <View style={styles.siteRow}>
+          <Avatar
+            avatarImage={siteLogo}
+            avatarOnError={() => {}}
+            size='sm'
+            style={styles.avatar}
+          />
+          <View style={styles.siteInfo}>
+            <Text style={styles.siteName}>{siteName}</Text>
+            <Text style={styles.siteOrigin}>{siteOrigin}</Text>
+          </View>
+        </View>
+
+        {txnData.signTxnData.psbtsHexes.length
+          ? txnData.signTxnData.psbtsHexes.map((psbtHex: string, index: number) => (
+              <View style={styles.txItem} key={`${psbtHex}--${index}`}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.txIndex}>Transaction {index + 1}</Text>
+                  <Text>{sliceAddress(psbtHex, 7)}</Text>
+                </View>
+                <TouchableOpacity
+                  style={[
+                    styles.viewBtn,
+                    { backgroundColor: getChainColor(activeChain) },
+                  ]}
+                  onPress={() => setShowDetailsForIdx(index)}
+                >
+                  <Text style={styles.viewBtnText}>View</Text>
+                </TouchableOpacity>
+              </View>
+            ))
+          : null}
+
+        {signingError && txStatus === 'error' ? (
+          <ErrorCard text={signingError} style={styles.errorCard} />
+        ) : null}
+      </ScrollView>
+
+      <View style={styles.actionBar}>
+        <Buttons.Generic
+          title="Reject"
+          color={Colors.gray900}
+          onClick={() => setHandleRejectClick(txnData?.payloadId)}
+          disabled={txStatus === 'loading'}
         >
-          <div className='px-7 py-3 overflow-y-auto relative h-[450px]'>
-            <h2 className='text-center text-lg font-bold dark:text-white-100 text-gray-900 w-full'>
-              Sign Multiple Transactions
-            </h2>
+          Reject
+        </Buttons.Generic>
 
-            <p className='text-center text-sm dark:text-gray-300 text-gray-500 w-full'>
-              Only sign these transactions if you fully understand the content and trust the requesting site
-            </p>
-
-            <div className='flex items-center mt-3 rounded-2xl dark:bg-gray-900 bg-white-100 p-4'>
-              <Avatar
-                avatarImage={siteLogo}
-                avatarOnError={imgOnError(Images.Misc.Globe)}
-                size='sm'
-                className='rounded-full overflow-hidden'
-              />
-              <div className='ml-3'>
-                <p className='capitalize text-gray-900 dark:text-white-100 text-base font-bold'>{siteName}</p>
-                <p className='lowercase text-gray-500 dark:text-gray-400 text-xs font-medium'>{siteOrigin}</p>
-              </div>
-            </div>
-
-            {txnData.signTxnData.psbtsHexes.length
-              ? txnData.signTxnData.psbtsHexes.map((psbtHex: string, index: number) => {
-                  return (
-                    <div
-                      key={`${psbtHex}--${index}`}
-                      className='flex items-center justify-between gap-4 dark:bg-gray-900 bg-white-100 p-4 rounded-2xl mt-3'
-                    >
-                      <p className='flex flex-col text-gray-900 dark:text-white-100'>
-                        <span className='font-semibold'>Transaction {index + 1}</span>
-                        <span>{sliceAddress(psbtHex, 7)}</span>
-                      </p>
-
-                      <button
-                        className='rounded-lg text-white-100 py-[4px] px-[12px] font-semibold'
-                        style={{
-                          backgroundColor: Colors.getChainColor(activeChain),
-                        }}
-                        onClick={() => setShowDetailsForIdx(index)}
-                      >
-                        View
-                      </button>
-                    </div>
-                  );
-                })
-              : null}
-
-            {signingError && txStatus === 'error' ? <ErrorCard text={signingError} className='mt-3' /> : null}
-          </div>
-
-          <div className='absolute bottom-0 left-0 py-3 px-7 dark:bg-black-100 bg-gray-50 w-full'>
-            <div className='flex items-center justify-center w-full space-x-3'>
-              <Buttons.Generic
-                title='Reject Button'
-                color={Colors.gray900}
-                onClick={() => handleRejectClick(navigate, txnData?.payloadId)}
-                disabled={txStatus === 'loading'}
-              >
-                Reject
-              </Buttons.Generic>
-
-              <Buttons.Generic
-                title='Approve Button'
-                color={Colors.getChainColor(activeChain)}
-                onClick={handleSignClick}
-                disabled={isApproveBtnDisabled}
-                className={`${isApproveBtnDisabled ? 'cursor-not-allowed opacity-50' : ''}`}
-              >
-                {txStatus === 'loading' ? <LoaderAnimation color='white' /> : 'Sign'}
-              </Buttons.Generic>
-            </div>
-          </div>
-        </PopupLayout>
-      </div>
-    </div>
+        <Buttons.Generic
+          title="Approve"
+          color={getChainColor(activeChain)}
+          onClick={handleSignClick}
+          disabled={isApproveBtnDisabled}
+          style={isApproveBtnDisabled ? styles.disabledBtn : undefined}
+        >
+          {txStatus === 'loading' ? <LoaderAnimation color='white' /> : 'Sign'}
+        </Buttons.Generic>
+      </View>
+    </PopupLayout>
   );
+});
+
+// ---- Styles ----
+const styles = StyleSheet.create({
+  pr4: { paddingRight: 16 },
+  scrollView: {
+    padding: 16,
+    paddingBottom: 120,
+  },
+  title: {
+    textAlign: 'center',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color: '#222',
+  },
+  desc: {
+    textAlign: 'center',
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 16,
+  },
+  siteRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 12,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+  },
+  avatar: {
+    borderRadius: 100,
+    overflow: 'hidden',
+  },
+  siteInfo: { marginLeft: 12 },
+  siteName: {
+    fontWeight: 'bold',
+    textTransform: 'capitalize',
+    color: '#222',
+    fontSize: 16,
+  },
+  siteOrigin: {
+    fontSize: 12,
+    color: '#888',
+    textTransform: 'lowercase',
+  },
+  txItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 10,
+    marginTop: 8,
+    elevation: 1,
+  },
+  txIndex: { fontWeight: 'bold', color: '#222' },
+  viewBtn: {
+    borderRadius: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    marginLeft: 10,
+  },
+  viewBtnText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  actionBar: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    padding: 12,
+    backgroundColor: '#f5f5f5',
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderColor: '#eee',
+    position: 'absolute',
+    left: 0,
+    bottom: 0,
+    width: '100%',
+    zIndex: 1,
+  },
+  errorCard: { marginTop: 12 },
+  disabledBtn: {
+    opacity: 0.5,
+  },
 });

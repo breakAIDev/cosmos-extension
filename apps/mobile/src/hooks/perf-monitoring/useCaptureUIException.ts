@@ -1,4 +1,4 @@
-import { captureException } from '@sentry/react';
+import { captureException } from '@sentry/react-native';
 import { useEffect } from 'react';
 import { uiErrorTags } from '../../utils/sentry';
 

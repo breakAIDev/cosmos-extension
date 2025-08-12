@@ -64,7 +64,7 @@ export function bondStatusToJSON(object: BondStatus): string {
  * (`n` is set by the staking module's `historical_entries` parameter).
  */
 export interface HistoricalInfo {
-  header: Header;
+  header: Header | undefined;
   valset: Validator[];
 }
 export interface HistoricalInfoProtoMsg {
@@ -139,9 +139,9 @@ export interface CommissionRatesSDKType {
 /** Commission defines commission parameters for a given validator. */
 export interface Commission {
   /** commission_rates defines the initial commission rates to be used for creating a validator. */
-  commissionRates: CommissionRates;
+  commissionRates: CommissionRates | undefined;
   /** update_time is the last time the commission rate was changed. */
-  updateTime: Date;
+  updateTime: Date | undefined;
 }
 export interface CommissionProtoMsg {
   typeUrl: '/cosmos.staking.v1beta1.Commission';
@@ -229,13 +229,13 @@ export interface Validator {
   /** delegator_shares defines total shares issued to a validator's delegators. */
   delegatorShares: string;
   /** description defines the description terms for the validator. */
-  description: Description;
+  description: Description | undefined;
   /** unbonding_height defines, if unbonding, the height at which this validator has begun unbonding. */
   unbondingHeight: bigint;
   /** unbonding_time defines, if unbonding, the min time for the validator to complete unbonding. */
-  unbondingTime: Date;
+  unbondingTime: Date | undefined;
   /** commission defines the commission parameters. */
-  commission: Commission;
+  commission: Commission | undefined;
   /** min_self_delegation is the validator's self declared minimum self delegation. */
   minSelfDelegation: string;
 }
@@ -530,7 +530,7 @@ export interface UnbondingDelegationEntry {
   /** creation_height is the height which the unbonding took place. */
   creationHeight: bigint;
   /** completion_time is the unix time for unbonding completion. */
-  completionTime: Date;
+  completionTime: Date | undefined;
   /** initial_balance defines the tokens initially scheduled to receive at completion. */
   initialBalance: string;
   /** balance defines the tokens to receive at completion. */
@@ -567,7 +567,7 @@ export interface RedelegationEntry {
   /** creation_height  defines the height which the redelegation took place. */
   creationHeight: bigint;
   /** completion_time defines the unix time for redelegation completion. */
-  completionTime: Date;
+  completionTime: Date | undefined;
   /** initial_balance defines the initial balance when redelegation started. */
   initialBalance: string;
   /** shares_dst is the amount of destination-validator shares created by redelegation. */
@@ -648,7 +648,7 @@ export interface RedelegationSDKType {
 /** Params defines the parameters for the staking module. */
 export interface Params {
   /** unbonding_time is the time duration of unbonding. */
-  unbondingTime: Duration;
+  unbondingTime: Duration | undefined;
   /** max_validators is the maximum number of validators. */
   maxValidators: number;
   /** max_entries is the max entries for either unbonding delegation or redelegation (per pair/trio). */
@@ -697,8 +697,8 @@ export interface ParamsSDKType {
  * balance in addition to shares which is more suitable for client responses.
  */
 export interface DelegationResponse {
-  delegation: Delegation;
-  balance: Coin;
+  delegation: Delegation | undefined;
+  balance: Coin | undefined;
 }
 export interface DelegationResponseProtoMsg {
   typeUrl: '/cosmos.staking.v1beta1.DelegationResponse';
@@ -730,7 +730,7 @@ export interface DelegationResponseSDKType {
  * responses.
  */
 export interface RedelegationEntryResponse {
-  redelegationEntry: RedelegationEntry;
+  redelegationEntry: RedelegationEntry | undefined;
   balance: string;
 }
 export interface RedelegationEntryResponseProtoMsg {
@@ -765,7 +765,7 @@ export interface RedelegationEntryResponseSDKType {
  * responses.
  */
 export interface RedelegationResponse {
-  redelegation: Redelegation;
+  redelegation: Redelegation | undefined;
   entries: RedelegationEntryResponse[];
 }
 export interface RedelegationResponseProtoMsg {
@@ -865,7 +865,6 @@ export const HistoricalInfo = {
   },
   fromPartial(object: Partial<HistoricalInfo>): HistoricalInfo {
     const message = createBaseHistoricalInfo();
-    
     
     message.header =
       object.header !== undefined && object.header !== null ? Header.fromPartial(object.header) : undefined;
@@ -1045,12 +1044,10 @@ export const Commission = {
   fromPartial(object: Partial<Commission>): Commission {
     const message = createBaseCommission();
     
-    
     message.commissionRates =
       object.commissionRates !== undefined && object.commissionRates !== null
         ? CommissionRates.fromPartial(object.commissionRates)
         : undefined;
-    
     
     message.updateTime = object.updateTime ?? undefined;
     return message;
@@ -1321,8 +1318,7 @@ export const Validator = {
     message.status = object.status ?? 0;
     message.tokens = object.tokens ?? '';
     message.delegatorShares = object.delegatorShares ?? '';
-    
-    
+        
     message.description =
       object.description !== undefined && object.description !== null
         ? Description.fromPartial(object.description)
@@ -1332,9 +1328,7 @@ export const Validator = {
         ? BigInt(object.unbondingHeight.toString())
         : BigInt(0);
     
-    
     message.unbondingTime = object.unbondingTime ?? undefined;
-    
     
     message.commission =
       object.commission !== undefined && object.commission !== null
@@ -2049,8 +2043,7 @@ export const UnbondingDelegationEntry = {
       object.creationHeight !== undefined && object.creationHeight !== null
         ? BigInt(object.creationHeight.toString())
         : BigInt(0);
-    
-    
+
     message.completionTime = object.completionTime ?? undefined;
     message.initialBalance = object.initialBalance ?? '';
     message.balance = object.balance ?? '';
@@ -2159,7 +2152,6 @@ export const RedelegationEntry = {
       object.creationHeight !== undefined && object.creationHeight !== null
         ? BigInt(object.creationHeight.toString())
         : BigInt(0);
-    
     
     message.completionTime = object.completionTime ?? undefined;
     message.initialBalance = object.initialBalance ?? '';
@@ -2387,7 +2379,6 @@ export const Params = {
   fromPartial(object: Partial<Params>): Params {
     const message = createBaseParams();
     
-    
     message.unbondingTime =
       object.unbondingTime !== undefined && object.unbondingTime !== null
         ? Duration.fromPartial(object.unbondingTime)
@@ -2493,12 +2484,10 @@ export const DelegationResponse = {
   fromPartial(object: Partial<DelegationResponse>): DelegationResponse {
     const message = createBaseDelegationResponse();
     
-    
     message.delegation =
       object.delegation !== undefined && object.delegation !== null
         ? Delegation.fromPartial(object.delegation)
         : undefined;
-    
     
     message.balance =
       object.balance !== undefined && object.balance !== null ? Coin.fromPartial(object.balance) : undefined;
@@ -2581,7 +2570,6 @@ export const RedelegationEntryResponse = {
   },
   fromPartial(object: Partial<RedelegationEntryResponse>): RedelegationEntryResponse {
     const message = createBaseRedelegationEntryResponse();
-    
     
     message.redelegationEntry =
       object.redelegationEntry !== undefined && object.redelegationEntry !== null
@@ -2669,7 +2657,6 @@ export const RedelegationResponse = {
   },
   fromPartial(object: Partial<RedelegationResponse>): RedelegationResponse {
     const message = createBaseRedelegationResponse();
-    
     
     message.redelegation =
       object.redelegation !== undefined && object.redelegation !== null

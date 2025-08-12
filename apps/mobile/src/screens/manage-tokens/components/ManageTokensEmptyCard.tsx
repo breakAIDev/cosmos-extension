@@ -1,7 +1,8 @@
 import { Buttons } from '@leapwallet/leap-ui';
-import { EmptyCard } from 'components/empty-card';
-import { Images } from 'images';
+import { EmptyCard } from '../../../components/empty-card';
+import { Images } from '../../../../assets/images';
 import React from 'react';
+import { Text, TouchableOpacity, View, StyleSheet } from 'react-native';
 
 type ManageTokensEmptyCardProps = {
   onAddTokenClick: (passState?: boolean) => void;
@@ -9,31 +10,28 @@ type ManageTokensEmptyCardProps = {
 };
 
 export function ManageTokensEmptyCard({ onAddTokenClick, searchedText }: ManageTokensEmptyCardProps) {
-  let subHeading = (
-    <p className='text-[13px]'>
-      Or manually add token data{' '}
-      <button
-        className='border-none bg-transparent hover:underline cursor-pointer font-bold text-sm'
-        style={{ color: '#ad4aff' }}
-        onClick={() => onAddTokenClick(false)}
-      >
-        here
-      </button>
-    </p>
+  let subHeading: React.ReactNode = (
+    <View style={styles.row}>
+      <Text style={styles.subText}>
+        Or manually add token data{' '}
+      </Text>
+      <TouchableOpacity onPress={() => onAddTokenClick(false)}>
+        <Text style={styles.linkText}>here</Text>
+      </TouchableOpacity>
+    </View>
   );
 
   if (searchedText) {
     subHeading = (
-      <p className='text-[13px]'>
-        Try manually adding tokens instead
+      <View>
+        <Text style={styles.subText}>Try manually adding tokens instead</Text>
         <Buttons.Generic
           onClick={() => onAddTokenClick(true)}
-          className='max-w-[200px] text-gray-900 mt-[16px]'
-          style={{ boxShadow: 'none' }}
+          style={styles.manualBtn}
         >
-          Add Tokens Manually
+          <Text style={styles.manualBtnText}>Add Tokens Manually</Text>
         </Buttons.Generic>
-      </p>
+      </View>
     );
   }
 
@@ -41,9 +39,57 @@ export function ManageTokensEmptyCard({ onAddTokenClick, searchedText }: ManageT
     <EmptyCard
       isRounded
       subHeading={subHeading}
-      heading={<p className='text-[15px]'>{searchedText ? 'No results found' : 'Search for any token'}</p>}
-      classname='flex-1 justify-center pt-0'
+      heading={
+        <Text style={styles.headingText}>
+          {searchedText ? 'No results found' : 'Search for any token'}
+        </Text>
+      }
+      style={styles.flexCenter}
       src={Images.Misc.Explore}
     />
   );
 }
+
+const styles = StyleSheet.create({
+  flexCenter: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingTop: 0,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    marginTop: 4,
+  },
+  subText: {
+    fontSize: 13,
+    color: '#5a5a5a',
+  },
+  linkText: {
+    color: '#ad4aff',
+    fontWeight: 'bold',
+    fontSize: 15,
+    marginLeft: 2,
+    textDecorationLine: 'underline',
+  },
+  headingText: {
+    fontSize: 15,
+    color: '#171717',
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  manualBtn: {
+    maxWidth: 200,
+    marginTop: 16,
+    backgroundColor: '#f3f3fa',
+    alignSelf: 'flex-start',
+    boxShadow: 'none', // has no effect in React Native but included for parity
+  },
+  manualBtnText: {
+    color: '#2d3142',
+    fontWeight: '600',
+    fontSize: 14,
+    textAlign: 'center',
+  },
+});

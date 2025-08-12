@@ -1,9 +1,9 @@
-import { isLedgerUnlocked } from '@leapwallet/cosmos-wallet-sdk';
-import { type IconProps } from '@phosphor-icons/react';
-import { motion } from 'framer-motion';
-import { LEDGER_NETWORK } from 'pages/onboarding/import/import-wallet-context';
-import { onboardingWrapperVariants } from 'pages/onboarding/wrapper';
 import React, { useEffect } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { isLedgerUnlocked } from '@leapwallet/cosmos-wallet-sdk';
+import { type IconProps } from 'phosphor-react-native';
+import { MotiView } from 'moti'; // Use Moti for animation
+import { LEDGER_NETWORK } from '../onboarding/import/import-wallet-context';
 
 export const HoldState = ({
   Icon,
@@ -13,7 +13,8 @@ export const HoldState = ({
   getLedgerAccountDetails,
 }: {
   Icon: (props: IconProps) => React.JSX.Element;
-  title: React.ReactNode;
+  title: string
+  ;
   moveToNextApp: (
     pathWiseAddresses: Record<
       string,
@@ -50,7 +51,7 @@ export const HoldState = ({
           clearInterval(interval);
         }
       } catch (error) {
-        // eslint-disable-next-line no-console
+        // Just for debugging
         console.error(error);
       }
     }, 1000);
@@ -58,27 +59,99 @@ export const HoldState = ({
     return () => {
       clearInterval(interval);
     };
-  }, [appType]);
+  }, [appType, getLedgerAccountDetails, moveToNextApp]);
 
   return (
-    <motion.div
-      className='flex flex-col w-full flex-1'
-      variants={onboardingWrapperVariants}
-      initial={'fromRight'}
-      animate='animate'
-      exit='exit'
-    >
-      <header className='flex flex-col items-center justify-center gap-6 flex-1'>
-        <div className='rounded-full size-[134px] animate-scaleUpDown [--scale-up-down-start:1.05] bg-accent-foreground/20 grid place-content-center'>
-          <div className='rounded-full size-[89px] animate-scaleUpDown [--scale-up-down-start:1.075] bg-accent-foreground/40 grid place-content-center'>
-            <div className='rounded-full size-[44.5px] animate-scaleUpDown [--scale-up-down-start:1.1] bg-accent-foreground grid place-content-center'>
-              <Icon className='size-6' />
-            </div>
-          </div>
-        </div>
+    <View style={styles.wrapper}>
+      <View style={styles.header}>
+        {/* Three layered animated circles */}
+        <MotiView
+          from={{ scale: 1.05 }}
+          animate={{ scale: 1 }}
+          transition={{
+            loop: true,
+            type: 'timing',
+            duration: 1200,
+            repeatReverse: true,
+          }}
+          style={styles.circleLarge}
+        >
+          <MotiView
+            from={{ scale: 1.075 }}
+            animate={{ scale: 1 }}
+            transition={{
+              loop: true,
+              type: 'timing',
+              duration: 1200,
+              repeatReverse: true,
+            }}
+            style={styles.circleMedium}
+          >
+            <MotiView
+              from={{ scale: 1.1 }}
+              animate={{ scale: 1 }}
+              transition={{
+                loop: true,
+                type: 'timing',
+                duration: 1200,
+                repeatReverse: true,
+              }}
+              style={styles.circleSmall}
+            >
+              <Icon size={24} color="#fff" />
+            </MotiView>
+          </MotiView>
+        </MotiView>
 
-        <span className='text-xl font-bold text-center'>{title}</span>
-      </header>
-    </motion.div>
+        <Text style={styles.title}>{title}</Text>
+      </View>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+    width: '100%',
+    justifyContent: 'center',
+  },
+  header: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 24,
+    marginTop: 24,
+  },
+  circleLarge: {
+    width: 134,
+    height: 134,
+    borderRadius: 67,
+    backgroundColor: 'rgba(16,185,129,0.16)', // bg-accent-foreground/20
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  circleMedium: {
+    width: 89,
+    height: 89,
+    borderRadius: 44.5,
+    backgroundColor: 'rgba(16,185,129,0.32)', // bg-accent-foreground/40
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  circleSmall: {
+    width: 44.5,
+    height: 44.5,
+    borderRadius: 22.25,
+    backgroundColor: '#10b981', // bg-accent-foreground
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  title: {
+    marginTop: 30,
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#222',
+    textAlign: 'center',
+    letterSpacing: 0.1,
+  },
+});

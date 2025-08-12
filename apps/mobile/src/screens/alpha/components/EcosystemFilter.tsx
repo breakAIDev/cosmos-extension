@@ -1,10 +1,11 @@
-import Text from 'components/text';
-import { EventName, PageName } from 'config/analytics';
-import { useDefaultTokenLogo, useNonNativeCustomChains } from 'hooks';
-import { useChainInfos } from 'hooks/useChainInfos';
-import { useCoingeckoChains } from 'hooks/useCoingeckoChains';
-import mixpanel from 'mixpanel-browser';
+import Text from '../../../components/text';
+import { EventName, PageName } from '../../../services/config/analytics';
+import { useDefaultTokenLogo, useNonNativeCustomChains } from '../../../hooks';
+import { useChainInfos } from '../../../hooks/useChainInfos';
+import { useCoingeckoChains } from '../../../hooks/useCoingeckoChains';
+import mixpanel from '../../../mixpanel';
 import React, { useCallback } from 'react';
+import { View, StyleSheet } from 'react-native';
 
 import { useFilters } from '../context/filter-context';
 import FilterItem from './FilterItem';
@@ -47,10 +48,10 @@ export default function EcosystemFilter({
   );
 
   return (
-    <div className='flex flex-col gap-5'>
-      <span className='text-muted-foreground text-sm uppercase font-bold'>Ecosystem</span>
+    <View style={styles.root}>
+      <Text style={styles.title}>Ecosystem</Text>
 
-      <div className='flex flex-col'>
+      <View style={styles.list}>
         {ecosystemFilters
           ?.sort((a, b) => a.localeCompare(b))
           ?.map((ecosystem, index) => {
@@ -80,7 +81,24 @@ export default function EcosystemFilter({
               />
             );
           })}
-      </div>
-    </div>
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flexDirection: 'column',
+    gap: 20,
+  },
+  title: {
+    color: '#888',
+    fontSize: 14,
+    textTransform: 'uppercase',
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  list: {
+    flexDirection: 'column',
+  },
+});

@@ -1,5 +1,6 @@
-import { Images } from 'images';
 import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { Images } from '../../../../assets/images';
 
 type ArrowHeaderProps = {
   activeIndex: number;
@@ -21,39 +22,71 @@ export function ArrowHeader({ activeIndex, setActiveIndex, limit }: ArrowHeaderP
   };
 
   return (
-    <div className='flex items-center gap-1'>
+    <View style={styles.container}>
       {activeIndex > 0 ? (
-        <div className='flex items-center'>
-          <button onClick={() => setActiveIndex(0)}>
-            <img src={Images.Misc.ArrowDoubleLeft} alt='arrow-double-left' />
-          </button>
+        <View style={styles.arrows}>
+          <TouchableOpacity onPress={() => setActiveIndex(0)}>
+            <Image source={{uri: Images.Misc.ArrowDoubleLeft}} style={styles.icon} resizeMode="contain" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handlePrevClick}>
+            <Image source={{uri: Images.Misc.ArrowSingleLeft}} style={styles.icon} resizeMode="contain" />
+          </TouchableOpacity>
+        </View>
+      ) : <View style={styles.arrowSpacer} />}
 
-          <button onClick={handlePrevClick}>
-            <img src={Images.Misc.ArrowSingleLeft} alt='arrow-single-left' />
-          </button>
-        </div>
-      ) : null}
-
-      <div className='flex-1 text-center'>
-        <p className='dark:text-white-100 text-gray-900 text-[12px]'>
-          <strong>
-            {activeIndex + 1} of {limit}
-          </strong>
-        </p>
-        <p className='dark:text-white-100 text-gray-900 text-[10px]'>requests waiting to be acknowledged</p>
-      </div>
+      <View style={styles.centerText}>
+        <Text style={styles.textCurrent}>
+          <Text style={{ fontWeight: 'bold' }}>{activeIndex + 1} of {limit}</Text>
+        </Text>
+        <Text style={styles.textWaiting}>requests waiting to be acknowledged</Text>
+      </View>
 
       {activeIndex < limit - 1 ? (
-        <div className='flex items-center'>
-          <button onClick={handleNextClick}>
-            <img src={Images.Misc.ArrowSingleRight} alt='arrow-single-right' />
-          </button>
-
-          <button onClick={() => setActiveIndex(limit - 1)}>
-            <img src={Images.Misc.ArrowDoubleRight} alt='arrow-double-right' />
-          </button>
-        </div>
-      ) : null}
-    </div>
+        <View style={styles.arrows}>
+          <TouchableOpacity onPress={handleNextClick}>
+            <Image source={{uri: Images.Misc.ArrowSingleRight}} style={styles.icon} resizeMode="contain" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setActiveIndex(limit - 1)}>
+            <Image source={{uri: Images.Misc.ArrowDoubleRight}} style={styles.icon} resizeMode="contain" />
+          </TouchableOpacity>
+        </View>
+      ) : <View style={styles.arrowSpacer} />}
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 6,
+    width: '100%',
+  },
+  arrows: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+  },
+  icon: {
+    width: 22,
+    height: 22,
+    marginHorizontal: 2,
+  },
+  arrowSpacer: {
+    width: 52, // Space to keep center text centered (2 icons' width + margin)
+  },
+  centerText: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  textCurrent: {
+    color: '#111827', // light; can use dynamic color with useColorScheme()
+    fontSize: 12,
+  },
+  textWaiting: {
+    color: '#111827',
+    fontSize: 10,
+  },
+});

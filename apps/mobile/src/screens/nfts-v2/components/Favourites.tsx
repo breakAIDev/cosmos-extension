@@ -3,7 +3,7 @@ import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { NftInfo, NftStore } from '@leapwallet/cosmos-wallet-store';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
-import { favNftStore, hiddenNftStore } from 'stores/manage-nft-store';
+import { favNftStore, hiddenNftStore } from '../../../context/manage-nft-store';
 
 import { useNftContext } from '../context';
 import { AllNftsHidden, TextHeaderCollectionCard } from './index';
@@ -25,15 +25,18 @@ export const Favourites = observer(({ nftStore }: FavouritesProps) => {
 
   if (favNftsList.length === 0 || areAllNftsHidden) {
     if (activeTab === 'All') {
-      return <></>;
+      return null;
     }
-
     return <AllNftsHidden />;
   }
 
   return (
     <TextHeaderCollectionCard
-      headerTitle={activeTab === 'All' ? 'Favorites' : `${favNftsList.length} NFT${favNftsList.length > 1 ? 's' : ''}`}
+      headerTitle={
+        activeTab === 'All'
+          ? 'Favorites'
+          : `${favNftsList.length} NFT${favNftsList.length > 1 ? 's' : ''}`
+      }
       nfts={favNftsList as unknown as (NftInfo & { chain: SupportedChain })[]}
     />
   );

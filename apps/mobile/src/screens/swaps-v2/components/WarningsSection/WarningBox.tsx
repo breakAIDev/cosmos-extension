@@ -1,4 +1,4 @@
-import { Warning } from '@phosphor-icons/react';
+import { Warning } from 'phosphor-react-native';
 import classNames from 'classnames';
 import React from 'react';
 

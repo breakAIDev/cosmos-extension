@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Image, Text, StyleSheet, useColorScheme } from 'react-native';
+import { View, Image, StyleSheet, useColorScheme, ViewStyle, StyleProp, ImageStyle } from 'react-native';
 import { useDefaultTokenLogo } from '../../hooks/utility/useDefaultTokenLogo';
 
 export type EmptyCardProps = {
@@ -7,9 +7,9 @@ export type EmptyCardProps = {
   heading?: React.ReactNode;
   subHeading?: React.ReactNode;
   isRounded?: boolean;
-  style?: object;
-  logoStyle?: object;
-  imgContainerStyle?: object;
+  style?: StyleProp<ViewStyle>;
+  logoStyle?: StyleProp<ImageStyle>;
+  imgContainerStyle?: StyleProp<ViewStyle>;
   testID?: string;
 };
 
@@ -33,7 +33,7 @@ export function EmptyCard(props: EmptyCardProps) {
     <View
       style={[
         styles.container,
-        isRounded && styles.rounded,
+        isRounded ? styles.rounded : {},
         style,
       ]}
     >
@@ -45,23 +45,22 @@ export function EmptyCard(props: EmptyCardProps) {
         ]}
       >
         <Image
-          source={src ? { uri: src } : defaultTokenLogo}
+          source={{uri: src ?? defaultTokenLogo}}
           style={[styles.logo, logoStyle]}
           resizeMode="contain"
         />
       </View>
       {heading && (
-        <Text
-          style={[styles.heading, { color: isDark ? '#F3F4F6' : '#1F2937' }]} // gray-100 (dark) / gray-800 (light)
-          testID={testID}
+        <View
+          style={[styles.heading, { backgroundColor: isDark ? '#F3F4F6' : '#1F2937' }]} // gray-100 (dark) / gray-800 (light)
         >
-          {heading}
-        </Text>
+          {React.isValidElement(heading) ? heading : <View/>}
+        </View>
       )}
       {subHeading && (
-        <Text style={styles.subHeading}>
-          {subHeading}
-        </Text>
+        <View style={styles.subHeading}>
+          {React.isValidElement(subHeading) ? subHeading : <View/>}
+        </View>
       )}
     </View>
   );
@@ -98,7 +97,7 @@ const styles = StyleSheet.create({
   },
   subHeading: {
     fontSize: 14,
-    color: '#9CA3AF', // gray-400
+    backgroundColor: '#9CA3AF', // gray-400
     textAlign: 'center',
     fontWeight: '500',
   },

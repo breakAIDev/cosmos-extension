@@ -1,21 +1,19 @@
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { CheckCircle, DotsThreeVertical, Star, TrashSimple } from '@phosphor-icons/react';
-import { captureException } from '@sentry/react';
-import classNames from 'classnames';
-import Text from 'components/text';
-import { EventName } from 'config/analytics';
-import { AGGREGATED_CHAIN_KEY } from 'config/constants';
-import useActiveWallet from 'hooks/settings/useActiveWallet';
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
-import { Images } from 'images';
-import mixpanel from 'mixpanel-browser';
+import { CheckCircle, DotsThreeVertical, Star, TrashSimple } from 'phosphor-react-native';
+import { captureException } from '@sentry/react-native';
+import { TouchableOpacity, View, Text, Image, StyleSheet } from 'react-native';
+import { EventName } from '../../../services/config/analytics';
+import { AGGREGATED_CHAIN_KEY } from '../../../services/config/constants';
+import useActiveWallet from '../../../hooks/settings/useActiveWallet';
+import { useDefaultTokenLogo } from '../../../hooks/utility/useDefaultTokenLogo';
+import { Images } from '../../../../assets/images';
+import mixpanel from '../../../mixpanel';
 import { observer } from 'mobx-react-lite';
 import React, { useState } from 'react';
-import { importWatchWalletSeedPopupStore } from 'stores/import-watch-wallet-seed-popup-store';
-import { starredChainsStore } from 'stores/starred-chains-store';
-import { Colors } from 'theme/colors';
-import { getChainName } from 'utils/getChainName';
-import { imgOnError } from 'utils/imgOnError';
+import { importWatchWalletSeedPopupStore } from '../../../context/import-watch-wallet-seed-popup-store';
+import { starredChainsStore } from '../../../context/starred-chains-store';
+import { Colors } from '../../../theme/colors';
+import { getChainName } from '../../../utils/getChainName';
 
 type Chain = SupportedChain | typeof AGGREGATED_CHAIN_KEY;
 
@@ -64,9 +62,8 @@ const ChainCardView = ({
     }
   };
 
-  
   const onStarToggle = (e: any) => {
-    e.stopPropagation();
+    e.stopPropagation && e.stopPropagation();
     if (isStarred) {
       starredChainsStore.removeStarredChain(chainName);
       trackCTAEvent(EventName.ChainUnfavorited);
@@ -77,101 +74,182 @@ const ChainCardView = ({
   };
 
   const handleToggleDelete = (e: any) => {
-    e.stopPropagation();
-    setShowDeleteBtn((showDeleteBtn) => !showDeleteBtn);
+    e.stopPropagation && e.stopPropagation();
+    setShowDeleteBtn((prev) => !prev);
   };
 
   const deleteChain = (e: any) => {
     if (handleDeleteClick && chainName !== 'aggregated') {
-      e.stopPropagation();
+      e.stopPropagation && e.stopPropagation();
       handleDeleteClick(chainName);
       setShowDeleteBtn(false);
     }
   };
 
   return (
-    <div
-      onClick={() => {
+    <TouchableOpacity
+      style={styles.cardContainer}
+      activeOpacity={0.8}
+      onPress={() => {
         if (isWatchWalletNotAvailableChain) {
           importWatchWalletSeedPopupStore.setShowPopup(true);
         } else {
           handleClick(chainName, beta);
         }
       }}
-      className='flex flex-1 items-center px-4 py-3.5 cursor-pointer relative'
     >
-      <div className='flex items-center flex-1 gap-2'>
-        {showStars && (
-          <>
+      <View style={styles.contentRow}>
+        {showStars ? (
+          <TouchableOpacity onPress={onStarToggle}>
             {isStarred ? (
-              <Star size={20} weight='fill' className='text-yellow-500 cursor-pointer' onClick={onStarToggle} />
+              <Star size={20} weight="fill" color="#FFD600" />
             ) : (
-              <Star size={20} className='text-secondary-600 cursor-pointer' onClick={onStarToggle} />
+              <Star size={20} color={Colors.orange600} />
             )}
-          </>
-        )}
-
-        <img
-          src={img ?? defaultTokenLogo}
-          className={classNames('h-6 w-6 ml-1 rounded-full', {
-            grayscale: isWatchWalletNotAvailableChain,
-          })}
-          onError={imgOnError(defaultTokenLogo)}
+          </TouchableOpacity>
+        ) : null}
+        <Image
+          source={{ uri: img ?? defaultTokenLogo }}
+          style={[
+            styles.chainLogo,
+            isWatchWalletNotAvailableChain ? { opacity: 0.4 } : {},
+          ]}
+          defaultSource={{ uri: defaultTokenLogo }}
         />
-
         <Text
-          size='sm'
-          className='font-bold'
-          color={isWatchWalletNotAvailableChain ? 'text-secondary-600' : 'text-foreground'}
-          data-testing-id={`switch-chain-${formattedChainName.toLowerCase()}-ele`}
+          style={[
+            styles.chainName,
+            isWatchWalletNotAvailableChain ? { color: Colors.orange600 } : { color: Colors.junoPrimary },
+          ]}
         >
           {onPage === 'AddCollection' ? getChainName(formattedChainName) : formattedChainName}
         </Text>
-
         {(beta !== false || showNewTag) && (
-          <span
-            className={classNames('text-xs font-bold  py-1 px-2 rounded-2xl', {
-              'text-green-500 bg-green-500/10': !activeWallet?.watchWallet || showNewTag,
-              'text-gray-400 dark:text-gray-700 bg-gray-100 dark:bg-gray-850': activeWallet?.watchWallet && !showNewTag,
-            })}
+          <View
+            style={[
+              styles.tag,
+              (!activeWallet?.watchWallet || showNewTag)
+                ? styles.tagGreen
+                : styles.tagGray,
+            ]}
           >
-            {showNewTag ? 'New' : 'Custom'}
-          </span>
+            <Text
+              style={[
+                styles.tagText,
+                (!activeWallet?.watchWallet || showNewTag)
+                  ? { color: Colors.green500 }
+                  : { color: '#888' },
+              ]}
+            >
+              {showNewTag ? 'New' : 'Custom'}
+            </Text>
+          </View>
         )}
-      </div>
+      </View>
 
-      <div className='ml-auto flex items-center'>
+      <View style={styles.iconsRow}>
         {selectedChain === chainName ? (
-          <CheckCircle
-            size={24}
-            weight='fill'
-            className='ml-2'
-            style={{
-              color: Colors.green500,
-            }}
-          />
+          <CheckCircle size={24} weight="fill" color={Colors.green500} style={{ marginLeft: 8 }} />
         ) : null}
-        {beta && (
-          <DotsThreeVertical onClick={handleToggleDelete} size={20} className='text-gray-400 ml-2 cursor-pointer' />
-        )}
-        {isWatchWalletNotAvailableChain && (
-          <img src={Images.Misc.SyncDisabled} onError={imgOnError(defaultTokenLogo)} />
-        )}
-      </div>
+        {beta ? (
+          <TouchableOpacity onPress={handleToggleDelete}>
+            <DotsThreeVertical size={20} color="#BDBDBD" style={{ marginLeft: 8 }} />
+          </TouchableOpacity>
+        ) : null}
+        {isWatchWalletNotAvailableChain ? (
+          <Image source={{uri: Images.Misc.SyncDisabled}} style={styles.syncDisabled} />
+        ) : null}
+      </View>
 
       {showDeleteBtn && (
-        <div
-          className='flex p-2.5 gap-x-2 absolute dark:bg-gray-900 bg-gray-50 rounded-lg items-center w-[120px] h-[42px] right-4 -bottom-[34px] z-[1]'
-          onClick={deleteChain}
-        >
-          <TrashSimple size={16} weight='fill' className='text-black-100 dark:text-white-100' />
-          <Text size='sm' className='font-medium'>
-            Delete
-          </Text>
-        </div>
+        <TouchableOpacity style={styles.deleteBtn} onPress={deleteChain}>
+          <TrashSimple size={16} weight="fill" color={Colors.black100} style={{ marginRight: 6 }} />
+          <Text style={styles.deleteBtnText}>Delete</Text>
+        </TouchableOpacity>
       )}
-    </div>
+    </TouchableOpacity>
   );
 };
+
+const styles = StyleSheet.create({
+  cardContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: 'white',
+    borderRadius: 16,
+    marginBottom: 6,
+    position: 'relative',
+    minHeight: 56,
+  },
+  contentRow: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  chainLogo: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    marginLeft: 4,
+    backgroundColor: '#e0e0e0',
+  },
+  chainName: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    marginLeft: 8,
+  },
+  tag: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 20,
+    marginLeft: 8,
+  },
+  tagGreen: {
+    backgroundColor: '#e6f9ef',
+  },
+  tagGray: {
+    backgroundColor: '#e0e0e0',
+  },
+  tagText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  iconsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 'auto',
+  },
+  syncDisabled: {
+    width: 20,
+    height: 20,
+    marginLeft: 8,
+  },
+  deleteBtn: {
+    position: 'absolute',
+    right: 16,
+    bottom: -34,
+    backgroundColor: '#fafafa',
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    zIndex: 1,
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 3,
+    width: 120,
+    height: 42,
+  },
+  deleteBtnText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#111',
+  },
+});
 
 export const ChainCard = observer(ChainCardView);

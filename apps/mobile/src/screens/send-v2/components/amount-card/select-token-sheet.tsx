@@ -1,13 +1,14 @@
 import { useChainInfo } from '@leapwallet/cosmos-wallet-hooks';
 import { DenomsRecord } from '@leapwallet/cosmos-wallet-sdk';
 import { Token } from '@leapwallet/cosmos-wallet-store';
-import BottomModal from '../bottom-modal';
-import NoSearchResults from 'components/no-search-results';
-import { SearchInput } from 'components/ui/input/search-input';
-import { useSendContext } from 'pages/send-v2/context';
-import { TokenCard } from 'pages/swaps-v2/components/TokenCard';
+import BottomModal from '../../../../components/bottom-modal';
+import NoSearchResults from '../../../../components/no-search-results';
+import { SearchInput } from '../../../../components/ui/input/search-input';
+import { useSendContext } from '../../../send-v2/context';
+import { TokenCard } from '../../../swaps-v2/components/TokenCard';
 import React, { useMemo, useState } from 'react';
-import { SourceToken } from 'types/swap';
+import { SourceToken } from '../../../../types/swap';
+import { View, ScrollView, StyleSheet } from 'react-native';
 
 type SelectTokenSheetProps = {
   assets: Token[];
@@ -57,31 +58,30 @@ export const SelectTokenSheet = ({
 
   return (
     <BottomModal
-      title='Select Token'
+      title="Select Token"
       isOpen={isOpen}
       closeOnBackdropClick={true}
       onClose={onClose}
-      contentClassName='!bg-white-100 dark:!bg-gray-950'
-      className='p-0 scrollbar'
+      // Add extra styles if your BottomModal supports it
+      style={styles.modal}
     >
-      <div className='flex flex-col items-center h-full py-6'>
-        <div className='w-full px-6'>
+      <View style={styles.container}>
+        <View style={styles.searchWrapper}>
           <SearchInput
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChangeText={setSearchQuery}
             onClear={() => setSearchQuery('')}
-            placeholder='Search tokens...'
+            placeholder="Search tokens..."
           />
-        </div>
-
-        <div
-          className='bg-white-100 dark:bg-gray-950 rounded-2xl min-h-[200px] max-h-[calc(100%-240px)] w-full mt-4'
-          style={{ overflowY: 'scroll' }}
+        </View>
+        <ScrollView
+          style={styles.tokensWrapper}
+          contentContainerStyle={transferableTokens.length === 0 && styles.noResultsScroll}
+          keyboardShouldPersistTaps="handled"
         >
           {transferableTokens.length > 0 ? (
             transferableTokens.map((asset, index) => {
               const isLast = index === transferableTokens.length - 1;
-
               let isSelected = selectedToken?.coinMinimalDenom === asset.coinMinimalDenom;
               if (selectedToken?.ibcDenom || asset.ibcDenom) {
                 isSelected = selectedToken?.ibcDenom === asset.ibcDenom;
@@ -89,7 +89,6 @@ export const SelectTokenSheet = ({
               if (selectedToken?.isEvm || asset?.isEvm) {
                 isSelected = isSelected && selectedToken?.isEvm === asset?.isEvm;
               }
-
               return (
                 <React.Fragment key={`${asset.coinMinimalDenom}-${index}`}>
                   <TokenCard
@@ -99,17 +98,55 @@ export const SelectTokenSheet = ({
                     selectedChain={undefined}
                     showRedirection={false}
                   />
-                  {!isLast && <div className='border-b mx-6 border-gray-100 dark:border-gray-850' />}
+                  {!isLast && <View style={styles.divider} />}
                 </React.Fragment>
               );
             })
           ) : (
-            <NoSearchResults searchQuery={searchQuery} classname='mx-6' />
+            <NoSearchResults searchQuery={searchQuery} style={styles.noResults} />
           )}
-        </div>
-      </div>
+        </ScrollView>
+      </View>
     </BottomModal>
   );
 };
 
 SelectTokenSheet.displayName = 'SelectTokenSheet';
+
+const styles = StyleSheet.create({
+  modal: {
+    padding: 0,
+  },
+  container: {
+    flex: 1,
+    paddingTop: 24,
+    paddingBottom: 0,
+    alignItems: 'center',
+    backgroundColor: '#fff', // or use your theme
+  },
+  searchWrapper: {
+    width: '100%',
+    paddingHorizontal: 24,
+  },
+  tokensWrapper: {
+    flex: 1,
+    minHeight: 200,
+    maxHeight: '70%', // Adjust as needed
+    width: '100%',
+    marginTop: 16,
+    borderRadius: 16,
+    backgroundColor: '#fff', // or theme
+  },
+  divider: {
+    height: 1,
+    marginHorizontal: 24,
+    backgroundColor: '#F3F4F6', // gray-100 or dark: #1f2937
+  },
+  noResults: {
+    marginHorizontal: 24,
+  },
+  noResultsScroll: {
+    flexGrow: 1,
+    justifyContent: 'center',
+  },
+});

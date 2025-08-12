@@ -1,4 +1,3 @@
-
 import { AptosApiError } from '@aptos-labs/ts-sdk';
 import { StdFee } from '@cosmjs/stargate';
 import {
@@ -29,52 +28,45 @@ import {
 } from '@leapwallet/cosmos-wallet-sdk';
 import { RootBalanceStore, RootDenomsStore } from '@leapwallet/cosmos-wallet-store';
 import { Avatar, Buttons, Header, ThemeName, useTheme } from '@leapwallet/leap-ui';
-import { CheckSquare, Square } from '@phosphor-icons/react';
-import { captureException } from '@sentry/react';
+import { CheckSquare, Square } from 'phosphor-react-native';
+import { captureException } from '@sentry/react-native';
 import BigNumber from 'bignumber.js';
-import classNames from 'classnames';
-import Tooltip from 'components/better-tooltip';
-import { ErrorCard } from 'components/ErrorCard';
-import GasPriceOptions, { useDefaultGasPrice } from 'components/gas-price-options';
-import PopupLayout from 'components/layout/popup-layout';
-import LedgerConfirmationModal from 'components/ledger-confirmation/confirmation-modal';
-import { LoaderAnimation } from 'components/loader/Loader';
-import SelectWalletSheet from 'components/select-wallet-sheet';
-import { Tabs } from 'components/tabs';
-import Text from 'components/text';
-import { walletLabels } from 'config/constants';
-import { MessageTypes } from 'config/message-types';
-import { BG_RESPONSE } from 'config/storage-keys';
-import { decodeChainIdToChain } from 'extension-scripts/utils';
-import { usePerformanceMonitor } from 'hooks/perf-monitoring/usePerformanceMonitor';
-import { useUpdateKeyStore } from 'hooks/settings/useActiveWallet';
-import { useSiteLogo } from 'hooks/utility/useSiteLogo';
-import { Wallet } from 'hooks/wallet/useWallet';
-import { Images } from 'images';
-import { GenericDark, GenericLight } from 'images/logos';
-import mixpanel from 'mixpanel-browser';
+import Tooltip from '../../components/better-tooltip';
+import { ErrorCard } from '../../components/ErrorCard';
+import GasPriceOptions, { useDefaultGasPrice } from '../../components/gas-price-options';
+import PopupLayout from '../../components/layout/popup-layout';
+import LedgerConfirmationModal from '../../components/ledger-confirmation/confirmation-modal';
+import { LoaderAnimation } from '../../components/loader/Loader';
+import SelectWalletSheet from '../../components/select-wallet-sheet';
+import { Tabs } from '../../components/tabs';
+import Text from '../../components/text';
+import { walletLabels } from '../../services/config/constants';
+import { MessageTypes } from '../../services/config/message-types';
+import { BG_RESPONSE } from '../../services/config/storage-keys';
+import { decodeChainIdToChain } from '../../context/utils';
+import { usePerformanceMonitor } from '../../hooks/perf-monitoring/usePerformanceMonitor';
+import { useUpdateKeyStore } from '../../hooks/settings/useActiveWallet';
+import { useSiteLogo } from '../../hooks/utility/useSiteLogo';
+import { Wallet } from '../../hooks/wallet/useWallet';
+import { Images } from '../../../assets/images';
+import { GenericDark, GenericLight } from '../../../assets/images/logos';
 import { observer } from 'mobx-react-lite';
-import { addToConnections } from 'pages/ApproveConnection/utils';
+import { addToConnections } from '../ApproveConnection/utils';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router';
-import { rootDenomsStore } from 'stores/denoms-store-instance';
-import { feeTokensStore } from 'stores/fee-store';
-import { rootBalanceStore } from 'stores/root-store';
-import { Colors } from 'theme/colors';
-import { assert } from 'utils/assert';
-import { formatWalletName } from 'utils/formatWalletName';
-import { imgOnError } from 'utils/imgOnError';
-import { isSidePanel } from 'utils/isSidePanel';
-import { trim } from 'utils/strings';
-import browser from 'webextension-polyfill';
+import { rootDenomsStore } from '../../context/denoms-store-instance';
+import { feeTokensStore } from '../../context/fee-store';
+import { rootBalanceStore } from '../../context/root-store';
+import { Colors, getChainColor } from '../../theme/colors';
+import { assert } from '../../utils/assert';
+import { formatWalletName } from '../../utils/formatWalletName';
+import { trim } from '../../utils/strings';
 
-import { EventName } from '../../config/analytics';
-import { NotAllowSignTxGasOptions } from './additional-fee-settings';
 import StaticFeeDisplay from './static-fee-display';
-import { mapWalletTypeToMixpanelWalletType, mixpanelTrackOptions } from './utils/mixpanel-config';
-//   import { NotAllowSignTxGasOptions } from './additional-fee-settings'
-//   import StaticFeeDisplay from './static-fee-display'
 import { getOriginalSignDoc, getSolanaSignDoc } from './utils/sign-solana';
+import { DeviceEventEmitter } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 
 const useGetWallet = Wallet.useGetWallet;
 const useSolanaSigner = Wallet.useSolanaSigner;
@@ -123,7 +115,7 @@ const SignTransaction = observer(
     const activeWallet = useActiveWallet();
     const getSolanaSigner = useSolanaSigner();
     const getWallet = useGetWallet(activeChain);
-    const navigate = useNavigate();
+    const navigation = useNavigation();
     const { chains } = useChainsStore();
     const updateKeyStore = useUpdateKeyStore();
 
@@ -320,20 +312,12 @@ const SignTransaction = observer(
       //     captureException(e)
       // }
 
-      await browser.runtime.sendMessage({
+      await DeviceEventEmitter.emit('signTransaction', { 
         type: MessageTypes.signResponse,
         payload: { status: 'error', data: 'Transaction cancelled by the user.' },
       });
-      if (isSidePanel()) {
-        navigate('/home');
-      } else {
-        await sleep(100);
-
-        setTimeout(async () => {
-          window.close();
-        }, 10);
-      }
-    }, [siteOrigin, activeWallet.walletType, chainInfo.chainId, chainInfo.chainName, navigate]);
+      navigation.goBack();
+    }, [navigation]);
 
     const currentWalletInfo = useMemo(() => {
       if (!activeWallet || !chainId || !siteOrigin) return undefined;
@@ -369,8 +353,8 @@ const SignTransaction = observer(
 
           try {
             // Check if there's an active connection for this dApp
-            const storage = await browser.storage.local.get(['CONNECTIONS']);
-            const connections = storage['CONNECTIONS'] || [];
+            const storage = await AsyncStorage.getItem('CONNECTIONS');
+            const connections = storage ? JSON.parse(storage) : [];
             const origin = siteOrigin || '';
 
             const isConnected = connections.some(
@@ -386,7 +370,7 @@ const SignTransaction = observer(
               await addToConnections(['101', '103'], selectedWalletIds, origin);
             }
 
-            browser.runtime.sendMessage({
+            DeviceEventEmitter.emit('signTransaction', {
               type: MessageTypes.signResponse,
               payload: { status: 'success', data: { signedTxData, activeAddress } },
             });
@@ -395,14 +379,7 @@ const SignTransaction = observer(
           }
 
           setIsSigning(false);
-          if (isSidePanel()) {
-            refetchData();
-            navigate('/home');
-          } else {
-            setTimeout(async () => {
-              window.close();
-            }, 10);
-          }
+          navigation.goBack();
           return;
         }
         const { tx: signedTxData, signature: txhash } = await solanaClient.signTransaction(signDoc);
@@ -435,8 +412,8 @@ const SignTransaction = observer(
         if (!shouldSubmit) {
           try {
             // Check if there's an active connection for this dApp
-            const storage = await browser.storage.local.get(['CONNECTIONS']);
-            const connections = storage['CONNECTIONS'] || [];
+            const storage = await AsyncStorage.getItem('CONNECTIONS');
+            const connections = storage ? JSON.parse(storage) : [];
             const origin = siteOrigin || '';
 
             // Check if this origin is already connected to the active wallet
@@ -454,7 +431,7 @@ const SignTransaction = observer(
               }
             });
 
-            browser.runtime.sendMessage({
+            DeviceEventEmitter.emit('signTransaction', {
               type: MessageTypes.signResponse,
               payload: { status: 'success', data: signedTxData },
             });
@@ -462,22 +439,15 @@ const SignTransaction = observer(
             throw new Error('Could not send transaction to the dApp');
           }
           setIsSigning(false);
-          if (isSidePanel()) {
-            refetchData();
-            navigate('/home');
-          } else {
-            setTimeout(async () => {
-              window.close();
-            }, 10);
-          }
+          navigation.goBack();
           return;
         }
 
         const broadcastedTxn = await solanaClient.broadcastTransaction(signedTxData);
 
         try {
-          const storage = await browser.storage.local.get(['CONNECTIONS']);
-          const connections = storage['CONNECTIONS'] || [];
+          const storage = await AsyncStorage.getItem('CONNECTIONS');
+          const connections = storage ? JSON.parse(storage) : [];
           const origin = siteOrigin || '';
 
           const isConnected = connections.some(
@@ -490,7 +460,7 @@ const SignTransaction = observer(
             await addToConnections(['101', '103'], selectedWalletIds, origin);
           }
 
-          browser.runtime.sendMessage({
+          DeviceEventEmitter.emit('signTransaction', {
             type: MessageTypes.signResponse,
             payload: { status: 'success', data: broadcastedTxn },
           });
@@ -498,14 +468,7 @@ const SignTransaction = observer(
           throw new Error('Could not send transaction to the dApp');
         }
         setIsSigning(false);
-        if (isSidePanel()) {
-          refetchData();
-          navigate('/home');
-        } else {
-          setTimeout(async () => {
-            window.close();
-          }, 10);
-        }
+        navigation.goBack();
       } catch (e) {
         captureException(e);
         setIsSigning(false);
@@ -532,11 +495,11 @@ const SignTransaction = observer(
     ]);
 
     useEffect(() => {
-      window.addEventListener('beforeunload', handleCancel);
-      browser.storage.local.remove(BG_RESPONSE);
-      return () => {
-        window.removeEventListener('beforeunload', handleCancel);
-      };
+      // window.addEventListener('beforeunload', handleCancel);
+      AsyncStorage.removeItem(BG_RESPONSE);
+      // return () => {
+      //   window.removeEventListener('beforeunload', handleCancel);
+      // };
     }, [handleCancel]);
 
     useEffect(() => {
@@ -627,76 +590,49 @@ const SignTransaction = observer(
       isSigning;
 
     return (
-      <div
-        className={classNames(
-          'panel-width enclosing-panel h-full relative self-center justify-self-center flex justify-center items-center',
-        )}
-      >
-        <div
-          className={classNames(
-            'relative w-full overflow-clip rounded-md border border-gray-300 dark:border-gray-900',
-            { 'panel-height': isSidePanel() },
-          )}
-        >
+      <View style={styles.enclosingPanel}>
+        <View style={[styles.panel]}>
           <PopupLayout
-            className='flex flex-col'
             header={
-              <div className='w-[396px]'>
-                <Header
-                  imgSrc={chainInfo.chainSymbolImageUrl ?? (theme === ThemeName.DARK ? GenericDark : GenericLight)}
-                  // imgOnError={imgOnError(theme === ThemeName.DARK ? GenericDark : GenericLight)}
-                  title={
-                    <Buttons.Wallet
-                      // brandLogo={
-                      //     isCompassWallet() ? (
-                      //         <img
-                      //             className='w-[24px] h-[24px] mr-1'
-                      //             src={Images.Logos.CompassCircle}
-                      //         />
-                      //     ) : undefined
-                      // }
-                      title={trim(walletName, 10)}
-                      className='pr-4 cursor-default'
-                    />
-                  }
+              <View style={{ width: 396 }}>
+                <Image source={{uri: chainInfo.chainSymbolImageUrl ?? (theme === ThemeName.DARK ? GenericDark : GenericLight)}}/>
+                <Buttons.Wallet
+                  title={trim(walletName, 10)}
+                  style={{ paddingRight: 16 }} // pr-4
                 />
-              </div>
+              </View>
             }
           >
-            <div
-              className='px-7 py-3 overflow-y-auto relative'
-              style={{
-                maxHeight: `calc(100% - 144px)`,
-              }}
+            <ScrollView
+              contentContainerStyle={styles.scrollContent}
+              style={{ maxHeight: '100%' /* mobile ignores calc */ }}
             >
-              <h2 className='text-center text-lg font-bold dark:text-white-100 text-gray-900 w-full'>
-                Approve Transaction
-              </h2>
-              <div className='flex items-center mt-3 rounded-2xl dark:bg-gray-900 bg-white-100 p-4'>
+              <Text style={styles.title}>Approve Transaction</Text>
+              <View style={styles.siteCard}>
                 <Avatar
                   avatarImage={siteLogo}
-                  avatarOnError={imgOnError(Images.Misc.Globe)}
-                  size='sm'
-                  className='rounded-full overflow-hidden'
+                  avatarOnError={() => {}}
+                  size="sm"
+                  style={styles.avatar}
                 />
-                <div className='ml-3'>
-                  <p className='capitalize text-gray-900 dark:text-white-100 text-base font-bold'>{siteName}</p>
-                  <p className='lowercase text-gray-500 dark:text-gray-400 text-xs font-medium'>{siteOrigin}</p>
-                </div>
-              </div>
+                <View style={{ marginLeft: 12 }}>
+                  <Text style={styles.siteName}>{siteName}</Text>
+                  <Text style={styles.siteOrigin}>{siteOrigin}</Text>
+                </View>
+              </View>
 
               {!isSignMessage ? (
                 <GasPriceOptions
                   initialFeeDenom={dappFeeDenom}
                   gasLimit={userPreferredGasLimit || String(recommendedGasLimit)}
-                  setGasLimit={(value: string | BigNumber | number) => setUserPreferredGasLimit(value.toString())}
+                  setGasLimit={value => setUserPreferredGasLimit(value.toString())}
                   recommendedGasLimit={String(recommendedGasLimit)}
                   gasPriceOption={
                     selectedGasOptionRef.current || allowSetFee
                       ? gasPriceOption
                       : { ...gasPriceOption, option: '' as GasOptions }
                   }
-                  onGasPriceOptionChange={(value: any) => {
+                  onGasPriceOptionChange={value => {
                     selectedGasOptionRef.current = true;
                     setGasPriceOption(value);
                   }}
@@ -708,11 +644,9 @@ const SignTransaction = observer(
                   chain={activeChain}
                   network={selectedNetwork}
                   validateFee={true}
-                  onInvalidFees={(_: NativeDenom, isFeesValid: boolean | null) => {
+                  onInvalidFees={(_, isFeesValid) => {
                     try {
-                      if (isFeesValid === false) {
-                        setIsFeesValid(false);
-                      }
+                      if (isFeesValid === false) setIsFeesValid(false);
                     } catch (e) {
                       captureException(e);
                     }
@@ -723,153 +657,142 @@ const SignTransaction = observer(
                   rootBalanceStore={rootBalanceStore}
                 >
                   <Tabs
-                    className='mt-3'
+                    style={{ marginTop: 12 }}
                     tabsList={[
                       { id: 'fees', label: 'Fees' },
                       { id: 'data', label: 'Data' },
                     ]}
                     tabsContent={{
                       fees: allowSetFee ? (
-                        <div className='rounded-2xl p-4 mt-3 dark:bg-gray-900 bg-white-100'>
-                          <div className='flex items-center'>
-                            <p className='text-gray-500 dark:text-gray-100 text-sm font-medium tracking-wide'>
-                              Gas Fees <span className='capitalize'>({gasPriceOption.option})</span>
-                            </p>
+                        <View style={styles.gasPanel}>
+                          <View style={styles.rowCenter}>
+                            <Text style={styles.gasLabel}>
+                              Gas Fees <Text style={styles.gasOption}>({gasPriceOption.option})</Text>
+                            </Text>
                             <Tooltip
                               content={
-                                <p className='text-gray-500 dark:text-gray-100 text-sm'>
+                                <Text style={styles.tooltipText}>
                                   You can choose higher gas fees for faster transaction processing.
-                                </p>
+                                </Text>
                               }
                             >
-                              <div className='relative ml-2'>
-                                <img src={Images.Misc.InfoCircle} alt='Hint' />
-                              </div>
+                              <View style={styles.tooltipIcon}>
+                                <Image source={{uri: Images.Misc.InfoCircle}} style={{ width: 16, height: 16 }} />
+                              </View>
                             </Tooltip>
-                          </div>
-
-                          <GasPriceOptions.Selector className='mt-2' />
-                          <div className='flex items-center justify-end'>
-                            <GasPriceOptions.AdditionalSettingsToggle className='p-0 mt-3' />
-                          </div>
+                          </View>
+                          <GasPriceOptions.Selector style={{ marginTop: 8 }} />
+                          <View style={styles.rowRight}>
+                            <GasPriceOptions.AdditionalSettingsToggle style={{ padding: 0, marginTop: 12 }} />
+                          </View>
                           <GasPriceOptions.AdditionalSettings
-                            className='mt-2'
+                            style={{ marginTop: 8 }}
                             showGasLimitWarning={true}
                             rootDenomsStore={rootDenomsStore}
                             rootBalanceStore={rootBalanceStore}
                           />
-
                           {gasPriceError ? (
-                            <p className='text-red-300 text-sm font-medium mt-2 px-1'>{gasPriceError}</p>
+                            <Text style={styles.gasError}>{gasPriceError}</Text>
                           ) : null}
-                        </div>
+                        </View>
                       ) : (
-                        <>
-                          <div className='rounded-2xl p-4 mt-3 dark:bg-gray-900 bg-white-100'>
-                            <StaticFeeDisplay
-                              fee={fee}
-                              error={gasPriceError}
-                              setError={setGasPriceError}
-                              disableBalanceCheck={disableBalanceCheck}
-                              rootBalanceStore={rootBalanceStore}
-                              activeChain={activeChain}
-                              selectedNetwork={selectedNetwork}
-                              feeTokensList={feeTokens}
-                            />
-                          </div>
-                        </>
+                        <View style={styles.gasPanel}>
+                          <StaticFeeDisplay
+                            fee={fee}
+                            error={gasPriceError}
+                            setError={setGasPriceError}
+                            disableBalanceCheck={disableBalanceCheck}
+                            rootBalanceStore={rootBalanceStore}
+                            activeChain={activeChain}
+                            selectedNetwork={selectedNetwork}
+                            feeTokensList={feeTokens}
+                          />
+                        </View>
                       ),
                       data: (
-                        <pre className='text-xs text-gray-900 dark:text-white-100 dark:bg-gray-900 bg-white-100 p-4 w-full overflow-x-auto mt-3 rounded-2xl'>
-                          {JSON.stringify(
-                            getOriginalSignDoc(signDoc, true).signDoc,
-                            (_, value) => {
-                              if (typeof value === 'bigint') {
-                                return value.toString();
-                              }
-                              return value;
-                            },
-                            2,
-                          )}
-                        </pre>
+                        <ScrollView horizontal style={styles.dataPreWrap}>
+                          <Text style={styles.dataPre}>
+                            {JSON.stringify(
+                              getOriginalSignDoc(signDoc, true).signDoc,
+                              (_, value) => (typeof value === 'bigint' ? value.toString() : value),
+                              2,
+                            )}
+                          </Text>
+                        </ScrollView>
                       ),
                     }}
                   />
                 </GasPriceOptions>
               ) : (
-                <pre
-                  className={classNames(
-                    'text-xs text-gray-900 dark:text-white-100 dark:bg-gray-900 bg-white-100 p-4 w-full overflow-x-auto mt-3 rounded-2xl whitespace-pre-line break-words',
-                  )}
-                >
-                  {message}
-                </pre>
+                <ScrollView horizontal style={styles.dataPreWrap}>
+                  <Text style={styles.dataPre}>{message}</Text>
+                </ScrollView>
               )}
 
-              <div className='mt-3'>
-                {signingError ?? ledgerError ? <ErrorCard text={signingError ?? ledgerError ?? ''} /> : null}
-              </div>
+              <View style={{ marginTop: 12 }}>
+                {(signingError ?? ledgerError) ? (
+                  <ErrorCard text={signingError ?? ledgerError ?? ''} />
+                ) : null}
+              </View>
 
               <LedgerConfirmationModal
                 showLedgerPopup={showLedgerPopup}
-                onClose={() => {
-                  setShowLedgerPopup(false);
-                }}
+                onClose={() => setShowLedgerPopup(false)}
               />
               <SelectWalletSheet
                 isOpen={showWalletSelector}
                 onClose={() => setShowWalletSelector(false)}
                 currentWalletInfo={currentWalletInfo}
-                title='Select Wallet'
+                title="Select Wallet"
                 activeChain={activeChain}
               />
               {isFeesValid === false && (
-                <div
-                  ref={errorMessageRef}
-                  className='flex dark:bg-gray-900 bg-white-100 px-4 py-3 w-full rounded-2xl items-center mt-3'
-                >
-                  <div className='mr-3' onClick={() => setHighFeeAccepted(!highFeeAccepted)}>
+                <View ref={errorMessageRef} style={styles.highFeeWarning}>
+                  <TouchableOpacity
+                    onPress={() => setHighFeeAccepted(!highFeeAccepted)}
+                    style={{ marginRight: 12 }}
+                  >
                     {!highFeeAccepted ? (
-                      <Square size={16} className='text-gray-700 cursor-pointer' />
+                      <Square size={16} color="#374151" /* gray-700 */ />
                     ) : (
-                      <CheckSquare size={16} className='cursor-pointer' color={Colors.getChainColor(activeChain)} />
+                      <CheckSquare size={16} color={getChainColor(activeChain)} />
                     )}
-                  </div>
-
-                  <Text size='sm' color='text-gray-400'>
+                  </TouchableOpacity>
+                  <Text style={styles.warningText}>
                     The selected fee amount is unusually high.
-                    <br />I confirm and agree to proceed
+                    {"\n"}I confirm and agree to proceed
                   </Text>
-                </div>
+                </View>
               )}
-            </div>
+            </ScrollView>
 
-            <div className='py-3 px-7 dark:bg-black-100 bg-gray-50 w-full mt-auto'>
-              <div className='flex items-center justify-center w-full space-x-3'>
-                <Buttons.Generic title={'Reject Button'} color={Colors.gray900} onClick={handleCancel}>
+            <View style={styles.footer}>
+              <View style={styles.footerRow}>
+                <Buttons.Generic
+                  title={'Reject Button'}
+                  color={Colors.gray900}
+                  onClick={handleCancel}
+                >
                   Reject
                 </Buttons.Generic>
                 <Buttons.Generic
                   title={'Approve Button'}
-                  color={Colors.getChainColor(activeChain)}
+                  color={getChainColor(activeChain)}
                   onClick={approveTransaction}
                   disabled={isApproveBtnDisabled}
-                  className={`${isApproveBtnDisabled ? 'cursor-not-allowed opacity-50' : ''}`}
+                  style={isApproveBtnDisabled ? styles.disabledBtn : undefined}
                 >
                   {isSigning ? 'Signing...' : 'Approve'}
                 </Buttons.Generic>
-              </div>
-            </div>
+              </View>
+            </View>
           </PopupLayout>
-        </div>
-      </div>
+        </View>
+      </View>
     );
   },
 );
 
-/**
- * This HOC helps makes sure that the txn signing request is decoded and the chain is set
- */
 const withTxnSigningRequest = (Component: React.FC<any>) => {
   const Wrapped = () => {
     const [chain, setChain] = useState<SupportedChain>();
@@ -877,35 +800,26 @@ const withTxnSigningRequest = (Component: React.FC<any>) => {
 
     const [txnData, setTxnData] = useState<any | null>(null);
     const [chainId, setChainId] = useState<string>();
-    const [error] = useState<{
-      message: string;
-      code: string;
-    } | null>(null);
+    const [error] = useState<{ message: string; code: string } | null>(null);
 
-    const navigate = useNavigate();
+    const navigation = useNavigation();
 
     useEffect(() => {
       decodeChainIdToChain().then(setChainIdToChain).catch(captureException);
     }, []);
 
     const signTxEventHandler = (message: any, sender: any) => {
-      if (sender.id !== browser.runtime.id) return;
+      // NOTE: This is for browser extension messaging, not for React Native!
       if (message.type === MessageTypes.signTransaction) {
         const txnData = message.payload;
         const chainId = txnData.chainId ? txnData.chainId : '101';
         const chain = chainId ? (_chainIdToChain['101'] as SupportedChain) : undefined;
         if (!chain) {
-          browser.runtime.sendMessage({
+          DeviceEventEmitter.emit('signTransaction', {
             type: MessageTypes.signResponse,
             payload: { status: 'error', data: `Invalid chainId ${chainId}` },
           });
-          if (isSidePanel()) {
-            navigate('/home');
-          } else {
-            setTimeout(async () => {
-              window.close();
-            }, 10);
-          }
+          navigation.goBack()
           return;
         }
         setChain(chain);
@@ -915,13 +829,11 @@ const withTxnSigningRequest = (Component: React.FC<any>) => {
     };
 
     useEffect(() => {
-      browser.runtime.sendMessage({ type: MessageTypes.signingPopupOpen });
-      browser.runtime.onMessage.addListener(signTxEventHandler);
-      return () => {
-        browser.runtime.onMessage.removeListener(signTxEventHandler);
-      };
-
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+      // browser.runtime.sendMessage({ type: MessageTypes.signingPopupOpen });
+      // browser.runtime.onMessage.addListener(signTxEventHandler);
+      // return () => {
+      //   browser.runtime.onMessage.removeListener(signTxEventHandler);
+      // };
     }, []);
 
     if (chain && txnData && chainId) {
@@ -937,7 +849,7 @@ const withTxnSigningRequest = (Component: React.FC<any>) => {
     }
 
     if (error) {
-      const heading = ((code) => {
+      const heading = ((code: string) => {
         switch (code) {
           case 'no-data':
             return 'No Transaction Data';
@@ -947,32 +859,26 @@ const withTxnSigningRequest = (Component: React.FC<any>) => {
       })(error.code);
 
       return (
-        <PopupLayout className='self-center justify-self-center' header={<Header title='Sign Transaction' />}>
-          <div className='h-full w-full flex flex-col gap-4 items-center justify-center'>
-            <h1 className='text-red-300 text-2xl font-bold px-4 text-center'>{heading}</h1>
-            <p className='text-black-100 dark:text-white-100 text-sm font-medium px-4 text-center'>{error.message}</p>
-            <button
-              className='mt-8 py-1 px-4 text-center text-sm font-medium dark:text-white-100 text-black-100 bg-indigo-300 rounded-full'
-              onClick={() => {
-                if (isSidePanel()) {
-                  navigate('/home');
-                } else {
-                  window.close();
-                }
-              }}
+        <PopupLayout header={<Header title="Sign Transaction" />}>
+          <View style={styles.centered}>
+            <Text style={styles.errorHeading}>{heading}</Text>
+            <Text style={styles.errorMessage}>{error.message}</Text>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => {navigation.goBack()}}
             >
-              Close Wallet
-            </button>
-          </div>
+              <Text style={styles.closeButtonText}>Close Wallet</Text>
+            </TouchableOpacity>
+          </View>
         </PopupLayout>
       );
     }
 
     return (
-      <PopupLayout className='self-center justify-self-center' header={<Header title='Sign Transaction' />}>
-        <div className='h-full w-full flex flex-col gap-4 items-center justify-center'>
-          <LoaderAnimation color='white' />
-        </div>
+      <PopupLayout header={<Header title="Sign Transaction" />}>
+        <View style={styles.centered}>
+          <LoaderAnimation color="white" />
+        </View>
       </PopupLayout>
     );
   };
@@ -985,3 +891,174 @@ const withTxnSigningRequest = (Component: React.FC<any>) => {
 const signTxSolana = withTxnSigningRequest(React.memo(SignTransaction));
 
 export default signTxSolana;
+
+const styles = StyleSheet.create({
+  enclosingPanel: {
+    flex: 1,
+    alignSelf: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  panel: {
+    position: 'relative',
+    width: '100%',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#D1D5DB', // gray-300
+    overflow: 'hidden',
+    backgroundColor: '#fff',
+  },
+  panelHeight: {
+    // customize for side panel height if needed
+  },
+  scrollContent: {
+    paddingHorizontal: 28,
+    paddingTop: 12,
+    paddingBottom: 12,
+    minHeight: 350,
+  },
+  title: {
+    textAlign: 'center',
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#111827', // gray-900
+    marginBottom: 8,
+  },
+  siteCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 12,
+    borderRadius: 16,
+    backgroundColor: '#fff',
+    padding: 16,
+  },
+  avatar: {
+    borderRadius: 9999,
+    overflow: 'hidden',
+  },
+  siteName: {
+    textTransform: 'capitalize',
+    color: '#111827',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  siteOrigin: {
+    textTransform: 'lowercase',
+    color: '#6B7280',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  gasPanel: {
+    borderRadius: 16,
+    padding: 16,
+    marginTop: 12,
+    backgroundColor: '#fff',
+  },
+  rowCenter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  gasLabel: {
+    color: '#6B7280', // gray-500
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  gasOption: {
+    textTransform: 'capitalize',
+  },
+  tooltipText: {
+    color: '#6B7280',
+    fontSize: 14,
+  },
+  tooltipIcon: {
+    marginLeft: 8,
+    justifyContent: 'center',
+  },
+  rowRight: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginTop: 12,
+  },
+  gasError: {
+    color: '#FCA5A5', // red-300
+    fontSize: 14,
+    fontWeight: '500',
+    marginTop: 8,
+    paddingHorizontal: 4,
+  },
+  dataPreWrap: {
+    marginTop: 12,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 12,
+  },
+  dataPre: {
+    fontSize: 12,
+    color: '#111827',
+    fontFamily: 'monospace',
+  },
+  highFeeWarning: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginTop: 12,
+  },
+  warningText: {
+    color: '#9CA3AF', // gray-400
+    fontSize: 14,
+  },
+  footer: {
+    paddingVertical: 12,
+    paddingHorizontal: 28,
+    backgroundColor: '#F9FAFB',
+    width: '100%',
+    marginTop: 'auto',
+  },
+  footerRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 12,
+  },
+  disabledBtn: {
+    opacity: 0.5,
+  },
+  centered: {
+    flex: 1,
+    width: '100%',
+    minHeight: 360,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 18,
+  },
+  errorHeading: {
+    color: '#FCA5A5', // red-300
+    fontSize: 24,
+    fontWeight: 'bold',
+    paddingHorizontal: 14,
+    textAlign: 'center',
+  },
+  errorMessage: {
+    color: '#0F172A',
+    fontSize: 15,
+    fontWeight: '500',
+    paddingHorizontal: 14,
+    textAlign: 'center',
+  },
+  closeButton: {
+    marginTop: 32,
+    paddingVertical: 7,
+    paddingHorizontal: 18,
+    backgroundColor: '#818CF8', // indigo-300
+    borderRadius: 16,
+  },
+  closeButtonText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+});

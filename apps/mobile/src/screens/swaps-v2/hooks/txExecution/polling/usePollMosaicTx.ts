@@ -3,7 +3,7 @@ import { MosaicAPI, TRANSFER_STATE, TXN_STATUS } from '@leapwallet/elements-core
 import { RouteAggregator } from '@leapwallet/elements-hooks';
 import { TransferAssetRelease } from '@skip-go/client';
 import { useCallback, useEffect, useRef } from 'react';
-import { SourceChain, SwapTxnStatus, TransferSequence } from 'types/swap';
+import { SourceChain, SwapTxnStatus, TransferSequence } from '../../../../../types/swap';
 
 import { RoutingInfo } from '../../useSwapsTx';
 

@@ -1,41 +1,41 @@
-/**
- * Note: Doing Ledger checks for Aggregated view in AggregatedNullComponents component
- */
+import React, { useCallback, useMemo, useState } from 'react';
+import { View, ScrollView, StyleSheet } from 'react-native';
+import { observer } from 'mobx-react-lite';
 
 import { Token, useChainInfo, useGetChains, WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { QueryStatus } from '@tanstack/react-query';
-import RewardStrip from 'components/alert-strip/RewardStrip';
-import { EmptyCard } from 'components/empty-card';
-import NewChainSupportTooltip from 'components/header/NewChainSupportTooltip';
-import { LightNodeRunningIndicator } from 'components/light-node-running-indicator/LightNodeRunningIndicator';
-import ReceiveToken from 'components/Receive';
-import { AGGREGATED_CHAIN_KEY } from 'config/constants';
-import { usePerformanceMonitor } from 'hooks/perf-monitoring/usePerformanceMonitor';
-import { useActiveChain } from 'hooks/settings/useActiveChain';
-import useActiveWallet from 'hooks/settings/useActiveWallet';
-import { useSelectedNetwork } from 'hooks/settings/useNetwork';
-import { useGetWalletAddresses } from 'hooks/useGetWalletAddresses';
-import { useQueryParams } from 'hooks/useQuery';
-import usePrevious from 'hooks/utility/usePrevious';
-import { Images } from 'images';
-import { observer } from 'mobx-react-lite';
-import EarnFeatHighlight from 'pages/earnUSDN/EarnFeatHighlight';
-import { RewardCard } from 'pages/initia-vip/components/RewardCard';
-import React, { useCallback, useMemo, useState } from 'react';
-import { aggregatedChainsStore, evmBalanceStore } from 'stores/balance-store';
-import { chainInfoStore, chainTagsStore } from 'stores/chain-infos-store';
-import { rootBalanceStore } from 'stores/root-store';
-import { AggregatedSupportedChain } from 'types/utility';
-import { cn } from 'utils/cn';
-import { getLedgerEnabledCosmosChainsKey, getLedgerEnabledEvmChainsKey } from 'utils/getLedgerEnabledEvmChains';
-import { isLedgerEnabled } from 'utils/isLedgerEnabled';
-import { queryParams } from 'utils/query-params';
+
+import RewardStrip from '../../../components/alert-strip/RewardStrip';
+import { EmptyCard } from '../../../components/empty-card';
+import NewChainSupportTooltip from '../../../components/header/NewChainSupportTooltip';
+import { LightNodeRunningIndicator } from '../../../components/light-node-running-indicator/LightNodeRunningIndicator';
+import ReceiveToken from '../../../components/Receive';
+import { AGGREGATED_CHAIN_KEY } from '../../../services/config/constants';
+import { usePerformanceMonitor } from '../../../hooks/perf-monitoring/usePerformanceMonitor';
+import { useActiveChain } from '../../../hooks/settings/useActiveChain';
+import useActiveWallet from '../../../hooks/settings/useActiveWallet';
+import { useSelectedNetwork } from '../../../hooks/settings/useNetwork';
+import { useGetWalletAddresses } from '../../../hooks/useGetWalletAddresses';
+import { useQueryParams } from '../../../hooks/useQuery';
+import usePrevious from '../../../hooks/utility/usePrevious';
+import { Images } from '../../../../assets/images';
+import EarnFeatHighlight from '../../earnUSDN/EarnFeatHighlight';
+import { RewardCard } from '../../initia-vip/components/RewardCard';
+
+import { aggregatedChainsStore, evmBalanceStore } from '../../../context/balance-store';
+import { chainInfoStore, chainTagsStore } from '../../../context/chain-infos-store';
+import { rootBalanceStore } from '../../../context/root-store';
+import { AggregatedSupportedChain } from '../../../types/utility';
+import { getLedgerEnabledCosmosChainsKey, getLedgerEnabledEvmChainsKey } from '../../../utils/getLedgerEnabledEvmChains';
+import { isLedgerEnabled } from '../../../utils/isLedgerEnabled';
+import { queryParams } from '../../../utils/query-params';
 
 import RequestFaucet from '../RequestFaucet';
 import SelectWallet from '../SelectWallet/v2';
 import { ChainInfoProp } from '../utils';
-import { GeneralHomeAlertStirps } from './general-home-alert-strips';
+
+import { GeneralHomeAlertStrips } from './general-home-alert-strips';
 import { GeneralHomeHeader } from './general-home-header';
 import { HeroSection } from './HeroSection';
 import { BannersLoading } from './home-loading-state';
@@ -57,19 +57,14 @@ export function tokenHasBalance(token: Token | undefined) {
 }
 
 export const GeneralHome = observer(() => {
-  /**
-   * Custom hooks
-   */
+  // Custom hooks
   const activeChain = useActiveChain() as AggregatedSupportedChain;
   const prevActiveChain = usePrevious(activeChain);
 
   const chains = useGetChains();
-
   const selectedNetwork = useSelectedNetwork();
-
   const { activeWallet } = useActiveWallet();
   const prevWallet = usePrevious(activeWallet);
-
   const chain: ChainInfoProp = useChainInfo();
   const walletAddresses = useGetWalletAddresses();
 
@@ -80,79 +75,66 @@ export const GeneralHome = observer(() => {
   const query = useQueryParams();
   const showCopyAddressSheet = query.get(queryParams.copyAddress) === 'true';
 
-  /**
-   * Local states
-   */
-
+  // Local states
   const [showSelectWallet, setShowSelectWallet] = useState(false);
 
-  /**
-   * Local effects
-   */
+  // Memoized values
+  const ledgerEnabledCosmosChainsKeys = useMemo(
+    () => getLedgerEnabledCosmosChainsKey(Object.values(chains)),
+    [chains]
+  );
+  const ledgerEnabledEvmChainsKeys = useMemo(
+    () => getLedgerEnabledEvmChainsKey(Object.values(chains)),
+    [chains]
+  );
 
-  /**
-   * Memoized values
-   */
+  const noAddress = useMemo(
+    () => activeChain !== AGGREGATED_CHAIN_KEY && !activeWallet?.addresses[activeChain],
+    [activeChain, activeWallet?.addresses]
+  );
 
-  const ledgerEnabledCosmosChainsKeys = useMemo(() => {
-    return getLedgerEnabledCosmosChainsKey(Object.values(chains));
-  }, [chains]);
-
-  const ledgerEnabledEvmChainsKeys = useMemo(() => {
-    return getLedgerEnabledEvmChainsKey(Object.values(chains));
-  }, [chains]);
-
-  const noAddress = useMemo(() => {
-    return activeChain !== AGGREGATED_CHAIN_KEY && !activeWallet?.addresses[activeChain];
-  }, [activeChain, activeWallet?.addresses]);
-
-  const connectLedger = useMemo(() => {
-    return (
+  const connectLedger = useMemo(
+    () =>
       activeChain !== AGGREGATED_CHAIN_KEY &&
       activeWallet?.walletType === WALLETTYPE.LEDGER &&
       noAddress &&
-      (ledgerEnabledCosmosChainsKeys.includes(activeChain) || ledgerEnabledEvmChainsKeys.includes(activeChain))
-    );
-  }, [activeChain, activeWallet?.walletType, ledgerEnabledCosmosChainsKeys, ledgerEnabledEvmChainsKeys, noAddress]);
+      (ledgerEnabledCosmosChainsKeys.includes(activeChain) ||
+        ledgerEnabledEvmChainsKeys.includes(activeChain)),
+    [activeChain, activeWallet?.walletType, ledgerEnabledCosmosChainsKeys, ledgerEnabledEvmChainsKeys, noAddress]
+  );
 
   const isTokenLoading = rootBalanceStore.loading;
 
-  /**
-   * Memoized functions
-   */
+  // Memoized functions
+  const handleCopyAddressSheetClose = useCallback(() => {
+    query.remove(queryParams.copyAddress);
+  }, [query]);
 
-  const handleCopyAddressSheetClose = useCallback(
-    (refetch?: boolean) => {
-      query.remove(queryParams.copyAddress);
-    },
-    [query],
-  );
-
-  const ledgerNotSupported = useMemo(() => {
-    return (
+  const ledgerNotSupported = useMemo(
+    () =>
       activeChain !== AGGREGATED_CHAIN_KEY &&
       activeWallet?.walletType === WALLETTYPE.LEDGER &&
-      !isLedgerEnabled(activeChain as SupportedChain, chain?.bip44.coinType, Object.values(chains))
-    );
-  }, [activeChain, activeWallet?.walletType, chain?.bip44.coinType, chains]);
+      !isLedgerEnabled(activeChain as SupportedChain, chain?.bip44.coinType, Object.values(chains)),
+    [activeChain, activeWallet?.walletType, chain?.bip44.coinType, chains]
+  );
 
-  const privateKeyNotSupported = useMemo(() => {
-    return (
+  const privateKeyNotSupported = useMemo(
+    () =>
       activeChain !== AGGREGATED_CHAIN_KEY &&
       activeWallet?.walletType === WALLETTYPE.PRIVATE_KEY &&
-      !activeWallet?.addresses?.[activeChain]
-    );
-  }, [activeChain, activeWallet?.walletType, activeWallet?.addresses]);
+      !activeWallet?.addresses?.[activeChain],
+    [activeChain, activeWallet?.walletType, activeWallet?.addresses]
+  );
 
   const queryStatus: QueryStatus = rootBalanceStore.loading ? 'loading' : 'success';
 
+  // Perf monitor hooks (safe to keep for analytics even on RN)
   usePerformanceMonitor({
     page: 'home',
     op: 'homePageLoad',
     queryStatus,
     description: 'loading state on home page',
   });
-
   usePerformanceMonitor({
     page: 'wallet-switch',
     op: 'walletSwitchLoadTime',
@@ -160,7 +142,6 @@ export const GeneralHome = observer(() => {
     description: 'loading state on wallet switch page',
     enabled: !!prevWallet && prevWallet.id !== activeWallet?.id,
   });
-
   usePerformanceMonitor({
     page: 'chain-switch',
     op: 'chainSwitchLoadTime',
@@ -169,24 +150,24 @@ export const GeneralHome = observer(() => {
     enabled: !!prevActiveChain && prevActiveChain !== activeChain,
   });
 
-  /**
-   * Early returns
-   */
-
+  // Early returns
   if (!activeWallet) {
-    return <EmptyCard classname='h-full !rounded-none' src={Images.Logos.LeapCosmos} heading='No wallet found' />;
+    return (
+      <EmptyCard
+        style={styles.fullHeightNoRadius}
+        src={Images.Logos.LeapCosmos}
+        heading='No wallet found'
+      />
+    );
   }
 
   if (!chain && activeChain !== AGGREGATED_CHAIN_KEY) {
     return null;
   }
 
-  /**
-   * Render
-   */
-
+  // Render
   return (
-    <>
+    <View style={styles.root}>
       <GeneralHomeHeader />
 
       <NewChainSupportTooltip />
@@ -198,8 +179,11 @@ export const GeneralHome = observer(() => {
       ) : privateKeyNotSupported ? (
         <PrivateKeyNotSupported />
       ) : (
-        <div className={cn('w-full flex flex-col justify-center items-center relative', connectLedger && 'hidden')}>
-          <GeneralHomeAlertStirps balanceError={balanceError} />
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={[styles.scrollContent, connectLedger && styles.hidden]}
+        >
+          <GeneralHomeAlertStrips balanceError={balanceError} />
 
           <LightNodeRunningIndicator />
 
@@ -223,7 +207,7 @@ export const GeneralHome = observer(() => {
             evmStatus={evmStatus}
             isTokenLoading={isTokenLoading}
           />
-        </div>
+        </ScrollView>
       )}
 
       <SelectWallet isVisible={showSelectWallet} onClose={() => setShowSelectWallet(false)} />
@@ -247,6 +231,32 @@ export const GeneralHome = observer(() => {
       )}
 
       <EarnFeatHighlight />
-    </>
+    </View>
   );
 });
+
+const styles = StyleSheet.create({
+  fullHeightNoRadius: {
+    flex: 1,           // Takes full height in RN flexbox layouts
+    borderRadius: 0,   // No border radius
+  },
+  root: {
+    flex: 1,
+    backgroundColor: '#FFF', // Adjust for your theme/dark mode
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    // paddingHorizontal: 16,
+    // paddingTop: 12,
+    // paddingBottom: 48,
+  },
+  hidden: {
+    display: 'none',
+  },
+});
+

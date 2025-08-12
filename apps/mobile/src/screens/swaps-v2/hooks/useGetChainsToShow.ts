@@ -1,9 +1,9 @@
 import { useGetChains } from '@leapwallet/cosmos-wallet-hooks';
 import { MosaicAPI } from '@leapwallet/elements-core';
 import { SkipSupportedChainData, useChains, useSkipSupportedChains } from '@leapwallet/elements-hooks';
-import { useNonNativeCustomChains } from 'hooks/useNonNativeCustomChains';
+import { useNonNativeCustomChains } from '../../../hooks/useNonNativeCustomChains';
 import { useMemo } from 'react';
-import { SourceChain } from 'types/swap';
+import { SourceChain } from '../../../types/swap';
 
 export function useGetChainsToShow() {
   const chains = useGetChains();

@@ -1,11 +1,12 @@
-import { AirdropEligibilityInfo } from '@leapwallet/cosmos-wallet-hooks';
-import { Buttons } from '@leapwallet/leap-ui';
-import { ArrowSquareOut } from '@phosphor-icons/react';
-import { captureException } from '@sentry/react';
-import { ButtonName, ButtonType, EventName } from 'config/analytics';
-import { LEAPBOARD_URL } from 'config/constants';
-import mixpanel from 'mixpanel-browser';
 import React from 'react';
+import { View, StyleSheet, Linking } from 'react-native';
+import { AirdropEligibilityInfo } from '@leapwallet/cosmos-wallet-hooks';
+import { Button } from '../../../components/ui/button';
+import { ArrowSquareOut } from 'phosphor-react-native'; // Replace with RN vector icon if needed
+import { captureException } from '@sentry/react-native';
+import { ButtonName, ButtonType, EventName } from '../../../services/config/analytics';
+import { LEAPBOARD_URL } from '../../../services/config/constants';
+import mixpanel from '../../../mixpanel';
 
 interface ClaimButtonProps {
   selectedAirdrop: AirdropEligibilityInfo;
@@ -30,20 +31,55 @@ export default function ClaimButton({ selectedAirdrop }: ClaimButtonProps) {
     }
   };
 
+  const handlePress = () => {
+    trackCTAEvent();
+    if (redirectURL) {
+      Linking.openURL(redirectURL).catch(captureException);
+    }
+  };
+
   return (
-    <Buttons.Generic
-      size='normal'
-      className='w-full mb-6 !bg-black-100 dark:!bg-white-100 text-white-100 dark:text-black-100'
-      title={selectedAirdrop?.CTAInfo?.text}
-      onClick={() => {
-        trackCTAEvent();
-        window.open(redirectURL, '_blank');
-      }}
-    >
-      <div className='flex items-center gap-2'>
-        {selectedAirdrop?.CTAInfo?.text}
-        <ArrowSquareOut size={20} className='text-white-100 dark:text-black-100' />
-      </div>
-    </Buttons.Generic>
+    <View style={styles.container}>
+      <Button
+        size="default"
+        style={styles.button}
+        textStyle={styles.buttonText}
+        onPress={handlePress}
+        disabled={!redirectURL}
+      >
+        <View style={styles.contentRow}>
+          <View>
+            {/* You can adjust the text style as needed */}
+            <ArrowSquareOut size={20} color="#fff" style={{ marginRight: 8 }} />
+          </View>
+          {selectedAirdrop?.CTAInfo?.text}
+        </View>
+      </Button>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    width: '100%',
+    marginBottom: 24,
+  },
+  button: {
+    width: '100%',
+    backgroundColor: '#111827', // black-100
+    borderRadius: 999,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonText: {
+    color: '#fff', // white-100
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  contentRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+});

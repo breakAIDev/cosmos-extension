@@ -1,23 +1,44 @@
-import { ArrowSquareOut } from '@phosphor-icons/react';
 import React from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { ArrowSquareOut } from 'phosphor-react-native';
+
+type TokenTitleProps = {
+  title: string;
+  showRedirection?: boolean;
+  handleRedirectionClick?: () => void;
+};
 
 export function TokenTitle({
   title,
   showRedirection,
   handleRedirectionClick,
-}: {
-  title: string;
-  showRedirection?: boolean;
-  handleRedirectionClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
-}) {
+}: TokenTitleProps) {
   return (
-    <div className='flex gap-1 items-center font-bold dark:text-white-100'>
-      <span className='shrink-0'>{title}</span>
+    <View style={styles.container}>
+      <Text style={styles.titleText}>{title}</Text>
       {showRedirection && (
-        <button onClick={handleRedirectionClick} className='!text-md dark:text-gray-400 !leading-4 flex items-center'>
-          <ArrowSquareOut size={16} />
-        </button>
+        <TouchableOpacity onPress={handleRedirectionClick} style={styles.redirectBtn} hitSlop={8}>
+          <ArrowSquareOut size={16} color="#94a3b8" weight="regular" />
+        </TouchableOpacity>
       )}
-    </div>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  titleText: {
+    fontWeight: 'bold',
+    color: '#111',
+    fontSize: 14,
+  },
+  redirectBtn: {
+    marginLeft: 3,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});

@@ -1,10 +1,9 @@
-import classNames from 'classnames';
-import { BG_RESPONSE, SUGGEST_TOKEN } from 'config/storage-keys';
 import React, { ReactNode, useCallback, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Colors } from 'theme/colors';
-import { isSidePanel } from 'utils/isSidePanel';
-import Browser from 'webextension-polyfill';
+import { View, StyleSheet } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
+import { BG_RESPONSE, SUGGEST_TOKEN } from '../../../services/config/storage-keys';
+import { Colors } from '../../../theme/colors';
 
 export type ChildrenParams = {
   handleRejectBtnClick: () => Promise<void>;
@@ -16,45 +15,64 @@ type ContainerProps = {
 };
 
 export function SuggestContainer({ children, suggestKey }: ContainerProps) {
-  const navigate = useNavigate();
+  const navigation = useNavigation<any>();
 
   const handleRejectBtnClick = useCallback(async () => {
-    await Browser.storage.local.set({ [BG_RESPONSE]: { error: 'Rejected by the user.' } });
+    await AsyncStorage.setItem(BG_RESPONSE, JSON.stringify({ error: 'Rejected by the user.' }));
 
     setTimeout(async () => {
-      await Browser.storage.local.remove([suggestKey]);
-      await Browser.storage.local.remove(BG_RESPONSE);
-      if (isSidePanel()) {
-        navigate('/home');
-      } else {
-        window.close();
-      }
+      await AsyncStorage.removeItem(suggestKey);
+      await AsyncStorage.removeItem(BG_RESPONSE);
+      if (navigation.canGoBack()) navigation.goBack();
+      else navigation.navigate('Home');
     }, 10);
-  }, [navigate, suggestKey]);
+  }, [navigation, suggestKey]);
 
   useEffect(() => {
-    window.addEventListener('beforeunload', handleRejectBtnClick);
-    Browser.storage.local.remove(BG_RESPONSE);
-
-    return function () {
-      window.removeEventListener('beforeunload', handleRejectBtnClick);
-    };
-  }, [handleRejectBtnClick]);
+    // Clear any previous BG response on mount
+    AsyncStorage.removeItem(BG_RESPONSE);
+  }, []);
 
   return (
-    <div className='flex justify-center items-center h-screen'>
-      <div className='panel-width panel-height max-panel-height enclosing-panel'>
-        <div className='w-full h-1 rounded-t-2xl' style={{ backgroundColor: Colors.cosmosPrimary }} />
-
-        <div
-          className={classNames('relative h-full flex flex-col justify-between items-center pt-4 pb-10', {
-            'px-4': isSidePanel(),
-            'px-7': !isSidePanel(),
-          })}
-        >
+    <View style={styles.screenCenter}>
+      <View style={styles.panel}>
+        <View style={styles.topBar} />
+        <View style={styles.content}>
           {children({ handleRejectBtnClick })}
-        </div>
-      </div>
-    </div>
+        </View>
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  screenCenter: {
+    flex: 1,                     // h-screen
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  panel: {
+    width: '100%',               // panel-width (fill)
+    maxWidth: 420,               // optional cap similar to extension panel
+    borderRadius: 16,            // enclosing-panel rounded corners
+    overflow: 'hidden',
+    backgroundColor: 'transparent',
+  },
+  topBar: {
+    width: '100%',
+    height: 4,                   // h-1 (~4px)
+    backgroundColor: Colors.cosmosPrimary,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+  },
+  content: {
+    // relative h-full flex flex-col justify-between items-center pt-4 pb-10 px-7
+    minHeight: 360,              // rough “panel-height”; adjust as needed
+    paddingTop: 16,              // pt-4
+    paddingBottom: 40,           // pb-10
+    paddingHorizontal: 28,       // px-7
+    backgroundColor: 'transparent',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+});

@@ -1,8 +1,7 @@
 import { SelectedAddress, useSendNft, UseSendNftReturnType } from '@leapwallet/cosmos-wallet-hooks';
-import assert from 'assert';
 import { observer } from 'mobx-react-lite';
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import { rootDenomsStore } from 'stores/denoms-store-instance';
+import { rootDenomsStore } from '../../../context/denoms-store-instance';
 
 type NFTSendContextType = {
   receiverAddress: SelectedAddress | null;
@@ -15,6 +14,7 @@ type NFTSendContextType = {
   setCollectionAddress: React.Dispatch<React.SetStateAction<string>>;
   sendNftReturn: UseSendNftReturnType;
 };
+
 export const NFTSendContext = createContext<NFTSendContextType | null>(null);
 
 export const NFTSendContextProvider = observer(({ children }: { children: React.ReactNode }) => {
@@ -24,7 +24,6 @@ export const NFTSendContextProvider = observer(({ children }: { children: React.
   const [txError, setTxError] = useState('');
 
   const denoms = rootDenomsStore.allDenoms;
-
   const sendNftReturn = useSendNft(denoms, collectionAddress);
 
   const value = useMemo(() => {
@@ -46,8 +45,8 @@ export const NFTSendContextProvider = observer(({ children }: { children: React.
 
 export const useNFTSendContext = () => {
   const context = useContext(NFTSendContext);
-
-  assert(context !== null, 'useNFTSendContext must be used within NFTSendContextProvider');
-
+  if (context === null) {
+    throw new Error('useNFTSendContext must be used within NFTSendContextProvider');
+  }
   return context;
 };

@@ -1,7 +1,7 @@
 import { ParsedMessage, ParsedMessageType } from '@leapwallet/parser-parfait';
-import classNames from 'classnames';
-import { RightArrow } from 'images/misc';
 import React from 'react';
+import { View, Text, TouchableOpacity, Image, StyleSheet, FlatList } from 'react-native';
+import { RightArrow } from '../../../assets/images/misc';
 
 import { getMessageTitle, getSimpleType } from './message-details';
 
@@ -23,45 +23,79 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, isLast, onClick }) =
       : _title;
 
   return (
-    <button
-      className={`flex items-center justify-between dark:bg-gray-900 mt-2 bg-white-100 w-full cursor-pointer p-4 rounded-2xl ${
-        !isLast ? 'border-b dark:border-gray-800 border-gray-100' : ''
-      }`}
-      onClick={onClick}
+    <TouchableOpacity
+      style={[
+        styles.messageItem,
+        !isLast && styles.itemBorder,
+      ]}
+      activeOpacity={0.7}
+      onPress={onClick}
     >
-      <div className='flex flex-col flex-1 max-w-[90%]'>
-        <p className='font-bold dark:text-white-100 text-gray-900 text-sm text-left'>{title}</p>
-      </div>
-      <img src={RightArrow} alt='View Details' className='block flex-shrink-0 mr-2' />
-    </button>
+      <View style={styles.itemTextContainer}>
+        <Text style={styles.messageTitle} numberOfLines={1}>
+          {title}
+        </Text>
+      </View>
+      <Image source={{uri: RightArrow}} style={styles.arrowIcon} resizeMode="contain" />
+    </TouchableOpacity>
   );
 };
 
 type MessageListProps = {
   parsedMessages: ParsedMessage[];
-  
   onMessageSelect: (message: ParsedMessage, index: number) => void;
   className?: string;
 };
 
-const MessageList: React.FC<MessageListProps> = ({ parsedMessages, onMessageSelect, className }) => {
+const MessageList: React.FC<MessageListProps> = ({ parsedMessages, onMessageSelect }) => {
   return (
-    <div className={classNames('', className)}>
-      {parsedMessages.map((message, index) => {
-        return (
-          <MessageItem
-            key={index}
-            isLast={index === parsedMessages.length - 1}
-            message={message}
-            messageNumber={index + 1}
-            onClick={() => {
-              onMessageSelect(message, index);
-            }}
-          />
-        );
-      })}
-    </div>
+    <FlatList
+      data={parsedMessages}
+      keyExtractor={(_, idx) => idx.toString()}
+      renderItem={({ item, index }) => (
+        <MessageItem
+          key={index}
+          isLast={index === parsedMessages.length - 1}
+          message={item}
+          messageNumber={index + 1}
+          onClick={() => onMessageSelect(item, index)}
+        />
+      )}
+      contentContainerStyle={{ gap: 0 }}
+    />
   );
 };
 
 export default MessageList;
+
+const styles = StyleSheet.create({
+  messageItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#fff', // Light background; use '#1A1A1A' for dark mode
+    marginTop: 8,
+    padding: 16,
+    borderRadius: 16,
+  },
+  itemBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB', // gray-100, use '#23272F' for dark mode
+  },
+  itemTextContainer: {
+    flex: 1,
+    maxWidth: '90%',
+  },
+  messageTitle: {
+    fontWeight: 'bold',
+    color: '#1F2937', // gray-900
+    fontSize: 15,
+    textAlign: 'left',
+  },
+  arrowIcon: {
+    height: 20,
+    width: 20,
+    marginLeft: 12,
+    tintColor: '#6B7280', // gray-400 or adjust for dark mode
+  },
+});

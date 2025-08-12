@@ -1,9 +1,10 @@
-import Text from 'components/text';
-import useActiveWallet from 'hooks/settings/useActiveWallet';
-import { Images } from 'images';
 import React, { useMemo } from 'react';
-import { formatWalletName } from 'utils/formatWalletName';
-import { trim } from 'utils/strings';
+import { View, Image, StyleSheet } from 'react-native';
+import Text from '../../../components/text';
+import useActiveWallet from '../../../hooks/settings/useActiveWallet';
+import { Images } from '../../../../assets/images';
+import { formatWalletName } from '../../../utils/formatWalletName';
+import { trim } from '../../../utils/strings';
 
 export default function WalletView() {
   const { activeWallet } = useActiveWallet();
@@ -13,25 +14,64 @@ export default function WalletView() {
     if (activeWallet?.avatar) {
       return activeWallet.avatar;
     }
-
-    return;
+    return null;
   }, [activeWallet?.avatar]);
 
   return (
-    <div className='flex items-center justify-between bg-secondary-100 pl-4 rounded-xl py-[10px]'>
-      <Text size='sm' className='font-medium'>
+    <View style={styles.outerContainer}>
+      <Text size="sm" style={styles.label}>
         Airdrops shown for
       </Text>
-      <div className='flex items-center gap-2 py-2 pl-3 pr-4 bg-gray-50 dark:bg-gray-900 rounded-[30px]'>
-        {walletAvatar ? (
-          <img className='w-5 h-5 rounded-full' src={walletAvatar} alt='wallet-avatar' />
-        ) : (
-          <img className='w-5 h-5' src={Images.Logos.LeapLogo28} alt='wallet-avatar' />
-        )}
-        <Text size='sm' className='font-bold'>
+      <View style={styles.walletContainer}>
+        <Image
+          style={styles.avatar}
+          source={
+            walletAvatar
+              ? { uri: walletAvatar }
+              : {uri: Images.Logos.LeapLogo28}
+          }
+        />
+        <Text size="sm" style={styles.walletName}>
           {trim(walletName, 10)}
         </Text>
-      </div>
-    </div>
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  outerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#F3F4F6', // secondary-100
+    paddingLeft: 16,
+    borderRadius: 16,
+    paddingVertical: 10,
+    marginBottom: 8,
+  },
+  label: {
+    fontWeight: '500',
+    fontSize: 14,
+  },
+  walletContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 8,
+    paddingLeft: 12,
+    paddingRight: 16,
+    backgroundColor: '#FAFAFA', // gray-50
+    borderRadius: 30,
+  },
+  avatar: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    marginRight: 6,
+  },
+  walletName: {
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+});

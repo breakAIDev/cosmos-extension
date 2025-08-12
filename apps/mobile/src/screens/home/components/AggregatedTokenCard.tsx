@@ -1,3 +1,10 @@
+import React, { useMemo } from 'react';
+import { TouchableOpacity, View, Text, StyleSheet, Image } from 'react-native';
+import { MotiText, AnimatePresence } from 'moti';
+
+import BigNumber from 'bignumber.js';
+
+// Your hooks/components (use native-ready ones)
 import {
   currencyDetail,
   formatPercentAmount,
@@ -7,24 +14,20 @@ import {
   useGetChains,
   useUserPreferredCurrency,
 } from '@leapwallet/cosmos-wallet-hooks';
-import { ChainInfos, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import BigNumber from 'bignumber.js';
-import { TokenImageWithFallback } from 'components/token-image-with-fallback';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from 'components/ui/tooltip';
-import { AGGREGATED_CHAIN_KEY } from 'config/constants';
-import { AnimatePresence, motion } from 'framer-motion';
-import { useActiveChain } from 'hooks/settings/useActiveChain';
-import { useFormatCurrency } from 'hooks/settings/useCurrency';
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
+import { useActiveChain } from '../../../hooks/settings/useActiveChain';
+import { useFormatCurrency } from '../../../hooks/settings/useCurrency';
+import { useDefaultTokenLogo } from '../../../hooks/utility/useDefaultTokenLogo';
 import { observer } from 'mobx-react-lite';
-import React, { useMemo } from 'react';
-import { miscellaneousDataStore } from 'stores/chain-infos-store';
-import { hideAssetsStore } from 'stores/hide-assets-store';
-import { hidePercentChangeStore } from 'stores/hide-percent-change';
-import { AggregatedSupportedChain } from 'types/utility';
-import { cn } from 'utils/cn';
-import { imgOnError } from 'utils/imgOnError';
-import { opacityFadeInOut, transition150 } from 'utils/motion-variants';
+import { miscellaneousDataStore } from '../../../context/chain-infos-store';
+import { hideAssetsStore } from '../../../context/hide-assets-store';
+import { hidePercentChangeStore } from '../../../context/hide-percent-change';
+import TokenImageWithFallback from '../../../components/token-image-with-fallback'; // should be RN component
+import { ChainInfos, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { AGGREGATED_CHAIN_KEY } from '../../../services/config/constants';
+import { AggregatedSupportedChain } from '../../../types/utility';
+import { Tooltip } from '../../../components/ui/tooltip';
+
+// ... your other imports
 
 type AggregatedTokenCardProps = {
   readonly title: string;
@@ -56,177 +59,245 @@ export const AggregatedTokenCardView = observer(
     tokenBalanceOnChain,
     isPlaceholder,
     percentChange24,
-    className,
   }: AggregatedTokenCardProps & { className?: string }) => {
-    const chains = useGetChains();
-    const activeChain = useActiveChain() as AggregatedSupportedChain;
-    const [formatCurrency] = useFormatCurrency();
+  const chains = useGetChains();
+  const activeChain = useActiveChain() as AggregatedSupportedChain;
+  const [formatCurrency] = useFormatCurrency();
+  const defaultTokenLogo = useDefaultTokenLogo();
+  const [preferredCurrency] = useUserPreferredCurrency();
 
-    const defaultTokenLogo = useDefaultTokenLogo();
-    const [preferredCurrency] = useUserPreferredCurrency();
-    const formattedFiatValue = usdValue ? formatCurrency(new BigNumber(usdValue || 0), true) : '-';
+  const formattedFiatValue = usdValue ? formatCurrency(new BigNumber(usdValue || 0), true) : '-';
+  const ibcInfo = ibcChainInfo
+    ? `${ibcChainInfo.pretty_name} / ${sliceWord(ibcChainInfo?.channelId ?? '', 7, 5)}`
+    : '';
 
-    const ibcInfo = ibcChainInfo
-      ? `${ibcChainInfo.pretty_name} / ${sliceWord(ibcChainInfo?.channelId ?? '', 7, 5)}`
-      : '';
+  const chainName = chains[tokenBalanceOnChain]?.chainName ?? '';
 
-    const chainName = chains[tokenBalanceOnChain]?.chainName ?? '';
+  const percentChangeText = useMemo(() => {
+    if (percentChange24 == null) return '-';
+    if (percentChange24 >= 0) return `+${formatPercentAmount(percentChange24.toString(), 2)}%`;
+    else return percentChange24 >= -100 ? `${formatPercentAmount(percentChange24.toString(), 2)}%` : '-99.99%';
+  }, [percentChange24]);
 
-    const percentChangeText = useMemo(() => {
-      if (!percentChange24) {
-        return '-';
-      }
-
-      if (percentChange24 >= 0) {
-        return `+${formatPercentAmount(percentChange24.toString(), 2)}%`;
-      } else {
-        return percentChange24 >= -100 ? `${formatPercentAmount(percentChange24.toString(), 2)}%` : '-99.99%';
-      }
-    }, [percentChange24]);
-
-    return (
-      <button
-        className={cn(
-          'text-start bg-secondary-100 hover:bg-secondary-200 transition-colors flex items-center justify-between py-3 px-4 w-full cursor-pointer gap-3',
-          className,
-        )}
-        onClick={onClick}
-      >
-        <div className='relative w-[32px] h-[32px] shrink-0 flex items-center justify-center'>
-          <TokenImageWithFallback
-            assetImg={assetImg}
-            text={symbol}
-            altText={chainName + ' logo'}
-            imageClassName='w-[30px] h-[30px] rounded-full'
-            containerClassName='w-[30px] h-[30px] rounded-full'
-            textClassName='text-[10px] !leading-[14px]'
-          />
-          {activeChain === AGGREGATED_CHAIN_KEY && (
-            <img
-              src={
-                chains[tokenBalanceOnChain]?.chainSymbolImageUrl ??
-                ChainInfos[tokenBalanceOnChain]?.chainSymbolImageUrl ??
-                defaultTokenLogo
-              }
-              onError={imgOnError(defaultTokenLogo)}
-              className='w-[15px] h-[15px] absolute bottom-[-2px] right-[-2px] rounded-full bg-white-100 dark:bg-black-100'
-            />
-          )}
-        </div>
-
-        <div className='flex flex-col justify-start mr-auto'>
-          <span className='font-bold text-md truncate max-w-32 text-foreground !leading-[22px] flex items-center gap-1'>
-            {sliceWord(title, 7, 4)}
-            {ibcInfo ? (
-              <span
-                title={ibcInfo}
-                className='px-1 bg-secondary-200 h-[19px] rounded-sm text-secondary-800 text-xs font-medium !leading-[19px] shrink-0'
-              >
-                IBC
-              </span>
-            ) : null}
-          </span>
-
-          <TooltipProvider delayDuration={100}>
-            <Tooltip>
-              <TooltipTrigger className='h-[19px] flex items-center'>
-                <AnimatePresence mode='wait'>
-                  <motion.span
-                    key={hideAssetsStore.isHidden ? 'hidden' : 'visible'}
-                    className='text-muted-foreground text-xs font-medium !leading-[19px] truncate max-w-44'
-                    transition={transition150}
-                    variants={opacityFadeInOut}
-                    initial='hidden'
-                    animate='visible'
-                    exit='hidden'
-                  >
-                    {hideAssetsStore.formatHideBalance(
-                      formatTokenAmount(amount, sliceWord(symbol, 4, 4), 3, currencyDetail[preferredCurrency].locale),
-                    )}
-                    {isEvm && hasToShowEvmTag ? ' · EVM' : ''}
-                  </motion.span>
-                </AnimatePresence>
-              </TooltipTrigger>
-              <TooltipContent side='bottom' className='capitalize'>
-                {chainName}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-
-        <div className='flex flex-col items-end gap-y-[2px]'>
-          {isPlaceholder ? (
-            <p className='font-bold text-sm text-end'>-</p>
-          ) : (
-            <AnimatePresence mode='wait'>
-              <motion.span
-                key={hideAssetsStore.isHidden ? 'hidden-fiat' : 'visible-fiat'}
-                className={
-                  'font-bold text-sm !leading-[20px] text-end ' +
-                  (hideAssetsStore.isHidden ? 'text-muted-foreground' : '')
-                }
-                transition={transition150}
-                variants={opacityFadeInOut}
-                initial='hidden'
-                animate='visible'
-                exit='hidden'
-              >
-                {hideAssetsStore.isHidden ? '••••••' : formattedFiatValue}
-              </motion.span>
-            </AnimatePresence>
-          )}
-
-          <AnimatePresence mode='wait'>
-            {!hidePercentChangeStore.isHidden && (
-              <motion.span
-                key={hideAssetsStore.isHidden ? 'hidden-percent' : 'visible-percent'}
-                transition={transition150}
-                variants={opacityFadeInOut}
-                initial='hidden'
-                animate='visible'
-                exit='hidden'
-                className={cn(
-                  'text-xs font-medium items-end !leading-[19px]',
-                  percentChange24
-                    ? percentChange24 > 0
-                      ? 'text-accent-success-200'
-                      : 'text-destructive-100'
-                    : 'text-muted-foreground',
-                  hideAssetsStore.isHidden ? 'text-muted-foreground' : '',
-                )}
-              >
-                {hideAssetsStore.isHidden ? '•••' : percentChangeText || '-'}
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </div>
-      </button>
-    );
-  },
-);
-
-const NobleRewards = () => {
+  // ---- Main Card ----
   return (
-    <div className='w-full py-1.5 bg-accent-green-900 bg-opacity-10 text-center font-medium text-xs text-accent-green-200'>
-      Earn rewards of up to
-      <span className='font-bold'>
-        &nbsp;
-        {parseFloat(miscellaneousDataStore.data?.noble?.usdnEarnApy) > 0
-          ? new BigNumber(miscellaneousDataStore.data.noble.usdnEarnApy).multipliedBy(100).toFixed(2) + '%'
-          : '-'}
-        &nbsp;APY!
-      </span>
-    </div>
-  );
-};
+    <TouchableOpacity style={[styles.card]} onPress={onClick} activeOpacity={0.8}>
+      {/* Token Image */}
+      <View style={styles.tokenImageContainer}>
+        <TokenImageWithFallback
+          assetImg={assetImg}
+          text={symbol}
+          altText={chainName + ' logo'}
+          imageStyle={styles.tokenImage}
+        />
+        {/* Chain Symbol */}
+        {activeChain === AGGREGATED_CHAIN_KEY && (
+          <Image
+            source={{
+              uri:
+                chains[tokenBalanceOnChain]?.chainSymbolImageUrl ||
+                ChainInfos[tokenBalanceOnChain]?.chainSymbolImageUrl ||
+                defaultTokenLogo,
+            }}
+            // fallback: handleError can set a local state to swap to defaultTokenLogo
+            onError={() => {/* optionally handle error, e.g., setImageSource(defaultTokenLogo) */}}
+            style={styles.aggregatedImg}
+            resizeMode="cover"
+          />
+        )}
+      </View>
 
+      {/* Details Column */}
+      <View style={styles.details}>
+        {/* Title Row */}
+        <View style={styles.titleRow}>
+          <Text numberOfLines={1} style={styles.tokenTitle}>
+            {sliceWord(title, 7, 4)}
+          </Text>
+          {ibcInfo ? (
+            <Text style={styles.ibcLabel}>IBC</Text>
+          ) : null}
+        </View>
+        {/* Amount w/ Tooltip */}
+        <Tooltip
+          content={
+            <View>
+              <Text style={{ color: '#222' }}>{chainName}</Text>
+            </View>
+          }
+        >
+          <View>
+            <AnimatePresence>
+              <MotiText
+                from={{ opacity: 0, translateY: 4 }}
+                animate={{ opacity: 1, translateY: 0 }}
+                exit={{ opacity: 0, translateY: -4 }}
+                transition={{ type: 'timing', duration: 150 }}
+                style={styles.amountText}
+                numberOfLines={1}
+              >
+                {hideAssetsStore.formatHideBalance(
+                  formatTokenAmount(amount, sliceWord(symbol, 4, 4), 3, currencyDetail[preferredCurrency].locale)
+                )}
+                {isEvm && hasToShowEvmTag ? ' · EVM' : ''}
+              </MotiText>
+            </AnimatePresence>
+          </View>
+        </Tooltip>
+      </View>
+
+      {/* Fiat and Percent Change Column */}
+      <View style={styles.rightColumn}>
+        {isPlaceholder ? (
+          <Text style={styles.usdText}>-</Text>
+        ) : (
+          <AnimatePresence>
+            <MotiText
+              from={{ opacity: 0, translateY: 4 }}
+              animate={{ opacity: 1, translateY: 0 }}
+              exit={{ opacity: 0, translateY: -4 }}
+              transition={{ type: 'timing', duration: 150 }}
+              style={[
+                styles.usdText,
+                hideAssetsStore.isHidden && { color: '#A1A1AA' },
+              ]}
+            >
+              {hideAssetsStore.isHidden ? '••••••' : formattedFiatValue}
+            </MotiText>
+          </AnimatePresence>
+        )}
+
+        <AnimatePresence>
+          {!hidePercentChangeStore.isHidden && (
+            <MotiText
+              from={{ opacity: 0, translateY: 2 }}
+              animate={{ opacity: 1, translateY: 0 }}
+              exit={{ opacity: 0, translateY: -2 }}
+              transition={{ type: 'timing', duration: 150 }}
+              style={[
+                styles.percentText,
+                percentChange24
+                  ? percentChange24 > 0
+                    ? styles.percentUp
+                    : styles.percentDown
+                  : styles.percentMuted,
+                hideAssetsStore.isHidden && styles.percentMuted,
+              ]}
+            >
+              {hideAssetsStore.isHidden ? '•••' : percentChangeText || '-'}
+            </MotiText>
+          )}
+        </AnimatePresence>
+      </View>
+    </TouchableOpacity>
+  );
+});
+
+// --- NobleRewards as React Native ---
+const NobleRewards = observer(() => {
+  const apy =
+    parseFloat(miscellaneousDataStore.data?.noble?.usdnEarnApy) > 0
+      ? new BigNumber(miscellaneousDataStore.data.noble.usdnEarnApy).multipliedBy(100).toFixed(2) + '%'
+      : '-';
+  return (
+    <View
+      style={styles.nobleRewards}
+    >
+      <Text style={{ color: '#29A874', fontSize: 12, fontWeight: 'bold' }}>
+        Earn rewards of up to <Text style={{ fontWeight: 'bold' }}>{apy} APY!</Text>
+      </Text>
+    </View>
+  );
+});
+
+// --- AggregatedTokenCard ---
 export const AggregatedTokenCard = (props: AggregatedTokenCardProps) => {
   const showNobleRewards = props.tokenBalanceOnChain === 'noble' && props.symbol === 'USDC';
 
   return (
-    <div className='flex flex-col w-full rounded-2xl overflow-hidden'>
+    <View style={{ flexDirection: 'column', width: '100%', borderRadius: 16, overflow: 'hidden', marginBottom: 4 }}>
       <AggregatedTokenCardView {...props} />
       {showNobleRewards && <NobleRewards />}
-    </div>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  nobleRewards: {
+    width: '100%',
+    paddingVertical: 6,
+    backgroundColor: 'rgba(36,207,129,0.1)', // bg-accent-green-900 with opacity
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  aggregatedImg: {
+    width: 15,
+    height: 15,
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    borderRadius: 8,
+    backgroundColor: '#fff', // use '#18181b' for dark if needed
+    // Optionally, add border for clarity
+    borderWidth: 1,
+    borderColor: '#eee',
+  },
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6', // bg-secondary-100
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    marginBottom: 6,
+  },
+  tokenImageContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  tokenImage: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+  },
+  chainSymbolImage: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    width: 15,
+    height: 15,
+    borderRadius: 8,
+    backgroundColor: '#fff',
+  },
+  details: { flex: 1, justifyContent: 'center' },
+  titleRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 2 },
+  tokenTitle: { fontWeight: 'bold', fontSize: 16, color: '#18181B', flexShrink: 1 },
+  ibcLabel: {
+    paddingHorizontal: 4,
+    backgroundColor: '#E5E7EB',
+    borderRadius: 4,
+    fontSize: 10,
+    color: '#52525B',
+    marginLeft: 4,
+    height: 19,
+    lineHeight: 19,
+    overflow: 'hidden',
+  },
+  amountText: {
+    color: '#6B7280', // text-muted-foreground
+    fontSize: 12,
+    fontWeight: '500',
+    maxWidth: 160,
+  },
+  rightColumn: { alignItems: 'flex-end', minWidth: 70 },
+  usdText: { fontWeight: 'bold', fontSize: 14 },
+  percentText: { fontSize: 12, fontWeight: '500', lineHeight: 19 },
+  percentUp: { color: '#29A874' }, // text-accent-success-200
+  percentDown: { color: '#FF707E' }, // text-destructive-100
+  percentMuted: { color: '#A1A1AA' }, // text-muted-foreground
+});

@@ -1,16 +1,17 @@
 import { Token, useGetChains } from '@leapwallet/cosmos-wallet-hooks';
 import { isAptosChain } from '@leapwallet/cosmos-wallet-sdk';
 import { generateRandomString } from '@leapwallet/cosmos-wallet-store';
-import { AGGREGATED_CHAIN_KEY } from 'config/constants';
-import { useActiveChain } from 'hooks/settings/useActiveChain';
+import { AGGREGATED_CHAIN_KEY } from '../../../services/config/constants';
+import { useActiveChain } from '../../../hooks/settings/useActiveChain';
 import { observer } from 'mobx-react-lite';
 import React, { useMemo } from 'react';
-import { percentageChangeDataStore } from 'stores/balance-store';
-import { chainInfoStore } from 'stores/chain-infos-store';
-import { rootDenomsStore } from 'stores/denoms-store-instance';
-import { AggregatedSupportedChain } from 'types/utility';
+import { percentageChangeDataStore } from '../../../context/balance-store';
+import { chainInfoStore } from '../../../context/chain-infos-store';
+import { rootDenomsStore } from '../../../context/denoms-store-instance';
+import { AggregatedSupportedChain } from '../../../types/utility';
 
 import { AssetCard } from './AssetCard';
+import { View, StyleSheet } from 'react-native';
 
 export const NativeTokenPlaceholder = observer(() => {
   const chains = useGetChains();
@@ -58,8 +59,8 @@ export const NativeTokenPlaceholder = observer(() => {
   }, [activeChain, chains]);
 
   return (
-    <div className='flex flex-col w-full px-5 pb-20'>
-      <div className={'w-full flex flex-col items-center justify-center gap-3'}>
+    <View style={styles.wrapper}>
+      <View style={styles.cardContainer}>
         {emptyNativeTokens?.map((asset) => (
           <AssetCard
             key={asset.id}
@@ -69,7 +70,24 @@ export const NativeTokenPlaceholder = observer(() => {
             isPlaceholder
           />
         ))}
-      </div>
-    </div>
+      </View>
+    </View>
   );
+});
+
+const styles = StyleSheet.create({
+  wrapper: {
+    flexDirection: 'column',
+    width: '100%',
+    paddingHorizontal: 20,
+    paddingBottom: 80,
+  },
+  cardContainer: {
+    width: '100%',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    // Add spacing here if you want:
+    // gap: 12, // Not supported in RN
+  },
 });

@@ -5,8 +5,6 @@ import { useMemo } from 'react';
 
 import { Images } from '../../../assets/images';
 
-// Make sure your Images are React Native-compatible (i.e., `require('./path')` or {uri: ...})
-
 export const getSwapImage = (activeChain: SupportedChain): any => {
   switch (activeChain) {
     case 'juno':

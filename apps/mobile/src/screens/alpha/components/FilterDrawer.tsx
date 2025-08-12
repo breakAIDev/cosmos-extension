@@ -1,7 +1,8 @@
-import BottomModal from 'components/new-bottom-modal';
-import { PageName } from 'config/analytics';
-import { AlphaOpportunity } from 'hooks/useAlphaOpportunities';
+import BottomModal from '../../../components/new-bottom-modal';
+import { PageName } from '../../../services/config/analytics';
+import { AlphaOpportunity } from '../../../hooks/useAlphaOpportunities';
 import React, { useMemo } from 'react';
+import { View, StyleSheet } from 'react-native';
 
 import CategoryFilter from './CategoryFilter';
 import EcosystemFilter from './EcosystemFilter';
@@ -46,9 +47,19 @@ export function FilterDrawer({
   }, [opportunities]);
 
   return (
-    <BottomModal fullScreen isOpen={isShown} onClose={onClose} title='Filter by' className='flex flex-col gap-10'>
-      <CategoryFilter categoryFilters={categoryFilters} pageName={pageName} />
-      <EcosystemFilter ecosystemFilters={ecosystemFilters} pageName={pageName} />
+    <BottomModal
+      fullScreen
+      isOpen={isShown}
+      onClose={onClose}
+      title="Filter by"
+      style={styles.modalContent}
+    >
+      <View style={styles.section}>
+        <CategoryFilter categoryFilters={categoryFilters} pageName={pageName} />
+      </View>
+      <View style={styles.section}>
+        <EcosystemFilter ecosystemFilters={ecosystemFilters} pageName={pageName} />
+      </View>
     </BottomModal>
   );
 }
@@ -71,8 +82,28 @@ export function EcosystemFilterDrawer({
   }, [opportunities]);
 
   return (
-    <BottomModal fullScreen isOpen={isShown} onClose={onClose} title='Filter by' className='flex flex-col gap-10'>
-      <EcosystemFilter ecosystemFilters={ecosystemFilters} pageName={pageName} />
+    <BottomModal
+      fullScreen
+      isOpen={isShown}
+      onClose={onClose}
+      title="Filter by"
+      style={styles.modalContent}
+    >
+      <View style={styles.section}>
+        <EcosystemFilter ecosystemFilters={ecosystemFilters} pageName={pageName} />
+      </View>
     </BottomModal>
   );
 }
+
+const styles = StyleSheet.create({
+  modalContent: {
+    flex: 1,
+    flexDirection: 'column',
+    padding: 16,
+    gap: 32, // Not supported in all RN versions; use marginBottom on section if needed
+  },
+  section: {
+    marginBottom: 24,
+  },
+});

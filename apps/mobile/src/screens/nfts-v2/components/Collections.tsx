@@ -1,16 +1,22 @@
 import { useDisabledNFTsCollections, useFractionalizedNftContracts } from '@leapwallet/cosmos-wallet-hooks';
 import { NftStore } from '@leapwallet/cosmos-wallet-store';
-import classNames from 'classnames';
-import { useChainPageInfo } from 'hooks';
-import { useChainInfos } from 'hooks/useChainInfos';
-import { RightArrow } from 'images/misc';
+import { useChainPageInfo } from '../../../hooks';
+import { useChainInfos } from '../../../hooks/useChainInfos';
+import { RightArrow } from '../../../../assets/images/misc';
 import { observer } from 'mobx-react-lite';
 import React, { useMemo } from 'react';
-import { getChainName } from 'utils/getChainName';
-import { isSidePanel } from 'utils/isSidePanel';
+import { getChainName } from '../../../utils/getChainName';
 
 import { useNftContext } from '../context';
 import { Chip, CollectionAvatar, Text } from './index';
+import {
+  View,
+  Text as RNText,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  ScrollView,
+} from 'react-native';
 
 type CollectionsProps = {
   setShowManageCollections: React.Dispatch<React.SetStateAction<boolean>>;
@@ -27,10 +33,9 @@ export const Collections = observer(({ setShowManageCollections, nftStore }: Col
   const disabledNftsCollections = useDisabledNFTsCollections();
 
   const sortedCollections = useMemo(() => {
-    return collectionData?.collections.slice().sort((collectionA, collectionB) => {
-      const nameA = collectionA.name.toLowerCase().trim();
-      const nameB = collectionB.name.toLowerCase().trim();
-
+    return collectionData?.collections.slice().sort((a, b) => {
+      const nameA = a.name.toLowerCase().trim();
+      const nameB = b.name.toLowerCase().trim();
       if (nameA > nameB) return 1;
       if (nameA < nameB) return -1;
       return 0;
@@ -38,25 +43,27 @@ export const Collections = observer(({ setShowManageCollections, nftStore }: Col
   }, [collectionData?.collections]);
 
   return (
-    <div className='rounded-2xl border dark:border-gray-900 mb-4'>
-      <div className='flex items-center justify-between p-4 border-b dark:border-gray-900'>
-        <h2 className='text-gray-800 dark:text-white-100 text-left'>Your collections</h2>
-        <button
-          style={{ color: topChainColor }}
-          className='font-semibold text-right'
-          onClick={() => setShowManageCollections(true)}
+    <View style={styles.root}>
+      <View style={styles.header}>
+        <RNText style={styles.headerTitle}>Your collections</RNText>
+        <TouchableOpacity
+          onPress={() => setShowManageCollections(true)}
+          style={styles.manageBtn}
         >
-          Manage collections
-        </button>
-      </div>
-      <div>
+          <RNText style={[styles.manageBtnText, { color: topChainColor }]}>
+            Manage collections
+          </RNText>
+        </TouchableOpacity>
+      </View>
+      <ScrollView>
         {sortedCollections?.map((collection, index, array) => {
           const { chain, name, image, totalNfts, address } = collection;
           let nftCount = totalNfts;
 
           if (fractionalizedNftContracts.includes(address)) {
-            const fractionalizedNft = collectionData?.nfts?.[chain].filter((nft) => nft.collection.address === address);
-
+            const fractionalizedNft = collectionData?.nfts?.[chain].filter(
+              (nft) => nft.collection.address === address
+            );
             nftCount = fractionalizedNft?.length ?? nftCount;
           }
 
@@ -64,12 +71,14 @@ export const Collections = observer(({ setShowManageCollections, nftStore }: Col
           const chainInfo = chainInfos[chain];
 
           return (
-            <div
+            <TouchableOpacity
               key={address}
-              className={classNames('py-3 px-4 flex items-center cursor-pointer', {
-                'border-b dark:border-gray-900': index + 1 !== array.length,
-              })}
-              onClick={() => {
+              style={[
+                styles.row,
+                index + 1 !== array.length && styles.rowBorder,
+              ]}
+              activeOpacity={0.85}
+              onPress={() => {
                 setActivePage('CollectionDetails');
                 setShowCollectionDetailsFor(address);
               }}
@@ -77,47 +86,149 @@ export const Collections = observer(({ setShowManageCollections, nftStore }: Col
               <CollectionAvatar
                 image={image}
                 bgColor={chainInfo.theme.primaryColor}
-                className='h-[30px] w-[30px] shrink-0'
+                style={styles.avatar}
               />
 
-              <div className='flex flex-col items-start flex-1'>
+              <View style={styles.colInfo}>
                 <Text
-                  className={classNames('text-gray-800 dark:text-white-100 mt-2', {
-                    '!max-w-[95px]': isSidePanel(),
-                  })}
+                  style={[
+                    styles.collectionName,
+                  ]}
+                  numberOfLines={1}
                 >
                   {name ?? ''}
                 </Text>
+                <View style={[styles.countBadge, { borderColor: topChainColor }]}>
+                  <RNText style={[styles.countBadgeText, { color: topChainColor }]}>
+                    {nftCount} item{(nftCount ?? 1) > 1 ? 's' : ''}
+                  </RNText>
+                </View>
+              </View>
 
-                <div
-                  className='border dark:border-gray-900 rounded-2xl py-[2px] px-[12px] text-[12px] mt-[1px]'
-                  style={{ color: topChainColor }}
-                >
-                  {nftCount} item{(nftCount ?? 1) > 1 ? 's' : ''}
-                </div>
-              </div>
-
-              <div className='ml-auto flex shrink-0'>
-                <Chip className='bg-gray-100 dark:bg-gray-900 py-[3px] px-[7px]'>
+              <View style={styles.chipWrap}>
+                <Chip style={styles.chip}>
                   <Chip.Image
-                    className='w-[12px] h-[12px]'
-                    src={chainInfo.chainSymbolImageUrl}
-                    alt={`${chainInfo.chainName.toLowerCase()} logo`}
+                    source={{ uri: chainInfo.chainSymbolImageUrl }}
+                    style={styles.chipImg}
                   />
-                  <Chip.Text
-                    className='text-gray-800 dark:text-gray-300 text-xs max-w-[90px] truncate'
-                    title={getChainName(chainInfo.chainName)}
-                  >
+                  <Chip.Text style={styles.chipText} numberOfLines={1}>
                     {getChainName(chainInfo.chainName)}
                   </Chip.Text>
                 </Chip>
-
-                <img src={RightArrow} alt='right arrow' className='ml-2' />
-              </div>
-            </div>
+                <Image source={{uri: RightArrow}} style={styles.arrow} resizeMode="contain" />
+              </View>
+            </TouchableOpacity>
           );
         })}
-      </div>
-    </div>
+      </ScrollView>
+    </View>
   );
+});
+
+const styles = StyleSheet.create({
+  root: {
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#16181d',
+    marginBottom: 16,
+    backgroundColor: '#fff',
+    overflow: 'hidden',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderColor: '#16181d',
+  },
+  headerTitle: {
+    color: '#1f2937',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  manageBtn: {
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+  },
+  manageBtnText: {
+    fontWeight: '600',
+    fontSize: 15,
+    textAlign: 'right',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: '#fff',
+  },
+  rowBorder: {
+    borderBottomWidth: 1,
+    borderColor: '#16181d',
+  },
+  avatar: {
+    width: 30,
+    height: 30,
+    marginRight: 12,
+    borderRadius: 15,
+  },
+  colInfo: {
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+  },
+  collectionName: {
+    color: '#18181b',
+    marginTop: 2,
+    fontSize: 15,
+    fontWeight: 'bold',
+    maxWidth: 150,
+  },
+  countBadge: {
+    borderWidth: 1,
+    borderRadius: 16,
+    paddingVertical: 2,
+    paddingHorizontal: 12,
+    marginTop: 2,
+    minWidth: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+  },
+  countBadgeText: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  chipWrap: {
+    marginLeft: 'auto',
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexShrink: 0,
+  },
+  chip: {
+    backgroundColor: '#f3f4f6',
+    paddingVertical: 3,
+    paddingHorizontal: 7,
+    borderRadius: 99,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  chipImg: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 4,
+  },
+  chipText: {
+    color: '#18181b',
+    fontSize: 12,
+    maxWidth: 90,
+  },
+  arrow: {
+    width: 16,
+    height: 16,
+    marginLeft: 8,
+  },
 });

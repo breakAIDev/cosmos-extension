@@ -1,53 +1,29 @@
-import {
-  BETA_EVM_NFT_TOKEN_IDS,
-  BETA_NFT_CHAINS,
-  BETA_NFTS_COLLECTIONS,
-  NftChain,
-  StoredBetaNftCollection,
-  useChainApis,
-  useDisabledNFTsCollections,
-  useSetDisabledNFTsInStorage,
-} from '@leapwallet/cosmos-wallet-hooks';
-import { CosmWasmClientHandler } from '@leapwallet/cosmos-wallet-hooks/dist/utils/useCosmWasmClient';
-import {
-  getNftBalanceCount,
-  getNftContractInfo,
-  getNftTokenIdInfo,
-  SupportedChain,
-} from '@leapwallet/cosmos-wallet-sdk';
-import { ChainTagsStore } from '@leapwallet/cosmos-wallet-store';
-import { GenericCard } from '@leapwallet/leap-ui';
-import classNames from 'classnames';
-import BottomModal from '../bottom-modal';
-import { InputComponent } from 'components/input-component/InputComponent';
-import { LoaderAnimation } from 'components/loader/Loader';
-import Text from 'components/text';
-import { AGGREGATED_CHAIN_KEY } from 'config/constants';
-import { useActiveChain } from 'hooks/settings/useActiveChain';
-import { useChainInfos } from 'hooks/useChainInfos';
-import { useDontShowSelectChain } from 'hooks/useDontShowSelectChain';
-import { useGetWalletAddresses } from 'hooks/useGetWalletAddresses';
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
-import { Images } from 'images';
-import { observer } from 'mobx-react-lite';
-import { SelectChainSheet } from 'pages/home/side-nav/CustomEndpoints';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { manageChainsStore } from 'stores/manage-chains-store';
-import {
-  betaEvmNftTokenIdsStore,
-  betaNftChainsStore,
-  betaNftsCollectionsStore,
-  nftChainsStore,
-  nftStore,
-} from 'stores/nft-store';
-import { AggregatedSupportedChain } from 'types/utility';
-import { getChainName } from 'utils/getChainName';
-import { imgOnError } from 'utils/imgOnError';
-import { isSidePanel } from 'utils/isSidePanel';
-import { normalizeImageSrc } from 'utils/normalizeImageSrc';
-import Browser from 'webextension-polyfill';
-
-import { ManageCollectionsProps, NftAvatar, NftToggleCard, Text as NftText } from './index';
+import { View, Image, StyleSheet, ScrollView } from 'react-native';
+import { observer } from 'mobx-react-lite';
+import { ChainTagsStore } from '@leapwallet/cosmos-wallet-store';
+import { useActiveChain } from '../../../hooks/settings/useActiveChain';
+import { useChainInfos } from '../../../hooks/useChainInfos';
+import { useDontShowSelectChain } from '../../../hooks/useDontShowSelectChain';
+import { useGetWalletAddresses } from '../../../hooks/useGetWalletAddresses';
+import { useDefaultTokenLogo } from '../../../hooks/utility/useDefaultTokenLogo';
+import { InputComponent } from '../../../components/input-component/InputComponent';
+import { LoaderAnimation } from '../../../components/loader/Loader';
+import BottomModal from '../../../components/bottom-modal';
+import Text from '../../../components/text';
+import { Images } from '../../../../assets/images';
+import { getChainName } from '../../../utils/getChainName';
+import { normalizeImageSrc } from '../../../utils/normalizeImageSrc';
+import { NftToggleCard, NftAvatar, Text as NftText, ManageCollectionsProps } from './index';
+import { AggregatedSupportedChain } from '../../../types/utility';
+import { AGGREGATED_CHAIN_KEY } from '../../../services/config/constants';
+import { getNftBalanceCount, getNftContractInfo, getNftTokenIdInfo, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { betaEvmNftTokenIdsStore, betaNftChainsStore, betaNftsCollectionsStore, nftChainsStore, nftStore } from '../../../context/nft-store';
+import { BETA_EVM_NFT_TOKEN_IDS, BETA_NFT_CHAINS, BETA_NFTS_COLLECTIONS, CosmWasmClientHandler, NftChain, StoredBetaNftCollection, useChainApis, useDisabledNFTsCollections, useSetDisabledNFTsInStorage } from '@leapwallet/cosmos-wallet-hooks';
+import { manageChainsStore } from '../../../context/manage-chains-store';
+import { SelectChainSheet } from '../../swaps-v2/components';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { GenericCard } from '@leapwallet/leap-ui';
 
 type AddCollectionProps = Omit<ManageCollectionsProps, 'openAddCollectionSheet'> & {
   chainTagsStore: ChainTagsStore;
@@ -56,6 +32,7 @@ type AddCollectionProps = Omit<ManageCollectionsProps, 'openAddCollectionSheet'>
 export const AddCollection = observer(({ isVisible, onClose, chainTagsStore }: AddCollectionProps) => {
   const chainInfos = useChainInfos();
   let activeChain = useActiveChain();
+
   if ((activeChain as AggregatedSupportedChain) === AGGREGATED_CHAIN_KEY) {
     activeChain = 'cosmos';
   }
@@ -64,11 +41,10 @@ export const AddCollection = observer(({ isVisible, onClose, chainTagsStore }: A
   const timeoutIdRef = useRef<NodeJS.Timeout>();
 
   const [showSelectChain, setShowSelectChain] = useState(false);
-  const [enteredCollection, setEnteredCollection] = useState('');
+  const [enteredCollection, setEnteredCollection] = useState<string>('');
   const [enteredTokenId, setEnteredTokenId] = useState('');
   const [selectedChain, setSelectedChain] = useState<SupportedChain>('' as SupportedChain);
 
-  
   const [nftInfo, setNftInfo] = useState<{ [key: string]: any }>({});
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [fetchingCollectionInfo, setFetchingCollectionInfo] = useState(false);
@@ -82,7 +58,6 @@ export const AddCollection = observer(({ isVisible, onClose, chainTagsStore }: A
     if (activeChain === 'seiDevnet') {
       return 'mainnet';
     }
-
     return chainInfos[chain].chainId === chainInfos[chain].testnetChainId ? 'testnet' : 'mainnet';
   }, [activeChain, chain, chainInfos]);
 
@@ -141,7 +116,7 @@ export const AddCollection = observer(({ isVisible, onClose, chainTagsStore }: A
               if (nftDisplayInfo.image) {
                 tempContractInfo.image = nftDisplayInfo.image;
               }
-            } catch (_) {
+            } catch (e) {
               if (tokenIdInfo.tokenURI) {
                 tempContractInfo.image = tokenIdInfo.tokenURI;
               } else {
@@ -221,9 +196,7 @@ export const AddCollection = observer(({ isVisible, onClose, chainTagsStore }: A
     const value = event.target.value.trim();
     setEnteredCollection(value);
 
-    
-    
-    if (value && selectedChain === '') {
+    if (value && selectedChain as string === '') {
       setErrors({ selectedChain: 'Please select a chain' });
     } else {
       setErrors({});
@@ -237,11 +210,11 @@ export const AddCollection = observer(({ isVisible, onClose, chainTagsStore }: A
   };
 
   const updateBetaEvmNftTokenIds = async () => {
-    const storage = await Browser.storage.local.get([BETA_EVM_NFT_TOKEN_IDS]);
+    const storage = await AsyncStorage.getItem(BETA_EVM_NFT_TOKEN_IDS);
     const address = walletAddresses[0].toLowerCase().startsWith('0x') ? walletAddresses[0] : walletAddresses[1];
 
-    if (storage[BETA_EVM_NFT_TOKEN_IDS]) {
-      const betaEvmNftTokenIds = JSON.parse(storage[BETA_EVM_NFT_TOKEN_IDS] ?? '{}');
+    if (storage) {
+      const betaEvmNftTokenIds = JSON.parse(storage ?? '{}');
       const newStorageInfo = {
         ...betaEvmNftTokenIds,
         [enteredCollection]: {
@@ -270,18 +243,20 @@ export const AddCollection = observer(({ isVisible, onClose, chainTagsStore }: A
     let hasToSetInfo = true;
     let hasToSetEvmTokenIds = true;
 
-    const storage = await Browser.storage.local.get([BETA_NFTS_COLLECTIONS, BETA_NFT_CHAINS, BETA_EVM_NFT_TOKEN_IDS]);
+    const collectionsStr = await AsyncStorage.getItem(BETA_NFTS_COLLECTIONS);
+    const chainsStr = await AsyncStorage.getItem(BETA_NFT_CHAINS);
+    const tokenIdsStr = await AsyncStorage.getItem(BETA_EVM_NFT_TOKEN_IDS);
 
     if (isEnabled) {
       _disabledNFTsCollections = disabledNFTsCollections.filter((collection) => collection !== enteredCollection);
 
-      if (storage[BETA_NFTS_COLLECTIONS]) {
+      if (collectionsStr) {
         const parsedData: StoredBetaNftCollection[] =
-          JSON.parse(storage[BETA_NFTS_COLLECTIONS])?.[selectedChain]?.[forceNetwork] ?? [];
+          JSON.parse(collectionsStr)?.[selectedChain]?.[forceNetwork] ?? [];
 
         if (parsedData.some((collection) => collection.address === enteredCollection)) {
           if (enteredCollection.toLowerCase().startsWith('0x')) {
-            const betaEvmNftTokenIds = JSON.parse(storage[BETA_EVM_NFT_TOKEN_IDS] ?? '{}');
+            const betaEvmNftTokenIds = JSON.parse(tokenIdsStr ?? '{}');
             const address = walletAddresses[0].toLowerCase().startsWith('0x') ? walletAddresses[0] : walletAddresses[1];
 
             if (betaEvmNftTokenIds?.[enteredCollection]?.[address]?.includes(enteredTokenId)) {
@@ -308,8 +283,8 @@ export const AddCollection = observer(({ isVisible, onClose, chainTagsStore }: A
         image: nftInfo?.contractInfo?.image ?? '',
       };
 
-      if (storage[BETA_NFTS_COLLECTIONS]) {
-        const parsedData = JSON.parse(storage[BETA_NFTS_COLLECTIONS]);
+      if (collectionsStr) {
+        const parsedData = JSON.parse(collectionsStr);
 
         if (
           !parsedData?.[selectedChain]?.[forceNetwork]?.some(
@@ -349,7 +324,7 @@ export const AddCollection = observer(({ isVisible, onClose, chainTagsStore }: A
           forceContractsListChain: selectedChain,
         };
 
-        await betaNftChainsStore.setBetaNftChains([...JSON.parse(storage[BETA_NFT_CHAINS] ?? '[]'), chain]);
+        await betaNftChainsStore.setBetaNftChains([...JSON.parse(chainsStr ?? '[]'), chain]);
       }
 
       nftStore.loadNfts();
@@ -362,7 +337,7 @@ export const AddCollection = observer(({ isVisible, onClose, chainTagsStore }: A
         isOpen={isVisible}
         onClose={() => {
           onClose();
-          setSelectedChain('' as SupportedChain);
+          setSelectedChain('');
           setEnteredCollection('');
           setNftInfo({});
           setErrors({});
@@ -370,89 +345,93 @@ export const AddCollection = observer(({ isVisible, onClose, chainTagsStore }: A
         title={'Add Collection'}
         closeOnBackdropClick={true}
       >
-        <div className='w-full h-[calc(100%-280px)] flex flex-col sticky top-[72px] bg-gray-50 dark:bg-black-100'>
-          <GenericCard
-            title={selectedChain ? getChainName(chainInfos[selectedChain].chainName) : 'Select Chain'}
-            img={
-              <img
-                src={
-                  selectedChain ? chainInfos[selectedChain].chainSymbolImageUrl ?? defaultTokenLogo : defaultTokenLogo
-                }
-                className='w-[28px] h-[28px] mr-2 border rounded-full dark:border-[#333333] border-[#cccccc]'
-                onError={imgOnError(defaultTokenLogo)}
-              />
-            }
-            isRounded={true}
-            title2={selectedChain ? 'Chain' : ''}
-            icon={
-              dontShowSelectChain ? undefined : <img className='w-[10px] h-[10px] ml-2' src={Images.Misc.RightArrow} />
-            }
-            className={classNames({ '!cursor-default': dontShowSelectChain })}
-            onClick={dontShowSelectChain ? undefined : () => setShowSelectChain(true)}
-          />
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <View style={styles.chainRow}>
+            <GenericCard
+              title={selectedChain ? getChainName(chainInfos[selectedChain].chainName) : 'Select Chain'}
+              img={
+                <Image
+                  source={
+                    selectedChain
+                      ? {uri: chainInfos[selectedChain].chainSymbolImageUrl ?? defaultTokenLogo}
+                      : {uri: defaultTokenLogo}
+                  }
+                  style={styles.chainIcon}
+                />
+              }
+              isRounded={true}
+              title2={selectedChain ? 'Chain' : ''}
+              icon={
+                dontShowSelectChain ? undefined : (
+                  <Image source={{uri: Images.Misc.RightArrow}} style={styles.rightArrow} />
+                )
+              }
+              style={dontShowSelectChain && styles.cursorDefault}
+              onPress={dontShowSelectChain ? undefined : () => setShowSelectChain(true)}
+            />
+          </View>
           {errors?.selectedChain && enteredCollection.length > 0 && (
-            <Text size='sm' color='text-red-300 mt-1 mb-2'>
+            <Text size="sm" style={styles.errorText}>
               {errors?.selectedChain}
             </Text>
           )}
 
-          <div className='rounded-2xl bg-white-100 dark:bg-gray-900 pt-4 px-4 pb-0 block my-4 w-full'>
+          <View style={styles.inputCard}>
             <InputComponent
-              placeholder='Enter collection address'
+              placeholder="Enter collection address"
               value={enteredCollection}
-              name='collection'
-              onChange={handleInputChange}
+              name="collection"
+              onChange={(e: string) => setEnteredTokenId(e)}
               error={errors.collection}
             />
-          </div>
+          </View>
 
           {showTokenIdInput ? (
             <InputComponent
-              placeholder='Enter token id'
-              name='tokenId'
+              placeholder="Enter token id"
+              name="tokenId"
               value={enteredTokenId}
-              onChange={handleTokenIdChange}
+              onChange={(e: string) => setEnteredTokenId(e)}
               error={errors.tokenId}
             />
           ) : null}
 
           {fetchingCollectionInfo && (
-            <div className='flex items-center justify-center'>
-              <LoaderAnimation color='#29a874' />
-            </div>
+            <View style={styles.loaderRow}>
+              <LoaderAnimation color="#29a874" />
+            </View>
           )}
 
           {Object.keys(nftInfo).length > 0 && (
             <NftToggleCard
               title={
-                <NftText className={classNames({ 'max-w-[95px]': isSidePanel() })}>
-                  {nftInfo.contractInfo.name ?? ''}
+                <NftText style={styles.nftTitle}>
+                  {nftInfo.contractInfo?.name ?? ''}
                 </NftText>
               }
-              size='md'
-              avatar={<NftAvatar image={normalizeImageSrc(nftInfo.contractInfo.image ?? '', enteredCollection)} />}
+              size="md"
+              avatar={<NftAvatar image={normalizeImageSrc(nftInfo.contractInfo?.image ?? '', enteredCollection)} />}
               isEnabled={nftInfo.enable}
               isRounded={true}
-              onClick={errors.noTokens ? () => undefined : (isEnabled) => handleToggleClick(isEnabled)}
-              className='roundex-2xl'
+              onPress={errors.noTokens ? () => undefined : (isEnabled) => handleToggleClick(isEnabled)}
+              style={styles.toggleCard}
             />
           )}
 
           {errors.noTokens && (
-            <Text size='sm' color='text-red-300 mt-4'>
-              Couldn&apos;t enable collection. You don&apos;t have any NFT in this collection.
+            <Text size="sm" style={styles.errorText}>
+              Couldn't enable collection. You don't have any NFT in this collection.
             </Text>
           )}
-        </div>
+        </ScrollView>
       </BottomModal>
 
       <SelectChainSheet
-        chainsToShow={undefined}
-        onPage='AddCollection'
+        onPage="AddCollection"
         isVisible={showSelectChain}
         onClose={() => setShowSelectChain(false)}
         selectedChain={selectedChain}
-        onChainSelect={(chaiName: SupportedChain) => {
+        onChainSelect={(chaiName) => {
           setSelectedChain(chaiName);
           setShowSelectChain(false);
         }}
@@ -460,4 +439,64 @@ export const AddCollection = observer(({ isVisible, onClose, chainTagsStore }: A
       />
     </>
   );
+});
+
+const styles = StyleSheet.create({
+  scrollContainer: {
+    flexGrow: 1,
+    paddingBottom: 24,
+    paddingTop: 8,
+    paddingHorizontal: 8,
+    backgroundColor: '#f3f4f6',
+    borderRadius: 16,
+    minHeight: 180,
+  },
+  chainRow: {
+    marginBottom: 8,
+  },
+  chainIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 999,
+    marginRight: 8,
+    borderWidth: 1,
+    borderColor: '#cccccc',
+    backgroundColor: '#fff',
+  },
+  rightArrow: {
+    width: 10,
+    height: 10,
+    marginLeft: 8,
+  },
+  cursorDefault: {
+    // Optionally disable pointer events or change opacity
+    opacity: 0.7,
+  },
+  inputCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    marginBottom: 12,
+    marginTop: 10,
+  },
+  loaderRow: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 12,
+  },
+  nftTitle: {
+    maxWidth: 95,
+  },
+  toggleCard: {
+    borderRadius: 16,
+    marginTop: 12,
+    marginBottom: 10,
+  },
+  errorText: {
+    color: '#fca5a5',
+    marginTop: 10,
+    marginBottom: 10,
+    fontWeight: 'bold',
+  },
 });

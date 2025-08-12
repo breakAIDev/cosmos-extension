@@ -1,26 +1,23 @@
 import { Key, SelectedAddress, sliceAddress, WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks';
 import { ChainInfo, pubKeyToEvmAddressToShow, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { Buttons } from '@leapwallet/leap-ui';
-import { CaretRight, MagnifyingGlassMinus, PencilSimpleLine } from '@phosphor-icons/react';
-import classNames from 'classnames';
-import BottomModal from 'components/new-bottom-modal';
-import Text from 'components/text';
-import { SearchInput } from 'components/ui/input/search-input';
-import { useDefaultTokenLogo } from 'hooks';
-import useActiveWallet from 'hooks/settings/useActiveWallet';
-import { useSelectedNetwork } from 'hooks/settings/useNetwork';
-import { useChainInfos } from 'hooks/useChainInfos';
-import { useContacts, useContactsSearch } from 'hooks/useContacts';
-import useQuery from 'hooks/useQuery';
-import { Wallet } from 'hooks/wallet/useWallet';
-import { Images } from 'images';
-import { observer } from 'mobx-react-lite';
-import { useSendContext } from 'pages/send/context';
+import { CaretRight, MagnifyingGlassMinus, PencilSimpleLine } from 'phosphor-react-native';
+import BottomModal from '../../components/new-bottom-modal';
+import Text from '../../components/text';
+import { SearchInput } from '../../components/ui/input/search-input';
+import { useDefaultTokenLogo } from '../../hooks';
+import useActiveWallet from '../../hooks/settings/useActiveWallet';
+import { useSelectedNetwork } from '../../hooks/settings/useNetwork';
+import { useChainInfos } from '../../hooks/useChainInfos';
+import { useContacts, useContactsSearch } from '../../hooks/useContacts';
+import { Wallet } from '../../hooks/wallet/useWallet';
+import { Images } from '../../../assets/images';
+import { useSendContext } from '../send/context';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { chainFeatureFlagsStore } from 'stores/balance-store';
-import { chainInfoStore } from 'stores/chain-infos-store';
-import { AddressBook } from 'utils/addressbook';
-import { cn } from 'utils/cn';
+import { chainFeatureFlagsStore } from '../../context/balance-store';
+import { chainInfoStore } from '../../context/chain-infos-store';
+import { AddressBook } from '../../utils/addressbook';
+import { View, TouchableOpacity, Image, ScrollView, StyleSheet } from 'react-native';
+import { observer } from 'mobx-react-lite';
 
 export const SelectChain = observer(
   ({
@@ -44,12 +41,9 @@ export const SelectChain = observer(
     const selectedNetwork = useSelectedNetwork();
     const chainInfos = chainInfoStore.chainInfos;
     const chains = useMemo(() => {
-      let _chains: SupportedChain[] = [];
-      if (chainList) {
-        _chains = chainList;
-      } else {
-        _chains = Object.keys(wallet?.addresses ?? {}) as SupportedChain[];
-      }
+      let _chains = chainList
+        ? chainList
+        : Object.keys(wallet?.addresses ?? {}) as SupportedChain[];
       const isTestnet = selectedNetwork === 'testnet';
       _chains = _chains.filter((item) => {
         const chainInfo = chainInfos[item];
@@ -62,7 +56,7 @@ export const SelectChain = observer(
       });
       return _chains.filter((chain) =>
         chainInfos[chain].chainName.toLowerCase().includes(searchedText.toLowerCase()),
-      ) as SupportedChain[];
+      );
     }, [chainList, selectedNetwork, wallet?.addresses, chainInfos, searchedText]);
 
     return (
@@ -70,98 +64,69 @@ export const SelectChain = observer(
         isOpen={isOpen}
         onClose={onClose}
         fullScreen
-        title='Select chain'
-        className='!pb-0'
-        direction='right'
+        title="Select chain"
         hideActionButton
-        secondaryActionButton={<Buttons.Back onClick={onClose} />}
       >
-        <div className='flex flex-col items-start gap-7 p-2 h-full w-full'>
-          <div className='flex flex-col items-center w-full'>
-            <SearchInput
-              value={searchedText}
-              onChange={(e) => setSearchedText(e.target.value)}
-              placeholder='Search by chain name'
-              onClear={() => setSearchedText('')}
-            />
-          </div>
-          <div className='w-full h-full overflow-y-auto'>
+        <View style={styles.container}>
+          <SearchInput
+            value={searchedText}
+            onChangeText={setSearchedText}
+            placeholder="Search by chain name"
+            style={styles.searchInput}
+            onClear={() => setSearchedText('')}
+          />
+          <ScrollView style={styles.list}>
             {chains.length > 0 ? (
-              chains.map((chain, index) => {
-                const isLast = index === chains.length - 1;
-                const isFirst = index === 0;
+              chains.map((chain) => {
                 const chainInfo = chainInfos[chain];
                 const walletAddress = address
                   ? address
                   : chainInfo?.evmOnlyChain
-                  ? pubKeyToEvmAddressToShow(wallet?.pubKeys?.[chainInfo?.key], true)
-                  : wallet?.addresses[chainInfo?.key];
+                    ? pubKeyToEvmAddressToShow(wallet?.pubKeys?.[chainInfo?.key], true)
+                    : wallet?.addresses[chainInfo?.key];
 
                 return (
-                  <React.Fragment key={chain}>
-                    <button
-                      className={classNames(
-                        'w-full flex items-center gap-3 cursor-pointer px-4 py-3 mb-3 rounded-xl bg-secondary-100 hover:bg-secondary-200',
-                      )}
-                      onClick={() => {
-                        setSelectedAddress({
-                          address: walletAddress,
-                          ethAddress: walletAddress,
-                          avatarIcon: wallet?.avatar || Images.Misc.getWalletIconAtIndex(wallet?.colorIndex ?? 0),
-                          chainIcon: '',
-                          chainName: chain,
-                          emoji: undefined,
-                          name: `${
-                            wallet
-                              ? wallet.name.length > 12
-                                ? `${wallet.name.slice(0, 12)}...`
-                                : wallet.name
-                              : forceName || sliceAddress(address)
-                          }`,
-                          selectionType: 'currentWallet',
-                        });
-                      }}
-                    >
-                      <div className='flex gap-4 items-center w-full'>
-                        <img className='h-10 w-10 rounded-full' src={chainInfo.chainSymbolImageUrl} />
-
-                        <div className='flex flex-col grow'>
-                          <p className='font-bold text-left text-monochrome text-sm capitalize'>
-                            {chainInfo.chainName}
-                          </p>
-                          <p className='text-sm text-muted-foreground text-left'>{sliceAddress(walletAddress)}</p>
-                        </div>
-                        <CaretRight className='text-muted-foreground' size={16} />
-                      </div>
-                    </button>
-
-                    {/* {!isLast && (
-                      <div className='border-b w-full border-gray-100 dark:border-gray-850' />
-                    )} */}
-                  </React.Fragment>
+                  <TouchableOpacity
+                    key={chain}
+                    style={styles.item}
+                    onPress={() => {
+                      setSelectedAddress({
+                        address: walletAddress,
+                        ethAddress: walletAddress,
+                        avatarIcon: wallet?.avatar || Images.Misc.getWalletIconAtIndex(wallet?.colorIndex ?? 0),
+                        chainIcon: '',
+                        chainName: chain,
+                        emoji: undefined,
+                        name:
+                          wallet
+                            ? wallet.name.length > 12
+                              ? `${wallet.name.slice(0, 12)}...`
+                              : wallet.name
+                            : forceName || sliceAddress(address),
+                        selectionType: 'currentWallet',
+                      });
+                    }}
+                  >
+                    <Image source={{ uri: chainInfo.chainSymbolImageUrl }} style={styles.chainIcon} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.chainName}>{chainInfo.chainName}</Text>
+                      <Text style={styles.chainAddress}>{sliceAddress(walletAddress)}</Text>
+                    </View>
+                    <CaretRight size={16} color="#888" />
+                  </TouchableOpacity>
                 );
               })
             ) : (
-              <div className='py-[80px] px-4 w-full flex-col flex  justify-center items-center gap-4'>
-                <MagnifyingGlassMinus
-                  size={64}
-                  className='dark:text-gray-50 text-gray-900 p-5 rounded-full bg-secondary-200'
-                />
-                <div className='flex flex-col justify-start items-center w-full gap-3'>
-                  <div className='text-lg text-center font-bold !leading-[21.5px] dark:text-white-100'>
-                    No chains found
-                  </div>
-                  {/* <div className='text-sm font-normal !leading-[22.4px] text-gray-400 dark:text-gray-400 text-center'>
-                    
-                  </div> */}
-                </div>
-              </div>
+              <View style={styles.noResult}>
+                <MagnifyingGlassMinus size={64} color="#888" />
+                <Text style={styles.noResultText}>No chains found</Text>
+              </View>
             )}
-          </div>
-        </div>
+          </ScrollView>
+        </View>
       </BottomModal>
     );
-  },
+  }
 );
 
 function MyWallets({ setSelectedAddress }: { setSelectedAddress: (address: SelectedAddress) => void }) {
@@ -172,9 +137,7 @@ function MyWallets({ setSelectedAddress }: { setSelectedAddress: (address: Selec
 
   const walletsList = useMemo(() => {
     return wallets
-      ? Object.values(wallets)
-          .map((wallet) => wallet)
-          .sort((a, b) => a.name.localeCompare(b.name))
+      ? Object.values(wallets).sort((a, b) => a.name.localeCompare(b.name))
       : [];
   }, [wallets]);
 
@@ -183,86 +146,75 @@ function MyWallets({ setSelectedAddress }: { setSelectedAddress: (address: Selec
       setSelectedAddress(s);
       setShowSelectChain(false);
     },
-    [setSelectedAddress, setShowSelectChain],
+    [setSelectedAddress, setShowSelectChain]
   );
 
   const handleOnSelectChainClose = useCallback(() => {
     setSelectedWallet(null);
     setShowSelectChain(false);
-  }, [setSelectedWallet, setShowSelectChain]);
+  }, []);
 
   return (
-    <>
-      <div className='relative w-full h-[calc(100%-235px)]] overflow-auto'>
-        {walletsList.length > 0 ? (
-          walletsList.map((wallet, index) => {
-            const isLast = index === walletsList.length - 1;
-            const isFirst = index === 0;
+    <View style={styles.root}>
+      {walletsList.length > 0 ? (
+        <ScrollView style={{ flex: 1 }}>
+          {walletsList.map((wallet, index) => {
             let walletLabel = '';
-
             if (wallet.walletType === WALLETTYPE.LEDGER) {
               walletLabel = `Imported · ${wallet.path?.replace("m/44'/118'/", '')}`;
             }
 
             return (
-              <React.Fragment key={wallet.id}>
-                <button
-                  className='w-full flex items-center gap-3 cursor-pointer mb-3 bg-secondary-100 hover:bg-secondary-200 px-4 py-3 rounded-xl'
-                  onClick={() => {
+              <View key={wallet.id}>
+                <TouchableOpacity
+                  style={styles.walletButton}
+                  onPress={() => {
                     setSelectedWallet(wallet);
                     setShowSelectChain(true);
                   }}
                 >
-                  <div className='flex items-center'>
-                    <div className='flex items-center justify-center h-10 w-10 mr-3 shrink-0'>
-                      <img
-                        className='h-9 w-9 rounded-full'
-                        src={wallet.avatar || Images.Misc.getWalletIconAtIndex(wallet.colorIndex ?? 0)}
-                      />
-                    </div>
-
-                    <div className='flex flex-col'>
-                      <div className='flex items-center gap-2'>
-                        <p className='font-bold text-left text-monochrome text-sm capitalize'>{wallet.name}</p>
+                  <View style={styles.avatarRow}>
+                    <Image
+                      style={styles.avatar}
+                      source={{ uri: wallet.avatar ?? Images.Misc.getWalletIconAtIndex(wallet.colorIndex ?? 0)}}
+                    />
+                    <View style={styles.walletInfo}>
+                      <View style={styles.walletNameRow}>
+                        <Text style={styles.walletName}>{wallet.name}</Text>
                         {activeWallet && activeWallet.id === wallet.id && (
-                          <p className='font-bold text-left text-accent-green rounded-[4px] bg-accent-green/10 border border-accent-green/40 px-1.5 py-0.5 text-xs'>
-                            Active
-                          </p>
+                          <Text style={styles.activeTag}>Active</Text>
                         )}
-                      </div>
-                      <p className='text-sm text-muted-foreground text-left'>{walletLabel ? walletLabel : ''}</p>
-                    </div>
-                  </div>
-                </button>
-
-                {isLast && <div className='bg-transparent h-1' />}
-              </React.Fragment>
+                      </View>
+                      {walletLabel ? (
+                        <Text style={styles.walletLabel}>{walletLabel}</Text>
+                      ) : null}
+                    </View>
+                  </View>
+                </TouchableOpacity>
+                {index === walletsList.length - 1 && <View style={{ height: 8 }} />}
+              </View>
             );
-          })
-        ) : (
-          <div className='py-[80px] px-4 w-full flex-col flex  justify-center items-center gap-4'>
-            <MagnifyingGlassMinus
-              size={64}
-              className='dark:text-gray-50 text-gray-900 p-5 rounded-full bg-secondary-200'
-            />
-            <div className='flex flex-col justify-start items-center w-full gap-3'>
-              <div className='text-lg text-center font-bold !leading-[21.5px] dark:text-white-100'>
-                No wallets found
-              </div>
-              <div className='text-sm font-normal !leading-[22.4px] text-gray-400 dark:text-gray-400 text-center'>
-                Use Leap’s in-wallet options to get started.
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+          })}
+        </ScrollView>
+      ) : (
+        <View style={styles.emptyRoot}>
+          <MagnifyingGlassMinus size={64} color="#888" style={styles.emptyIcon} />
+          <View style={styles.emptyContent}>
+            <Text style={styles.emptyTitle}>No wallets found</Text>
+            <Text style={styles.emptySubtitle}>
+              Use Leap’s in-wallet options to get started.
+            </Text>
+          </View>
+        </View>
+      )}
+
       <SelectChain
         isOpen={showSelectChain}
         onClose={handleOnSelectChainClose}
         setSelectedAddress={handleChainSelect}
         wallet={selectedWallet ?? undefined}
       />
-    </>
+    </View>
   );
 }
 
@@ -278,7 +230,6 @@ function MyContacts({
   const [showSelectChain, setShowSelectChain] = useState<boolean>(false);
   const contacts = useContactsSearch();
   const chainInfos = useChainInfos();
-  const { setMemo } = useSendContext();
   const defaultTokenLogo = useDefaultTokenLogo();
   const [selectedContact, setSelectedContact] = useState<AddressBook.SavedAddress | null>(null);
 
@@ -298,101 +249,76 @@ function MyContacts({
         selectionType: 'saved',
       });
     }
-    setMemo(contact.memo ?? '');
   };
 
   const handleOnSelectChainClose = useCallback(() => {
     setSelectedContact(null);
     setShowSelectChain(false);
-  }, [setSelectedContact, setShowSelectChain]);
+  }, []);
 
   const handleSelectChain = useCallback(
     (address: SelectedAddress) => {
       handleContactSelect({ ...address, selectionType: 'saved' });
       setShowSelectChain(false);
     },
-    [handleContactSelect, setShowSelectChain],
+    [handleContactSelect]
   );
 
   return (
-    <>
-      <div className='relative w-full h-full flex flex-col'>
-        {contacts.length > 0 ? (
-          <>
-            <div className='w-full h-[calc(100%-84px)] overflow-auto flex flex-col pb-6'>
-              {contacts.map((contact, index) => {
-                const chainImage = chainInfos[contact.blockchain]?.chainSymbolImageUrl ?? defaultTokenLogo;
-                const isLast = index === contacts.length - 1;
-
-                return (
-                  <React.Fragment key={contact.address}>
-                    <button
-                      className='w-full flex items-center gap-3 mb-3 bg-secondary-100 hover:bg-secondary-200 px-4 py-3 rounded-xl'
-                      onClick={() => handleAvatarClick(contact, chainImage)}
-                    >
-                      <div className='flex justify-between items-center w-full'>
-                        <div className='flex items-center'>
-                          <div className='flex items-center justify-center h-10 w-10 mr-3 shrink-0'>
-                            <img className='h-9 w-9 rounded-full' src={Images.Misc.getWalletIconAtIndex(0)} />
-                          </div>
-
-                          <div className='flex flex-col'>
-                            <p className='font-bold text-left text-monochrome text-sm capitalize'>{contact.name}</p>
-                            <p className='text-sm text-muted-foreground'>
-                              {sliceAddress(contact.ethAddress ? contact.ethAddress : contact.address)}
-                            </p>
-                          </div>
-                        </div>
-                        <PencilSimpleLine
-                          size={34}
-                          weight='fill'
-                          className='bg-secondary-200 hover:bg-secondary-300 border rounded-full p-2.5 border-secondary-300 text-muted-foreground cursor-pointer'
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            editContact(contact);
-                          }}
+    <View style={styles.root}>
+      {contacts.length > 0 ? (
+        <>
+          <ScrollView style={styles.list}>
+            {contacts.map((contact, index) => {
+              const chainImage = chainInfos[contact.blockchain]?.chainSymbolImageUrl ?? defaultTokenLogo;
+              return (
+                <View key={contact.address}>
+                  <TouchableOpacity
+                    style={styles.contactButton}
+                    onPress={() => handleAvatarClick(contact, chainImage)}
+                  >
+                    <View style={styles.contactRow}>
+                      <View style={styles.avatarRow}>
+                        <Image
+                          style={styles.avatar}
+                          source={{uri: Images.Misc.getWalletIconAtIndex(0)}}
                         />
-                      </div>
-                    </button>
+                        <View>
+                          <Text style={styles.contactName}>{contact.name}</Text>
+                          <Text style={styles.contactAddress}>
+                            {sliceAddress(contact.ethAddress ? contact.ethAddress : contact.address)}
+                          </Text>
+                        </View>
+                      </View>
+                      <TouchableOpacity
+                        style={styles.editIconWrap}
+                        onPress={() => editContact(contact)}
+                      >
+                        <PencilSimpleLine size={24} weight='fill' color="#888" />
+                      </TouchableOpacity>
+                    </View>
+                  </TouchableOpacity>
+                  {index === contacts.length - 1 && <View style={{ height: 8 }} />}
+                </View>
+              );
+            })}
+          </ScrollView>
+          <TouchableOpacity style={styles.addContactButton} onPress={() => editContact()}>
+            <Text style={styles.addContactButtonText}>Add new contact</Text>
+          </TouchableOpacity>
+        </>
+      ) : (
+        <View style={styles.emptyRoot}>
+          <MagnifyingGlassMinus size={64} color="#888" style={styles.emptyIcon} />
+          <View style={styles.emptyContent}>
+            <Text style={styles.emptyTitle}>No contacts found</Text>
+            <TouchableOpacity onPress={() => editContact()}>
+              <Text style={styles.emptyAddContact}>+ Add new contact</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
 
-                    {isLast && <div className='bg-transparent h-1' />}
-                  </React.Fragment>
-                );
-              })}
-            </div>
-            <div
-              className='text-sm font-bold py-3.5 !leading-[22.4px] text-muted-foreground border border-secondary-300 rounded-full text-center cursor-pointer'
-              onClick={(e) => {
-                e.stopPropagation();
-                editContact();
-              }}
-            >
-              Add new contact
-            </div>
-          </>
-        ) : (
-          <div className='py-[80px] px-4 w-full flex-col flex  justify-center items-center gap-4'>
-            <MagnifyingGlassMinus
-              size={64}
-              className='dark:text-gray-50 text-gray-900 p-5 rounded-full bg-secondary-200'
-            />
-            <div className='flex flex-col justify-start items-center w-full gap-3'>
-              <div className='text-lg text-center font-bold !leading-[21.5px] dark:text-white-100'>
-                No contacts found
-              </div>
-              <div
-                className='mt-2 text-sm font-medium !leading-[22.4px] text-accent-foreground text-center cursor-pointer'
-                onClick={(e) => {
-                  e.stopPropagation();
-                  editContact();
-                }}
-              >
-                + Add new contact
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
       <SelectChain
         isOpen={showSelectChain}
         onClose={handleOnSelectChainClose}
@@ -400,147 +326,386 @@ function MyContacts({
         address={selectedContact?.address}
         setSelectedAddress={handleSelectChain}
       />
-    </>
+    </View>
   );
 }
 
-export const SelectRecipientSheet = observer(
-  ({
-    isOpen,
-    onClose,
-    editContact,
-    postSelectRecipient,
-  }: {
+export const SelectRecipientSheet = observer(({
+  isOpen,
+  onClose,
+  editContact,
+  postSelectRecipient,
+}: {
     isOpen: boolean;
     onClose: () => void;
     editContact: (s?: AddressBook.SavedAddress) => void;
     postSelectRecipient: () => void;
   }) => {
-    const [selectedTab, setSelectedTab] = useState<'contacts' | 'wallets'>('contacts');
-    const { contacts, loading: loadingContacts } = useContacts();
-    const selectedNetwork = useSelectedNetwork();
-    const { setEthAddress, selectedAddress, setSelectedAddress, setAddressError, setMemo, setCustomIbcChannelId } =
-      useSendContext();
-    const wallets = Wallet.useWallets();
-    const walletsList = useMemo(() => {
-      return wallets
-        ? Object.values(wallets)
-            .map((wallet) => wallet)
-            .sort((a, b) =>
-              a.createdAt && b.createdAt
-                ? new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-                : a.name.localeCompare(b.name),
-            )
-        : [];
-    }, [wallets]);
+  const [selectedTab, setSelectedTab] = useState('contacts');
+  const { contacts, loading: loadingContacts } = useContacts();
+  const selectedNetwork = useSelectedNetwork();
+  const {
+    setEthAddress,
+    selectedAddress,
+    setSelectedAddress,
+    setAddressError,
+    setMemo,
+    setCustomIbcChannelId,
+  } = useSendContext();
+  const wallets = Wallet.useWallets();
 
-    const chains = chainInfoStore.chainInfos;
-    const chainFeatureFlags = chainFeatureFlagsStore.chainFeatureFlagsData;
+  const walletsList = useMemo(() => {
+    return wallets
+      ? Object.values(wallets).sort((a, b) =>
+          a.createdAt && b.createdAt
+            ? new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+            : a.name.localeCompare(b.name)
+        )
+      : [];
+  }, [wallets]);
 
-    const minitiaChains = useMemo(() => {
-      const _minitiaChains: ChainInfo[] = [];
-      Object.keys(chainFeatureFlags)
-        .filter((chain) => chainFeatureFlags[chain].chainType === 'minitia')
-        .forEach((c) => {
-          if (chains[c as SupportedChain]) {
-            _minitiaChains.push(chains[c as SupportedChain]);
-          }
-          const _chain = Object.values(chainInfoStore.chainInfos).find((chainInfo) =>
-            selectedNetwork === 'testnet' ? chainInfo?.testnetChainId === c : chainInfo?.chainId === c,
-          );
-          if (_chain) {
-            _minitiaChains.push(_chain);
-          }
-        });
-      return _minitiaChains;
-    }, [chainFeatureFlags, chains, selectedNetwork]);
+  const chains = chainInfoStore.chainInfos;
+  const chainFeatureFlags = chainFeatureFlagsStore.chainFeatureFlagsData;
 
-    const handleContactSelect = useCallback(
-      (s: SelectedAddress) => {
-        setAddressError(undefined);
-        setSelectedAddress(s);
-        setEthAddress(s.ethAddress ?? '');
-        postSelectRecipient();
-        onClose();
-      },
-      [setAddressError, setEthAddress, setSelectedAddress, onClose, postSelectRecipient],
-    );
+  const minitiaChains = useMemo(() => {
+    const _minitiaChains: ChainInfo[] = [];
+    Object.keys(chainFeatureFlags)
+      .filter((chain) => chainFeatureFlags[chain].chainType === 'minitia')
+      .forEach((c) => {
+        if (chains[c as SupportedChain]) {
+          _minitiaChains.push(chains[c as SupportedChain]);
+        }
+        const _chain = Object.values(chainInfoStore.chainInfos).find((chainInfo) =>
+          selectedNetwork === 'testnet' ? chainInfo?.testnetChainId === c : chainInfo?.chainId === c,
+        );
+        if (_chain) {
+          _minitiaChains.push(_chain);
+        }
+      });
+    return _minitiaChains;
+  }, [chainFeatureFlags, chains, selectedNetwork]);
 
-    const handleWalletSelect = useCallback(
-      (s: SelectedAddress) => {
-        setAddressError(undefined);
-        setSelectedAddress(s);
-        setEthAddress(s.ethAddress ?? '');
-        setMemo('');
-        postSelectRecipient();
-        onClose();
-      },
-      [setAddressError, setEthAddress, setMemo, setSelectedAddress, onClose, postSelectRecipient],
-    );
+  const handleContactSelect = useCallback(
+    (s: SelectedAddress) => {
+      setAddressError(undefined);
+      setSelectedAddress(s);
+      setEthAddress(s.ethAddress ?? '');
+      postSelectRecipient();
+      onClose();
+    },
+    [setAddressError, setEthAddress, setSelectedAddress, onClose, postSelectRecipient]
+  );
 
-    useEffect(() => {
-      if (selectedAddress?.chainName) {
-        setCustomIbcChannelId(undefined);
-      }
-    }, [selectedAddress?.chainName, setCustomIbcChannelId]);
+  const handleWalletSelect = useCallback(
+    (s: SelectedAddress) => {
+      setAddressError(undefined);
+      setSelectedAddress(s);
+      setEthAddress(s.ethAddress ?? '');
+      setMemo('');
+      postSelectRecipient();
+      onClose();
+    },
+    [setAddressError, setEthAddress, setMemo, setSelectedAddress, onClose, postSelectRecipient]
+  );
 
-    useEffect(() => {
-      if (!loadingContacts && Object.keys(contacts).length === 0) {
-        setSelectedTab('wallets');
-      }
-    }, [contacts, loadingContacts]);
+  useEffect(() => {
+    if (selectedAddress?.chainName) {
+      setCustomIbcChannelId(undefined);
+    }
+  }, [selectedAddress?.chainName, setCustomIbcChannelId]);
 
-    return (
-      <>
-        <BottomModal isOpen={isOpen} onClose={onClose} fullScreen title='Address Book' className='h-full'>
-          <div className='flex flex-col items-start gap-6 w-full h-full'>
-            <>
-              {Object.values(contacts).length === 0 && walletsList.length === 0 ? null : walletsList.length === 0 ? (
-                <Text className='font-bold mt-2' color='text-muted-foreground' size='xs'>
-                  Contacts
-                </Text>
-              ) : (
-                <div className='flex gap-2.5 mt-2'>
-                  <div
-                    className={cn(
-                      'font-medium text-xs border bg-secondary py-2 px-4 hover:border-secondary-400 cursor-pointer',
-                      {
-                        'text-monochrome !border-monochrome rounded-full': selectedTab === 'contacts',
-                        'text-muted-foreground border-transparent rounded-full': selectedTab !== 'contacts',
-                      },
-                    )}
-                    onClick={() => setSelectedTab('contacts')}
-                  >
-                    Your contacts
-                  </div>
-                  <div
-                    className={cn(
-                      'font-medium text-xs border bg-secondary py-2 px-4 hover:border-secondary-400 cursor-pointer',
-                      {
-                        'text-monochrome !border-monochrome rounded-full': selectedTab === 'wallets',
-                        'text-muted-foreground border-transparent rounded-full': selectedTab !== 'wallets',
-                      },
-                    )}
-                    onClick={() => setSelectedTab('wallets')}
-                  >
-                    Your wallets
-                  </div>
-                </div>
-              )}
+  useEffect(() => {
+    if (!loadingContacts && Object.keys(contacts).length === 0) {
+      setSelectedTab('wallets');
+    }
+  }, [contacts, loadingContacts]);
 
-              {selectedTab === 'wallets' ? (
-                <MyWallets setSelectedAddress={handleWalletSelect} />
-              ) : (
-                <MyContacts
-                  handleContactSelect={handleContactSelect}
-                  editContact={editContact}
-                  minitiaChains={minitiaChains.map((chain) => chain.key)}
-                />
-              )}
-            </>
-          </div>
-        </BottomModal>
-      </>
-    );
+  return (
+    <BottomModal isOpen={isOpen} onClose={onClose} fullScreen title="Address Book">
+      <View style={styles.container}>
+        {/* Tab Selector */}
+        {Object.values(contacts).length === 0 && walletsList.length === 0 ? null : walletsList.length === 0 ? (
+          <Text style={[styles.tabLabel, { marginTop: 10, color: '#888' }]}>Contacts</Text>
+        ) : (
+          <View style={styles.tabRow}>
+            <TouchableOpacity
+              style={[
+                styles.tabButton,
+                selectedTab === 'contacts' && styles.tabButtonSelected,
+              ]}
+              onPress={() => setSelectedTab('contacts')}
+            >
+              <Text
+                style={[
+                  styles.tabButtonText,
+                  selectedTab === 'contacts' && styles.tabButtonTextSelected,
+                ]}
+              >
+                Your contacts
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.tabButton,
+                selectedTab === 'wallets' && styles.tabButtonSelected,
+              ]}
+              onPress={() => setSelectedTab('wallets')}
+            >
+              <Text
+                style={[
+                  styles.tabButtonText,
+                  selectedTab === 'wallets' && styles.tabButtonTextSelected,
+                ]}
+              >
+                Your wallets
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Tab Content */}
+        <View style={{ flex: 1, width: '100%' }}>
+          {selectedTab === 'wallets' ? (
+            <MyWallets setSelectedAddress={handleWalletSelect} />
+          ) : (
+            <MyContacts
+              handleContactSelect={handleContactSelect}
+              editContact={editContact}
+              minitiaChains={minitiaChains.map((chain) => chain.key)}
+            />
+          )}
+        </View>
+      </View>
+    </BottomModal>
+  );
+});
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingTop: 4,
+    paddingHorizontal: 0,
+    width: '100%',
   },
-);
+  tabRow: {
+    flexDirection: 'row',
+    marginTop: 12,
+    marginBottom: 10,
+    gap: 10,
+    justifyContent: 'flex-start',
+  },
+  tabButton: {
+    borderWidth: 1,
+    borderColor: '#dde3ec',
+    borderRadius: 32,
+    backgroundColor: '#f5f7fa',
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    marginRight: 10,
+  },
+  tabButtonSelected: {
+    borderColor: '#212121',
+    backgroundColor: '#fff',
+  },
+  tabButtonText: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#888',
+  },
+  tabButtonTextSelected: {
+    color: '#212121',
+    fontWeight: 'bold',
+  },
+  tabLabel: {
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
+  list: {
+    flex: 1,
+    paddingHorizontal: 0,
+    paddingTop: 0,
+    marginBottom: 12,
+  },
+  contactButton: {
+    backgroundColor: '#e8ecf2',
+    borderRadius: 16,
+    marginBottom: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  contactRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  contactName: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    color: '#222',
+    textTransform: 'capitalize',
+  },
+  contactAddress: {
+    fontSize: 14,
+    color: '#888',
+  },
+  editIconWrap: {
+    backgroundColor: '#e8ecf2',
+    borderRadius: 16,
+    padding: 8,
+    borderWidth: 1,
+    borderColor: '#dde3ec',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  addContactButton: {
+    borderColor: '#dde3ec',
+    borderWidth: 1,
+    borderRadius: 32,
+    paddingVertical: 12,
+    paddingHorizontal: 0,
+    alignItems: 'center',
+    marginVertical: 10,
+    marginHorizontal: 40,
+    backgroundColor: '#f5f7fa',
+  },
+  addContactButtonText: {
+    fontWeight: 'bold',
+    fontSize: 15,
+    color: '#888',
+  },
+  emptyAddContact: {
+    fontSize: 16,
+    color: '#2d72d9',
+    marginTop: 10,
+    fontWeight: '500',
+  },
+  root: {
+    flex: 1,
+    width: '100%',
+    // equivalent to h-[calc(100%-235px)] in web, adjust as needed for your layout
+    minHeight: 200,
+    maxHeight: '100%',
+  },
+  walletButton: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#e8ecf2', // bg-secondary-100
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 16,
+    marginBottom: 12,
+  },
+  avatarRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  avatar: {
+    height: 36,
+    width: 36,
+    borderRadius: 18,
+    marginRight: 12,
+  },
+  walletInfo: {
+    flexDirection: 'column',
+  },
+  walletNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  walletName: {
+    fontWeight: 'bold',
+    color: '#212121',
+    fontSize: 16,
+    textTransform: 'capitalize',
+  },
+  activeTag: {
+    marginLeft: 6,
+    color: '#23b26d', // accent-green
+    backgroundColor: '#23b26d22',
+    borderColor: '#23b26d77',
+    borderWidth: 1,
+    borderRadius: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    fontSize: 11,
+    fontWeight: 'bold',
+  },
+  walletLabel: {
+    fontSize: 14,
+    color: '#888',
+    marginTop: 2,
+  },
+  emptyRoot: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 80,
+    paddingHorizontal: 16,
+  },
+  emptyIcon: {
+    backgroundColor: '#e8ecf2',
+    borderRadius: 40,
+    padding: 14,
+  },
+  emptyContent: {
+    marginTop: 18,
+    alignItems: 'center',
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#222',
+    marginBottom: 6,
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    marginTop: 2,
+  },
+  searchInput: {
+    backgroundColor: '#f5f5f7',
+    borderRadius: 12,
+    marginBottom: 12,
+    paddingHorizontal: 12,
+    height: 44,
+  },
+  item: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#e8ecf2',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+  },
+  chainIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 12,
+  },
+  chainName: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    marginBottom: 4,
+    color: '#212121',
+    textTransform: 'capitalize',
+  },
+  chainAddress: {
+    color: '#888',
+    fontSize: 14,
+  },
+  noResult: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 60,
+  },
+  noResultText: {
+    fontWeight: 'bold',
+    fontSize: 18,
+    color: '#333',
+    marginTop: 12,
+  },
+});

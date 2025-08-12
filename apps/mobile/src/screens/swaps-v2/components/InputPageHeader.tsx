@@ -1,5 +1,5 @@
 import { Buttons, LineDivider } from '@leapwallet/leap-ui';
-import { ArrowClockwise, GearSix } from '@phosphor-icons/react';
+import { ArrowClockwise, GearSix } from 'phosphor-react-native';
 import classNames from 'classnames';
 import React, { useCallback, useState } from 'react';
 

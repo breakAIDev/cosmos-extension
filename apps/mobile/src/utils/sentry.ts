@@ -1,4 +1,4 @@
-import { Scope } from '@sentry/react';
+import { Scope } from '@sentry/react-native';
 
 export const uiErrorTags = {
   uiError: true,

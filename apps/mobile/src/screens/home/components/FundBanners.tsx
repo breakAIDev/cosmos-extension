@@ -1,18 +1,17 @@
-import { useActiveWallet, useChainInfo, useFeatureFlags } from '@leapwallet/cosmos-wallet-hooks';
-import { type Icon, Path, ShoppingBag, Wallet } from '@phosphor-icons/react';
-import { ArrowsLeftRight } from '@phosphor-icons/react/dist/ssr';
-import { captureException } from '@sentry/react';
-import { useHardCodedActions } from 'components/search-modal';
-import Text from 'components/text';
-import { ButtonName, ButtonType, EventName, PageName } from 'config/analytics';
-import { AGGREGATED_CHAIN_KEY, LEAPBOARD_URL } from 'config/constants';
-import { useActiveChain } from 'hooks/settings/useActiveChain';
-import { useAddress } from 'hooks/wallet/useAddress';
-import mixpanel from 'mixpanel-browser';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { AggregatedSupportedChain } from 'types/utility';
-import { UserClipboard } from 'utils/clipboard';
-import { trim } from 'utils/strings';
+import { View, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { useActiveWallet, useChainInfo, useFeatureFlags } from '@leapwallet/cosmos-wallet-hooks';
+import { type Icon, ShoppingBag, Wallet, ArrowsLeftRight } from 'phosphor-react-native';
+import { useHardCodedActions } from '../../../components/search-modal';
+import Text from '../../../components/text';
+import { ButtonName, ButtonType, EventName, PageName } from '../../../services/config/analytics';
+import { AGGREGATED_CHAIN_KEY, LEAPBOARD_URL } from '../../../services/config/constants';
+import { useActiveChain } from '../../../hooks/settings/useActiveChain';
+import { useAddress } from '../../../hooks/wallet/useAddress';
+import mixpanel from '../../../mixpanel';
+import { AggregatedSupportedChain } from '../../../types/utility';
+import { UserClipboard } from '../../../utils/clipboard';
+import { trim } from '../../../utils/strings';
 
 import FundsSheet from './FundSheet';
 
@@ -24,10 +23,6 @@ export type FundBannerData = {
   onClick: () => void;
   hide?: boolean;
 };
-
-export interface FundBannersProps {
-  handleCopyClick: () => void;
-}
 
 const FundBanners = React.memo(() => {
   const address = useAddress();
@@ -49,9 +44,8 @@ const FundBanners = React.memo(() => {
 
   useEffect(() => {
     if (showCopyAddress) {
-      setTimeout(() => {
-        setShowCopyAddress(false);
-      }, 2000);
+      const timer = setTimeout(() => setShowCopyAddress(false), 2000);
+      return () => clearTimeout(timer);
     }
   }, [showCopyAddress]);
 
@@ -60,7 +54,6 @@ const FundBanners = React.memo(() => {
       if (type === 'swap') {
         return `${LEAPBOARD_URL}/transact/${type}${isAggregatedView ? '' : `?destinationChainId=${chain?.chainId}`}`;
       }
-
       if (type === 'bridge') {
         return `https://swapfast.app/bridge${isAggregatedView ? '' : `?destinationChainId=${chain?.chainId}`}`;
       }
@@ -80,7 +73,7 @@ const FundBanners = React.memo(() => {
           chainName,
         });
       } catch (e) {
-        captureException(e);
+        // You may want to use a native crash logger here
       }
     },
     [chainId, chainName],
@@ -97,13 +90,9 @@ const FundBanners = React.memo(() => {
             : `Copy your wallet address to deposit ${token}`,
           textColor: '#FFC770',
           onClick: () => {
-            if (isAggregatedView) {
-              return;
-            }
-
+            if (isAggregatedView) return;
             if (!activeWallet) return;
             UserClipboard.copyText(address);
-
             setShowCopyAddress(true);
             trackCTAEvent(ButtonName.RECEIVE_ASSETS);
           },
@@ -133,52 +122,45 @@ const FundBanners = React.memo(() => {
           },
         },
         {
-          icon: Path,
+          icon: ShoppingBag,
           title: 'Bridge from EVMs, Solana',
           content: 'Swap & bridge tokens from other ecosystems',
           textColor: '#3ACF92',
           onClick: () => {
-            window.open(transactUrl('bridge'), '_blank');
+            // In RN, use Linking.openURL (import { Linking } from 'react-native')
+            // Linking.openURL(transactUrl('bridge'));
             trackCTAEvent(ButtonName.BRIDGE, transactUrl('bridge'));
           },
         },
       ].filter((d) => !d?.hide),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [activeWallet, address, chain?.bip44?.coinType, chain?.key, trackCTAEvent, transactUrl, isAggregatedView, token],
+    [activeWallet, address, trackCTAEvent, transactUrl, isAggregatedView, token, featureFlags, swapPath, handleBuyClick, handleSwapClick],
   );
 
   const modalTitle = isAggregatedView ? 'Get started' : `Get started on ${trim(chain?.chainName, 14)}`;
 
   return (
-    <>
-      <div className='flex flex-col w-[352px] bg-white-100 dark:bg-gray-950 border border-gray-100 dark:border-gray-850 rounded-xl p-6 mt-1'>
-        <div className='flex mb-4 justify-between'>
-          <div className='flex'>
-            {bannerData.map((d: FundBannerData, index: number) => (
-              <div
-                key={index}
-                className='flex items-center justify-center bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-850 w-9 h-9 rounded-3xl ml-[-4px]'
-              >
-                <div className='!h-5 !w-5' style={{ color: d.textColor }}>
-                  <d.icon size={20} />
-                </div>
-              </div>
-            ))}
-          </div>
-          <button
-            className='bg-gray-100 dark:bg-gray-850 rounded-[32px] px-6 py-2 text-sm font-bold text-black-100 dark:text-white-100'
-            onClick={() => setIsModalOpen(true)}
-          >
-            Start
-          </button>
-        </div>
-        <Text className='font-bold mb-2'>Nothing here, yet...</Text>
-        <Text size='xs' color='text-gray-600 dark:text-gray-400' className='font-medium'>
-          The interchain is more fun with some tokens!
-          <br />
-          Use Leap&apos;s in-wallet options to get started.
-        </Text>
-      </div>
+    <View style={styles.cardContainer}>
+      <View style={styles.iconsRow}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {bannerData.map((d: FundBannerData, index: number) => (
+            <View key={index} style={styles.iconWrapper}>
+              <d.icon size={20} color={d.textColor} />
+            </View>
+          ))}
+        </ScrollView>
+        <TouchableOpacity
+          style={styles.startButton}
+          onPress={() => setIsModalOpen(true)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.startButtonText}>Start</Text>
+        </TouchableOpacity>
+      </View>
+      <Text style={styles.heading}>Nothing here, yet...</Text>
+      <Text size="xs" color="text-gray-600" style={styles.subheading}>
+        The interchain is more fun with some tokens!{'\n'}
+        Use Leap's in-wallet options to get started.
+      </Text>
       <FundsSheet
         isVisible={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -186,8 +168,64 @@ const FundBanners = React.memo(() => {
         showCopyAddress={showCopyAddress}
         modalTitle={modalTitle}
       />
-    </>
+    </View>
   );
+});
+
+const styles = StyleSheet.create({
+  cardContainer: {
+    flexDirection: 'column',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    marginTop: 8,
+    width: 352,
+    shadowColor: '#000',
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  iconsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    justifyContent: 'space-between',
+  },
+  iconWrapper: {
+    width: 36,
+    height: 36,
+    backgroundColor: '#f9fafb',
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: -4,
+    borderWidth: 1,
+    borderColor: '#f1f1f1',
+  },
+  startButton: {
+    backgroundColor: '#f1f1f1',
+    borderRadius: 32,
+    paddingVertical: 6,
+    paddingHorizontal: 24,
+    marginLeft: 16,
+  },
+  startButtonText: {
+    color: '#111',
+    fontWeight: 'bold',
+    fontSize: 15,
+  },
+  heading: {
+    fontWeight: 'bold',
+    marginBottom: 8,
+    fontSize: 18,
+    color: '#222',
+  },
+  subheading: {
+    fontSize: 13,
+    color: '#666',
+    fontWeight: '500',
+    marginBottom: 4,
+  },
 });
 
 FundBanners.displayName = 'FundBanners';

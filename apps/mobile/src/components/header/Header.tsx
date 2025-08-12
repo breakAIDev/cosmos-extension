@@ -28,7 +28,7 @@ export const Header: React.FC<Props> = ({
       )}
 
       {subtitle ? (
-        <Text size="md" color="text-gray-400" style={styles.subtitle}>
+        <Text size="md" color="#9CA3AF" style={styles.subtitle}>
           {subtitle}
         </Text>
       ) : null}

@@ -50,10 +50,18 @@ export class SeiEvmTx {
     const latestBaseFeePerGas = parseInt(feeHistory?.baseFeePerGas?.pop() ?? '0');
     if (feeHistory && latestBaseFeePerGas) {
       
-      const baseFeePerGases: Record<EvmFeeType, BigNumber> = {};
-      
-      const medianOfPriorityFeesPerGases: Record<EvmFeeType, string> = {};
+      const baseFeePerGases: Record<EvmFeeType, BigNumber> = {
+        low: new BigNumber(0),
+        medium: new BigNumber(0),
+        high: new BigNumber(0),
+      };
 
+      const medianOfPriorityFeesPerGases: Record<EvmFeeType, BigNumber> = {
+        low: new BigNumber(0),
+        medium: new BigNumber(0),
+        high: new BigNumber(0),
+      };
+      
       for (const key in EVM_FEE_SETTINGS) {
         baseFeePerGases[key as EvmFeeType] = new BigNumber(latestBaseFeePerGas).multipliedBy(
           multiplier?.[key as EvmFeeType] ?? EVM_FEE_SETTINGS[key as EvmFeeType].gasMultiplier,

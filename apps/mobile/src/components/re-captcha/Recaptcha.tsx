@@ -1,7 +1,10 @@
 import React, { useRef } from 'react';
-import ReCaptcha from 'react-native-recaptcha-that-works';
+import ReCaptcha, { RecaptchaRef } from 'react-native-recaptcha-that-works';
+import { Button } from '../ui/button';
+import Text from '../text';
 
 type Props = {
+  ref: RecaptchaRef;
   siteKey: string;
   baseUrl: string; // e.g., 'https://yourdomain.com'
   onVerify: (token: string) => void;
@@ -9,8 +12,8 @@ type Props = {
   onError?: (err: any) => void;
 };
 
-const Recaptcha: React.FC<Props> = ({ siteKey, baseUrl, onVerify, onExpire, onError }) => {
-  const recaptchaRef = useRef<ReCaptcha>(null);
+const Recaptcha: React.FC<Props> = ({ ref, siteKey, baseUrl, onVerify, onExpire, onError }) => {
+  const recaptchaRef = useRef<RecaptchaRef>(ref);
 
   const show = () => {
     recaptchaRef.current?.open();
@@ -29,7 +32,9 @@ const Recaptcha: React.FC<Props> = ({ siteKey, baseUrl, onVerify, onExpire, onEr
         theme="light" // or "dark"
       />
       {/* Button to manually trigger if invisible */}
-      {/* <Button title="I'm not a robot" onPress={show} /> */}
+      <Button onPress={show}>
+        <Text>I'm not a robot</Text>
+      </Button>
     </>
   );
 };

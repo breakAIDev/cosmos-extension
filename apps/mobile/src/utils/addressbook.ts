@@ -7,13 +7,10 @@ import {
   SupportedChain,
 } from '@leapwallet/cosmos-wallet-sdk';
 
-/* eslint-disable no-use-before-define */
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-import { isValidSuiAddress } from 'pages/send-v2/hooks/useCheckAddressError';
+import { isValidSuiAddress } from '../screens/send-v2/hooks/useCheckAddressError';
 import { useEffect, useState } from 'react';
-import extension from 'webextension-polyfill';
-
 import { DEBUG } from './debug';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 export namespace AddressBook {
@@ -36,20 +33,20 @@ export namespace AddressBook {
 
   
   export function subscribe(cb: (s: SavedAddresses) => void) {
-    extension.storage.onChanged.addListener((changes, areaName) => {
-      if (areaName === 'local' && changes[STORAGE_ID]) {
-        cb(changes[STORAGE_ID].newValue);
-      }
-    });
+    // extension.storage.onChanged.addListener((changes, areaName) => {
+    //   if (areaName === 'local' && changes[STORAGE_ID]) {
+    //     cb(changes[STORAGE_ID].newValue);
+    //   }
+    // });
   }
 
   
   export function unsubscribe(cb: (s: SavedAddresses) => void) {
-    extension.storage.onChanged.removeListener((changes, areaName) => {
-      if (areaName === 'local' && changes[STORAGE_ID]) {
-        cb(changes[STORAGE_ID].newValue);
-      }
-    });
+    // extension.storage.onChanged.removeListener((changes, areaName) => {
+    //   if (areaName === 'local' && changes[STORAGE_ID]) {
+    //     cb(changes[STORAGE_ID].newValue);
+    //   }
+    // });
   }
 
   /**
@@ -77,9 +74,9 @@ export namespace AddressBook {
       entry.blockchain = getBlockChainFromAddress(address) as SupportedChain;
     }
 
-    const data = await extension.storage.local.get([STORAGE_ID]);
+    const data = await AsyncStorage.getItem(STORAGE_ID);
 
-    const storedContacts: SavedAddresses = data[STORAGE_ID] ?? {};
+    const storedContacts: SavedAddresses = data ? JSON.parse(data) : {};
 
     const newContacts: SavedAddresses = {};
 
@@ -91,9 +88,7 @@ export namespace AddressBook {
 
     const newSaveContact = { ...storedContacts, ...newContacts };
 
-    await extension.storage.local.set({
-      [STORAGE_ID]: newSaveContact,
-    });
+    await AsyncStorage.setItem(STORAGE_ID, JSON.stringify(newSaveContact));
 
     return entry;
   }
@@ -103,8 +98,8 @@ export namespace AddressBook {
    */
 
   export async function getEntry(address: string) {
-    const data = await extension.storage.local.get([STORAGE_ID]);
-    const storedContacts = (data[STORAGE_ID] as SavedAddresses) ?? {};
+    const data = await AsyncStorage.getItem(STORAGE_ID);
+    const storedContacts = data ? (JSON.parse(data) as SavedAddresses) : {};
     return storedContacts[address];
   }
 
@@ -137,12 +132,12 @@ export namespace AddressBook {
         }
       };
 
-      extension.storage.onChanged.addListener(onChange);
+      // extension.storage.onChanged.addListener(onChange);
 
-      return () => {
-        cancel = true;
-        extension.storage.onChanged.removeListener(onChange);
-      };
+      // return () => {
+      //   cancel = true;
+      //   extension.storage.onChanged.removeListener(onChange);
+      // };
     }, [address]);
 
     return contact;
@@ -154,8 +149,8 @@ export namespace AddressBook {
    */
 
   export const getAllEntries = async () => {
-    const data = await extension.storage.local.get([STORAGE_ID]);
-    const storedContacts: SavedAddresses = data[STORAGE_ID] ?? {};
+    const data = await AsyncStorage.getItem(STORAGE_ID);
+    const storedContacts: SavedAddresses = data ? JSON.parse(data) : {};
     return storedContacts;
   };
 
@@ -165,9 +160,9 @@ export namespace AddressBook {
    */
 
   export async function removeEntry(address: string) {
-    const data = await extension.storage.local.get([STORAGE_ID]);
+    const data = await AsyncStorage.getItem(STORAGE_ID);
 
-    const storedContacts: SavedAddresses = data[STORAGE_ID] ?? {};
+    const storedContacts: SavedAddresses = data ? JSON.parse(data) : {};
 
     const savedEntry = await getEntry(address);
 
@@ -177,9 +172,7 @@ export namespace AddressBook {
 
     delete storedContacts[address];
 
-    await extension.storage.local.set({
-      [STORAGE_ID]: storedContacts,
-    });
+    await AsyncStorage.setItem(STORAGE_ID, JSON.stringify(storedContacts));
   }
 
   /**
@@ -187,8 +180,6 @@ export namespace AddressBook {
    */
 
   export function clear() {
-    extension.storage.local.set({
-      [STORAGE_ID]: {},
-    });
+    AsyncStorage.setItem(STORAGE_ID, JSON.stringify({}));
   }
 }

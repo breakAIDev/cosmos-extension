@@ -1,22 +1,21 @@
 import { useChainApis } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk/dist/browser/constants';
 import { ParsedMessage, ParsedMessageType } from '@leapwallet/parser-parfait';
-import BottomModal from '../bottom-modal';
-import DisclosureContainer from 'components/disclosure-container';
-import { LoaderAnimation } from 'components/loader/Loader';
+import BottomModal from '../../components/bottom-modal'; // React Native compatible
+import DisclosureContainer from '../../components/disclosure-container'; // React Native compatible
+import { LoaderAnimation } from '../../components/loader/Loader';
 import React from 'react';
+import { View, Text, ScrollView } from 'react-native';
 
 import { getSimpleType, useMessageDetails } from './message-details';
 
 const MessageDetailsSheet: React.FC<{
   isOpen: boolean;
-  
   setIsOpen: (isOpen: boolean) => void;
   onClose: () => void;
   message: {
     index: number;
     parsed: ParsedMessage;
-    
     raw: any;
   } | null;
   activeChain: SupportedChain;
@@ -39,47 +38,52 @@ const MessageDetailsSheet: React.FC<{
     >
       {!isLoading && data ? (
         <>
-          <div className='w-full text-left dark:bg-gray-900 bg-white-100 p-4 rounded-2xl'>
-            <p className='text-gray-500 dark:text-gray-100 text-sm font-medium tracking-wide'>Description</p>
-            <p className='dark:text-white-100 text-gray-900 text-sm mt-1 font-bold'>
+          <View style={{ width: '100%', padding: 16, backgroundColor: '#fff', borderRadius: 16 }}>
+            <Text style={{ color: '#888', fontSize: 14, fontWeight: '500' }}>Description</Text>
+            <Text style={{ color: '#222', fontSize: 15, fontWeight: 'bold', marginTop: 4 }}>
               {data === 'unknown' ? (
                 message.parsed.__type === ParsedMessageType.Unimplemented ? (
-                  <span className='text-red-500'>
+                  <Text style={{ color: 'red' }}>
                     {getSimpleType(
                       message.parsed.message['@type'] ??
                         message.parsed.message.type ??
                         message.parsed.message.type_url ??
                         message.parsed.message.typeUrl,
                     )}
-                  </span>
+                  </Text>
                 ) : (
                   'Unknown'
                 )
               ) : (
                 data
               )}
-            </p>
-          </div>
-          <DisclosureContainer title='Message Data' className='overflow-x-auto mt-4 p-0' initialOpen={true}>
-            <pre className='text-xs text-gray-900 dark:text-white-100 w-full overflow-x-auto'>
-              {JSON.stringify(
-                message.raw,
-                (key, value) => {
-                  if (typeof value === 'bigint') {
-                    return value.toString();
-                  }
-                  return value;
-                },
-                2,
-              )}
-            </pre>
+            </Text>
+          </View>
+          <DisclosureContainer title="Message Data" initialOpen={true} style={{ marginTop: 16, padding: 0 }}>
+            <ScrollView horizontal style={{ width: '100%', marginTop: 8 }}>
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: '#222',
+                  fontFamily: 'monospace',
+                  flexShrink: 1,
+                }}
+                selectable
+              >
+                {JSON.stringify(
+                  message.raw,
+                  (key, value) => (typeof value === 'bigint' ? value.toString() : value),
+                  2,
+                )}
+              </Text>
+            </ScrollView>
           </DisclosureContainer>
         </>
       ) : (
-        <div className='h-32 flex flex-col items-center justify-center'>
-          <LoaderAnimation color='white' />
-          <p className='text-gray-900 dark:text-white-100 text-xs mt-2'>Loading message details</p>
-        </div>
+        <View style={{ height: 128, alignItems: 'center', justifyContent: 'center' }}>
+          <LoaderAnimation color="white" />
+          <Text style={{ color: '#222', fontSize: 12, marginTop: 8 }}>Loading message details</Text>
+        </View>
       )}
     </BottomModal>
   );

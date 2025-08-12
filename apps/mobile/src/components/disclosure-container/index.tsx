@@ -1,118 +1,95 @@
+import React, { useCallback, useState } from 'react';
+import { View, Text, TouchableOpacity, Image, StyleSheet, ViewStyle, StyleProp } from 'react-native';
+import { AnimatePresence, MotiView } from 'moti';
 import { Images } from '../../../assets/images';
-
-import React, { useCallback, useRef, useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Image,
-  StyleSheet,
-  Animated,
-  Easing,
-  LayoutAnimation,
-  Platform,
-  UIManager,
-} from 'react-native';
-
-// Adjust image imports as needed
-// const DownArrow = require('../../../assets/images/misc/down-arrow.png');
-
-// Enable LayoutAnimation on Android
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 const DisclosureContainer = ({
   children,
   title,
+  style,      // Not used in this version, but you could map this to styles if needed
   leftIcon,
   initialOpen = false,
 }: {
   children: React.ReactNode;
   title: string;
-  leftIcon?: any; // Use require path for RN
+  leftIcon?: string;
+  style?: StyleProp<ViewStyle>;
   initialOpen?: boolean;
 }) => {
   const [isOpen, setIsOpen] = useState(initialOpen);
 
-  // For icon rotation
-  const rotateAnim = useRef(new Animated.Value(initialOpen ? 1 : 0)).current;
-
-  // Expand/collapse: for height animation, LayoutAnimation is simpler
   const toggle = useCallback(() => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setIsOpen((prev) => {
-      Animated.timing(rotateAnim, {
-        toValue: prev ? 0 : 1,
-        duration: 250,
-        useNativeDriver: true,
-        easing: Easing.linear,
-      }).start();
-      return !prev;
-    });
-  }, [rotateAnim]);
-
-  const rotation = rotateAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '180deg'],
-  });
+    setIsOpen((v) => !v);
+  }, []);
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.button} onPress={toggle} activeOpacity={0.8}>
-        {leftIcon ? <Image source={leftIcon} style={styles.leftIcon} /> : null}
+      <TouchableOpacity style={styles.header} onPress={toggle} activeOpacity={0.7}>
+        {leftIcon ? (
+          <Image source={typeof leftIcon === 'string' ? { uri: leftIcon } : leftIcon} style={styles.leftIcon} />
+        ) : null}
         <Text style={styles.title}>{title}</Text>
-        <Animated.View style={[styles.arrowWrapper, { transform: [{ rotate: rotation }] }]}>
-          <Image source={Images.Misc.DownArrow} style={styles.arrow} />
-        </Animated.View>
-      </TouchableOpacity>
-      {isOpen ? (
-        <View style={styles.content}>
-          {children}
+        <View style={styles.arrowContainer}>
+          <Image
+            source={{uri: Images.Misc.DownArrow}}
+            style={[
+              styles.arrow,
+              isOpen && { transform: [{ rotate: '180deg' }] },
+            ]}
+            resizeMode="contain"
+          />
         </View>
-      ) : null}
+      </TouchableOpacity>
+      <AnimatePresence>
+        {isOpen ? (
+          <MotiView
+            from={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ type: 'timing', duration: 250 }}
+            style={[styles.content, style]}
+          >
+            {React.isValidElement(children) ? children : <View/>}
+          </MotiView>
+        ) : null}
+      </AnimatePresence>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 16, // 2xl
+    borderRadius: 16,
     padding: 16,
     marginTop: 16,
-    backgroundColor: '#FFFFFF', // white-100, adjust for dark mode as needed
-    // You can add conditional styling for dark mode if you use useColorScheme
+    backgroundColor: '#f8fafc', // Light bg; use '#111827' for dark mode if you implement
   },
-  button: {
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
     width: '100%',
   },
   leftIcon: {
     marginRight: 8,
-    width: 20,
     height: 20,
-    resizeMode: 'contain',
+    width: 20,
   },
   title: {
-    color: '#6B7280', // text-gray-500
+    color: '#6b7280',
     fontSize: 14,
     fontWeight: '500',
-    letterSpacing: 0.5,
-    flex: 1,
+    letterSpacing: 1,
   },
-  arrowWrapper: {
+  arrowContainer: {
     padding: 8,
     marginLeft: 'auto',
   },
   arrow: {
     width: 20,
     height: 20,
-    resizeMode: 'contain',
   },
   content: {
     overflow: 'hidden',
-    // Add more padding if needed
   },
 });
 

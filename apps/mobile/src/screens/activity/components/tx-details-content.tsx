@@ -1,16 +1,15 @@
+import React, { useMemo } from 'react';
+import { View, Text, Image, StyleSheet } from 'react-native';
 import { useGetChains } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { Avatar } from '@leapwallet/leap-ui';
 import { parfait, ParsedMessage } from '@leapwallet/parser-parfait';
 import dayjs from 'dayjs';
-import { useActivityImage } from 'hooks/activity/useActivityImage';
-import { DollarIcon } from 'icons/dollar-icon';
-import { Images } from 'images';
-import React, { useMemo } from 'react';
-import { UserClipboard } from 'utils/clipboard';
-import { cn } from 'utils/cn';
-import { formatTokenAmount, sliceAddress } from 'utils/strings';
-
+import { useActivityImage } from '../../../hooks/activity/useActivityImage';
+import { DollarIcon } from '../../../../assets/icons/dollar-icon';
+import { Images } from '../../../../assets/images';
+import { UserClipboard } from '../../../utils/clipboard';
+import { formatTokenAmount, sliceAddress } from '../../../utils/strings';
 import { SelectedTx } from './ChainActivity';
 import { CopyButton } from './copy-button';
 import { DetailsCard } from './tx-detail-card';
@@ -77,21 +76,18 @@ export const TxDetailsContent = ({
       : undefined;
 
   return (
-    <div className='flex flex-col gap-4'>
-      <div className='w-full flex flex-col items-center shrink-0 gap-3 mb-4'>
-        <img src={isTxSuccessful ? icon : Images.Activity.Error} className='size-[4.5rem]' />
+    <View style={styles.root}>
+      <View style={styles.header}>
+        <Image source={{ uri: isTxSuccessful ? icon : Images.Activity.Error }} style={styles.iconImg} />
 
-        {/** Title */}
-        <span className='font-bold text-2xl mt-4'>
+        <Text style={styles.titleText}>
           {tx?.content?.txType === 'vote' ? tx?.content?.title1 : isTxSuccessful ? title : 'Fail'}
-        </span>
+        </Text>
 
-        {/** Date */}
-        <span className='text-sm font-medium text-muted-foreground'>{date}</span>
-      </div>
+        <Text style={styles.dateText}>{date}</Text>
+      </View>
 
-      {/* Amount info */}
-      {sentAmountInfo || receivedAmountInfo ? (
+      {(sentAmountInfo || receivedAmountInfo) && (
         <DetailsCard
           title={tx?.content?.title1}
           imgSrc={chainInfo.chainSymbolImageUrl ?? defaultImg}
@@ -99,25 +95,26 @@ export const TxDetailsContent = ({
           activeChain={activeChain}
           txType={tx?.content?.txType}
           trailing={
-            <span
-              className={cn('text-muted-foreground ml-auto font-medium', {
-                'text-accent-success': receivedUsdValue,
-                'text-destructive-100': sentUsdValue,
-              })}
+            <Text
+              style={[
+                styles.amountText,
+                receivedUsdValue ? styles.accentSuccess : undefined,
+                sentUsdValue ? styles.destructive : undefined,
+              ]}
             >
               {sentUsdValue
                 ? `- $${Number(sentUsdValue).toFixed(2)}`
                 : receivedUsdValue
                 ? `+ $${Number(receivedUsdValue).toFixed(2)}`
                 : ''}
-            </span>
+            </Text>
           }
         />
-      ) : null}
+      )}
 
-      {/** Send and Receive */}
+      {/* Send and Receive */}
       {isSimpleTokenTransfer && (
-        <div className='rounded-2xl w-full overflow-auto shrink-0'>
+        <View style={styles.transferContainer}>
           {tx?.content?.txType === 'send' ? (
             <DetailsCard
               title={'Sent to ' + contact.name}
@@ -127,7 +124,7 @@ export const TxDetailsContent = ({
               txType={tx?.content?.txType}
               trailing={
                 <CopyButton
-                  onClick={() => {
+                  onPress={() => {
                     UserClipboard.copyText((txnMessage as parfait.cosmos.bank.send).toAddress);
                   }}
                 />
@@ -142,31 +139,31 @@ export const TxDetailsContent = ({
               txType={tx?.content?.txType}
               trailing={
                 <CopyButton
-                  onClick={() => {
+                  onPress={() => {
                     UserClipboard.copyText((txnMessage as parfait.cosmos.bank.send).fromAddress);
                   }}
                 />
               }
             />
           ) : null}
-        </div>
+        </View>
       )}
 
-      <div>
+      {/* Transaction ID */}
+      <View>
         <DetailsCard
-          title='Transaction ID'
+          title="Transaction ID"
           imgSrc={
-            <span className='size-10 grid place-content-center bg-secondary-250 text-secondary-foreground rounded-full text-mdl font-medium'>
-              #
-            </span>
+            <View style={styles.txIdAvatar}>
+              <Text style={styles.txIdText}>#</Text>
+            </View>
           }
           subtitle={sliceAddress(tx?.parsedTx?.txHash ?? '')}
           activeChain={activeChain}
           txType={tx?.content?.txType}
-          className={tx?.content?.feeAmount ? '!rounded-b-none' : ''}
           trailing={
             <CopyButton
-              onClick={() => {
+              onPress={() => {
                 UserClipboard.copyText(tx?.parsedTx?.txHash ?? '');
               }}
             />
@@ -175,19 +172,85 @@ export const TxDetailsContent = ({
 
         {tx?.content?.feeAmount && (
           <DetailsCard
-            className='!rounded-t-none !pt-0'
-            title='Transaction Fee'
+            title="Transaction Fee"
             imgSrc={
-              <span className='size-10 grid place-content-center bg-secondary-250 text-secondary-foreground rounded-full'>
-                <DollarIcon className='size-4' />
-              </span>
+              <View style={styles.feeAvatar}>
+                <DollarIcon width={16} height={16} />
+              </View>
             }
             subtitle={tx?.content?.feeAmount}
             activeChain={activeChain}
             txType={tx?.content?.txType}
           />
         )}
-      </div>
-    </div>
+      </View>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    flexDirection: 'column',
+    gap: 16,
+  },
+  header: {
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 16,
+    gap: 8,
+  },
+  iconImg: {
+    width: 72,
+    height: 72,
+    marginBottom: 8,
+    borderRadius: 36,
+  },
+  titleText: {
+    fontWeight: 'bold',
+    fontSize: 22,
+    marginTop: 16,
+  },
+  dateText: {
+    fontSize: 14,
+    color: '#8A94A6',
+    marginTop: 6,
+  },
+  amountText: {
+    color: '#8A94A6',
+    fontWeight: '500',
+    marginLeft: 'auto',
+  },
+  accentSuccess: {
+    color: '#26c06f',
+  },
+  destructive: {
+    color: '#E2655A',
+  },
+  transferContainer: {
+    borderRadius: 16,
+    width: '100%',
+    overflow: 'hidden',
+  },
+  txIdAvatar: {
+    width: 40,
+    height: 40,
+    backgroundColor: '#E6EBF0',
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  txIdText: {
+    color: '#8A94A6',
+    fontWeight: 'bold',
+    fontSize: 17,
+  },
+  feeAvatar: {
+    width: 40,
+    height: 40,
+    backgroundColor: '#E6EBF0',
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});

@@ -1,3 +1,5 @@
+import React, { useMemo } from 'react';
+import { View, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import {
   capitalize,
   Key,
@@ -7,13 +9,12 @@ import {
   WALLETTYPE,
 } from '@leapwallet/cosmos-wallet-hooks';
 import { ChainInfo, pubKeyToEvmAddressToShow } from '@leapwallet/cosmos-wallet-sdk';
-import classNames from 'classnames';
-import useActiveWallet from 'hooks/settings/useActiveWallet';
-import { Wallet } from 'hooks/wallet/useWallet';
-import { Images } from 'images';
-import React, { useMemo } from 'react';
-import { getLedgerEnabledEvmChainsKey } from 'utils/getLedgerEnabledEvmChains';
-import { isLedgerEnabled } from 'utils/isLedgerEnabled';
+import useActiveWallet from '../../../../hooks/settings/useActiveWallet';
+import { Wallet } from '../../../../hooks/wallet/useWallet';
+import { Images } from '../../../../../assets/images';
+import { getLedgerEnabledEvmChainsKey } from '../../../../utils/getLedgerEnabledEvmChains';
+import { isLedgerEnabled } from '../../../../utils/isLedgerEnabled';
+import Text from '../../../../components/text'; // Your custom RN-compatible Text
 
 type WalletCardProps = {
   chainInfo: ChainInfo;
@@ -72,20 +73,24 @@ const WalletCard = ({ wallet, onClick, chainInfo }: WalletCardProps) => {
     ledgerApp,
   ]);
 
+  // Button disabled if walletAddress is falsy
+  const isDisabled = !walletAddress;
+
   return (
-    <button
-      key={wallet.id}
-      className={classNames(
-        'flex items-center px-4 py-4 bg-white-100 dark:bg-gray-900 gap-3 cursor-pointer rounded-2xl',
-        {
-          '!cursor-not-allowed opacity-50': !walletAddress,
-        },
-      )}
-      disabled={!walletAddress}
-      onClick={() => {
-        const name = `${wallet.name.length > 12 ? `${wallet.name.slice(0, 12)}...` : wallet.name} - ${capitalize(
-          chainInfo.chainName === 'seiTestnet2' ? 'sei' : chainInfo.chainName,
-        )}`;
+    <TouchableOpacity
+      style={[
+        styles.card,
+        isDisabled && styles.disabledCard,
+      ]}
+      activeOpacity={isDisabled ? 1 : 0.7}
+      disabled={isDisabled}
+      onPress={() => {
+        const name =
+          wallet.name.length > 12
+            ? `${wallet.name.slice(0, 12)}...`
+            : wallet.name +
+              ' - ' +
+              capitalize(chainInfo.chainName === 'seiTestnet2' ? 'sei' : chainInfo.chainName);
         onClick({
           address: walletAddress,
           chainName: chainInfo.chainName,
@@ -93,21 +98,20 @@ const WalletCard = ({ wallet, onClick, chainInfo }: WalletCardProps) => {
         });
       }}
     >
-      <img
-        height={40}
-        width={40}
-        src={wallet?.avatar ?? Images.Misc.getWalletIconAtIndex(wallet.colorIndex)}
-        alt={wallet.name}
-        className='h-10 w-10 rounded-full'
+      <Image
+        source={{ uri: wallet.avatar ?? Images.Misc.getWalletIconAtIndex(wallet.colorIndex)}}
+        style={styles.walletAvatar}
+        resizeMode="cover"
       />
-
-      <div className='flex flex-col'>
-        <span className='text-md font-bold text-black-100 dark:text-white-100 text-left max-w-[170px] text-ellipsis overflow-hidden'>
+      <View style={styles.cardInfo}>
+        <Text style={styles.walletName}>
           {wallet.name}
-        </span>
-        <span className='text-gray-600 dark:text-gray-400 text-xs'>{addressText}</span>
-      </div>
-    </button>
+        </Text>
+        <Text style={styles.walletAddress}>
+          {addressText}
+        </Text>
+      </View>
+    </TouchableOpacity>
   );
 };
 
@@ -116,13 +120,16 @@ type MyEvmWalletAddressesProps = {
   setSelectedAddress: (address: SelectedAddress) => void;
 };
 
-export const MyEvmWalletAddresses = ({ chainInfo, setSelectedAddress }: MyEvmWalletAddressesProps) => {
+export const MyEvmWalletAddresses = ({
+  chainInfo,
+  setSelectedAddress,
+}: MyEvmWalletAddressesProps) => {
   const wallets = Wallet.useWallets();
   const { activeWallet } = useActiveWallet();
   const walletList = Object.values(wallets || {});
 
   return (
-    <div className='flex flex-col gap-3'>
+    <View style={styles.list}>
       {walletList.map((wallet) => {
         if (activeWallet?.id === wallet.id) {
           return null;
@@ -134,7 +141,9 @@ export const MyEvmWalletAddresses = ({ chainInfo, setSelectedAddress }: MyEvmWal
             chainInfo={chainInfo}
             wallet={wallet}
             onClick={({ address, name, chainName }) => {
-              const img = wallet?.avatar ?? Images.Misc.getWalletIconAtIndex(wallet.colorIndex);
+              const img = wallet?.avatar
+                ? wallet.avatar
+                : Images.Misc.getWalletIconAtIndex(wallet.colorIndex);
 
               setSelectedAddress({
                 address,
@@ -149,6 +158,51 @@ export const MyEvmWalletAddresses = ({ chainInfo, setSelectedAddress }: MyEvmWal
           />
         );
       })}
-    </div>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  list: {
+    flexDirection: 'column',
+    gap: 12,
+  },
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    gap: 12,
+    marginBottom: 0,
+  },
+  disabledCard: {
+    opacity: 0.5,
+  },
+  walletAvatar: {
+    height: 40,
+    width: 40,
+    borderRadius: 20,
+    marginRight: 12,
+  },
+  cardInfo: {
+    flex: 1,
+    flexDirection: 'column',
+    maxWidth: 170,
+  },
+  walletName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#1a1a1a',
+    marginBottom: 2,
+    textAlign: 'left',
+  },
+  walletAddress: {
+    fontSize: 13,
+    color: '#888',
+    textAlign: 'left',
+  },
+});
+
+export default MyEvmWalletAddresses;

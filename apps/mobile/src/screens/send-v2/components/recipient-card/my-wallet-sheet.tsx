@@ -1,20 +1,24 @@
-import { Key, SelectedAddress, useActiveChain } from '@leapwallet/cosmos-wallet-hooks';
+import React, { useEffect, useMemo, useState } from 'react';
+import { View, TouchableOpacity, Image, StyleSheet, ScrollView } from 'react-native';
+import {
+  Key,
+  SelectedAddress,
+  useActiveChain,
+} from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { CardDivider } from '@leapwallet/leap-ui';
-import BottomModal from '../bottom-modal';
-import { EmptyCard } from 'components/empty-card';
-import Loader from 'components/loader/Loader';
-import Text from 'components/text';
-import { SearchInput } from 'components/ui/input/search-input';
-import useActiveWallet from 'hooks/settings/useActiveWallet';
-import { useChainInfos } from 'hooks/useChainInfos';
-import useQuery from 'hooks/useQuery';
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
-import { Images } from 'images';
-import React, { useEffect, useMemo, useState } from 'react';
-import { formatWalletName } from 'utils/formatWalletName';
-import { capitalize } from 'utils/strings';
-
+import BottomModal from '../../../../components/bottom-modal';
+import { EmptyCard } from '../../../../components/empty-card';
+import Loader from '../../../../components/loader/Loader';
+import Text from '../../../../components/text';
+import { SearchInput } from '../../../../components/ui/input/search-input';
+import useActiveWallet from '../../../../hooks/settings/useActiveWallet';
+import { useChainInfos } from '../../../../hooks/useChainInfos';
+import useQuery from '../../../../hooks/useQuery';
+import { useDefaultTokenLogo } from '../../../../hooks/utility/useDefaultTokenLogo';
+import { Images } from '../../../../../assets/images';
+import { formatWalletName } from '../../../../utils/formatWalletName';
+import { capitalize } from '../../../../utils/strings';
 import { SendContextType, useSendContext } from '../../context';
 
 type MyWalletSheetProps = {
@@ -33,7 +37,8 @@ export const MyWalletSheet: React.FC<MyWalletSheetProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const trimmedQuery = searchQuery.trim();
 
-  const { displayAccounts: _displayMyAccounts, isIbcSupportDataLoading } = useSendContext() as SendContextType;
+  const { displayAccounts: _displayMyAccounts, isIbcSupportDataLoading } =
+    useSendContext() as SendContextType;
 
   const {
     activeWallet: { name, colorIndex, watchWallet },
@@ -45,15 +50,22 @@ export const MyWalletSheet: React.FC<MyWalletSheetProps> = ({
   const defaultTokenLogo = useDefaultTokenLogo();
   const activeWallet = useActiveWallet();
 
-  
   const _displaySkipAccounts: any[][] = [];
   Object.keys(chainInfos).map((chain) => {
-    if (skipSupportedDestinationChainsIDs?.includes(chainInfos[chain as SupportedChain]?.chainId)) {
-      _displaySkipAccounts.push([chain, activeWallet?.activeWallet?.addresses?.[chain as SupportedChain]]);
+    if (
+      skipSupportedDestinationChainsIDs?.includes(
+        chainInfos[chain as SupportedChain]?.chainId,
+      )
+    ) {
+      _displaySkipAccounts.push([
+        chain,
+        activeWallet?.activeWallet?.addresses?.[chain as SupportedChain],
+      ]);
     }
   });
 
-  const _displayAccounts = _displaySkipAccounts.length > 0 ? _displaySkipAccounts : _displayMyAccounts;
+  const _displayAccounts =
+    _displaySkipAccounts.length > 0 ? _displaySkipAccounts : _displayMyAccounts;
 
   const displayAccounts = useMemo(
     () =>
@@ -68,7 +80,9 @@ export const MyWalletSheet: React.FC<MyWalletSheetProps> = ({
 
   useEffect(() => {
     if (toChainId && displayAccounts?.length > 0) {
-      const chainKey = Object.values(chainInfos).find((chain) => chain.chainId === toChainId)?.key;
+      const chainKey = Object.values(chainInfos).find(
+        (chain) => chain.chainId === toChainId,
+      )?.key;
       const toChain = displayAccounts.filter(([_chain]) => _chain === chainKey)?.[0];
       const img = chainInfos[chainKey as SupportedChain]?.chainSymbolImageUrl ?? defaultTokenLogo;
 
@@ -82,53 +96,51 @@ export const MyWalletSheet: React.FC<MyWalletSheetProps> = ({
         selectionType: 'currentWallet',
       });
     }
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toChainId, displayAccounts?.length > 0, activeChain]);
 
   return (
-    <BottomModal isOpen={isOpen} closeOnBackdropClick={true} title='Choose Recipient Wallet' onClose={onClose}>
-      <div>
+    <BottomModal isOpen={isOpen} closeOnBackdropClick title="Choose Recipient Wallet" onClose={onClose}>
+      <View>
         {isIbcSupportDataLoading ? (
-          <div className='bg-white-100 dark:bg-gray-900 rounded-2xl p-3 relative h-48 w-full'>
-            <Text size='xs' className='p-1 font-bold' color='text-gray-600 dark:text-gray-200'>
+          <View style={styles.loadingCard}>
+            <Text size="xs" style={styles.loadingText}>
               Loading IBC Supported Chains
             </Text>
             <Loader />
-          </div>
+          </View>
         ) : (
           <>
             <SearchInput
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChangeText={setSearchQuery}
               onClear={() => setSearchQuery('')}
-              placeholder='Search chains...'
+              placeholder="Search chains..."
             />
-
-            <div className='bg-white-100 dark:bg-gray-900 rounded-2xl p-4 relative mt-4'>
+            <View style={styles.resultCard}>
               {displayAccounts.length > 0 ? (
                 <>
-                  <div className='flex justify-between items-center'>
-                    <Text size='xs' className='p-1 font-bold' color='text-gray-600 dark:text-gray-200'>
+                  <View style={styles.titleRow}>
+                    <Text size="xs" style={styles.listTitle}>
                       Other chains in current wallet: {formatWalletName(name)}
                     </Text>
-                  </div>
-                  <div className='mt-2'>
+                  </View>
+                  <ScrollView style={{ marginTop: 8, maxHeight: 330 }}>
                     {displayAccounts.map(([_chain, address], index) => {
                       const chain = _chain as unknown as SupportedChain;
                       const img = chainInfos[chain]?.chainSymbolImageUrl ?? defaultTokenLogo;
                       const chainName = chainInfos[chain]?.chainName ?? chain;
-                      const isFirst = index === 0;
                       const isLast = index === displayAccounts.length - 1;
 
                       return (
-                        <React.Fragment key={_chain}>
-                          <button
-                            style={{ paddingLeft: 0, paddingRight: 0 }}
-                            className={`card-container w-full flex-row items-center py-3 ${
-                              isFirst || isLast ? 'rounded-2xl' : ''
-                            }`}
-                            onClick={() => {
+                        <View key={_chain}>
+                          <TouchableOpacity
+                            style={[
+                              styles.walletButton,
+                              (index === 0 || isLast) && styles.roundedButton,
+                            ]}
+                            activeOpacity={0.75}
+                            onPress={() => {
                               setSelectedAddress({
                                 address: address,
                                 avatarIcon: Images.Misc.getWalletIconAtIndex(colorIndex, watchWallet),
@@ -141,41 +153,117 @@ export const MyWalletSheet: React.FC<MyWalletSheetProps> = ({
                               onClose();
                             }}
                           >
-                            <img
-                              src={img}
-                              alt={`${chainName} logo`}
-                              className='rounded-full border border-white-30 h-10 w-10'
+                            <Image
+                              source={typeof img === 'string' ? { uri: img } : img}
+                              style={styles.walletIcon}
                             />
-                            <p className='font-bold dark:text-white-100 text-gray-700 capitalize ml-2'>{chainName}</p>
-                            <img className='ml-auto' src={Images.Misc.RightArrow} alt='Right Arrow' />
-                          </button>
-
+                            <Text style={styles.walletName}>{chainName}</Text>
+                            <Image source={{uri: Images.Misc.RightArrow}} style={styles.rightArrow} />
+                          </TouchableOpacity>
                           {!isLast && (
-                            <div className='w-full flex'>
+                            <View style={styles.dividerWrap}>
                               <CardDivider />
-                            </div>
+                            </View>
                           )}
-                        </React.Fragment>
+                        </View>
                       );
                     })}
-                  </div>
+                  </ScrollView>
                 </>
               ) : (
                 <EmptyCard
                   src={trimmedQuery.length > 0 ? Images.Misc.NoSearchResult : Images.Misc.Blockchain}
-                  heading='No Chain Found'
+                  heading="No Chain Found"
                   subHeading={
                     trimmedQuery.length > 0
                       ? `No chains found for "${trimmedQuery}"`
                       : `No chains support IBC with ${chainInfos[activeChain].chainName}`
                   }
-                  classname='!px-0 !py-5 !w-full justify-center'
+                  style={{
+                    paddingHorizontal: 0,
+                    paddingVertical: 20,
+                    width: '100%',
+                    justifyContent: 'center',
+                  }}
                 />
               )}
-            </div>
+            </View>
           </>
         )}
-      </div>
+      </View>
     </BottomModal>
   );
 };
+
+const styles = StyleSheet.create({
+  loadingCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 12,
+    height: 192,
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  loadingText: {
+    color: '#999',
+    fontWeight: 'bold',
+    padding: 4,
+    marginBottom: 12,
+  },
+  resultCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 16,
+    marginTop: 16,
+    position: 'relative',
+  },
+  titleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  listTitle: {
+    color: '#888',
+    fontWeight: 'bold',
+    padding: 4,
+  },
+  walletButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingLeft: 0,
+    paddingRight: 0,
+    backgroundColor: 'transparent',
+  },
+  roundedButton: {
+    borderRadius: 16,
+  },
+  walletIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#ececec',
+    marginRight: 10,
+  },
+  walletName: {
+    fontWeight: 'bold',
+    color: '#333',
+    fontSize: 15,
+    textTransform: 'capitalize',
+    marginLeft: 8,
+  },
+  rightArrow: {
+    marginLeft: 'auto',
+    width: 16,
+    height: 16,
+    resizeMode: 'contain',
+  },
+  dividerWrap: {
+    width: '100%',
+  },
+});
+
+export default MyWalletSheet;

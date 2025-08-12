@@ -1,6 +1,6 @@
 import { ParsedMessage, ParsedMessageType } from '@leapwallet/parser-parfait';
 
-export function isGenericOrSendAuthzGrant(parsedMessages: ParsedMessage[] | null) {
+export function isGenericOrSendAuthzGrant(parsedMessages: ParsedMessage[] | null): string {
   if (parsedMessages === null || parsedMessages.length === 0) {
     return '';
   }
@@ -25,7 +25,10 @@ export function isGenericOrSendAuthzGrant(parsedMessages: ParsedMessage[] | null
       }
 
       if (isTrue) {
-        if (isSendAuthorization || parsedMessage.grant.authorization?.value?.msg === '/cosmos.bank.v1beta1.MsgSend') {
+        if (
+          isSendAuthorization ||
+          parsedMessage.grant.authorization?.value?.msg === '/cosmos.bank.v1beta1.MsgSend'
+        ) {
           message =
             'You are allowing another account to transfer assets from your wallet for the specific time period. Be aware of scammers and approve with caution.';
         } else {

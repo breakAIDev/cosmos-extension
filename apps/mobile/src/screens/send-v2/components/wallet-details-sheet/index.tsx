@@ -1,11 +1,11 @@
-import { AvatarCard, Buttons, ThemeName, useTheme } from '@leapwallet/leap-ui';
-import BottomModal from '../bottom-modal';
-import { SelectedAddress } from 'pages/send-v2/types';
 import React, { ReactElement, useCallback, useState } from 'react';
-import { Colors } from 'theme/colors';
-import { AddressBook } from 'utils/addressbook';
-import { sliceAddress } from 'utils/strings';
-
+import { View, StyleSheet, TouchableWithoutFeedback, Text } from 'react-native';
+import { AvatarCard, Buttons, ThemeName, useTheme } from '@leapwallet/leap-ui';
+import BottomModal from '../../../../components/bottom-modal'; // Must be a RN modal
+import { SelectedAddress } from '../../..//send-v2/types';
+import { Colors } from '../../../../theme/colors';
+import { AddressBook } from '../../../../utils/addressbook';
+import { sliceAddress } from '../../../../utils/strings';
 import SaveAddressSheet from '../recipient-card/save-address-sheet';
 
 export type WalletDetailsSheetProps = {
@@ -25,72 +25,127 @@ export default function WalletDetailsSheet({
   const contact = AddressBook.useGetContact(selectedAddress.address ?? '');
   const { theme } = useTheme();
 
-  const stopPropagation = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    e.stopPropagation();
-  }, []);
-
-  // do not remove stopPropagation, it is needed to prevent the modal from closing when clicking on the modal itself
-  // this happens due to the address input component
+  // RN doesn't support stopPropagation exactly, but you can block touches to parent via pointerEvents
+  const stopPropagation = useCallback(() => {}, []);
 
   return (
-    <div onClick={stopPropagation}>
-      <BottomModal
-        title='Contact details'
-        onClose={onCloseHandler}
-        isOpen={isOpen}
-        closeOnBackdropClick={true}
-        contentClassName='!bg-white-100 dark:!bg-gray-950'
-        className='p-6'
-      >
-        <div className='flex flex-col items-center gap-4'>
-          <div className='w-full bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 flex items-center flex-col'>
-            <AvatarCard
-              chainIcon={selectedAddress.chainIcon}
-              emoji={contact?.emoji ?? selectedAddress.emoji}
-              size='lg'
-              title={contact?.name ?? selectedAddress.name}
-              className='mt-3'
-            />
-
-            <Buttons.CopyWalletAddress
-              className='mt-1'
-              color={Colors.juno}
-              walletAddress={sliceAddress(selectedAddress.address)}
-            />
-          </div>
-
-          <div className='flex gap-4 w-full'>
-            <Buttons.Generic
-              title='Delete contact'
-              color={Colors.red300}
-              onClick={async () => {
-                await AddressBook.removeEntry(selectedAddress.address ?? '');
-                onDelete();
-                onCloseHandler();
-              }}
-              className='flex-1'
+    <TouchableWithoutFeedback onPress={stopPropagation}>
+      <View>
+        <BottomModal
+          title="Contact details"
+          onClose={onCloseHandler}
+          isOpen={isOpen}
+          closeOnBackdropClick={true}
+          contentStyle={[
+            styles.modalContent,
+            { backgroundColor: theme === ThemeName.DARK ? '#10151C' : '#FFFFFF' },
+          ]}
+        >
+          <View style={styles.centered}>
+            <View
+              style={[
+                styles.card,
+                { backgroundColor: theme === ThemeName.DARK ? '#202636' : '#F8FAFC' },
+              ]}
             >
-              Delete contact
-            </Buttons.Generic>
+              <AvatarCard
+                chainIcon={selectedAddress.chainIcon}
+                emoji={contact?.emoji ?? selectedAddress.emoji}
+                size="lg"
+                title={contact?.name ?? selectedAddress.name}
+                style={styles.avatar}
+              />
 
-            <Buttons.Generic
-              title='Edit contact'
-              color={theme === ThemeName.DARK ? Colors.gray900 : '#F4F4F4'}
-              onClick={() => setShowSaveAddressSheet(true)}
-              className='flex-1'
-            >
-              <p className='!text-black-100 dark:!text-white-100'>Edit contact</p>
-            </Buttons.Generic>
-          </div>
-        </div>
-      </BottomModal>
+              <Buttons.CopyWalletAddress
+                style={styles.copyButton}
+                color={Colors.juno}
+                walletAddress={sliceAddress(selectedAddress.address)}
+              />
+            </View>
 
-      <SaveAddressSheet
-        isOpen={showSaveAddressSheet}
-        title='Edit Contact'
-        address={selectedAddress.address ?? ''}
-        onClose={() => setShowSaveAddressSheet(false)}
-      />
-    </div>
+            <View style={styles.buttonRow}>
+              <Buttons.Generic
+                title="Delete contact"
+                color={Colors.red300}
+                onClick={async () => {
+                  await AddressBook.removeEntry(selectedAddress.address ?? '');
+                  onDelete();
+                  onCloseHandler();
+                }}
+                style={styles.flex1}
+              >
+                <Text style={styles.deleteText}>Delete contact</Text>
+              </Buttons.Generic>
+
+              <Buttons.Generic
+                title="Edit contact"
+                color={theme === ThemeName.DARK ? Colors.gray900 : '#F4F4F4'}
+                onClick={() => setShowSaveAddressSheet(true)}
+                style={styles.flex1}
+              >
+                <Text
+                  style={[
+                    theme === ThemeName.DARK ? styles.editTextDark : styles.editTextLight,
+                  ]}
+                >
+                  Edit contact
+                </Text>
+              </Buttons.Generic>
+            </View>
+          </View>
+        </BottomModal>
+
+        <SaveAddressSheet
+          isOpen={showSaveAddressSheet}
+          title="Edit Contact"
+          address={selectedAddress.address ?? ''}
+          onClose={() => setShowSaveAddressSheet(false)}
+        />
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
+
+const styles = StyleSheet.create({
+  modalContent: {
+    borderRadius: 20,
+    padding: 24,
+  },
+  centered: {
+    alignItems: 'center',
+    gap: 16,
+  },
+  card: {
+    width: '100%',
+    borderRadius: 20,
+    padding: 16,
+    alignItems: 'center',
+    flexDirection: 'column',
+  },
+  avatar: {
+    marginTop: 12,
+  },
+  copyButton: {
+    marginTop: 4,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 16,
+    width: '100%',
+  },
+  flex1: {
+    flex: 1,
+  },
+  deleteText: {
+    color: Colors.red300,
+    textAlign: 'center',
+  },
+  editTextDark: {
+    color: '#fff',
+    textAlign: 'center',
+  },
+  editTextLight: {
+    color: '#000',
+    textAlign: 'center',
+  },
+});

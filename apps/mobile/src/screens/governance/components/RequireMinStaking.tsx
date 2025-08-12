@@ -1,10 +1,11 @@
+import React, { useCallback } from 'react';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { useActiveStakingDenom, useChainInfo } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { observer } from 'mobx-react-lite';
-import React, { useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { rootDenomsStore } from 'stores/denoms-store-instance';
-import { isSidePanel } from 'utils/isSidePanel';
+import { rootDenomsStore } from '../../../context/denoms-store-instance';
+import { useNavigation } from '@react-navigation/native';
+import Text from '../../../components/text'; // Or use RN's Text
 
 type RequireMinStakingProps = {
   forceChain?: SupportedChain;
@@ -15,24 +16,61 @@ export const RequireMinStaking = observer(({ forceChain, forceNetwork }: Require
   const chainInfo = useChainInfo(forceChain);
   const denoms = rootDenomsStore.allDenoms;
   const [activeStakingDenom] = useActiveStakingDenom(denoms, forceChain, forceNetwork);
-  const navigate = useNavigate();
+  const navigation = useNavigation();
 
+  // Use your navigation function here (e.g., useNavigation from @react-navigation/native)
   const handleButtonClick = useCallback(() => {
-    navigate('/stake');
-  }, [navigate]);
+    navigation.navigate('Stake');
+  }, [navigation]);
 
   return (
-    <div className='flex mt-4 p-4 w-full flex-row justify-between items-center gap-2 dark:bg-gray-900 bg-white-100 rounded-[20px]'>
-      <div className='text-xs font-medium !leading-[19.2px] dark:text-white-100'>
-        {chainInfo.chainName} requires you to have {!isSidePanel() && <br></br>}
-        at least <span className='font-bold'>1 {activeStakingDenom?.coinDenom} staked</span> to start voting
-      </div>
-      <button
-        onClick={handleButtonClick}
-        className='rounded-full shrink-0 bg-gray-950 dark:bg-white-100 font-bold text-xs text-gray-100 py-[6px] px-[12px] dark:text-gray-950 !leading-[20px]'
-      >
-        Stake {activeStakingDenom?.coinDenom}
-      </button>
-    </div>
+    <View style={styles.root}>
+      <Text style={styles.message}>
+        {chainInfo.chainName} requires you to have{'\n'}
+        at least <Text style={styles.boldText}>1 {activeStakingDenom?.coinDenom} staked</Text> to start voting
+      </Text>
+      <TouchableOpacity style={styles.button} onPress={handleButtonClick} activeOpacity={0.8}>
+        <Text style={styles.buttonText}>Stake {activeStakingDenom?.coinDenom}</Text>
+      </TouchableOpacity>
+    </View>
   );
+});
+
+const styles = StyleSheet.create({
+  root: {
+    flexDirection: 'row',
+    marginTop: 16,
+    padding: 16,
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderRadius: 20,
+    backgroundColor: '#fff',
+    gap: 8,
+  },
+  message: {
+    fontSize: 12,
+    color: '#222',
+    fontWeight: '500',
+    lineHeight: 19.2,
+    flex: 1,
+  },
+  boldText: {
+    fontWeight: 'bold',
+    color: '#222',
+  },
+  button: {
+    borderRadius: 999,
+    backgroundColor: '#222', // dark
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    alignSelf: 'flex-start',
+    marginLeft: 16,
+  },
+  buttonText: {
+    fontWeight: 'bold',
+    fontSize: 12,
+    color: '#fff',
+    lineHeight: 20,
+  },
 });

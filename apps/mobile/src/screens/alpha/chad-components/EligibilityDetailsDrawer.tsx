@@ -1,15 +1,17 @@
-import { useAddress } from '@leapwallet/cosmos-wallet-hooks';
-import { CheckCircle } from '@phosphor-icons/react/dist/ssr';
-import BottomModal from 'components/new-bottom-modal';
-import { Button } from 'components/ui/button';
-import { Drawer, DrawerContent } from 'components/ui/drawer';
-import { useAlphaUser } from 'hooks/useAlphaUser';
-import { useQueryParams } from 'hooks/useQuery';
-import { CrownFrog, HappyFrog } from 'icons/frog';
-import { Images } from 'images';
 import React from 'react';
-import { useNavigate } from 'react-router';
-import { queryParams } from 'utils/query-params';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Platform } from 'react-native';
+import { useAddress } from '@leapwallet/cosmos-wallet-hooks';
+import { CheckCircle } from 'phosphor-react-native';
+import BottomModal from '../../../components/new-bottom-modal'; // This is the file above
+import { Button } from '../../../components/ui/button'; // This should be your RN Button abstraction
+import { Drawer, DrawerContent } from '../../../components/ui/drawer';
+import { useAlphaUser } from '../../../hooks/useAlphaUser';
+import { useQueryParams } from '../../../hooks/useQuery';
+import { CrownFrog, HappyFrog } from '../../../../assets/icons/frog'; // Use your RN svg or PNGs
+import { Images } from '../../../../assets/images'; // Make sure this resolves to RN image
+import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { RootStackParamList } from '../../../navigation/types';
+import { queryParams } from '../../../utils/query-params';
 
 type EligibilityDrawerProps = {
   isShown: boolean;
@@ -23,89 +25,94 @@ const eligibilitySteps = [
 ];
 
 function NonChadDetailsDrawer({ isShown, onClose }: EligibilityDrawerProps) {
-  const navigate = useNavigate();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+
   return (
-    <BottomModal fullScreen isOpen={isShown} onClose={onClose} className='flex flex-col items-center gap-4 h-full'>
-      <div className='flex flex-col items-center'>
-        {/* all raffles tab */}
-        <div className='size-20'>
-          <HappyFrog />
-        </div>
+    <BottomModal
+      fullScreen
+      isOpen={isShown}
+      onClose={onClose}
+      title="How to Become a Leap Chad?"
+      hideActionButton={true}
+      style={[styles.centeredCol, styles.mb4]}
+    >
+      <View style={styles.centeredCol}>
+        <View style={styles.iconCircle}>
+          <HappyFrog width={64} height={64} />
+        </View>
 
-        <span className='flex flex-col gap-3 text-center mb-7 mt-2'>
-          <span className='font-bold text-lg'>How to Become a Leap Chad?</span>
-          <span className='text-sm font-medium'>
-            NFT WL Giveaways, Early access & Invite Codes, Dapp Quests, Points, Airdrops and more are waiting. You can
-            qualify for Leap Chad by:
-          </span>
-        </span>
+        <View style={[styles.centeredCol, styles.mt2, styles.mb7]}>
+          <Text style={styles.heading}>How to Become a Leap Chad?</Text>
+          <Text style={styles.subheading}>
+            NFT WL Giveaways, Early access & Invite Codes, Dapp Quests, Points, Airdrops and more are waiting. You can qualify for Leap Chad by:
+          </Text>
+        </View>
 
-        <ul className='flex flex-col gap-4 bg-secondary-100 rounded-xl p-5 w-full'>
+        <View style={styles.stepsList}>
           {eligibilitySteps.map((step) => (
-            <li key={step} className='flex items-center gap-2.5 text-sm m-0'>
-              <CheckCircle size={24} className='text-primary' />
-              <span>{step}</span>
-            </li>
+            <View key={step} style={styles.stepItem}>
+              <Text style={{ marginRight: 8 }}>
+                <CheckCircle size={24} color="#2563eb" />
+              </Text>
+              <Text style={styles.stepText}>{step}</Text>
+            </View>
           ))}
-        </ul>
-      </div>
+        </View>
 
-      <Button className='w-full mt-auto' onClick={() => navigate('/')}>
-        Explore Leap Features
-      </Button>
-      <span className='text-xs font-medium text-muted-foreground'>
-        We&apos;ll notify you when you become a Leap Chad!
-      </span>
+        <Button
+          style={[styles.actionBtn, { marginTop: 'auto' }]}
+          onPress={() => navigation.navigate('Home')}
+        >
+          <Text style={styles.actionBtnText}>Explore Leap Features</Text>
+        </Button>
+        <Text style={styles.notice}>
+          We'll notify you when you become a Leap Chad!
+        </Text>
+      </View>
     </BottomModal>
   );
 }
 
 function ChadDetailsDrawer({ isShown, onClose }: EligibilityDrawerProps) {
-  const navigate = useNavigate();
+  const navigation = useNavigation();
 
   return (
     <Drawer open={isShown} onClose={onClose}>
-      <DrawerContent showHandle={false} className='max-panel-height h-screen rounded-none'>
-        <div className='flex flex-col items-center gap-7 m-auto'>
-          <div className='isolate flex flex-col items-center gap-4 relative h-[454px] w-[342px] px-6 py-8'>
-            <img
-              src={Images.Alpha.chadDetailsBanner}
-              className='select-none -z-10 absolute inset-0 w-full h-full rounded-2xl overflow-hidden mx-auto'
+      <DrawerContent showHandle={false}>
+        <ScrollView contentContainerStyle={[styles.centeredCol, {margin: 'auto'}, styles.mb7]}>
+          <View style={styles.bannerContainer}>
+            <Image
+              source={{uri: Images.Alpha.chadDefaultBanner}}
+              style={styles.bannerImg}
+              resizeMode="cover"
             />
-
-            <CrownFrog className='my-8' />
-
-            <span className='flex flex-col gap-3 text-center'>
-              <span className='font-bold text-xl'>
-                Congratulations! <br />
-                You are now a Leap Chad
-              </span>
-              <span className='text-muted-foreground text-sm'>
+            <CrownFrog style={{ margninVertical: 24 }} />
+            <View style={{ alignItems: 'center', marginBottom: 24 }}>
+              <Text style={styles.chadCongrats}>Congratulations!{'\n'}You are now a Leap Chad</Text>
+              <Text style={styles.chadText}>
                 You now have access to exclusive whitelisted giveaways, airdrops and more!
-              </span>
-            </span>
-
+              </Text>
+            </View>
             <Button
-              variant='mono'
-              className='mt-auto w-full'
-              onClick={() => {
+              style={[styles.actionBtn, { width: '100%' }]}
+              onPress={() => {
                 onClose();
-                navigate(`/alpha?${queryParams.alphaTab}=exclusive`);
+                navigation.navigate('Alpha', {tab: 'exclusive'});
               }}
             >
-              View exclusive rewards
+              <Text style={styles.actionBtnText}>View exclusive rewards</Text>
             </Button>
-          </div>
-
-          <button onClick={onClose} className='font-bold text-muted-foreground hover:text-foreground transition-colors'>
-            Dismiss
-          </button>
-        </div>
+          </View>
+          <TouchableOpacity onPress={onClose}>
+            <Text style={styles.dismissBtn}>Dismiss</Text>
+          </TouchableOpacity>
+        </ScrollView>
       </DrawerContent>
     </Drawer>
   );
 }
 
+// Your wrapper should pass isChad, isShown, onClose props from parent screen
 export const EligibleDetailsDrawer = () => {
   const cosmosAddress = useAddress('cosmos');
   const { alphaUser } = useAlphaUser(cosmosAddress);
@@ -121,3 +128,112 @@ export const EligibleDetailsDrawer = () => {
     <NonChadDetailsDrawer isShown={show} onClose={hide} />
   );
 };
+
+const styles = StyleSheet.create({
+  mb4: {marginBottom: 16,},
+  mb7: {marginBottom: 27,},
+  mt2: {marginTop: 8,},
+  centeredCol: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    textAlign: 'center',
+    flex: 1,
+  },
+  iconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  heading: {
+    fontWeight: 'bold',
+    fontSize: 20,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  subheading: {
+    fontSize: 15,
+    textAlign: 'center',
+    color: '#666',
+  },
+  stepsList: {
+    backgroundColor: '#F1F5F9',
+    borderRadius: 16,
+    padding: 18,
+    width: '100%',
+    marginVertical: 12,
+  },
+  stepItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  stepText: {
+    fontSize: 15,
+    color: '#222',
+  },
+  actionBtn: {
+    backgroundColor: '#2563eb',
+    paddingVertical: 14,
+    borderRadius: 10,
+    alignItems: 'center',
+    width: '100%',
+    marginVertical: 18,
+  },
+  actionBtnText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  notice: {
+    fontSize: 13,
+    color: '#949AB0',
+    textAlign: 'center',
+    marginTop: 12,
+  },
+  bannerContainer: {
+    width: 340,
+    minHeight: 440,
+    borderRadius: 24,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 18,
+    marginVertical: 30,
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    elevation: 2,
+  },
+  bannerImg: {
+    position: 'absolute',
+    left: 0, right: 0, top: 0, bottom: 0,
+    width: '100%',
+    height: '100%',
+    borderRadius: 24,
+    zIndex: -1,
+  },
+  chadCongrats: {
+    fontWeight: 'bold',
+    fontSize: 20,
+    textAlign: 'center',
+    marginBottom: 8,
+    color: '#2563eb',
+  },
+  chadText: {
+    fontSize: 14,
+    textAlign: 'center',
+    color: '#222',
+    marginBottom: 16,
+  },
+  dismissBtn: {
+    marginTop: 20,
+    color: '#8c8c8c',
+    fontWeight: 'bold',
+    fontSize: 15,
+    textAlign: 'center',
+  },
+});

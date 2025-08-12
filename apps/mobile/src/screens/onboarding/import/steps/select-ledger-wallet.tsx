@@ -1,16 +1,22 @@
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { View, StyleSheet, ScrollView, Text } from 'react-native';
 import { pubKeyToEvmAddressToShow } from '@leapwallet/cosmos-wallet-sdk';
 import { KeyChain } from '@leapwallet/leap-keychain';
-import { Button } from 'components/ui/button';
-import WalletInfoCard from 'components/wallet-info-card';
-import { OnboardingWrapper } from 'pages/onboarding/wrapper';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { cn } from 'utils/cn';
-
+import { Button } from '../../../../components/ui/button';
+import WalletInfoCard from '../../../../components/wallet-info-card';
+import { OnboardingWrapper } from '../../../onboarding/wrapper';
 import { LEDGER_NETWORK, useImportWalletContext } from '../import-wallet-context';
 
 export const SelectLedgerWallet = () => {
-  const { prevStep, currentStep, selectedIds, setSelectedIds, moveToNextStep, addresses, ledgerNetworks } =
-    useImportWalletContext();
+  const {
+    prevStep,
+    currentStep,
+    selectedIds,
+    setSelectedIds,
+    moveToNextStep,
+    addresses,
+    ledgerNetworks,
+  } = useImportWalletContext();
 
   const [existingAddresses, setExistingAddresses] = useState<string[]>([]);
 
@@ -18,7 +24,6 @@ export const SelectLedgerWallet = () => {
     const fn = async () => {
       const allWallets = await KeyChain.getAllWallets();
       const addresses = [];
-
       for (const wallet of Object.values(allWallets ?? {})) {
         const address = wallet?.addresses?.cosmos;
         if (address) {
@@ -30,14 +35,13 @@ export const SelectLedgerWallet = () => {
           addresses.push(evmAddress);
         }
       }
-
       setExistingAddresses(addresses);
     };
     fn();
   }, []);
 
   const handleSelectChange = useCallback(
-    (id: number, flag: boolean) => {
+    (id: number | string, flag: boolean) => {
       setSelectedIds((prevSelectedIds) => ({ ...(prevSelectedIds ?? {}), [id]: flag }));
     },
     [setSelectedIds],
@@ -46,7 +50,6 @@ export const SelectLedgerWallet = () => {
   const proceedButtonEnabled = useMemo(() => {
     const isCosmosAppSelected = ledgerNetworks.has(LEDGER_NETWORK.COSMOS);
     const isEvmAppSelected = ledgerNetworks.has(LEDGER_NETWORK.ETH);
-    // check if atleast one of the selected wallets is not already in the existing addresses
     return Object.entries(selectedIds ?? {}).some(([key, val]) => {
       if (!val) return false;
       const cosmosAddress = addresses?.[key]?.cosmos?.address;
@@ -88,20 +91,21 @@ export const SelectLedgerWallet = () => {
     });
   }, [ledgerNetworks.size, selectedIds, addresses, existingAddresses]);
 
+  // Max height logic for the list:
+  const listMaxHeight = multiEcosystemImportNote ? 299 : 330;
+
   return (
     <OnboardingWrapper
       heading={'Your wallets'}
       subHeading={'Select the ones you want to import'}
       entry={prevStep <= currentStep ? 'right' : 'left'}
     >
-      <div className={'gradient-overlay'}>
-        <div
-          className={cn(
-            'flex flex-col w-full py-1 overflow-y-auto',
-            !multiEcosystemImportNote ? 'max-h-[330px]' : 'max-h-[299px]',
-          )}
-        >
-          <div className='flex flex-col gap-4 pb-28'>
+      <View style={styles.gradientOverlay}>
+        <View style={[styles.scrollWrap, { maxHeight: listMaxHeight }]}>
+          <ScrollView
+            contentContainerStyle={styles.walletList}
+            showsVerticalScrollIndicator={false}
+          >
             {Object.entries(addresses ?? {}).map(([path, value], index) => {
               let address;
               let isExistingCosmosAddress = false;
@@ -115,7 +119,7 @@ export const SelectLedgerWallet = () => {
               let isExistingEvmAddress = false;
               if (ledgerNetworks.has(LEDGER_NETWORK.ETH)) {
                 const evmPubKey = value?.ethereum?.pubKey;
-                evmAddress = pubKeyToEvmAddressToShow(evmPubKey, true) || undefined;
+                evmAddress = evmPubKey ? pubKeyToEvmAddressToShow(evmPubKey, true) || undefined : undefined;
                 if (evmAddress) {
                   isExistingEvmAddress = existingAddresses.indexOf(evmAddress) > -1;
                 }
@@ -138,25 +142,58 @@ export const SelectLedgerWallet = () => {
                 />
               );
             })}
-          </div>
-        </div>
-      </div>
+          </ScrollView>
+        </View>
+      </View>
 
-      <div className='flex flex-col items-center mt-auto w-full'>
+      <View style={styles.bottomSection}>
         <Button
-          className='w-full'
+          style={styles.fullWidth}
           disabled={!proceedButtonEnabled}
-          data-testing-id='btn-select-wallet-proceed'
-          onClick={moveToNextStep}
+          data-testing-id="btn-select-wallet-proceed"
+          onPress={moveToNextStep}
         >
           Add selected wallets
         </Button>
         {multiEcosystemImportNote && (
-          <div className='mt-3 text-muted-foreground text-xs !leading-[19px] text-center'>
+          <Text style={styles.ecosystemNote}>
             All addresses for the EVM & Cosmos network will be imported.
-          </div>
+          </Text>
         )}
-      </div>
+      </View>
     </OnboardingWrapper>
   );
 };
+
+const styles = StyleSheet.create({
+  gradientOverlay: {
+    // Add gradient if needed, for now just acts as a wrapper
+  },
+  scrollWrap: {
+    width: '100%',
+    paddingVertical: 4,
+    flex: 1,
+    alignSelf: 'stretch',
+  },
+  walletList: {
+    flexDirection: 'column',
+    gap: 16, // gap-4
+    paddingBottom: 112, // pb-28
+  },
+  bottomSection: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    marginTop: 'auto',
+    width: '100%',
+  },
+  fullWidth: {
+    width: '100%',
+  },
+  ecosystemNote: {
+    marginTop: 12,
+    color: '#64748b', // text-muted-foreground
+    fontSize: 12,
+    lineHeight: 19,
+    textAlign: 'center',
+  },
+});

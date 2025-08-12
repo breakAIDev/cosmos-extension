@@ -1,30 +1,39 @@
-import { EARN_MODE, FeeTokenData, formatTokenAmount, useEarnTx } from '@leapwallet/cosmos-wallet-hooks';
+import {
+  EARN_MODE, FeeTokenData, formatTokenAmount, useEarnTx,
+} from '@leapwallet/cosmos-wallet-hooks';
 import { fromSmall } from '@leapwallet/cosmos-wallet-sdk';
-import { Header, HeaderActionType } from '@leapwallet/leap-ui';
-import { ArrowDown, ArrowLeft, CaretDown, CheckSquare, GasPump, Square } from '@phosphor-icons/react';
+import {
+  ArrowDown, ArrowLeft, CaretDown, CheckSquare, GasPump, Square,
+} from 'phosphor-react-native';
 import BigNumber from 'bignumber.js';
-import classNames from 'classnames';
-import GasPriceOptions, { useDefaultGasPrice } from 'components/gas-price-options';
-import { DisplayFeeValue, GasPriceOptionValue } from 'components/gas-price-options/context';
-import { DisplayFee } from 'components/gas-price-options/display-fee';
-import { FeesSettingsSheet } from 'components/gas-price-options/fees-settings-sheet';
-import { PageHeader } from 'components/header/PageHeaderV2';
-import PopupLayout from 'components/layout/popup-layout';
-import Text from 'components/text';
-import { PageName } from 'config/analytics';
-import { usePageView } from 'hooks/analytics/usePageView';
-import { useSelectedNetwork } from 'hooks/settings/useNetwork';
-import useQuery from 'hooks/useQuery';
-import { Wallet } from 'hooks/wallet/useWallet';
-import { Images } from 'images';
+import React, {
+  useCallback, useEffect, useState,
+} from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
+
+import GasPriceOptions, { useDefaultGasPrice } from '../../components/gas-price-options'; // Should be RN
+import { DisplayFee } from '../../components/gas-price-options/display-fee';
+import { FeesSettingsSheet } from '../../components/gas-price-options/fees-settings-sheet';
+import { PageHeader } from '../../components/header/PageHeaderV2';
+import { useSelectedNetwork } from '../../hooks/settings/useNetwork';
+import useQuery from '../../hooks/useQuery';
+import { Wallet } from '../../hooks/wallet/useWallet';
+import { Images } from '../../../assets/images';
 import { observer } from 'mobx-react-lite';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import Skeleton from 'react-loading-skeleton';
-import { useNavigate } from 'react-router';
-import { miscellaneousDataStore } from 'stores/chain-infos-store';
-import { rootDenomsStore } from 'stores/denoms-store-instance';
-import { rootBalanceStore } from 'stores/root-store';
-import { imgOnError } from 'utils/imgOnError';
+import { useNavigation } from '@react-navigation/native';
+import { miscellaneousDataStore } from '../../context/chain-infos-store';
+import { rootDenomsStore } from '../../context/denoms-store-instance';
+import { rootBalanceStore } from '../../context/root-store';
 
 import ReviewTxSheet from './ReviewTxSheet';
 import Terms from './Terms';
@@ -32,8 +41,7 @@ import TxPage from './TxPage';
 
 const EarnPage = observer(() => {
   // usePageView(PageName.USDN_REWARDS)
-  const navigate = useNavigate();
-  const inputRef = useRef<HTMLInputElement>(null);
+  const navigation = useNavigation();
   const query = useQuery();
   const [mode, setMode] = useState<EARN_MODE>(query.get('withdraw') ? 'withdraw' : 'deposit');
   const [showTerms, setShowTerms] = useState(false);
@@ -72,40 +80,33 @@ const EarnPage = observer(() => {
   const [showReviewTxSheet, setShowReviewTxSheet] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const allBalanceTokens = rootBalanceStore.allTokens;
-  const defaultGasPrice = useDefaultGasPrice(rootDenomsStore.allDenoms, {
-    activeChain: 'noble',
-  });
+  const defaultGasPrice = useDefaultGasPrice(rootDenomsStore.allDenoms, { activeChain: 'noble' });
   const [gasError, setGasError] = useState<string | null>(null);
-  const [gasPriceOption, setGasPriceOption] = useState<GasPriceOptionValue>({
+  const [gasPriceOption, setGasPriceOption] = useState({
     option: gasOption,
     gasPrice: userPreferredGasPrice ?? defaultGasPrice.gasPrice,
   });
-  const [displayFeeValue, setDisplayFeeValue] = useState<DisplayFeeValue>();
+  const [displayFeeValue, setDisplayFeeValue] = useState<any>();
 
   useEffect(() => {
     setGasPriceOption({
       option: gasOption,
       gasPrice: defaultGasPrice.gasPrice,
     });
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultGasPrice.gasPrice.amount.toString(), defaultGasPrice.gasPrice.denom]);
 
   useEffect(() => {
-    if (gasPriceOption.option) {
-      setGasOption(gasPriceOption.option);
-    }
-    if (gasPriceOption.gasPrice) {
-      setUserPreferredGasPrice(gasPriceOption.gasPrice);
-    }
+    if (gasPriceOption.option) setGasOption(gasPriceOption.option);
+    if (gasPriceOption.gasPrice) setUserPreferredGasPrice(gasPriceOption.gasPrice);
   }, [gasPriceOption, setGasOption, setUserPreferredGasPrice]);
 
   const onGasPriceOptionChange = useCallback(
-    (value: GasPriceOptionValue, feeBaseDenom: FeeTokenData) => {
+    (value: any, feeBaseDenom: FeeTokenData) => {
       setGasPriceOption(value);
       setFeeDenom(feeBaseDenom.denom);
     },
-    [setFeeDenom],
+    [setFeeDenom]
   );
 
   useEffect(() => {
@@ -142,12 +143,15 @@ const EarnPage = observer(() => {
 
   useEffect(() => {
     if (textInputValue && sourceToken) {
-      if (new BigNumber(textInputValue).gt(0) && new BigNumber(textInputValue).lte(sourceToken.amount ?? '0')) {
+      if (
+        new BigNumber(textInputValue).gt(0)
+        && new BigNumber(textInputValue).lte(sourceToken.amount ?? '0')
+      ) {
         let val = textInputValue;
         setAmountError('');
         if (
-          customFee?.amount[0].denom === sourceToken.coinMinimalDenom &&
-          new BigNumber(textInputValue).plus(fromSmall(customFee?.amount[0].amount ?? '0')).gt(sourceToken.amount)
+          customFee?.amount[0].denom === sourceToken.coinMinimalDenom
+          && new BigNumber(textInputValue).plus(fromSmall(customFee?.amount[0].amount ?? '0')).gt(sourceToken.amount)
         ) {
           const newVal = new BigNumber(sourceToken.amount).minus(fromSmall(customFee?.amount[0].amount ?? '0'));
           if (newVal.gt(0)) {
@@ -174,16 +178,12 @@ const EarnPage = observer(() => {
 
   const handle25Click = () => {
     const amount = new BigNumber(sourceToken?.amount ?? '0');
-    if (amount.gt(0)) {
-      setTextInputValue(amount.dividedBy(4).toFixed(6, 1));
-    }
+    if (amount.gt(0)) setTextInputValue(amount.dividedBy(4).toFixed(6, 1));
   };
 
   const handle50Click = () => {
     const amount = new BigNumber(sourceToken?.amount ?? '0');
-    if (amount.gt(0)) {
-      setTextInputValue(amount.dividedBy(2).toFixed(6, 1));
-    }
+    if (amount.gt(0)) setTextInputValue(amount.dividedBy(2).toFixed(6, 1));
   };
 
   const handleMaxClick = () => {
@@ -192,20 +192,18 @@ const EarnPage = observer(() => {
         ? fromSmall(customFee?.amount[0].amount ?? '0')
         : '0',
     );
-    if (amount.gt(0)) {
-      setTextInputValue(amount.toFixed(6, 1));
-    }
+    if (amount.gt(0)) setTextInputValue(amount.toFixed(6, 1));
   };
 
   const isReviewDisabled =
-    !new BigNumber(amountOut).gt(0) ||
-    !new BigNumber(textInputValue).gt(0) ||
-    isLoading ||
-    !!amountError ||
-    !!gasError ||
-    !!error ||
-    !!ledgerError ||
-    (mode === 'deposit' && !isChecked);
+    !new BigNumber(amountOut).gt(0)
+    || !new BigNumber(textInputValue).gt(0)
+    || isLoading
+    || !!amountError
+    || !!gasError
+    || !!error
+    || !!ledgerError
+    || (mode === 'deposit' && !isChecked);
 
   const handleConfirmTx = useCallback(async () => {
     setIsProcessing(true);
@@ -223,6 +221,7 @@ const EarnPage = observer(() => {
     }
   }, [getWallet, onReviewTransaction, setError, setTxHash, txHash]);
 
+  // --- Render logic ---
   if (txHash) {
     return (
       <TxPage
@@ -254,218 +253,176 @@ const EarnPage = observer(() => {
   }
 
   return (
-    // <div className='relative h-full w-full'>
     <>
-      {/* <PopupLayout
-        header={
-          <Header
-            title='Earn'
-            action={{
-              type: HeaderActionType.BACK,
-              onClick: () => {
-                navigate(-1)
-              },
-            }}
-          />
-        }
-      > */}
-      <>
+      <KeyboardAvoidingView
+        style={{ flex: 1, backgroundColor: '#fff' }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
         <PageHeader>
-          <ArrowLeft
-            size={36}
-            className='text-muted-foreground hover:text-foreground cursor-pointer p-2'
-            onClick={() => {
-              navigate(-1);
-            }}
-          />
-          <span className='text-[18px] font-bold text-foreground'>Earn</span>
-          <div className='w-9' />
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconBtn}>
+            <ArrowLeft size={36} color="#64748b" /> {/* text-muted-foreground */}
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Earn</Text>
+          <View style={{ width: 36 }} /> {/* Spacer */}
         </PageHeader>
-        <div className='flex flex-col p-6 !pb-4 items-center max-w-[400px] h-[calc(100%-72px)]'>
-          <Text className='self-start mb-5 !inline' color='text-gray-600 dark:text-gray-400' size='sm'>
+
+        <ScrollView contentContainerStyle={styles.container}>
+          <Text style={styles.descText}>
             Put your stable asset to work and earn
-            {
-              <strong className='text-green-600'>
-                &nbsp;
-                {parseFloat(miscellaneousDataStore.data?.noble?.usdnEarnApy) > 0
-                  ? new BigNumber(miscellaneousDataStore.data.noble.usdnEarnApy).multipliedBy(100).toFixed(2) + '%'
-                  : '-'}
-                &nbsp;APY
-              </strong>
-            }{' '}
-            with no lock-ups!
+            <Text style={styles.strongGreen}>
+              {' '}
+              {
+                parseFloat(miscellaneousDataStore.data?.noble?.usdnEarnApy) > 0
+                  ? `${new BigNumber(miscellaneousDataStore.data.noble.usdnEarnApy).multipliedBy(100).toFixed(2)}%`
+                  : '-'
+              }
+              {' '}APY
+            </Text>
+            {' '}with no lock-ups!
           </Text>
 
-          <div className='relative flex flex-col gap-4 w-full'>
-            <div className='flex flex-col gap-3 bg-secondary-100 rounded-xl p-5'>
-              <p className='text-gray-600 dark:text-gray-400 text-sm font-medium !leading-[22.4px]'>
-                Enter amount to deposit
-              </p>
-              <div className='flex rounded-2xl justify-between w-full items-center gap-2 h-[34px] p-[2px]'>
-                <input
-                  type='number'
-                  className={classNames(
-                    'bg-transparent outline-none w-full text-left placeholder:font-bold placeholder:text-[24px] placeholder:text-black-100 dark:placeholder:text-white-100 font-bold !leading-[32.4px] caret-green-600',
-                    {
-                      'text-red-400 dark:text-red-600': amountError,
-                      'text-black-100 dark:text-white-100': !amountError,
-                      'text-[24px]': textInputValue.length < 12,
-                      'text-[22px]': textInputValue.length >= 12 && textInputValue.length < 15,
-                      'text-[20px]': textInputValue.length >= 15 && textInputValue.length < 18,
-                      'text-[18px]': textInputValue.length >= 18,
-                    },
-                  )}
-                  placeholder={'0'}
-                  value={textInputValue}
-                  ref={inputRef}
-                  onChange={(e) => setTextInputValue(e.target.value)}
-                  autoFocus
+          {/* Input Card */}
+          <View style={styles.card}>
+            <Text style={styles.label}>Enter amount to deposit</Text>
+            <View style={styles.inputRow}>
+              <TextInput
+                style={[
+                  styles.input,
+                  amountError
+                    ? styles.inputError
+                    : styles.inputOk,
+                  textInputValue.length < 12
+                    ? styles.inputLarge
+                    : textInputValue.length < 15
+                      ? styles.inputMedium
+                      : textInputValue.length < 18
+                        ? styles.inputSmall
+                        : styles.inputXSmall,
+                ]}
+                placeholder="0"
+                keyboardType="numeric"
+                value={textInputValue}
+                onChangeText={setTextInputValue}
+                autoFocus
+                placeholderTextColor="#d1d5db"
+              />
+              <View style={styles.tokenBtn}>
+                <Image
+                  source={{uri: sourceToken?.img ?? Images.Logos.GenericDark}}
+                  style={styles.tokenIcon}
+                  resizeMode="contain"
                 />
-                <button
-                  className={classNames(
-                    'flex justify-end items-center gap-2 shrink-0 py-1 pl-1.5 pr-2.5 rounded-[40px] bg-gray-100 dark:bg-gray-800 cursor-default',
-                  )}
-                >
-                  <div className='relative'>
-                    <img
-                      src={sourceToken?.img ?? Images.Logos.GenericDark}
-                      className='w-[24px] h-[24px] rounded-full'
-                      onError={imgOnError(Images.Logos.GenericDark)}
-                    />
-                  </div>
-
-                  <p className='dark:text-white-100 text-sm font-medium'>{sourceToken?.symbol}</p>
-                </button>
-              </div>
-              <div className='flex w-full justify-between'>
-                <Text size='sm' color='text-gray-600 dark:text-gray-400' className='font-medium'>
-                  {formatTokenAmount(sourceToken?.amount ?? '0', sourceToken?.symbol)}
-                </Text>
-                <div className='flex gap-1'>
-                  <button
-                    onClick={handle25Click}
-                    className='rounded-full bg-gray-100 dark:bg-gray-850 px-[6px] py-0.5 font-medium text-xs hover:bg-gray-50 dark:hover:bg-gray-800 dark:hover:text-white-100 hover:text-black-100 !leading-[19.2px] text-gray-600 dark:text-gray-400'
-                  >
-                    25%
-                  </button>
-                  <button
-                    onClick={handle50Click}
-                    className='rounded-full bg-gray-100 dark:bg-gray-850 px-[6px] py-0.5 font-medium text-xs hover:bg-gray-50 dark:hover:bg-gray-800 dark:hover:text-white-100 hover:text-black-100 !leading-[19.2px] text-gray-600 dark:text-gray-400'
-                  >
-                    50%
-                  </button>
-                  <button
-                    onClick={handleMaxClick}
-                    className='rounded-full bg-gray-100 dark:bg-gray-850 px-[6px] py-0.5 font-medium text-xs hover:bg-gray-50 dark:hover:bg-gray-800 dark:hover:text-white-100 hover:text-black-100 !leading-[19.2px] text-gray-600 dark:text-gray-400'
-                  >
-                    Max
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className='absolute p-[5px] bg-secondary-100 top-[130px] left-[calc(50%-20px)]'>
-              <ArrowDown className=' text-black-100 dark:text-white-100 rounded-full bg-green-600 p-1.5' size={30} />
-            </div>
-
-            <div className='flex flex-col gap-3 bg-secondary-100 rounded-xl p-5'>
-              <p className='text-gray-600 dark:text-gray-400 text-sm font-medium !leading-[22.4px]'>To</p>
-              <div className='flex rounded-2xl justify-between w-full items-center gap-2 h-[34px] p-[2px]'>
-                {isLoading ? (
-                  <div className='w-[50px] h-full z-0'>
-                    <Skeleton className='rounded-full bg-gray-50 dark:bg-gray-800' />
-                  </div>
-                ) : (
-                  <input
-                    type='number'
-                    readOnly
-                    className={classNames(
-                      'bg-transparent outline-none w-full text-left placeholder:font-bold placeholder:text-[24px] placeholder:text-black-100 dark:placeholder:text-white-100 font-bold !leading-[32.4px] text-black-100 dark:text-white-100',
-                      {
-                        'text-[24px]': amountOut.length < 12,
-                        'text-[22px]': amountOut.length >= 12 && amountOut.length < 15,
-                        'text-[20px]': amountOut.length >= 15 && amountOut.length < 18,
-                        'text-[18px]': amountOut.length >= 18,
-                      },
-                    )}
-                    placeholder={'0'}
-                    value={amountOut}
-                  />
-                )}
-                <button
-                  className={classNames(
-                    'flex justify-end items-center gap-2 shrink-0 py-1 pl-1.5 pr-2.5 rounded-[40px] bg-gray-100 dark:bg-gray-800 cursor-default',
-                  )}
-                >
-                  <div className='relative'>
-                    <img
-                      src={destinationToken?.img ?? Images.Logos.GenericDark}
-                      className='w-[24px] h-[24px] rounded-full'
-                      onError={imgOnError(Images.Logos.GenericDark)}
-                    />
-                  </div>
-
-                  <p className='dark:text-white-100 text-sm font-medium'>{destinationToken?.symbol}</p>
-                </button>
-              </div>
-            </div>
-
-            {displayFeeValue?.fiatValue && new BigNumber(amount).gt(0) && !isLoading && (
-              <div className='flex justify-between'>
-                <Text size='sm' color='text-gray-600 dark:text-gray-400' className='font-medium'>
-                  Fees
-                </Text>
-                <div
-                  onClick={() => setShowFeesSettingSheet(true)}
-                  className='flex gap-x-1 items-center hover:cursor-pointer ml-auto'
-                >
-                  <GasPump size={20} className='text-gray-800 dark:text-gray-200' />
-                  <Text size='xs' color='text-gray-800 dark:text-gray-200' className='font-medium'>
-                    {displayFeeValue?.fiatValue}
-                  </Text>
-                  <CaretDown size={16} className='text-gray-800 dark:text-gray-200' />
-                </div>
-              </div>
-            )}
-          </div>
-
-          {(error || gasError || ledgerError) && (
-            <p className='text-sm font-bold text-red-600 px-2 mt-2'>{error || gasError || ledgerError}</p>
-          )}
-
-          <button
-            className={classNames(
-              'w-full mt-auto text-md font-bold text-white-100 h-12 rounded-full cursor-pointer bg-green-600',
-              {
-                'hover:bg-green-500 ': !amountError && !isReviewDisabled,
-                'bg-red-600': !!amountError,
-                'opacity-40': isReviewDisabled,
-              },
-            )}
-            disabled={isReviewDisabled}
-            onClick={() => setShowReviewTxSheet(true)}
-          >
-            {amountError ? amountError : 'Swap now'}
-          </button>
-          {mode === 'deposit' && (
-            <div className='flex items-center gap-1 mt-3.5'>
-              <div className='cursor-pointer' onClick={() => setIsChecked(!isChecked)}>
-                {isChecked ? (
-                  <CheckSquare size={24} className='p-0.5 text-green-600' weight='fill' />
-                ) : (
-                  <Square size={24} className='p-0.5 text-green-600' />
-                )}
-              </div>
-              <Text size='xs' color='dark:text-gray-400 text-gray-600'>
-                I agree to the&nbsp;
-                <p className='text-green-500 font-medium cursor-pointer' onClick={() => setShowTerms(true)}>
-                  Terms & Conditions
-                </p>
+                <Text style={styles.tokenLabel}>{sourceToken?.symbol}</Text>
+              </View>
+            </View>
+            <View style={styles.rowBetween}>
+              <Text style={styles.balanceText}>
+                {formatTokenAmount(sourceToken?.amount ?? '0', sourceToken?.symbol)}
               </Text>
-            </div>
+              <View style={styles.pctRow}>
+                <TouchableOpacity style={styles.pctBtn} onPress={handle25Click}>
+                  <Text style={styles.pctBtnText}>25%</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.pctBtn} onPress={handle50Click}>
+                  <Text style={styles.pctBtnText}>50%</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.pctBtn} onPress={handleMaxClick}>
+                  <Text style={styles.pctBtnText}>Max</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+
+          {/* Arrow */}
+          <View style={styles.arrowContainer}>
+            <ArrowDown size={30} color="#22c55e" style={styles.arrowIcon} />
+          </View>
+
+          {/* Output Card */}
+          <View style={styles.card}>
+            <Text style={styles.label}>To</Text>
+            <View style={styles.inputRow}>
+              {isLoading ? (
+                <View style={styles.tokenBtn}>
+                  {/* Replace with a skeleton loader if you have one for RN */}
+                  <Text style={{ color: '#64748b' }}>...</Text>
+                </View>
+              ) : (
+                <TextInput
+                  style={[styles.input, styles.inputOk]}
+                  placeholder="0"
+                  value={amountOut}
+                  editable={false}
+                  placeholderTextColor="#d1d5db"
+                />
+              )}
+              <View style={styles.tokenBtn}>
+                <Image
+                  source={{uri: destinationToken?.img ?? Images.Logos.GenericDark}}
+                  style={styles.tokenIcon}
+                  resizeMode="contain"
+                />
+                <Text style={styles.tokenLabel}>{destinationToken?.symbol}</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Fees */}
+          {(displayFeeValue?.fiatValue && new BigNumber(amount).gt(0) && !isLoading) && (
+            <View style={styles.rowBetween}>
+              <Text style={styles.feeLabel}>Fees</Text>
+              <TouchableOpacity style={styles.feeInfo} onPress={() => setShowFeesSettingSheet(true)}>
+                <GasPump size={20} color="#0f172a" />
+                <Text style={styles.feeText}>{displayFeeValue?.fiatValue}</Text>
+                <CaretDown size={16} color="#0f172a" />
+              </TouchableOpacity>
+            </View>
           )}
-        </div>
-      </>
+
+          {/* Error */}
+          {(error || gasError || ledgerError) && (
+            <Text style={styles.errorText}>{error || gasError || ledgerError}</Text>
+          )}
+
+          {/* Main Action */}
+          <TouchableOpacity
+            style={[
+              styles.actionBtn,
+              amountError ? styles.actionBtnError : isReviewDisabled ? styles.actionBtnDisabled : {},
+            ]}
+            disabled={isReviewDisabled}
+            onPress={() => setShowReviewTxSheet(true)}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.actionBtnLabel}>
+              {amountError ? amountError : 'Swap now'}
+            </Text>
+          </TouchableOpacity>
+
+          {/* Terms agreement */}
+          {mode === 'deposit' && (
+            <View style={styles.agreeRow}>
+              <TouchableOpacity onPress={() => setIsChecked(!isChecked)}>
+                {isChecked
+                  ? <CheckSquare size={24} color="#22c55e" weight="fill" />
+                  : <Square size={24} color="#22c55e" />}
+              </TouchableOpacity>
+              <Text style={styles.termsText}>
+                I agree to the{' '}
+                <Text
+                  style={styles.termsLink}
+                  onPress={() => setShowTerms(true)}
+                >
+                  Terms & Conditions
+                </Text>
+              </Text>
+            </View>
+          )}
+
+        </ScrollView>
+      </KeyboardAvoidingView>
+
+      {/* ReviewTxSheet */}
       {showReviewTxSheet && sourceToken && destinationToken && (
         <ReviewTxSheet
           amountIn={amount}
@@ -480,6 +437,7 @@ const EarnPage = observer(() => {
           showLedgerPopup={showLedgerPopup}
         />
       )}
+      {/* Gas Price Modal/Sheet */}
       <GasPriceOptions
         recommendedGasLimit={recommendedGasLimit.toString()}
         gasLimit={userPreferredGasLimit?.toString() ?? recommendedGasLimit.toString()}
@@ -494,7 +452,7 @@ const EarnPage = observer(() => {
         rootBalanceStore={rootBalanceStore}
       >
         <DisplayFee
-          className='hidden'
+          style={{ display: 'none' }} // You can skip rendering
           setDisplayFeeValue={setDisplayFeeValue}
           setShowFeesSettingSheet={setShowFeesSettingSheet}
         />
@@ -505,9 +463,148 @@ const EarnPage = observer(() => {
         />
       </GasPriceOptions>
     </>
-    // </PopupLayout>
-    // </div>
   );
 });
 
 export default EarnPage;
+
+const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    paddingHorizontal: 24,
+    paddingBottom: 24,
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  iconBtn: { padding: 6 },
+  headerTitle: { fontWeight: 'bold', fontSize: 18, color: '#1e293b' },
+  descText: {
+    alignSelf: 'flex-start',
+    marginBottom: 20,
+    color: '#64748b',
+    fontSize: 14,
+    fontWeight: '400',
+  },
+  strongGreen: { color: '#22c55e', fontWeight: 'bold' },
+  card: {
+    width: '100%',
+    backgroundColor: '#f3f4f6',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+  },
+  label: {
+    color: '#64748b',
+    fontSize: 14,
+    fontWeight: '500',
+    marginBottom: 8,
+  },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+    borderRadius: 20,
+    paddingHorizontal: 4,
+    height: 36,
+  },
+  input: {
+    backgroundColor: 'transparent',
+    flex: 1,
+    textAlign: 'left',
+    fontWeight: 'bold',
+    color: '#111827',
+    lineHeight: 32,
+    padding: 0,
+    margin: 0,
+  },
+  inputLarge: { fontSize: 24 },
+  inputMedium: { fontSize: 22 },
+  inputSmall: { fontSize: 20 },
+  inputXSmall: { fontSize: 18 },
+  inputError: { color: '#f87171' }, // red-400
+  inputOk: { color: '#111827' }, // black-100
+  tokenBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#e5e7eb',
+    borderRadius: 40,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    marginLeft: 8,
+  },
+  tokenIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#fff',
+    marginRight: 4,
+  },
+  tokenLabel: {
+    fontSize: 14,
+    color: '#1e293b',
+    fontWeight: '500',
+  },
+  rowBetween: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 6,
+  },
+  balanceText: {
+    fontSize: 13,
+    color: '#64748b',
+    fontWeight: '500',
+  },
+  pctRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  pctBtn: {
+    backgroundColor: '#e5e7eb',
+    borderRadius: 9999,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    marginLeft: 2,
+  },
+  pctBtnText: {
+    fontSize: 12,
+    color: '#64748b',
+    fontWeight: '500',
+  },
+  arrowContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 8,
+  },
+  arrowIcon: {
+    backgroundColor: '#22c55e',
+    borderRadius: 15,
+    padding: 4,
+  },
+  feeLabel: { fontSize: 14, color: '#64748b', fontWeight: '500' },
+  feeInfo: { flexDirection: 'row', alignItems: 'center', marginLeft: 'auto' },
+  feeText: { fontSize: 12, color: '#0f172a', fontWeight: '600', marginHorizontal: 4 },
+  errorText: { color: '#dc2626', fontSize: 14, fontWeight: '700', marginVertical: 6, textAlign: 'center' },
+  actionBtn: {
+    width: '100%',
+    height: 48,
+    borderRadius: 9999,
+    backgroundColor: '#22c55e',
+    marginTop: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  actionBtnLabel: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+  actionBtnDisabled: { opacity: 0.4 },
+  actionBtnError: { backgroundColor: '#dc2626' },
+  agreeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 18,
+    gap: 6,
+  },
+  termsText: { fontSize: 12, color: '#64748b', fontWeight: '400', marginLeft: 6 },
+  termsLink: { color: '#22c55e', fontWeight: '500' },
+});

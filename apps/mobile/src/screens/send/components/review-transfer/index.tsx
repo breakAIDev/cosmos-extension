@@ -1,25 +1,26 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { View, StyleSheet } from 'react-native';
+import { observer } from 'mobx-react-lite';
+import { useQuery } from '@tanstack/react-query';
+
 import { useAddress, useChainsStore, useFeatureFlags, useGetAptosGasPrices } from '@leapwallet/cosmos-wallet-hooks';
 import { isAptosChain, isSolanaChain, SolanaTx, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { SkipSupportedAsset } from '@leapwallet/elements-core';
 import { useAllSkipAssets, useDebouncedValue, useSkipSupportedChains, useTransfer } from '@leapwallet/elements-hooks';
 import { useTransferReturnType } from '@leapwallet/elements-hooks/dist/use-transfer';
-import { useQuery } from '@tanstack/react-query';
-import { AutoAdjustAmountSheet } from 'components/auto-adjust-amount-sheet';
-import Text from 'components/text';
-import { Button } from 'components/ui/button';
-import { FIXED_FEE_CHAINS } from 'config/constants';
-import useActiveWallet from 'hooks/settings/useActiveWallet';
-import { useChainInfos } from 'hooks/useChainInfos';
-import { useEffectiveAmountValue } from 'hooks/useEffectiveAmountValue';
-import { useWalletClient } from 'hooks/useWalletClient';
-import { observer } from 'mobx-react-lite';
-import { useSendContext } from 'pages/send/context';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { rootDenomsStore, rootERC20DenomsStore } from 'stores/denoms-store-instance';
-import { rootBalanceStore } from 'stores/root-store';
-import { selectedNetworkStore } from 'stores/selected-network-store';
-import { cn } from 'utils/cn';
+
+import { AutoAdjustAmountSheet } from '../../../../components/auto-adjust-amount-sheet';
+import { Button } from '../../../../components/ui/button'; // Should be a RN-compatible Button
+import { FIXED_FEE_CHAINS } from '../../../../services/config/constants';
+import useActiveWallet from '../../../../hooks/settings/useActiveWallet';
+import { useChainInfos } from '../../../../hooks/useChainInfos';
+import { useEffectiveAmountValue } from '../../../../hooks/useEffectiveAmountValue';
+import { useWalletClient } from '../../../../hooks/useWalletClient';
+import { useSendContext } from '../../../send/context';
+
+import { rootDenomsStore, rootERC20DenomsStore } from '../../../../context/denoms-store-instance';
+import { rootBalanceStore } from '../../../../context/root-store';
+import { selectedNetworkStore } from '../../../../context/selected-network-store';
 
 import { FeesView } from '../fees-view';
 import { FixedFee } from '../fees-view/FixedFee';
@@ -86,10 +87,8 @@ export const ReviewTransfer = observer(({ setShowTxPage }: { setShowTxPage: (val
       if (selectedToken?.ibcDenom) {
         return skipDenom === selectedToken.ibcDenom;
       }
-
       return skipDenom === selectedToken?.coinMinimalDenom;
     });
-
     if (!skipAsset) {
       return {
         denom: (selectedToken?.ibcDenom || selectedToken?.coinMinimalDenom) ?? '',
@@ -121,7 +120,6 @@ export const ReviewTransfer = observer(({ setShowTxPage }: { setShowTxPage: (val
       const asset = allSkipAssets?.[chain?.chainId]?.find(
         (asset) => asset.denom === Object.values(chain?.nativeDenoms)[0]?.coinMinimalDenom,
       );
-
       return asset;
     }
     return undefined;
@@ -131,7 +129,7 @@ export const ReviewTransfer = observer(({ setShowTxPage }: { setShowTxPage: (val
     amount: debouncedAmount,
     asset: asset,
     destinationChain: elementsChains?.find(
-      //@ts-ignore
+      // @ts-ignore
       (d) => d.chainId === chains[selectedAddress?.chainName]?.chainId,
     ),
     destinationAsset: destinationAsset,
@@ -166,7 +164,7 @@ export const ReviewTransfer = observer(({ setShowTxPage }: { setShowTxPage: (val
   );
 
   useEffect(() => {
-    //@ts-ignore
+    // @ts-ignore
     if (transferData?.messages) {
       setTransferData(transferData);
     } else {
@@ -177,25 +175,15 @@ export const ReviewTransfer = observer(({ setShowTxPage }: { setShowTxPage: (val
         gasFeesError: undefined,
       });
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    selectedToken?.coinMinimalDenom,
-    selectedAddress?.chainName,
-    
-    transferData?.messages,
-  ]);
+  }, [selectedToken?.coinMinimalDenom, selectedAddress?.chainName, transferData?.messages, transferData, setTransferData]);
 
   useEffect(() => {
     if (isInitiaTxn) {
       if (
-        
         !transferData?.isLoadingMessages &&
-        
         !transferData?.isLoadingRoute &&
         selectedAddress?.chainName &&
         chains[selectedAddress?.chainName as SupportedChain]?.chainId !== chains[sendActiveChain]?.chainId &&
-        
         !transferData?.messages
       ) {
         setRouteError(true);
@@ -208,11 +196,8 @@ export const ReviewTransfer = observer(({ setShowTxPage }: { setShowTxPage: (val
     isInitiaTxn,
     selectedAddress?.chainName,
     sendActiveChain,
-    
     transferData?.isLoadingMessages,
-    
     transferData?.messages,
-    
     transferData?.isLoadingRoute,
   ]);
 
@@ -220,7 +205,6 @@ export const ReviewTransfer = observer(({ setShowTxPage }: { setShowTxPage: (val
     if (!!addressError && !!selectedAddress) {
       return `Select a different token or address`;
     }
-
     if (!inputAmount) return 'Enter amount';
     if (routeError) return 'No routes found';
 
@@ -289,13 +273,10 @@ export const ReviewTransfer = observer(({ setShowTxPage }: { setShowTxPage: (val
   const isReviewDisabled = useMemo(() => {
     if (
       isInitiaTxn &&
-      
       (transferData?.isLoadingRoute ||
-        
         transferData?.isLoadingMessages ||
         (selectedAddress?.chainName &&
           chains[selectedAddress?.chainName as SupportedChain]?.chainId !== chains[sendActiveChain]?.chainId &&
-          
           !transferData?.messages))
     ) {
       return true;
@@ -314,11 +295,8 @@ export const ReviewTransfer = observer(({ setShowTxPage }: { setShowTxPage: (val
     );
   }, [
     isInitiaTxn,
-    
     transferData?.isLoadingRoute,
-    
     transferData?.isLoadingMessages,
-    
     transferData?.messages,
     selectedAddress?.chainName,
     gasError,
@@ -340,12 +318,12 @@ export const ReviewTransfer = observer(({ setShowTxPage }: { setShowTxPage: (val
   };
 
   if (isAptosTx && aptosGasPriceStatus === 'loading') {
-    return <></>;
+    return null;
   }
 
   return (
-    <>
-      <div className='flex flex-col gap-4 w-full p-4 mt-auto sticky bottom-0 bg-secondary-100 '>
+    <View style={styles.container}>
+      <View style={styles.card}>
         {inputAmount &&
           (FIXED_FEE_CHAINS.includes(sendActiveChain) ? (
             <FixedFee />
@@ -353,17 +331,18 @@ export const ReviewTransfer = observer(({ setShowTxPage }: { setShowTxPage: (val
             <FeesView rootBalanceStore={rootBalanceStore} rootDenomsStore={rootDenomsStore} />
           ))}
         <Button
-          onClick={showAdjustmentSheet}
+          onPress={showAdjustmentSheet}
           disabled={isReviewDisabled}
-          data-testing-id='send-review-transfer-btn'
-          className={cn('w-full', {
-            '!bg-red-300 text-white-100':
-              addressError || amountError || routeError || gasError || minimumRentAmountError,
-          })}
+          // You may want to handle conditional styles using your custom Button
+          style={[
+            styles.button,
+            (addressError || amountError || routeError || gasError || minimumRentAmountError) && styles.buttonError,
+          ]}
+          testID="send-review-transfer-btn"
         >
           {btnText}
         </Button>
-      </div>
+      </View>
 
       {selectedToken && fee && checkForAutoAdjust ? (
         <AutoAdjustAmountSheet
@@ -388,6 +367,33 @@ export const ReviewTransfer = observer(({ setShowTxPage }: { setShowTxPage: (val
         setShowTxPage={setShowTxPage}
         rootERC20DenomsStore={rootERC20DenomsStore}
       />
-    </>
+    </View>
   );
+});
+
+const styles = StyleSheet.create({
+  container: {
+    width: '100%',
+    padding: 16,
+    paddingBottom: 24,
+    position: 'absolute',
+    bottom: 0,
+    backgroundColor: '#F7F8FA', // secondary-100
+    zIndex: 10,
+  },
+  card: {
+    flexDirection: 'column',
+    gap: 16, // If unsupported, use marginBottom
+    width: '100%',
+  },
+  button: {
+    width: '100%',
+    backgroundColor: '#0564E4',
+    borderRadius: 12,
+    paddingVertical: 16,
+    marginTop: 12,
+  },
+  buttonError: {
+    backgroundColor: '#EF4444',
+  },
 });

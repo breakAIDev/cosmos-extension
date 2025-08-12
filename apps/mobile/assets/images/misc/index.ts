@@ -1,5 +1,3 @@
-import { Colors } from 'theme/colors';
-
 import Add from './add.svg';
 import AddCircle from './add-circle.svg';
 import AddContact from './add-contact.svg';
@@ -183,6 +181,7 @@ import WalletIcon from './wallet-sample.svg';
 import WalletIconTeal from './wallet-teal.svg';
 import WalletIconWhite from './wallet-white.svg';
 import Warning from './warning.svg';
+import { walletColors } from '../../../src/theme/colors';
 
 export const ChainChecks: Record<string, string> = {
   cosmos: CheckCosmos,
@@ -391,5 +390,5 @@ export const getWalletIconAtIndex = (ind: number, isWatchWallet?: boolean) => {
     return GreyEye;
   }
   const wallets = [Wallet0, Wallet1, Wallet2, Wallet3, Wallet4, Wallet5, Wallet6, Wallet7, Wallet8, Wallet9];
-  return wallets[ind % Colors.walletColors.length] ?? Wallet0;
+  return wallets[ind % walletColors.length] ?? Wallet0;
 };

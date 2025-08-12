@@ -16,11 +16,11 @@ import {
 import { RootCW20DenomsStore, RootDenomsStore, RootERC20DenomsStore } from '@leapwallet/cosmos-wallet-store';
 import { useTransferReturnType } from '@leapwallet/elements-hooks/dist/use-transfer';
 import { EthWallet } from '@leapwallet/leap-keychain';
-import { useSecretWallet } from 'hooks/wallet/useScrtWallet';
-import { Wallet } from 'hooks/wallet/useWallet';
+import { useSecretWallet } from '../../hooks/wallet/useScrtWallet';
+import { Wallet } from '../../hooks/wallet/useWallet';
 import { observer } from 'mobx-react-lite';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { assert } from 'utils/assert';
+import { assert } from '../../utils/assert';
 
 const useGetWallet = Wallet.useGetWallet;
 const useAptosSigner = Wallet.useAptosSigner;
@@ -208,7 +208,7 @@ export const SendContextProvider: React.FC<SendContextProviderProps> = observer(
     useEffect(() => {
       setIsIbcUnwindingDisabled(false);
       setCustomIbcChannelId(undefined);
-    }, [selectedToken, selectedAddress]);
+    }, [selectedToken, selectedAddress, setCustomIbcChannelId]);
 
     const value = useMemo(() => {
       const fromChain = getBlockChainFromAddress(currentWalletAddress);

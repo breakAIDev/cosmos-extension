@@ -109,7 +109,7 @@ export interface QueryValidatorRequestSDKType {
 /** QueryValidatorResponse is response type for the Query/Validator RPC method */
 export interface QueryValidatorResponse {
   /** validator defines the the validator info. */
-  validator: Validator;
+  validator: Validator | undefined;
 }
 export interface QueryValidatorResponseProtoMsg {
   typeUrl: '/cosmos.staking.v1beta1.QueryValidatorResponse';
@@ -359,7 +359,7 @@ export interface QueryUnbondingDelegationRequestSDKType {
  */
 export interface QueryUnbondingDelegationResponse {
   /** unbond defines the unbonding information of a delegation. */
-  unbond: UnbondingDelegation;
+  unbond: UnbondingDelegation | undefined;
 }
 export interface QueryUnbondingDelegationResponseProtoMsg {
   typeUrl: '/cosmos.staking.v1beta1.QueryUnbondingDelegationResponse';
@@ -720,7 +720,7 @@ export interface QueryDelegatorValidatorRequestSDKType {
  */
 export interface QueryDelegatorValidatorResponse {
   /** validator defines the the validator info. */
-  validator: Validator;
+  validator: Validator | undefined;
 }
 export interface QueryDelegatorValidatorResponseProtoMsg {
   typeUrl: '/cosmos.staking.v1beta1.QueryDelegatorValidatorResponse';
@@ -824,7 +824,7 @@ export interface QueryPoolRequestSDKType {}
 /** QueryPoolResponse is response type for the Query/Pool RPC method. */
 export interface QueryPoolResponse {
   /** pool defines the pool info. */
-  pool: Pool;
+  pool: Pool | undefined;
 }
 export interface QueryPoolResponseProtoMsg {
   typeUrl: '/cosmos.staking.v1beta1.QueryPoolResponse';
@@ -860,7 +860,7 @@ export interface QueryParamsRequestSDKType {}
 /** QueryParamsResponse is response type for the Query/Params RPC method. */
 export interface QueryParamsResponse {
   /** params holds all the parameters of this module. */
-  params: Params;
+  params: Params | undefined;
 }
 export interface QueryParamsResponseProtoMsg {
   typeUrl: '/cosmos.staking.v1beta1.QueryParamsResponse';
@@ -1150,7 +1150,6 @@ export const QueryValidatorResponse = {
   },
   fromPartial(object: Partial<QueryValidatorResponse>): QueryValidatorResponse {
     const message = createBaseQueryValidatorResponse();
-    
     
     message.validator =
       object.validator !== undefined && object.validator !== null ? Validator.fromPartial(object.validator) : undefined;
@@ -1808,7 +1807,6 @@ export const QueryUnbondingDelegationResponse = {
   },
   fromPartial(object: Partial<QueryUnbondingDelegationResponse>): QueryUnbondingDelegationResponse {
     const message = createBaseQueryUnbondingDelegationResponse();
-    
     
     message.unbond =
       object.unbond !== undefined && object.unbond !== null
@@ -2680,7 +2678,6 @@ export const QueryDelegatorValidatorResponse = {
   fromPartial(object: Partial<QueryDelegatorValidatorResponse>): QueryDelegatorValidatorResponse {
     const message = createBaseQueryDelegatorValidatorResponse();
     
-    
     message.validator =
       object.validator !== undefined && object.validator !== null ? Validator.fromPartial(object.validator) : undefined;
     return message;
@@ -2948,7 +2945,6 @@ export const QueryPoolResponse = {
   fromPartial(object: Partial<QueryPoolResponse>): QueryPoolResponse {
     const message = createBaseQueryPoolResponse();
     
-    
     message.pool = object.pool !== undefined && object.pool !== null ? Pool.fromPartial(object.pool) : undefined;
     return message;
   },
@@ -3074,7 +3070,6 @@ export const QueryParamsResponse = {
   },
   fromPartial(object: Partial<QueryParamsResponse>): QueryParamsResponse {
     const message = createBaseQueryParamsResponse();
-    
     
     message.params =
       object.params !== undefined && object.params !== null ? Params.fromPartial(object.params) : undefined;

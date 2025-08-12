@@ -1,19 +1,19 @@
-import { Faders, X } from '@phosphor-icons/react';
-import { Button } from 'components/ui/button';
-import { AGGREGATED_CHAIN_KEY } from 'config/constants';
-import { AnimatePresence } from 'framer-motion';
-import { motion } from 'framer-motion';
-import { useActiveChain } from 'hooks/settings/useActiveChain';
-import { useSelectedNetwork } from 'hooks/settings/useNetwork';
-import { SearchIcon } from 'icons/search-icon';
-import React, { useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { AggregatedSupportedChain } from 'types/utility';
-import { transition250 } from 'utils/motion-variants';
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { Faders, X } from 'phosphor-react-native';
+import { Button } from '../../../../components/ui/button';
+import { AGGREGATED_CHAIN_KEY } from '../../../../services/config/constants';
+import { useActiveChain } from '../../../../hooks/settings/useActiveChain';
+import { useSelectedNetwork } from '../../../../hooks/settings/useNetwork';
+import { SearchIcon } from '../../../../../assets/icons/search-icon';
+import { useNavigation } from '@react-navigation/native';
+import { MotiView, AnimatePresence } from 'moti';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 
 const searchButtonVariants = {
-  hidden: { opacity: 0, scale: 0.95, rotate: 90 },
-  visible: { opacity: 1, scale: 1, rotate: 0 },
+  from: { opacity: 0, scale: 0.95, rotate: '90deg' },
+  animate: { opacity: 1, scale: 1, rotate: '0deg' },
+  exit: { opacity: 0, scale: 0.95, rotate: '90deg' },
 };
 
 export const TokenSectionHeader = ({
@@ -23,71 +23,88 @@ export const TokenSectionHeader = ({
   showSearch: boolean;
   toggleSearchTokensInput: () => void;
 }) => {
-  const activeChain = useActiveChain() as AggregatedSupportedChain;
+  const activeChain = useActiveChain();
   const selectedNetwork = useSelectedNetwork();
+  const navigation = useNavigation();
 
-  const navigate = useNavigate();
-
-  const handleGearActionButtonClick = useCallback(() => {
+  const handleGearActionButtonClick = () => {
     if (activeChain === 'secret' && selectedNetwork === 'mainnet') {
-      navigate('/snip20-manage-tokens?');
+      navigation.navigate('Snip20ManageTokens');
       return;
     }
-
-    navigate('/manage-tokens');
-  }, [activeChain, navigate, selectedNetwork]);
+    navigation.navigate('ManageTokens');
+  };
 
   return (
-    <>
-      <header className='flex items-center justify-between mb-3'>
-        <span className='text-sm font-bold'>Your tokens</span>
-
-        <div className='flex items-center gap-3'>
+    <View style={styles.header}>
+      <Text style={styles.title}>Your tokens</Text>
+      <View style={styles.actions}>
+        <Button
+          variant="secondary"
+          size="icon"
+          onPress={toggleSearchTokensInput}
+          style={styles.iconButton}
+        >
+          <AnimatePresence>
+            {showSearch ? (
+              <MotiView
+                from={searchButtonVariants.from}
+                animate={searchButtonVariants.animate}
+                exit={searchButtonVariants.exit}
+                key="search"
+                transition={{ type: 'timing', duration: 250 }}
+              >
+                <X size={18} />
+              </MotiView>
+            ) : (
+              <MotiView
+                from={searchButtonVariants.from}
+                animate={searchButtonVariants.animate}
+                exit={searchButtonVariants.exit}
+                key="clear"
+                transition={{ type: 'timing', duration: 250 }}
+              >
+                <SearchIcon size={18} />
+              </MotiView>
+            )}
+          </AnimatePresence>
+        </Button>
+        {activeChain !== AGGREGATED_CHAIN_KEY as SupportedChain && (
           <Button
-            variant='secondary'
-            size='icon'
-            onClick={toggleSearchTokensInput}
-            className='p-1.5 h-auto bg-secondary-100 hover:bg-secondary-200'
+            variant="secondary"
+            size="icon"
+            onPress={handleGearActionButtonClick}
+            style={styles.iconButton}
           >
-            <AnimatePresence mode='wait'>
-              {showSearch ? (
-                <motion.div
-                  key='search'
-                  initial='hidden'
-                  animate='visible'
-                  variants={searchButtonVariants}
-                  transition={transition250}
-                >
-                  <X className='size-4' />
-                </motion.div>
-              ) : (
-                <motion.div
-                  key='clear'
-                  initial='hidden'
-                  animate='visible'
-                  variants={searchButtonVariants}
-                  transition={transition250}
-                >
-                  <SearchIcon className='size-4' />
-                </motion.div>
-              )}
-            </AnimatePresence>
-            <span className='sr-only'>Search tokens</span>
+            <Faders size={16} style={{ transform: [{ rotate: '-90deg' }] }} />
           </Button>
-
-          {activeChain !== AGGREGATED_CHAIN_KEY && (
-            <Button
-              variant='secondary'
-              size='icon'
-              onClick={handleGearActionButtonClick}
-              className='p-1.5 h-auto bg-secondary-100 hover:bg-secondary-200'
-            >
-              <Faders size={16} className='-rotate-90' />
-              <span className='sr-only'>Manage tokens</span>
-            </Button>
-          )}
-        </div>
-      </header>
-    </>
+        )}
+      </View>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  title: {
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  actions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  iconButton: {
+    padding: 6,
+    height: 'auto',
+    backgroundColor: '#f6f6f6', // Secondary-100
+    marginLeft: 8,
+    borderRadius: 8,
+  },
+});

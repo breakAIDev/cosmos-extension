@@ -1,12 +1,13 @@
+import React, { useMemo, useState } from 'react';
+import { View, FlatList, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { observer } from 'mobx-react-lite';
 import { ChainInfo, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { ChainFeatureFlagsStore, ChainInfosStore } from '@leapwallet/cosmos-wallet-store';
-import BottomModal from '../bottom-modal';
-import Text from 'components/text';
-import { SearchInput } from 'components/ui/input/search-input';
-import { GenericLight } from 'images/logos';
-import { observer } from 'mobx-react-lite';
-import React, { useMemo, useState } from 'react';
-import { imgOnError } from 'utils/imgOnError';
+import BottomModal from '../../../../components/bottom-modal'; // Must be a RN modal
+import Text from '../../../../components/text';
+import { SearchInput } from '../../../../components/ui/input/search-input';
+import { GenericLight } from '../../../../../assets/images/logos';
+import { ResizeMode } from 'expo-av';
 
 type SelectInitiaChainSheetProps = {
   isOpen: boolean;
@@ -33,7 +34,9 @@ export const SelectInitiaChainSheet: React.FC<SelectInitiaChainSheetProps> = obs
             _minitiaChains.push(chains[c as SupportedChain]);
           }
           const _chain = Object.values(chainInfoStore.chainInfos).find((chainInfo) =>
-            selectedNetwork === 'testnet' ? chainInfo?.testnetChainId === c : chainInfo?.chainId === c,
+            selectedNetwork === 'testnet'
+              ? chainInfo?.testnetChainId === c
+              : chainInfo?.chainId === c
           );
           if (_chain) {
             _minitiaChains.push(_chain);
@@ -43,56 +46,91 @@ export const SelectInitiaChainSheet: React.FC<SelectInitiaChainSheetProps> = obs
     }, [chainFeatureFlags, chainInfoStore.chainInfos, chains, selectedNetwork]);
 
     const initiaChains = useMemo(() => {
-      return minitiaChains.filter((chain) => chain?.chainName.toLowerCase().includes(searchedTerm.toLowerCase()));
+      return minitiaChains.filter((chain) =>
+        chain?.chainName.toLowerCase().includes(searchedTerm.toLowerCase())
+      );
     }, [minitiaChains, searchedTerm]);
 
     return (
       <BottomModal
-        title='Select Recipient'
+        title="Select Recipient"
         onClose={() => {
           setSearchedTerm('');
           onClose();
         }}
         isOpen={isOpen}
         closeOnBackdropClick={true}
-        containerClassName='h-[calc(100%-34px)]'
-        className='p-6'
+        containerStyle={{ height: '90%' }}
+        style={styles.modalPadding}
       >
-        <div className='flex flex-col gap-y-6 h-full'>
+        <View style={styles.flexCol}>
           <SearchInput
             value={searchedTerm}
-            onChange={(e) => setSearchedTerm(e.target.value)}
-            placeholder='Search chain'
+            onChangeText={setSearchedTerm}
+            placeholder="Search chain"
             onClear={() => setSearchedTerm('')}
           />
-          <div className='flex flex-col'>
-            {initiaChains.map((chain) => {
-              if (!chain) return null;
-              return (
-                <div
-                  key={chain.key}
-                  onClick={() => {
-                    setSelectedInitiaChain(chain.key);
-                    onClose();
-                  }}
-                  className='flex items-center gap-x-3 py-3 border-b dark:border-b-gray-850 border-b-gray-100 cursor-pointer'
-                >
-                  <img
-                    src={chain.chainSymbolImageUrl}
-                    onError={imgOnError(GenericLight)}
-                    width={40}
-                    height={40}
-                    className='rounded-full'
-                  />
-                  <Text size='md' color='text-gray-800 dark:text-white-100' className='font-bold'>
-                    {chain.chainName}
-                  </Text>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+          <FlatList
+            data={initiaChains}
+            keyExtractor={(chain) => chain.key}
+            renderItem={({ item: chain }) => (
+              <TouchableOpacity
+                style={styles.chainRow}
+                onPress={() => {
+                  setSelectedInitiaChain(chain.key);
+                  onClose();
+                }}
+                activeOpacity={0.7}
+              >
+                <Image
+                  source={{ uri: chain.chainSymbolImageUrl ?? GenericLight}}
+                  onError={() => {}}
+                  style={styles.chainImg}
+                  resizeMode={"cover" as ResizeMode}
+                />
+                <Text size="md" style={styles.chainText}>
+                  {chain.chainName}
+                </Text>
+              </TouchableOpacity>
+            )}
+            contentContainerStyle={styles.chainList}
+          />
+        </View>
       </BottomModal>
     );
-  },
+  }
 );
+
+const styles = StyleSheet.create({
+  modalPadding: {
+    padding: 24,
+  },
+  flexCol: {
+    flexDirection: 'column',
+    gap: 24,
+    flex: 1,
+  },
+  chainList: {
+    flexGrow: 1,
+    marginTop: 12,
+  },
+  chainRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#E5E7EB',
+  },
+  chainImg: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#F4F4F4',
+  },
+  chainText: {
+    fontWeight: 'bold',
+    color: '#1F2937',
+    flex: 1,
+  },
+});

@@ -1,14 +1,15 @@
 import { useAddress, useGetExplorerTxnUrl } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { ParsedMessageType } from '@leapwallet/parser-parfait';
-import { ArrowSquareOut } from '@phosphor-icons/react';
-import BottomModal from 'components/new-bottom-modal';
-import { Button } from 'components/ui/button';
-import { useActiveChain } from 'hooks/settings/useActiveChain';
-import { useSelectedNetwork } from 'hooks/settings/useNetwork';
-import { useChainInfos } from 'hooks/useChainInfos';
 import React, { useEffect, useMemo, useState } from 'react';
-import { AddressBook } from 'utils/addressbook';
+import { View, Text, StyleSheet, Linking } from 'react-native';
+import { ArrowSquareOut } from 'phosphor-react-native'; // Make sure this is installed
+import BottomModal from '../../../components/new-bottom-modal'; // Must be RN compatible!
+import { Button } from '../../../components/ui/button';
+import { useActiveChain } from '../../../hooks/settings/useActiveChain';
+import { useSelectedNetwork } from '../../../hooks/settings/useNetwork';
+import { useChainInfos } from '../../../hooks/useChainInfos';
+import { AddressBook } from '../../../utils/addressbook';
 
 import { SelectedTx } from './ChainActivity';
 import { TxDetailsContent } from './tx-details-content';
@@ -18,21 +19,6 @@ export type TxDetailsProps = {
   tx: SelectedTx | null;
   onBack: () => void;
   forceChain?: SupportedChain;
-};
-
-export type ToExplorer = {
-  mainnet?:
-    | {
-        readonly name: string;
-        readonly txUrl: string;
-      }
-    | undefined;
-  testnet?:
-    | {
-        readonly name: string;
-        readonly txUrl: string;
-      }
-    | undefined;
 };
 
 const emptyContact = { name: '', emoji: 0 };
@@ -73,21 +59,57 @@ export function TxDetails({ open, tx, onBack, forceChain }: TxDetailsProps) {
   return (
     <BottomModal
       fullScreen
-      title='Transaction details'
+      title="Transaction details"
       isOpen={open}
       onClose={onBack}
-      className='px-6 pb-6 pt-8 flex flex-col gap-8 overflow-auto h-full'
+      contentStyle={styles.modal}
     >
-      {tx && <TxDetailsContent tx={tx} contact={contact} txnMessage={txnMessage} activeChain={activeChain} />}
-
-      {txnUrl && (
-        <Button className='w-full mt-auto' onClick={() => window.open(txnUrl, '_blank')}>
-          <div className='flex justify-center items-center'>
-            <ArrowSquareOut size={20} className='mr-1' />
-            <span>View on {chainInfos[activeChain].txExplorer?.[selectedNetwork]?.name}</span>
-          </div>
-        </Button>
+      {tx && (
+        <TxDetailsContent
+          tx={tx}
+          contact={contact}
+          txnMessage={txnMessage}
+          activeChain={activeChain}
+        />
       )}
+
+      {txnUrl ? (
+        <Button
+          style={styles.button}
+          onPress={() => Linking.openURL(txnUrl)}
+        >
+          <View style={styles.buttonContent}>
+            <ArrowSquareOut size={20} style={{ marginRight: 6 }} />
+            <Text style={styles.buttonText}>
+              View on {chainInfos[activeChain].txExplorer?.[selectedNetwork]?.name}
+            </Text>
+          </View>
+        </Button>
+      ) : null}
     </BottomModal>
   );
 }
+
+const styles = StyleSheet.create({
+  modal: {
+    paddingHorizontal: 24,
+    paddingBottom: 24,
+    paddingTop: 32,
+    flex: 1,
+  },
+  button: {
+    width: '100%',
+    marginTop: 'auto',
+    alignSelf: 'center',
+  },
+  buttonContent: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  buttonText: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    color: '#222', // Or your accent color
+  },
+});

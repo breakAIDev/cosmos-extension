@@ -1,4 +1,5 @@
-import { useGetExplorerAccountUrl } from '@leapwallet/cosmos-wallet-hooks';
+import React, { useMemo } from 'react';
+import { View, StyleSheet, Linking } from 'react-native';
 import { NativeDenom } from '@leapwallet/cosmos-wallet-sdk';
 import {
   BetaCW20DenomsStore,
@@ -7,9 +8,8 @@ import {
   EnabledCW20DenomsStore,
 } from '@leapwallet/cosmos-wallet-store';
 import { observer } from 'mobx-react-lite';
-import React, { useCallback, useMemo } from 'react';
-import { cn } from 'utils/cn';
-import { capitalize, sliceWord } from 'utils/strings';
+import { useGetExplorerAccountUrl } from '@leapwallet/cosmos-wallet-hooks';
+import { capitalize, sliceWord } from '../../../utils/strings';
 
 import { CustomToggleCard } from './CustomToggleCard';
 import { TokenTitle } from './TokenTitle';
@@ -55,28 +55,23 @@ export const ManuallyAddedTokenCard = observer(
     const explorerURL = getExplorerAccountUrl(token.coinMinimalDenom);
 
     const tokenType = useMemo(() => {
-      let _TokenType = <TokenType type='native' className='bg-[#ff9f0a1a] text-orange-500' />;
-
       if (betaCW20Denoms[token.coinMinimalDenom]) {
-        _TokenType = <TokenType type='cw20' className='bg-[#29A8741A] text-green-600' />;
+        return <TokenType type='cw20' style={styles.cw20} />;
       } else if (betaERC20Denoms[token.coinMinimalDenom]) {
-        _TokenType = <TokenType type='erc20' className='bg-[#A52A2A1A] text-[#a52a2a]' />;
+        return <TokenType type='erc20' style={styles.erc20} />;
       } else if (token.coinMinimalDenom.trim().toLowerCase().startsWith('factory')) {
-        _TokenType = <TokenType type='factory' className='bg-[#0AB8FF1A] text-teal-500' />;
+        return <TokenType type='factory' style={styles.factory} />;
       }
-      return _TokenType;
+      return <TokenType type='native' style={styles.native} />;
     }, [betaCW20Denoms, betaERC20Denoms, token.coinMinimalDenom]);
 
-    const handleRedirectionClick = useCallback(
-      (e: React.MouseEvent<HTMLButtonElement>) => {
-        e.stopPropagation();
-        window.open(explorerURL, '_blank');
-      },
-      [explorerURL],
-    );
+    // On mobile, open URL via Linking
+    const handleRedirectionClick = () => {
+      if (explorerURL) Linking.openURL(explorerURL);
+    };
 
     return (
-      <>
+      <View style={[styles.cardWrap, isFirst && { marginTop: 24 }, isLast && { marginBottom: 12 }]}>
         <CustomToggleCard
           title={
             <TokenTitle
@@ -94,14 +89,43 @@ export const ManuallyAddedTokenCard = observer(
             !fetchedTokens.includes(token.coinMinimalDenom) &&
             enabledCW20Denoms.includes(token.coinMinimalDenom)
           }
-          onToggleChange={(isEnabled) => handleToggleChange(isEnabled, token.coinMinimalDenom)}
+          onToggleChange={isEnabled => handleToggleChange(isEnabled, token.coinMinimalDenom)}
           onDeleteClick={() => onDeleteClick(token)}
-          className={cn('!bg-secondary-100 hover:!bg-secondary-200 rounded-xl mb-4 w-full', isFirst ? 'mt-6' : '')}
-          imageClassName='!h-10 !w-10 !rounded-full'
+          style={[
+            styles.card,
+            isLast && styles.roundedBottom,
+          ]}
+          imageStyle={styles.tokenImg}
         />
-
-        {isLast ? <div className='h-[1px] bg-transparent mt-6' /> : null}
-      </>
+        {isLast ? <View style={{ height: 1, backgroundColor: 'transparent', marginTop: 24 }} /> : null}
+      </View>
     );
   },
 );
+
+const styles = StyleSheet.create({
+  cardWrap: {
+    marginBottom: 16,
+    width: '100%',
+  },
+  card: {
+    backgroundColor: '#f3f4f6', // secondary-100
+    borderRadius: 16,
+    width: '100%',
+  },
+  roundedBottom: {
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
+  },
+  tokenImg: {
+    height: 40,
+    width: 40,
+    borderRadius: 20,
+  },
+  native: { backgroundColor: '#ff9f0a1a', color: '#ff9500' },
+  cw20: { backgroundColor: '#29A8741A', color: '#22c55e' },
+  erc20: { backgroundColor: '#A52A2A1A', color: '#a52a2a' },
+  factory: { backgroundColor: '#0AB8FF1A', color: '#14b8a6' },
+});
+
+export default ManuallyAddedTokenCard;

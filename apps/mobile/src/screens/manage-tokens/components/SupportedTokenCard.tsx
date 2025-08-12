@@ -1,16 +1,14 @@
-import { useGetExplorerAccountUrl } from '@leapwallet/cosmos-wallet-hooks';
-import { ActiveChainStore, AutoFetchedCW20DenomsStore, CW20DenomsStore } from '@leapwallet/cosmos-wallet-store';
-import { GenericCard, ThemeName, Toggle, useTheme } from '@leapwallet/leap-ui';
-import { useDefaultTokenLogo } from 'hooks';
-import { Images } from 'images';
+import React from 'react';
+import { View, Text, Image, StyleSheet } from 'react-native';
 import { observer } from 'mobx-react-lite';
-import React, { useCallback, useMemo } from 'react';
-import { cn } from 'utils/cn';
-import { imgOnError } from 'utils/imgOnError';
-import { capitalize, sliceWord } from 'utils/strings';
-
-import { SupportedToken } from './SupportedTokens';
+import { Toggle, useTheme, ThemeName } from '@leapwallet/leap-ui'; // Assume this is your RN Toggle or use a Switch
+import { useDefaultTokenLogo } from '../../../hooks';
+import { Images } from '../../../../assets/images';
+import { capitalize, sliceWord } from '../../../utils/strings';
 import { TokenTitle } from './TokenTitle';
+import { SupportedToken } from './SupportedTokens';
+import { useNavigation } from '@react-navigation/native';
+import { ActiveChainStore, AutoFetchedCW20DenomsStore, CW20DenomsStore } from '@leapwallet/cosmos-wallet-store';
 
 type SupportedTokenCardProps = {
   token: SupportedToken;
@@ -28,83 +26,111 @@ export const SupportedTokenCard = observer(
     tokensLength,
     index,
     handleToggleChange,
-    cw20DenomsStore,
-    autoFetchedCW20DenomsStore,
   }: SupportedTokenCardProps) => {
-    const { cw20Denoms } = cw20DenomsStore;
-    const { autoFetchedCW20Denoms } = autoFetchedCW20DenomsStore;
-
     const defaultTokenLogo = useDefaultTokenLogo();
     const { theme } = useTheme();
-    const { getExplorerAccountUrl } = useGetExplorerAccountUrl({});
-    const combinedCW20Denoms = useMemo(
-      () => ({ ...cw20Denoms, ...autoFetchedCW20Denoms }),
-      [cw20Denoms, autoFetchedCW20Denoms],
-    );
+    const navigation = useNavigation();
 
     const isLast = index === tokensLength - 1;
     const isFirst = index === 0;
     const title = sliceWord(token?.name ?? capitalize(token.coinDenom.toLowerCase()) ?? '', 7, 4);
     const subTitle = sliceWord(token.coinDenom, 4, 4);
 
-    const explorerURL = getExplorerAccountUrl(token.coinMinimalDenom);
-    const handleRedirectionClick = useCallback(
-      (e: React.MouseEvent<HTMLButtonElement>) => {
-        e.stopPropagation();
-        window.open(explorerURL, '_blank');
-      },
-      [explorerURL],
-    );
+    const handleRedirectionClick = () => {
+      navigation.navigate('Home');
+    };
 
     return (
-      <>
-        <GenericCard
-          title={
+      <View
+        style={[
+          styles.card,
+          isFirst && { marginTop: 24 },
+          isLast && { marginBottom: 24 },
+        ]}
+      >
+        <View style={styles.tokenInfoRow}>
+          <View style={styles.tokenImgContainer}>
+            <Image
+              source={{ uri: token.icon ?? defaultTokenLogo }}
+              style={styles.tokenImg}
+            />
+            {token.verified && (
+              <Image
+                source={{
+                  uri:
+                    theme === ThemeName.DARK
+                      ? Images.Misc.VerifiedWithBgStarDark
+                      : Images.Misc.VerifiedWithBgStar,
+                }}
+                style={styles.verifiedIcon}
+              />
+            )}
+          </View>
+          <View style={{ flex: 1 }}>
             <TokenTitle
               title={title}
-              showRedirection={!!combinedCW20Denoms?.[token?.coinMinimalDenom] && !!explorerURL}
+              showRedirection={false}
               handleRedirectionClick={handleRedirectionClick}
             />
-          }
-          subtitle={subTitle}
-          isRounded={isLast}
-          size='md'
-          img={
-            <div className='relative mr-3 !h-10 !w-10 !shrink-0 flex items-center justify-center'>
-              <img
-                src={token.icon ?? defaultTokenLogo}
-                className='h-8 rounded-full w-8'
-                onError={imgOnError(defaultTokenLogo)}
-              />
-              {token.verified && (
-                <div className='absolute group -bottom-[2px] -right-[2px]'>
-                  <img
-                    src={theme === ThemeName.DARK ? Images.Misc.VerifiedWithBgStarDark : Images.Misc.VerifiedWithBgStar}
-                    alt='verified-token'
-                    className='h-4 w-4'
-                  />
-                  <div className='group-hover:!block hidden absolute bottom-0 right-0 translate-x-full bg-gray-200 dark:bg-gray-800 px-3 py-2 rounded-lg text-xs dark:text-white-100'>
-                    Whitelisted
-                  </div>
-                </div>
-              )}
-            </div>
-          }
-          icon={
-            <div className='flex items-center gap-[8px]'>
-              <Toggle
-                checked={token.enabled}
-                onChange={(isEnabled) => handleToggleChange(isEnabled, token.coinMinimalDenom)}
-              />
-            </div>
-          }
-          className={cn(
-            '!bg-secondary-100 hover:!bg-secondary-200 rounded-xl mb-4 w-full !h-[66px]',
-            isFirst ? 'mt-6' : '',
-          )}
-        />
-        {isLast ? <div className='h-[1px] bg-transparent mt-6' /> : null}
-      </>
+            <Text style={styles.subTitle}>{subTitle}</Text>
+          </View>
+        </View>
+        <View style={styles.toggleContainer}>
+          <Toggle
+            checked={token.enabled}
+            onChange={(isEnabled: boolean) =>
+              handleToggleChange(isEnabled, token.coinMinimalDenom)
+            }
+          />
+        </View>
+      </View>
     );
   },
 );
+
+const styles = StyleSheet.create({
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f3f6fc',
+    borderRadius: 16,
+    marginBottom: 16,
+    height: 66,
+    width: '100%',
+    paddingHorizontal: 16,
+    justifyContent: 'space-between',
+  },
+  tokenInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  tokenImgContainer: {
+    marginRight: 12,
+    position: 'relative',
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  tokenImg: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+  },
+  verifiedIcon: {
+    width: 16,
+    height: 16,
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+  },
+  subTitle: {
+    fontSize: 12,
+    color: '#6b7280',
+    marginTop: 1,
+  },
+  toggleContainer: {
+    marginLeft: 8,
+  },
+});

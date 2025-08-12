@@ -1,18 +1,22 @@
+import React, { useEffect, useMemo, useState } from 'react';
+import { View, StyleSheet, TextInput, Text as RNText } from 'react-native';
 import { SelectedAddress, useAddressPrefixes } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { Avatar, Buttons, Input, Memo } from '@leapwallet/leap-ui';
-import { bech32 } from 'bech32';
-import BottomModal from '../bottom-modal';
-import IconButton from 'components/icon-button';
-import { LoaderAnimation } from 'components/loader/Loader';
-import Text from 'components/text';
-import { useChainInfos } from 'hooks/useChainInfos';
-import { useContacts } from 'hooks/useContacts';
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
-import { Images } from 'images';
-import React, { ChangeEvent, useEffect, useMemo, useState } from 'react';
-import { Colors } from 'theme/colors';
-import { AddressBook } from 'utils/addressbook';
+import { Avatar, Buttons, Memo } from '@leapwallet/leap-ui';
+import { decode } from 'bech32';
+import BottomModal from '../../../../components/bottom-modal';
+import IconButton from '../../../../components/icon-button';
+import { LoaderAnimation } from '../../../../components/loader/Loader';
+import Text from '../../../../components/text';
+import { useChainInfos } from '../../../../hooks/useChainInfos';
+import { useContacts } from '../../../../hooks/useContacts';
+import { useDefaultTokenLogo } from '../../../../hooks/utility/useDefaultTokenLogo';
+import { Images } from '../../../../../assets/images';
+import { Colors } from '../../../../theme/colors';
+import { AddressBook } from '../../../../utils/addressbook';
+
+const getPrevEmojiIndex = (a: number) => ((a - 1) % 20) + (a >= 1 ? 0 : 20);
+const getNextEmojiIndex = (a: number) => (a + 1) % 20;
 
 type SaveAddressSheetProps = {
   title?: string;
@@ -23,14 +27,6 @@ type SaveAddressSheetProps = {
   onSave?: (s: SelectedAddress) => void;
 };
 
-const getPrevEmojiIndex = (a: number) => {
-  return ((a - 1) % 20) + (a >= 1 ? 0 : 20);
-};
-
-const getNextEmojiIndex = (a: number) => {
-  return (a + 1) % 20;
-};
-
 export default function SaveAddressSheet({
   title = 'Save Contact',
   isOpen,
@@ -38,12 +34,11 @@ export default function SaveAddressSheet({
   address,
   onSave,
 }: SaveAddressSheetProps) {
-  const [memo, setMemo] = useState<string>('');
-  const [name, setName] = useState<string>('');
-  const [emoji, setEmoji] = useState<number>(1);
+  const [memo, setMemo] = useState('');
+  const [name, setName] = useState('');
+  const [emoji, setEmoji] = useState(1);
   const [error, setError] = useState('');
-
-  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const existingContact = AddressBook.useGetContact(address);
   const { contacts: savedContacts, loading: savedContactsLoading } = useContacts();
@@ -53,18 +48,18 @@ export default function SaveAddressSheet({
 
   const chain = useMemo(() => {
     try {
-      const { prefix } = bech32.decode(address);
+      const { prefix } = decode(address);
       const _chain = addressPrefixes[prefix];
       if (_chain === 'cosmoshub') {
         return 'cosmos';
       }
-      return _chain as SupportedChain;
+      return _chain;
     } catch (e) {
       return 'cosmos';
     }
   }, [address, addressPrefixes]);
 
-  const chainIcon = chainInfos[chain].chainSymbolImageUrl ?? defaultTokenLogo;
+  const chainIcon = chainInfos[chain]?.chainSymbolImageUrl ?? defaultTokenLogo;
 
   useEffect(() => {
     if (existingContact) {
@@ -74,22 +69,19 @@ export default function SaveAddressSheet({
     }
   }, [existingContact]);
 
-  const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
-    error && setError('');
-    const value = event.target.value;
-
+  const handleNameChange = (value: string) => {
+    if (error) setError('');
     if (value.length < 24) {
       if (
         value.length &&
         !savedContactsLoading &&
         Object.values(savedContacts).some(
-          ({ name, address: sCAddress }) =>
-            sCAddress !== address && name.trim().toLowerCase() === value.trim().toLowerCase(),
+          ({ name: n, address: sCAddress }) =>
+            sCAddress !== address && n.trim().toLowerCase() === value.trim().toLowerCase(),
         )
       ) {
         setError('Contact with same name already exists');
       }
-
       setName(value);
     }
   };
@@ -99,7 +91,7 @@ export default function SaveAddressSheet({
       setIsSaving(true);
       await AddressBook.save({
         address: address,
-        blockchain: chain,
+        blockchain: chain as SupportedChain,
         emoji: emoji,
         name: name,
         memo: memo,
@@ -111,7 +103,7 @@ export default function SaveAddressSheet({
         emoji: emoji,
         name: name,
         avatarIcon: '',
-        chainName: chainInfos[chain].chainName,
+        chainName: chainInfos[chain]?.chainName,
         selectionType: 'saved',
       });
       onClose();
@@ -121,45 +113,42 @@ export default function SaveAddressSheet({
 
   return (
     <BottomModal isOpen={isOpen} onClose={onClose} title={title} closeOnBackdropClick={true}>
-      <div className='flex flex-col items-center w-full gap-y-4'>
-        <div className='flex flex-col gap-y-4 w-full bg-white-100 dark:bg-gray-900 rounded-2xl p-3 justify-center  items-center'>
-          <div className='flex flex-row justify-center items-center'>
+      <View style={styles.container}>
+        <View style={styles.card}>
+          <View style={styles.emojiRow}>
             <IconButton
-              className='mx-2 p-2 rotate-180'
-              onClick={() => {
-                setEmoji(getPrevEmojiIndex(emoji));
-              }}
-              image={{ src: Images.Misc.RightArrow, alt: 'left' }}
+              style={[styles.iconBtn, { transform: [{ rotate: '180deg' }] }]}
+              onPress={() => setEmoji(getPrevEmojiIndex(emoji))}
+              image={{ src: {uri: Images.Misc.RightArrow}, alt: 'left' }}
             />
-            <Avatar size='lg' chainIcon={chainIcon} emoji={emoji ?? 0} />
+            <Avatar size="lg" chainIcon={chainIcon} emoji={emoji ?? 0} />
             <IconButton
-              className='mx-2 p-2'
-              onClick={() => {
-                setEmoji(getNextEmojiIndex(emoji));
-              }}
-              image={{ src: Images.Misc.RightArrow, alt: 'right' }}
+              style={styles.iconBtn}
+              onPress={() => setEmoji(getNextEmojiIndex(emoji))}
+              image={{ src: {uri: Images.Misc.RightArrow}, alt: 'right' }}
             />
-          </div>
-
-          <div className='w-full'>
-            <div className='w-full flex shrink relative justify-center'>
-              <Input width={312} placeholder={'enter name'} value={name} onChange={handleNameChange} />
-              <div className='absolute right-[16px] top-[14px] text-gray-400 text-sm font-medium'>{`${name.length}/24`}</div>
-            </div>
-
-            {error && (
-              <Text size='xs' color='text-red-300' className='mt-2 ml-1 font-bold'>
-                {error}
-              </Text>
-            )}
-          </div>
-        </div>
+          </View>
+          <View style={styles.inputRow}>
+            <TextInput
+              style={styles.input}
+              placeholder="enter name"
+              value={name}
+              onChangeText={(e: string) => handleNameChange(e)}
+              maxLength={24}
+            />
+            <RNText style={styles.counter}>{`${name.length}/24`}</RNText>
+          </View>
+          {error ? (
+            <Text size="xs" style={styles.errorText}>
+              {error}
+            </Text>
+          ) : null}
+        </View>
 
         <Memo
           value={memo}
-          onChange={(e) => {
-            setMemo(e.target.value);
-          }}
+          onChange={(e) => setMemo(e.target.value)}
+          style={{ width: '100%', marginTop: 8 }}
         />
 
         {isSaving ? (
@@ -167,18 +156,76 @@ export default function SaveAddressSheet({
         ) : (
           <Buttons.Generic
             color={Colors.juno}
-            size='normal'
-            className='w-full'
+            size="normal"
+            style={styles.saveBtn}
             disabled={!name || !!error}
-            title='Send'
-            onClick={async () => {
-              await onClickSave();
-            }}
+            title="Save contact"
+            onClick={onClickSave}
           >
             Save contact
           </Buttons.Generic>
         )}
-      </div>
+      </View>
     </BottomModal>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    alignItems: 'center',
+    width: '100%',
+    gap: 16,
+    flexDirection: 'column',
+  },
+  card: {
+    width: '100%',
+    backgroundColor: '#f8fafc',
+    borderRadius: 16,
+    padding: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 12,
+  },
+  emojiRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 12,
+  },
+  iconBtn: {
+    marginHorizontal: 8,
+    padding: 8,
+  },
+  inputRow: {
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  input: {
+    width: 312,
+    alignSelf: 'center',
+    fontSize: 16,
+    backgroundColor: 'white',
+    borderRadius: 8,
+    padding: 10,
+  },
+  counter: {
+    position: 'absolute',
+    right: 16,
+    top: 16,
+    color: '#a1a1aa',
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  errorText: {
+    color: '#fca5a5',
+    fontWeight: 'bold',
+    marginTop: 6,
+    marginLeft: 4,
+  },
+  saveBtn: {
+    width: '100%',
+    marginTop: 14,
+  },
+});

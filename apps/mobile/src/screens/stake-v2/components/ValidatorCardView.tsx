@@ -1,12 +1,10 @@
+import React, { useCallback } from 'react';
+import { View, Text, TouchableOpacity, Image, StyleSheet, Dimensions } from 'react-native';
 import { sliceWord } from '@leapwallet/cosmos-wallet-hooks';
-import { Images } from 'images';
-import React from 'react';
-import { cn } from 'utils/cn';
-import { imgOnError } from 'utils/imgOnError';
-import { sidePanel } from 'utils/isSidePanel';
+import { Images } from '../../../../assets/images';
 
 type ValidatorCardProps = {
-  onClick?: () => void;
+  onPress?: () => void;
   imgSrc?: string;
   moniker: string;
   titleAmount: string;
@@ -17,49 +15,148 @@ type ValidatorCardProps = {
 };
 
 export const ValidatorCardView = React.memo(
-  ({ onClick, imgSrc, moniker, titleAmount, subAmount, jailed, disabled, subText }: ValidatorCardProps) => {
+  ({
+    onPress,
+    imgSrc,
+    moniker,
+    titleAmount,
+    subAmount,
+    jailed,
+    disabled,
+    subText,
+  }: ValidatorCardProps) => {
+    // Responsive name slice logic (adjust as needed)
+    const screenWidth = Dimensions.get('window').width;
+    const sidePanel = false; // Provide your logic here if needed
+    const nameMaxLen = sidePanel
+      ? 5 + Math.floor(((Math.min(screenWidth, 400) - 320) / 81) * 7)
+      : 10;
+
+    // Image fallback (basic RN logic)
+    const [imgError, setImgError] = React.useState(false);
+    const finalImgSrc = !imgError && imgSrc ? { uri: imgSrc } : {uri: Images.Misc.Validator};
+
     return (
-      <button
-        disabled={disabled || !onClick}
-        onClick={onClick}
-        className={cn(
-          'flex justify-between items-center px-4 py-3 bg-secondary-100 disabled:hover:bg-secondary-100 hover:bg-secondary-200 disabled:cursor-auto rounded-xl',
-          ' ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none focus-visible:ring-accent-success/50',
-        )}
+      <TouchableOpacity
+        disabled={disabled || !onPress}
+        onPress={onPress}
+        activeOpacity={disabled ? 1 : 0.8}
+        style={[
+          styles.card,
+          disabled && styles.cardDisabled,
+        ]}
       >
-        <img
-          src={imgSrc}
-          onError={imgOnError(Images.Misc.Validator)}
+        <Image
+          source={finalImgSrc}
+          style={styles.avatar}
           width={36}
           height={36}
-          className='mr-4 rounded-full'
+          onError={() => setImgError(true)}
         />
 
-        <div className='flex justify-between items-center w-full'>
-          <div className='flex flex-col items-start gap-y-0.5'>
-            <span className='font-bold text-sm overflow-hidden'>
-              {sliceWord(
-                moniker,
-                sidePanel ? 5 + Math.floor(((Math.min(window.innerWidth, 400) - 320) / 81) * 7) : 10,
-                3,
-              )}
-            </span>
+        <View style={styles.rowBetween}>
+          <View style={styles.infoColumn}>
+            <Text
+              style={styles.monikerText}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {sliceWord(moniker, nameMaxLen, 3)}
+            </Text>
 
             {subText ? (
-              <span className='font-medium text-right text-xs text-muted-foreground'>{subText}</span>
+              <Text style={styles.subText}>{subText}</Text>
             ) : jailed ? (
-              <span className='font-medium text-xs text-destructive-100 mt-0.5'>Jailed</span>
+              <Text style={styles.jailedText}>Jailed</Text>
             ) : null}
-          </div>
+          </View>
 
-          <div className='flex flex-col items-end gap-y-0.5'>
-            <span className='font-bold text-right text-sm'>{titleAmount}</span>
-            <span className='font-medium text-right text-xs text-muted-foreground'>{subAmount}</span>
-          </div>
-        </div>
-      </button>
+          <View style={styles.amountColumn}>
+            <Text style={styles.titleAmount}>{titleAmount}</Text>
+            <Text style={styles.subAmount}>{subAmount}</Text>
+          </View>
+        </View>
+      </TouchableOpacity>
     );
-  },
+  }
 );
 
 ValidatorCardView.displayName = 'ValidatorCardView';
+
+const styles = StyleSheet.create({
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f4f5f8',
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginBottom: 8,
+    gap: 10,
+  },
+  cardDisabled: {
+    opacity: 0.5,
+    backgroundColor: '#f4f5f8',
+  },
+  avatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    marginRight: 16,
+    backgroundColor: '#e5e5e5',
+  },
+  rowBetween: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  infoColumn: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: 1,
+    flexShrink: 1,
+    minWidth: 80,
+    maxWidth: 160,
+  },
+  monikerText: {
+    fontWeight: 'bold',
+    fontSize: 15,
+    color: '#222',
+    flexShrink: 1,
+    marginBottom: 1,
+  },
+  subText: {
+    fontWeight: '500',
+    fontSize: 12,
+    color: '#999',
+    marginTop: 1,
+    textAlign: 'right',
+  },
+  jailedText: {
+    fontWeight: '500',
+    fontSize: 12,
+    color: '#d12a40',
+    marginTop: 2,
+    textAlign: 'right',
+  },
+  amountColumn: {
+    flexDirection: 'column',
+    alignItems: 'flex-end',
+    gap: 1,
+    minWidth: 80,
+  },
+  titleAmount: {
+    fontWeight: 'bold',
+    fontSize: 15,
+    color: '#222',
+    textAlign: 'right',
+  },
+  subAmount: {
+    fontWeight: '500',
+    fontSize: 12,
+    color: '#888',
+    textAlign: 'right',
+    marginTop: 1,
+  },
+});

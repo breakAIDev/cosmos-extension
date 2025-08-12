@@ -1,52 +1,122 @@
 import { sliceWord } from '@leapwallet/cosmos-wallet-hooks';
 import { Collection } from '@leapwallet/cosmos-wallet-store';
-import { Heart } from '@phosphor-icons/react';
-import Text from 'components/text';
-import { Images } from 'images';
+import { Heart } from 'phosphor-react-native';
+import Text from '../../components/text';
+import { Images } from '../../../assets/images';
 import React from 'react';
-import { favNftStore } from 'stores/manage-nft-store';
-import { imgOnError } from 'utils/imgOnError';
-
+import { favNftStore } from '../../context/manage-nft-store';
 import { useNftContext } from './context';
+
+import {
+  View,
+  Image,
+  TouchableOpacity,
+  FlatList,
+  StyleSheet,
+  Dimensions,
+} from 'react-native';
+
+const ITEM_SIZE = (Dimensions.get('window').width - 64 - 16) / 2; // adjust padding/gap as needed
 
 const CollectionList = ({ collections }: { collections: Collection[] }) => {
   const { setShowCollectionDetailsFor } = useNftContext();
+
   return (
-    <div className='grid grid-cols-2 gap-5 mb-5'>
-      {collections.map((c) => {
+    <FlatList
+      data={collections}
+      numColumns={2}
+      keyExtractor={(item, idx) => `${item.address}-${idx}`}
+      columnWrapperStyle={{ gap: 16, marginBottom: 16 }}
+      renderItem={({ item: c }) => {
         const isCollectionFav = favNftStore.favNfts.some((item) => item.includes(c.address));
         return (
-          <div
-            key={c.name}
-            className='relative cursor-pointer rounded-xl w-[166px] h-[166px] overflow-hidden bg-secondary-100 hover:bg-secondary-200 transition-colors'
-            onClick={() => setShowCollectionDetailsFor(c.address)}
+          <TouchableOpacity
+            activeOpacity={0.84}
+            style={styles.card}
+            onPress={() => setShowCollectionDetailsFor(c.address)}
           >
-            <img
-              src={c.image ?? Images.Logos.GenericNFT}
-              width={166}
-              height={166}
-              className='hover:scale-110 duration-300 ease-out'
-              onError={imgOnError(Images.Logos.GenericNFT)}
+            <Image
+              source={{ uri: c.image ?? Images.Logos.GenericNFT}}
+              style={styles.image}
+              resizeMode="cover"
             />
             {isCollectionFav && (
-              <div>
-                <Heart size={26} className='absolute top-[9px] right-[9px]' />
-                <Heart size={24} weight='fill' color='#D0414F' className='absolute top-2.5 right-2.5' />
-              </div>
+              <>
+                <Heart
+                  size={26}
+                  style={[styles.heartIcon, { position: 'absolute', top: 9, right: 9 }]}
+                />
+                <Heart
+                  size={24}
+                  weight="fill"
+                  color="#D0414F"
+                  style={[styles.heartFillIcon, { position: 'absolute', top: 16, right: 16 }]}
+                />
+              </>
             )}
-            <div className='absolute bottom-3 left-3 inline-flex gap-x-0.5 rounded-lg px-2 py-1.5 bg-monochrome-foreground'>
-              <Text size='xs' className='font-bold' color='text-monochrome'>
+            <View style={styles.bottomLeftInfo}>
+              <Text size="xs" style={styles.nameText}>
                 {sliceWord(c.name, 12, 0)}
               </Text>
-              <Text size='xs' className='font-bold' color='text-muted-foreground'>
+              <Text size="xs" style={styles.countText}>
                 ({c.totalNfts})
               </Text>
-            </div>
-          </div>
+            </View>
+          </TouchableOpacity>
         );
-      })}
-    </div>
+      }}
+      contentContainerStyle={{ paddingBottom: 24 }}
+      showsVerticalScrollIndicator={false}
+    />
   );
 };
+
+const styles = StyleSheet.create({
+  card: {
+    flex: 1,
+    width: ITEM_SIZE,
+    height: ITEM_SIZE,
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: '#edf3f3',
+    marginBottom: 0,
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  image: {
+    width: ITEM_SIZE,
+    height: ITEM_SIZE,
+    borderRadius: 16,
+    backgroundColor: '#eee',
+  },
+  heartIcon: {
+    zIndex: 2,
+  },
+  heartFillIcon: {
+    zIndex: 3,
+  },
+  bottomLeftInfo: {
+    position: 'absolute',
+    left: 12,
+    bottom: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 8,
+    backgroundColor: '#f4f4f8cc',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    gap: 4,
+  },
+  nameText: {
+    fontWeight: 'bold',
+    color: '#222',
+    marginRight: 2,
+  },
+  countText: {
+    fontWeight: 'bold',
+    color: '#888',
+  },
+});
 
 export default CollectionList;

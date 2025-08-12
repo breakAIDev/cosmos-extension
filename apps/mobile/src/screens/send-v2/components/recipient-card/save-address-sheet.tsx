@@ -1,18 +1,19 @@
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { View, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
 import { SelectedAddress, useAddressPrefixes, useGetChains } from '@leapwallet/cosmos-wallet-hooks';
 import { getBlockChainFromAddress, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { Avatar, Buttons, Input } from '@leapwallet/leap-ui';
-import { CaretLeft, CaretRight } from '@phosphor-icons/react';
-import BottomModal from '../bottom-modal';
-import { CustomCheckbox } from 'components/custom-checkbox';
-import { LoaderAnimation } from 'components/loader/Loader';
-import Text from 'components/text';
-import { useActiveChain } from 'hooks/settings/useActiveChain';
-import { useContacts } from 'hooks/useContacts';
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
-import React, { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
-import { Colors } from 'theme/colors';
-import { AddressBook } from 'utils/addressbook';
-import { sliceAddress } from 'utils/strings';
+import { Avatar, Buttons } from '@leapwallet/leap-ui';
+import { CaretLeft, CaretRight } from 'phosphor-react-native';
+import BottomModal from '../../../../components/bottom-modal';
+import { CustomCheckbox } from '../../../../components/custom-checkbox';
+import { LoaderAnimation } from '../../../../components/loader/Loader';
+import Text from '../../../../components/text';
+import { useActiveChain } from '../../../../hooks/settings/useActiveChain';
+import { useContacts } from '../../../../hooks/useContacts';
+import { useDefaultTokenLogo } from '../../../../hooks/utility/useDefaultTokenLogo';
+import { Colors } from '../../../../theme/colors';
+import { AddressBook } from '../../../../utils/addressbook';
+import { sliceAddress } from '../../../../utils/strings';
 
 import { SendContextType, useSendContext } from '../../context';
 
@@ -23,17 +24,11 @@ type SaveAddressSheetProps = {
   ethAddress?: string;
   sendActiveChain?: SupportedChain;
   onClose: () => void;
-  
   onSave?: (s: SelectedAddress) => void;
 };
 
-const subtract = (a: number) => {
-  return ((a - 1) % 20) + (a >= 1 ? 0 : 20);
-};
-
-const add = (a: number) => {
-  return (a + 1) % 20;
-};
+const subtract = (a: number) => ((a - 1) % 20) + (a >= 1 ? 0 : 20);
+const add = (a: number) => (a + 1) % 20;
 
 export default function SaveAddressSheet({
   title = 'Save Contact',
@@ -49,7 +44,6 @@ export default function SaveAddressSheet({
   const [emoji, setEmoji] = useState<number>(1);
   const [saveAsCEX, setSaveAsCEX] = useState<boolean>(false);
   const [error, setError] = useState('');
-
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const { setMemo: setNewMemo } = useSendContext() as SendContextType;
 
@@ -57,21 +51,18 @@ export default function SaveAddressSheet({
   const { contacts: savedContacts, loading: savedContactsLoading } = useContacts();
   const addressPrefixes = useAddressPrefixes();
   const defaultTokenLogo = useDefaultTokenLogo();
-  const enterNameRef = useRef<HTMLInputElement | null>(null);
+  const enterNameRef = useRef<TextInput | null>(null);
 
   const chains = useGetChains();
   const _activeChain = useActiveChain();
 
-  const activeChain = useMemo(() => {
-    return sendActiveChain ?? _activeChain;
-  }, [sendActiveChain, _activeChain]);
+  const activeChain = useMemo(() => sendActiveChain ?? _activeChain, [sendActiveChain, _activeChain]);
 
   const chain = useMemo(() => {
     try {
       if (chains[activeChain]?.evmOnlyChain && address.toLowerCase().startsWith('0x')) {
         return activeChain;
       }
-
       const prefix = getBlockChainFromAddress(address);
       const _chain = addressPrefixes[prefix ?? ''];
       if (_chain === 'cosmoshub') {
@@ -94,26 +85,25 @@ export default function SaveAddressSheet({
 
   useEffect(() => {
     if (isOpen && enterNameRef.current) {
-      enterNameRef.current.focus();
+      setTimeout(() => {
+        enterNameRef.current?.focus();
+      }, 100);
     }
   }, [isOpen]);
 
-  const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleNameChange = (value: string) => {
     error && setError('');
-    const value = event.target.value;
-
     if (value.length < 24) {
       if (
         value.length &&
         !savedContactsLoading &&
         Object.values(savedContacts).some(
-          ({ name, address: sCAddress }) =>
-            sCAddress !== address && name.trim().toLowerCase() === value.trim().toLowerCase(),
+          ({ name: contactName, address: sCAddress }) =>
+            sCAddress !== address && contactName.trim().toLowerCase() === value.trim().toLowerCase(),
         )
       ) {
         setError('Contact with same name already exists');
       }
-
       setName(value);
     }
   };
@@ -152,94 +142,192 @@ export default function SaveAddressSheet({
       title={title}
       onClose={onClose}
       isOpen={isOpen}
-      closeOnBackdropClick={true}
-      containerClassName='!max-panel-height'
-      contentClassName='!bg-white-100 dark:!bg-gray-950'
-      className='p-6'
+      containerStyle={styles.modalContainer}
     >
-      <form
-        className='flex flex-col items-center w-full gap-y-4'
-        onSubmit={(event) => {
-          event.preventDefault();
-          handleSubmit();
-        }}
-      >
-        <div className='flex flex-col gap-y-4 w-full bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 justify-center items-center'>
-          <div className='flex flex-row justify-center items-center gap-5'>
-            <div
-              className='p-1 bg-gray-100 dark:bg-gray-850 rounded-full cursor-pointer'
-              onClick={() => setEmoji(subtract(emoji))}
-            >
-              <CaretLeft size={32} className='text-black-100 dark:text-white-100' />
-            </div>
-            <Avatar size='lg' chainIcon={chains[chain]?.chainSymbolImageUrl ?? defaultTokenLogo} emoji={emoji ?? 0} />
-            <div
-              className='p-1 bg-gray-100 dark:bg-gray-850 rounded-full cursor-pointer'
-              onClick={() => setEmoji(add(emoji))}
-            >
-              <CaretRight size={32} className='text-black-100 dark:text-white-100' />
-            </div>
-          </div>
+      <View style={styles.form}>
+        {/* Emoji selector */}
+        <View style={styles.emojiRow}>
+          <TouchableOpacity
+            style={styles.emojiButton}
+            onPress={() => setEmoji(subtract(emoji))}
+            activeOpacity={0.8}
+          >
+            <CaretLeft size={32} color="#111" />
+          </TouchableOpacity>
+          <Avatar size="lg" chainIcon={chains[chain]?.chainSymbolImageUrl ?? defaultTokenLogo} emoji={emoji ?? 0} />
+          <TouchableOpacity
+            style={styles.emojiButton}
+            onPress={() => setEmoji(add(emoji))}
+            activeOpacity={0.8}
+          >
+            <CaretRight size={32} color="#111" />
+          </TouchableOpacity>
+        </View>
 
-          <p className='text-gray-600 dark:text-gray-400 font-bold'>{sliceAddress(address)}</p>
+        <Text style={styles.addressText}>{sliceAddress(address)}</Text>
 
-          <div className='w-full'>
-            <div className='w-full flex shrink relative justify-center'>
-              <Input
-                placeholder={'Enter name'}
-                value={name}
-                onChange={handleNameChange}
-                ref={enterNameRef}
-                className='h-12 rounded-xl placeholder:text-gray-600 dark:placeholder:text-gray-400 text-black-100 dark:text-white-100 outline-none border !border-[transparent] focus-within:!border-green-600 !bg-gray-100 dark:!bg-gray-850'
-              />
-              <div className='absolute right-[16px] top-[14px] text-gray-400 text-sm font-medium'>{`${name.length}/24`}</div>
-            </div>
+        {/* Name input */}
+        <View style={styles.inputWrap}>
+          <TextInput
+            placeholder="Enter name"
+            value={name}
+            onChangeText={handleNameChange}
+            ref={enterNameRef}
+            style={styles.input}
+            maxLength={24}
+            returnKeyType="done"
+            blurOnSubmit={true}
+            autoCapitalize="words"
+          />
+          <Text style={styles.charCount}>{`${name.length}/24`}</Text>
+          {error ? (
+            <Text size="xs" style={styles.errorText}>
+              {error}
+            </Text>
+          ) : null}
+        </View>
+      </View>
 
-            {error && (
-              <Text size='xs' color='text-red-300' className='mt-2 ml-1 font-bold'>
-                {error}
-              </Text>
-            )}
-          </div>
-        </div>
+      {/* Memo and CEX checkbox */}
+      {!chains[chain]?.evmOnlyChain && (
+        <>
+          <View style={styles.memoWrap}>
+            <Text style={styles.memoLabel}>Add Memo</Text>
+            <TextInput
+              style={styles.memoInput}
+              value={memo}
+              placeholder="Required for CEX transfers..."
+              placeholderTextColor="#888"
+              onChangeText={setMemo}
+              maxLength={60}
+            />
+          </View>
+          <View style={styles.cexRow}>
+            <CustomCheckbox checked={saveAsCEX} onClick={() => setSaveAsCEX((prev) => !prev)} />
+            <Text style={styles.cexLabel}>Save as Centralized Exchange Address</Text>
+          </View>
+        </>
+      )}
 
-        {chains[chain]?.evmOnlyChain ? null : (
-          <>
-            <div className='p-4 rounded-2xl bg-gray-50 dark:bg-gray-900 w-full'>
-              <p className='font-medium text-sm text-gray-600 dark:text-gray-400 mb-3'>Add Memo</p>
-              <input
-                type='text'
-                value={memo}
-                placeholder='Required for CEX transfers...'
-                className='w-full h-10 rounded-xl px-4 py-2 font-medium text-sm placeholder:text-gray-600 dark:placeholder:text-gray-400 text-black-100 dark:text-white-100 outline-none border border-[transparent] focus-within:border-green-600 bg-gray-100 dark:bg-gray-850'
-                onChange={(e) => setMemo(e.target?.value)}
-              />
-            </div>
-
-            <div className='flex gap-3 p-4 rounded-2xl bg-gray-50 dark:bg-gray-900 w-full'>
-              <CustomCheckbox checked={saveAsCEX} onClick={() => setSaveAsCEX((prevValue) => !prevValue)} />
-              <p className='text-sm font-medium text-gray-800 dark:text-gray-200'>
-                Save as Centralized Exchange Address
-              </p>
-            </div>
-          </>
-        )}
-
+      {/* Save Button */}
+      <View style={{ width: '100%', alignItems: 'center', marginTop: 16 }}>
         {isSaving ? (
           <LoaderAnimation color={Colors.white100} />
         ) : (
           <Buttons.Generic
             color={Colors.green600}
-            size='normal'
-            className='w-full'
+            size="normal"
+            style={{ width: '100%' }}
             disabled={!name || !!error}
-            title='Save contact'
-            type='submit'
+            title="Save contact"
+            onClick={handleSubmit}
           >
             Save contact
           </Buttons.Generic>
         )}
-      </form>
+      </View>
     </BottomModal>
   );
 }
+
+const styles = StyleSheet.create({
+  modalContainer: {
+    padding: 24,
+    backgroundColor: '#fff',
+    borderRadius: 24,
+  },
+  form: {
+    width: '100%',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f7',
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 16,
+  },
+  emojiRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 24,
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  emojiButton: {
+    padding: 4,
+    backgroundColor: '#eee',
+    borderRadius: 24,
+  },
+  addressText: {
+    color: '#888',
+    fontWeight: 'bold',
+    marginBottom: 12,
+  },
+  inputWrap: {
+    width: '100%',
+    position: 'relative',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  input: {
+    height: 48,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    backgroundColor: '#f6f6f9',
+    fontWeight: 'bold',
+    fontSize: 16,
+    color: '#111',
+    width: '100%',
+  },
+  charCount: {
+    position: 'absolute',
+    right: 16,
+    top: 14,
+    color: '#888',
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  errorText: {
+    color: '#fc5a5a',
+    marginTop: 4,
+    fontWeight: 'bold',
+    marginLeft: 2,
+  },
+  memoWrap: {
+    width: '100%',
+    backgroundColor: '#f6f6f9',
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 12,
+  },
+  memoLabel: {
+    fontWeight: '500',
+    fontSize: 14,
+    color: '#888',
+    marginBottom: 6,
+  },
+  memoInput: {
+    width: '100%',
+    height: 40,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    backgroundColor: '#e9e9ef',
+    fontSize: 15,
+    color: '#111',
+    fontWeight: '500',
+  },
+  cexRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f6f6f9',
+    borderRadius: 20,
+    width: '100%',
+    padding: 16,
+    gap: 12,
+    marginBottom: 0,
+  },
+  cexLabel: {
+    fontSize: 15,
+    color: '#222',
+    fontWeight: '500',
+    marginLeft: 6,
+  },
+});

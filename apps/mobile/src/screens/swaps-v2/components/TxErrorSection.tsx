@@ -1,5 +1,5 @@
 import { useChains } from '@leapwallet/elements-hooks';
-import { WarningCircle } from '@phosphor-icons/react';
+import { WarningCircle } from 'phosphor-react-native';
 import { useCaptureUIException } from 'hooks/perf-monitoring/useCaptureUIException';
 import React, { useMemo } from 'react';
 

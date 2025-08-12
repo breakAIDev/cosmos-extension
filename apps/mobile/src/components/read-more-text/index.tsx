@@ -4,16 +4,16 @@ import Text, { TextProps } from '../text';
 
 type ReadMoreProps = {
   textProps: TextProps;
-  children: string;
-  readMoreColor: string;
+  children?: string;
+  readMoreColor?: string;
 };
 
 export default function ReadMoreText({ children, textProps, readMoreColor }: ReadMoreProps) {
   const [isReadMore, setIsReadMore] = useState(true);
   const toggleReadMore = () => setIsReadMore(!isReadMore);
 
-  const isTruncatable = children.length > 150;
-  const displayedText = isReadMore && isTruncatable ? children.slice(0, 150).trim() + '...' : children;
+  const isTruncatable = children ? children.length > 150 : false;
+  const displayedText = isReadMore && children &&  isTruncatable ? children.slice(0, 150).trim() + '...' : children;
 
   return (
     <View>

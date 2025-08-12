@@ -1,23 +1,26 @@
-import { EventName, PageName } from 'config/analytics';
-import { Images } from 'images';
+import { EventName, PageName } from '../../../services/config/analytics';
+import { Images } from '../../../../assets/images';
 import React, { useCallback } from 'react';
-import { mixpanelTrack } from 'utils/tracking';
+import { mixpanelTrack } from '../../../utils/tracking';
+import { View, Text, StyleSheet } from 'react-native';
 
 import FilterItem from '../components/FilterItem';
 import { useChadProvider } from '../context/chad-exclusives-context';
 import { CategoryIcon } from '../utils/filters';
+
+type Props = {
+  categoryFilters: string[];
+  pageName: PageName;
+  isChad: boolean;
+  onClose: () => void;
+};
 
 export default function CategoryFilter({
   categoryFilters,
   pageName,
   isChad,
   onClose,
-}: {
-  categoryFilters: string[];
-  pageName: PageName;
-  isChad: boolean;
-  onClose: () => void;
-}) {
+}: Props) {
   const { selectedOpportunities, selectedEcosystems, setOpportunities } = useChadProvider();
 
   const handleCategoryToggle = useCallback(
@@ -38,10 +41,9 @@ export default function CategoryFilter({
   );
 
   return (
-    <div className='flex flex-col gap-5'>
-      <span className='text-muted-foreground text-sm uppercase font-bold'>Category</span>
-
-      <div className='flex flex-col'>
+    <View style={styles.container}>
+      <Text style={styles.label}>CATEGORY</Text>
+      <View style={styles.filtersContainer}>
         {categoryFilters
           ?.sort((a, b) => a.localeCompare(b))
           ?.map((category, index) => (
@@ -53,9 +55,32 @@ export default function CategoryFilter({
               isSelected={selectedOpportunities?.includes(category)}
               onSelect={() => handleCategoryToggle(category)}
               onRemove={() => handleCategoryToggle(category)}
+              style={index < categoryFilters.length - 1 ? styles.filterItem : undefined}
             />
           ))}
-      </div>
-    </div>
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'column',
+    gap: 20,
+  },
+  label: {
+    color: '#97A3B9', // muted-foreground
+    fontSize: 13,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+    marginBottom: 8,
+    letterSpacing: 1,
+  },
+  filtersContainer: {
+    flexDirection: 'column',
+    width: '100%',
+  },
+  filterItem: {
+    marginBottom: 8,
+  },
+});

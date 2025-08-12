@@ -1,23 +1,18 @@
-import { useActiveChain } from '@leapwallet/cosmos-wallet-hooks';
-import { Buttons } from '@leapwallet/leap-ui';
-import { Wallet as WalletIcon } from '@phosphor-icons/react';
-import BottomModal from 'components/new-bottom-modal';
-import { Button } from 'components/ui/button';
-import { Input } from 'components/ui/input';
-import { getWalletIconAtIndex } from 'images/misc';
+import BottomModal from '../../components/new-bottom-modal';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { getWalletIconAtIndex } from '../../../assets/images/misc';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { View, Image, StyleSheet } from 'react-native';
 
-import CreateWalletInput from '../../components/create-wallet-form/CreateWalletInput';
 import SelectWalletColors from '../../components/create-wallet-form/SelectWalletColors';
 import { ErrorCard } from '../../components/ErrorCard';
-import { LoaderAnimation } from '../../components/loader/Loader';
 import { Wallet } from '../../hooks/wallet/useWallet';
-import { Colors } from '../../theme/colors';
 import { getWalletName } from './utils/wallet-names';
+import Text from '../../components/text';
 
 type NewWalletFormProps = {
   isVisible: boolean;
-  
   onClose: (closeParent: boolean) => void;
 };
 
@@ -27,7 +22,6 @@ export function NewWalletForm({ isVisible, onClose }: NewWalletFormProps) {
   const [name, setName] = useState('');
   const [colorIndex, setColorIndex] = useState<number>(0);
   const [error, setError] = useState('');
-  const activeChain = useActiveChain();
   const wallets = Wallet.useWallets();
   const shouldAutoFillName = useRef(true);
 
@@ -36,9 +30,7 @@ export function NewWalletForm({ isVisible, onClose }: NewWalletFormProps) {
     setError('');
     onClose(value);
     shouldAutoFillName.current = true;
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [onClose]);
 
   const createWallet = async () => {
     setError('');
@@ -66,43 +58,99 @@ export function NewWalletForm({ isVisible, onClose }: NewWalletFormProps) {
       isOpen={isVisible}
       onClose={() => handleClose(false)}
       title={'Create new wallet'}
-      className='w-full'
+      style={{width: '100%'}}
       footerComponent={
-        <>
-          <Button size='md' variant='secondary' className='flex-1' onClick={() => handleClose(false)}>
+        <View style={styles.footerRow}>
+          <Button size="md" variant="secondary" style={styles.footerBtn} onPress={() => handleClose(false)}>
             Cancel
           </Button>
           <Button
-            size='md'
+            size="md"
             disabled={!name || isLoading}
-            data-testing-id='btn-create-wallet'
-            className='flex-1'
-            onClick={createWallet}
+            data-testing-id="btn-create-wallet"
+            style={styles.footerBtn}
+            onPress={createWallet}
           >
             Create Wallet
           </Button>
-        </>
+        </View>
       }
     >
-      <div className='flex p-4 mb-4 rounded-2xl flex-col bg-secondary-50 items-center gap-4'>
-        <img src={getWalletIconAtIndex(colorIndex)} alt='wallet-icon' className='size-20' />
+      <View style={styles.contentBox}>
+        <Image source={{uri: getWalletIconAtIndex(colorIndex)}} style={styles.walletIcon} />
 
         <Input
           autoFocus
-          placeholder='Enter wallet name'
+          placeholder="Enter wallet name"
           maxLength={24}
           value={name}
-          onChange={(e) => {
-            if (e.target.value.length < 25) setName(e.target.value);
+          onChangeText={text => {
+            if (text.length <= 24) setName(text);
           }}
-          className='ring-accent-green-200 h-12'
-          trailingElement={<div className='text-muted-foreground text-sm font-medium'>{`${name.length}/24`}</div>}
+          style={styles.input}
         />
+        <View style={styles.charCounter}>
+          <View>
+            {/* You can position this wherever you want */}
+            <Input>
+              <View>
+                <Text style={styles.counterText}>{`${name.length}/24`}</Text>
+              </View>
+            </Input>
+          </View>
+        </View>
 
         <SelectWalletColors selectColorIndex={setColorIndex} colorIndex={colorIndex} />
-      </div>
+      </View>
 
-      {!!error && <ErrorCard data-testing-id='create-new-wallet-error' text={error} />}
+      {!!error && <ErrorCard data-testing-id="create-new-wallet-error" text={error} />}
     </BottomModal>
   );
 }
+
+const styles = StyleSheet.create({
+  contentBox: {
+    padding: 16,
+    marginBottom: 16,
+    borderRadius: 16,
+    backgroundColor: '#F3F4F6', // bg-secondary-50
+    alignItems: 'center',
+    gap: 16,
+  },
+  walletIcon: {
+    width: 80,
+    height: 80,
+    marginBottom: 12,
+    borderRadius: 40,
+  },
+  input: {
+    width: '100%',
+    height: 48,
+    borderRadius: 8,
+    marginTop: 8,
+  },
+  charCounter: {
+    width: '100%',
+    alignItems: 'flex-end',
+    marginBottom: 8,
+    marginTop: -8,
+  },
+  counterText: {
+    color: '#6B7280',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  footerRow: {
+    flexDirection: 'row',
+    gap: 12,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+  },
+  footerBtn: {
+    flex: 1,
+    marginHorizontal: 4,
+  },
+});

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import {
   BETA_NFTS_COLLECTIONS,
   ENABLED_NFTS_COLLECTIONS,

@@ -1,15 +1,16 @@
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { View, StyleSheet } from 'react-native';
 import { SelectedNetworkType, useActiveChain, useSendNft, UseSendNftReturnType } from '@leapwallet/cosmos-wallet-hooks';
 import { RootBalanceStore, RootDenomsStore } from '@leapwallet/cosmos-wallet-store';
 import { Buttons } from '@leapwallet/leap-ui';
 import assert from 'assert';
-import { useGetWalletAddresses } from 'hooks/useGetWalletAddresses';
-import { useThemeColor } from 'hooks/utility/useThemeColor';
-import { Wallet } from 'hooks/wallet/useWallet';
+import { useGetWalletAddresses } from '../../../../hooks/useGetWalletAddresses';
+import { useThemeColor } from '../../../../hooks/utility/useThemeColor';
+import { Wallet } from '../../../../hooks/wallet/useWallet';
 import { observer } from 'mobx-react-lite';
-import { SelectedAddress } from 'pages/send-v2/types';
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { nftStore } from 'stores/nft-store';
-import { useTxCallBack } from 'utils/txCallback';
+import { SelectedAddress } from '../../..//send-v2/types';
+import { nftStore } from '../../../../context/nft-store';
+import { useTxCallBack } from '../../../../utils/txCallback';
 
 import { NftDetailsType } from '../../context';
 import { FeesView } from '../fees-view';
@@ -23,7 +24,6 @@ export function useSendNftCardContext() {
   assert(context !== null, 'SendNftCardContext must be used within SendNftCard');
   return context;
 }
-
 type SendNftCardProps = {
   nftDetails: NftDetailsType;
   rootDenomsStore: RootDenomsStore;
@@ -43,7 +43,7 @@ export const SendNftCard = observer(
     }, [_activeChain, nftDetails?.chain]);
     const walletAddresses = useGetWalletAddresses(activeChain);
     const [selectedAddress, setSelectedAddress] = useState<SelectedAddress | null>(null);
-    const [associatedSeiAddress, setAssociatedSeiAddress] = useState<string>('');
+    const [associatedSeiAddress, setAssociatedSeiAddress] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
 
     const [txError, setTxError] = useState('');
@@ -94,18 +94,7 @@ export const SendNftCard = observer(
           memo: memo,
         });
       })();
-
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [
-      fromAddress,
-      collectionAddress,
-      isProcessing,
-      isSending,
-      memo,
-      nftDetails,
-      selectedAddress,
-      walletAddresses.length,
-    ]);
+    }, [fromAddress, collectionAddress, isProcessing, isSending, memo, nftDetails, selectedAddress, walletAddresses.length, getWallet, activeChain, simulateTransferNFTContract]);
 
     const handleSendNft = async () => {
       if (!nftDetails || !collectionAddress || !selectedAddress?.address || !fromAddress || !fee) {
@@ -130,8 +119,6 @@ export const SendNftCard = observer(
         txCallback(res.success ? 'success' : 'txDeclined');
       } else {
         setIsProcessing(false);
-        
-        
         setTxError(res?.errors?.[0]);
       }
     };
@@ -145,19 +132,19 @@ export const SendNftCard = observer(
 
     return (
       <SendNftCardContext.Provider value={sendNftReturn}>
-        <div className='my-2 flex'></div>
+        <View style={styles.spacer} />
         <RecipientCard
           themeColor={themeColor}
           selectedAddress={selectedAddress}
           setSelectedAddress={setSelectedAddress}
           addressError={addressError}
-          setAddressError={setAddressError}
+          setAddressError={(e: string) => setAddressError(e)}
           collectionAddress={collectionAddress}
           associatedSeiAddress={associatedSeiAddress}
           setAssociatedSeiAddress={setAssociatedSeiAddress}
         />
 
-        <div className='my-2 flex'></div>
+        <View style={styles.spacer} />
         {!!fee && (
           <FeesView
             fee={fee}
@@ -166,20 +153,19 @@ export const SendNftCard = observer(
             rootBalanceStore={rootBalanceStore}
           />
         )}
-        <div className='my-2 flex'></div>
+        <View style={styles.spacer} />
 
         <Buttons.Generic
-          size='normal'
+          size="normal"
           color={themeColor}
           onClick={handleReviewTransferClick}
-          className='w-[344px]'
+          style={styles.reviewButton}
           disabled={isReviewDisabled}
-          data-testing-id='send-review-transfer-btn'
-        >
-          Review Transfer
-        </Buttons.Generic>
+          data-testing-id="send-review-transfer-btn"
+          title="Review Transfer"
+        />
 
-        <div className='my-2 flex'></div>
+        <View style={styles.spacer} />
 
         {selectedAddress && (
           <ReviewNFTTransferSheet
@@ -202,5 +188,15 @@ export const SendNftCard = observer(
         )}
       </SendNftCardContext.Provider>
     );
-  },
+  }
 );
+
+const styles = StyleSheet.create({
+  spacer: {
+    marginVertical: 8,
+  },
+  reviewButton: {
+    width: 344,
+    alignSelf: 'center',
+  },
+});

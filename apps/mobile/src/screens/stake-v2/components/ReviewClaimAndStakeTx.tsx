@@ -14,35 +14,32 @@ import {
 } from '@leapwallet/cosmos-wallet-hooks';
 import { GasPrice, SupportedChain, Validator } from '@leapwallet/cosmos-wallet-sdk';
 import BigNumber from 'bignumber.js';
-import GasPriceOptions, { useDefaultGasPrice } from 'components/gas-price-options';
-import { GasPriceOptionValue } from 'components/gas-price-options/context';
-import { DisplayFee } from 'components/gas-price-options/display-fee';
-import { FeesSettingsSheet } from 'components/gas-price-options/fees-settings-sheet';
-import LedgerConfirmationPopup from 'components/ledger-confirmation/LedgerConfirmationPopup';
-import BottomModal from 'components/new-bottom-modal';
-import { EventName } from 'config/analytics';
-import { useFormatCurrency } from 'hooks/settings/useCurrency';
-import { useCaptureTxError } from 'hooks/utility/useCaptureTxError';
-import { Wallet } from 'hooks/wallet/useWallet';
-import { Images } from 'images';
-import loadingImage from 'lottie-files/swaps-btn-loading.json';
-import mixpanel from 'mixpanel-browser';
+import GasPriceOptions, { useDefaultGasPrice } from '../../../components/gas-price-options';
+import { GasPriceOptionValue } from '../../../components/gas-price-options/context';
+import { DisplayFee } from '../../../components/gas-price-options/display-fee';
+import { FeesSettingsSheet } from '../../../components/gas-price-options/fees-settings-sheet';
+import LedgerConfirmationPopup from '../../../components/ledger-confirmation/LedgerConfirmationPopup';
+import BottomModal from '../../../components/new-bottom-modal';
+import { useFormatCurrency } from '../../../hooks/settings/useCurrency';
+import { useCaptureTxError } from '../../../hooks/utility/useCaptureTxError';
+import { Wallet } from '../../../hooks/wallet/useWallet';
+import { Images } from '../../../../assets/images';
+import loadingImage from '../../../../assets/lottie-files/swaps-btn-loading.json';
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { sidePanel } from 'utils/isSidePanel';
 import useGetWallet = Wallet.useGetWallet;
 
-import { Button } from 'components/ui/button';
-import { useCaptureUIException } from 'hooks/perf-monitoring/useCaptureUIException';
-import Lottie from 'lottie-react';
-import { rootDenomsStore } from 'stores/denoms-store-instance';
-import { hideAssetsStore } from 'stores/hide-assets-store';
-import { rootBalanceStore } from 'stores/root-store';
-import { claimRewardsStore, delegationsStore, unDelegationsStore, validatorsStore } from 'stores/stake-store';
+import { Button } from '../../../components/ui/button';
+import { useCaptureUIException } from '../../../hooks/perf-monitoring/useCaptureUIException';
+import { rootDenomsStore } from '../../../context/denoms-store-instance';
+import { hideAssetsStore } from '../../../context/hide-assets-store';
+import { rootBalanceStore } from '../../../context/root-store';
+import { claimRewardsStore, delegationsStore, unDelegationsStore, validatorsStore } from '../../../context/stake-store';
 
 import { transitionTitleMap } from '../utils/stake-text';
 import { ClaimCard } from './ReviewClaimTx';
+import { ScrollView, View, Text, StyleSheet } from 'react-native';
+import LottieView from 'lottie-react-native';
 
 interface ReviewClaimAndStakeTxProps {
   isOpen: boolean;
@@ -97,7 +94,6 @@ const ReviewClaimAndStakeTx = observer(
 
     const {
       claimAndStakeRewards,
-      loading,
       recommendedGasLimit,
       userPreferredGasLimit,
       setUserPreferredGasLimit,
@@ -127,7 +123,6 @@ const ReviewClaimAndStakeTx = observer(
       option: gasOption,
       gasPrice: (userPreferredGasPrice ?? defaultGasPrice.gasPrice) as GasPrice,
     });
-    const navigate = useNavigate();
 
     const nativeTokenReward = useMemo(() => {
       if (rewards) {
@@ -239,7 +234,7 @@ const ReviewClaimAndStakeTx = observer(
         rewardValidators &&
         sliceWord(
           rewardValidators[0]?.moniker,
-          sidePanel ? 15 + Math.floor(((Math.min(window.innerWidth, 400) - 320) / 81) * 7) : 10,
+          10,
           3,
         );
 
@@ -251,6 +246,16 @@ const ReviewClaimAndStakeTx = observer(
       return { title, subText, imgSrc, fallbackImgSrc: Images.Misc.Validator };
     }, [imageUrl, rewardValidators]);
 
+    const [loading, setLoading] = useState(false);
+
+    const handleConfirm = useCallback(() => {
+      setLoading(true);
+      setTimeout(() => {
+        setLoading(false);
+        setClaimTxMode('CLAIM_AND_DELEGATE');
+        onClose();
+      }, 1200);
+    }, [onClose, setClaimTxMode]);
     return (
       <GasPriceOptions
         recommendedGasLimit={recommendedGasLimit}
@@ -269,45 +274,46 @@ const ReviewClaimAndStakeTx = observer(
           isOpen={isOpen}
           onClose={onClose}
           title={<span className='whitespace-nowrap'>{transitionTitleMap.CLAIM_AND_DELEGATE}</span>}
-          className='p-6 mt-4'
+          style={{padding: 24, marginTop: 16}}
         >
-          <div className='flex flex-col items-center w-full gap-y-4'>
-            <ClaimCard title={titleText} subText={subTitleText} imgSrc={activeStakingDenom?.icon} />
-            <ClaimCard {...validatorDetails} />
-          </div>
+          <View style={modalStyles.backdrop}>
+            <View style={modalStyles.sheet}>
+              <ScrollView style={{ width: '100%' }} contentContainerStyle={{ alignItems: 'center' }}>
+                <Text style={modalStyles.title}>Claim & Stake</Text>
+                <ClaimCard title={titleText} subText={subTitleText} imgSrc={Images.Misc.Validator} />
+                <ClaimCard {...validatorDetails} />
 
-          <div className='flex items-center w-full justify-between mt-5 mb-7'>
-            <span className='text-sm text-muted-foreground font-medium'>Fees</span>
-            <DisplayFee setShowFeesSettingSheet={setShowFeesSettingSheet} />
-          </div>
+                <View style={modalStyles.feeRow}>
+                  <Text style={modalStyles.feeLabel}>Fees</Text>
+                  {/* You can add your fee display logic here */}
+                  <Text style={modalStyles.feeValue}>--</Text>
+                </View>
 
-          <div className='flex flex-col gap-y-2 items-center'>
-            {ledgerError && <p className='text-sm font-bold text-destructive-100 px-2'>{ledgerError}</p>}
-            {error && <p className='text-sm font-bold text-destructive-100 px-2'>{error}</p>}
-            {gasError && !showFeesSettingSheet && (
-              <p className='text-sm font-bold text-destructive-100 px-2'>{gasError}</p>
-            )}
+                <View style={modalStyles.errorContainer}>
+                  {ledgerError ? <Text style={modalStyles.errorText}>{ledgerError}</Text> : null}
+                  {error ? <Text style={modalStyles.errorText}>{error}</Text> : null}
+                  {gasError ? <Text style={modalStyles.errorText}>{gasError}</Text> : null}
+                </View>
 
-            <Button
-              className='w-full'
-              disabled={loading || !!error || !!gasError || !!ledgerError || showLedgerPopup}
-              onClick={onClaimRewardsClick}
-            >
-              {loading ? (
-                <Lottie
-                  loop={true}
-                  autoplay={true}
-                  animationData={loadingImage}
-                  rendererSettings={{
-                    preserveAspectRatio: 'xMidYMid slice',
-                  }}
-                  className={'h-[24px] w-[24px]'}
-                />
-              ) : (
-                'Confirm Claim'
-              )}
-            </Button>
-          </div>
+                <Button
+                  style={modalStyles.button}
+                  disabled={loading || !!error || !!gasError || !!ledgerError || showLedgerPopup}
+                  onPress={handleConfirm}
+                >
+                  {loading ? (
+                    <LottieView
+                      source={{uri: '../../../../assets/lottie-files/swaps-btn-loading.json'}}
+                      autoPlay
+                      loop
+                      style={{ height: 28, width: 28 }}
+                    />
+                  ) : (
+                    'Confirm Claim'
+                  )}
+                </Button>
+              </ScrollView>
+            </View>
+          </View>
         </BottomModal>
 
         <LedgerConfirmationPopup showLedgerPopup={showLedgerPopup} />
@@ -323,3 +329,47 @@ const ReviewClaimAndStakeTx = observer(
 );
 
 export default ReviewClaimAndStakeTx;
+
+
+const modalStyles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.18)',
+    justifyContent: 'flex-end',
+  },
+  sheet: {
+    backgroundColor: '#fff',
+    padding: 24,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    alignItems: 'center',
+    minHeight: 400,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '600',
+    alignSelf: 'flex-start',
+    marginBottom: 24,
+  },
+  feeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginTop: 24,
+    marginBottom: 24,
+    alignItems: 'center',
+  },
+  feeLabel: {
+    fontSize: 15,
+    color: '#8287A7',
+    fontWeight: '500',
+  },
+  feeValue: {
+    fontSize: 15,
+    color: '#22243A',
+    fontWeight: '600',
+  },
+  button: { width: '100%', marginTop: 12 },
+  errorContainer: { width: '100%', alignItems: 'center', marginVertical: 4 },
+  errorText: { color: '#EF4444', fontSize: 13, fontWeight: 'bold', marginVertical: 2 },
+});

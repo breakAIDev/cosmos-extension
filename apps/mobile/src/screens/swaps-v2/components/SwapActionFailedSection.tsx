@@ -1,5 +1,5 @@
 import { RootDenomsStore } from '@leapwallet/cosmos-wallet-store';
-import { LightbulbFilament } from '@phosphor-icons/react';
+import { LightbulbFilament } from 'phosphor-react-native';
 import { TransferAssetRelease } from '@skip-go/client';
 import { TokenImageWithFallback } from 'components/token-image-with-fallback';
 import { observer } from 'mobx-react-lite';

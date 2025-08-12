@@ -1,4 +1,4 @@
-import { Check } from '@phosphor-icons/react';
+import { Check } from 'phosphor-react-native';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import React from 'react';
 

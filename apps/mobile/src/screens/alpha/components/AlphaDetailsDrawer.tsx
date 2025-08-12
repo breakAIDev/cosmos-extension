@@ -1,11 +1,8 @@
-import classNames from 'classnames';
-import BottomModal from 'components/new-bottom-modal';
-import { Separator } from 'components/ui/separator';
-import { EventName, PageName } from 'config/analytics';
-import React, { useEffect, useRef } from 'react';
-import { mixpanelTrack } from 'utils/tracking';
-
-import { getHostname } from '../utils';
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Linking } from 'react-native';
+import BottomModal from '../../../components/new-bottom-modal';
+import { Separator } from '../../../components/ui/separator';
+import { PageName } from '../../../services/config/analytics';
 import { AlphaOpportunityProps } from './alpha-timeline';
 import AlphaDescription from './AlphaDescription';
 import ListingFooter from './ListingFooter';
@@ -18,37 +15,15 @@ type AlphaDetailsDrawerProps = {
   opportunity: AlphaOpportunityProps | null;
 };
 
-export default function AlphaDetailsDrawer({ isShown, onClose, opportunity }: AlphaDetailsDrawerProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (containerRef.current) {
-      containerRef.current.style.height = '100%';
-      const parentElement = containerRef.current.parentElement;
-      if (parentElement) {
-        if (isShown) {
-          parentElement.style.overflow = 'hidden';
-        } else {
-          parentElement.style.overflow = 'auto';
-        }
-      }
-    }
-  }, [isShown]);
-
+export default function AlphaDetailsDrawer({
+  isShown,
+  onClose,
+  opportunity,
+}: AlphaDetailsDrawerProps) {
   const handleExternalLinkClick = () => {
     const alphaExternalURL = opportunity?.relevantLinks?.[0];
-
-    // mixpanelTrack(EventName.PageView, {
-    //   pageName: PageName.Post,
-    //   name: opportunity?.homepageDescription,
-    //   id: opportunity?.id,
-    //   alphaExternalURL: alphaExternalURL ? getHostname(alphaExternalURL ?? '') : undefined,
-    //   ecosystem: [...(opportunity?.ecosystemFilter ?? [])],
-    //   categories: [...(opportunity?.categoryFilter ?? [])],
-    // })
-
     if (alphaExternalURL) {
-      window.open(alphaExternalURL ?? '', '_blank', 'noopener,noreferrer');
+      Linking.openURL(alphaExternalURL);
     }
   };
 
@@ -57,42 +32,44 @@ export default function AlphaDetailsDrawer({ isShown, onClose, opportunity }: Al
       fullScreen
       isOpen={isShown}
       onClose={onClose}
-      title='Post'
-      className='flex flex-col gap-4 p-6 pt-7 mb-4'
+      title="Post"
+      style={styles.modal}
     >
-      {/* Opportunity details section */}
-      <div
-        onClick={handleExternalLinkClick}
-        className={classNames('flex items-start gap-6', {
-          'cursor-pointer': !!opportunity?.relevantLinks?.[0],
-        })}
+      <TouchableOpacity
+        onPress={handleExternalLinkClick}
+        activeOpacity={opportunity?.relevantLinks?.[0] ? 0.8 : 1}
+        style={[
+          styles.row,
+          opportunity?.relevantLinks?.[0] && styles.cursorPointer,
+        ]}
+        disabled={!opportunity?.relevantLinks?.[0]}
       >
-        <header>
+        <View style={{ flex: 1 }}>
           <Tags
             visibilityStatus={opportunity?.visibilityStatus}
             ecosystemFilter={opportunity?.ecosystemFilter ?? []}
             categoryFilter={opportunity?.categoryFilter ?? []}
           />
 
-          <p className='text-xl font-bold mt-3 mb-2'>{opportunity?.homepageDescription}</p>
+          <Text style={styles.title}>{opportunity?.homepageDescription}</Text>
 
           <ListingFooter
             endDate={opportunity?.endDate}
             additionDate={opportunity?.additionDate ?? ''}
             relevantLinks={opportunity?.relevantLinks ?? []}
           />
-        </header>
+        </View>
 
-        <div className='size-12 rounded-lg overflow-hidden shrink-0'>
+        <View style={styles.imageContainer}>
           <ListingImage
             ecosystemFilter={opportunity?.ecosystemFilter?.[0]}
             categoryFilter={opportunity?.categoryFilter?.[0]}
             image={opportunity?.image}
           />
-        </div>
-      </div>
+        </View>
+      </TouchableOpacity>
 
-      <Separator className='my-2' />
+      <Separator style={styles.separator} />
 
       {/* Description actions section */}
       {opportunity?.descriptionActions && opportunity?.descriptionActions !== 'NA' ? (
@@ -101,3 +78,41 @@ export default function AlphaDetailsDrawer({ isShown, onClose, opportunity }: Al
     </BottomModal>
   );
 }
+
+const styles = StyleSheet.create({
+  modal: {
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingTop: 28,
+    paddingBottom: 16,
+    backgroundColor: '#fff',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 24,
+    marginBottom: 12,
+  },
+  cursorPointer: {
+    // no real "cursor:pointer" in RN, but you could add visual feedback
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginTop: 12,
+    marginBottom: 8,
+    color: '#18181b',
+  },
+  imageContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 10,
+    overflow: 'hidden',
+    marginLeft: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  separator: {
+    marginVertical: 8,
+  },
+});

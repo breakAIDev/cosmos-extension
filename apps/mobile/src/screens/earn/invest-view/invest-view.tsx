@@ -1,11 +1,14 @@
 import type { CategoryId, InvestData } from '@leapwallet/cosmos-wallet-hooks';
-import BottomModal from '../bottom-modal';
-import { TxFee } from 'images/activity';
-import { HelpIcon } from 'images/misc';
 import React, { useMemo, useState } from 'react';
 
+import { TxFee } from '../../../../assets/images/activity'; // If SVG: ensure react-native-svg import
+import { HelpIcon } from '../../../../assets/images/misc'; // PNG/SVG, adjust as needed
+
 import { DisplaySettings } from '../types';
-import { InvestmentProductList } from './investment-product-list';
+import { InvestmentProductList } from './investment-product-list'; // Your RN version
+import BottomModal from '../../../components/bottom-modal'; // Your RN modal
+
+import { View, Text, TouchableOpacity, Image, ScrollView, StyleSheet } from 'react-native';
 
 type InvestViewProps = {
   data: InvestData;
@@ -13,26 +16,17 @@ type InvestViewProps = {
 };
 
 export const InvestView: React.FC<InvestViewProps> = ({ data, displaySettings }) => {
-  const [showDescription, setShowDescription] = useState<CategoryId>();
+  const [showDescription, setShowDescription] = useState<CategoryId | undefined>(undefined);
 
   const { dappCategories, dapps: _dapps, products: _products, disclaimer } = data;
 
-  const dapps = useMemo(() => {
-    return Object.values(_dapps);
-  }, [_dapps]);
-
-  const products = useMemo(() => {
-    return Object.values(_products);
-  }, [_products]);
+  const dapps = useMemo(() => Object.values(_dapps), [_dapps]);
+  const products = useMemo(() => Object.values(_products), [_products]);
 
   const visibleDappCategories = useMemo(() => {
     return Object.entries(dappCategories)
       .filter(([categoryId, categoryData]) => {
-        // if category is disabled, don't show it
-        if (!categoryData.visible) {
-          return false;
-        }
-        // if category is not disabled, but there are not products with the given category id, don't show it
+        if (!categoryData.visible) return false;
         if (
           !products.some((product) => {
             const productBelongsToCategory = product.dappCategory === categoryId;
@@ -48,84 +42,145 @@ export const InvestView: React.FC<InvestViewProps> = ({ data, displaySettings })
         }
         return true;
       })
-      .sort(([, a], [, b]) => {
-        return a.position - b.position;
-      });
+      .sort(([, a], [, b]) => a.position - b.position);
   }, [dappCategories, dapps, products]);
 
   return (
-    <>
-      <div className='space-y-5'>
+    <ScrollView style={{ flex: 1 }}>
+      <View style={{ padding: 16 }}>
         {visibleDappCategories.map(([categoryId, categoryData], index) => {
           const isFirstOfList = index === 0;
 
           return (
-            <div key={categoryId}>
+            <View key={categoryId}>
               {isFirstOfList ? (
-                <div className='flex-[6] flex items-center pr-10 gap-2 my-3'>
-                  <div className='flex w-[184px] items-center'>
-                    <h3 className='text-sm font-medium text-gray-700 dark:text-gray-400'>{categoryData.label}</h3>
-                    <button
-                      className='ml-2 opacity-40'
-                      onClick={() => {
-                        setShowDescription(categoryId);
-                      }}
+                <View style={styles.categoryHeader}>
+                  <View style={styles.labelContainer}>
+                    <Text style={styles.label}>{categoryData.label}</Text>
+                    <TouchableOpacity
+                      onPress={() => setShowDescription(categoryId)}
                     >
-                      <img src={HelpIcon} alt='help' className='h-[14px] w-[14px]' />
-                    </button>
-                  </div>
-                  <p className='flex-[1] flex-shrink-0 dark:text-[#858585] text-gray-400 font-bold text-sm text-center'>
-                    TVL
-                  </p>
-                  <p className='flex-[1] flex-shrink-0 dark:text-[#858585] text-gray-400 font-bold text-sm text-center'>
-                    APR
-                  </p>
-                </div>
+                      <Image source={{uri: HelpIcon}} style={styles.helpIcon} />
+                    </TouchableOpacity>
+                  </View>
+                  <Text style={styles.value}>TVL</Text>
+                  <Text style={styles.value}>APR</Text>
+                </View>
               ) : (
-                <div className='flex items-center'>
-                  <h3 className='text-sm font-medium text-gray-700 dark:text-gray-300'>{categoryData.label}</h3>
-                  <button
-                    className='ml-2 opacity-40'
-                    onClick={() => {
-                      setShowDescription(categoryId);
-                    }}
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text style={[styles.label, { color: '#d1d5db' } /* gray-300 */]}>
+                    {categoryData.label}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => setShowDescription(categoryId)}
                   >
-                    <img src={HelpIcon} alt='help' className='h-[14px] w-[14px]' />
-                  </button>
-                </div>
+                    <Image source={{uri: HelpIcon}} style={styles.helpIcon} />
+                  </TouchableOpacity>
+                </View>
               )}
+
               <InvestmentProductList
                 dapps={dapps}
                 products={products}
                 categoryId={categoryId}
                 sortBy={displaySettings.sortBy}
               />
-            </div>
+            </View>
           );
         })}
-      </div>
-      <div className='mt-4'>
-        <h4 className='text-gray-400 dark:text-gray-700 font-bold text-xs'>Disclaimer</h4>
-        <p className='text-gray-400 dark:text-gray-700 text-[10px] mt-1'>{disclaimer}</p>
-      </div>
+
+        <View>
+          <Text style={styles.disclaimerTitle}>Disclaimer</Text>
+          <Text style={styles.disclaimerText}>{disclaimer}</Text>
+        </View>
+      </View>
+
       <BottomModal
-        title='Earn Section Help'
+        title="Earn Section Help"
         isOpen={!!showDescription}
         onClose={() => setShowDescription(undefined)}
         closeOnBackdropClick={true}
       >
         {showDescription ? (
-          <div className='dark:bg-gray-900 bg-white-100 rounded-2xl flex flex-col justify-center p-4'>
-            <img src={TxFee} alt='dollar icon' className='h-12 w-12 filter grayscale opacity-50' />
-            <h2 className='text-gray-900 dark:text-white-100 font-bold mt-4'>
+          <View style={styles.modalContent}>
+            <Image source={{uri: TxFee}} style={styles.modalIcon} resizeMode="contain" />
+            <Text style={styles.modalTitle}>
               What are {dappCategories[showDescription].label}?
-            </h2>
-            <p className='text-gray-500 dark:text-gray-400 text-sm mt-2'>
+            </Text>
+            <Text style={styles.modalDescription}>
               {dappCategories[showDescription].description}
-            </p>
-          </div>
+            </Text>
+          </View>
         ) : null}
       </BottomModal>
-    </>
+    </ScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  categoryHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingRight: 10,
+    marginVertical: 12,
+  },
+  labelContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: 184,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#374151', // gray-700
+  },
+  helpIcon: {
+    marginLeft: 8,
+    opacity: 0.4,
+    width: 14,
+    height: 14,
+  },
+  value: {
+    flex: 1,
+    color: '#9ca3af', // gray-400
+    fontWeight: 'bold',
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  disclaimerTitle: {
+    color: '#9ca3af', // gray-400
+    fontWeight: 'bold',
+    fontSize: 12,
+    marginTop: 16,
+  },
+  disclaimerText: {
+    color: '#9ca3af',
+    fontSize: 10,
+    marginTop: 4,
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalTitle: {
+    color: '#1f2937', // gray-900
+    fontWeight: 'bold',
+    marginTop: 16,
+    fontSize: 16,
+  },
+  modalDescription: {
+    color: '#6b7280', // gray-500
+    fontSize: 14,
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  modalIcon: {
+    width: 48,
+    height: 48,
+    opacity: 0.5,
+    marginBottom: 8,
+  },
+});

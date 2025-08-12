@@ -1,12 +1,13 @@
+import React, { forwardRef, useState } from 'react';
+import { View, StyleSheet } from 'react-native';
 import { SelectedAddress } from '@leapwallet/cosmos-wallet-hooks';
 import { ChainInfo, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { ChainFeatureFlagsStore, ChainInfosStore } from '@leapwallet/cosmos-wallet-store';
-import Text from 'components/text';
-import { Images } from 'images';
+import Text from '../../../../components/text';
+import { Images } from '../../../../../assets/images';
 import { observer } from 'mobx-react-lite';
-import { useSendContext } from 'pages/send/context';
-import React, { forwardRef, useState } from 'react';
-import { AddressBook } from 'utils/addressbook';
+import { useSendContext } from '../../../send/context';
+import { AddressBook } from '../../../../utils/addressbook';
 
 import { ErrorWarning } from '../error-warning';
 import InputCard from './input-card';
@@ -28,7 +29,7 @@ interface RecipientCardProps {
   chainFeatureFlagsStore: ChainFeatureFlagsStore;
 }
 
-const RecipientCard = forwardRef(
+const RecipientCard = forwardRef<any, RecipientCardProps>(
   (
     {
       isIBCTransfer,
@@ -43,26 +44,26 @@ const RecipientCard = forwardRef(
       inputInProgress,
       chainInfoStore,
       chainFeatureFlagsStore,
-    }: RecipientCardProps,
-    ref: React.Ref<HTMLInputElement>,
+    },
+    ref,
   ) => {
     const [recipientInputValue, setRecipientInputValue] = useState<string>('');
     const { setSelectedAddress } = useSendContext();
 
     return (
-      <div className=' bg-secondary-100 rounded-xl mx-6'>
-        <div className='w-full p-5 flex flex-col gap-4'>
-          <div className='flex justify-between items-center w-full'>
-            <p className='text-muted-foreground text-sm font-medium !leading-[22.4px]'>Recipient</p>
+      <View style={styles.cardContainer}>
+        <View style={styles.innerCard}>
+          <View style={styles.rowBetween}>
+            <Text style={styles.recipientLabel}>Recipient</Text>
             {isIBCTransfer && sendSelectedNetwork === 'mainnet' && destChainInfo ? (
-              <div className='flex w-fit gap-0.5 py-0.5 px-[10px] bg-[#0A84FF] rounded-3xl items-center'>
+              <View style={styles.ibcPill}>
                 <Images.Misc.IbcProtocol color='#fff' />
-                <Text size='xs' color='text-white-100' className='whitespace-nowrap font-medium'>
+                <Text size='xs' style={styles.ibcPillText}>
                   IBC Transfer
                 </Text>
-              </div>
+              </View>
             ) : null}
-          </div>
+          </View>
 
           {selectedAddress && !inputInProgress ? (
             <RecipientDisplayCard
@@ -75,8 +76,8 @@ const RecipientCard = forwardRef(
                 setRecipientInputValue(selectedAddress?.ethAddress || selectedAddress?.address || '');
                 setSelectedAddress(null);
                 setTimeout(() => {
-                  if (ref && 'current' in ref) {
-                    ref.current?.focus();
+                  if (ref && typeof ref !== 'function' && ref.current) {
+                    ref.current.focus();
                   }
                 }, 200);
               }}
@@ -93,16 +94,57 @@ const RecipientCard = forwardRef(
               selectedNetwork={sendSelectedNetwork}
             />
           )}
-        </div>
+        </View>
 
         {selectedAddress && !inputInProgress ? <RecipientChainInfo /> : null}
 
         <ErrorWarning />
-      </div>
+      </View>
     );
   },
 );
 
 RecipientCard.displayName = 'RecipientCard';
+
+const styles = StyleSheet.create({
+  cardContainer: {
+    backgroundColor: '#F4F6F8', // Example secondary-100, adjust as per your theme
+    borderRadius: 18,
+    marginHorizontal: 24,
+    marginTop: 0,
+    marginBottom: 0,
+  },
+  innerCard: {
+    width: '100%',
+    padding: 20,
+    flexDirection: 'column',
+    gap: 16,
+  },
+  rowBetween: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  recipientLabel: {
+    color: '#8C94A6', // Example text-muted-foreground
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  ibcPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 2,
+    paddingHorizontal: 10,
+    backgroundColor: '#0A84FF',
+    borderRadius: 18,
+  },
+  ibcPillText: {
+    color: '#fff',
+    fontWeight: '500',
+    marginLeft: 4,
+    fontSize: 12,
+  },
+});
 
 export default observer(RecipientCard);

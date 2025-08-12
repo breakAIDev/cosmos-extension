@@ -1,26 +1,22 @@
-import { BookmarkSimple, CheckCircle, EyeSlash } from '@phosphor-icons/react';
-import { EventName, PageName } from 'config/analytics';
-import { AnimatePresence, motion } from 'framer-motion';
-import { AlphaOpportunity as AlphaOpportunityType } from 'hooks/useAlphaOpportunities';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { cn } from 'utils/cn';
-import { opacityFadeInOut } from 'utils/motion-variants';
-import { mixpanelTrack } from 'utils/tracking';
+import React, { useRef, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, Dimensions, Linking } from 'react-native';
+import { PanGestureHandler, PanGestureHandlerStateChangeEvent, State } from 'react-native-gesture-handler';
+import { MotiView, AnimatePresence } from 'moti';
+import { BookmarkSimple, CheckCircle, EyeSlash } from 'phosphor-react-native';
+import { AlphaOpportunity as AlphaOpportunityType } from '../../../hooks/useAlphaOpportunities';
 
-import {
-  alphaCardTransition,
-  alphaCardVariants,
-  animateBookMark,
-  getBookMarkCloneId,
-} from '../chad-components/RaffleListing';
+import Tags from './Tags';
+import ListingFooter from './ListingFooter';
+import ListingImage from './ListingImage';
 import { useBookmarks } from '../context/bookmark-context';
 import { useFilters } from '../context/filter-context';
 import { getHostname } from '../utils';
-import { ALPHA_BOOKMARK_ID } from '../utils/constants';
 import { RaffleVisibilityStatus } from './alpha-timeline/use-raffle-status-map';
-import ListingFooter from './ListingFooter';
-import ListingImage from './ListingImage';
-import Tags from './Tags';
+import { EventName, PageName } from '../../../services/config/analytics';
+import { mixpanelTrack } from '../../../utils/tracking';
+
+const SWIPE_THRESHOLD = 100;
+const SCREEN_WIDTH = Dimensions.get('window').width;
 
 export type AlphaOpportunityProps = AlphaOpportunityType & {
   isBookmarked: boolean;
@@ -29,25 +25,6 @@ export type AlphaOpportunityProps = AlphaOpportunityType & {
   onMarkRaffle?: (id: string, status: RaffleVisibilityStatus) => void;
   visibilityStatus?: RaffleVisibilityStatus;
 };
-
-const exitDurationInSec = 0.4;
-const exitVariants = {
-  exitLeft: {
-    x: '-100%',
-    transition: {
-      duration: exitDurationInSec,
-      ease: 'easeInOut',
-    },
-  },
-  exitRight: {
-    x: '100%',
-    transition: {
-      duration: exitDurationInSec,
-      ease: 'easeInOut',
-    },
-  },
-};
-
 export default function AlphaOpportunity(props: AlphaOpportunityProps) {
   const {
     additionDate,
@@ -64,53 +41,32 @@ export default function AlphaOpportunity(props: AlphaOpportunityProps) {
     onMarkRaffle,
     visibilityStatus,
   } = props;
+
   const { toggleBookmark, isBookmarked } = useBookmarks();
   const { setOpportunities, setEcosystems, selectedOpportunities, selectedEcosystems, openDetails } = useFilters();
 
-  const isDragging = useRef(false);
-  const dragStartX = useRef<number | null>(null);
-  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
-  const bookMarkIconRef = useRef<SVGSVGElement>(null);
-  const bookMarkAnimationRef = useRef<Animation | null>(null);
+  // Swipe state
+  const [swipeDirection, setSwipeDirection] = useState<string | null>(null); // 'left' | 'right' | null
   const [isExiting, setIsExiting] = useState(false);
+  const translateX = useRef(new Animated.Value(0)).current;
 
-  const handleBookmarkClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-
+  // Handle bookmark toggle
+  const handleBookmarkClick = () => {
     const prevBookMarked = isBookmarked(id);
-    const headerBookMarkIcon = document.getElementById(ALPHA_BOOKMARK_ID);
-
-    if (!prevBookMarked && headerBookMarkIcon && bookMarkIconRef.current) {
-      bookMarkAnimationRef.current = animateBookMark(id, headerBookMarkIcon, bookMarkIconRef.current);
-    }
-
     toggleBookmark(id);
-    mixpanelTrack(EventName.Bookmark, {
+    mixpanelTrack('Bookmark', {
       [!prevBookMarked ? 'bookmarkAdded' : 'bookmarkRemoved']: id,
       name: homepageDescription,
       page: PageName.Alpha,
     });
   };
 
-  const handleClick = () => {
-    if (isDragging.current) return;
-
-    // if the opportunity is a post, open the details page:
+  // Card tap logic
+  const handlePress = () => {
     if (descriptionActions && descriptionActions !== 'NA') {
       openDetails(props);
-
-      // mixpanelTrack(EventName.PageView, {
-      //   pageName: PageName.Post,
-      //   name: homepageDescription,
-      //   alphaSelectSource: isSearched ? 'Search Results' : 'Default List',
-      //   id: id,
-      //   ecosystem: [...(ecosystemFilter || [])],
-      //   categories: [...(categoryFilter || [])],
-      // })
-
       return;
     }
-    // if the opportunity only has an external link, open the link:
     if (relevantLinks?.[0]) {
       mixpanelTrack(EventName.PageView, {
         pageName: pageName,
@@ -121,7 +77,8 @@ export default function AlphaOpportunity(props: AlphaOpportunityProps) {
         ecosystem: [...(ecosystemFilter || [])],
         categories: [...(categoryFilter || [])],
       });
-      window.open(relevantLinks[0], '_blank', 'noopener,noreferrer');
+
+      Linking.openURL(relevantLinks[0]);
 
       return;
     }
@@ -137,145 +94,201 @@ export default function AlphaOpportunity(props: AlphaOpportunityProps) {
     });
   };
 
-  const handleEcosystemClick = useCallback(
-    (ecosystem: string) => {
-      setEcosystems([...(selectedEcosystems || []), ecosystem]);
-    },
-    [selectedEcosystems, setEcosystems],
-  );
+  // Pan gesture logic
+  const onGestureEvent = Animated.event([{ nativeEvent: { translationX: translateX } }], {
+    useNativeDriver: false,
+  });
 
-  const handleCategoryClick = useCallback(
-    (category: string) => {
-      setOpportunities([...(selectedOpportunities || []), category]);
-    },
-    [selectedOpportunities, setOpportunities],
-  );
-
-  // Swipe gesture logic
-  const handleDragStart = (_: any, info: { point: { x: number } }) => {
-    isDragging.current = true;
-    dragStartX.current = info.point.x;
-    setSwipeDirection(null);
-  };
-
-  const handleDrag = (_: any, info: { point: { x: number } }) => {
-    if (dragStartX.current !== null) {
-      const deltaX = info.point.x - dragStartX.current;
-      if (Math.abs(deltaX) > 10) {
-        setSwipeDirection(deltaX > 0 ? 'right' : 'left');
+  const onHandlerStateChange = (event: PanGestureHandlerStateChangeEvent) => {
+    const nativeEvent = event.nativeEvent;
+    if (nativeEvent.state === State.END) { // 5 === END
+      if (nativeEvent.translationX > SWIPE_THRESHOLD && onMarkRaffle) {
+        setSwipeDirection('right');
+        setIsExiting(true);
+        setTimeout(() => {
+          onMarkRaffle(id, 'hidden');
+          setIsExiting(false);
+          setSwipeDirection(null);
+          translateX.setValue(0);
+        }, 350);
+      } else if (nativeEvent.translationX < -SWIPE_THRESHOLD && onMarkRaffle) {
+        setSwipeDirection('left');
+        setIsExiting(true);
+        setTimeout(() => {
+          onMarkRaffle(id, 'completed');
+          setIsExiting(false);
+          setSwipeDirection(null);
+          translateX.setValue(0);
+        }, 350);
+      } else {
+        Animated.spring(translateX, { toValue: 0, useNativeDriver: false }).start();
+        setSwipeDirection(null);
       }
     }
   };
 
-  const handleDragEnd = (_: any, info: { offset: { x: number } }) => {
-    isDragging.current = false;
-    dragStartX.current = null;
-
-    let status: RaffleVisibilityStatus | null = null;
-    if (info.offset.x < -100) {
-      // Swiped right: completed
-      status = 'completed';
-    } else if (info.offset.x > 100) {
-      // Swiped left: hide
-      status = 'hidden';
+  // Render swipe background
+  const renderSwipeBackground = () => {
+    if (swipeDirection === 'right') {
+      return (
+        <MotiView
+          from={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          style={[styles.swipeBackground, styles.swipeRight]}
+        >
+          <EyeSlash size={40} color="#fff" />
+        </MotiView>
+      );
     }
-
-    setIsExiting(!!status);
-    setTimeout(() => {
-      status && onMarkRaffle?.(id, status);
-      setSwipeDirection(null);
-    }, (exitDurationInSec - 0.05) * 1000); // exit bit faster than the animation
+    if (swipeDirection === 'left') {
+      return (
+        <MotiView
+          from={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          style={[styles.swipeBackground, styles.swipeLeft]}
+        >
+          <CheckCircle size={40} color="#fff" />
+        </MotiView>
+      );
+    }
+    return null;
   };
-
-  useEffect(() => {
-    return () => {
-      if (bookMarkAnimationRef.current) {
-        bookMarkAnimationRef.current.cancel();
-        document.getElementById(getBookMarkCloneId(id))?.remove();
-      }
-    };
-  }, [id]);
-
-  const enableDrag = !!onMarkRaffle && !visibilityStatus;
 
   return (
-    <motion.div
-      initial='initial'
-      animate={'animate'}
-      variants={alphaCardVariants}
-      transition={alphaCardTransition}
-      onClick={handleClick}
-      className='relative isolate'
-    >
-      <motion.div
-        variants={exitVariants}
-        animate={isExiting ? (swipeDirection === 'left' ? 'exitLeft' : 'exitRight') : undefined}
-        drag={enableDrag ? 'x' : undefined}
-        dragConstraints={{ left: 0, right: 0 }}
-        onDragStart={handleDragStart}
-        onDrag={handleDrag}
-        onDragEnd={handleDragEnd}
-        className={cn(
-          'cursor-pointer flex items-start p-5 transition-colors duration-200 ease-in-out gap-4 flex-col rounded-2xl border mb-4 border-secondary-300',
-          visibilityStatus ? '' : 'gradient-linear-mono',
-        )}
-      >
-        <div className='flex items-center gap-2 justify-between w-full'>
-          <Tags
-            visibilityStatus={visibilityStatus}
-            ecosystemFilter={ecosystemFilter}
-            categoryFilter={categoryFilter}
-            handleEcosystemClick={handleEcosystemClick}
-            handleCategoryClick={handleCategoryClick}
-          />
-
-          <button onClick={handleBookmarkClick}>
-            <BookmarkSimple
-              ref={bookMarkIconRef}
-              weight={isBookmarked(id) ? 'fill' : 'regular'}
-              className={cn('size-5', isBookmarked(id) ? 'text-primary' : 'text-foreground')}
-            />
-          </button>
-        </div>
-
-        <div className='flex items-start gap-2 justify-between w-full'>
-          <div className='flex flex-col gap-1'>
-            <span className='font-bold text-sm leading-snug'>{homepageDescription}</span>
-
-            <ListingFooter endDate={endDate} additionDate={additionDate} relevantLinks={relevantLinks} />
-          </div>
-
-          <div className='size-12 rounded-lg bg-secondary overflow-hidden shrink-0'>
-            <ListingImage ecosystemFilter={ecosystemFilter?.[0]} categoryFilter={categoryFilter?.[0]} image={image} />
-          </div>
-        </div>
-      </motion.div>
-
+    <View style={styles.root}>
       <AnimatePresence>
-        {swipeDirection === 'right' ? (
-          <motion.div
-            key='right'
-            variants={opacityFadeInOut}
-            initial='hidden'
-            animate='visible'
-            exit='hidden'
-            className='absolute inset-0 rounded-2xl bg-destructive-100 -z-10 select-none pointer-events-none flex items-center justify-start px-10'
-          >
-            <EyeSlash size={40} className='text-white' />
-          </motion.div>
-        ) : swipeDirection === 'left' ? (
-          <motion.div
-            key='left'
-            variants={opacityFadeInOut}
-            initial='hidden'
-            animate='visible'
-            exit='hidden'
-            className='absolute inset-0 rounded-2xl bg-primary -z-10 select-none pointer-events-none flex items-center justify-end px-10'
-          >
-            <CheckCircle size={40} className='text-white' />
-          </motion.div>
-        ) : null}
+        {renderSwipeBackground()}
       </AnimatePresence>
-    </motion.div>
+      <PanGestureHandler
+        enabled={!!onMarkRaffle && !visibilityStatus}
+        onGestureEvent={onGestureEvent}
+        onHandlerStateChange={onHandlerStateChange}
+      >
+        <Animated.View
+          style={[
+            styles.card,
+            visibilityStatus ? styles.cardInactive : styles.cardActive,
+            { transform: [{ translateX }] },
+          ]}
+        >
+          <TouchableOpacity onPress={handlePress} activeOpacity={0.92}>
+            {/* Top bar with tags and bookmark */}
+            <View style={styles.topBar}>
+              <Tags
+                visibilityStatus={visibilityStatus}
+                ecosystemFilter={ecosystemFilter}
+                categoryFilter={categoryFilter}
+                handleEcosystemClick={eco => setEcosystems([...(selectedEcosystems || []), eco])}
+                handleCategoryClick={cat => setOpportunities([...(selectedOpportunities || []), cat])}
+              />
+              <TouchableOpacity onPress={handleBookmarkClick} hitSlop={8}>
+                <BookmarkSimple
+                  weight={isBookmarked(id) ? 'fill' : 'regular'}
+                  size={24}
+                  color={isBookmarked(id) ? '#22c55e' : '#222'}
+                />
+              </TouchableOpacity>
+            </View>
+            {/* Middle: description and image */}
+            <View style={styles.middleRow}>
+              <View style={styles.middleText}>
+                <Text style={styles.homepageDescription}>{homepageDescription}</Text>
+                <ListingFooter endDate={endDate} additionDate={additionDate} relevantLinks={relevantLinks} />
+              </View>
+              <View style={styles.imageContainer}>
+                <ListingImage
+                  ecosystemFilter={ecosystemFilter?.[0]}
+                  categoryFilter={categoryFilter?.[0]}
+                  image={image}
+                />
+              </View>
+            </View>
+          </TouchableOpacity>
+        </Animated.View>
+      </PanGestureHandler>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    marginBottom: 18,
+    position: 'relative',
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  card: {
+    width: '100%',
+    borderRadius: 18,
+    padding: 20,
+    backgroundColor: '#fff',
+    borderColor: '#e3e4e6',
+    borderWidth: 1,
+    elevation: 2,
+    zIndex: 2,
+  },
+  cardActive: {
+    backgroundColor: '#f7fafc',
+  },
+  cardInactive: {
+    backgroundColor: '#f4f4f6',
+    opacity: 0.7,
+  },
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+    width: '100%',
+  },
+  middleRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    width: '100%',
+    marginTop: 2,
+    gap: 12,
+  },
+  middleText: {
+    flex: 1,
+    marginRight: 12,
+  },
+  homepageDescription: {
+    fontWeight: 'bold',
+    fontSize: 15,
+    marginBottom: 2,
+    color: '#18181b',
+  },
+  imageContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 8,
+    overflow: 'hidden',
+    backgroundColor: '#f1f5f9',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  swipeBackground: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    height: '100%',
+    width: SCREEN_WIDTH - 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    zIndex: 1,
+    paddingHorizontal: 32,
+  },
+  swipeLeft: {
+    backgroundColor: '#22c55e',
+    right: 0,
+    alignItems: 'flex-end',
+  },
+  swipeRight: {
+    backgroundColor: '#dc2626',
+    left: 0,
+    alignItems: 'flex-start',
+  },
+});

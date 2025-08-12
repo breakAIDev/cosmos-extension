@@ -2,11 +2,12 @@ import { useDisabledNFTsCollections } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { NftInfo, NftStore } from '@leapwallet/cosmos-wallet-store';
 import { Header, HeaderActionType } from '@leapwallet/leap-ui';
-import PopupLayout from 'components/layout/popup-layout';
-import { useChainInfos } from 'hooks/useChainInfos';
+import PopupLayout from '../../components/layout/popup-layout';
+import { useChainInfos } from '../../hooks/useChainInfos';
 import { observer } from 'mobx-react-lite';
 import React, { useMemo } from 'react';
-import { getChainName } from 'utils/getChainName';
+import { View, Text, StyleSheet } from 'react-native';
+import { getChainName } from '../../utils/getChainName';
 
 import { CollectionAvatar, TextHeaderCollectionCard } from './components';
 import { useNftContext } from './context';
@@ -28,7 +29,6 @@ export const ChainNftsDetails = observer(({ nftStore }: ChainNftsDetailsProps) =
         if (disabledNFTsCollections.includes(nft.collection?.address ?? '')) {
           return _nfts;
         }
-
         return [
           ..._nfts,
           {
@@ -42,7 +42,7 @@ export const ChainNftsDetails = observer(({ nftStore }: ChainNftsDetailsProps) =
   }, [collectionData?.nfts, disabledNFTsCollections, showChainNftsFor]);
 
   return (
-    <div className='relative w-full overflow-clip panel-height'>
+    <View style={styles.container}>
       <PopupLayout
         header={
           <Header
@@ -51,24 +51,60 @@ export const ChainNftsDetails = observer(({ nftStore }: ChainNftsDetailsProps) =
               type: HeaderActionType.BACK,
             }}
             title={
-              <h1 className='flex'>
-                <CollectionAvatar className='h-[30px] w-[30px]' image={chainInfo.chainSymbolImageUrl} />
-                <span className='truncate !max-w-[150px]' title={getChainName(chainInfo.chainName)}>
+              <View style={styles.headerTitle}>
+                <CollectionAvatar style={styles.avatar} image={chainInfo.chainSymbolImageUrl} />
+                <Text
+                  style={styles.chainName}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
                   {getChainName(chainInfo.chainName)}
-                </span>
-              </h1>
+                </Text>
+              </View>
             }
           />
         }
       >
-        <div className='px-6 pt-4 pb-8'>
+        <View style={styles.content}>
           <TextHeaderCollectionCard
             headerTitle={`${nfts.length} NFT${nfts.length > 1 ? 's' : ''}`}
             nfts={nfts}
             noChip={true}
           />
-        </div>
+        </View>
       </PopupLayout>
-    </div>
+    </View>
   );
+});
+
+const styles = StyleSheet.create({
+  container: {
+    position: 'relative',
+    width: '100%',
+    flex: 1,
+    overflow: 'hidden',
+    // panel-height: handle with parent if needed
+  },
+  headerTitle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    maxWidth: 210,
+    flexShrink: 1,
+  },
+  avatar: {
+    width: 30,
+    height: 30,
+    marginRight: 8,
+  },
+  chainName: {
+    flexShrink: 1,
+    maxWidth: 150,
+    fontSize: 17,
+    fontWeight: '600',
+  },
+  content: {
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingBottom: 32,
+  },
 });

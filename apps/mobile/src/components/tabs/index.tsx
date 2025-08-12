@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ViewStyle, StyleProp } from 'react-native';
 
 type Tab = {
   id: string;
@@ -9,14 +9,14 @@ type Tab = {
 type TabsProps = {
   tabsList: Tab[];
   tabsContent: { [key: string]: React.ReactNode };
-  className?: object;
+  style?: StyleProp<ViewStyle>;
 };
 
-export const Tabs: React.FC<TabsProps> = ({ tabsList, tabsContent, className }) => {
+export const Tabs: React.FC<TabsProps> = ({ tabsList, tabsContent, style }) => {
   const [activeTab, setActiveTab] = useState(tabsList[0]?.id);
 
   return (
-    <View style={[styles.container, className]}>
+    <View style={[styles.container, style]}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabsRow}>
         {tabsList.map(({ id, label }) => (
           <TouchableOpacity
@@ -33,7 +33,9 @@ export const Tabs: React.FC<TabsProps> = ({ tabsList, tabsContent, className }) 
           </TouchableOpacity>
         ))}
       </ScrollView>
-      <View style={styles.tabContent}>{tabsContent[activeTab]}</View>
+      
+      <View style={styles.tabContent}>{React.isValidElement(tabsContent[activeTab]) ? tabsContent[activeTab] : <View/>}</View>
+      
     </View>
   );
 };

@@ -1,14 +1,15 @@
 import { useChainApis } from '@leapwallet/cosmos-wallet-hooks';
 import { NativeDenom } from '@leapwallet/cosmos-wallet-sdk';
-import { Plus } from '@phosphor-icons/react';
-import { SearchInput } from 'components/ui/input/search-input';
+import { Plus } from 'phosphor-react-native';
+import { SearchInput } from '../../components/ui/input/search-input';
 import { autorun } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { activeChainStore } from 'stores/active-chain-store';
-import { cw20TokenBalanceStore, erc20TokenBalanceStore } from 'stores/balance-store';
-import { chainInfoStore } from 'stores/chain-infos-store';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { activeChainStore } from '../../context/active-chain-store';
+import { cw20TokenBalanceStore, erc20TokenBalanceStore } from '../../context/balance-store';
+import { chainInfoStore } from '../../context/chain-infos-store';
 import {
   autoFetchedCW20DenomsStore,
   betaCW20DenomsStore,
@@ -19,15 +20,14 @@ import {
   enabledCW20DenomsStore,
   erc20DenomsStore,
   interactedDenomsStore,
-} from 'stores/denoms-store-instance';
-import { selectedNetworkStore } from 'stores/selected-network-store';
-import { getContractInfo } from 'utils/getContractInfo';
-import extension from 'webextension-polyfill';
-
+} from '../../context/denoms-store-instance';
+import { selectedNetworkStore } from '../../context/selected-network-store';
+import { getContractInfo } from '../../utils/getContractInfo';
 import { DeleteTokenSheet, SupportedToken } from './components';
 import ManageTokensHeader from './components/ManageTokensHeader';
 import { ManageTokensTabs } from './components/ManageTokensTab';
 import { sortBySymbols } from './utils';
+import { TextInput } from 'react-native-gesture-handler';
 
 const ManageTokens = observer(() => {
   const { activeChain } = activeChainStore;
@@ -45,7 +45,7 @@ const ManageTokens = observer(() => {
   const { cw20Tokens: cw20TokensBalances } = cw20TokenBalanceStore;
   const { erc20Tokens: erc20TokensBalances } = erc20TokenBalanceStore;
 
-  const navigate = useNavigate();
+  const navigation = useNavigation();
   const { lcdUrl } = useChainApis();
 
   const [showDeleteSheet, setShowDeleteSheet] = useState(false);
@@ -54,55 +54,44 @@ const ManageTokens = observer(() => {
   const [searchedText, setSearchedText] = useState('');
   const [fetchedTokens, setFetchedTokens] = useState<string[]>([]);
   const [fetchingContract, setFetchingContract] = useState(false);
-  const timeoutIdRef = useRef<NodeJS.Timeout>();
+  const timeoutIdRef = useRef<NodeJS.Timeout>(undefined);
   const [manuallyAddedTokens, setManuallyAddedTokens] = useState<NativeDenom[]>([]);
-  const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchInputRef = useRef<TextInput>(null);
   const [activeTab, setActiveTab] = useState('supported');
 
-  /**
-   * Initialize supported tokens
-   */
+  // ----------- Supported Tokens Logic (Same as web) -----------
   const supportedTokens = useMemo(() => {
     let _supportedTokens: SupportedToken[] = [];
-
-    const _nativeCW20Tokens =
-      Object.values(cw20Denoms)?.map((token) => {
-        const tokenBalance = cw20TokensBalances?.find((balance) => balance.coinMinimalDenom === token.coinMinimalDenom);
-        return {
-          ...token,
-          enabled:
-            !tokenBalance || String(tokenBalance?.amount) === '0'
-              ? enabledCW20Denoms?.includes(token.coinMinimalDenom)
-              : !disabledCW20Denoms?.includes(token.coinMinimalDenom),
-          verified: true,
-        };
-      }) ?? [];
-
-    const _autoFetchedCW20Tokens =
-      Object.values(autoFetchedCW20Denoms)?.map((token) => ({
+    const _nativeCW20Tokens = Object.values(cw20Denoms)?.map((token) => {
+      const tokenBalance = cw20TokensBalances?.find((balance) => balance.coinMinimalDenom === token.coinMinimalDenom);
+      return {
         ...token,
-        enabled: enabledCW20Denoms?.includes(token.coinMinimalDenom),
-        verified: false,
-      })) ?? [];
-
-    const _nativeERC20Tokens =
-      Object.values(erc20Denoms)?.map((token) => {
-        const tokenBalance = erc20TokensBalances?.find(
-          (balance) => balance.coinMinimalDenom === token.coinMinimalDenom,
-        );
-
-        return {
-          ...token,
-          enabled:
-            !tokenBalance || String(tokenBalance?.amount) === '0'
-              ? enabledCW20Denoms?.includes(token.coinMinimalDenom)
-              : !disabledCW20Denoms?.includes(token.coinMinimalDenom),
-          verified: true,
-        };
-      }) ?? [];
-
+        enabled:
+          !tokenBalance || String(tokenBalance?.amount) === '0'
+            ? enabledCW20Denoms?.includes(token.coinMinimalDenom)
+            : !disabledCW20Denoms?.includes(token.coinMinimalDenom),
+        verified: true,
+      };
+    }) ?? [];
+    const _autoFetchedCW20Tokens = Object.values(autoFetchedCW20Denoms)?.map((token) => ({
+      ...token,
+      enabled: enabledCW20Denoms?.includes(token.coinMinimalDenom),
+      verified: false,
+    })) ?? [];
+    const _nativeERC20Tokens = Object.values(erc20Denoms)?.map((token) => {
+      const tokenBalance = erc20TokensBalances?.find(
+        (balance) => balance.coinMinimalDenom === token.coinMinimalDenom,
+      );
+      return {
+        ...token,
+        enabled:
+          !tokenBalance || String(tokenBalance?.amount) === '0'
+            ? enabledCW20Denoms?.includes(token.coinMinimalDenom)
+            : !disabledCW20Denoms?.includes(token.coinMinimalDenom),
+        verified: true,
+      };
+    }) ?? [];
     _supportedTokens = [..._supportedTokens, ..._nativeCW20Tokens, ..._autoFetchedCW20Tokens, ..._nativeERC20Tokens];
-
     return _supportedTokens;
   }, [
     autoFetchedCW20Denoms,
@@ -114,10 +103,7 @@ const ManageTokens = observer(() => {
     erc20TokensBalances,
   ]);
 
-  /**
-   * Replace with AllBetaTokensStore ?
-   * Initialize manually added tokens
-   */
+  // ----------- MobX Reaction for manually added tokens -----------
   useEffect(
     () =>
       autorun(() => {
@@ -125,49 +111,33 @@ const ManageTokens = observer(() => {
         if (betaNativeDenoms) {
           _manuallyAddedTokens = [..._manuallyAddedTokens, ...(Object.values(betaNativeDenoms) ?? [])];
         }
-
         if (betaCW20Denoms) {
           _manuallyAddedTokens = [..._manuallyAddedTokens, ...(Object.values(betaCW20Denoms) ?? [])];
         }
-
         if (betaERC20Denoms) {
           _manuallyAddedTokens = [..._manuallyAddedTokens, ...(Object.values(betaERC20Denoms) ?? [])];
         }
-
         setManuallyAddedTokens(_manuallyAddedTokens);
       }),
     [betaCW20Denoms, betaERC20Denoms, betaNativeDenoms],
   );
 
-  /**
-   * Remove disabled tokens from fetched tokens
-   */
   useEffect(() => {
     setFetchedTokens((prevValue) => {
       return (prevValue ?? []).filter((tokenDenom) => !disabledCW20Denoms.includes(tokenDenom));
     });
+  }, [disabledCW20Denoms, disabledCW20Denoms.length]);
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [disabledCW20Denoms.length]);
-
-  /**
-   * Filter manually added tokens
-   */
   const filteredManuallyAddedTokens = useMemo(() => {
     return (
       manuallyAddedTokens
         ?.filter((token) => {
           const lowercasedSearchedText = searchedText.trim().toLowerCase();
-
-          if (
+          return (
             (token.name ?? '').toLowerCase().includes(lowercasedSearchedText) ||
             token.coinDenom.toLowerCase().includes(lowercasedSearchedText) ||
             token.coinMinimalDenom.toLowerCase().includes(lowercasedSearchedText)
-          ) {
-            return true;
-          }
-
-          return false;
+          );
         })
         ?.sort((tokenA, tokenB) => {
           const symbolA = tokenA.coinDenom.toUpperCase();
@@ -180,55 +150,35 @@ const ManageTokens = observer(() => {
     );
   }, [manuallyAddedTokens, searchedText]);
 
-  /**
-   * Filter supported tokens
-   */
   const filteredSupportedTokens = useMemo(() => {
     return (
       supportedTokens
         ?.filter((token) => {
           const lowercasedSearchedText = searchedText.trim().toLowerCase();
-
-          if (
+          return (
             (token.name ?? '').toLowerCase().includes(lowercasedSearchedText) ||
             token.coinDenom.toLowerCase().includes(lowercasedSearchedText) ||
             token.coinMinimalDenom.toLowerCase().includes(lowercasedSearchedText)
-          ) {
-            return true;
-          }
-
-          return false;
+          );
         })
         ?.sort((tokenA, tokenB) => {
           const isEnabledA = tokenA.enabled;
           const isEnabledB = tokenB.enabled;
-
           if (isEnabledA && !isEnabledB) return -1;
           if (!isEnabledA && isEnabledB) return 1;
-
-          const isNativeCW20A = !!(cw20Denoms?.[tokenA.coinMinimalDenom] || erc20Denoms?.[tokenA.coinMinimalDenom]);
-          const isNativeCW20B = !!(cw20Denoms?.[tokenB.coinMinimalDenom] || erc20Denoms?.[tokenB.coinMinimalDenom]);
-
-          if (isNativeCW20A && !isNativeCW20B) return -1;
-          if (!isNativeCW20A && isNativeCW20B) return 1;
-
           return sortBySymbols(tokenA, tokenB);
         }) ?? []
     );
-  }, [supportedTokens, searchedText, cw20Denoms, erc20Denoms]);
+  }, [supportedTokens, searchedText]);
 
-  /**
-   * Fetch contract info from the chain
-   */
+  // ----------- Fetch contract info -----------
   useEffect(() => {
     if (searchedText.length !== 0 && filteredSupportedTokens.length === 0 && filteredManuallyAddedTokens.length === 0) {
       clearTimeout(timeoutIdRef.current);
-
       timeoutIdRef.current = setTimeout(async () => {
         try {
           setFetchingContract(true);
           const result = await getContractInfo(lcdUrl ?? '', searchedText);
-
           if (typeof result !== 'string' && result.symbol) {
             setFetchedTokens((prevValue) => [...prevValue, searchedText]);
             setManuallyAddedTokens((prevValue) => [
@@ -253,43 +203,25 @@ const ManageTokens = observer(() => {
     }
   }, [searchedText, filteredManuallyAddedTokens.length, lcdUrl, activeChain, filteredSupportedTokens.length]);
 
-  /**
-   * Handle add new token click
-   */
-  const handleAddNewTokenClick = useCallback(
-    (passState = false) => {
-      const views = extension.extension.getViews({ type: 'popup' });
+  // ----------- Handle Add New Token -----------
+  const handleAddNewTokenClick = useCallback(() => {
+    // In RN, you usually use navigation params instead of browser popups
+    navigation.navigate('AddToken', { coinMinimalDenom: searchedText });
+  }, [navigation, searchedText]);
 
-      if (views.length === 0) {
-        const params: { replace: boolean; state?: { coinMinimalDenom: string } } = { replace: true };
-        if (passState) params['state'] = { coinMinimalDenom: searchedText };
-
-        navigate('/add-token', params);
-      } else {
-        window.open(extension.runtime.getURL('index.html#/add-token'));
-      }
-    },
-    [navigate, searchedText],
-  );
-
-  /**
-   * Handle toggle change
-   */
+  // ----------- Handle Toggle -----------
   const handleToggleChange = useCallback(
     async (isEnabled: boolean, coinMinimalDenom: string) => {
       const hasUserInteracted = interactedDenoms.some((token) => token === coinMinimalDenom);
       if (!hasUserInteracted) {
         await interactedDenomsStore.setInteractedDenoms([...interactedDenoms, coinMinimalDenom]);
       }
-
       let _disabledCW20Tokens: string[] = [];
       let _enabledCW20Denoms: string[] = [];
       let hasToUpdateBetaCW20Tokens = false;
-
       if (isEnabled) {
         _disabledCW20Tokens = disabledCW20Denoms.filter((token) => token !== coinMinimalDenom);
         _enabledCW20Denoms = [...enabledCW20Denoms, coinMinimalDenom];
-
         const tokenInfo = manuallyAddedTokens.find((token) => token.coinMinimalDenom === coinMinimalDenom);
         if (fetchedTokens.includes(coinMinimalDenom) && tokenInfo) {
           hasToUpdateBetaCW20Tokens = true;
@@ -297,8 +229,10 @@ const ManageTokens = observer(() => {
         if (activeChain !== 'aggregated') {
           cw20TokenBalanceStore.fetchCW20TokenBalances(activeChain, selectedNetwork, [coinMinimalDenom]);
         }
+        // Fetch balance if chain is not 'aggregated'
+        // Call to your MobX store fetcher, if needed
       } else {
-        _disabledCW20Tokens = [...disabledCW20Denoms, coinMinimalDenom];
+        _disabledCW20Tokens = [..._disabledCW20Tokens, coinMinimalDenom];
         _enabledCW20Denoms = enabledCW20Denoms.filter((token) => token !== coinMinimalDenom);
       }
 
@@ -327,15 +261,7 @@ const ManageTokens = observer(() => {
         );
       }
     },
-    [
-      activeChain,
-      selectedNetwork,
-      disabledCW20Denoms,
-      enabledCW20Denoms,
-      fetchedTokens,
-      interactedDenoms,
-      manuallyAddedTokens,
-    ],
+    [activeChain, disabledCW20Denoms, enabledCW20Denoms, fetchedTokens, interactedDenoms, manuallyAddedTokens, selectedNetwork],
   );
 
   const onCloseDeleteTokenSheet = useCallback(() => {
@@ -349,31 +275,25 @@ const ManageTokens = observer(() => {
   }, []);
 
   useEffect(() => {
-    searchInputRef.current?.focus();
+    searchInputRef.current?.focus?.();
   }, []);
 
   return (
-    <div className='flex flex-col h-full bg-secondary-50'>
+    <View style={styles.container}>
       <ManageTokensHeader />
-      <div className='flex items-center gap-2 m-6'>
+      <View style={styles.searchRow}>
         <SearchInput
           ref={searchInputRef}
           value={searchedText}
-          onChange={(e) => setSearchedText(e?.target?.value ?? '')}
-          placeholder='Search by chain name'
+          onChangeText={setSearchedText}
+          placeholder="Search by token name"
           onClear={() => setSearchedText('')}
+          style={styles.searchInput}
         />
-
-        {handleAddNewTokenClick && (
-          <div
-            className='bg-secondary-100 hover:bg-secondary-200 px-4 py-3 text-muted-foreground rounded-xl cursor-pointer'
-            onClick={() => handleAddNewTokenClick()}
-          >
-            <Plus size={20} />
-          </div>
-        )}
-      </div>
-
+        <TouchableOpacity style={styles.addBtn} onPress={handleAddNewTokenClick}>
+          <Plus size={20} color="#64748b" />
+        </TouchableOpacity>
+      </View>
       <ManageTokensTabs
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -386,7 +306,6 @@ const ManageTokens = observer(() => {
         handleAddNewTokenClick={handleAddNewTokenClick}
         searchedText={searchedText}
       />
-
       <DeleteTokenSheet
         activeChainStore={activeChainStore}
         chainInfosStore={chainInfoStore}
@@ -397,10 +316,38 @@ const ManageTokens = observer(() => {
         onClose={onCloseDeleteTokenSheet}
         tokenToDelete={tokenToDelete}
       />
-    </div>
+    </View>
   );
 });
 
-export default observer(() => {
-  return <ManageTokens />;
+export default ManageTokens;
+
+// ---- Styles ----
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f6f7fa',
+  },
+  searchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    margin: 16,
+  },
+  searchInput: {
+    flex: 1,
+    backgroundColor: '#f3f4f6',
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    height: 44,
+    fontSize: 16,
+    color: '#2d3142',
+  },
+  addBtn: {
+    marginLeft: 10,
+    backgroundColor: '#e3e9f4',
+    borderRadius: 12,
+    padding: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });

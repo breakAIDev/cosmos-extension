@@ -122,7 +122,7 @@ export interface PartSetHeaderSDKType {
 export interface Part {
   index: number;
   bytes: Uint8Array;
-  proof: Proof;
+  proof: Proof | undefined;
 }
 export interface PartProtoMsg {
   typeUrl: '/tendermint.types.Part';
@@ -145,7 +145,7 @@ export interface PartSDKType {
 /** BlockID */
 export interface BlockID {
   hash: Uint8Array;
-  partSetHeader: PartSetHeader;
+  partSetHeader: PartSetHeader | undefined;
 }
 export interface BlockIDProtoMsg {
   typeUrl: '/tendermint.types.BlockID';
@@ -168,12 +168,12 @@ export interface BlockIDSDKType {
 /** Header defines the structure of a Tendermint block header. */
 export interface Header {
   /** basic block info */
-  version: Consensus;
+  version: Consensus | undefined;
   chainId: string;
   height: bigint;
-  time: Date;
+  time: Date | undefined;
   /** prev block info */
-  lastBlockId: BlockID;
+  lastBlockId: BlockID | undefined;
   /** hashes of block data */
   lastCommitHash: Uint8Array;
   /** transactions */
@@ -285,8 +285,8 @@ export interface Vote {
   height: bigint;
   round: number;
   /** zero if vote is nil. */
-  blockId: BlockID;
-  timestamp: Date;
+  blockId: BlockID | undefined;
+  timestamp: Date | undefined;
   validatorAddress: Uint8Array;
   validatorIndex: number;
   signature: Uint8Array;
@@ -332,7 +332,7 @@ export interface VoteSDKType {
 export interface Commit {
   height: bigint;
   round: number;
-  blockId: BlockID;
+  blockId: BlockID | undefined;
   signatures: CommitSig[];
 }
 export interface CommitProtoMsg {
@@ -361,7 +361,7 @@ export interface CommitSDKType {
 export interface CommitSig {
   blockIdFlag: BlockIDFlag;
   validatorAddress: Uint8Array;
-  timestamp: Date;
+  timestamp: Date | undefined;
   signature: Uint8Array;
 }
 export interface CommitSigProtoMsg {
@@ -391,8 +391,8 @@ export interface Proposal {
   height: bigint;
   round: number;
   polRound: number;
-  blockId: BlockID;
-  timestamp: Date;
+  blockId: BlockID | undefined;
+  timestamp: Date | undefined;
   signature: Uint8Array;
 }
 export interface ProposalProtoMsg {
@@ -462,9 +462,9 @@ export interface LightBlockSDKType {
   validator_set?: ValidatorSetSDKType;
 }
 export interface BlockMeta {
-  blockId: BlockID;
+  blockId: BlockID | undefined;
   blockSize: bigint;
-  header: Header;
+  header: Header | undefined;
   numTxs: bigint;
 }
 export interface BlockMetaProtoMsg {
@@ -637,7 +637,6 @@ export const Part = {
     message.index = object.index ?? 0;
     message.bytes = object.bytes ?? new Uint8Array();
     
-    
     message.proof = object.proof !== undefined && object.proof !== null ? Proof.fromPartial(object.proof) : undefined;
     return message;
   },
@@ -717,7 +716,6 @@ export const BlockID = {
   fromPartial(object: Partial<BlockID>): BlockID {
     const message = createBaseBlockID();
     message.hash = object.hash ?? new Uint8Array();
-    
     
     message.partSetHeader =
       object.partSetHeader !== undefined && object.partSetHeader !== null
@@ -881,16 +879,13 @@ export const Header = {
   fromPartial(object: Partial<Header>): Header {
     const message = createBaseHeader();
     
-    
     message.version =
       object.version !== undefined && object.version !== null ? Consensus.fromPartial(object.version) : undefined;
     message.chainId = object.chainId ?? '';
     message.height =
       object.height !== undefined && object.height !== null ? BigInt(object.height.toString()) : BigInt(0);
     
-    
     message.time = object.time ?? undefined;
-    
     
     message.lastBlockId =
       object.lastBlockId !== undefined && object.lastBlockId !== null
@@ -1138,10 +1133,8 @@ export const Vote = {
       object.height !== undefined && object.height !== null ? BigInt(object.height.toString()) : BigInt(0);
     message.round = object.round ?? 0;
     
-    
     message.blockId =
       object.blockId !== undefined && object.blockId !== null ? BlockID.fromPartial(object.blockId) : undefined;
-    
     
     message.timestamp = object.timestamp ?? undefined;
     message.validatorAddress = object.validatorAddress ?? new Uint8Array();
@@ -1262,7 +1255,6 @@ export const Commit = {
       object.height !== undefined && object.height !== null ? BigInt(object.height.toString()) : BigInt(0);
     message.round = object.round ?? 0;
     
-    
     message.blockId =
       object.blockId !== undefined && object.blockId !== null ? BlockID.fromPartial(object.blockId) : undefined;
     message.signatures = object.signatures?.map((e) => CommitSig.fromPartial(e)) || [];
@@ -1365,7 +1357,6 @@ export const CommitSig = {
     const message = createBaseCommitSig();
     message.blockIdFlag = object.blockIdFlag ?? 0;
     message.validatorAddress = object.validatorAddress ?? new Uint8Array();
-    
     
     message.timestamp = object.timestamp ?? undefined;
     message.signature = object.signature ?? new Uint8Array();
@@ -1491,10 +1482,8 @@ export const Proposal = {
     message.round = object.round ?? 0;
     message.polRound = object.polRound ?? 0;
     
-    
     message.blockId =
       object.blockId !== undefined && object.blockId !== null ? BlockID.fromPartial(object.blockId) : undefined;
-    
     
     message.timestamp = object.timestamp ?? undefined;
     message.signature = object.signature ?? new Uint8Array();
@@ -1764,12 +1753,10 @@ export const BlockMeta = {
   fromPartial(object: Partial<BlockMeta>): BlockMeta {
     const message = createBaseBlockMeta();
     
-    
     message.blockId =
       object.blockId !== undefined && object.blockId !== null ? BlockID.fromPartial(object.blockId) : undefined;
     message.blockSize =
       object.blockSize !== undefined && object.blockSize !== null ? BigInt(object.blockSize.toString()) : BigInt(0);
-    
     
     message.header =
       object.header !== undefined && object.header !== null ? Header.fromPartial(object.header) : undefined;

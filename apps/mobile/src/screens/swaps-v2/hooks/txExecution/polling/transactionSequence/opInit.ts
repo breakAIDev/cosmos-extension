@@ -1,5 +1,5 @@
 import { OPInitTransferInfoJSON, OPInitTransferState, TransferState } from '@skip-go/client';
-import { OPInitPacketTxnSeq } from 'types/swap';
+import { OPInitPacketTxnSeq } from '../../../../../../types/swap';
 
 import { convertPacketFromJSON } from './convertPackageFromJson';
 

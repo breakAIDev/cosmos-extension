@@ -1,4 +1,4 @@
-import { SourceToken } from 'types/swap';
+import { SourceToken } from '../../../types/swap';
 
 export function getSortFnBasedOnWhiteListing(
   autoFetchedTokensList: string[],

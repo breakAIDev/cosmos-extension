@@ -1,10 +1,11 @@
 import { AvatarCard, Buttons, ThemeName, useTheme } from '@leapwallet/leap-ui';
-import BottomModal from '../bottom-modal';
-import { SelectedAddress } from 'pages/send/types';
-import React, { ReactElement, useCallback, useState } from 'react';
-import { Colors } from 'theme/colors';
-import { AddressBook } from 'utils/addressbook';
-import { sliceAddress } from 'utils/strings';
+import BottomModal from '../../../../components/bottom-modal';
+import { SelectedAddress } from '../../../send/types';
+import React, { useState } from 'react';
+import { View, StyleSheet } from 'react-native';
+import { Colors } from '../../../../theme/colors';
+import { AddressBook } from '../../../../utils/addressbook';
+import { sliceAddress } from '../../../../utils/strings';
 
 import SaveAddressSheet from '../recipient-card/save-address-sheet';
 
@@ -20,76 +21,141 @@ export default function WalletDetailsSheet({
   onCloseHandler,
   onDelete,
   selectedAddress,
-}: WalletDetailsSheetProps): ReactElement {
+}: WalletDetailsSheetProps) {
   const [showSaveAddressSheet, setShowSaveAddressSheet] = useState<boolean>(false);
   const contact = AddressBook.useGetContact(selectedAddress.address ?? '');
   const { theme } = useTheme();
 
-  const stopPropagation = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    e.stopPropagation();
-  }, []);
-
-  // do not remove stopPropagation, it is needed to prevent the modal from closing when clicking on the modal itself
-  // this happens due to the address input component
+  // For RN Modal, backdrop click is handled by modal component
 
   return (
-    <div onClick={stopPropagation}>
+    <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
       <BottomModal
-        title='Contact details'
+        title="Contact details"
         onClose={onCloseHandler}
         isOpen={isOpen}
-        contentClassName='!bg-white-100 dark:!bg-gray-950'
-        className='p-6'
+        contentStyle={[
+          styles.modalContent,
+          theme === ThemeName.DARK ? styles.darkModal : styles.lightModal,
+        ]}
+        style={styles.modal}
       >
-        <div className='flex flex-col items-center gap-4'>
-          <div className='w-full bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 flex items-center flex-col'>
+        <View style={styles.centeredCol}>
+          <View
+            style={[
+              styles.assetCard,
+              theme === ThemeName.DARK ? styles.darkCard : styles.lightCard,
+            ]}
+          >
             <AvatarCard
               chainIcon={selectedAddress.chainIcon}
               emoji={contact?.emoji ?? selectedAddress.emoji}
-              size='lg'
+              size="lg"
               title={contact?.name ?? selectedAddress.name}
-              className='mt-3'
+              style={styles.avatar}
             />
 
             <Buttons.CopyWalletAddress
-              className='mt-1'
+              style={styles.copyButton}
               color={Colors.juno}
               walletAddress={sliceAddress(selectedAddress.address)}
             />
-          </div>
+          </View>
 
-          <div className='flex gap-4 w-full'>
+          <View style={styles.row}>
             <Buttons.Generic
-              title='Delete contact'
+              title="Delete contact"
               color={Colors.red300}
               onClick={async () => {
                 await AddressBook.removeEntry(selectedAddress.address ?? '');
                 onDelete();
                 onCloseHandler();
               }}
-              className='flex-1'
+              style={styles.flex1}
             >
               Delete contact
             </Buttons.Generic>
 
             <Buttons.Generic
-              title='Edit contact'
+              title="Edit contact"
               color={theme === ThemeName.DARK ? Colors.gray900 : '#F4F4F4'}
               onClick={() => setShowSaveAddressSheet(true)}
-              className='flex-1'
+              style={styles.flex1}
             >
-              <p className='!text-black-100 dark:!text-white-100'>Edit contact</p>
+              {/* Use Text instead of <p> */}
+              <Text
+                style={theme === ThemeName.DARK ? styles.editTextDark : styles.editTextLight}
+              >
+                Edit contact
+              </Text>
             </Buttons.Generic>
-          </div>
-        </div>
+          </View>
+        </View>
       </BottomModal>
 
       <SaveAddressSheet
         isOpen={showSaveAddressSheet}
-        title='Edit Contact'
+        title="Edit Contact"
         address={selectedAddress.address ?? ''}
         onClose={() => setShowSaveAddressSheet(false)}
       />
-    </div>
+    </View>
   );
 }
+
+import { Text } from 'react-native';
+
+const styles = StyleSheet.create({
+  modalContent: {
+    backgroundColor: '#fff',
+  },
+  darkModal: {
+    backgroundColor: '#0B0B0E',
+  },
+  lightModal: {
+    backgroundColor: '#FFF',
+  },
+  modal: {
+    padding: 24,
+  },
+  centeredCol: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 16,
+  },
+  assetCard: {
+    width: '100%',
+    borderRadius: 24,
+    padding: 16,
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  darkCard: {
+    backgroundColor: '#232334',
+  },
+  lightCard: {
+    backgroundColor: '#F7F8FA',
+  },
+  avatar: {
+    marginTop: 12,
+  },
+  copyButton: {
+    marginTop: 4,
+  },
+  row: {
+    flexDirection: 'row',
+    gap: 16,
+    width: '100%',
+  },
+  flex1: {
+    flex: 1,
+  },
+  editTextLight: {
+    color: '#19191A',
+    textAlign: 'center',
+  },
+  editTextDark: {
+    color: '#FFF',
+    textAlign: 'center',
+  },
+});

@@ -1,6 +1,7 @@
-import { X } from '@phosphor-icons/react';
-import Text from 'components/text';
+import { X } from 'phosphor-react-native';
+import Text from '../../../components/text';
 import React from 'react';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 
 import { useChadProvider } from '../context/chad-exclusives-context';
 import { useFilters } from '../context/filter-context';
@@ -17,44 +18,32 @@ export default function SelectedFilterTags() {
   };
 
   return (
-    <section className='flex flex-wrap gap-2'>
-      {selectedOpportunities.map((category) => {
-        return (
-          <div
-            key={category}
-            className='flex items-center gap-1 pl-2.5 pr-1.5 py-1 bg-gray-100 dark:bg-gray-900 rounded-full shrink-0'
+    <View style={styles.tagsContainer}>
+      {selectedOpportunities.map((category) => (
+        <View key={category} style={styles.tag}>
+          <Text size="xs" style={styles.tagLabel}>{category}</Text>
+          <TouchableOpacity
+            onPress={() => handleRemoveCategory(category)}
+            style={styles.tagRemoveBtn}
+            activeOpacity={0.7}
           >
-            <Text size='xs' className='!text-gray-600 dark:!text-gray-400 font-semibold'>
-              {category}
-            </Text>
-            <button
-              onClick={() => handleRemoveCategory(category)}
-              className='p-[2px] hover:bg-gray-200 dark:hover:bg-gray-500 rounded-full bg-gray-200 dark:bg-gray-700 transition-colors duration-200 ease-in-out'
-            >
-              <X size={10} weight='bold' className='text-gray-100 dark:text-gray-900' />
-            </button>
-          </div>
-        );
-      })}
-      {selectedEcosystems.map((ecosystem) => {
-        return (
-          <div
-            key={ecosystem}
-            className='flex items-center gap-1 pl-2.5 pr-1.5 py-1 bg-gray-100 dark:bg-gray-900 rounded-full shrink-0'
+            <X size={10} weight="bold" color="#222" />
+          </TouchableOpacity>
+        </View>
+      ))}
+      {selectedEcosystems.map((ecosystem) => (
+        <View key={ecosystem} style={styles.tag}>
+          <Text size="xs" style={styles.tagLabel}>{ecosystem}</Text>
+          <TouchableOpacity
+            onPress={() => handleRemoveEcosystem(ecosystem)}
+            style={styles.tagRemoveBtn}
+            activeOpacity={0.7}
           >
-            <Text size='xs' className='!text-gray-600 dark:!text-gray-400 font-semibold'>
-              {ecosystem}
-            </Text>
-            <button
-              onClick={() => handleRemoveEcosystem(ecosystem)}
-              className='p-[2px] hover:bg-gray-200 dark:hover:bg-gray-500 rounded-full bg-gray-200 dark:bg-gray-700 transition-colors duration-200 ease-in-out'
-            >
-              <X size={10} weight='bold' className='text-gray-100 dark:text-gray-900' />
-            </button>
-          </div>
-        );
-      })}
-    </section>
+            <X size={10} weight="bold" color="#222" />
+          </TouchableOpacity>
+        </View>
+      ))}
+    </View>
   );
 }
 
@@ -70,39 +59,93 @@ export function SelectedChadFilterTags() {
   };
 
   return (
-    <section className='flex flex-wrap gap-2 mb-2'>
-      {selectedOpportunities.map((category) => {
-        return (
-          <div
-            key={category}
-            className='flex items-center gap-1 pl-2.5 pr-1.5 py-1 bg-secondary-200 rounded-full shrink-0 border border-secondary-600 '
+    <View style={[styles.tagsContainer, { marginBottom: 8 }]}>
+      {selectedOpportunities.map((category) => (
+        <View key={category} style={styles.chadTag}>
+          <Text style={styles.chadTagLabel}>{category}</Text>
+          <TouchableOpacity
+            onPress={() => handleRemoveCategory(category)}
+            style={styles.chadTagRemoveBtn}
+            activeOpacity={0.7}
           >
-            <span className='text-xs text-muted-foreground'>{category}</span>
-            <button
-              onClick={() => handleRemoveCategory(category)}
-              className='p-0.5 bg-secondary-600 hover:bg-secondary-800 rounded-full transition-colors duration-200 ease-in-out'
-            >
-              <X size={10} weight='bold' className='text-gray-100 dark:text-gray-900' />
-            </button>
-          </div>
-        );
-      })}
-      {selectedEcosystems.map((ecosystem) => {
-        return (
-          <div
-            key={ecosystem}
-            className='flex items-center gap-1 pl-2.5 pr-1.5 py-1 bg-secondary-200 rounded-full shrink-0 border border-secondary-600 '
+            <X size={10} weight="bold" color="#fff" />
+          </TouchableOpacity>
+        </View>
+      ))}
+      {selectedEcosystems.map((ecosystem) => (
+        <View key={ecosystem} style={styles.chadTag}>
+          <Text style={styles.chadTagLabel}>{ecosystem}</Text>
+          <TouchableOpacity
+            onPress={() => handleRemoveEcosystem(ecosystem)}
+            style={styles.chadTagRemoveBtn}
+            activeOpacity={0.7}
           >
-            <span className='text-xs text-muted-foreground'>{ecosystem}</span>
-            <button
-              onClick={() => handleRemoveEcosystem(ecosystem)}
-              className='p-0.5 bg-secondary-600 hover:bg-secondary-800 rounded-full transition-colors duration-200 ease-in-out'
-            >
-              <X size={10} weight='bold' className='text-gray-100 dark:text-gray-900' />
-            </button>
-          </div>
-        );
-      })}
-    </section>
+            <X size={10} weight="bold" color="#fff" />
+          </TouchableOpacity>
+        </View>
+      ))}
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  tagsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8, // If not supported, use marginRight: 8 on tag
+    marginBottom: 2,
+  },
+  tag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6', // gray-100
+    borderRadius: 999,
+    paddingVertical: 4,
+    paddingLeft: 10,
+    paddingRight: 8,
+    marginRight: 8,
+    marginBottom: 6,
+  },
+  tagLabel: {
+    color: '#4B5563', // gray-600
+    fontWeight: '600',
+    fontSize: 13,
+    marginRight: 3,
+  },
+  tagRemoveBtn: {
+    backgroundColor: '#E5E7EB', // gray-200
+    borderRadius: 99,
+    padding: 2,
+    marginLeft: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  // Chad style
+  chadTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E0E7FF', // secondary-200
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: '#6366F1', // secondary-600
+    paddingVertical: 4,
+    paddingLeft: 10,
+    paddingRight: 8,
+    marginRight: 8,
+    marginBottom: 6,
+  },
+  chadTagLabel: {
+    color: '#6366F1', // muted-foreground/secondary-600
+    fontSize: 13,
+    marginRight: 3,
+  },
+  chadTagRemoveBtn: {
+    backgroundColor: '#6366F1', // secondary-600
+    borderRadius: 99,
+    padding: 3,
+    marginLeft: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});

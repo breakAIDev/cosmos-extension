@@ -6,6 +6,7 @@ import Long from 'long';
 
 import { getFee } from './get-fee';
 import { getMilkywayMemo } from './get-milkyway-memo';
+import { BigNumber } from 'bignumber.js';
 
 
 export function getProtoSignDocDecoder(signRequestData: Record<string, any>) {
@@ -42,7 +43,7 @@ export function getDirectSignDoc({
   
   signRequestData: Record<string, any>;
   gasPrice: GasPrice;
-  gasLimit: string;
+  gasLimit: string | BigNumber;
   memo: string;
   isGasOptionSelected: boolean;
 }) {

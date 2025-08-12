@@ -1,14 +1,11 @@
+import React, { useEffect, useState } from 'react';
+import { View, StyleSheet } from 'react-native';
+import { ThumbsUp } from 'phosphor-react-native';
+import dayjs from 'dayjs';
+
+import Text from '../../../components/text';
 import { Proposal, ProposalApi } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { Buttons, CardDivider } from '@leapwallet/leap-ui';
-import { ThumbsUp } from '@phosphor-icons/react';
-import classNames from 'classnames';
-import dayjs from 'dayjs';
-import Vote from 'icons/vote';
-import React, { useEffect, useState } from 'react';
-import Skeleton from 'react-loading-skeleton';
-import { Colors } from 'theme/colors';
-
 import { convertTime, voteRatio } from '../utils';
 import { ProposalStatusEnum } from './ProposalStatus';
 
@@ -21,7 +18,14 @@ type VoteDetailsProps = {
   hasMinStaked: boolean;
 };
 
-export function VoteDetails({ currVote, proposal, isLoading, activeChain, hasMinStaked, onVote }: VoteDetailsProps) {
+export function VoteDetails({
+  currVote,
+  proposal,
+  isLoading,
+  activeChain,
+  hasMinStaked,
+  onVote,
+}: VoteDetailsProps) {
   const [timeLeft, setTimeLeft] = useState<string | undefined>();
 
   useEffect(() => {
@@ -36,124 +40,196 @@ export function VoteDetails({ currVote, proposal, isLoading, activeChain, hasMin
       setTimeLeft(convertTime(duration));
     };
 
+    getTime(); // call once immediately
     const i = setInterval(getTime, 1000);
     return () => clearInterval(i);
+  }, [proposal]);
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [proposal, convertTime]);
+  if (
+    proposal.status === ProposalStatusEnum.PROPOSAL_STATUS_VOTING_PERIOD
+  ) {
+    return (
+      <>
+        <View style={styles.card}>
+          <View style={styles.row}>
+            <Text style={styles.label}>Voting Starts</Text>
+            <Text style={styles.bold}>
+              {dayjs(proposal.voting_start_time).format('MMM DD, YYYY')}
+            </Text>
+          </View>
+          <View style={styles.divider} />
+          <View style={styles.row}>
+            <Text style={styles.label}>Voting Ends</Text>
+            <Text style={styles.bold}>
+              {dayjs(proposal.voting_end_time).format('MMM DD, YYYY')}
+            </Text>
+          </View>
+          {timeLeft ? (
+            <>
+              <View style={styles.divider} />
+              <View style={styles.row}>
+                <Text style={styles.label}>Ending in</Text>
+                <Text style={styles.bold}>{timeLeft}</Text>
+              </View>
+            </>
+          ) : null}
+        </View>
+        {currVote && currVote !== 'NO_VOTE' && (
+          <View style={styles.voteChip}>
+            <View style={styles.voteChipIcon}>
+              <ThumbsUp size={16} color="#22744d" />
+            </View>
+            <View style={styles.voteChipTextCol}>
+              <Text style={styles.voteChipTitle}>Vote submitted</Text>
+              <Text style={styles.voteChipSub}>
+                Voted {currVote}
+              </Text>
+            </View>
+          </View>
+        )}
+      </>
+    );
+  }
 
-  switch (proposal.status) {
-    case ProposalStatusEnum.PROPOSAL_STATUS_VOTING_PERIOD:
-      return (
-        <>
-          <div className='rounded-2xl bg-secondary-100 flex flex-col mt-7'>
-            <div className='flex items-center justify-between gap-3 px-5 py-4'>
-              <div className='text-secondary-800 text-sm'>Voting Starts</div>
+  if (proposal.status === ProposalStatusEnum.PROPOSAL_STATUS_DEPOSIT_PERIOD) {
+    return (
+      <View style={styles.card}>
+        <View style={styles.row}>
+          <Text style={styles.label}>Deposit Period Ends</Text>
+          <Text style={styles.bold}>
+            {dayjs(proposal.deposit_end_time).format('MMM DD, YYYY')}
+          </Text>
+        </View>
+        {timeLeft ? (
+          <>
+            <View style={styles.divider} />
+            <View style={styles.row}>
+              <Text style={styles.label}>Ending in</Text>
+              <Text style={styles.bold}>{timeLeft}</Text>
+            </View>
+          </>
+        ) : null}
+      </View>
+    );
+  }
 
-              <div className='text-foreground text-sm font-bold'>
-                {dayjs(proposal.voting_start_time).format('MMM DD, YYYY')}
-              </div>
-            </div>
-            <div className='h-[1px] bg-secondary-300' />
-
-            <div className='flex items-center justify-between gap-3 px-5 py-4'>
-              <div className='text-secondary-800 text-sm'>Voting Ends</div>
-
-              <div className='text-foreground text-sm font-bold'>
-                {dayjs(proposal.voting_end_time).format('MMM DD, YYYY')}
-              </div>
-            </div>
-            {timeLeft && (
-              <>
-                <div className='h-[1px] bg-secondary-300' />
-                <div className='flex items-center justify-between gap-3 px-5 py-4'>
-                  <div className='text-secondary-800 text-sm'>Ending in</div>
-
-                  <div className='text-foreground text-sm font-bold'>{timeLeft}</div>
-                </div>
-              </>
-            )}
-          </div>
-
-          {currVote && currVote !== 'NO_VOTE' && (
-            <div
-              className={classNames(
-                'flex p-4 w-[344px] mt-4 dark:bg-green-900 bg-green-300 border-2 dark:border-green-800 border-green-600 rounded-2xl',
-              )}
-            >
-              <div className='h-10 w-10 bg-green-400 rounded-full flex items-center justify-center'>
-                <ThumbsUp size={16} className='text-green-700' />
-              </div>
-
-              <div className='flex flex-col justify-center items-start px-3'>
-                <div className='text-base text-white-100 text-left'>Vote submitted</div>
-                <div className='text-sm text-gray-600 font-medium'>Voted {currVote}</div>
-              </div>
-            </div>
-          )}
-        </>
-      );
-
-    case ProposalStatusEnum.PROPOSAL_STATUS_DEPOSIT_PERIOD:
-      return (
-        <>
-          <div className='rounded-2xl bg-secondary-100 flex flex-col mt-7'>
-            <div className='flex items-center justify-between gap-3 px-5 py-4'>
-              <div className='text-secondary-800 text-sm'>Deposit Period Ends</div>
-              <div className='text-foreground text-sm font-bold'>
-                {dayjs(proposal.deposit_end_time).format('MMM DD, YYYY')}
-              </div>
-            </div>
-            {timeLeft && (
-              <>
-                <div className='h-[1px] bg-secondary-300' />
-                <div className='flex items-center justify-between gap-3 px-5 py-4'>
-                  <div className='text-secondary-800 text-sm'>Ending in</div>
-
-                  <div className='text-foreground text-sm font-bold'>{timeLeft}</div>
-                </div>
-              </>
-            )}
-          </div>
-        </>
-      );
-
-    case ProposalStatusEnum.PROPOSAL_STATUS_PASSED:
-    case ProposalStatusEnum.PROPOSAL_STATUS_FAILED:
-    case ProposalStatusEnum.PROPOSAL_STATUS_REJECTED:
-      return (
-        <>
-          <div className='rounded-2xl bg-secondary-100 flex flex-col mt-7 p-5'>
-            <div className='text-secondary-800 mb-5 text-sm font-bold'>Results</div>
-
-            <div className='flex flex-col justify-center gap-3'>
-              {voteRatio((proposal as unknown as ProposalApi).tally || proposal.final_tally_result).map((values) => (
-                <div
-                  key={values.label}
-                  className={classNames('flex relative overflow-clip border rounded-lg', values.selectedBorderCSS)}
-                >
-                  <div
-                    className={classNames(
-                      'text-foreground text-sm font-bold py-2 z-10 flex-1',
-                      values.selectedBorderCSS,
-                    )}
-                  >
-                    <span className='ml-4 max-h-10'>{values.label}</span>
-                  </div>
-                  <div className={classNames('text-foreground text-sm py-[10px] shrink-0', values.selectedBorderCSS)}>
-                    <span className='absolute right-4 font-bold'>{values.percentage.toFixed(2)}</span>
-                  </div>
-                  <div
-                    style={{ width: (values.percentage * 3.12).toString() + 'px' }}
-                    className={classNames('h-10 absolute l-0 rounded-xl', values.selectedBackgroundCSS)}
-                  ></div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </>
-      );
+  if (
+    proposal.status === ProposalStatusEnum.PROPOSAL_STATUS_PASSED ||
+    proposal.status === ProposalStatusEnum.PROPOSAL_STATUS_FAILED ||
+    proposal.status === ProposalStatusEnum.PROPOSAL_STATUS_REJECTED
+  ) {
+    return (
+      <View style={[styles.card, { padding: 20 }]}>
+        <Text style={[styles.label, { marginBottom: 16, fontWeight: 'bold' }]}>Results</Text>
+        <View style={{ flexDirection: 'column', gap: 10 }}>
+          {voteRatio((proposal as ProposalApi).tally || proposal.final_tally_result).map((values) => (
+            <View key={values.label} style={[styles.resultRow, {
+              borderColor: values.selectedBorderColor,
+              backgroundColor: values.selectedBackgroundColor ? values.selectedBackgroundColor + '22' : '#fff',
+            }]}>
+              {/* Color Bar */}
+              <View style={{
+                position: 'absolute',
+                left: 0,
+                top: 0,
+                bottom: 0,
+                width: Math.max(4, values.percentage * 3.12),
+                backgroundColor: values.selectedBackgroundColor,
+                borderTopLeftRadius: 12,
+                borderBottomLeftRadius: 12,
+                opacity: 0.18,
+              }} />
+              {/* Main content */}
+              <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', zIndex: 1 }}>
+                <Text style={[styles.bold, { marginLeft: 12 }]}>{values.label}</Text>
+                <View style={{ flex: 1 }} />
+                <Text style={[styles.bold, { marginRight: 12 }]}>{values.percentage.toFixed(2)}</Text>
+              </View>
+            </View>
+          ))}
+        </View>
+      </View>
+    );
   }
 
   return <></>;
 }
+
+const styles = StyleSheet.create({
+  card: {
+    borderRadius: 20,
+    backgroundColor: '#f2f4fa', // secondary-100
+    marginTop: 28,
+    flexDirection: 'column',
+    overflow: 'hidden',
+    paddingVertical: 0,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    gap: 12,
+  },
+  label: {
+    color: '#22272e', // secondary-800
+    fontSize: 14,
+  },
+  bold: {
+    fontWeight: 'bold',
+    color: '#22272e',
+    fontSize: 14,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#d9dbe8', // secondary-300
+    marginHorizontal: 20,
+  },
+  voteChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#82d9a2', // bg-green-300
+    borderColor: '#29A874',     // border-green-600
+    borderWidth: 2,
+    borderRadius: 18,
+    marginTop: 16,
+    marginBottom: 8,
+    width: 344,
+    alignSelf: 'center',
+    padding: 12,
+  },
+  voteChipIcon: {
+    height: 40,
+    width: 40,
+    backgroundColor: '#A5DFB1', // bg-green-400
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  voteChipTextCol: {
+    marginLeft: 16,
+    justifyContent: 'center',
+  },
+  voteChipTitle: {
+    fontSize: 16,
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  voteChipSub: {
+    fontSize: 13,
+    color: '#444',
+    marginTop: 2,
+    fontWeight: '500',
+  },
+  resultRow: {
+    borderRadius: 12,
+    borderWidth: 2,
+    marginBottom: 8,
+    position: 'relative',
+    minHeight: 44,
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+    overflow: 'hidden',
+  },
+});

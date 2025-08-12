@@ -1,29 +1,28 @@
-import BottomModal from 'components/new-bottom-modal';
-import { PageName } from 'config/analytics';
+import React, { useMemo, useState } from 'react';
+import { View, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
+import BottomModal from '../../../components/new-bottom-modal';
+import { PageName } from '../../../services/config/analytics';
 import Fuse from 'fuse.js';
-import { usePageView } from 'hooks/analytics/usePageView';
+import { usePageView } from '../../../hooks/analytics/usePageView';
 import {
   AlphaOpportunity as AlphaOpportunityType,
   Raffle,
   useAlphaOpportunities,
   useRaffles,
   useRaffleWins,
-} from 'hooks/useAlphaOpportunities';
-import React, { useMemo, useState } from 'react';
-import { Virtuoso } from 'react-virtuoso';
+} from '../../../hooks/useAlphaOpportunities';
 
 import RaffleListing from '../chad-components/RaffleListing';
 import { useBookmarks, useChadBookmarks } from '../context/bookmark-context';
 import { useChadProvider } from '../context/chad-exclusives-context';
 import { useFilters } from '../context/filter-context';
 import { formatRaffleDate, sortOpportunitiesByDate } from '../utils';
-import { VirtualizationFooter } from './alpha-timeline';
-import { AlphaTimelineFilters } from './alpha-timeline/filters';
 import AlphaOpportunity from './AlphaOpportunity';
 import EmptyBookmarks from './EmptyBookmarks';
 import { FilterDrawer } from './FilterDrawer';
 import { NoFilterResult } from './NoResultStates';
 import SelectedFilterTags from './SelectedFilterTags';
+import { AlphaTimelineFilters } from './alpha-timeline/filters';
 
 type BookmarkedAlphaProps = {
   isOpen: boolean;
@@ -57,7 +56,6 @@ export const BookmarkedAlpha: React.FC<BookmarkedAlphaProps> = ({ isOpen, toggle
 
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const [searchedTerm, setSearchedTerm] = useState('');
-  const [customScrollParent, setCustomScrollParent] = useState<HTMLDivElement | null>(null);
 
   // combined alpha listing and raffles:
   const allItems = useMemo<TimelineItem[]>(() => {
@@ -82,9 +80,7 @@ export const BookmarkedAlpha: React.FC<BookmarkedAlphaProps> = ({ isOpen, toggle
     return sortOpportunitiesByDate(combined);
   }, [opportunities, raffles]);
 
-  /**
-   * @description filtering items according to search query
-   */
+  // Search
   const fuse = useMemo(() => {
     return new Fuse(allItems, {
       keys: ['data.homepageDescription', 'data.title', 'data.description', 'categoryFilter', 'ecosystemFilter'],
@@ -97,19 +93,14 @@ export const BookmarkedAlpha: React.FC<BookmarkedAlphaProps> = ({ isOpen, toggle
     if (!searchedTerm) {
       return allItems;
     }
-
     const results = fuse.search(searchedTerm);
     return sortOpportunitiesByDate(results.map((result) => result.item));
   }, [allItems, searchedTerm, fuse]);
 
-  /**
-   * @description filtering items according to category and ecosystem filters
-   */
+  // Filtering
   const filteredItems = useMemo(() => {
     const filteredList = searchedItems.filter((item) => bookmarks.has(item.id ?? ''));
-
     if (!selectedOpportunities?.length && !selectedEcosystems?.length) return filteredList;
-
     return filteredList.filter((item) => {
       return (
         (!selectedOpportunities?.length ||
@@ -122,64 +113,65 @@ export const BookmarkedAlpha: React.FC<BookmarkedAlphaProps> = ({ isOpen, toggle
 
   const filterCount = selectedEcosystems?.length + selectedOpportunities?.length;
 
+  // ----------- RENDER -----------
+
   return (
-    <BottomModal fullScreen isOpen={isOpen} onClose={toggler} title='Bookmarks' className='flex-1'>
+    <BottomModal fullScreen isOpen={isOpen} onClose={toggler} title="Bookmarks" style={styles.modal}>
       {filteredItems.length === 0 && filterCount === 0 && !isLoading && !searchedTerm ? (
         <EmptyBookmarks
-          title='No Bookmarks Found'
-          subTitle='Try looking at some listings and saving them'
-          className='h-full'
+          title="No Bookmarks Found"
+          subTitle="Try looking at some listings and saving them"
+          style={{ flex: 1 }}
         />
       ) : (
-        <div className='flex flex-col gap-4 h-full' ref={setCustomScrollParent}>
+        <View style={styles.container}>
           <AlphaTimelineFilters setSearchedTerm={setSearchedTerm} setIsFilterDrawerOpen={setIsFilterDrawerOpen} />
 
-          {/* Showing Filters */}
-          {selectedOpportunities.length > 0 || selectedEcosystems.length > 0 ? <SelectedFilterTags /> : null}
-
-          {/* No results state */}
-          {filteredItems.length === 0 && !isLoading && (
-            <NoFilterResult className='mt-3 h-full flex-1' filterType={searchedTerm ? 'search' : 'no-results'} />
+          {(selectedOpportunities.length > 0 || selectedEcosystems.length > 0) && (
+            <SelectedFilterTags />
           )}
 
-          {/* Virtualized Items */}
+          {(filteredItems.length === 0 && !isLoading) && (
+            <NoFilterResult
+              style={{ marginTop: 12, flex: 1 }}
+              filterType={searchedTerm ? 'search' : 'no-results'}
+            />
+          )}
+
           {filteredItems.length > 0 ? (
-            <div className='h-full flex flex-col flex-1'>
-              <Virtuoso
-                components={{ Footer: VirtualizationFooter }}
-                customScrollParent={customScrollParent ?? undefined}
-                style={{ height: '100%' }}
-                totalCount={filteredItems.length}
-                itemContent={(index) => {
-                  const item = filteredItems[index];
-                  if (item.type === 'opportunity') {
-                    return (
-                      <AlphaOpportunity
-                        key={`${item.id}-${index}`}
-                        {...(item.data as AlphaOpportunityType)}
-                        pageName={PageName.Bookmark}
-                        isBookmarked={bookmarks.has(item.id ?? '')}
-                      />
-                    );
-                  } else {
-                    return (
-                      <RaffleListing
-                        highlight={true}
-                        key={`${item.id}-${index}`}
-                        {...(item.data as Raffle)}
-                        pageName={PageName.Bookmark}
-                        isBookmarked={bookmarks.has(item.id ?? '')}
-                        userWon={!!raffleWins?.find((win) => win.id === item.id)}
-                      />
-                    );
-                  }
-                }}
-              />
-            </div>
+            <FlatList
+              data={filteredItems}
+              keyExtractor={(item, idx) => `${item.id}-${idx}`}
+              renderItem={({ item, index }) => {
+                if (item.type === 'opportunity') {
+                  return (
+                    <AlphaOpportunity
+                      key={`${item.id}-${index}`}
+                      {...(item.data as AlphaOpportunityType)}
+                      pageName={PageName.Bookmark}
+                      isBookmarked={bookmarks.has(item.id ?? '')}
+                    />
+                  );
+                } else {
+                  return (
+                    <RaffleListing
+                      highlight={true}
+                      key={`${item.id}-${index}`}
+                      {...(item.data as Raffle)}
+                      pageName={PageName.Bookmark}
+                      isBookmarked={bookmarks.has(item.id ?? '')}
+                      userWon={!!raffleWins?.find((win) => win.id === item.id)}
+                    />
+                  );
+                }
+              }}
+              contentContainerStyle={{ flexGrow: 1 }}
+              ListFooterComponent={<View style={{ height: 32 }} />}
+            />
           ) : isLoading ? (
-            <div className='flex justify-center items-center py-8'>
-              <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-white-100'></div>
-            </div>
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#222" />
+            </View>
           ) : null}
 
           <FilterDrawer
@@ -188,8 +180,28 @@ export const BookmarkedAlpha: React.FC<BookmarkedAlphaProps> = ({ isOpen, toggle
             onClose={() => setIsFilterDrawerOpen(false)}
             pageName={PageName.Bookmark}
           />
-        </div>
+        </View>
       )}
     </BottomModal>
   );
 };
+
+const styles = StyleSheet.create({
+  modal: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  container: {
+    flex: 1,
+    flexDirection: 'column',
+    paddingHorizontal: 24,
+    paddingVertical: 20,
+    backgroundColor: '#fff',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 32,
+  },
+});

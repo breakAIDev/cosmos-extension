@@ -1,19 +1,19 @@
 import { useDebounce } from '@leapwallet/cosmos-wallet-hooks';
-import { EventName, PageName } from 'config/analytics';
-import { motion } from 'framer-motion';
+import { EventName, PageName } from '../../../../services/config/analytics';
 import Fuse from 'fuse.js';
-import { usePageView } from 'hooks/analytics/usePageView';
+import {MotiView} from 'moti';
+import { usePageView } from '../../../../hooks/analytics/usePageView';
 import {
   AlphaOpportunity as AlphaOpportunityType,
   Raffle,
   useAlphaOpportunities,
   useRaffles,
   useRaffleWins,
-} from 'hooks/useAlphaOpportunities';
+} from '../../../../hooks/useAlphaOpportunities';
 import { observer } from 'mobx-react-lite';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
-import { mixpanelTrack } from 'utils/tracking';
+import React, { useEffect, useMemo, useState } from 'react';
+import { View, FlatList, StyleSheet } from 'react-native';
+import { mixpanelTrack } from '../../../../utils/tracking';
 
 import RaffleListing from '../../chad-components/RaffleListing';
 import { useBookmarks } from '../../context/bookmark-context';
@@ -74,8 +74,6 @@ export default observer(function AlphaTimeline() {
   const { bookmarks } = useBookmarks();
 
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
-  const [customScrollParent, setCustomScrollParent] = useState<HTMLDivElement | null>(null);
-  const virtuosoRef = useRef<VirtuosoHandle>(null);
 
   const { raffleStatusMap, updateRaffleStatus } = useRaffleStatusMap();
 
@@ -177,89 +175,100 @@ export default observer(function AlphaTimeline() {
         page: PageName.Alpha,
       });
     }
-  }, [debouncedSearchTerm]);
+  }, [debouncedSearchTerm, filteredItems]);
 
-  // no items found state:
   if (allItems.length < 1 && !isLoading) {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, ease: 'easeOut' }}
-        className='p-7'
+      <MotiView
+        from={{ opacity: 0, translateY: 20 }}
+        animate={{ opacity: 1, translateY: 0 }}
+        transition={{ type: 'timing', duration: 300 }}
+        style={styles.emptyContainer}
       >
-        <EmptyBookmarks title='No Alpha Opportunities' subTitle={<>Check back later for new alpha opportunities</>} />
-      </motion.div>
+        <EmptyBookmarks
+          title='No Alpha Opportunities'
+          subTitle='Check back later for new alpha opportunities'
+        />
+      </MotiView>
     );
   }
 
-  // main state when opportunities exist:
   return (
-    <div className='flex flex-col gap-4 h-full overflow-y-auto px-6 py-7 mb-4' ref={setCustomScrollParent}>
-      <AlphaTimelineFilters setSearchedTerm={setSearchedTerm} setIsFilterDrawerOpen={setIsFilterDrawerOpen} />
+    <View style={styles.mainContainer}>
+      <AlphaTimelineFilters
+        setSearchedTerm={setSearchedTerm}
+        setIsFilterDrawerOpen={setIsFilterDrawerOpen}
+      />
 
-      {/* Showing Filters */}
-      {selectedOpportunities.length > 0 || selectedEcosystems.length > 0 ? <SelectedFilterTags /> : null}
-
-      {/* No results state */}
-      {filteredItems.length === 0 && !isLoading && (
-        <NoFilterResult className='mt-3 mb-9' filterType={searchedTerm ? 'search' : 'no-results'} />
+      {(selectedOpportunities.length > 0 || selectedEcosystems.length > 0) && (
+        <SelectedFilterTags />
       )}
 
-      {/* Virtualized Alpha Items */}
+      {(filteredItems.length === 0 && !isLoading) && (
+        <NoFilterResult
+          style={{ marginTop: 12, marginBottom: 36 }}
+          filterType={searchedTerm ? 'search' : 'no-results'}
+        />
+      )}
+
       {filteredItems.length > 0 && (
-        <div className='h-full flex flex-col flex-1'>
-          <Virtuoso
-            ref={virtuosoRef}
-            components={{ Footer: VirtualizationFooter }}
-            customScrollParent={customScrollParent ?? undefined}
-            style={{ height: '100%' }}
-            totalCount={filteredItems.length}
-            itemContent={(index) => {
-              const item = filteredItems[index];
-              if (item.type === 'opportunity') {
-                return (
-                  <AlphaOpportunity
-                    key={`${item.id}-${index}`}
-                    {...(item.data as AlphaOpportunityType)}
-                    pageName={PageName.Alpha}
-                    isSearched={searchedTerm !== ''}
-                    isBookmarked={bookmarks.has(item.id ?? '')}
-                    onMarkRaffle={updateRaffleStatus}
-                    visibilityStatus={raffleStatusMap[item.id]}
-                  />
-                );
-              } else {
-                return (
-                  <RaffleListing
-                    highlight={true}
-                    key={`${item.id}-${index}`}
-                    {...(item.data as Raffle)}
-                    pageName={PageName.Alpha}
-                    isSearched={searchedTerm !== ''}
-                    isBookmarked={bookmarks.has(item.id ?? '')}
-                    userWon={!!raffleWins?.find((win) => win.id === item.id)}
-                  />
-                );
-              }
-            }}
-          />
-        </div>
+        <FlatList
+          data={filteredItems}
+          keyExtractor={(item, idx) => `${item.id}-${idx}`}
+          contentContainerStyle={{ flexGrow: 1 }}
+          renderItem={({ item, index }) =>
+            item.type === 'opportunity'
+              ? (
+                <AlphaOpportunity
+                  {...item.data}
+                  key={`${item.id}-${index}`}
+                  pageName='Alpha'
+                  isSearched={!!searchedTerm}
+                  isBookmarked={bookmarks.has(item.id ?? '')}
+                  onMarkRaffle={updateRaffleStatus}
+                  visibilityStatus={raffleStatusMap[item.id]}
+                />
+              )
+              : (
+                <RaffleListing
+                  highlight={true}
+                  {...(item.data as Raffle)}
+                  key={`${item.id}-${index}`}
+                  pageName={PageName.Alpha}
+                  isSearched={!!searchedTerm}
+                  isBookmarked={bookmarks.has(item.id ?? '')}
+                  userWon={!!raffleWins?.find(win => win.id === item.id)}
+                />
+              )
+          }
+          ListFooterComponent={<View style={{ padding: 16 }} />}
+        />
       )}
 
-      {/* Loading state */}
-      {isLoading && (
-        <div className='space-y-4 isolate'>
-          <AlphaSkeletonList />
-        </div>
-      )}
+      {isLoading && <AlphaSkeletonList />}
 
       <FilterDrawer
         opportunities={opportunities}
         isShown={isFilterDrawerOpen}
         onClose={() => setIsFilterDrawerOpen(false)}
-        pageName={PageName.Alpha}
+        pageName='Alpha'
       />
-    </div>
+    </View>
   );
+});
+
+const styles = StyleSheet.create({
+  mainContainer: {
+    flex: 1,
+    flexDirection: 'column',
+    paddingHorizontal: 24,
+    paddingVertical: 28,
+    backgroundColor: '#fff',
+  },
+  emptyContainer: {
+    padding: 28,
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });

@@ -1,9 +1,8 @@
-import { X } from '@phosphor-icons/react';
-import classNames from 'classnames';
-import Sort from 'icons/sort';
-import { Images } from 'images';
+import { X } from 'phosphor-react-native';
+import Sort from '../../../../assets/icons/sort';
+import { Images } from '../../../../assets/images';
 import React from 'react';
-import { isSidePanel } from 'utils/isSidePanel';
+import { View, TextInput, TouchableOpacity, Image, StyleSheet } from 'react-native';
 
 type FilterProps = {
   readonly searchedText: string;
@@ -13,36 +12,83 @@ type FilterProps = {
 
 export function Filter({ searchedText, setSearchedText, onClickSortBy }: FilterProps) {
   return (
-    <div className='flex justify-between items-center mb-4'>
-      <div className='flex-1 flex h-10 bg-white-100 dark:bg-gray-950 rounded-[30px] py-2 pl-5 pr-[10px]'>
-        <input
-          type='text'
+    <View style={styles.root}>
+      <View style={[styles.inputWrap]}>
+        <TextInput
           value={searchedText}
-          placeholder='search by nft collection/name...'
-          className={classNames(
-            'flex flex-grow font-medium text-base text-gray-600 dark:text-gray-400 outline-none bg-white-0',
-            { 'w-[50px]': isSidePanel() },
-          )}
-          onChange={(e) => setSearchedText(e.target?.value)}
+          placeholder="search by nft collection/name..."
+          placeholderTextColor="#9ca3af"
+          style={styles.input}
+          onChangeText={setSearchedText}
         />
 
         {searchedText.length > 0 ? (
-          <X
-            onClick={() => setSearchedText('')}
-            size={16}
-            className='h-8 w-8 cursor-pointer text-center text-gray-400'
-          />
+          <TouchableOpacity onPress={() => setSearchedText('')} style={styles.iconBtn}>
+            <X size={16} color="#9ca3af" />
+          </TouchableOpacity>
         ) : (
-          <img src={Images.Misc.Search} />
+          <Image source={{uri: Images.Misc.Search}} style={styles.iconImg} />
         )}
-      </div>
+      </View>
 
-      <button
-        onClick={onClickSortBy}
-        className='rounded-3xl h-10 w-10 cursor-pointer ml-3 flex flex-shrink-0 justify-center items-center dark:bg-gray-950 bg-white-100'
+      <TouchableOpacity
+        onPress={onClickSortBy}
+        style={styles.sortBtn}
+        activeOpacity={0.75}
       >
-        <Sort size={24} className='text-center text-gray-400' />
-      </button>
-    </div>
+        <Sort size={24} color="#9ca3af" />
+      </TouchableOpacity>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    justifyContent: 'space-between',
+  },
+  inputWrap: {
+    flex: 1,
+    flexDirection: 'row',
+    height: 40,
+    backgroundColor: '#fff', // bg-white-100
+    borderRadius: 30,
+    alignItems: 'center',
+    paddingLeft: 20,
+    paddingRight: 10,
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    color: '#4b5563', // text-gray-600
+    backgroundColor: 'transparent',
+    fontWeight: '500',
+    paddingVertical: 0,
+    paddingHorizontal: 0,
+    margin: 0,
+    // outline-none: not needed for RN
+  },
+  iconBtn: {
+    height: 32,
+    width: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconImg: {
+    width: 18,
+    height: 18,
+    tintColor: '#9ca3af',
+  },
+  sortBtn: {
+    marginLeft: 12,
+    borderRadius: 24,
+    height: 40,
+    width: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff', // bg-white-100
+    // For dark mode, you can use dynamic color here
+  },
+});

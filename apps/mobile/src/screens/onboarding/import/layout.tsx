@@ -1,8 +1,8 @@
-import { ArrowLeft } from '@phosphor-icons/react';
-import { Button } from 'components/ui/button';
-import StepProgress from 'components/ui/step-progress';
 import React from 'react';
-import { cn } from 'utils/cn';
+import { View, StyleSheet, ViewStyle, StyleProp } from 'react-native';
+import { ArrowLeft } from 'phosphor-react-native';
+import { Button } from '../../../components/ui/button';
+import StepProgress from '../../../components/ui/step-progress';
 
 import { OnboardingLayout } from '../layout';
 import { useImportWalletContext } from './import-wallet-context';
@@ -13,33 +13,67 @@ const NavHeader = () => {
   const isShortStep = walletName === 'private-key' || walletName === 'watch-wallet';
   const isLongStep = walletName === 'ledger' || walletName === 'evm-ledger';
 
-  const totalStepsToShow = isShortStep ? totalSteps - 1 : isLongStep ? totalSteps + 1 : totalSteps;
+  const totalStepsToShow = isShortStep
+    ? totalSteps - 1
+    : isLongStep
+      ? totalSteps + 1
+      : totalSteps;
 
   return (
-    <div className='flex flex-row items-center justify-between align-center w-full relative -m-1'>
-      <Button variant='secondary' size='icon' onClick={backToPreviousStep}>
-        <ArrowLeft className='size-4' />
+    <View style={styles.header}>
+      <Button variant="secondary" size="icon" onPress={backToPreviousStep}>
+        <ArrowLeft size={16} />
       </Button>
 
-      {currentStep > 0 && <StepProgress currentStep={currentStep} totalSteps={totalStepsToShow} />}
+      {currentStep > 0 && (
+        <StepProgress
+          currentStep={currentStep}
+          totalSteps={totalStepsToShow}
+          style={styles.progress}
+        />
+      )}
 
-      {/* to center the progress bar horizontally */}
-      <div className='size-9 shrink-0' />
-    </div>
+      {/* Spacer for progress bar centering */}
+      <View style={styles.spacer} />
+    </View>
   );
 };
 
-export const ImportWalletLayout = (props: React.PropsWithChildren<{ className?: string }>) => {
+export const ImportWalletLayout = (props: React.PropsWithChildren<{ style?: StyleProp<ViewStyle> }>) => {
   return (
-    <OnboardingLayout
-      className={cn(
-        'flex flex-col items-stretch gap-7 p-7 overflow-auto border-secondary-300 relative',
-        props.className,
-      )}
-    >
+    <OnboardingLayout style={[styles.layout, props.style]}>
       <NavHeader />
-
       {props.children}
     </OnboardingLayout>
   );
 };
+
+const styles = StyleSheet.create({
+  layout: {
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'stretch',
+    padding: 28, // p-7
+    borderColor: '#E0E7EF', // border-secondary-300
+    borderWidth: 1,
+    backgroundColor: '#fff',
+    position: 'relative',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    position: 'relative',
+    margin: -4, // -m-1
+  },
+  progress: {
+    alignSelf: 'center',
+    height: 36,
+  },
+  spacer: {
+    width: 36,  // size-9
+    height: 36,
+    flexShrink: 0,
+  },
+});

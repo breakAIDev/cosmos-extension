@@ -1,12 +1,15 @@
 import { calculateFee, StdFee } from '@cosmjs/stargate';
 import { GasPrice, NativeDenom } from '@leapwallet/cosmos-wallet-sdk';
 import BigNumber from 'bignumber.js';
-import { getStdFee } from 'pages/sign-aptos/utils/get-fee';
+import { getStdFee } from '../../sign-aptos/utils/get-fee';
 
-export function getOriginalSignDoc(signRequestData: any, isDisplay: boolean = false) {
+export function getOriginalSignDoc(
+  signRequestData: any,
+  isDisplay: boolean = false,
+): { signDoc: Uint8Array | string; signOptions: object } {
   const transaction = new Uint8Array(Object.values(signRequestData));
   if (isDisplay) {
-    const message = new TextDecoder().decode(new Uint8Array(Object.values(signRequestData)));
+    const message = new TextDecoder().decode(transaction);
     return {
       signDoc: message,
       signOptions: {},
@@ -19,7 +22,10 @@ export function getOriginalSignDoc(signRequestData: any, isDisplay: boolean = fa
 }
 
 function getDefaultFee(nativeFeeDenom: NativeDenom) {
-  return calculateFee(Number(1000000), GasPrice.fromString(`${0}${nativeFeeDenom.coinMinimalDenom}`));
+  return calculateFee(
+    Number(1000000),
+    GasPrice.fromString(`0${nativeFeeDenom.coinMinimalDenom}`)
+  );
 }
 
 function getUpdatedFee(
@@ -35,12 +41,17 @@ function getUpdatedFee(
     signOptions?.preferNoSetFee && !isGasOptionSelected
       ? defaultFee
       : getStdFee(
-          !customGasLimit.isNaN() && customGasLimit.isGreaterThan(0) ? customGasLimit.toString() : defaultFee.gas,
+          !customGasLimit.isNaN() && customGasLimit.isGreaterThan(0)
+            ? customGasLimit.toString()
+            : defaultFee.gas,
           gasPrice,
         );
 
-  //@ts-ignore
-  fee.amount[0].amount = new BigNumber(fee.amount[0].amount).toString();
+  // @ts-ignore
+  if (fee.amount && fee.amount[0]) {
+    // @ts-ignore
+    fee.amount[0].amount = new BigNumber(fee.amount[0].amount).toString();
+  }
 
   return fee;
 }
@@ -52,7 +63,6 @@ export function getSuiSignDoc({
   isGasOptionSelected,
   nativeFeeDenom,
 }: {
-  
   signRequestData: Record<string, any>;
   gasPrice: GasPrice;
   gasLimit: string;

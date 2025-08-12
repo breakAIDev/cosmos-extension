@@ -1,20 +1,19 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { useAddress, useAddressPrefixes, useChainsStore } from '@leapwallet/cosmos-wallet-hooks';
 import { getBlockChainFromAddress, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { CosmosChainData, Prettify, SupportedChain as SupportedChains } from '@leapwallet/elements-core';
 import { SkipCosmosMsg, useSkipSupportedChains } from '@leapwallet/elements-hooks';
-import { Info, Warning } from '@phosphor-icons/react';
+import { Info, Warning } from 'phosphor-react-native';
 import BigNumber from 'bignumber.js';
-import Text from 'components/text';
-import useActiveWallet from 'hooks/settings/useActiveWallet';
-import { useChainInfos } from 'hooks/useChainInfos';
-import { useSendContext } from 'pages/send-v2/context';
+import Text from '../../../../components/text';
+import useActiveWallet from '../../../../hooks/settings/useActiveWallet';
+import { useChainInfos } from '../../../../hooks/useChainInfos';
+import { useSendContext } from '../../../send-v2/context';
 import React, { useEffect, useMemo, useState } from 'react';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 
 import IBCSettings from '../IBCSettings';
 
 function ErrorWarning() {
-  
   const [assetChain, setAssetChain] = useState<any>(null);
 
   const {
@@ -40,7 +39,6 @@ function ErrorWarning() {
     if (selectedToken && selectedToken.usdPrice && selectedToken.usdPrice !== '0') {
       return selectedToken.usdPrice;
     }
-
     return undefined;
   }, [selectedToken]);
 
@@ -70,11 +68,10 @@ function ErrorWarning() {
 
   const { data: skipSupportedChains } = useSkipSupportedChains();
 
-  // checking if the token selected is pfmEnbled
+  // checking if the token selected is pfmEnabled
   useEffect(() => {
     if (transferData?.isSkipTransfer && transferData?.routeResponse) {
       const allMessages = transferData?.messages?.[1] as SkipCosmosMsg;
-
       const _skipChain = skipSupportedChains?.find(
         (d) => d.chainId === allMessages?.multi_chain_msg?.chain_id,
       ) as Prettify<CosmosChainData & SupportedChains>;
@@ -91,18 +88,14 @@ function ErrorWarning() {
       setAssetChain(null);
       setPfmEnabled(true);
     }
-
     return () => {
       setPfmEnabled(true);
     };
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     skipSupportedChains,
     transferData?.isSkipTransfer,
-    
     transferData?.routeResponse,
-    
     transferData?.messages,
   ]);
 
@@ -113,12 +106,12 @@ function ErrorWarning() {
 
   if (cw20Error || isAddressNotSupported) {
     return (
-      <div className='p-4 rounded-2xl bg-red-100 dark:bg-red-900 items-center flex gap-2'>
-        <Warning size={24} className='text-red-400 dark:text-red-300' />
-        <Text size='xs' className='font-medium'>
+      <View style={[styles.warningBox, styles.bgRed]}>
+        <Warning size={24} color={'#F87171'} /* text-red-400 */ />
+        <Text size='xs' style={styles.warningText}>
           {amountError}
         </Text>
-      </div>
+      </View>
     );
   }
 
@@ -127,82 +120,110 @@ function ErrorWarning() {
   // Error warning for IBC transfers
   if (isIBCError || customIbcChannelId) {
     const destChainInfo = () => {
-      if (!selectedAddress?.address) {
-        return null;
-      }
-
+      if (!selectedAddress?.address) return null;
       const destChainAddrPrefix = getBlockChainFromAddress(selectedAddress.address);
-      if (!destChainAddrPrefix) {
-        return null;
-      }
-
+      if (!destChainAddrPrefix) return null;
       const destinationChainKey = addressPrefixes[destChainAddrPrefix] as SupportedChain | undefined;
-      if (!destinationChainKey) {
-        return null;
-      }
-
-      // we are sure that the key is there in the chains object due to previous checks
+      if (!destinationChainKey) return null;
       return chains[destinationChainKey];
     };
 
-    return <IBCSettings targetChain={destChainInfo()?.key as SupportedChain} sourceChain={sendActiveChain} />;
+    return (
+      <IBCSettings
+        targetChain={destChainInfo()?.key as SupportedChain}
+        sourceChain={sendActiveChain}
+      />
+    );
   }
 
   // warning to show if PFM is not enabled on the chain
   if (!pfmEnabled && !isIbcUnwindingDisabled) {
     return (
-      <div className='p-4 rounded-2xl bg-orange-200 dark:bg-orange-900 items-center flex gap-2'>
-        <Info size={16} className='text-[#FFB33D] dark:text-orange-300 self-start' />
-        <Text size='xs' className='flex-1 font-medium'>
+      <View style={[styles.warningBox, styles.bgOrange]}>
+        <Info size={16} color={'#FFB33D'} style={{ alignSelf: 'flex-start' }} />
+        <Text size='xs' style={[styles.warningText, { flex: 1 }]}>
           You will have to send this token to {assetChain?.chainName} first to able to use it.
         </Text>
-        <button
-          title='Autofill address'
-          onClick={onAutoFillAddress}
-          className='text-xs font-bold text-black-100 bg-white-100 py-2 px-4 rounded-3xl'
+        <TouchableOpacity
+          onPress={onAutoFillAddress}
+          style={styles.autofillButton}
         >
-          Autofill address
-        </button>
-      </div>
+          <Text size='xs' style={styles.autofillButtonText}>
+            Autofill address
+          </Text>
+        </TouchableOpacity>
+      </View>
     );
   }
 
   // warning to show if sending to same wallet address
   if (isSendingToSameWallet) {
     return (
-      <div className='p-4 rounded-2xl bg-orange-200 dark:bg-orange-900 items-center flex gap-2'>
-        <Info size={16} className='text-[#FFB33D] dark:text-orange-300 self-start' />
-        <Text size='xs' className='font-medium'>
-          You&apos;re transferring funds to the same address within your own wallet
+      <View style={[styles.warningBox, styles.bgOrange]}>
+        <Info size={16} color={'#FFB33D'} style={{ alignSelf: 'flex-start' }} />
+        <Text size='xs' style={styles.warningText}>
+          You're transferring funds to the same address within your own wallet
         </Text>
-      </div>
+      </View>
     );
   }
 
   // warning to show if USD value cannot be calculated
   if (switchToUSDDisabled && selectedToken?.chain) {
     return (
-      <div className='py-3 px-4 rounded-2xl bg-orange-200 dark:bg-orange-900 items-center flex gap-2'>
-        <Warning size={16} className='text-[#FFB33D] dark:text-orange-300 self-start' />
-        <Text size='xs' className='font-medium'>
+      <View style={[styles.warningBox, styles.bgOrange]}>
+        <Warning size={16} color={'#FFB33D'} style={{ alignSelf: 'flex-start' }} />
+        <Text size='xs' style={styles.warningText}>
           USD value cannot be calculated for this transaction
         </Text>
-      </div>
+      </View>
     );
   }
 
   if (isCexIbcTransferWarningNeeded) {
     return (
-      <div className='py-3 px-4 rounded-2xl bg-orange-200 dark:bg-orange-900 items-center flex gap-2'>
-        <Warning size={16} className='text-[#FFB33D] dark:text-orange-300 self-start' />
-        <Text size='xs' className='font-medium'>
+      <View style={[styles.warningBox, styles.bgOrange]}>
+        <Warning size={16} color={'#FFB33D'} style={{ alignSelf: 'flex-start' }} />
+        <Text size='xs' style={styles.warningText}>
           Avoid transferring IBC tokens to centralised exchanges.
         </Text>
-      </div>
+      </View>
     );
   }
 
   return null;
 }
+
+const styles = StyleSheet.create({
+  warningBox: {
+    padding: 16,
+    borderRadius: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginVertical: 4,
+  },
+  bgRed: {
+    backgroundColor: '#fee2e2', // red-100
+  },
+  bgOrange: {
+    backgroundColor: '#fde68a', // orange-200
+  },
+  warningText: {
+    fontWeight: '500',
+  },
+  autofillButton: {
+    backgroundColor: '#fff',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 24,
+    marginLeft: 8,
+    alignSelf: 'center',
+  },
+  autofillButtonText: {
+    color: '#1f2937', // black-100
+    fontWeight: 'bold',
+  },
+});
 
 export default ErrorWarning;

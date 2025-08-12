@@ -1,28 +1,27 @@
 import { Key as WalletKey, useChainsStore } from '@leapwallet/cosmos-wallet-hooks';
 import { ChainInfo, sleep } from '@leapwallet/cosmos-wallet-sdk';
-import { Buttons, GenericCard, useTheme } from '@leapwallet/leap-ui';
-import { captureException } from '@sentry/react';
-import { Divider, KeyNew as Key, ValueNew as Value } from 'components/dapp';
-import { ErrorCard } from 'components/ErrorCard';
-import { InfoCard } from 'components/info-card';
-import { LoaderAnimation } from 'components/loader/Loader';
-import BottomModal from 'components/new-bottom-modal';
-import { Button } from 'components/ui/button';
-import { ButtonName, ButtonType, EventName } from 'config/analytics';
-import { BETA_CHAINS } from 'config/storage-keys';
-import { useSetActiveChain } from 'hooks/settings/useActiveChain';
-import useActiveWallet, { useUpdateKeyStore } from 'hooks/settings/useActiveWallet';
-import { useChainInfos } from 'hooks/useChainInfos';
-import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
-import mixpanel from 'mixpanel-browser';
+import { captureException } from '@sentry/react-native';
+import { Divider, KeyNew as Key, ValueNew as Value } from '../../components/dapp';
+import { ErrorCard } from '../../components/ErrorCard';
+import { InfoCard } from '../../components/info-card';
+import { LoaderAnimation } from '../../components/loader/Loader';
+import BottomModal from '../../components/new-bottom-modal';
+import { Button } from '../../components/ui/button';
+import { ButtonName, ButtonType, EventName } from '../../services/config/analytics';
+import { BETA_CHAINS } from '../../services/config/storage-keys';
+import { useSetActiveChain } from '../../hooks/settings/useActiveChain';
+import useActiveWallet, { useUpdateKeyStore } from '../../hooks/settings/useActiveWallet';
+import { useChainInfos } from '../../hooks/useChainInfos';
+import { useDefaultTokenLogo } from '../../hooks/utility/useDefaultTokenLogo';
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { chainTagsStore } from 'stores/chain-infos-store';
-import { rootStore } from 'stores/root-store';
-import { Colors } from 'theme/colors';
-import { imgOnError } from 'utils/imgOnError';
-import browser from 'webextension-polyfill';
+import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { chainTagsStore } from '../../context/chain-infos-store';
+import { rootStore } from '../../context/root-store';
+import { Colors } from '../../theme/colors';
+import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import mixpanel from '../../mixpanel'
 
 type AddFromChainStoreProps = {
   readonly isVisible: boolean;
@@ -33,7 +32,13 @@ type AddFromChainStoreProps = {
 };
 
 const AddFromChainStore = observer(
-  ({ isVisible, onClose, newAddChain, skipUpdatingActiveChain, successCallback }: AddFromChainStoreProps) => {
+  ({
+    isVisible,
+    onClose,
+    newAddChain,
+    skipUpdatingActiveChain,
+    successCallback,
+  }: AddFromChainStoreProps) => {
     const [showMore, setShowMore] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -44,8 +49,7 @@ const AddFromChainStore = observer(
     const { activeWallet, setActiveWallet } = useActiveWallet();
     const setActiveChain = useSetActiveChain();
     const chainInfos = useChainInfos();
-    const navigate = useNavigate();
-    const { theme } = useTheme();
+    const navigation = useNavigation();
 
     const isEvmChain = useMemo(() => !!newAddChain && 'evmOnlyChain' in newAddChain, [newAddChain]);
 
@@ -83,34 +87,31 @@ const AddFromChainStore = observer(
       rootStore.setChains({ ...chainInfos, [newChainKey]: newAddChain });
       await sleep(500);
 
-      browser.storage.local.get([BETA_CHAINS]).then(async (resp) => {
-        try {
-          const updatedKeystore = await updateKeyStore(activeWallet as WalletKey, newChainKey, 'UPDATE', newAddChain);
-          let betaChains = resp?.[BETA_CHAINS];
-          betaChains = typeof betaChains === 'string' ? JSON.parse(betaChains) : {};
-          betaChains[newChainKey] = newAddChain;
-          await browser.storage.local.set({ [BETA_CHAINS]: JSON.stringify(betaChains) });
+      try {
+        const updatedKeystore = await updateKeyStore(activeWallet as WalletKey, newChainKey, 'UPDATE', newAddChain);
+        let betaChains = JSON.parse((await AsyncStorage.getItem(BETA_CHAINS)) ?? '{}');
+        betaChains[newChainKey] = newAddChain;
+        await AsyncStorage.setItem(BETA_CHAINS, JSON.stringify(betaChains));
 
-          if (isEvmChain) {
-            chainTagsStore.setBetaChainTags(newAddChain.chainId, ['EVM']);
-          } else {
-            chainTagsStore.setBetaChainTags(newAddChain.chainId, ['Cosmos']);
-          }
-
-          if (!skipUpdatingActiveChain) {
-            if (activeWallet) {
-              await setActiveWallet(updatedKeystore[activeWallet.id] as WalletKey);
-            }
-            await setActiveChain(newChainKey, newAddChain);
-            navigate('/');
-          }
-          successCallback?.();
-        } catch (error) {
-          setErrors((s) => ({ ...s, submit: 'Unable to add chain' }));
-        } finally {
-          setIsLoading(false);
+        if (isEvmChain) {
+          chainTagsStore.setBetaChainTags(newAddChain.chainId, ['EVM']);
+        } else {
+          chainTagsStore.setBetaChainTags(newAddChain.chainId, ['Cosmos']);
         }
-      });
+
+        if (!skipUpdatingActiveChain) {
+          if (activeWallet) {
+            await setActiveWallet(updatedKeystore[activeWallet.id] as WalletKey);
+          }
+          await setActiveChain(newChainKey, newAddChain);
+          navigation.navigate('Home'); // Replace with your navigation logic
+        }
+        successCallback?.();
+      } catch (error) {
+        setErrors((s) => ({ ...s, submit: 'Unable to add chain' }));
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     return (
@@ -118,116 +119,168 @@ const AddFromChainStore = observer(
         isOpen={isVisible}
         onClose={onClose}
         fullScreen
-        title='Add from chain store'
+        title="Add from chain store"
         hideActionButton
-        className='!h-[calc(100%-61px)] p-0 overflow-y-hidden'
-        secondaryActionButton={
-          <div className='absolute top-[22px] left-7'>
-            <Buttons.Back onClick={onClose} />
-          </div>
-        }
       >
-        <div className='h-full w-full flex flex-col justify-between items-center overflow-y-auto pt-6 px-6'>
-          <div className='flex flex-col items-center pb-[92px]'>
-            <div className='flex flex-row items-center gap-x-4 w-full mb-6'>
-              <img
-                src={newAddChain?.chainSymbolImageUrl ?? defaultTokenLogo}
-                className='h-[54px] w-[54px] rounded-full'
-                onError={imgOnError(defaultTokenLogo)}
+        <View style={styles.modalContent}>
+          <ScrollView contentContainerStyle={styles.scrollContent}>
+            <View style={styles.headerRow}>
+              <Image
+                source={{ uri: newAddChain?.chainSymbolImageUrl ?? defaultTokenLogo }}
+                style={styles.chainLogo}
+                resizeMode="cover"
+                // onError={imgOnError(defaultTokenLogo)} // You may need to handle image error in RN
               />
-              <span className='text-lg !leading-[27px] font-bold text-foreground truncate'>
-                {newAddChain?.chainName || '--'}
-              </span>
-            </div>
+              <Text style={styles.chainName}>{newAddChain?.chainName || '--'}</Text>
+            </View>
 
-            <div className='flex flex-col gap-4 bg-secondary-100 rounded-xl p-5 w-full'>
-              <div className='flex flex-col gap-[6px]'>
+            <View style={styles.cardSection}>
+              <View style={styles.infoBlock}>
                 <Key>Network Name</Key>
                 <Value>{newAddChain?.chainName || '--'}</Value>
-              </div>
-
-              {Divider}
-
-              <div className='flex flex-col gap-[6px]'>
+              </View>
+              <Divider/>
+              <View style={styles.infoBlock}>
                 <Key>Network URL</Key>
                 <Value>{networkUrl || '--'}</Value>
-              </div>
-
-              {Divider}
-
-              <div className='flex flex-col gap-[6px]'>
+              </View>
+              <Divider/>
+              <View style={styles.infoBlock}>
                 <Key>Chain ID</Key>
                 <Value>{newAddChain?.chainId || '--'}</Value>
-              </div>
-
-              {Divider}
-
-              <div className='flex flex-col gap-[6px]'>
+              </View>
+              <Divider/>
+              <View style={styles.infoBlock}>
                 <Key>Currency Symbol</Key>
                 <Value>{newAddChain?.denom || '--'}</Value>
-              </div>
+              </View>
               {showMore && (
                 <>
-                  {Divider}
-                  <div className='flex flex-col gap-[6px]'>
+                  <Divider/>
+                  <View style={styles.infoBlock}>
                     <Key>Coin Type</Key>
                     <Value>{newAddChain?.bip44?.coinType || '--'}</Value>
-                  </div>
-
-                  {!isEvmChain ? (
+                  </View>
+                  {!isEvmChain && (
                     <>
-                      {Divider}
-                      <div className='flex flex-col gap-[6px]'>
+                      <Divider/>
+                      <View style={styles.infoBlock}>
                         <Key>Address Prefix</Key>
                         <Value>{newAddChain?.addressPrefix || '--'}</Value>
-                      </div>
-
-                      {Divider}
-
-                      <div className='flex flex-col gap-[6px]'>
+                      </View>
+                      <Divider/>
+                      <View style={styles.infoBlock}>
                         <Key>Chain Registry Path</Key>
                         <Value>{newAddChain?.chainRegistryPath || '--'}</Value>
-                      </div>
+                      </View>
                     </>
-                  ) : null}
+                  )}
                 </>
               )}
-              <button
-                className='text-xs font-bold text-gray-400 h-5 w-full text-left'
-                style={{ color: '#726FDC' }}
-                onClick={() => setShowMore(!showMore)}
+              <TouchableOpacity
+                style={styles.showMoreBtn}
+                onPress={() => setShowMore(!showMore)}
+                activeOpacity={0.8}
               >
-                {showMore ? 'Show less' : 'Show more'}
-              </button>
-            </div>
+                <Text style={styles.showMoreText}>
+                  {showMore ? 'Show less' : 'Show more'}
+                </Text>
+              </TouchableOpacity>
+            </View>
 
             <InfoCard
-              message='Some wallet features may not work as expected for custom-added chains'
-              className='my-6'
+              message="Some wallet features may not work as expected for custom-added chains"
+              style={styles.infoCard}
             />
 
             {errors.submit ? <ErrorCard text={errors.submit} /> : null}
-          </div>
-        </div>
-
-        <div className='w-full items-center box-border sticky bottom-0 py-5 px-6 bg-secondary-100 flex flex-row gap-4 justify-between'>
-          <Button
-            className='flex-1 flex flex-row justify-center items-center text-secondary-100 hover:bg-foreground bg-foreground font-bold'
-            onClick={handleCancel}
-          >
-            Cancel
-          </Button>
-          <Button
-            className='flex-1 text-foreground'
-            onClick={onAddChain}
-            disabled={isLoading || Object.values(errors).length > 0}
-          >
-            {isLoading ? <LoaderAnimation color={Colors.white100} /> : 'Add Chain'}
-          </Button>
-        </div>
+          </ScrollView>
+          <View style={styles.footerRow}>
+            <Button style={styles.footerBtn} onPress={handleCancel}>
+              Cancel
+            </Button>
+            <Button
+              style={styles.footerBtn}
+              onPress={onAddChain}
+              disabled={isLoading || Object.values(errors).length > 0}
+            >
+              {isLoading ? <LoaderAnimation color={Colors.white100} /> : 'Add Chain'}
+            </Button>
+          </View>
+        </View>
       </BottomModal>
     );
   },
 );
+
+const styles = StyleSheet.create({
+  modalContent: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  scrollContent: {
+    flexGrow: 1,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    paddingVertical: 24,
+    paddingHorizontal: 24,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    width: '100%',
+    marginBottom: 24,
+  },
+  chainLogo: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    marginRight: 16,
+  },
+  chainName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#222',
+    flex: 1,
+  },
+  cardSection: {
+    width: '100%',
+    backgroundColor: '#F3F4F6',
+    borderRadius: 18,
+    padding: 20,
+    marginBottom: 12,
+  },
+  infoBlock: {
+    marginBottom: 6,
+  },
+  showMoreBtn: {
+    marginTop: 10,
+    marginBottom: 0,
+    alignItems: 'flex-start',
+  },
+  showMoreText: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    color: '#726FDC',
+    height: 20,
+  },
+  infoCard: {
+    marginVertical: 24,
+  },
+  footerRow: {
+    flexDirection: 'row',
+    gap: 12,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+    paddingVertical: 20,
+    paddingHorizontal: 24,
+  },
+  footerBtn: {
+    flex: 1,
+    marginHorizontal: 4,
+  },
+});
 
 export default AddFromChainStore;

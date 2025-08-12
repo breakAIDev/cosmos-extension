@@ -1,9 +1,10 @@
+import React from 'react';
+import { StyleSheet, ScrollView } from 'react-native';
 import { ActivityCardContent, ActivityType } from '@leapwallet/cosmos-wallet-hooks';
 import { SKIP_TXN_STATUS, TXN_STATUS } from '@leapwallet/elements-core';
-import BottomModal from '../bottom-modal';
-import { ActivityCard } from 'pages/activity/components/ActivityCard';
-import React, { Dispatch, SetStateAction } from 'react';
-import { TxStoreObject } from 'utils/pendingSwapsTxsStore';
+import BottomModal from '../../components/bottom-modal'; // RN version
+import { ActivityCard } from '../activity/components/ActivityCard'; // RN version
+import { TxStoreObject } from '../../utils/pendingSwapsTxsStore';
 
 const SKIP_TERMINAL_STATES = [
   SKIP_TXN_STATUS.STATE_COMPLETED_SUCCESS,
@@ -15,28 +16,39 @@ const SKIP_TERMINAL_STATES = [
 
 type Props = {
   pendingSwapTxs?: TxStoreObject[];
-  setShowSwapTxPageFor: Dispatch<SetStateAction<TxStoreObject | undefined>>;
+  setShowSwapTxPageFor: React.Dispatch<React.SetStateAction<TxStoreObject | undefined>>;
   isOpen: boolean;
   onClose: () => void;
 };
 
-function PendingSwapsSheet({ isOpen, onClose, pendingSwapTxs, setShowSwapTxPageFor }: Props) {
+const PendingSwapsSheet: React.FC<Props> = ({
+  isOpen,
+  onClose,
+  pendingSwapTxs,
+  setShowSwapTxPageFor,
+}) => {
   return (
     <BottomModal
-      title='Pending Transactions'
-      onClose={onClose}
+      title="Pending Transactions"
       isOpen={isOpen}
+      onClose={onClose}
       closeOnBackdropClick={true}
-      contentClassName='!bg-white-100 dark:!bg-gray-950'
-      className='p-6'
+      contentStyle={styles.modalContent}
+      style={styles.modal}
     >
-      <div className='flex flex-col justify-start w-full items-start gap-[16px]'>
+      <ScrollView contentContainerStyle={styles.container}>
         {pendingSwapTxs?.map((swapTx, index) => {
           let subtitle = 'Swap in progress';
-          if (swapTx.state && [SKIP_TXN_STATUS.STATE_COMPLETED_SUCCESS, TXN_STATUS.SUCCESS].includes(swapTx.state)) {
+          if (
+            swapTx.state &&
+            [SKIP_TXN_STATUS.STATE_COMPLETED_SUCCESS, TXN_STATUS.SUCCESS].includes(swapTx.state)
+          ) {
             subtitle = 'Transaction Successful';
           }
-          if (swapTx.state && [SKIP_TXN_STATUS.STATE_COMPLETED_ERROR, TXN_STATUS.FAILED].includes(swapTx.state)) {
+          if (
+            swapTx.state &&
+            [SKIP_TXN_STATUS.STATE_COMPLETED_ERROR, TXN_STATUS.FAILED].includes(swapTx.state)
+          ) {
             subtitle = 'Transaction Failed';
           }
           // @ts-expect-error TODO: fix this
@@ -44,7 +56,7 @@ function PendingSwapsSheet({ isOpen, onClose, pendingSwapTxs, setShowSwapTxPageF
             subtitle = 'Cannot Track';
           }
 
-          const content = {
+          const content: ActivityCardContent = {
             txType: 'swap' as ActivityType,
             title1: `${swapTx.sourceToken?.symbol} → ${swapTx.destinationToken?.symbol}`,
             subtitle1: subtitle,
@@ -52,28 +64,61 @@ function PendingSwapsSheet({ isOpen, onClose, pendingSwapTxs, setShowSwapTxPageF
             secondaryImg: swapTx.destinationToken?.img,
             sentAmount: swapTx.inAmount,
             receivedAmount: swapTx.amountOut,
-            sentTokenInfo: { coinDenom: swapTx.sourceToken?.symbol },
-            receivedTokenInfo: { coinDenom: swapTx.destinationToken?.symbol },
-          } as ActivityCardContent;
+            sentTokenInfo: {
+              coinDenom: swapTx.sourceToken?.symbol,
+              coinMinimalDenom: '',
+              coinDecimals: 0,
+              icon: '',
+              chain: '',
+              coinGeckoId: ''
+            },
+            receivedTokenInfo: {
+              coinDenom: swapTx.destinationToken?.symbol,
+              coinMinimalDenom: '',
+              coinDecimals: 0,
+              icon: '',
+              chain: '',
+              coinGeckoId: ''
+            },
+          };
 
           return (
-            <React.Fragment key={`${swapTx.inAmount}-${index}`}>
-              <ActivityCard
-                showLoader={!swapTx.state || !SKIP_TERMINAL_STATES.includes(swapTx.state)}
-                content={content}
-                onClick={() => {
-                  setShowSwapTxPageFor(swapTx);
-                  onClose();
-                }}
-                isSuccessful={true}
-                containerClassNames='w-full'
-              />
-            </React.Fragment>
+            <ActivityCard
+              key={`${swapTx.inAmount}-${index}`}
+              showLoader={!swapTx.state || !SKIP_TERMINAL_STATES.includes(swapTx.state)}
+              content={content}
+              onClick={() => {
+                setShowSwapTxPageFor(swapTx);
+                onClose();
+              }}
+              isSuccessful={true}
+              containerStyle={styles.card}
+            />
           );
         })}
-      </div>
+      </ScrollView>
     </BottomModal>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  modal: {
+    padding: 24,
+  },
+  modalContent: {
+    backgroundColor: '#F9FAFB', // adjust for light/dark if needed
+  },
+  container: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    width: '100%',
+    gap: 16,
+    paddingVertical: 8,
+  },
+  card: {
+    width: '100%',
+    marginBottom: 16,
+  },
+});
 
 export default PendingSwapsSheet;

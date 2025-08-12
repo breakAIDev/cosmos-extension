@@ -1,6 +1,6 @@
-import { useQueryParams } from 'hooks/useQuery';
+import { useQueryParams } from '../../hooks/useQuery';
 import React from 'react';
-import { queryParams } from 'utils/query-params';
+import { queryParams } from '../../utils/query-params';
 
 import { AlphaHeader } from './alpha-header';
 import { BookmarkedChad } from './chad-components/ChadBookmarks';

@@ -1,39 +1,47 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, GestureResponderEvent } from 'react-native';
+import React, { forwardRef } from 'react';
+import { View, TouchableOpacity, Text, StyleSheet, ViewStyle } from 'react-native';
 
-type ClickableIconProps = {
+interface ClickableIconProps {
   disabled?: boolean;
   label: string;
   icon: React.ElementType;
   darker?: boolean;
-  onPress?: (event: GestureResponderEvent) => void;
-  style?: any;
-  iconProps?: any;
-};
+  style?: ViewStyle;
+  onPress?: () => void;
+  testID?: string;
+}
 
-const ClickableIcon = React.forwardRef<TouchableOpacity, ClickableIconProps>(
-  ({ disabled, icon: Icon, label, onPress, style, iconProps, darker, ...rest }, ref) => {
+const ClickableIcon = forwardRef(
+  (
+    { disabled, icon: Icon, label, darker = false, style, onPress, testID, ...rest }: ClickableIconProps,
+    ref: React.Ref<View>
+  ) => {
     return (
-      <View style={[styles.container, disabled && styles.disabled, style]}>
+      <View
+        style={[
+          styles.container,
+          disabled && styles.disabled,
+        ]}
+      >
         <TouchableOpacity
           ref={ref}
-          activeOpacity={0.7}
-          disabled={disabled}
+          {...rest}
           style={[
             styles.button,
-            darker ? styles.buttonDarker : null,
+            darker ? styles.darker : styles.lighter,
+            style,
           ]}
+          disabled={disabled}
           onPress={onPress}
-          {...rest}
+          activeOpacity={0.7}
+          testID={testID}
         >
-          {/* You can pass iconProps for custom color/size */}
-          <Icon width={24} height={24} {...iconProps} />
+          <Icon width={24} height={24} />
         </TouchableOpacity>
-        {label ? (
-          <Text style={styles.label} numberOfLines={1}>
-            {label}
-          </Text>
-        ) : null}
+
+        {!!label && (
+          <Text style={styles.label}>{label}</Text>
+        )}
       </View>
     );
   }
@@ -41,37 +49,38 @@ const ClickableIcon = React.forwardRef<TouchableOpacity, ClickableIconProps>(
 
 ClickableIcon.displayName = 'ClickableIcon';
 
-export default ClickableIcon;
-
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'column',
     alignItems: 'center',
+    justifyContent: 'center',
     opacity: 1,
-    minWidth: 64,
   },
   disabled: {
     opacity: 0.4,
   },
   button: {
-    width: 52,           // 3.25rem
-    height: 52,          // 3.25rem
+    width: 52,
+    height: 52,
     borderRadius: 26,
-    backgroundColor: '#F5F7FB', // secondary-100
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 4,
   },
-  buttonDarker: {
-    backgroundColor: '#E9EEF7', // secondary-200 or your darker color
+  lighter: {
+    backgroundColor: '#F3F4F6', // Tailwind's bg-secondary-100
+  },
+  darker: {
+    backgroundColor: '#E5E7EB', // Tailwind's bg-secondary-200 or a bit darker
   },
   label: {
-    marginTop: 8,        // mt-2
-    textAlign: 'center',
-    fontSize: 15,        // text-sm
+    fontSize: 14,
+    marginTop: 8,
     fontWeight: 'bold',
-    color: '#222B45',
-    letterSpacing: 0.2,
-    minHeight: 22,
+    letterSpacing: 0.3,
+    textAlign: 'center',
+    color: '#222',
   },
 });
+
+export default ClickableIcon;

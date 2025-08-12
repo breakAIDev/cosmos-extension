@@ -1,51 +1,95 @@
-import './styles.css';
-
-import { AnimatePresence, motion, Variants } from 'framer-motion';
-import { Images } from 'images';
 import React from 'react';
+import { View, StyleSheet, Image, ActivityIndicator, Dimensions } from 'react-native';
+import { MotiView, MotiText, AnimatePresence } from 'moti';
+import { Images } from '../../../../../assets/images';
 
-const transition = {
-  duration: 0.5,
-  ease: 'easeInOut',
-};
-
-export const createWalletLoaderVariants: Variants = {
-  hidden: { opacity: 0, y: '50%' },
-  visible: { opacity: 1, y: 0 },
-};
-
-export const createWalletLoaderContainerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1 },
-};
+const { width, height } = Dimensions.get('window');
 
 export const CreatingWalletLoader = ({ title }: { title?: string }) => {
   return (
     <AnimatePresence>
-      <motion.div
-        transition={transition}
-        variants={createWalletLoaderContainerVariants}
-        initial='hidden'
-        animate='visible'
-        className='flex flex-col items-center justify-center gap-8 h-full border-secondary-300 absolute inset-0 z-10 bg-secondary'
+      <MotiView
+        from={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 500, type: 'timing' }}
+        style={[styles.container, styles.overlay]}
       >
-        <div className='relative'>
-          <img src={Images.Misc.WalletIconGreen} alt='wallet' className='size-6 absolute inset-0 mx-auto my-auto' />
-          <div className='loader-container'>
-            <div className='spinning-loader' />
-          </div>
-        </div>
-
-        <motion.span
-          className='text-secondary-foreground text-xl font-bold'
-          transition={transition}
-          variants={createWalletLoaderVariants}
-          initial='hidden'
-          animate='visible'
+        <View style={styles.iconWrap}>
+          <Image
+            source={{uri: Images.Misc.WalletIconGreen}}
+            style={styles.icon}
+            resizeMode="contain"
+          />
+          <View style={styles.loaderContainer}>
+            {/* Use ActivityIndicator as a native spinning loader */}
+            <ActivityIndicator size="large" color="#13c47b" style={styles.loader} />
+          </View>
+        </View>
+        <MotiText
+          from={{ opacity: 0, translateY: 32 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ duration: 500, type: 'timing' }}
+          style={styles.title}
         >
           {title || 'Creating your wallet'}
-        </motion.span>
-      </motion.div>
+        </MotiText>
+      </MotiView>
     </AnimatePresence>
   );
 };
+
+const styles = StyleSheet.create({
+  overlay: {
+    position: 'absolute',
+    zIndex: 10,
+    left: 0,
+    top: 0,
+    width,
+    height,
+    backgroundColor: '#f8fafc', // 'bg-secondary' (adapt as needed for theme)
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  container: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 32,
+    height: '100%',
+  },
+  iconWrap: {
+    position: 'relative',
+    width: 48,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  icon: {
+    position: 'absolute',
+    width: 24,
+    height: 24,
+    left: 12,
+    top: 12,
+    zIndex: 1,
+  },
+  loaderContainer: {
+    width: 48,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loader: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    width: 48,
+    height: 48,
+  },
+  title: {
+    color: '#334155', // 'text-secondary-foreground'
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 32,
+  },
+});
+

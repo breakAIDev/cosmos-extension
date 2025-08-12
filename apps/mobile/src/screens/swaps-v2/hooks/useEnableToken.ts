@@ -12,7 +12,7 @@ import {
   RootDenomsStore,
 } from '@leapwallet/cosmos-wallet-store';
 import { useCallback, useMemo } from 'react';
-import { SourceChain, SourceToken } from 'types/swap';
+import { SourceChain, SourceToken } from '../../../types/swap';
 
 import { SWAP_NETWORK } from './useSwapsTx';
 

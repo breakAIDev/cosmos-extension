@@ -1,3 +1,15 @@
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  Linking,
+  Alert,
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { isDeliverTxSuccess } from '@cosmjs/stargate';
 import {
   CosmosTxType,
@@ -6,7 +18,6 @@ import {
   getMetaDataForSendTx,
   LeapWalletApi,
   MobileAppBanner,
-  sliceAddress,
   useActiveChain,
   useAddress,
   useChainId,
@@ -17,23 +28,17 @@ import {
   useSelectedNetwork,
 } from '@leapwallet/cosmos-wallet-hooks';
 import { RootBalanceStore, RootStakeStore } from '@leapwallet/cosmos-wallet-store';
-import { Buttons, Header, ThemeName, useTheme } from '@leapwallet/leap-ui';
-import { ArrowSquareOut, CopySimple, UserCircle } from '@phosphor-icons/react';
+import { Header, useTheme } from '@leapwallet/leap-ui';
+import { ArrowSquareOut,  UserCircle } from 'phosphor-react-native';
 import BigNumber from 'bignumber.js';
-import classnames from 'classnames';
-import PopupLayout from 'components/layout/popup-layout';
-import { LoaderAnimation } from 'components/loader/Loader';
-import { Images } from 'images';
-import { Cross } from 'images/misc';
-import { observer } from 'mobx-react-lite';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import PopupLayout from '../../components/layout/popup-layout';
+import { LoaderAnimation } from '../../components/loader/Loader';
+import { Images } from '../../../assets/images';
+import { Cross } from '../../../assets/images/misc';
 import { TxResponse } from 'secretjs';
-import { hideAssetsStore } from 'stores/hide-assets-store';
-import { Colors } from 'theme/colors';
-import { UserClipboard } from 'utils/clipboard';
+import { hideAssetsStore } from '../../context/hide-assets-store';
+import { UserClipboard } from '../../utils/clipboard';
 
-const PENDING_TX_MOBILE_QR_CODE_BANNER = 'pending-tx-mobile-qr-code-banner';
 
 const txStatusStyles = {
   loading: {
@@ -50,25 +55,17 @@ const txStatusStyles = {
   },
 };
 
-function MobileQrCode({
-  setShowMobileQrCode,
-  data,
-}: {
-  setShowMobileQrCode: React.Dispatch<React.SetStateAction<boolean>>;
-  data: MobileAppBanner;
-}) {
+function MobileQrCode({ setShowMobileQrCode, data }: { setShowMobileQrCode: (show: boolean) => void; data: MobileAppBanner }) {
   const handleClose = () => {
     setShowMobileQrCode(false);
-    sessionStorage.setItem(PENDING_TX_MOBILE_QR_CODE_BANNER, 'true');
   };
-
   return (
-    <div className='mb-4 relative'>
-      <img src={data.img_src} />
-      <button className='absolute top-[20px] right-[20px] w-[8px]' onClick={handleClose}>
-        <img src={Cross} />
-      </button>
-    </div>
+    <View style={styles.qrContainer}>
+      <Image source={{ uri: data.img_src }} style={styles.qrImage} />
+      <TouchableOpacity style={styles.qrCloseButton} onPress={handleClose}>
+        <Image source={{uri: Cross}} style={styles.qrCloseIcon} />
+      </TouchableOpacity>
+    </View>
   );
 }
 
@@ -77,17 +74,14 @@ type PendingTxProps = {
   rootStakeStore: RootStakeStore;
 };
 
-const PendingTx = observer(({ rootBalanceStore, rootStakeStore }: PendingTxProps) => {
-  const navigate = useNavigate();
+const PendingTx = ({ rootBalanceStore, rootStakeStore }: PendingTxProps) => {
+  const navigation = useNavigation();
   const [txHash, setTxHash] = useState('');
-  const [showMobileQrCode, setShowMobileQrCode] = useState(
-    sessionStorage.getItem(PENDING_TX_MOBILE_QR_CODE_BANNER) ? false : true,
-  );
+  const [showMobileQrCode, setShowMobileQrCode] = useState(true);
+  const [isCopiedClick, setIsCopiedClick] = useState(false);
   const { theme } = useTheme();
-  const copyTxHashRef = useRef<HTMLButtonElement>(null);
   const { pendingTx, setPendingTx } = usePendingTxState();
   const txPostToDB = LeapWalletApi.useOperateCosmosTx();
-
   const {
     txType,
     title1,
@@ -126,7 +120,6 @@ const PendingTx = observer(({ rootBalanceStore, rootStakeStore }: PendingTxProps
   }, [activeChain, rootStakeStore, selectedNetwork]);
 
   const invalidateActivity = useInvalidateActivity();
-
   useEffect(() => {
     const invalidateQueries = () => {
       invalidateBalances();
@@ -207,15 +200,13 @@ const PendingTx = observer(({ rootBalanceStore, rootStakeStore }: PendingTxProps
           invalidateQueries();
         });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeChain, address, selectedNetwork, activeChainId]);
+  }, [activeChain, address, selectedNetwork, activeChainId, pendingTx, invalidateBalances, invalidateDelegations, invalidateActivity, setPendingTx, txPostToDB]);
 
   useEffect(() => {
     if (_txHash) setTxHash(_txHash);
   }, [_txHash]);
 
   const { status, data } = useMobileAppBanner();
-  const [isCopiedClick, setIsCopiedClick] = useState(false);
 
   const sentAmountInfo =
     sentAmount && sentTokenInfo ? formatTokenAmount(sentAmount, sentTokenInfo.coinDenom) : undefined;
@@ -223,7 +214,6 @@ const PendingTx = observer(({ rootBalanceStore, rootStakeStore }: PendingTxProps
     receivedAmount && receivedTokenInfo ? formatTokenAmount(receivedAmount, receivedTokenInfo.coinDenom) : undefined;
 
   const balanceReduced = txType === 'delegate' || txType === 'send' || txType === 'liquidity/add';
-  const balanceIncreased = txType === 'undelegate' || txType === 'receive' || txType === 'liquidity/remove';
 
   const { explorerTxnUrl: txnUrl } = useGetExplorerTxnUrl({
     forceTxHash: txHash,
@@ -234,157 +224,320 @@ const PendingTx = observer(({ rootBalanceStore, rootStakeStore }: PendingTxProps
   const isSendTxn = txType
     ? ['ibc/transfer', 'send', 'secretTokenTransfer', 'cw20TokenTransfer'].includes(txType)
     : false;
-  return (
-    <PopupLayout>
-      <Header title={`Transaction ${txStatusStyles[txStatus ?? 'loading'].title}`} />
-      <div className='flex h-[calc(100%-72px)] p-6 flex-col items-center overflow-y-auto'>
-        <div className='bg-white-100 dark:bg-gray-950 rounded-2xl w-full flex flex-col items-center p-4 mb-4'>
-          {txStatus === 'loading' && <LoaderAnimation color={Colors.green600} className='w-20 h-20' />}
-          {(txStatus === 'success' || txStatus === 'submitted') && (
-            <img src={Images.Activity.SendDetails} className='w-20 h-20' />
-          )}
-          {txStatus === 'failed' && <img src={Images.Activity.Error} className='w-20 h-20' />}
 
-          <div className='text-xl font-bold text-black-100 dark:text-white-100 text-left mt-1 break-all'>{title1}</div>
-          {isSendTxn && txStatus !== 'submitted' ? (
-            <div className='text-sm font-medium text-black-100 dark:text-white-100 mt-1'>
+  const handleCopyTxHash = () => {
+    UserClipboard.copyText(txHash);
+    setIsCopiedClick(true);
+    setTimeout(() => setIsCopiedClick(false), 2000);
+  };
+
+  const handleOpenExplorer = () => {
+    if (txnUrl) {
+      Linking.openURL(txnUrl).catch(() => Alert.alert('Unable to open URL'));
+    }
+  };
+
+  return (
+    <PopupLayout style={styles.popupLayout}>
+      <Header title={`Transaction ${txStatusStyles[txStatus ?? 'loading'].title}`} />
+      <ScrollView contentContainerStyle={styles.content}>
+        <View style={styles.card}>
+          {txStatus === 'loading' && <LoaderAnimation color="#29a874" style={styles.statusIcon} />}
+          {(txStatus === 'success' || txStatus === 'submitted') && (
+            <Image source={{uri: Images.Activity.SendDetails}} style={styles.statusIcon} />
+          )}
+          {txStatus === 'failed' && (
+            <Image source={{uri: Images.Activity.Error}} style={styles.statusIcon} />
+          )}
+
+          <Text style={styles.title}>{title1}</Text>
+
+          {isSendTxn && txStatus !== 'submitted' && (
+            <Text style={styles.statusLabel}>
               {txStatus === 'success'
                 ? 'sent successfully to'
                 : txStatus === 'failed'
                 ? 'failed sending to'
                 : 'sending to'}
-            </div>
-          ) : null}
+            </Text>
+          )}
+
           {isSendTxn ? (
-            <div className='flex rounded-full gap-[6px] py-[6px] pl-2 pr-3 bg-gray-50 dark:bg-gray-900 text-sm font-bold text-black-100 dark:text-white-100 mt-2 items-center'>
-              <UserCircle size={18} className='text-gray-200 dark:text-gray-800' />
-              {subtitle1}
-            </div>
+            <View style={styles.recipientBadge}>
+              <UserCircle size={18} style={{ color: theme === 'dark' ? '#1F2937' : '#E5E7EB' }} />
+              <Text style={styles.recipientText}>{subtitle1}</Text>
+            </View>
           ) : (
-            <div className='text-base text-gray-600 dark:text-gray-400 text-center break-all mt-1'>{subtitle1}</div>
+            <Text style={styles.subTitle}>{subtitle1}</Text>
           )}
 
           {!isSendTxn ? (
-            <div className='flex mt-2 space-x-2 text-sm items-center'>
+            <View style={styles.row}>
               {txType === 'swap' ? (
                 <>
                   {receivedAmountInfo && (
-                    <p className='text-right font-semibold text-green-600 dark:text-green-600'>
+                    <Text style={[styles.textRight, styles.fontSemibold, styles.textGreen]}>
                       + {hideAssetsStore.formatHideBalance(receivedAmountInfo)}
-                    </p>
+                    </Text>
                   )}
                   {sentAmountInfo && (
-                    <p className='text-right text-gray-600 dark:text-gray-400'>
+                    <Text style={[styles.textRight, theme !== 'dark' ? styles.textGrayLight : styles.textGrayDark]}>
                       - {hideAssetsStore.formatHideBalance(sentAmountInfo)}
-                    </p>
+                    </Text>
                   )}
                 </>
               ) : (
                 <>
                   {sentUsdValue && (
-                    <p
-                      className={classnames('text-right font-semibold', {
-                        'text-black-100 dark:text-white-100': !balanceIncreased && !balanceReduced,
-                        'text-red-600 dark:text-red-300': balanceReduced,
-                        'text-green-600 dark:text-green-600': balanceIncreased,
-                      })}
-                    >
-                      ({balanceReduced && '-'} ${hideAssetsStore.formatHideBalance(Number(sentUsdValue).toFixed(2))})
-                    </p>
+                    <Text style={[styles.textRight, styles.fontSemibold]}>
+                      ({balanceReduced ? '-' : ''}
+                      ${hideAssetsStore.formatHideBalance(Number(sentUsdValue).toFixed(2))})
+                    </Text>
                   )}
-
                   {sentAmountInfo && (
-                    <p className={classnames('text-right text-gray-600 dark:text-gray-400')}>
-                      {balanceReduced && '-'} {hideAssetsStore.formatHideBalance(sentAmountInfo)}
-                    </p>
+                    <Text style={[styles.textRight, theme !== 'dark' ? styles.textGrayLight : styles.textGrayDark]}>
+                      {balanceReduced ? '-' : ''}
+                      {hideAssetsStore.formatHideBalance(sentAmountInfo)}
+                    </Text>
                   )}
                 </>
               )}
-            </div>
-          ) : null}
-        </div>
+            </View>
+          ) : (
+            null
+          )}
+        </View>
 
-        {txHash && (
-          <div
-            className='rounded-2xl w-full mb-4 px-6 py-4 bg-white-100 dark:bg-gray-950 cursor-pointer flex items-center'
-            onClick={() => {
-              copyTxHashRef.current?.click();
-              UserClipboard.copyText(txHash);
-              setIsCopiedClick(true);
-              setTimeout(() => setIsCopiedClick(false), 2000);
-            }}
-          >
-            <div className='flex-1'>
-              <div className='text-sm font-bold text-black-100 dark:text-white-100 mb-1'>Transaction ID</div>
-              <div className='text-md font-medium text-gray-600 dark:text-gray-400'>{sliceAddress(txHash)}</div>
-            </div>
-            <Buttons.CopyWalletAddress
-              copyIcon={Images.Activity.Copy}
-              ref={copyTxHashRef}
-              color={Colors.green600}
-              className={!isCopiedClick ? 'hidden' : ''}
-            />
-
-            {!isCopiedClick && (
-              <span
-                className='text-black-100 dark:text-white-100 bg-gray-50 dark:bg-gray-900 rounded-full p-2 ml-2'
-                onClick={() => {
-                  copyTxHashRef.current?.click();
-                  UserClipboard.copyText(txHash);
-                  setIsCopiedClick(true);
-                  setTimeout(() => setIsCopiedClick(false), 2000);
-                }}
-              >
-                <CopySimple size={20} />
-              </span>
+        {txHash ? (
+          <TouchableOpacity style={styles.txHashRow} onPress={handleCopyTxHash}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.txHashLabel}>Transaction ID</Text>
+              <Text style={styles.txHashValue}>{txHash}</Text>
+            </View>
+            {isCopiedClick ? (
+              <Text style={styles.copiedText}>Copied!</Text>
+            ) : (
+              <Image source={{uri: Images.Activity.Copy}} style={styles.copyIcon} />
             )}
-
-            {txnUrl && !isCopiedClick ? (
-              <span
-                className='text-black-100 dark:text-white-100 bg-gray-50 dark:bg-gray-900 rounded-full p-2 ml-2'
-                onClick={(event) => {
-                  event.stopPropagation();
-                  window.open(txnUrl, '_blank');
-                }}
-              >
-                <ArrowSquareOut size={20} className='text-black-100 dark:text-white-100' />
-              </span>
+            {txnUrl ? (
+              <TouchableOpacity onPress={handleOpenExplorer}>
+                <ArrowSquareOut
+                  size={20}
+                  color={theme === 'dark' ? '#FFF' : '#111'} // white or black
+                  style={styles.openIcon}
+                />
+              </TouchableOpacity>
             ) : null}
-          </div>
-        )}
+          </TouchableOpacity>
+        ) : null}
 
         {showMobileQrCode && status === 'success' && data && data.visible ? (
           <MobileQrCode setShowMobileQrCode={setShowMobileQrCode} data={data} />
         ) : null}
 
-        <div className='w-full flex gap-4 mt-auto'>
-          <Buttons.Generic
-            color={theme === ThemeName.DARK ? Colors.gray900 : Colors.gray300}
-            size='normal'
-            className='w-full'
-            onClick={() => navigate('/home')}
+        <View style={styles.buttonRow}>
+          <TouchableOpacity style={styles.homeButton} onPress={() => navigation.navigate('Home')}>
+            <Text style={styles.homeButtonText}>Home</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.sendAgainButton, { opacity: txStatus === 'success' || txStatus === 'submitted' ? 1 : 0.5 }]}
+            onPress={() => {navigation.navigate('Send')}}
+            disabled={!(txStatus === 'success' || txStatus === 'submitted')}
           >
-            <p className='!text-black-100 dark:!text-white-100'>Home</p>
-          </Buttons.Generic>
-          {isSendTxn && !title1?.toLowerCase()?.includes('nft') ? (
-            <Buttons.Generic
-              color={Colors.green600}
-              size='normal'
-              className='w-full'
-              onClick={() =>
-                navigate(`/send?assetCoinDenom=${sentTokenInfo?.ibcDenom || sentTokenInfo?.coinMinimalDenom}`, {
-                  replace: true,
-                })
-              }
-              disabled={txStatus !== 'success' && txStatus !== 'submitted'}
-            >
-              Send Again
-            </Buttons.Generic>
-          ) : null}
-        </div>
-      </div>
+            <Text style={styles.sendAgainButtonText}>Send Again</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </PopupLayout>
   );
+};
+
+const styles = StyleSheet.create({
+  popupLayout: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  header: {
+    paddingTop: 24,
+    paddingBottom: 12,
+    alignItems: 'center',
+  },
+  headerText: {
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  content: {
+    flexGrow: 1,
+    padding: 16,
+    alignItems: 'center',
+  },
+  card: {
+    backgroundColor: '#f7f8fa',
+    borderRadius: 16,
+    width: '100%',
+    alignItems: 'center',
+    padding: 16,
+    marginBottom: 16,
+  },
+  statusIcon: {
+    width: 80,
+    height: 80,
+    marginBottom: 12,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 4,
+    color: '#222',
+    textAlign: 'center',
+  },
+  statusLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#222',
+    marginTop: 4,
+  },
+  subTitle: {
+    fontSize: 15,
+    color: '#888',
+    textAlign: 'center',
+    marginTop: 4,
+  },
+  recipientBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f3f3f5',
+    borderRadius: 999,
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    marginTop: 8,
+  },
+  recipientText: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#222',
+  },
+  txHashRow: {
+    backgroundColor: '#f7f8fa',
+    borderRadius: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    marginBottom: 16,
+    width: '100%',
+  },
+  txHashLabel: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#222',
+  },
+  txHashValue: {
+    fontSize: 13,
+    color: '#888',
+    marginTop: 2,
+  },
+  copyIcon: {
+    width: 24,
+    height: 24,
+    marginLeft: 8,
+  },
+  copiedText: {
+    color: '#29a874',
+    marginLeft: 8,
+    fontWeight: '500',
+  },
+  openIcon: {
+    width: 24,
+    height: 24,
+    marginLeft: 8,
+  },
+  qrContainer: {
+    position: 'relative',
+    marginBottom: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  qrImage: {
+    width: 200,
+    height: 200,
+    borderRadius: 16,
+  },
+  qrCloseButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    padding: 8,
+    zIndex: 10,
+  },
+  qrCloseIcon: {
+    width: 18,
+    height: 18,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 12,
+    width: '100%',
+    marginTop: 16,
+  },
+  homeButton: {
+    flex: 1,
+    backgroundColor: '#F3F3F5',
+    borderRadius: 999,
+    alignItems: 'center',
+    paddingVertical: 12,
+    marginRight: 8,
+  },
+  homeButtonText: {
+    color: '#222',
+    fontWeight: 'bold',
+    fontSize: 15,
+  },
+  sendAgainButton: {
+    flex: 1,
+    backgroundColor: '#29a874',
+    borderRadius: 999,
+    alignItems: 'center',
+    paddingVertical: 12,
+    marginLeft: 8,
+  },
+  sendAgainButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 15,
+  },
+  row: {
+    flexDirection: 'row',
+    marginTop: 8,            // mt-2
+    alignItems: 'center',
+  },
+  textRight: {
+    textAlign: 'right',
+  },
+  fontSemibold: {
+    fontWeight: '600',
+  },
+  // Color styles
+  textGreen: {
+    color: '#16A34A',        // tailwind 'text-green-600'
+  },
+  textGrayLight: {
+    color: '#4B5563',        // tailwind 'text-gray-600'
+  },
+  textGrayDark: {
+    color: '#9CA3AF',        // tailwind 'dark:text-gray-400'
+  },
+  textBlack: {
+    color: '#222222',        // tailwind 'text-black-100'
+  },
+  textWhite: {
+    color: '#FFFFFF',        // tailwind 'dark:text-white-100'
+  },
+  textRedLight: {
+    color: '#DC2626',        // tailwind 'text-red-600'
+  },
+  textRedDark: {
+    color: '#FCA5A5',        // tailwind 'dark:text-red-300'
+  },
 });
 
 export default PendingTx;

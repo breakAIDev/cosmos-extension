@@ -28,6 +28,5 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     width: '100%',
     backgroundColor: 'rgba(240,240,240,0.75)', // Simulates `bg-secondary-100/75`
-    backdropFilter: 'blur(10px)', // For Web. If you're on native: skip or use a blur view lib
   },
 });

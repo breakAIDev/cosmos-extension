@@ -1,5 +1,5 @@
 import { GoFastTransferInfoJSON, GoFastTransferState, TransferState } from '@skip-go/client';
-import { GoFastTransferPacketTxnSeq } from 'types/swap';
+import { GoFastTransferPacketTxnSeq } from '../../../../../../types/swap';
 
 import { convertPacketFromJSON } from './convertPackageFromJson';
 

@@ -47,25 +47,25 @@ import { TransferAssetRelease } from '@skip-go/client';
 import { BigNumber } from 'bignumber.js';
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
-import { Wallet } from 'hooks/wallet/useWallet';
-import { useInvalidateSwapAssetsQueries } from 'pages/swaps-v2/hooks/txExecution/useInvalidateSwapAssetsQueries';
-import { useGetChainsToShow } from 'pages/swaps-v2/hooks/useGetChainsToShow';
-import { SkipRouteResponse } from 'pages/swaps-v2/hooks/useRoute';
-import { RoutingInfo, SkipMsgWithCustomTxHash, SWAP_NETWORK } from 'pages/swaps-v2/hooks/useSwapsTx';
-import { handleCosmosTx } from 'pages/swaps-v2/tx/cosmosTxHandler';
-import { handleEthermintTx } from 'pages/swaps-v2/tx/ethermintTxHandler';
-import { handleInitiaTx } from 'pages/swaps-v2/tx/initiaTxHandler';
-import { handleInjectiveTx } from 'pages/swaps-v2/tx/injectiveTxHandler';
+import { Wallet } from '../../../../hooks/wallet/useWallet';
+import { useInvalidateSwapAssetsQueries } from '../../../swaps-v2/hooks/txExecution/useInvalidateSwapAssetsQueries';
+import { useGetChainsToShow } from '../../../swaps-v2/hooks/useGetChainsToShow';
+import { SkipRouteResponse } from '../../../swaps-v2/hooks/useRoute';
+import { RoutingInfo, SkipMsgWithCustomTxHash, SWAP_NETWORK } from '../../../swaps-v2/hooks/useSwapsTx';
+import { handleCosmosTx } from '../../..//swaps-v2/tx/cosmosTxHandler';
+import { handleEthermintTx } from '../../..//swaps-v2/tx/ethermintTxHandler';
+import { handleInitiaTx } from '../../..//swaps-v2/tx/initiaTxHandler';
+import { handleInjectiveTx } from '../../..//swaps-v2/tx/injectiveTxHandler';
 import {
   approveTokenAllowanceIfNeeded,
   capitalizeFirstLetter,
   getChainIdsFromRoute,
   sendTrackingRequest,
-} from 'pages/swaps-v2/utils';
-import { routeDoesSwap } from 'pages/swaps-v2/utils/priceImpact';
+} from '../../..//swaps-v2/utils';
+import { routeDoesSwap } from '../../..//swaps-v2/utils/priceImpact';
 import { useCallback, useMemo } from 'react';
-import { SourceChain, SourceToken, SwapTxnStatus, TransferSequence } from 'types/swap';
-import { getLedgerEnabledEvmChainsIds } from 'utils/getLedgerEnabledEvmChains';
+import { SourceChain, SourceToken, SwapTxnStatus, TransferSequence } from '../../../../types/swap';
+import { getLedgerEnabledEvmChainsIds } from '../../../../utils/getLedgerEnabledEvmChains';
 
 import { usePollTx } from './polling/usePollTx';
 

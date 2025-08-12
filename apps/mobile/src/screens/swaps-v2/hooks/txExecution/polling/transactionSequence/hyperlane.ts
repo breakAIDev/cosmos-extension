@@ -1,5 +1,5 @@
 import { HyperlaneTransferInfoJSON, HyperlaneTransferState, TransferState } from '@skip-go/client';
-import { HyperlanePacketTxnSeq } from 'types/swap';
+import { HyperlanePacketTxnSeq } from '../../../../../../types/swap';
 
 import { convertPacketFromJSON } from './convertPackageFromJson';
 

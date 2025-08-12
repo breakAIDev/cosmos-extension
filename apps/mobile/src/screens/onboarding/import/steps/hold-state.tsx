@@ -1,11 +1,11 @@
-import { isLedgerUnlocked } from '@leapwallet/cosmos-wallet-sdk';
-import { type IconProps } from '@phosphor-icons/react';
-import { Button } from 'components/ui/button';
-import { motion } from 'framer-motion';
-import { onboardingWrapperVariants } from 'pages/onboarding/wrapper';
 import React, { useEffect } from 'react';
-
-import { LEDGER_NETWORK, useImportWalletContext } from '../import-wallet-context';
+import { View, Text, StyleSheet } from 'react-native';
+import { isLedgerUnlocked } from '@leapwallet/cosmos-wallet-sdk';
+import { Button } from '../../../../components/ui/button';
+import { useImportWalletContext } from '../import-wallet-context';
+import { LEDGER_NETWORK } from '../import-wallet-context';
+import { MotiView } from 'moti';
+import { IconProps } from 'phosphor-react-native';
 
 export const HoldState = ({
   Icon,
@@ -15,7 +15,7 @@ export const HoldState = ({
   appType,
 }: {
   Icon: (props: IconProps) => React.JSX.Element;
-  title: React.ReactNode;
+  title: string | React.ReactNode;
   cta?: React.ReactNode;
   moveToNextApp: (appType: LEDGER_NETWORK) => void;
   appType: LEDGER_NETWORK;
@@ -40,33 +40,123 @@ export const HoldState = ({
     return () => {
       clearInterval(interval);
     };
-  }, [appType]);
+  }, [appType, getLedgerAccountDetails, moveToNextApp]);
 
   return (
-    <motion.div
-      className='flex flex-col w-full flex-1'
-      variants={onboardingWrapperVariants}
-      initial={'fromRight'}
-      animate='animate'
-      exit='exit'
+    <MotiView
+      style={styles.wrapper}
+      from={{ opacity: 0, translateX: 70 }}
+      animate={{ opacity: 1, translateX: 0 }}
+      exit={{ opacity: 0, translateX: -70 }}
+      transition={{ type: 'timing', duration: 400 }}
     >
-      <header className='flex flex-col items-center justify-center gap-6 flex-1'>
-        <div className='rounded-full size-[134px] animate-scaleUpDown [--scale-up-down-start:1.05] bg-accent-foreground/20 grid place-content-center'>
-          <div className='rounded-full size-[89px] animate-scaleUpDown [--scale-up-down-start:1.075] bg-accent-foreground/40 grid place-content-center'>
-            <div className='rounded-full size-[44.5px] animate-scaleUpDown [--scale-up-down-start:1.1] bg-accent-foreground grid place-content-center'>
-              <Icon className='size-6' />
-            </div>
-          </div>
-        </div>
-
-        <span className='text-xl font-bold text-center'>{title}</span>
-      </header>
+      <View style={styles.header}>
+        {/* Outer circle */}
+        <MotiView
+          from={{ scale: 1.05 }}
+          animate={{ scale: 1 }}
+          transition={{
+            loop: true,
+            type: 'timing',
+            duration: 1200,
+            repeatReverse: true,
+          }}
+          style={styles.outerCircle}
+        >
+          {/* Middle circle */}
+          <MotiView
+            from={{ scale: 1.075 }}
+            animate={{ scale: 1 }}
+            transition={{
+              loop: true,
+              type: 'timing',
+              duration: 900,
+              repeatReverse: true,
+              delay: 100,
+            }}
+            style={styles.middleCircle}
+          >
+            {/* Inner circle */}
+            <MotiView
+              from={{ scale: 1.1 }}
+              animate={{ scale: 1 }}
+              transition={{
+                loop: true,
+                type: 'timing',
+                duration: 700,
+                repeatReverse: true,
+                delay: 200,
+              }}
+              style={styles.innerCircle}
+            >
+              <Icon size={26} color="#343a40" />
+            </MotiView>
+          </MotiView>
+        </MotiView>
+        {React.isValidElement(title) ? title
+        : typeof title === 'string' ?
+          <Text style={styles.title}>{title}</Text>
+          : null
+        }
+      </View>
 
       {Boolean(cta && moveToNextApp) && (
-        <Button className='w-full' onClick={() => moveToNextApp(appType)}>
+        <Button style={styles.button} onPress={() => moveToNextApp(appType)}>
           {cta}
         </Button>
       )}
-    </motion.div>
+    </MotiView>
   );
 };
+
+const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+    width: '100%',
+    flexDirection: 'column',
+  },
+  header: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 28,
+    marginBottom: 20,
+    marginTop: 18,
+  },
+  outerCircle: {
+    width: 134,
+    height: 134,
+    borderRadius: 67,
+    backgroundColor: 'rgba(50,130,250,0.08)', // accent-foreground/20
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  middleCircle: {
+    width: 89,
+    height: 89,
+    borderRadius: 44.5,
+    backgroundColor: 'rgba(50,130,250,0.16)', // accent-foreground/40
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  innerCircle: {
+    width: 44.5,
+    height: 44.5,
+    borderRadius: 22.25,
+    backgroundColor: '#3282fa', // accent-foreground
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  title: {
+    marginTop: 36,
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#111',
+    textAlign: 'center',
+  },
+  button: {
+    width: '100%',
+    alignSelf: 'flex-end',
+    marginTop: 16,
+  },
+});

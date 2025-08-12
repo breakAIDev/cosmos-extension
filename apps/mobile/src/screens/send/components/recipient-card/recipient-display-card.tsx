@@ -1,9 +1,10 @@
-import { capitalize, SelectedAddress, sliceAddress } from '@leapwallet/cosmos-wallet-hooks';
-import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-import { EditIcon } from 'icons/edit-icon';
-import { Images } from 'images';
 import React from 'react';
-import { AddressBook } from 'utils/addressbook';
+import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { capitalize, sliceAddress, SelectedAddress } from '@leapwallet/cosmos-wallet-hooks';
+import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
+import { EditIcon } from '../../../../../assets/icons/edit-icon'; // Must be a React Native-compatible SVG or component
+import { Images } from '../../../../../assets/images';
+import { AddressBook } from '../../../../utils/addressbook';
 
 interface RecipientDisplayCardProps {
   selectedAddress: SelectedAddress;
@@ -21,57 +22,107 @@ const RecipientDisplayCard = ({
   onEdit,
 }: RecipientDisplayCardProps) => {
   return (
-    <>
-      <div className='flex justify-between items-center w-full'>
-        <div className='flex gap-4 items-center'>
-          <img
-            className='h-11 w-11 rounded-full'
-            src={selectedAddress?.avatarIcon || Images.Misc.getWalletIconAtIndex(0)}
-          />
-
-          <div className='flex flex-col gap-1'>
-            <p className='font-bold text-left text-monochrome text-sm'>
-              {selectedAddress?.name
-                ? capitalize(selectedAddress?.name)
-                : sliceAddress(selectedAddress?.ethAddress ? selectedAddress?.ethAddress : selectedAddress?.address)}
-            </p>
-            {selectedAddress?.name ? (
-              <p className='text-sm text-muted-foreground'>
-                {sliceAddress(selectedAddress?.ethAddress ? selectedAddress?.ethAddress : selectedAddress?.address)}
-              </p>
-            ) : (
-              <div
-                className='bg-secondary-200 hover:bg-secondary-300 text-xs text-muted-foreground hover:text-monochrome rounded-full py-0.5 pl-1.5 pr-2 cursor-pointer'
-                onClick={() => {
-                  setSelectedContact({
-                    address: selectedAddress?.ethAddress || selectedAddress?.address || '',
-                    name: '',
-                    emoji: 0,
-                    blockchain: activeChain,
-                    ethAddress: selectedAddress?.ethAddress || '',
-                  });
-                  setIsAddContactSheetVisible(true);
-                }}
-              >
-                + Add to contacts
-              </div>
-            )}
-          </div>
-        </div>
-
-        <EditIcon
-          height={32}
-          width={32}
-          weight='fill'
-          className='bg-secondary-300 rounded-full p-2 text-monochrome cursor-pointer'
-          onClick={(e) => {
-            e.stopPropagation();
-            onEdit();
-          }}
+    <View style={styles.container}>
+      <View style={styles.infoContainer}>
+        <Image
+          source={{ uri: selectedAddress.avatarIcon ?? Images.Misc.getWalletIconAtIndex(0)}}
+          style={styles.avatar}
         />
-      </div>
-    </>
+
+        <View style={styles.textContainer}>
+          <Text style={styles.nameText}>
+            {selectedAddress?.name
+              ? capitalize(selectedAddress?.name)
+              : sliceAddress(selectedAddress?.ethAddress || selectedAddress?.address)}
+          </Text>
+          {selectedAddress?.name ? (
+            <Text style={styles.addressText}>
+              {sliceAddress(selectedAddress?.ethAddress || selectedAddress?.address)}
+            </Text>
+          ) : (
+            <TouchableOpacity
+              style={styles.addContactBtn}
+              onPress={() => {
+                setSelectedContact({
+                  address: selectedAddress?.ethAddress || selectedAddress?.address || '',
+                  name: '',
+                  emoji: 0,
+                  blockchain: activeChain,
+                  ethAddress: selectedAddress?.ethAddress || '',
+                });
+                setIsAddContactSheetVisible(true);
+              }}
+            >
+              <Text style={styles.addContactText}>+ Add to contacts</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+      <TouchableOpacity
+        style={styles.editIconBtn}
+        onPress={onEdit}
+        activeOpacity={0.7}
+      >
+        {/* Your EditIcon component must be React Native compatible (SVG or Image) */}
+        <EditIcon size={24}/>
+      </TouchableOpacity>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    marginVertical: 6,
+    paddingHorizontal: 4,
+  },
+  infoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  avatar: {
+    height: 44,
+    width: 44,
+    borderRadius: 22,
+    backgroundColor: '#ddd',
+  },
+  textContainer: {
+    flexDirection: 'column',
+    gap: 4,
+  },
+  nameText: {
+    fontWeight: 'bold',
+    color: '#222', // You can use your theme colors here
+    fontSize: 15,
+    marginBottom: 2,
+  },
+  addressText: {
+    color: '#8c8c8c',
+    fontSize: 13,
+  },
+  addContactBtn: {
+    backgroundColor: '#f1f2f6',
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    alignSelf: 'flex-start',
+  },
+  addContactText: {
+    fontSize: 12,
+    color: '#8c8c8c',
+  },
+  editIconBtn: {
+    backgroundColor: '#e3e6ea',
+    borderRadius: 16,
+    padding: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 8,
+  },
+});
 
 export default RecipientDisplayCard;

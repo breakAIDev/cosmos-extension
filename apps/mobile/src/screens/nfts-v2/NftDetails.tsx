@@ -6,26 +6,24 @@ import {
 } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { CardDivider, Header, HeaderActionType } from '@leapwallet/leap-ui';
-import { UploadSimple } from '@phosphor-icons/react';
-import classNames from 'classnames';
-import { AlertStrip } from 'components/alert-strip';
-import PopupLayout from 'components/layout/popup-layout';
-import { useChainPageInfo } from 'hooks';
-import useActiveWallet from 'hooks/settings/useActiveWallet';
-import { useChainInfos } from 'hooks/useChainInfos';
-import { Wallet } from 'hooks/wallet/useWallet';
-import { Images } from 'images';
+import { UploadSimple } from 'phosphor-react-native';
+import { AlertStrip } from '../../components/alert-strip';
+import PopupLayout from '../../components/layout/popup-layout';
+import { useChainPageInfo } from '../../hooks';
+import useActiveWallet from '../../hooks/settings/useActiveWallet';
+import { useChainInfos } from '../../hooks/useChainInfos';
+import { Wallet } from '../../hooks/wallet/useWallet';
+import { Images } from '../../../assets/images';
 import { observer } from 'mobx-react-lite';
 import React, { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { rootDenomsStore } from 'stores/denoms-store-instance';
-import { favNftStore, hiddenNftStore } from 'stores/manage-nft-store';
-import { rootBalanceStore } from 'stores/root-store';
-import { Colors } from 'theme/colors';
-import { getChainName } from 'utils/getChainName';
-import { isSidePanel } from 'utils/isSidePanel';
-import { normalizeImageSrc } from 'utils/normalizeImageSrc';
-import { sessionGetItem, sessionRemoveItem } from 'utils/sessionStorage';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Linking, ScrollView } from 'react-native';
+import { rootDenomsStore } from '../../context/denoms-store-instance';
+import { favNftStore, hiddenNftStore } from '../../context/manage-nft-store';
+import { rootBalanceStore } from '../../context/root-store';
+import { Colors } from '../../theme/colors';
+import { getChainName } from '../../utils/getChainName';
+import { normalizeImageSrc } from '../../utils/normalizeImageSrc';
+import { sessionGetItem, sessionRemoveItem } from '../../utils/sessionStorage';
 
 import {
   Chip,
@@ -42,14 +40,12 @@ export const NftDetails = observer(() => {
   const fractionalizedNftContracts = useFractionalizedNftContracts();
 
   const { topChainColor } = useChainPageInfo();
-  const navigate = useNavigate();
   const { activeWallet, setActiveWallet } = useActiveWallet();
   const [alertMsg, setAlertMsg] = useState({ body: '', status: '' });
 
   const [showMenu, setShowMenu] = useState(false);
   const [coverImage, setCoverImage] = useState(true);
   const { setActivePage, nftDetails, setNftDetails } = useNftContext();
-
   const [showSendNFT, setShowSendNFT] = useState(false);
 
   const giveSendOption = useMemo(() => {
@@ -67,7 +63,6 @@ export const NftDetails = observer(() => {
         return _nftDetails.Images.map((image) => normalizeImageSrc(image, nftDetails?.collection.address ?? ''));
       }
     }
-
     return [normalizeImageSrc(nftDetails?.image ?? '', nftDetails?.collection.address ?? '')];
   }, [isFractionalizedNft, nftDetails]);
 
@@ -118,7 +113,8 @@ export const NftDetails = observer(() => {
 
       setActiveWallet(newWallet);
       await Wallet.storeWallets({ [newWallet.id]: newWallet });
-      navigate('/home?walletAvatarChanged=true');
+      // React Native: replace with your navigation logic
+      // navigation.navigate('Home', { walletAvatarChanged: true });
     }
   };
 
@@ -134,8 +130,9 @@ export const NftDetails = observer(() => {
     }
   };
 
+  // --- Render
   return (
-    <div className='relative w-full overflow-clip panel-height'>
+    <View style={styles.root}>
       <PopupLayout
         header={
           <Header
@@ -153,25 +150,33 @@ export const NftDetails = observer(() => {
               type: HeaderActionType.BACK,
             }}
             title={
-              <h1 className='flex'>
-                <span className='truncate !max-w-[150px]' title={nftDetails?.name ?? ''}>
+              <View style={styles.headerRow}>
+                <Text
+                  numberOfLines={1}
+                  style={styles.headerTitle}
+                >
                   {showSendNFT ? 'Send' : nftDetails?.name ?? ''}
-                </span>
-              </h1>
+                </Text>
+              </View>
             }
           />
         }
       >
-        <div className='px-6 pt-4 pb-8 relative'>
+        <ScrollView
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+        >
           {alertMsg.body.length > 0 && (
-            <AlertStrip
-              message={alertMsg.body}
-              bgColor={alertMsg.status === 'add' ? Colors.green600 : Colors.red300}
-              alwaysShow={false}
-              onHide={() => setAlertMsg({ body: '', status: '' })}
-              className='absolute top-[10px] left-[40px] z-10 rounded-2xl w-80 h-auto p-2'
-              timeOut={1000}
-            />
+            <View>
+              <AlertStrip
+                message={alertMsg.body}
+                bgColor={alertMsg.status === 'add' ? Colors.green600 : Colors.red300}
+                alwaysShow={false}
+                onHide={() => setAlertMsg({ body: '', status: '' })}
+                style={styles.alertWrap}
+                timeOut={1000}
+              />
+            </View>
           )}
 
           <NftCardCarousel
@@ -182,113 +187,106 @@ export const NftDetails = observer(() => {
               description:
                 nftDetails?.extension?.description ?? `${nftDetails?.collection?.name ?? ''} - ${nftDetails?.name}`,
             }}
-            imgClassName={classNames('h-[200px] w-full', {
-              'object-contain': !coverImage,
-              'object-cover': coverImage,
-            })}
+            style={{
+              height: 200,
+              width: '100%',
+              resizeMode: coverImage ? 'cover' : 'contain',
+              alignSelf: 'center',
+            }}
             handleExpandClick={() => setCoverImage(!coverImage)}
             showExpand={true}
             images={nftImages}
           />
 
-          <div className='my-4 flex items-center justify-between'>
-            <div className='flex flex-col flex-1'>
-              <p
-                className={classNames('text-gray-800 dark:text-white-100 truncate max-w-[200px] text-lg font-bold', {
-                  '!max-w-[160px]': isSidePanel(),
-                })}
-                title={nftDetails?.name ?? ''}
+          <View style={styles.nftHeaderRow}>
+            <View style={{ flex: 1 }}>
+              <Text
+                style={[styles.nftTitle]}
+                numberOfLines={1}
               >
                 {nftDetails?.name ?? ''}
-              </p>
+              </Text>
               {nftDetails?.tokenId && (
-                <p
-                  className={classNames('text-gray-300 text-sm truncate max-w-[180px] text-base', {
-                    '!max-w-[160px]': isSidePanel(),
-                  })}
-                  title={nftDetails.tokenId}
+                <Text
+                  style={[styles.nftSub]}
+                  numberOfLines={1}
                 >
                   #{nftDetails.tokenId}
-                </p>
+                </Text>
               )}
-            </div>
-
+            </View>
             {nftDetails?.chain && (
-              <Chip className='bg-gray-100 dark:bg-gray-900 py-[3px] px-[7px] shrink-0'>
+              <Chip style={styles.chip}>
                 <Chip.Image
-                  className='w-[24px] h-[24px]'
+                  style={{ width: 24, height: 24, marginRight: 6 }}
                   src={chainInfos[nftDetails.chain].chainSymbolImageUrl}
-                  alt={`${chainInfos[nftDetails.chain].chainName.toLowerCase()} logo`}
                 />
                 <Chip.Text
-                  className='text-gray-800 dark:text-gray-300 text-sm max-w-[90px] truncate'
-                  title={getChainName(chainInfos[nftDetails.chain].chainName)}
+                  style={styles.chipText}
                 >
                   {getChainName(chainInfos[nftDetails.chain].chainName)}
                 </Chip.Text>
               </Chip>
             )}
-          </div>
+          </View>
 
           <CardDivider />
+
           {!!showSendNFT && giveSendOption && nftDetails && (
             <SendNftCard
               rootDenomsStore={rootDenomsStore}
               nftDetails={nftDetails}
               rootBalanceStore={rootBalanceStore}
-              forceNetwork='mainnet'
+              forceNetwork="mainnet"
             />
           )}
+
           {!showSendNFT && (
-            <div className='my-4 flex justify-between items-center'>
-              <button
-                className={classNames(
-                  'rounded-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white-100 flex items-center justify-center flex-1 py-[12px] mr-[12px]',
-                  {
-                    'opacity-50': !nftDetails?.tokenUri,
-                    'px-[30px]': !isSidePanel(),
-                    'px-[12px] flex-wrap': isSidePanel(),
-                  },
-                )}
-                onClick={() =>
-                  window.open(
-                    normalizeImageSrc(nftDetails?.tokenUri ?? '', nftDetails?.collection?.address ?? ''),
-                    '_blank',
-                  )
-                }
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                style={[
+                  styles.marketButton,
+                  { opacity: nftDetails?.tokenUri ? 1 : 0.5, backgroundColor: '#f3f4f6' },
+                ]}
+                onPress={() => {
+                  if (nftDetails?.tokenUri) {
+                    Linking.openURL(normalizeImageSrc(nftDetails?.tokenUri ?? '', nftDetails?.collection?.address ?? ''));
+                  }
+                }}
                 disabled={!nftDetails?.tokenUri}
               >
-                <div className='flex flex-row items-center'>
-                  <img className='mr-2 invert dark:invert-0' src={Images.Misc.OpenLink} alt='open' /> View
-                </div>
-                <span className='ml-1'>{isFractionalizedNft ? 'details' : 'on marketplace'}</span>
-              </button>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Image source={{uri: Images.Misc.OpenLink}} style={{ width: 18, height: 18, marginRight: 8, tintColor: '#333' }} />
+                  <Text style={{ fontWeight: '500', fontSize: 16 }}>View</Text>
+                </View>
+                <Text style={{ marginLeft: 4 }}>
+                  {isFractionalizedNft ? 'details' : 'on marketplace'}
+                </Text>
+              </TouchableOpacity>
 
               {giveSendOption && (
-                <button
-                  title='send'
-                  className='w-[20px] h-[20px] dark:text-gray-100 mx-1 text-black-100'
-                  onClick={() => {
-                    setShowSendNFT(true);
-                  }}
+                <TouchableOpacity
+                  style={styles.iconButton}
+                  onPress={() => setShowSendNFT(true)}
                 >
-                  <UploadSimple size={16} weight='bold' className='text-current' />
-                </button>
+                  <UploadSimple size={18} weight="bold" color="#111" />
+                </TouchableOpacity>
               )}
 
-              <button title='favourite' className='w-[20px] h-[20px] mx-[12px]' onClick={handleFavNftClick}>
-                {isInFavNfts ? (
-                  <img src={Images.Misc.FilledFavStar} alt='star' />
-                ) : (
-                  <img className='invert dark:invert-0' src={Images.Misc.OutlinedFavStar} alt='star' />
-                )}
-              </button>
+              <TouchableOpacity style={styles.iconButton} onPress={handleFavNftClick}>
+                <Image
+                  source={{uri: isInFavNfts ? Images.Misc.FilledFavStar : Images.Misc.OutlinedFavStar}}
+                  style={{ width: 20, height: 20, tintColor: isInFavNfts ? '#F59E42' : '#aaa' }}
+                  resizeMode="contain"
+                />
+              </TouchableOpacity>
 
-              <button title='menu' onClick={() => setShowMenu(!showMenu)}>
-                <img className='invert dark:invert-0' src={Images.Misc.VerticalDots} alt='menu' />
-              </button>
-            </div>
+              <TouchableOpacity style={styles.iconButton} onPress={() => setShowMenu(!showMenu)}>
+                <Image source={{uri: Images.Misc.VerticalDots}} style={{ width: 20, height: 20, tintColor: '#888' }} />
+              </TouchableOpacity>
+            </View>
           )}
+
           {!showSendNFT && (
             <>
               <CardDivider />
@@ -313,8 +311,100 @@ export const NftDetails = observer(() => {
               )}
             </>
           )}
-        </div>
+        </ScrollView>
       </PopupLayout>
-    </div>
+    </View>
   );
+});
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    position: 'relative',
+    width: '100%',
+    overflow: 'hidden',
+  },
+  content: {
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingBottom: 32,
+    flexGrow: 1,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    maxWidth: 200,
+  },
+  headerTitle: {
+    flex: 1,
+    fontSize: 20,
+    fontWeight: '700',
+    maxWidth: 150,
+  },
+  alertWrap: {
+    position: 'absolute',
+    top: 10,
+    left: 40,
+    zIndex: 10,
+    width: 320,
+    padding: 8,
+    borderRadius: 16,
+  },
+  nftHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 18,
+    justifyContent: 'space-between',
+  },
+  nftTitle: {
+    color: '#18181b',
+    fontWeight: 'bold',
+    fontSize: 20,
+    maxWidth: 200,
+    marginBottom: 2,
+  },
+  nftSub: {
+    color: '#a1a1aa',
+    fontSize: 15,
+    marginTop: 2,
+    maxWidth: 180,
+  },
+  chip: {
+    backgroundColor: '#f3f4f6',
+    paddingVertical: 3,
+    paddingHorizontal: 7,
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 8,
+  },
+  chipText: {
+    color: '#18181b',
+    fontSize: 14,
+    maxWidth: 90,
+    fontWeight: '500',
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 16,
+    justifyContent: 'space-between',
+  },
+  marketButton: {
+    borderRadius: 999,
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 18,
+    marginRight: 10,
+    backgroundColor: '#f3f4f6',
+  },
+  iconButton: {
+    width: 36,
+    height: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 5,
+  },
 });

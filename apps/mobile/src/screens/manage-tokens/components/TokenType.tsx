@@ -1,15 +1,28 @@
-import classNames from 'classnames';
 import React from 'react';
+import { Text, StyleSheet } from 'react-native';
 
 type TokenTypeProps = {
-  className?: string;
+  style?: any;
   type: string;
 };
 
-export function TokenType({ className, type }: TokenTypeProps) {
+export function TokenType({ style, type }: TokenTypeProps) {
   return (
-    <span className={classNames('px-[6px] py-[1px] text-[10px] text-center ml-[2px] rounded-xl', className)}>
+    <Text style={[styles.tokenType, style]}>
       {type}
-    </span>
+    </Text>
   );
 }
+
+const styles = StyleSheet.create({
+  tokenType: {
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    fontSize: 10,
+    textAlign: 'center',
+    marginLeft: 2,
+    borderRadius: 8,
+    overflow: 'hidden',
+    // The color is overridden by typeStyle
+  },
+});

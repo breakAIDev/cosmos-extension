@@ -1,5 +1,5 @@
 import { CCTPTransferInfoJSON, CCTPTransferState, TransferState } from '@skip-go/client';
-import { CCTPPacketTxnSeq } from 'types/swap';
+import { CCTPPacketTxnSeq } from '../../../../../../types/swap';
 
 import { convertPacketFromJSON } from './convertPackageFromJson';
 

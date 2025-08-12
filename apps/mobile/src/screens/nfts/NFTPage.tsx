@@ -1,23 +1,21 @@
 import { NftPage, useDisabledNFTsCollections } from '@leapwallet/cosmos-wallet-hooks';
 import { NftStore } from '@leapwallet/cosmos-wallet-store';
-import { ArrowCounterClockwise, Faders, MagnifyingGlassMinus } from '@phosphor-icons/react';
-import { WalletButtonV2 } from 'components/button';
-import { PageHeader } from 'components/header/PageHeaderV2';
-import { SideNavMenuOpen } from 'components/header/sidenav-menu';
-import Text from 'components/text';
-import { Button } from 'components/ui/button';
-import { SearchInput } from 'components/ui/input/search-input';
-import { motion } from 'framer-motion';
-import { useWalletInfo } from 'hooks';
-import useQuery from 'hooks/useQuery';
-import { Images } from 'images';
+import { ArrowCounterClockwise, Faders, MagnifyingGlassMinus } from 'phosphor-react-native';
+import { WalletButtonV2 } from '../../components/button';
+import { PageHeader } from '../../components/header/PageHeaderV2';
+import { SideNavMenuOpen } from '../../components/header/sidenav-menu';
+import Text from '../../components/text';
+import { Button } from '../../components/ui/button';
+import { SearchInput } from '../../components/ui/input/search-input';
+import { MotiView } from 'moti';
+import { useWalletInfo } from '../../hooks';
+import useQuery from '../../hooks/useQuery';
+import { Images } from '../../../assets/images';
 import { observer } from 'mobx-react-lite';
-import SelectWallet from 'pages/home/SelectWallet/v2';
-import { createWalletLoaderVariants } from 'pages/onboarding/create/creating-wallet-loader';
+import SelectWallet from '../home/SelectWallet/v2';
 import React, { useEffect, useMemo, useState } from 'react';
-import { FavNftStore, favNftStore } from 'stores/manage-nft-store';
-import { nftStore } from 'stores/nft-store';
-import { transition } from 'utils/motion-variants';
+import { FavNftStore, favNftStore } from '../../context/manage-nft-store';
+import { nftStore } from '../../context/nft-store';
 
 import CollectionDetails from './CollectionDetails';
 import CollectionList from './CollectionList';
@@ -26,6 +24,16 @@ import { NftContextProvider, useNftContext } from './context';
 import { NftDetails } from './NFTDetails';
 import { NFTLoading } from './NFTLoading';
 import TxPage, { TxType } from './send-nft/TxPage';
+
+import {
+  View,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+  Modal,
+  SafeAreaView,
+} from 'react-native';
 
 const NFTs = observer(({ nftStore, favNftStore }: { nftStore: NftStore; favNftStore: FavNftStore }) => {
   const query = useQuery();
@@ -60,7 +68,6 @@ const NFTs = observer(({ nftStore, favNftStore }: { nftStore: NftStore; favNftSt
       .sort((collectionA, collectionB) => {
         const nameA = collectionA.name.toLowerCase().trim();
         const nameB = collectionB.name.toLowerCase().trim();
-
         if (nameA > nameB) return 1;
         if (nameA < nameB) return -1;
         return 0;
@@ -68,7 +75,6 @@ const NFTs = observer(({ nftStore, favNftStore }: { nftStore: NftStore; favNftSt
       .sort((collectionA, collectionB) => {
         const isCollectionAFav = favNftStore.favNfts.some((item) => item.includes(collectionA.address));
         const isCollectionBFav = favNftStore.favNfts.some((item) => item.includes(collectionB.address));
-
         if (isCollectionAFav && !isCollectionBFav) return -1;
         if (!isCollectionAFav && isCollectionBFav) return 1;
         return 0;
@@ -91,9 +97,7 @@ const NFTs = observer(({ nftStore, favNftStore }: { nftStore: NftStore; favNftSt
     return (
       <TxPage
         isOpen={showTxPage}
-        onClose={() => {
-          setShowTxPage(false);
-        }}
+        onClose={() => setShowTxPage(false)}
         txType={TxType.NFTSEND}
       />
     );
@@ -105,50 +109,42 @@ const NFTs = observer(({ nftStore, favNftStore }: { nftStore: NftStore; favNftSt
 
   if (hasToShowNetworkErrorView) {
     return (
-      <div className='flex flex-col px-10 items-center justify-center gap-7 flex-1 pb-[75px]'>
-        <div className='flex flex-col gap-8 items-center'>
-          <div className='h-16 w-16 p-5 rounded-full bg-red-600 dark:bg-red-400'>
-            {/* TODO: change it to failed red */}
-            <img src={Images.Misc.Warning} />
-          </div>
-          <div className='flex flex-col gap-3 items-center'>
-            <Text size='lg' color='text-monochrome' className='font-bold'>
-              Failed to load NFTs
+      <View style={styles.centeredPanel}>
+        <View style={{ alignItems: 'center', gap: 18 }}>
+          <View style={styles.failedIconContainer}>
+            <Image source={{uri: Images.Misc.Warning}} style={styles.failedIcon} />
+          </View>
+          <View style={{ alignItems: 'center', gap: 8 }}>
+            <Text size="lg" style={styles.boldText}>Failed to load NFTs</Text>
+            <Text size="sm" style={styles.secondaryTextCenter}>
+              We were unable to load your NFTs at the moment due to some technical failure. Please try again in some time.
             </Text>
-            <Text size='sm' color='text-secondary-800' className='text-center'>
-              We were unable to load your NFTs at the moment due to some technical failure. Please try again in some
-              time.
-            </Text>
-          </div>
-        </div>
+          </View>
+        </View>
         <Button
-          className='w-full'
-          onClick={() => {
-            nftStore.loadNfts();
-          }}
+          style={{ width: '100%', marginTop: 32 }}
+          onPress={() => nftStore.loadNfts()}
         >
-          <div className='flex items-center gap-x-1.5'>
-            <ArrowCounterClockwise size={16} className='text-monochrome' />
-            <Text size='sm' className='font-bold !leading-[18.9px]' color='text-monochrome'>
-              Reload NFTs
-            </Text>
-          </div>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <ArrowCounterClockwise size={16} color="#1a222c" />
+            <Text size="sm" style={styles.boldText}>Reload NFTs</Text>
+          </View>
         </Button>
-      </div>
+      </View>
     );
   }
 
   if (noNFTFound) {
     return (
-      <div className='h-[calc(100%-140px)] px-[68px] w-full flex-col flex  justify-center items-center gap-4'>
-        <MagnifyingGlassMinus size={64} className='dark:text-gray-50 text-gray-900 p-5 rounded-full bg-secondary-200' />
-        <div className='flex flex-col justify-start items-center w-full gap-3'>
-          <div className='text-lg text-center font-bold !leading-[21.5px] text-monochrome'>No NFTs found</div>
-          <div className='text-sm font-normal !leading-[22.4px] text-secondary-800 text-center'>
-            Looks like we couldn&apos;t find any NFTs in your wallet.
-          </div>
-        </div>
-      </div>
+      <View style={styles.noNftsPanel}>
+        <MagnifyingGlassMinus size={64} color="#101013" style={styles.noNftsIcon} />
+        <View style={{ alignItems: 'center', gap: 8 }}>
+          <Text size="lg" style={styles.boldText}>No NFTs found</Text>
+          <Text size="sm" style={styles.secondaryTextCenter}>
+            Looks like we couldn't find any NFTs in your wallet.
+          </Text>
+        </View>
+      </View>
     );
   }
 
@@ -158,33 +154,29 @@ const NFTs = observer(({ nftStore, favNftStore }: { nftStore: NftStore; favNftSt
 
   return (
     <>
-      <div className='flex flex-1 flex-col px-6 py-7 gap-y-8 justify-between pb-[75px]'>
-        <div className='flex flex-col justify-between gap-y-8'>
-          <SearchInput
-            value={searchQuery}
-            autoFocus={false}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder='Search by collection or name'
-            onClear={() => setSearchQuery('')}
-          />
-          {filteredCollections?.length > 0 ? (
-            <CollectionList collections={filteredCollections} />
-          ) : (
-            <div className='pt-10 px-4 w-full flex-col flex  justify-center items-center gap-4'>
-              <MagnifyingGlassMinus
-                size={64}
-                className='dark:text-gray-50 text-gray-900 p-5 rounded-full bg-secondary-200'
-              />
-              <div className='flex flex-col justify-start items-center w-full gap-3'>
-                <div className='text-lg text-center font-bold !leading-[21.5px] text-monochrome'>No NFTs found</div>
-                <div className='text-sm font-normal !leading-[22.4px] text-secondary-800 text-center'>
-                  We couldn’t find a match. Try searching again or use a different keyword.
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+      <ScrollView style={styles.scrollArea} contentContainerStyle={{ paddingBottom: 120 }}>
+        <SearchInput
+          value={searchQuery}
+          autoFocus={false}
+          onChangeText={setSearchQuery}
+          placeholder="Search by collection or name"
+          onClear={() => setSearchQuery('')}
+          style={{ marginBottom: 16 }}
+        />
+        {filteredCollections?.length > 0 ? (
+          <CollectionList collections={filteredCollections} />
+        ) : (
+          <View style={styles.noNftsInnerPanel}>
+            <MagnifyingGlassMinus size={64} color="#101013" style={styles.noNftsIcon} />
+            <View style={{ alignItems: 'center', gap: 8 }}>
+              <Text size="lg" style={styles.boldText}>No NFTs found</Text>
+              <Text size="sm" style={styles.secondaryTextCenter}>
+                We couldn’t find a match. Try searching again or use a different keyword.
+              </Text>
+            </View>
+          </View>
+        )}
+      </ScrollView>
       <CollectionDetails />
     </>
   );
@@ -200,36 +192,119 @@ const NFTPage = observer(() => {
 
   return (
     <NftContextProvider value={value}>
-      <div className='enclosing-panel relative m-auto flex flex-col overflow-hidden panel-width bg-secondary panel-height max-panel-height'>
-        <motion.div id='popup-layout' className={'flex-1 panel-height overflow-auto flex flex-col'}>
-          {/* main body */}
+      <SafeAreaView style={styles.safePanel}>
+        <MotiView style={styles.panelBody}>
           <PageHeader>
-            <SideNavMenuOpen className='py-2 pr-1.5 pl-2.5 text-foreground/75 hover:text-foreground transition-colors' />
-
+            <SideNavMenuOpen style={{ paddingVertical: 8, paddingHorizontal: 12 }} />
             <WalletButtonV2
               showDropdown
               showWalletAvatar
-              className='absolute top-1/2 right-1/2 translate-x-1/2 -translate-y-1/2'
+              style={styles.walletBtn}
               walletName={walletInfo.walletName}
               walletAvatar={walletInfo.walletAvatar}
               handleDropdownClick={() => setShowSelectWallet(true)}
             />
             {collectionData?.collections?.length > 0 && (
-              <button
-                onClick={() => setShowManageCollections(true)}
-                className='bg-secondary-200 hover:bg-secondary-300 rounded-full gap-x-0.5 p-2'
+              <TouchableOpacity
+                onPress={() => setShowManageCollections(true)}
+                style={styles.fadersBtn}
               >
-                <Faders size={20} className='rotate-90 text-foreground' />
-              </button>
+                <Faders size={20} color="#222" style={{ transform: [{ rotate: '90deg' }] }} />
+              </TouchableOpacity>
             )}
           </PageHeader>
           <NFTs nftStore={nftStore} favNftStore={favNftStore} />
-          <SelectWallet isVisible={showSelectWallet} onClose={() => setShowSelectWallet(false)} title='Your Wallets' />
+          <SelectWallet isVisible={showSelectWallet} onClose={() => setShowSelectWallet(false)} title="Your Wallets" />
           <ManageCollections isVisible={showManageCollections} onClose={() => setShowManageCollections(false)} />
-        </motion.div>
-      </div>
+        </MotiView>
+      </SafeAreaView>
     </NftContextProvider>
   );
+});
+
+const styles = StyleSheet.create({
+  safePanel: {
+    flex: 1,
+    backgroundColor: '#f4f6fa',
+  },
+  panelBody: {
+    flex: 1,
+    backgroundColor: '#f4f6fa',
+  },
+  centeredPanel: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 28,
+    paddingHorizontal: 36,
+    paddingTop: 40,
+    paddingBottom: 80,
+  },
+  failedIconContainer: {
+    height: 64,
+    width: 64,
+    borderRadius: 32,
+    backgroundColor: '#e6555a',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  failedIcon: {
+    width: 28,
+    height: 28,
+  },
+  boldText: {
+    fontWeight: 'bold',
+    color: '#101013',
+    textAlign: 'center',
+  },
+  secondaryTextCenter: {
+    color: '#757580',
+    textAlign: 'center',
+  },
+  noNftsPanel: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+    paddingHorizontal: 44,
+    paddingTop: 40,
+    paddingBottom: 80,
+  },
+  noNftsIcon: {
+    padding: 10,
+    borderRadius: 32,
+    backgroundColor: '#e9f6f4',
+    marginBottom: 8,
+  },
+  noNftsInnerPanel: {
+    paddingTop: 60,
+    paddingHorizontal: 32,
+    alignItems: 'center',
+    gap: 12,
+  },
+  scrollArea: {
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingTop: 20,
+  },
+  walletBtn: {
+    position: 'absolute',
+    top: 10,
+    right: 60,
+    zIndex: 2,
+  },
+  fadersBtn: {
+    backgroundColor: '#e7eaf3',
+    borderRadius: 100,
+    padding: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    zIndex: 2,
+  },
 });
 
 export default NFTPage;

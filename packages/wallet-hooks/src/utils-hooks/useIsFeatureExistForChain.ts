@@ -11,6 +11,10 @@ export type useIsFeatureExistForChainParams = {
   forceNetwork?: 'mainnet' | 'testnet';
 };
 
+function hasKey<T extends object>(obj: T | undefined, key: PropertyKey): obj is T & Record<PropertyKey, unknown> {
+  return !!obj && Object.prototype.hasOwnProperty.call(obj, key);
+}
+
 export function useIsFeatureExistForChain({
   checkForExistenceType,
   feature,
@@ -34,37 +38,25 @@ export function useIsFeatureExistForChain({
   }, [chains, activeChain, selectedNetwork]);
 
   return useMemo(() => {
-    switch (checkForExistenceType) {
-      case 'comingSoon': {
-        if (chainInfosConfig.coming_soon_features[feature]) {
-          const { platforms, chains } = chainInfosConfig.coming_soon_features[feature];
+    const platformMatches = (platforms: string[]) =>
+      platforms.includes('All') || platforms.includes(platform);
 
-          if (platforms.includes('All') || platforms.includes(platform)) {
-            return chains[activeChainId];
-          }
-        }
-
-        break;
+    if (checkForExistenceType === 'comingSoon') {
+      const map = chainInfosConfig.coming_soon_features;
+      if (hasKey(map, feature)) {
+        const { platforms, chains } = (map as any)[feature];
+        if (platformMatches(platforms)) return !!chains?.[activeChainId];
       }
+      return false;
+    }
 
-      case 'notSupported': {
-        
-        
-        if (chainInfosConfig.not_supported_features[feature]) {
-          
-          
-          const { platforms, chains } = chainInfosConfig.not_supported_features[feature];
-
-          if (platforms.includes('All') || platforms.includes(platform)) {
-            return chains[activeChainId];
-          }
-        }
-
-        break;
+    if (checkForExistenceType === 'notSupported') {
+      const map = chainInfosConfig.not_supported_features;
+      if (hasKey(map, feature)) {
+        const { platforms, chains } = (map as any)[feature];
+        if (platformMatches(platforms)) return !!chains?.[activeChainId];
       }
-
-      default:
-        return false;
+      return false;
     }
 
     return false;

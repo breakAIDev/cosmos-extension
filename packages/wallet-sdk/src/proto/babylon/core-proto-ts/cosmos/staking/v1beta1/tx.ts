@@ -19,13 +19,13 @@ import {
 } from './staking';
 /** MsgCreateValidator defines a SDK message for creating a new validator. */
 export interface MsgCreateValidator {
-  description: Description;
-  commission: CommissionRates;
+  description: Description | undefined;
+  commission: CommissionRates | undefined;
   minSelfDelegation: string;
   delegatorAddress: string;
   validatorAddress: string;
   pubkey?: Any;
-  value: Coin;
+  value: Coin | undefined;
 }
 export interface MsgCreateValidatorProtoMsg {
   typeUrl: '/cosmos.staking.v1beta1.MsgCreateValidator';
@@ -71,7 +71,7 @@ export interface MsgCreateValidatorResponseAminoMsg {
 export interface MsgCreateValidatorResponseSDKType {}
 /** MsgEditValidator defines a SDK message for editing an existing validator. */
 export interface MsgEditValidator {
-  description: Description;
+  description: Description | undefined;
   validatorAddress: string;
   /**
    * We pass a reference to the new commission rate and min self delegation as
@@ -131,7 +131,7 @@ export interface MsgEditValidatorResponseSDKType {}
 export interface MsgDelegate {
   delegatorAddress: string;
   validatorAddress: string;
-  amount: Coin;
+  amount: Coin | undefined;
 }
 export interface MsgDelegateProtoMsg {
   typeUrl: '/cosmos.staking.v1beta1.MsgDelegate';
@@ -181,7 +181,7 @@ export interface MsgBeginRedelegate {
   delegatorAddress: string;
   validatorSrcAddress: string;
   validatorDstAddress: string;
-  amount: Coin;
+  amount: Coin | undefined;
 }
 export interface MsgBeginRedelegateProtoMsg {
   typeUrl: '/cosmos.staking.v1beta1.MsgBeginRedelegate';
@@ -213,7 +213,7 @@ export interface MsgBeginRedelegateSDKType {
 }
 /** MsgBeginRedelegateResponse defines the Msg/BeginRedelegate response type. */
 export interface MsgBeginRedelegateResponse {
-  completionTime: Date;
+  completionTime: Date | undefined;
 }
 export interface MsgBeginRedelegateResponseProtoMsg {
   typeUrl: '/cosmos.staking.v1beta1.MsgBeginRedelegateResponse';
@@ -238,7 +238,7 @@ export interface MsgBeginRedelegateResponseSDKType {
 export interface MsgUndelegate {
   delegatorAddress: string;
   validatorAddress: string;
-  amount: Coin;
+  amount: Coin | undefined;
 }
 export interface MsgUndelegateProtoMsg {
   typeUrl: '/cosmos.staking.v1beta1.MsgUndelegate';
@@ -268,9 +268,9 @@ export interface MsgUndelegateSDKType {
 }
 /** MsgUndelegateResponse defines the Msg/Undelegate response type. */
 export interface MsgUndelegateResponse {
-  completionTime: Date;
+  completionTime: Date | undefined;
   /** amount returns the amount of undelegated coins */
-  amount: Coin;
+  amount: Coin | undefined;
 }
 export interface MsgUndelegateResponseProtoMsg {
   typeUrl: '/cosmos.staking.v1beta1.MsgUndelegateResponse';
@@ -296,7 +296,7 @@ export interface MsgCancelUnbondingDelegation {
   delegatorAddress: string;
   validatorAddress: string;
   /** amount is always less than or equal to unbonding delegation entry balance */
-  amount: Coin;
+  amount: Coin | undefined;
   /** creation_height is the height which the unbonding took place. */
   creationHeight: bigint;
 }
@@ -347,7 +347,7 @@ export interface MsgUpdateParams {
    *
    * NOTE: All parameters must be supplied.
    */
-  params: Params;
+  params: Params | undefined;
 }
 export interface MsgUpdateParamsProtoMsg {
   typeUrl: '/cosmos.staking.v1beta1.MsgUpdateParams';
@@ -517,12 +517,10 @@ export const MsgCreateValidator = {
   fromPartial(object: Partial<MsgCreateValidator>): MsgCreateValidator {
     const message = createBaseMsgCreateValidator();
     
-    
     message.description =
       object.description !== undefined && object.description !== null
         ? Description.fromPartial(object.description)
         : undefined;
-    
     
     message.commission =
       object.commission !== undefined && object.commission !== null
@@ -532,7 +530,6 @@ export const MsgCreateValidator = {
     message.delegatorAddress = object.delegatorAddress ?? '';
     message.validatorAddress = object.validatorAddress ?? '';
     message.pubkey = object.pubkey !== undefined && object.pubkey !== null ? Any.fromPartial(object.pubkey) : undefined;
-    
     
     message.value = object.value !== undefined && object.value !== null ? Coin.fromPartial(object.value) : undefined;
     return message;
@@ -709,7 +706,6 @@ export const MsgEditValidator = {
   fromPartial(object: Partial<MsgEditValidator>): MsgEditValidator {
     const message = createBaseMsgEditValidator();
     
-    
     message.description =
       object.description !== undefined && object.description !== null
         ? Description.fromPartial(object.description)
@@ -872,7 +868,6 @@ export const MsgDelegate = {
     message.delegatorAddress = object.delegatorAddress ?? '';
     message.validatorAddress = object.validatorAddress ?? '';
     
-    
     message.amount =
       object.amount !== undefined && object.amount !== null ? Coin.fromPartial(object.amount) : undefined;
     return message;
@@ -1032,7 +1027,6 @@ export const MsgBeginRedelegate = {
     message.validatorSrcAddress = object.validatorSrcAddress ?? '';
     message.validatorDstAddress = object.validatorDstAddress ?? '';
     
-    
     message.amount =
       object.amount !== undefined && object.amount !== null ? Coin.fromPartial(object.amount) : undefined;
     return message;
@@ -1115,7 +1109,6 @@ export const MsgBeginRedelegateResponse = {
   },
   fromPartial(object: Partial<MsgBeginRedelegateResponse>): MsgBeginRedelegateResponse {
     const message = createBaseMsgBeginRedelegateResponse();
-    
     
     message.completionTime = object.completionTime ?? undefined;
     return message;
@@ -1203,7 +1196,6 @@ export const MsgUndelegate = {
     message.delegatorAddress = object.delegatorAddress ?? '';
     message.validatorAddress = object.validatorAddress ?? '';
     
-    
     message.amount =
       object.amount !== undefined && object.amount !== null ? Coin.fromPartial(object.amount) : undefined;
     return message;
@@ -1290,9 +1282,7 @@ export const MsgUndelegateResponse = {
   fromPartial(object: Partial<MsgUndelegateResponse>): MsgUndelegateResponse {
     const message = createBaseMsgUndelegateResponse();
     
-    
     message.completionTime = object.completionTime ?? undefined;
-    
     
     message.amount =
       object.amount !== undefined && object.amount !== null ? Coin.fromPartial(object.amount) : undefined;
@@ -1391,7 +1381,6 @@ export const MsgCancelUnbondingDelegation = {
     const message = createBaseMsgCancelUnbondingDelegation();
     message.delegatorAddress = object.delegatorAddress ?? '';
     message.validatorAddress = object.validatorAddress ?? '';
-    
     
     message.amount =
       object.amount !== undefined && object.amount !== null ? Coin.fromPartial(object.amount) : undefined;
@@ -1543,7 +1532,6 @@ export const MsgUpdateParams = {
   fromPartial(object: Partial<MsgUpdateParams>): MsgUpdateParams {
     const message = createBaseMsgUpdateParams();
     message.authority = object.authority ?? '';
-    
     
     message.params =
       object.params !== undefined && object.params !== null ? Params.fromPartial(object.params) : undefined;

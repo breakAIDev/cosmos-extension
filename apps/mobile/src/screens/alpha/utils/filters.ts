@@ -1,4 +1,4 @@
-import { Images } from 'images';
+import { Images } from '../../../../assets/images';
 
 export const CategoryIcon: Record<string, string> = {
   NFT: Images.Alpha.nftGiveaway,

@@ -166,7 +166,7 @@ export function useSend(denoms: DenomsRecord, toAddress: string) {
       } catch (e: any) {
         if (e.message === transactionDeclinedError) {
           callback('txDeclined');
-          // navigate('/home?txDeclined=true');
+          // navigate('Home?txDeclined=true');
         } else {
           setSigningError(e.message);
           setShowLedgerPopup(false);
@@ -250,12 +250,12 @@ export function useSend(denoms: DenomsRecord, toAddress: string) {
           promise,
         });
         callback('success');
-        // navigate('/activity', { state: { fromTx: true } });
+        // navigate('Activity', { state: { fromTx: true } });
         setSigningError('');
       } catch (e: any) {
         if (e.message === transactionDeclinedError) {
           callback('txDeclined');
-          // navigate('/home?txDeclined=true');
+          // navigate('Home?txDeclined=true');
         } else {
           setSigningError(e.message);
           setShowLedgerPopup(false);

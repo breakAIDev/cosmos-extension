@@ -1,10 +1,14 @@
-import { Buttons, ThemeName, useTheme } from '@leapwallet/leap-ui';
-import { X } from '@phosphor-icons/react';
-import Text from 'components/text';
-import { LedgerEvmChains } from 'images/logos';
-import { CheckGreenNew } from 'images/misc';
 import React from 'react';
-import { Colors } from 'theme/colors';
+import { View, StyleSheet, Image, TouchableOpacity, Dimensions } from 'react-native';
+import { X } from 'phosphor-react-native';
+import Text from '../../../components/text';
+import { LedgerEvmChains } from '../../../../assets/images/logos';
+import { CheckGreenNew } from '../../../../assets/images/misc';
+import { Colors } from '../../../theme/colors';
+import { Buttons, ThemeName, useTheme } from '@leapwallet/leap-ui';
+
+const { width } = Dimensions.get('window');
+const MODAL_WIDTH = Math.min(width - 32, 540);
 
 interface ImportEvmModalProps {
   onYes: () => void;
@@ -16,53 +20,152 @@ export default function ImportEvmModal({ onYes, onNo, onClose }: ImportEvmModalP
   const { theme } = useTheme();
 
   return (
-    <div className='absolute w-full h-full flex items-center justify-center left-0 top-0 bg-[#0003] backdrop-blur-[10px] z-10'>
-      <div className='w-[540px] bg-gray-950 rounded-3xl'>
-        <div className='flex justify-between py-6 px-6 border-b border-gray-900'>
-          <Text className='font-[700] text-[18px]'>Cosmos import successful</Text>
+    <View style={styles.overlay}>
+      <View style={styles.modal}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Cosmos import successful</Text>
+          <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+            <X size={24} color="#6B7280" />
+          </TouchableOpacity>
+        </View>
 
-          <X size={24} className='text-gray-500 cursor-pointer' onClick={onClose} />
-        </div>
-
-        <div className='flex flex-col items-center justify-center gap-4 mb-8 mt-11'>
-          <img src={CheckGreenNew} className='height-[72px] width-[72px]' />
-
-          <Text size='lg' className='font-bold text-center'>
-            Your Cosmos wallets can <br /> now be used with Leap!
+        {/* Cosmos Success */}
+        <View style={styles.sectionCenter}>
+          <Image source={{uri: CheckGreenNew}} style={styles.checkImg} />
+          <Text size="lg" style={styles.boldCenter}>
+            Your Cosmos wallets can{'\n'}now be used with Leap!
           </Text>
-        </div>
+        </View>
 
-        <div className='h-[1px] bg-gray-900 w-full' />
+        {/* Divider */}
+        <View style={styles.divider} />
 
-        <div className='flex flex-col items-center justify-center gap-3 mt-11 mb-7'>
-          <img src={LedgerEvmChains} className='height-[32px] width-[88px]' />
-
-          <Text size='md' className='text-center'>
-            You can now import your EVM based wallets to use <br /> chains like Dymension, Evmos & Injective.
+        {/* EVM Info */}
+        <View style={styles.sectionCenter}>
+          <Image source={{uri: LedgerEvmChains}} style={styles.ledgerImg} />
+          <Text size="md" style={styles.textCenter}>
+            You can now import your EVM based wallets to use{'\n'}chains like Dymension, Evmos & Injective.
           </Text>
-        </div>
+        </View>
 
-        <div className='flex gap-4 px-6 mb-6'>
+        {/* Actions */}
+        <View style={styles.actionsRow}>
           <Buttons.Generic
             color={theme === ThemeName.DARK ? Colors.gray800 : Colors.gray100}
-            size='normal'
-            className={'w-full'}
+            size="normal"
+            style={styles.button}
             onClick={onNo}
           >
-            <Text color='text-green-600'>Skip</Text>
+            <Text style={{ color: '#22c55e' }}>Skip</Text>
           </Buttons.Generic>
-
-          <Buttons.Generic color={Colors.green600} size='normal' className={'w-full'} onClick={onYes}>
+          <Buttons.Generic
+            color={Colors.green600}
+            size="normal"
+            style={styles.button}
+            onClick={onYes}
+          >
             Import
           </Buttons.Generic>
-        </div>
+        </View>
 
-        <div className='flex items-center justify-center text-center mb-8'>
-          <Text color='text-gray-400 dark:text-gray-600 ' className='font-medium'>
+        {/* Bottom text */}
+        <View style={styles.sectionCenter}>
+          <Text style={styles.bottomNote}>
             You can also import EVM wallets later.
           </Text>
-        </div>
-      </div>
-    </div>
+        </View>
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  overlay: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    left: 0,
+    top: 0,
+    backgroundColor: 'rgba(0,0,0,0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  modal: {
+    width: MODAL_WIDTH,
+    backgroundColor: '#18181B', // bg-gray-950
+    borderRadius: 24,
+    overflow: 'hidden',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 24,
+    paddingVertical: 24,
+    borderBottomWidth: 1,
+    borderColor: '#18181B', // border-gray-900
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontWeight: '700',
+    fontSize: 18,
+    color: '#FFF',
+  },
+  closeBtn: {
+    padding: 4,
+  },
+  sectionCenter: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 32,
+    marginTop: 32,
+    gap: 16,
+  },
+  checkImg: {
+    width: 72,
+    height: 72,
+    marginBottom: 16,
+    resizeMode: 'contain',
+  },
+  boldCenter: {
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#FFF',
+    fontSize: 18,
+    marginTop: 4,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#18181B', // bg-gray-900
+    width: '100%',
+  },
+  ledgerImg: {
+    width: 88,
+    height: 32,
+    marginBottom: 16,
+    resizeMode: 'contain',
+  },
+  textCenter: {
+    textAlign: 'center',
+    color: '#E5E7EB',
+  },
+  actionsRow: {
+    flexDirection: 'row',
+    gap: 16,
+    paddingHorizontal: 24,
+    marginBottom: 24,
+  },
+  button: {
+    flex: 1,
+    marginHorizontal: 4,
+  },
+  bottomNote: {
+    color: '#9CA3AF', // text-gray-400
+    fontWeight: '500',
+    textAlign: 'center',
+    marginBottom: 24,
+    marginTop: 0,
+  },
+});
