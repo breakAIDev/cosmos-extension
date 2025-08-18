@@ -174,7 +174,7 @@ export const ReviewTransfer = observer(
     }, [
       selectedToken?.coinMinimalDenom,
       selectedAddress?.chainName,
-      
+      // @ts-ignore
       transferData?.messages,
     ]);
 
@@ -185,13 +185,13 @@ export const ReviewTransfer = observer(
             ? chains[selectedAddress?.chainName as SupportedChain]?.chainId
             : chains[selectedAddress?.chainName as SupportedChain]?.testnetChainId;
         if (
-          
+          // @ts-ignore
           !transferData?.isLoadingMessages &&
-          
+          // @ts-ignore
           !transferData?.isLoadingRoute &&
           selectedAddress?.chainName &&
           selectedAddressChainId !== sourceChainId &&
-          
+          // @ts-ignore
           !transferData?.messages
         ) {
           setRouteError(true);
@@ -204,11 +204,11 @@ export const ReviewTransfer = observer(
       isInitiaTxn,
       selectedAddress?.chainName,
       sendActiveChain,
-      
+      // @ts-ignore
       transferData?.isLoadingMessages,
-      
+      // @ts-ignore
       transferData?.messages,
-      
+      // @ts-ignore
       transferData?.isLoadingRoute,
       sourceChainId,
       sendSelectedNetwork,
@@ -259,13 +259,13 @@ export const ReviewTransfer = observer(
           : chains[selectedAddress?.chainName as SupportedChain]?.testnetChainId;
       if (
         isInitiaTxn &&
-        
+        // @ts-ignore
         (transferData?.isLoadingRoute ||
-          
+          // @ts-ignore
           transferData?.isLoadingMessages ||
           (selectedAddress?.chainName &&
             selectedAddressChainId !== sourceChainId &&
-            
+            // @ts-ignore
             !transferData?.messages))
       ) {
         return true;
@@ -287,11 +287,11 @@ export const ReviewTransfer = observer(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
       isInitiaTxn,
-      
+      // @ts-ignore
       transferData?.isLoadingRoute,
-      
+      // @ts-ignore
       transferData?.isLoadingMessages,
-      
+      // @ts-ignore
       transferData?.messages,
       selectedAddress?.chainName,
       chains,

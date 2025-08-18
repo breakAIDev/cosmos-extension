@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   CosmosTxType,
   getChainId,
@@ -346,8 +346,8 @@ export const useExecuteSkipTx = () => {
           chainId: activeChainId,
         });
 
-        
-        
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         setPendingTx(pendingTx);
 
         if (success) {

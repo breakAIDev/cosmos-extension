@@ -56,7 +56,7 @@ import { SeedPhrase } from './seed-phrase/useSeedPhrase';
 
 export type LedgerAppId = 'cosmos' | 'sei';
 
-
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace Wallet {
   export type Keystore = Record<string, Key>;
 
@@ -130,8 +130,8 @@ export namespace Wallet {
       ethWallet: false,
     });
     const accounts = await mainWallet.getAccounts();
-    
-    
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     return { accounts, mainWallet };
   }
 

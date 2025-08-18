@@ -9,7 +9,7 @@ import {
 } from '@solana/web3.js';
 import BigNumber from 'bignumber.js';
 import { getStdFee } from 'pages/sign-aptos/utils/get-fee';
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getOriginalSignDoc(signRequestData: any, isDisplay: boolean = false) {
   const transaction = VersionedTransaction.deserialize(signRequestData);
   if (isDisplay) {
@@ -98,7 +98,7 @@ export function getSolanaSignDoc({
   isGasOptionSelected,
   nativeFeeDenom,
 }: {
-  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   signRequestData: Record<string, any>;
   gasPrice: GasPrice;
   gasLimit: string;

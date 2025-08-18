@@ -34,7 +34,7 @@ const FILTERS = [
 
 type NtrnProposalListProps = {
   onClick: (proposal: string) => void;
-  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   proposalList: any[];
   proposalListStatus: 'success' | 'error' | 'loading' | 'fetching-more';
   fetchMore: () => void;
@@ -164,7 +164,7 @@ export const NtrnProposalList = observer(
                   src={Images.Misc.Explore}
                 />
               ) : (
-                
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 filteredProposalList?.map((proposal: any, index: number) => {
                   return (
                     <div key={getId(proposal, shouldPreferFallback ?? false)} className='w-full'>

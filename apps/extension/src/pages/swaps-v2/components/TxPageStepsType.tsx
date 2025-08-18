@@ -181,8 +181,8 @@ export const TxPageStepsType = observer(
         };
       }
       // TODO: fix this
-      
-      
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       return { txHash: (txData as unknown)?.tx_hash, chainId: (txData as unknown)?.chain_id };
     }, [txData]);
 

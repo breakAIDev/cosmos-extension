@@ -6,15 +6,15 @@ import React, { useState } from 'react';
 import { cn } from 'utils/cn';
 
 type SeedPhraseWordInputProps = {
-  
+  // eslint-disable-next-line no-unused-vars
   handlePaste: (wordIndex: number, value: string) => void;
   wordIndex: number;
   word: string;
-  
+  // eslint-disable-next-line no-unused-vars
   handleWordChange: (wordIndex: number, value: string) => void;
   isError: boolean;
   isFocused: boolean;
-  
+  // eslint-disable-next-line no-unused-vars
   handleWordFocused: (wordIndex: number) => void;
   handleWordBlur: () => void;
 };

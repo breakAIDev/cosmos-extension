@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { fromBase64 } from '@cosmjs/encoding';
 import { useActiveChain, useChainsStore, WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
@@ -40,8 +40,8 @@ export const useWalletClient = (forceChain?: SupportedChain) => {
       if ('signAmino' in wallet) {
         const res = await wallet.signAmino(address, signDoc);
         return {
-          
-          
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
           signature: new Uint8Array(Buffer.from(res.signature.signature, 'base64')),
           signed: res.signed,
         };

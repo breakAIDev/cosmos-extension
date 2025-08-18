@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useActiveChain, useActiveWallet, useChainInfo, WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks';
 import { BtcTx } from '@leapwallet/cosmos-wallet-sdk';
 import { BtcWallet } from '@leapwallet/leap-keychain';

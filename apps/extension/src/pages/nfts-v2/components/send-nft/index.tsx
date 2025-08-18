@@ -130,8 +130,8 @@ export const SendNftCard = observer(
         txCallback(res.success ? 'success' : 'txDeclined');
       } else {
         setIsProcessing(false);
-        
-        
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         setTxError(res?.errors?.[0]);
       }
     };

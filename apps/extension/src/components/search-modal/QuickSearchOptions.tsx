@@ -12,7 +12,7 @@ import { imgOnError } from 'utils/imgOnError';
 type QuickSearchOptionsProps = {
   suggestionsList: QuickSearchOption[];
   activeSearchOption: number;
-  
+  // eslint-disable-next-line no-unused-vars
   handleOptionClick: (config: OptionPlatformConfig, optionIndex: number, actionName: string) => void;
 };
 

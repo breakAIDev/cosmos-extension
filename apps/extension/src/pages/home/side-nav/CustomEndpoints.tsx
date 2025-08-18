@@ -64,7 +64,7 @@ export const SelectChainSheet = observer(
 type CustomEndpointInputProps = {
   label: string;
   inputValue: string;
-  
+  // eslint-disable-next-line no-unused-vars
   inputOnChange: (value: string) => void;
   crossOnClick: VoidFunction;
   name: string;

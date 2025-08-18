@@ -17,7 +17,7 @@ import { getWalletName } from './utils/wallet-names';
 
 type NewWalletFormProps = {
   isVisible: boolean;
-  
+  // eslint-disable-next-line no-unused-vars
   onClose: (closeParent: boolean) => void;
 };
 

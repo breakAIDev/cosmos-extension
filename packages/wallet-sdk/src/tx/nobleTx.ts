@@ -17,7 +17,6 @@ import {
   SigningStargateClientOptions,
   StdFee,
 } from '@cosmjs/stargate';
-import axios, { AxiosError } from 'axios';
 import { MsgGrant, MsgRevoke } from 'cosmjs-types/cosmos/authz/v1beta1/tx.js';
 import { MsgCancelUnbondingDelegation } from 'cosmjs-types/cosmos/staking/v1beta1/tx.js';
 import { SignMode } from 'cosmjs-types/cosmos/tx/signing/v1beta1/signing';
@@ -130,41 +129,44 @@ async function simulateTx(lcd: string, signerAddress: string, msgs: any[], fee: 
     signatures: [new Uint8Array(64)],
   }).finish();
 
-  try {
-    const result = await axiosWrapper({
-      baseURL: lcd,
-      method: 'post',
-      url: '/cosmos/tx/v1beta1/simulate',
-      timeout: 20_000,
-      data: { tx_bytes: Buffer.from(unsignedTx).toString('base64') },
-    });
+  const result = await axiosWrapper({
+    baseURL: lcd,
+    method: 'post',
+    url: '/cosmos/tx/v1beta1/simulate',
+    timeout: 20_000,
+    data: {
+      tx_bytes: Buffer.from(unsignedTx).toString('base64'),
+    },
+  });
 
-    const data = result.data;
-
-    if (data?.error) {
-      throw new Error(data.error);
-    }
-
-    const gasUsed = Number(data?.gas_info?.gas_used);
-    const gasWanted = Number(data?.gas_info?.gas_wanted);
-    const amountOut = Number(data?.result?.msg_responses?.[0]?.result?.amount);
-
-    if (Number.isNaN(gasUsed)) {
-      throw new Error(`Invalid integer gas: ${data?.gas_info?.gas_used}`);
-    }
-
-    return { gasUsed, gasWanted, amountOut };
-  } catch (e) {
-    const err = e as AxiosError<any>;
-    if (axios.isAxiosError(err)) {
-      const msg =
-        err.response?.data?.message ??
-        err.response?.data?.error ??
-        err.message;
-      throw new Error(msg);
-    }
-    throw e;
+  if (
+    result &&
+    // @ts-ignore
+    (result.code === 'ERR_BAD_RESPONSE' || result.code === 'ERR_BAD_REQUEST') &&
+    // @ts-ignore
+    result.response &&
+    // @ts-ignore
+    result.response.data
+  ) {
+    // @ts-ignore
+    throw new Error(result.response.data.message);
   }
+
+  if (result.data?.error) {
+    throw new Error(result.data?.error);
+  }
+
+  const gasUsed = parseInt(result.data?.gas_info?.gas_used);
+  const gasWanted = parseInt(result.data?.gas_info?.gas_wanted);
+  const amountOut = parseInt(result.data?.result?.msg_responses?.[0]?.result?.amount);
+  if (Number.isNaN(gasUsed)) {
+    throw new Error(`Invalid integer gas: ${result.data?.gas_info?.gas_used}`);
+  }
+  return {
+    gasUsed,
+    gasWanted,
+    amountOut,
+  };
 }
 
 export async function simulateSwapUSD(lcdEndpoint: string, signer: string, amount: Coin, min: Coin) {

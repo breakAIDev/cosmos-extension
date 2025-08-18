@@ -203,7 +203,7 @@ export const ImportWalletProvider = observer(({ children }: { children: React.Re
       passwordStore.setPassword(password);
       await navigateToSuccess();
 
-      
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       if (error.message.trim() === 'Wallet already present') {
         throw error;

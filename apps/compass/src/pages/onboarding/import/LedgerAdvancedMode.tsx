@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { LineDivider, ThemeName, useTheme } from '@leapwallet/leap-ui';
 import { X } from '@phosphor-icons/react';
 import classNames from 'classnames';

@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Proposal, useStaking } from '@leapwallet/cosmos-wallet-hooks';
 import {
   ChainTagsStore,
@@ -35,7 +35,7 @@ import { ProposalStatus, RequireMinStaking } from './index';
 import { ProposalStatusEnum } from './ProposalStatus';
 
 export type ProposalListProps = {
-  
+  // eslint-disable-next-line no-unused-vars
   onClick: (proposal: string) => void;
   shouldPreferFallback?: boolean;
   governanceStore: GovStore;

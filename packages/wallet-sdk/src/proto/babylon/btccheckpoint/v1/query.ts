@@ -25,7 +25,7 @@ export interface QueryParamsRequestSDKType {}
 /** QueryParamsResponse is response type for the Query/Params RPC method. */
 export interface QueryParamsResponse {
   /** params holds all the parameters of this module. */
-  params: Params | undefined;
+  params: Params;
 }
 export interface QueryParamsResponseProtoMsg {
   typeUrl: '/babylon.btccheckpoint.v1.QueryParamsResponse';
@@ -535,8 +535,9 @@ export const QueryParamsResponse = {
     return message;
   },
   fromPartial(object: Partial<QueryParamsResponse>): QueryParamsResponse {
-    const message: QueryParamsResponse = createBaseQueryParamsResponse();
-    
+    const message = createBaseQueryParamsResponse();
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     message.params =
       object.params !== undefined && object.params !== null ? Params.fromPartial(object.params) : undefined;
     return message;

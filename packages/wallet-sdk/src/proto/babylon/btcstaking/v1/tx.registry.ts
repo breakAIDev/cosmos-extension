@@ -11,7 +11,7 @@ import {
 } from './tx';
 export const registry: ReadonlyArray<[string, GeneratedType]> = [
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore  
+  // @ts-ignore
   ['/babylon.btcstaking.v1.MsgCreateFinalityProvider', MsgCreateFinalityProvider],
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore

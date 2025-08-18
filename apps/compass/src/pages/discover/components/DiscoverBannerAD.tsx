@@ -88,7 +88,7 @@ const DiscoverBannerAD = React.memo(() => {
   }, [activeBannerIndex, handleContainerScroll]);
 
   useEffect(() => {
-    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let intervalId: any;
     if (scrollableContainerRef.current && banners.length > 1 && autoSwitchBanner) {
       intervalId = setInterval(handleContainerScroll, autoScrollDuration * 1000);

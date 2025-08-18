@@ -26,7 +26,7 @@ export interface ValidatorSetSDKType {
 }
 export interface Validator {
   address: Uint8Array;
-  pubKey: PublicKey | undefined;
+  pubKey: PublicKey;
   votingPower: bigint;
   proposerPriority: bigint;
 }
@@ -217,7 +217,8 @@ export const Validator = {
   fromPartial(object: Partial<Validator>): Validator {
     const message = createBaseValidator();
     message.address = object.address ?? new Uint8Array();
-    
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     message.pubKey =
       object.pubKey !== undefined && object.pubKey !== null ? PublicKey.fromPartial(object.pubKey) : undefined;
     message.votingPower =

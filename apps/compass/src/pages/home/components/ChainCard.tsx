@@ -53,7 +53,7 @@ const ChainCardView = ({
   const isWatchWalletNotAvailableChain =
     chainName !== 'aggregated' && activeWallet?.watchWallet && !activeWallet?.addresses[chainName];
 
-  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onStarToggle = (e: any) => {
     e.stopPropagation();
     if (isStarred) {

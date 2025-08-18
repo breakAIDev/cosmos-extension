@@ -116,7 +116,7 @@ export interface StoredParams {
    */
   version: number;
   /** NOTE: Parameters must always be provided */
-  params: Params | undefined;
+  params: Params;
 }
 export interface StoredParamsProtoMsg {
   typeUrl: '/babylon.btcstaking.v1.StoredParams';
@@ -347,7 +347,8 @@ export const StoredParams = {
   fromPartial(object: Partial<StoredParams>): StoredParams {
     const message = createBaseStoredParams();
     message.version = object.version ?? 0;
-    
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     message.params =
       object.params !== undefined && object.params !== null ? Params.fromPartial(object.params) : undefined;
     return message;

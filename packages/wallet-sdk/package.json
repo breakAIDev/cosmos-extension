@@ -13,7 +13,6 @@
     "prettier:write": "prettier -w ./src",
     "prepublish": "yarn build"
   },
-  "react-native": "dist/browser/index.js",
   "types": "dist/browser/index.d.ts",
   "browser": "dist/browser/index.js",
   "files": [
@@ -59,8 +58,6 @@
     "@metamask/eth-sig-util": "4.0.0",
     "@scure/base": "1.1.9",
     "@scure/btc-signer": "1.4.0",
-    "@sentry/react": "7.120.3",
-    "@solana/web3.js": "1.98.2",
     "@zondax/ledger-cosmos-js": "3.0.3",
     "@zondax/ledger-sei": "1.0.2",
     "axios": "1.6.4",
@@ -72,23 +69,17 @@
     "crypto-js": "4.2.0",
     "dayjs": "1.11.5",
     "deepmerge": "4.2.2",
-    "dompurify": "3.2.6",
-    "elliptic": "^6.6.1",
+    "elliptic": "6.5.4",
     "eth-sig-util": "3.0.1",
     "ethereumjs-util": "7.1.5",
     "ethers": "5.7.0",
     "futoin-hkdf": "1.5.1",
-    "joi": "17.13.3",
-    "lerna": "8.2.3",
+    "joi": "17.9.2",
     "long": "5.2.1",
-    "parse-duration": "^2.1.4",
-    "postcss": "8.5.6",
+    "parse-duration": "1.0.2",
     "secretjs": "1.12.0",
     "secure-random": "1.1.2",
-    "viem": "^2.32.1",
-    "vitepress": "0.1.1",
-    "webpack": "5.100.2",
-    "webpack-dev-server": "5.2.2"
+    "viem": "2.5.0"
   },
   "devDependencies": {
     "@babel/node": "7.19.1",
@@ -97,13 +88,14 @@
     "@types/crypto-js": "4.1.1",
     "@types/elliptic": "6.4.14",
     "@types/jest": "27.5.1",
+    "@types/joi": "17.2.3",
     "@types/lodash": "4.14.182",
     "@types/secure-random": "1.1.0",
     "babel-plugin-transform-import-meta": "2.2.1",
     "cross-env": "7.0.3",
-    "eslint-plugin-jsdoc": "^46.9.1",
+    "eslint-plugin-jsdoc": "39.3.0",
     "jest": "28.1.0",
-    "tslib": "2.4.0",
-    "typescript": "5.2.2"
+    "typescript": "5.2.2",
+    "tslib": "2.4.0"
   }
 }

@@ -19,7 +19,7 @@ type SaveAddressSheetProps = {
   isOpen: boolean;
   address: string;
   onClose: () => void;
-  
+  // eslint-disable-next-line no-unused-vars
   onSave?: (s: SelectedAddress) => void;
 };
 

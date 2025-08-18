@@ -62,7 +62,7 @@ async function getPage(browser: Browser): Promise<Page> {
     height: 800,
   })
 
-  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ;(global as any).page = _page
 
   return _page

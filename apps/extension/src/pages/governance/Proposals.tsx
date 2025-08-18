@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useActiveChain, useIsFeatureExistForChain } from '@leapwallet/cosmos-wallet-hooks';
 import { QueryStatus } from '@tanstack/react-query';
 import { BottomNavLabel } from 'components/bottom-nav/BottomNav';

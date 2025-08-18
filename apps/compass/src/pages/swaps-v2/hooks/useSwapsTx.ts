@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import {
   currencyDetail,
@@ -640,8 +640,8 @@ export function useSwapsTx({
             return;
           }
         }
-        
-        
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         const baseDenomToSet = sourceChain.baseDenom ?? '';
         const sourceToken = sourceAssets.find((asset) =>
           !destinationChain ||
@@ -708,8 +708,8 @@ export function useSwapsTx({
             ? SEI_TOKEN_DENOMS
             : compassDefaultToken;
           const destinationToken = destinationAssets.find(
-            
-            
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             (asset) => {
               return defaultTokenDenoms.some(
                 (defaultToken) => asset.coinMinimalDenom.toLowerCase() === defaultToken.toLowerCase(),
@@ -738,8 +738,8 @@ export function useSwapsTx({
           chainToSet = chainsToShow?.find((chain) => chain.key !== highestBalanceTokenChain?.key && chain.enabled);
         }
 
-        
-        
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         const baseDenomToSet = (chainToSet ? chainToSet.baseDenom : destinationChain.baseDenom) ?? '';
         const _destinationChain = chainToSet ?? destinationChain;
         const destinationToken = destinationAssets.find((asset) =>

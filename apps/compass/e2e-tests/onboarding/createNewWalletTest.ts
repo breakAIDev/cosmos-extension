@@ -17,7 +17,7 @@ export function createNewWalletTest(mnemonicObj: { mnemonic: string }) {
     it('must show 12 words mnemonic on click of Create new wallet', async () => {
       await page.click('[data-testing-id=create-new-wallet]')
       await page.click('[data-testing-id=mnemonic-copy-to-clipboard]')
-      
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mnemonicObj.mnemonic = await page.evaluate(() => (window as any).testingClipboard ?? '')
 
       const wordsCount = mnemonicObj.mnemonic.split(' ').length

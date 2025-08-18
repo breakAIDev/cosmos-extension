@@ -1,5 +1,5 @@
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-use-before-define */
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 import {
@@ -12,7 +12,7 @@ import extension from 'webextension-polyfill';
 
 import { DEBUG } from './debug';
 
-
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace AddressBook {
   const STORAGE_ID = 'all-saved-contacts';
 
@@ -31,7 +31,7 @@ export namespace AddressBook {
     [address: string]: SavedAddress;
   };
 
-  
+  // eslint-disable-next-line no-unused-vars
   export function subscribe(cb: (s: SavedAddresses) => void) {
     extension.storage.onChanged.addListener((changes, areaName) => {
       if (areaName === 'local' && changes[STORAGE_ID]) {
@@ -40,7 +40,7 @@ export namespace AddressBook {
     });
   }
 
-  
+  // eslint-disable-next-line no-unused-vars
   export function unsubscribe(cb: (s: SavedAddresses) => void) {
     extension.storage.onChanged.removeListener((changes, areaName) => {
       if (areaName === 'local' && changes[STORAGE_ID]) {

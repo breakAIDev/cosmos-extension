@@ -16,7 +16,7 @@ import { WatchWalletAvatar } from './WalletCardWrapper';
 
 type ImportWatchAddressProps = {
   isVisible: boolean;
-  
+  // eslint-disable-next-line no-unused-vars
   onClose: (closeParent: boolean) => void;
 };
 

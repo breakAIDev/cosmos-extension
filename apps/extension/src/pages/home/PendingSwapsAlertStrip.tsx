@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { TXN_STATUS } from '@leapwallet/elements-core';
 import { CaretRight, CheckCircle, XCircle } from '@phosphor-icons/react';
 import { AnimatePresence, motion } from 'framer-motion';

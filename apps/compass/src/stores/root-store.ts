@@ -1,4 +1,4 @@
-import { CompassRootStore, RootBalanceStore, RootStakeStore } from '@leapwallet/cosmos-wallet-store';
+import { RootBalanceStore, RootStakeStore, RootStore } from '@leapwallet/cosmos-wallet-store';
 
 import { activeChainStore } from './active-chain-store';
 import { addressStore } from './address-store-instance';
@@ -12,14 +12,13 @@ import {
   evmBalanceStore,
   marketDataStore,
   nmsStore,
+  priceStore,
   solanaCoinDataStore,
-  suiCoinDataStore,
 } from './balance-store';
 import { chainInfoStore, compassTokensAssociationsStore } from './chain-infos-store';
 import { stakeEpochStore } from './epoch-store';
 import { selectedNetworkStore } from './selected-network-store';
 import { claimRewardsStore, delegationsStore, unDelegationsStore, validatorsStore } from './stake-store';
-import { zeroStateTokensStore } from './zero-state-tokens-store';
 
 export const rootStakeStore = new RootStakeStore(
   delegationsStore,
@@ -39,21 +38,20 @@ export const rootBalanceStore = new RootBalanceStore(
   solanaCoinDataStore,
   aptosCoinDataStore,
   bitcoinBalanceStore,
-  suiCoinDataStore,
   compassTokensAssociationsStore,
   addressStore,
   selectedNetworkStore,
   currencyStore,
-  zeroStateTokensStore,
 );
 
-export const rootStore = new CompassRootStore(
+export const rootStore = new RootStore(
   nmsStore,
   addressStore,
   activeChainStore,
   selectedNetworkStore,
   rootBalanceStore,
   rootStakeStore,
+  priceStore,
   marketDataStore,
   currencyStore,
   chainInfoStore,

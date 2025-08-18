@@ -1,9 +1,10 @@
+import { ChainInfo } from '@leapwallet/cosmos-wallet-sdk';
 import create from 'zustand';
 
-import { CustomChainsType, formatNewChainInfo, FormattedChainInfo } from '../utils/formatNewChainInfo';
+import { CustomChainsType, formatNewChainInfo } from '../utils/formatNewChainInfo';
 
 type CustomChainsState = {
-  customChains: FormattedChainInfo[];
+  customChains: ChainInfo[];
   setCustomChains: (customChains: CustomChainsType[]) => void;
 };
 

@@ -5,7 +5,7 @@ import { ChainData, ChainMetaData } from '../types/chains-metadata';
 
 export async function getChainInfo(chain: string, testnet?: boolean): Promise<ChainData | undefined> {
   if (chain === 'noble') {
-    
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
     return {
       chain_name: 'Noble',
@@ -15,7 +15,7 @@ export async function getChainInfo(chain: string, testnet?: boolean): Promise<Ch
   }
 
   if (chain === 'chain4energy') {
-    
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
     return {
       chain_name: 'Chain4Energy',
@@ -25,7 +25,7 @@ export async function getChainInfo(chain: string, testnet?: boolean): Promise<Ch
   }
 
   if (chain === 'seiDevnet') {
-    
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
     return {
       chain_name: 'Sei Devnet (Arctic-1)',

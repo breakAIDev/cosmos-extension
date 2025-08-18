@@ -1,3 +1,4 @@
+import { toHex } from '@cosmjs/encoding';
 import { Uint64 } from '@cosmjs/math';
 import { decodePubkey, EncodeObject, OfflineSigner, Registry } from '@cosmjs/proto-signing';
 import {
@@ -351,18 +352,22 @@ export class Tx {
   }
 
   async broadcastTx(txRaw: TxRaw) {
-    if (!this.client) throw new Error('Stargate client not initialised');
-
-    try{
-      const txBytes = TxRaw.encode(txRaw).finish();
-      const res = await this.client.broadcastTx(txBytes); // ✅ public
-  
-      if (res.code !== 0) {
-        throw new Error(res.rawLog ?? `Broadcast failed with code ${res.code}`);
-      }
-      return res.transactionHash; // same shape you used before
-    } catch(e: any) {
+    if (this.client instanceof SigningStargateClient) {
+      try {
+        const broadcasted = await this.client
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          .forceGetTmClient()
+          .broadcastTxSync({ tx: TxRaw.encode(txRaw).finish() });
+        if (broadcasted.code) {
+          throw new Error(`Transaction broadcast failed error code: ${broadcasted.code} ${broadcasted.log}`);
+        }
+        return toHex(broadcasted.hash).toUpperCase();
+      } catch (e: any) {
         throw new Error(e);
+      }
+    } else {
+      throw new Error('Stargate client not initialised');
     }
   }
 

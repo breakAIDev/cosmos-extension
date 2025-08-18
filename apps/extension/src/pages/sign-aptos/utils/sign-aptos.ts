@@ -5,7 +5,7 @@ import BigNumber from 'bignumber.js';
 
 import { getStdFee } from './get-fee';
 
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getOriginalSignDoc(signRequestData: Record<string, any>) {
   const _signDoc = Uint8Array.from(Buffer.from(signRequestData.signDoc, 'hex'));
   const signOptions = signRequestData?.signOptions;
@@ -38,8 +38,8 @@ function getUpdatedFee(
       ? defaultFee
       : getStdFee(
           !customGasLimit.isNaN() && customGasLimit.isGreaterThan(0) ? customGasLimit.toString() : defaultFee.gas,
-          
-          
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
           gasPrice,
         );
 
@@ -68,7 +68,7 @@ export function getAptosSignDoc({
   isGasOptionSelected,
   nativeFeeDenom,
 }: {
-  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   signRequestData: Record<string, any>;
   gasPrice: GasPrice;
   gasLimit: string;

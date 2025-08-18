@@ -1,10 +1,10 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Browser, { Storage } from 'webextension-polyfill';
 
 export function fillBetaValuesFromStorage(
   activeChain: string,
   resourceKey: string,
-  
+  // eslint-disable-next-line no-unused-vars
   setResource: (param: any) => void,
   defaultResourceData?: any,
 ) {

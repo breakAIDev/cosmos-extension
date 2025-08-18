@@ -41,7 +41,7 @@ type SelectTokenSheetProps = {
   onClose: () => void;
   showFor: 'source' | 'destination' | '';
   selectedChain: SourceChain | undefined;
-  
+  // eslint-disable-next-line no-unused-vars
   onTokenSelect: (token: SourceToken) => void;
   rootDenomsStore: RootDenomsStore;
   whitelistedFactorTokenStore: WhitelistedFactoryTokensStore;

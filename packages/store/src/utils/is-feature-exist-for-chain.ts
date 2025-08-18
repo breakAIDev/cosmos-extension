@@ -1,8 +1,4 @@
-import { ChainInfosConfigPossibleFeatureType, ChainInfosConfigPossibleFeatureValueType, ChainInfosConfigType } from '../types';
-
-function hasKey<T extends object>(obj: T, key: PropertyKey): key is keyof T {
-  return key in obj;
-}
+import { ChainInfosConfigPossibleFeatureType, ChainInfosConfigType } from '../types';
 
 export function isFeatureExistForChain(
   checkForExistenceType: 'comingSoon' | 'notSupported',
@@ -12,21 +8,38 @@ export function isFeatureExistForChain(
   chainInfosConfig: ChainInfosConfigType,
 ) {
   if (!activeChainId) return false;
+  switch (checkForExistenceType) {
+    case 'comingSoon': {
+      if (chainInfosConfig.coming_soon_features?.[feature]) {
+        const { platforms, chains } = chainInfosConfig.coming_soon_features[feature];
 
-  const test = (map?: Record<string, ChainInfosConfigPossibleFeatureValueType>) => {
-    if (!map || !hasKey(map, feature)) return false; // ✅ narrows feature to keyof map
-    const { platforms, chains } = map[feature];
-    if (platforms.includes('All') || platforms.includes(platform)) {
-      return !!chains[activeChainId];
+        if (platforms.includes('All') || platforms.includes(platform)) {
+          return chains[activeChainId];
+        }
+      }
+
+      break;
     }
-    return false;
-  };
 
-  if (checkForExistenceType === 'comingSoon') {
-    return test(chainInfosConfig.coming_soon_features);
+    case 'notSupported': {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      if (chainInfosConfig.not_supported_features?.[feature]) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        const { platforms, chains } = chainInfosConfig.not_supported_features[feature];
+
+        if (platforms.includes('All') || platforms.includes(platform)) {
+          return chains[activeChainId];
+        }
+      }
+
+      break;
+    }
+
+    default:
+      return false;
   }
-  if (checkForExistenceType === 'notSupported') {
-    return test(chainInfosConfig.not_supported_features);
-  }
+
   return false;
 }

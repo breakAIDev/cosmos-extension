@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { calculateFee } from '@cosmjs/stargate';
 import {
   CosmosTxType,

@@ -24,7 +24,7 @@ type TokenInputCardProps = {
   chainLogo?: string;
   loadingAssets?: boolean;
   loadingChains?: boolean;
-  
+  // eslint-disable-next-line no-unused-vars
   onChange?: (value: string) => void;
   onTokenSelectSheet?: () => void;
   selectTokenDisabled?: boolean;

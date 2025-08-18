@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { AminoSignResponse, encodeSecp256k1Pubkey, StdSignDoc } from '@cosmjs/amino';
 import { Secp256k1 } from '@cosmjs/crypto';
@@ -164,7 +164,7 @@ export async function logDirectTx(
   data: DirectSignResponse,
   messages: any[],
   origin: string,
-  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fee: any,
   chain: SupportedChain,
   address: string,

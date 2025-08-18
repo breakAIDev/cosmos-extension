@@ -158,7 +158,7 @@ export function useSend(denoms: DenomsRecord, toAddress: string) {
           title1: `Sent ${selectedDenom?.symbol ?? ''}`,
           txStatus: 'loading',
           txType: 'secretTokenTransfer',
-          
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           //@ts-ignore
           promise,
         });
@@ -166,7 +166,7 @@ export function useSend(denoms: DenomsRecord, toAddress: string) {
       } catch (e: any) {
         if (e.message === transactionDeclinedError) {
           callback('txDeclined');
-          // navigate('Home?txDeclined=true');
+          // navigate('/home?txDeclined=true');
         } else {
           setSigningError(e.message);
           setShowLedgerPopup(false);
@@ -250,12 +250,12 @@ export function useSend(denoms: DenomsRecord, toAddress: string) {
           promise,
         });
         callback('success');
-        // navigate('Activity', { state: { fromTx: true } });
+        // navigate('/activity', { state: { fromTx: true } });
         setSigningError('');
       } catch (e: any) {
         if (e.message === transactionDeclinedError) {
           callback('txDeclined');
-          // navigate('Home?txDeclined=true');
+          // navigate('/home?txDeclined=true');
         } else {
           setSigningError(e.message);
           setShowLedgerPopup(false);

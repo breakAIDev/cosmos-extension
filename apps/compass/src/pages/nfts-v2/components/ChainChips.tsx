@@ -39,7 +39,7 @@ function ChainChip({ isActive, title, children, onClick }: ChainChipProps) {
 }
 
 type ChainChipsProps = {
-  
+  // eslint-disable-next-line no-unused-vars
   handleTabClick: (selectedTab: string) => void;
   nftStore: NftStore;
 };

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useActiveChain, useActiveWallet, useAddress, useChainInfo, WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks';
 import { BtcTx } from '@leapwallet/cosmos-wallet-sdk';
 import { RootDenomsStore } from '@leapwallet/cosmos-wallet-store';
@@ -94,7 +94,7 @@ export const SignPsbt = observer(({ txnData, rootDenomsStore, isRedirected, hand
           });
         }
 
-        
+        // @ts-ignore
         wallet.signIdx(address, details.tx, index);
       });
 
@@ -147,7 +147,7 @@ export const SignPsbt = observer(({ txnData, rootDenomsStore, isRedirected, hand
           header={
             <div className='w-[396px]'>
               <Header
-                
+                // @ts-ignore
                 action={
                   isRedirected
                     ? {

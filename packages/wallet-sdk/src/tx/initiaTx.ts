@@ -176,7 +176,7 @@ export class InitiaTx extends Tx {
 
       const [accountFromSigner] = await this.wallet.getAccounts();
       const pubkey = encodePubkeyInitia(encodeEthSecp256k1Pubkey(accountFromSigner.pubkey));
-      const signMode : number = SignMode.SIGN_MODE_EIP_191;
+      const signMode = SignMode.SIGN_MODE_EIP_191;
       const msgs = message.map((msg: any) => aminoTypes.toAmino(msg));
 
       const signDoc = makeSignDocAmino(msgs, fees as StdFee, this.chainId, memo, accountNumber, sequence);

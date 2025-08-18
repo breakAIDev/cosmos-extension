@@ -233,8 +233,8 @@ export class BtcTx {
 
       txToSign.addOutput({ script: Script.encode(['RETURN']), amount: BigInt(0) });
 
-      
-      
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       signer.signIdx(accounts[0].address, txToSign, 0);
 
       txToSign.finalizeIdx(0);
@@ -468,8 +468,8 @@ export class BtcTx {
   private signInput(address: string, tx: Transaction, inputIndex: number, addressType: AddressType) {
     switch (addressType) {
       case 'p2wpkh':
-        
-        
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         this.signer.signIdx(address, tx, inputIndex);
         break;
       default:

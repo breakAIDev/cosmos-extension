@@ -212,7 +212,7 @@ export function useExecuteTx({
       setIsLoading(true);
       await executeTx();
 
-      
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       if (err instanceof LedgerError) {
         setLedgerError && setLedgerError(err.message);

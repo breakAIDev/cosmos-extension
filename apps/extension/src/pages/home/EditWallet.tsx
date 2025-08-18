@@ -24,7 +24,7 @@ import { RemoveWallet } from './RemoveWallet';
 type EditWalletFormProps = {
   wallet: Key;
   isVisible: boolean;
-  
+  // eslint-disable-next-line no-unused-vars
   onClose: (closeParent: boolean) => void;
   activeChainStore: ActiveChainStore;
   chainInfosStore: ChainInfosStore;
@@ -68,7 +68,7 @@ export const EditWalletForm = observer(
           }
 
           onClose(false);
-          
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
           setError(error.message);
         }

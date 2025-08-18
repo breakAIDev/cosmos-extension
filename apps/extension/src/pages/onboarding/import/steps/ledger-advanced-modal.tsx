@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ThemeName, useTheme } from '@leapwallet/leap-ui';
 import classNames from 'classnames';
 import { LoaderAnimation } from 'components/loader/Loader';

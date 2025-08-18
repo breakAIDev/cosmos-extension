@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import {
   AddressWarning,
@@ -148,7 +148,7 @@ export function useCheckAddressError({
       setAddressWarning(INITIAL_ADDRESS_WARNING);
       setFetchAccountDetailsData(undefined);
 
-      
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setSelectedToken((prev: any) => {
         return {
           ...(prev ?? {}),

@@ -22,7 +22,7 @@ import { CopyButton } from './copy-address';
 type EditWalletFormProps = {
   wallet: Key;
   isVisible: boolean;
-  
+  // eslint-disable-next-line no-unused-vars
   onClose: (closeParent: boolean) => void;
   activeChainStore: ActiveChainStore;
 };
@@ -62,7 +62,7 @@ export const EditWalletForm = observer(({ isVisible, wallet, onClose, activeChai
         }
 
         onClose(false);
-        
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         setError(error.message);
       }

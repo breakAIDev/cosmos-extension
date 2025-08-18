@@ -19,7 +19,7 @@ import { calculateFeeAmount } from './index';
 
 type DisplayFeeProps = {
   className?: string;
-  
+  // eslint-disable-next-line no-unused-vars
   setDisplayFeeValue?: (value: DisplayFeeValue) => void;
   setShowFeesSettingSheet?: React.Dispatch<React.SetStateAction<boolean>>;
   forceChain?: SupportedChain;

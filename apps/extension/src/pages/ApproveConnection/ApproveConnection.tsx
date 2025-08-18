@@ -67,7 +67,7 @@ function closeWindow() {
   }, 50);
 }
 
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function sendMessage(message: { type: string; payload: any; status: 'success' | 'failed' }) {
   try {
     await browser.runtime.sendMessage(message);
@@ -98,7 +98,7 @@ const ApproveConnection = () => {
   const [readMoreEnabled, setReadMoreEnabled] = useState(false);
 
   const [showApprovalUi, setShowApprovalUi] = useState(false);
-  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [approvalRequests, setApprovalRequests] = useState<Array<any>>([]);
   const activeWallet = useActiveWallet();
   const { chains } = useChainsStore();
@@ -264,7 +264,7 @@ const ApproveConnection = () => {
         isLeap?: boolean;
       };
     },
-    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     sender: any,
   ) {
     if (sender.id !== browser.runtime.id) return;

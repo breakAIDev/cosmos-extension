@@ -48,7 +48,7 @@ export interface QueryParamsRequestSDKType {}
 /** QueryParamsResponse is response type for the Query/Params RPC method. */
 export interface QueryParamsResponse {
   /** params holds all the parameters of this module. */
-  params: Params | undefined;
+  params: Params;
 }
 export interface QueryParamsResponseProtoMsg {
   typeUrl: '/babylon.btcstaking.v1.QueryParamsResponse';
@@ -90,7 +90,7 @@ export interface QueryParamsByVersionRequestSDKType {
 /** QueryParamsResponse is response type for the Query/Params RPC method. */
 export interface QueryParamsByVersionResponse {
   /** params holds all the parameters of this module. */
-  params: Params | undefined;
+  params: Params;
 }
 export interface QueryParamsByVersionResponseProtoMsg {
   typeUrl: '/babylon.btcstaking.v1.QueryParamsByVersionResponse';
@@ -1127,7 +1127,8 @@ export const QueryParamsResponse = {
   },
   fromPartial(object: Partial<QueryParamsResponse>): QueryParamsResponse {
     const message = createBaseQueryParamsResponse();
-    
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     message.params =
       object.params !== undefined && object.params !== null ? Params.fromPartial(object.params) : undefined;
     return message;
@@ -1255,7 +1256,8 @@ export const QueryParamsByVersionResponse = {
   },
   fromPartial(object: Partial<QueryParamsByVersionResponse>): QueryParamsByVersionResponse {
     const message = createBaseQueryParamsByVersionResponse();
-    
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     message.params =
       object.params !== undefined && object.params !== null ? Params.fromPartial(object.params) : undefined;
     return message;

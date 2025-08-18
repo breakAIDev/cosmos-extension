@@ -1,5 +1,4 @@
 import {
-  AllParams,
   getChainInfo,
   getUnbondingTime,
   isAptosChain,
@@ -44,6 +43,7 @@ export class ValidatorsStore {
   aggregatedChainsStore: AggregatedChainsStore;
   chainsAprStore: ChainsAprStore;
   stakingApiStore: StakingApiStore;
+
   chainWiseValidators: Record<string, ValidatorData | Record<string, never>> = {};
   chainWiseStatus: Record<string, LoadingStatusType> = {};
   chainWiseRefetchNetwork: Record<string, () => Promise<void>> = {};
@@ -281,7 +281,9 @@ export class ValidatorsStore {
       runInAction(() => {
         this.chainWiseValidators[chainKey] = {
           chainData: {
-            params: Object.assign({}, { calculated_apr: calculatedApr, unbonding_time }) as AllParams,
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            params: Object.assign({}, { calculated_apr: calculatedApr, unbonding_time }),
           },
           validators,
         };

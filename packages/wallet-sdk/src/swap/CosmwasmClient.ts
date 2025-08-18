@@ -4,6 +4,7 @@ import {
   SigningCosmWasmClient,
   SigningCosmWasmClientOptions,
 } from '@cosmjs/cosmwasm-stargate';
+import { toHex } from '@cosmjs/encoding';
 import { Coin, EncodeObject, OfflineSigner } from '@cosmjs/proto-signing';
 import { calculateFee, coin, DeliverTxResponse, SignerData, StdFee, TimeoutError } from '@cosmjs/stargate';
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
@@ -95,18 +96,17 @@ export class BaseSwapTx {
   }
 
   async broadcastTx(txRaw: TxRaw) {
-    if (!this.client) throw new Error('Cosmwasm client not initialised');
-
-    try {
-      const txBytes = TxRaw.encode(txRaw).finish();
-      const res = await this.client.broadcastTx(txBytes); // public method
-  
-      if (res.code !== 0) {
-        throw new Error(res.rawLog ?? `Broadcast failed with code ${res.code}`);
+    if (this.client instanceof SigningCosmWasmClient) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const broadcasted = await this.client.forceGetTmClient().broadcastTxSync({ tx: TxRaw.encode(txRaw).finish() });
+      if (broadcasted.code) {
+        return Promise.reject(new Error(broadcasted.code.toString()));
       }
-      return res.transactionHash; // string (uppercase hex)
-    } catch(e: any) {
-      throw new Error(e);
+
+      return toHex(broadcasted.hash).toUpperCase();
+    } else {
+      throw new Error('Cosmwasm client not initialised');
     }
   }
 

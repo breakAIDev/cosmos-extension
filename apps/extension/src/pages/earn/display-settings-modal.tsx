@@ -16,7 +16,7 @@ type DisplaySettingsModalProps = {
   isOpen: boolean;
   onClose: () => void;
   settings: DisplaySettings;
-  
+  // eslint-disable-next-line no-unused-vars
   onSettingsChange: (_: DisplaySettings) => void;
 };
 

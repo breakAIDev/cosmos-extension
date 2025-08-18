@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 export type { NameServiceResolveResult };
 
+// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 export const useNameServiceResolver = (queryAddress: string, network: 'mainnet' | 'testnet') => {
   const [data, setData] = useState<Record<string, NameServiceResolveResult | null>>({});
 

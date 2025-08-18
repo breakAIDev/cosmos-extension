@@ -14,7 +14,7 @@ export default function InfoSheet({
   title: string;
   desc: string;
   isVisible: boolean;
-  
+  // eslint-disable-next-line no-unused-vars
   setVisible: (v: boolean) => void;
   className?: string;
 }) {

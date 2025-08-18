@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { APTOS_COIN, APTOS_FA } from '@aptos-labs/ts-sdk';
 import {

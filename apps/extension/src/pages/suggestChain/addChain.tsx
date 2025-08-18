@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { fetchEvmChainId, Key, removeTrailingSlash, useCustomChains } from '@leapwallet/cosmos-wallet-hooks';
 import { chainIdToChain, ChainInfo, defaultGasPriceStep, sleep, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { ArrowLeft, ExclamationMark } from '@phosphor-icons/react';

@@ -15,7 +15,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import IBCSettings from '../IBCSettings';
 
 export function ErrorChannel() {
-  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [assetChain, setAssetChain] = useState<any>(null);
 
   const {
@@ -85,9 +85,9 @@ export function ErrorChannel() {
   }, [
     skipSupportedChains,
     transferData?.isSkipTransfer,
-    
+    // @ts-ignore
     transferData?.routeResponse,
-    
+    // @ts-ignore
     transferData?.messages,
   ]);
 

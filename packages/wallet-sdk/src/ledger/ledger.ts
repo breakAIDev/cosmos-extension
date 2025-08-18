@@ -104,7 +104,7 @@ export async function getLedgerTransport(): Promise<Transport> {
   }
 
   if (isWindows()) {
-    
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
     if (!navigator.hid) {
       throw new LedgerError(

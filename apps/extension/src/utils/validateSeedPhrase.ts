@@ -8,9 +8,9 @@ import correctMnemonic from './correct-mnemonic';
 type validateSeedPhraseParams = {
   phrase: string;
   isPrivateKey: boolean;
-  
+  // eslint-disable-next-line no-unused-vars
   setError: (value: React.SetStateAction<string>) => void;
-  
+  // eslint-disable-next-line no-unused-vars
   setSecret: (value: React.SetStateAction<string>) => void;
 };
 

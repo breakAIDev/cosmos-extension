@@ -28,9 +28,9 @@ type RecaptchaState = {
 
 const isReady = () =>
   typeof window !== 'undefined' &&
-  
+  // @ts-ignore
   typeof window.grecaptcha !== 'undefined' &&
-  
+  // @ts-ignore
   typeof window.grecaptcha.render === 'function';
 
 export class Recaptcha extends Component<RecaptchaProps, RecaptchaState> {
@@ -43,11 +43,11 @@ export class Recaptcha extends Component<RecaptchaProps, RecaptchaState> {
       widget: null,
     };
 
-    
+    // @ts-ignore
     this.readyCheck = null;
 
     if (!this.state.ready && typeof window !== 'undefined') {
-      
+      // @ts-ignore
       this.readyCheck = setInterval(this._updateReadyState.bind(this), 1000);
     }
   }
@@ -67,14 +67,14 @@ export class Recaptcha extends Component<RecaptchaProps, RecaptchaState> {
   }
 
   componentWillUnmount() {
-    
+    // @ts-ignore
     clearInterval(this.readyCheck);
   }
 
   reset() {
     const { ready, widget } = this.state;
     if (ready && widget !== null) {
-      
+      // @ts-ignore
       window.grecaptcha.reset(widget);
     }
   }
@@ -82,7 +82,7 @@ export class Recaptcha extends Component<RecaptchaProps, RecaptchaState> {
   execute() {
     const { ready, widget } = this.state;
     if (ready && widget !== null) {
-      
+      // @ts-ignore
       window.grecaptcha.execute(widget);
     }
   }
@@ -93,14 +93,14 @@ export class Recaptcha extends Component<RecaptchaProps, RecaptchaState> {
         ready: true,
       });
 
-      
+      // @ts-ignore
       clearInterval(this.readyCheck);
     }
   }
 
   _renderGrecaptcha() {
     this.setState({
-      
+      // @ts-ignore
       widget: window.grecaptcha.render(this.props.elementID, {
         sitekey: this.props.sitekey,
         callback: this.props.verifyCallback ? this.props.verifyCallback : undefined,

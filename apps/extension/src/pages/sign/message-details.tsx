@@ -31,7 +31,7 @@ function getMessageType(type: string) {
   return parts[parts.length - 1] ?? '';
 }
 
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getSimpleType = (type: string | undefined, additionalInfo?: any) => {
   if (!type) {
     return 'unknown';
@@ -195,8 +195,9 @@ export const getMessageDetails = async (message: ParsedMessage, restUrl: string,
   switch (message.__type) {
     case ParsedMessageType.AuthzExec:
       return Promise.resolve(
-        `${sliceAddress(message.grantee)} shall execute the following authorized message ${message.messages}          
-           not sure why ts is complaining here
+        `${sliceAddress(message.grantee)} shall execute the following authorized message ${message.messages
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore not sure why ts is complaining here
           .map((m) => getSimpleType('type' in m ? (m.type as string) : m['@type']))
           .join(', ')} on behalf of you`,
       );
@@ -317,8 +318,8 @@ export const getMessageDetails = async (message: ParsedMessage, restUrl: string,
       } else if (typeof message.proposalId === 'bigint') {
         proposalId = (message.proposalId as bigint).toString();
       } else {
-        
-        
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         proposalId = message.proposalId?.low ?? JSON.stringify(message.proposalId);
       }
 

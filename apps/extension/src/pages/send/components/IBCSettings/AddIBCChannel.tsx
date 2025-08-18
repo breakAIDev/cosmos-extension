@@ -4,7 +4,7 @@ import React, { useCallback, useState } from 'react';
 
 type AddIBCChannelProps = {
   targetChain: string;
-  
+  // eslint-disable-next-line no-unused-vars
   onAddComplete: (value: string) => void;
   value: string;
   setValue: (value: string) => void;

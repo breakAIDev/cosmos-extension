@@ -112,8 +112,8 @@ export default class MsgExecuteContractCompat extends MsgBase<
       msg: JSON.stringify(this.getMsgObject()),
     };
 
-    
-    
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     delete message.funds_list;
 
     return {

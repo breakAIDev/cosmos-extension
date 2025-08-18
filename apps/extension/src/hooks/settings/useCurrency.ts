@@ -15,7 +15,7 @@ interface CurrencyTypes {
 }
 
 type CurrencySymbolsTypes = {
-  
+  // eslint-disable-next-line no-unused-vars
   [key in SupportedCurrencies]: {
     symbol: SupportedSymbols;
     currencyPointer: Currency;

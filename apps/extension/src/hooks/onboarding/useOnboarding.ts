@@ -242,7 +242,7 @@ export function useOnboarding() {
         address: account.address,
         pubkey: account.pubkey,
         index: (prev ?? []).length + index,
-        
+        // @ts-ignore
         path: account.path,
       })),
     ]);
@@ -288,7 +288,7 @@ export function useOnboarding() {
         address: account.address,
         pubkey: account.pubkey,
         index: (prev ?? []).length + index,
-        
+        // @ts-ignore
         path: account.path,
         name,
       })),

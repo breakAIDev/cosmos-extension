@@ -13,7 +13,7 @@ type AutoAdjustSheetProps = {
   isOpen: boolean;
   tokenAmount: string;
   fee: { amount: string; denom: string };
-  
+  // eslint-disable-next-line no-unused-vars
   setTokenAmount: (amount: string) => void;
   token: Token;
 };

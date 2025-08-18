@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { AptosApiError } from '@aptos-labs/ts-sdk';
 import { StdFee } from '@cosmjs/stargate';
 import {

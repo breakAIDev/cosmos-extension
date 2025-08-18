@@ -1,0 +1,2 @@
+Please create google chrome extension developer account with this email: mo@nnchain.org
+And publish the extension

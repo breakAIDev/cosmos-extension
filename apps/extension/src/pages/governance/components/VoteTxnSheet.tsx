@@ -47,8 +47,8 @@ export const VoteTxnSheet = observer(
       pendingTx.promise
         .then(
           (result) => {
-            
-            
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             if (result && isDeliverTxSuccess(result)) {
               setPendingTx({ ...pendingTx, txStatus: 'success' });
             } else {

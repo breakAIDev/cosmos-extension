@@ -12,7 +12,7 @@ import browser from 'webextension-polyfill';
 import { awaitEnableChainResponse, Page } from '../utils';
 
 export async function addLeapEthereumChain(
-  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payload: any,
   evmChainIdMap: Record<
     string,

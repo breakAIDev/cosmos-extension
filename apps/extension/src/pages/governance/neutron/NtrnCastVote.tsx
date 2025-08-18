@@ -50,7 +50,7 @@ const VoteOptionsList = [
 type CastVoteSheetProps = {
   proposalId: string;
   isProposalInVotingPeriod: boolean;
-  
+  // eslint-disable-next-line no-unused-vars
   onSubmitVote: (option: VoteOptions) => void;
   setShowFeesSettingSheet: React.Dispatch<React.SetStateAction<boolean>>;
   isOpen: boolean;

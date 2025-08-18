@@ -3,7 +3,7 @@ import React, { ReactNode } from 'react';
 
 export type NftToggleCardProps = Omit<GenericCardProps, 'onClick'> & {
   readonly avatar: ReactNode;
-  
+  // eslint-disable-next-line no-unused-vars
   readonly onClick: (isEnable: boolean) => void;
   readonly isEnabled: boolean;
 };

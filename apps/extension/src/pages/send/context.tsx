@@ -30,7 +30,7 @@ const useSuiSigner = Wallet.useSuiSigner;
 export type SendContextType = ReturnType<typeof useSendModule> &
   Readonly<{
     confirmSend: (
-      
+      // eslint-disable-next-line no-unused-vars
       args: Omit<sendTokensParams, 'gasEstimate' | 'getWallet'>,
       modifiedCallback: TxCallback,
     ) => Promise<void>;
@@ -378,8 +378,8 @@ export const SendContextProvider: React.FC<SendContextProviderProps> = observer(
       setAssociated0xAddress,
     ]);
 
-    
-    
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     return <SendContext.Provider value={value}>{children}</SendContext.Provider>;
   },
 );

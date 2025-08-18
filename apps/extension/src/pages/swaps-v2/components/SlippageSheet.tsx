@@ -21,7 +21,7 @@ interface SlippageSheetProps {
   onClose: () => void;
   onSlippageInfoClick: () => void;
 }
-const SLIPPAGE_OPTIONS: (number | string)[] = [0.5, 1, 3, 'custom'] as const;
+const SLIPPAGE_OPTIONS: (number | string)[] = [0.5, 1, 3, 'custom'];
 
 export function SlippageSheet({ isOpen, onClose, onSlippageInfoClick }: SlippageSheetProps) {
   const { slippagePercent, setSlippagePercent } = useSwapContext();

@@ -42,7 +42,7 @@ export function showSecretPhraseTest(mnemonicObj: { mnemonic: string }) {
       await page.click('[data-testing-id=submit]')
 
       await page.click('[data-testing-id=copy-seed-phrase]')
-      
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const mnemonic = await page.evaluate(() => (window as any).testingClipboard ?? '')
 
       expect(mnemonic).toBe(mnemonicObj.mnemonic)

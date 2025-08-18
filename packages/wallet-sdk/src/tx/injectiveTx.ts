@@ -419,8 +419,8 @@ export class InjectiveTx {
       const latest_height = channelIdData.data.identified_client_state.client_state.latest_height;
 
       height = {
-        
-        
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         revisionHeight: latest_height.revision_height + 1,
         revisionNumber: latest_height.revision_number,
       };
@@ -626,13 +626,13 @@ export class InjectiveTx {
           accountNumber: parseInt(signDoc.accountNumber.toString()),
         });
 
-        
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         //@ts-ignore
         const signedTx = await this.wallet.signDirect(signerAddress, _signDoc);
         const _txRaw = createTxRawFromSigResponse(signedTx);
         return _txRaw;
       } else {
-        
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         //@ts-ignore
         const rawSignature = await this.wallet?.sign(signerAddress, keccak256(signBytes));
         const _splitSignature = splitSignature(rawSignature);
@@ -698,20 +698,20 @@ export class InjectiveTx {
       ethereumChainId: this.evmChainId,
     });
 
-    
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
     const index = eip712Tx.types.MsgValue.findIndex((value) => value.name === 'timeout_timestamp');
     if (index > -1) {
-      
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       //@ts-ignore
       eip712Tx.types.MsgValue[index].type = 'uint64';
     }
 
-    
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
     const memoIndex = eip712Tx.types.MsgValue.findIndex((value) => value.name === 'memo');
     if (!eip712Tx.message.msgs.every((msg) => msg.value.memo) && memoIndex > -1) {
-      
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       //@ts-ignore
       eip712Tx.types.MsgValue.splice(memoIndex, 1);
     }
@@ -745,10 +745,10 @@ export class InjectiveTx {
   async createTx(signerAddress: string, msgs: EncodeObject[], fee: StdFee, memo = '') {
     const accountDetails = await fetchAccountDetails(this.restEndpoint, signerAddress);
 
-    
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
     const walletAccount = !(this.wallet instanceof EthWallet || this.wallet?.constructor?.name === 'EthWallet')
-      ? 
+      ? // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         //@ts-ignore
         await this.wallet.getAccounts(this.chainId)
       : await this.wallet.getAccounts();

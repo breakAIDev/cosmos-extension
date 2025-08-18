@@ -11,10 +11,6 @@ export type useIsFeatureExistForChainParams = {
   forceNetwork?: 'mainnet' | 'testnet';
 };
 
-function hasKey<T extends object>(obj: T | undefined, key: PropertyKey): obj is T & Record<PropertyKey, unknown> {
-  return !!obj && Object.prototype.hasOwnProperty.call(obj, key);
-}
-
 export function useIsFeatureExistForChain({
   checkForExistenceType,
   feature,
@@ -38,25 +34,37 @@ export function useIsFeatureExistForChain({
   }, [chains, activeChain, selectedNetwork]);
 
   return useMemo(() => {
-    const platformMatches = (platforms: string[]) =>
-      platforms.includes('All') || platforms.includes(platform);
+    switch (checkForExistenceType) {
+      case 'comingSoon': {
+        if (chainInfosConfig.coming_soon_features[feature]) {
+          const { platforms, chains } = chainInfosConfig.coming_soon_features[feature];
 
-    if (checkForExistenceType === 'comingSoon') {
-      const map = chainInfosConfig.coming_soon_features;
-      if (hasKey(map, feature)) {
-        const { platforms, chains } = (map as any)[feature];
-        if (platformMatches(platforms)) return !!chains?.[activeChainId];
-      }
-      return false;
-    }
+          if (platforms.includes('All') || platforms.includes(platform)) {
+            return chains[activeChainId];
+          }
+        }
 
-    if (checkForExistenceType === 'notSupported') {
-      const map = chainInfosConfig.not_supported_features;
-      if (hasKey(map, feature)) {
-        const { platforms, chains } = (map as any)[feature];
-        if (platformMatches(platforms)) return !!chains?.[activeChainId];
+        break;
       }
-      return false;
+
+      case 'notSupported': {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        if (chainInfosConfig.not_supported_features[feature]) {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          const { platforms, chains } = chainInfosConfig.not_supported_features[feature];
+
+          if (platforms.includes('All') || platforms.includes(platform)) {
+            return chains[activeChainId];
+          }
+        }
+
+        break;
+      }
+
+      default:
+        return false;
     }
 
     return false;

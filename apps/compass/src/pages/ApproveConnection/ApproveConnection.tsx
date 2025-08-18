@@ -46,7 +46,7 @@ const ApproveConnection = () => {
   const [requestedChains, setRequestedChains] = useState<{ chain: SupportedChain; payloadId: string }[]>([]);
 
   const [showApprovalUi, setShowApprovalUi] = useState(false);
-  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [approvalRequests, setApprovalRequests] = useState<Array<any>>([]);
   const activeWallet = useActiveWallet();
   const { walletName } = useWalletInfo();
@@ -155,7 +155,7 @@ const ApproveConnection = () => {
         isLeap?: boolean;
       };
     },
-    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     sender: any,
   ) {
     if (sender.id !== browser.runtime.id) return;

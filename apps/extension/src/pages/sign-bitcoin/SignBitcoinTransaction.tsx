@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useActiveChain } from '@leapwallet/cosmos-wallet-hooks';
 import { BITCOIN_METHOD_TYPE } from '@leapwallet/cosmos-wallet-provider/dist/provider/types';
 import { isBitcoinChain } from '@leapwallet/cosmos-wallet-store/dist/utils';

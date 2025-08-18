@@ -16,7 +16,7 @@ import { capitalize } from 'utils/strings';
 type MyWalletSheetProps = {
   isOpen: boolean;
   onClose: () => void;
-  
+  // eslint-disable-next-line no-unused-vars
   setSelectedAddress: (address: SelectedAddress) => void;
 };
 

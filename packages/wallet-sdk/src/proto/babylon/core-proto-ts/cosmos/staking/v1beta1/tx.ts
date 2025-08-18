@@ -19,13 +19,13 @@ import {
 } from './staking';
 /** MsgCreateValidator defines a SDK message for creating a new validator. */
 export interface MsgCreateValidator {
-  description: Description | undefined;
-  commission: CommissionRates | undefined;
+  description: Description;
+  commission: CommissionRates;
   minSelfDelegation: string;
   delegatorAddress: string;
   validatorAddress: string;
   pubkey?: Any;
-  value: Coin | undefined;
+  value: Coin;
 }
 export interface MsgCreateValidatorProtoMsg {
   typeUrl: '/cosmos.staking.v1beta1.MsgCreateValidator';
@@ -71,7 +71,7 @@ export interface MsgCreateValidatorResponseAminoMsg {
 export interface MsgCreateValidatorResponseSDKType {}
 /** MsgEditValidator defines a SDK message for editing an existing validator. */
 export interface MsgEditValidator {
-  description: Description | undefined;
+  description: Description;
   validatorAddress: string;
   /**
    * We pass a reference to the new commission rate and min self delegation as
@@ -131,7 +131,7 @@ export interface MsgEditValidatorResponseSDKType {}
 export interface MsgDelegate {
   delegatorAddress: string;
   validatorAddress: string;
-  amount: Coin | undefined;
+  amount: Coin;
 }
 export interface MsgDelegateProtoMsg {
   typeUrl: '/cosmos.staking.v1beta1.MsgDelegate';
@@ -181,7 +181,7 @@ export interface MsgBeginRedelegate {
   delegatorAddress: string;
   validatorSrcAddress: string;
   validatorDstAddress: string;
-  amount: Coin | undefined;
+  amount: Coin;
 }
 export interface MsgBeginRedelegateProtoMsg {
   typeUrl: '/cosmos.staking.v1beta1.MsgBeginRedelegate';
@@ -213,7 +213,7 @@ export interface MsgBeginRedelegateSDKType {
 }
 /** MsgBeginRedelegateResponse defines the Msg/BeginRedelegate response type. */
 export interface MsgBeginRedelegateResponse {
-  completionTime: Date | undefined;
+  completionTime: Date;
 }
 export interface MsgBeginRedelegateResponseProtoMsg {
   typeUrl: '/cosmos.staking.v1beta1.MsgBeginRedelegateResponse';
@@ -238,7 +238,7 @@ export interface MsgBeginRedelegateResponseSDKType {
 export interface MsgUndelegate {
   delegatorAddress: string;
   validatorAddress: string;
-  amount: Coin | undefined;
+  amount: Coin;
 }
 export interface MsgUndelegateProtoMsg {
   typeUrl: '/cosmos.staking.v1beta1.MsgUndelegate';
@@ -268,9 +268,9 @@ export interface MsgUndelegateSDKType {
 }
 /** MsgUndelegateResponse defines the Msg/Undelegate response type. */
 export interface MsgUndelegateResponse {
-  completionTime: Date | undefined;
+  completionTime: Date;
   /** amount returns the amount of undelegated coins */
-  amount: Coin | undefined;
+  amount: Coin;
 }
 export interface MsgUndelegateResponseProtoMsg {
   typeUrl: '/cosmos.staking.v1beta1.MsgUndelegateResponse';
@@ -296,7 +296,7 @@ export interface MsgCancelUnbondingDelegation {
   delegatorAddress: string;
   validatorAddress: string;
   /** amount is always less than or equal to unbonding delegation entry balance */
-  amount: Coin | undefined;
+  amount: Coin;
   /** creation_height is the height which the unbonding took place. */
   creationHeight: bigint;
 }
@@ -347,7 +347,7 @@ export interface MsgUpdateParams {
    *
    * NOTE: All parameters must be supplied.
    */
-  params: Params | undefined;
+  params: Params;
 }
 export interface MsgUpdateParamsProtoMsg {
   typeUrl: '/cosmos.staking.v1beta1.MsgUpdateParams';
@@ -516,12 +516,14 @@ export const MsgCreateValidator = {
   },
   fromPartial(object: Partial<MsgCreateValidator>): MsgCreateValidator {
     const message = createBaseMsgCreateValidator();
-    
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     message.description =
       object.description !== undefined && object.description !== null
         ? Description.fromPartial(object.description)
         : undefined;
-    
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     message.commission =
       object.commission !== undefined && object.commission !== null
         ? CommissionRates.fromPartial(object.commission)
@@ -530,7 +532,8 @@ export const MsgCreateValidator = {
     message.delegatorAddress = object.delegatorAddress ?? '';
     message.validatorAddress = object.validatorAddress ?? '';
     message.pubkey = object.pubkey !== undefined && object.pubkey !== null ? Any.fromPartial(object.pubkey) : undefined;
-    
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     message.value = object.value !== undefined && object.value !== null ? Coin.fromPartial(object.value) : undefined;
     return message;
   },
@@ -705,7 +708,8 @@ export const MsgEditValidator = {
   },
   fromPartial(object: Partial<MsgEditValidator>): MsgEditValidator {
     const message = createBaseMsgEditValidator();
-    
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     message.description =
       object.description !== undefined && object.description !== null
         ? Description.fromPartial(object.description)
@@ -867,7 +871,8 @@ export const MsgDelegate = {
     const message = createBaseMsgDelegate();
     message.delegatorAddress = object.delegatorAddress ?? '';
     message.validatorAddress = object.validatorAddress ?? '';
-    
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     message.amount =
       object.amount !== undefined && object.amount !== null ? Coin.fromPartial(object.amount) : undefined;
     return message;
@@ -1026,7 +1031,8 @@ export const MsgBeginRedelegate = {
     message.delegatorAddress = object.delegatorAddress ?? '';
     message.validatorSrcAddress = object.validatorSrcAddress ?? '';
     message.validatorDstAddress = object.validatorDstAddress ?? '';
-    
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     message.amount =
       object.amount !== undefined && object.amount !== null ? Coin.fromPartial(object.amount) : undefined;
     return message;
@@ -1109,7 +1115,8 @@ export const MsgBeginRedelegateResponse = {
   },
   fromPartial(object: Partial<MsgBeginRedelegateResponse>): MsgBeginRedelegateResponse {
     const message = createBaseMsgBeginRedelegateResponse();
-    
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     message.completionTime = object.completionTime ?? undefined;
     return message;
   },
@@ -1195,7 +1202,8 @@ export const MsgUndelegate = {
     const message = createBaseMsgUndelegate();
     message.delegatorAddress = object.delegatorAddress ?? '';
     message.validatorAddress = object.validatorAddress ?? '';
-    
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     message.amount =
       object.amount !== undefined && object.amount !== null ? Coin.fromPartial(object.amount) : undefined;
     return message;
@@ -1281,9 +1289,11 @@ export const MsgUndelegateResponse = {
   },
   fromPartial(object: Partial<MsgUndelegateResponse>): MsgUndelegateResponse {
     const message = createBaseMsgUndelegateResponse();
-    
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     message.completionTime = object.completionTime ?? undefined;
-    
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     message.amount =
       object.amount !== undefined && object.amount !== null ? Coin.fromPartial(object.amount) : undefined;
     return message;
@@ -1381,7 +1391,8 @@ export const MsgCancelUnbondingDelegation = {
     const message = createBaseMsgCancelUnbondingDelegation();
     message.delegatorAddress = object.delegatorAddress ?? '';
     message.validatorAddress = object.validatorAddress ?? '';
-    
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     message.amount =
       object.amount !== undefined && object.amount !== null ? Coin.fromPartial(object.amount) : undefined;
     message.creationHeight =
@@ -1532,7 +1543,8 @@ export const MsgUpdateParams = {
   fromPartial(object: Partial<MsgUpdateParams>): MsgUpdateParams {
     const message = createBaseMsgUpdateParams();
     message.authority = object.authority ?? '';
-    
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     message.params =
       object.params !== undefined && object.params !== null ? Params.fromPartial(object.params) : undefined;
     return message;

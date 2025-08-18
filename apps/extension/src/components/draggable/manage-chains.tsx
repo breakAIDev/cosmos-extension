@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Draggable } from '@hello-pangea/dnd';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { CardDivider, ToggleCard } from '@leapwallet/leap-ui';
@@ -17,7 +17,7 @@ import { capitalize } from 'utils/strings';
 interface PropTypes {
   chains: ManageChainSettings[];
   searchQuery: string;
-  
+  // eslint-disable-next-line no-unused-vars
   updateChainFunction: (chainName: SupportedChain) => void;
   title?: string;
 }
@@ -49,8 +49,8 @@ const BetaCard = observer(({ chain }: { chain: ManageChainSettings }) => {
             <button
               className='text-sm font-bold text-red-300 py-1 px-3 rounded-[14px]'
               style={{ backgroundColor: 'rgba(255, 112, 126, 0.1)' }}
-              
-              
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
               onClick={() => deleteChainStore.setChainInfo(chain)}
             >
               Remove

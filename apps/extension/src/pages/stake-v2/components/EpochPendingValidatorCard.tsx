@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { sliceWord, useValidatorImage } from '@leapwallet/cosmos-wallet-hooks';
 import { Validator } from '@leapwallet/cosmos-wallet-sdk';
 import BigNumber from 'bignumber.js';

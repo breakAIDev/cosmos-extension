@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Key as WalletKey, useCustomChains } from '@leapwallet/cosmos-wallet-hooks';
 import { sleep, SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { GenericCard } from '@leapwallet/leap-ui';

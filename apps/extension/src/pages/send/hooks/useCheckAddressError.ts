@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { AddressWarning, INITIAL_ADDRESS_WARNING, useAddress } from '@leapwallet/cosmos-wallet-hooks';
 import {

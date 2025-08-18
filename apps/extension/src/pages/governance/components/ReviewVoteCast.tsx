@@ -16,13 +16,13 @@ import { Colors } from 'theme/colors';
 export type ReviewVoteCastProps = {
   isOpen: boolean;
   onCloseHandler: () => void;
-  
+  // eslint-disable-next-line no-unused-vars
   onSubmitVote: (option: VoteOptions) => Promise<boolean>;
   loading: boolean;
   error?: string;
   selectedVote: VoteOptions | undefined;
   memo: string;
-  
+  // eslint-disable-next-line no-unused-vars
   setMemo: (memo: string) => void;
   feeText: string;
   proposalId: string;

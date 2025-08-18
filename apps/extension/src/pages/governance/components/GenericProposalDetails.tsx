@@ -40,8 +40,8 @@ export default function GenericProposalDetails({
       forceChain={selectedProposalChain}
       forceNetwork={forceNetwork}
       governanceStore={{
-        
-        
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         chainProposals: {
           data: allProposals as ProposalApi[] | Proposal[],
           shouldUseFallback,

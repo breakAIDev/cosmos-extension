@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useActiveChain, useActiveWallet, useAddress, useChainInfo, WALLETTYPE } from '@leapwallet/cosmos-wallet-hooks';
 import { BtcTx } from '@leapwallet/cosmos-wallet-sdk';
 import { RootDenomsStore } from '@leapwallet/cosmos-wallet-store';
@@ -77,8 +77,8 @@ export const SignPsbts = observer(({ txnData, rootDenomsStore }: SignPsbtsProps)
 
       for (const txDetails of details) {
         txDetails.inputs.forEach((_: any, index: number) => {
-          
-          
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
           wallet.signIdx(address, txDetails.tx, index);
         });
 

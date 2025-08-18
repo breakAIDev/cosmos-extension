@@ -5,7 +5,7 @@ import { BroadcastMode } from 'cosmjs-types/cosmos/tx/v1beta1/service';
 
 import { decodeChainIdToChain, getExperimentalChains } from './utils';
 
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function handleSendTx(data: any) {
   const tx = data?.tx;
   const mode = data?.mode;

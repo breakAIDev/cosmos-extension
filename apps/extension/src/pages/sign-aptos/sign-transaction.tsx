@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   AccountAuthenticatorEd25519,
   AptosApiError,

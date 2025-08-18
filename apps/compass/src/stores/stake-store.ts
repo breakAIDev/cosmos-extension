@@ -6,7 +6,6 @@ import {
   DelegationsStore,
   IbcDenomInfoStore,
   PriorityValidatorsStore,
-  StakingApiStore,
   StakingDenomsStore,
   UndelegationsStore,
   ValidatorsStore,
@@ -21,7 +20,6 @@ import { selectedNetworkStore } from './selected-network-store';
 
 const priorityValidatorsStore = new PriorityValidatorsStore();
 const stakingDenomsStore = new StakingDenomsStore();
-const stakingApiStore = new StakingApiStore();
 
 const activeStakingDenomStore = new ActiveStakingDenomStore(
   activeChainStore,
@@ -44,7 +42,6 @@ export const validatorsStore = new ValidatorsStore(
   priorityValidatorsStore,
   aggregatedChainsStore,
   chainsAprStore,
-  stakingApiStore,
 );
 
 export const delegationsStore = new DelegationsStore(
@@ -57,7 +54,6 @@ export const delegationsStore = new DelegationsStore(
   aggregatedChainsStore,
   activeStakingDenomStore,
   priceStore,
-  stakingApiStore,
 );
 
 export const unDelegationsStore = new UndelegationsStore(
@@ -71,7 +67,6 @@ export const unDelegationsStore = new UndelegationsStore(
   aggregatedChainsStore,
   activeStakingDenomStore,
   priceStore,
-  stakingApiStore,
 );
 
 const ibcDenomInfoStore = new IbcDenomInfoStore(nmsStore, chainInfoStore, denomsStore);
@@ -87,7 +82,6 @@ export const claimRewardsStore = new ClaimRewardsStore(
   activeStakingDenomStore,
   priceStore,
   ibcDenomInfoStore,
-  stakingApiStore,
 );
 
 export const aggregateStakeStore = new AggregateStakeStore(

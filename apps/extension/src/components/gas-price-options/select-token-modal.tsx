@@ -22,7 +22,7 @@ type SelectTokenSheetProps = {
   isOpen: boolean;
   onClose: () => void;
   selectedToken?: Token;
-  
+  // eslint-disable-next-line no-unused-vars
   onTokenSelect: (baseDenom: string, ibcDenom?: string) => void;
 };
 

@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { AminoSignResponse, OfflineAminoSigner, StdSignature, StdSignDoc } from '@cosmjs/amino';
 import { DirectSignResponse, OfflineDirectSigner } from '@cosmjs/proto-signing';
 import {
@@ -292,8 +292,8 @@ const SignTransaction = observer(
           },
         });
 
-        
-        
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         const parsedMessages = docDecoder.txMsgs.map((msg: { unpacked: any; typeUrl: string }) => {
           if (msg instanceof UnknownMessage) {
             const raw = msg.toJSON();
@@ -584,11 +584,11 @@ const SignTransaction = observer(
 
           const wallet = (await getWallet(activeChain, !!(ethSignType || eip712Types))) as OfflineAminoSigner & {
             signAmino: (
-              
+              // eslint-disable-next-line no-unused-vars
               address: string,
-              
+              // eslint-disable-next-line no-unused-vars
               signDoc: StdSignDoc,
-              
+              // eslint-disable-next-line no-unused-vars
               options?: { extraEntropy?: boolean },
             ) => Promise<StdSignature>;
           };
@@ -1023,8 +1023,8 @@ const SignTransaction = observer(
                   {isSignArbitrary && typeof messages === 'string'
                     ? (messages as unknown as string)
                     : JSON.stringify(
-                        
-                        
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        // @ts-ignore
                         JSON.parse(Array.isArray(messages) ? messages?.[0].parsed?.message : null),
                         null,
                         2,

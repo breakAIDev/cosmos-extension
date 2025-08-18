@@ -18,7 +18,7 @@ dayjs.extend(utc);
 
 type RequestFaucetProps = {
   address: string;
-  
+  // eslint-disable-next-line no-unused-vars
   setShowFaucetResp: (data: { msg: string; status: 'success' | 'fail' | null }) => void;
   rootBalanceStore: RootBalanceStore;
 };
@@ -62,7 +62,7 @@ export default function RequestFaucet({ rootBalanceStore, address, setShowFaucet
     async (args: Record<string, string>) => {
       const { method } = faucetDetails;
       // Resolve payload
-      
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let payload: Record<string, any> = {};
       if (faucetDetails.payloadResolution) {
         payload = Object.entries(faucetDetails.payloadResolution).reduce((acc, val) => {

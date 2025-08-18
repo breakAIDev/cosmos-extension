@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useInvestData } from '@leapwallet/cosmos-wallet-hooks';
 import { CardDivider } from '@leapwallet/leap-ui';
 import { CaretRight } from '@phosphor-icons/react';

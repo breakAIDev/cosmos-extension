@@ -337,7 +337,7 @@ export function parseAssetPlatform(platform: string): AssetPlatform | undefined 
 }
 
 /** CG ID APIs for Terra native tokens. */
-
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace CgTerraNativeTokens {
   /** Type guard to check that the `token` can be indexed by {@link Ids}. */
   export function isKey(token: string): token is keyof typeof Ids {
@@ -447,27 +447,6 @@ export enum Platform {
   Kyve = 'KYVE',
   Migaloo = 'MIGALOO',
   Noble = 'NOBLE',
-  Aura = 'AURA',
-  SeiTestNet2 = 'SEI_TESTNET_2',
-  ImpactHub = 'IMPACT_HUB',
-  Jackal = 'JACKAL',
-  Planq = 'PLANQ',
-  Nomic = 'NOMIC',
-  Nibiru = 'NIBIRU',
-  Odin = 'ODIN_CHAIN',
-  MayaChain = 'MAYA_CHAIN',
-  EmpowerChain = 'EMPOWER_CHAIN',
-  Dydx = 'DYDX',
-  Gitopia = 'GITOPIA',
-  Sge = 'SGE',
-  Celestia = 'CELESTIA',
-  Xpla = 'XPLA',
-  Composable = 'COMPOSABLE',
-  Dymension = 'DYMENSION',
-  PryzmTestNet = 'PRYZM',
-  Saga = 'SAGA',
-  Initia = 'INITIA',
-  HumansAi = 'HUMANS_AI',
 }
 
 export enum CosmosBlockchain {

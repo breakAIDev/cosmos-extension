@@ -1,4 +1,4 @@
-  import { SelectedAddress, sliceAddress } from '@leapwallet/cosmos-wallet-hooks';
+import { SelectedAddress, sliceAddress } from '@leapwallet/cosmos-wallet-hooks';
 import { SupportedChain } from '@leapwallet/cosmos-wallet-sdk';
 import { AvatarCard, InputWithButton } from '@leapwallet/leap-ui';
 import BottomModal from 'components/bottom-modal';
@@ -13,7 +13,7 @@ import { AddressBook } from 'utils/addressbook';
 type ContactsSheetProps = {
   isOpen: boolean;
   onClose: () => void;
-  
+  // eslint-disable-next-line no-unused-vars
   onContactSelect: (s: SelectedAddress) => void;
 };
 

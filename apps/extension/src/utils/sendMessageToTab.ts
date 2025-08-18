@@ -1,6 +1,6 @@
 import Browser from 'webextension-polyfill';
 
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function sendMessageToTab(message: any) {
   const tabs = await Browser.tabs.query({
     status: 'complete',
@@ -19,7 +19,7 @@ export async function sendMessageToTab(message: any) {
   }
 }
 
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function sendMessageToAllTabs(message: any) {
   const tabs = await Browser.tabs.query({
     status: 'complete',

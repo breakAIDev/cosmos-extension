@@ -182,20 +182,20 @@ export const ReviewTransfer = observer(({ setShowTxPage }: { setShowTxPage: (val
   }, [
     selectedToken?.coinMinimalDenom,
     selectedAddress?.chainName,
-    
+    // @ts-ignore
     transferData?.messages,
   ]);
 
   useEffect(() => {
     if (isInitiaTxn) {
       if (
-        
+        // @ts-ignore
         !transferData?.isLoadingMessages &&
-        
+        // @ts-ignore
         !transferData?.isLoadingRoute &&
         selectedAddress?.chainName &&
         chains[selectedAddress?.chainName as SupportedChain]?.chainId !== chains[sendActiveChain]?.chainId &&
-        
+        // @ts-ignore
         !transferData?.messages
       ) {
         setRouteError(true);
@@ -208,11 +208,11 @@ export const ReviewTransfer = observer(({ setShowTxPage }: { setShowTxPage: (val
     isInitiaTxn,
     selectedAddress?.chainName,
     sendActiveChain,
-    
+    // @ts-ignore
     transferData?.isLoadingMessages,
-    
+    // @ts-ignore
     transferData?.messages,
-    
+    // @ts-ignore
     transferData?.isLoadingRoute,
   ]);
 
@@ -289,13 +289,13 @@ export const ReviewTransfer = observer(({ setShowTxPage }: { setShowTxPage: (val
   const isReviewDisabled = useMemo(() => {
     if (
       isInitiaTxn &&
-      
+      // @ts-ignore
       (transferData?.isLoadingRoute ||
-        
+        // @ts-ignore
         transferData?.isLoadingMessages ||
         (selectedAddress?.chainName &&
           chains[selectedAddress?.chainName as SupportedChain]?.chainId !== chains[sendActiveChain]?.chainId &&
-          
+          // @ts-ignore
           !transferData?.messages))
     ) {
       return true;
@@ -314,11 +314,11 @@ export const ReviewTransfer = observer(({ setShowTxPage }: { setShowTxPage: (val
     );
   }, [
     isInitiaTxn,
-    
+    // @ts-ignore
     transferData?.isLoadingRoute,
-    
+    // @ts-ignore
     transferData?.isLoadingMessages,
-    
+    // @ts-ignore
     transferData?.messages,
     selectedAddress?.chainName,
     gasError,

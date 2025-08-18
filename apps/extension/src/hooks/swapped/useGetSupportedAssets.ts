@@ -29,7 +29,7 @@ export function useGetSupportedAssets() {
     const denomsArray = Object.values(denoms);
     const chainsArray = Object.values(chainInfos);
 
-    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const filteredAssets: AssetProps[] = cryptoAssets.reduce((acc: AssetProps[], asset: any) => {
       const chain = chainsArray.find((chain) => {
         return chain.chainRegistryPath === asset.network || chain.key === asset.network;
@@ -52,7 +52,7 @@ export function useGetSupportedAssets() {
       }
       return acc;
     }, []);
-    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     filteredAssets.sort((assetA: any, assetB: any) => {
       const priorityA = assetA.priority ?? Infinity;
       const priorityB = assetB.priority ?? Infinity;

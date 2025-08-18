@@ -52,8 +52,8 @@ const EarnPage = observer(({ chainTagsStore }: { chainTagsStore: ChainTagsStore 
             action={{
               onClick: () => globalSheetsStore.toggleSideNav(),
               type: HeaderActionType.NAVIGATION,
-              
-              
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
               className:
                 'min-w-[48px] h-[36px] px-2 bg-[#FFFFFF] dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full',
             }}

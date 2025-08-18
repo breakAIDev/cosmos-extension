@@ -16,7 +16,7 @@ type SelectChainSheetProps = {
   selectedChain: SourceChain | undefined;
   selectedToken: SourceToken | null;
   loadingChains: boolean;
-  
+  // eslint-disable-next-line no-unused-vars
   onChainSelect: (chain: TokenAssociatedChain) => void;
   destinationAssets?: SourceToken[];
   showAllChainsOption?: boolean;

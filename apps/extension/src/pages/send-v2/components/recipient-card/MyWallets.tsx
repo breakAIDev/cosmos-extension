@@ -42,7 +42,7 @@ function MyWallets({ skipSupportedDestinationChainsIDs, setSelectedAddress }: My
   const [searchQuery, setSearchQuery] = useState('');
   const trimmedQuery = searchQuery.trim();
 
-  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const _displaySkipAccounts: any[][] = [];
   Object.keys(chainInfos).map((chain) => {
     if (skipSupportedDestinationChainsIDs?.includes(chainInfos[chain as SupportedChain]?.chainId)) {

@@ -55,8 +55,8 @@ export const StakeTxnSheet = observer(({ isOpen, onClose, mode }: StakeTxnSheetP
     pendingTx.promise
       .then(
         (result) => {
-          
-          
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
           if (result && isDeliverTxSuccess(result)) {
             setPendingTx({ ...pendingTx, txStatus: 'success' });
           } else {

@@ -1,4 +1,4 @@
-
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 import { WindowPostMessageStream } from '@metamask/post-message-stream';
 import Long from 'long';

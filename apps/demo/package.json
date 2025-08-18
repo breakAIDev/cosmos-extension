@@ -18,23 +18,13 @@
     "check": "yarn prettier:check && yarn eslint:lint"
   },
   "dependencies": {
-    "@aptos-labs/ts-sdk": "1.39.0",
     "@leapwallet/cosmos-wallet-hooks": "*",
     "@leapwallet/cosmos-wallet-sdk": "*",
     "@leapwallet/leap-ui": "0.1.35",
-    "@sentry/react": "7.120.3",
-    "@solana/web3.js": "1.98.2",
-    "@zondax/ledger-cosmos-js": "4.0.1",
-    "bech32": "2.0.0",
     "bignumber.js": "9.0.2",
     "classnames": "2.3.1",
     "dayjs": "1.11.5",
-    "dompurify": "3.2.6",
-    "elliptic": "6.6.1",
-    "ethers": "5.8.0",
-    "lerna": "8.2.3",
     "mixpanel-browser": "2.45.0",
-    "parse-duration": "2.1.4",
     "react": "17.0.2",
     "react-beautiful-dnd": "13.1.1",
     "react-country-flag": "3.1.0",
@@ -42,11 +32,9 @@
     "react-loading-skeleton": "3.1.0",
     "react-router": "6.3.0",
     "react-router-dom": "6.3.0",
-    "reaviz": "^16.0.5",
+    "reaviz": "13.1.4",
     "recoil": "0.7.5",
-    "viem": "2.32.1",
-    "vitepress": "^0.1.1",
-    "vitepress-plugin-search": "0.0.3"
+    "bech32": "2.0.0"
   },
   "devDependencies": {
     "@babel/core": "7.18.5",
@@ -69,7 +57,7 @@
     "css-loader": "6.7.1",
     "dotenv-webpack": "7.1.0",
     "html-webpack-plugin": "5.5.0",
-    "postcss": "^8.5.6",
+    "postcss": "8.4.12",
     "postcss-loader": "6.2.1",
     "process": "0.11.10",
     "stream-browserify": "3.0.0",
@@ -81,10 +69,10 @@
     "typescript": "5.2.2",
     "vite": "3.1.0",
     "webextension-polyfill": "0.9.0",
-    "webpack": "^5.100.2",
+    "webpack": "5.70.0",
     "webpack-bundle-analyzer": "4.6.1",
     "webpack-cli": "4.10.0",
-    "webpack-dev-server": "^5.2.2"
+    "webpack-dev-server": "4.11.1"
   },
   "homepage": "https://github.com/leapwallet/leap-cosmos/apps/demo",
   "repository": {

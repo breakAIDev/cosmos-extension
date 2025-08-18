@@ -80,11 +80,11 @@ export function TokensChart({
   useEffect(
     () =>
       setFormattedChartData(
-        
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         chartData?.map((val: { price: any; date: any }) => {
           return {
             data: val.price,
-            
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             key: new Date((val as any).timestamp),
             metadata: val.date,
           };
@@ -159,7 +159,7 @@ export function TokensChart({
                     modifiers={{
                       offset: '2px, 5px',
                     }}
-                    
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     content={(data: any) => {
                       const { price, formattedDate } = getDateAndPrice(data);
                       const distFromTop = Math.ceil((184 / maxPrice) * data.value) - 184;

@@ -39,8 +39,8 @@ import { TokenImageWithFallback } from 'components/token-image-with-fallback';
 import { useEnableEvmGasRefetch } from 'hooks/cosm-wasm/use-enable-evm-gas-refetch';
 import { useFormatCurrency } from 'hooks/settings/useCurrency';
 import { Images } from 'images';
-
-
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import Long from 'long';
 import { observer } from 'mobx-react-lite';
 import React, { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
@@ -302,7 +302,7 @@ const GasPriceOptions = observer(
         chainGasPriceOptionsStore
           .validateFees(
             {
-              
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               gaslimit: (fee as any).gasLimit ?? Long.fromString(fee.gas),
               feeAmount: fee.amount[0]?.amount,
               feeDenom: fee.amount[0]?.denom,
@@ -449,7 +449,7 @@ const GasPriceOptions = observer(
       const amount = gasPriceBN
         .multipliedBy(gasLimit)
         .multipliedBy(considerGasAdjustment ? gasAdjustmentStore.getGasAdjustments(activeChain) : 1)
-        
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         //@ts-ignore
         .dividedBy(10 ** (hasToChangeDecimals ? 18 : feeTokenData?.denom?.coinDecimals ?? 8));
 
@@ -845,7 +845,7 @@ GasPriceOptions.AdditionalSettingsToggle = function AdditionalSettingsToggle({
   children,
   className,
 }: {
-  
+  // eslint-disable-next-line no-unused-vars
   children?: (isOpen: boolean) => JSX.Element;
   className?: string;
 }) {

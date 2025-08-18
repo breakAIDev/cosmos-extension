@@ -153,7 +153,7 @@ export function useInitChainInfos() {
     }
 
     getBetaChains(true);
-    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const addChainEventListener = (storage: Record<string, any>) => {
       if (storage && (storage[BETA_CHAINS] || storage[CUSTOM_ENDPOINTS])) {
         getBetaChains(false);
