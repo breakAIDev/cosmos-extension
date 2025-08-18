@@ -17,7 +17,7 @@ type EligibilityDrawerProps = {
 };
 
 const eligibilitySteps = [
-  'Make transactions with Leap Wallet',
+  'Make transactions with NNWallet',
   'Use core features like Swap and Stake',
   'Stay active in the Leap ecosystem',
 ];

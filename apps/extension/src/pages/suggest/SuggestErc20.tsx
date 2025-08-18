@@ -88,7 +88,7 @@ const SuggestErc20 = observer(({ handleRejectBtnClick }: ChildrenParams) => {
     <>
       <div className='flex flex-col items-center'>
         <Heading text='Add Token' />
-        <SubHeading text={`This will allow this token to be viewed within Leap Wallet`} />
+        <SubHeading text={`This will allow this token to be viewed within NNWallet`} />
         <TokenContractAddress
           address={contractInfo.address}
           img={

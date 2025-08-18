@@ -382,7 +382,7 @@ const StakeInputPage = observer(
         selectedValidator?.custom_attributes?.priority &&
         selectedValidator?.custom_attributes?.priority > 0
       ) {
-        setMemo('Staked with Leap Wallet');
+        setMemo('Staked with NNWallet');
       } else {
         setMemo('');
       }

@@ -140,7 +140,7 @@ const ReviewClaimAndStakeTx = observer(
           }
         }
       }
-      setMemo(isPromotedValidator ? 'Staked with Leap Wallet' : '');
+      setMemo(isPromotedValidator ? 'Staked with NNWallet' : '');
     }, [rewardValidators, setMemo]);
 
     const txCallback = useCallback(() => {

@@ -46,7 +46,7 @@ function LoginView(props: {
           props.exitAnimationState && 'opacity-0 pointer-events-none',
         )}
       >
-        Leap Wallet
+        NNWallet
       </div>
 
       <div className={'flex flex-col flex-1 gap-5 p-6 justify-center items-center w-full relative'}>

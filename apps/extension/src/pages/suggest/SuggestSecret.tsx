@@ -237,7 +237,7 @@ const SuggestSecret = observer(({ handleRejectBtnClick }: ChildrenParams) => {
     <>
       <div className='flex flex-col items-center'>
         <Heading text='Adding token' />
-        <SubHeading text={`This will allow this token to be viewed within Leap Wallet`} />
+        <SubHeading text={`This will allow this token to be viewed within NNWallet`} />
 
         <TokenContractAddress address={payload.contractAddress ?? ''} />
         {isFetching ? (

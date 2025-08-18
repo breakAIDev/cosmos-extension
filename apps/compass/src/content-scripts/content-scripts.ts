@@ -181,7 +181,7 @@ function resetExtensionStreamListeners() {
   extensionPort.onDisconnect.addListener(resetExtensionStreamListeners);
 }
 
-// creates two-way communication between leap wallet extension and the injected script. Also resets the streams if the service worker resets.
+// creates two-way communication between NNWallet extension and the injected script. Also resets the streams if the service worker resets.
 function setupStreams() {
   setUpPageStreams();
   setupExtensionStream();

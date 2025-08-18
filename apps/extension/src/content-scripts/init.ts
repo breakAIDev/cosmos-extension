@@ -79,7 +79,7 @@ function initEvm(leapEvm: Ethereum, isCompass: boolean) {
   const uuid = uuidv4();
   let info = {
     uuid,
-    name: 'Leap Wallet',
+    name: 'NNWallet',
     icon: LeapFaviconDataURI,
     rdns: 'io.leapwallet.LeapWallet',
   };

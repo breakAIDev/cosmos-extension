@@ -52,7 +52,7 @@ export function importWalletUsingSeed24Test() {
       await page.click('[data-testing-id=btn-password-proceed]')
       const readyWalletEleText = await getElementInnerText(page, 'ready-wallet-ele')
 
-      const expectedReadyWalletEleText = 'Your Leap wallet is ready!'
+      const expectedReadyWalletEleText = 'Your NNWallet is ready!'
       expect(readyWalletEleText).toBe(expectedReadyWalletEleText)
     })
 

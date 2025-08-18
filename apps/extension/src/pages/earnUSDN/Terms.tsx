@@ -19,7 +19,7 @@ const Terms = ({ onBack, onAgree }: { onBack: () => void; onAgree: () => void })
         <div className='flex flex-col gap-3 p-6 !pb-0 h-[calc(100%-72px)] overflow-scroll'>
           <div className='text-black-100 dark:text-white-100 break-words w-full overflow-y-scroll h-[calc(100%-48px)] max-h-[calc(100%-48px)]'>
             <p className='mt-2'>
-              <strong>Note</strong>: This product is provided by Noble (NASD, Inc.), not Leap Wallet. The terms below
+              <strong>Note</strong>: This product is provided by Noble (NASD, Inc.), not NNWallet. The terms below
               are reproduced for your convenience from{' '}
               <a className='underline' href='https://dollar.noble.xyz/terms-of-use' target='_blank' rel='noreferrer'>
                 Noble’s official Terms of Use

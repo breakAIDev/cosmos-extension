@@ -12,9 +12,9 @@ const buildTypes = {
     outDirPath: 'builds/cosmos',
     publicDir: 'public/leap-cosmos',
     manifestData: {
-      name: 'Leap Wallet',
+      name: 'NNWallet',
       description:
-        'Multichain crypto wallet for Cosmos, EVM, Solana, Move, Bitcoin & more. Leap everywhere!',
+        'Multichain crypto wallet for Cosmos, EVM, Solana, Move, Bitcoin & more. NNWallet everywhere!',
     },
   },
   staging: {
@@ -23,9 +23,9 @@ const buildTypes = {
     outDirPath: 'builds/staging',
     publicDir: 'public/leap-cosmos',
     manifestData: {
-      name: 'Leap Wallet',
+      name: 'NNWallet',
       description:
-        'Multichain crypto wallet for Cosmos, EVM, Solana, Move, Bitcoin & more. Leap everywhere!',
+        'Multichain crypto wallet for Cosmos, EVM, Solana, Move, Bitcoin & more. NNWallet everywhere!',
     },
   },
   canary: {
@@ -34,7 +34,7 @@ const buildTypes = {
     outDirPath: 'builds/canary',
     publicDir: 'public/leap-cosmos',
     manifestData: {
-      name: 'Leap Wallet CANARY BUILD',
+      name: 'NNWallet CANARY BUILD',
       description:
         'THIS IS THE CANARY DISTRIBUTION OF THE LEAP COSMOS EXTENSION, INTENDED FOR DEVELOPERS.',
     },
@@ -45,7 +45,7 @@ const buildTypes = {
     publicDir: 'public/leap-cosmos',
     outDirPath: 'builds/development',
     manifestData: {
-      name: 'Leap Wallet DEVELOPMENT BUILD',
+      name: 'NNWallet DEVELOPMENT BUILD',
       description:
         'THIS IS THE DEVELOPMENT DISTRIBUTION OF THE LEAP COSMOS EXTENSION, INTENDED FOR LOCAL DEVELOPMENT.',
     },

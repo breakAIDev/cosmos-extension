@@ -14,7 +14,7 @@ const buildTypes = {
     outDirPath: 'builds/compass',
     manifestData: {
       name: 'Compass Wallet for Sei',
-      description: 'A crypto wallet for Sei Blockchain, brought to you by the Leap Wallet team.',
+      description: 'A crypto wallet for Sei Blockchain, brought to you by the NNWallet team.',
     },
   },
   staging: {
@@ -24,7 +24,7 @@ const buildTypes = {
     outDirPath: 'builds/staging',
     manifestData: {
       name: 'Compass Wallet for Sei',
-      description: 'A crypto wallet for Sei Blockchain, brought to you by the Leap Wallet team.',
+      description: 'A crypto wallet for Sei Blockchain, brought to you by the NNWallet team.',
     },
   },
   canary: {

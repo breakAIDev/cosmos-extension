@@ -35,7 +35,7 @@ export default function RequestFaucet() {
   faucetDetails = RECAPTCHA_CHAINS.includes(activeChain)
     ? {
         title: 'Pryzm Testnet Faucet',
-        description: 'Claim Pryzm testnet tokens directly from Leap Wallet',
+        description: 'Claim Pryzm testnet tokens directly from NNWallet',
         url: 'https://testnet-pryzmatics.pryzm.zone/pryzmatics/faucet/claim',
         network: 'testnet',
         security: {

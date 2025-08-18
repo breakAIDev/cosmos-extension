@@ -19,7 +19,7 @@ const ErrorBoundaryFallback = () => {
 
   return (
     <div className='relative w-full overflow-clip enclosing-panel panel-height'>
-      <PopupLayout header={<Header title='Leap Wallet' />} skipWatchingWalletHeader>
+      <PopupLayout header={<Header title='NNWallet' />} skipWatchingWalletHeader>
         <div
           className='flex flex-col items-center justify-center w-full'
           style={{

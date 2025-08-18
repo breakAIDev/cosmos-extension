@@ -138,7 +138,7 @@ const OnboardingView = ({
           transition={transition}
           className='flex flex-col gap-4'
         >
-          <span className='text-center text-xxl font-bold text-secondary-foreground'>Leap everywhere</span>
+          <span className='text-center text-xxl font-bold text-secondary-foreground'>NNWallet everywhere</span>
           <span className='text-center text-xl text-secondary-800'>
             Multi-chain wallet for Cosmos, Ethereum, Solana, Bitcoin & more
           </span>

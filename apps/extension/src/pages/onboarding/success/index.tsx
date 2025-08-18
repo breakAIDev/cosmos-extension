@@ -168,7 +168,7 @@ const PinButton = () => {
           className='absolute top-0 right-10 z-10 rounded-b-xl px-9 flex items-center gap-3 bg-[hsl(var(--gradient-radial-mono-end))]'
         >
           <div className='text-white-100 bg-primary rounded-b-xl px-4 py-2 flex items-center gap-3'>
-            <span className='text-sm font-bold w-32'>Pin Leap to your toolbar</span>
+            <span className='text-sm font-bold w-32'>Pin NNWallet to your toolbar</span>
 
             <ArrowUp size={24} weight='bold' />
           </div>

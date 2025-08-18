@@ -117,7 +117,7 @@ const SuggestEthereumChain = observer(
       <>
         <div className='flex flex-col items-center'>
           <Heading text='Add Network' />
-          <SubHeading text={`This will allow this network to be used within Leap Wallet.`} />
+          <SubHeading text={`This will allow this network to be used within NNWallet.`} />
 
           <GenericCard
             title={<span className='text-[15px] truncate'>{chainInfo?.chainName ?? ''}</span>}

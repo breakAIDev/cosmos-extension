@@ -75,7 +75,7 @@ const SideNav = observer((): ReactElement => {
         <DrawerHeader className='flex items-center justify-between border-b border-border-bottom/50 px-6 py-4'>
           <div className='flex items-center gap-2'>
             <HappyFrog className='size-8' />
-            <h3 className='text-mdl font-bold'>Leap Wallet</h3>
+            <h3 className='text-mdl font-bold'>NNWallet</h3>
           </div>
 
           <DrawerClose asChild>
