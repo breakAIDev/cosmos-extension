@@ -50,14 +50,14 @@ export const Features = observer(({ setShowNavPage }: { setShowNavPage: (page: N
         },
         enabled: !isVoteHidden,
       },
-      {
-        title: 'Celestia Light Node',
-        titleIcon: <CelestiaIcon />,
-        onClick: () => {
-          setShowNavPage(NavPages.LightNode);
-        },
-        enabled: featureFlags?.light_node?.extension === 'active',
-      },
+      // {
+      //   title: 'Celestia Light Node',
+      //   titleIcon: <CelestiaIcon />,
+      //   onClick: () => {
+      //     setShowNavPage(NavPages.LightNode);
+      //   },
+      //   enabled: featureFlags?.light_node?.extension === 'active',
+      // },
     ];
 
     return features;
