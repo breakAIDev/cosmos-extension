@@ -51,7 +51,7 @@ export enum ButtonName {
   MANAGE_CHAIN = 'manage chain',
   RETRY_AIRDROP = 'retry airdrop',
   CLAIM_AIRDROP = 'claim airdrop',
-  GO_TO_LEAPBOARD = 'go to leapboard',
+  GO_TO_NNWALLETBOARD = 'go to nnwalletboard',
   SIDE_PANEL_OPENED = 'side panel opened',
   SIDE_PANEL_CLOSED = 'side panel closed',
   ONRAMP_TOKEN_SELECTION = 'on-ramp token selection',

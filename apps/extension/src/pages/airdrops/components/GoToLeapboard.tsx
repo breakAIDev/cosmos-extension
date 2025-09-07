@@ -17,7 +17,7 @@ export default function GoToLeapboard({ className = '' }: GoToLeapboardProps) {
     try {
       mixpanel.track(EventName.ButtonClick, {
         buttonType: ButtonType.AIRDROPS,
-        buttonName: ButtonName.GO_TO_LEAPBOARD,
+        buttonName: ButtonName.GO_TO_NNWALLETBOARD,
         redirectURL,
         time: Date.now() / 1000,
       });
@@ -39,7 +39,7 @@ export default function GoToLeapboard({ className = '' }: GoToLeapboardProps) {
     >
       <img src='https://assets.leapwallet.io/Leapboard.png' alt='leapboard_logo' width={16} height={16} />
       <Text size='xs' className='font-bold'>
-        Go to Leap Dashboard
+        Go to NNWallet Dashboard
       </Text>
       <RocketLaunch size={16} className='text-black-100 dark:text-white-100' />
     </div>
