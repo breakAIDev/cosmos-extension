@@ -41,7 +41,7 @@ export enum ServiceProviderEnum {
 }
 
 export enum ServiceProviderBaseUrlEnum {
-  SWAPPED = 'https://widget.swapped.com',
+  SWAPPED = 'https://app.nnx.xyz/?tab=buy',
 }
 
 const Buy = () => {

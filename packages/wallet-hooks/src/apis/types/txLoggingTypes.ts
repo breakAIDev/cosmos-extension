@@ -156,7 +156,7 @@ export type DappTransaction = {
 
   /**
    * [Mobile Apps] `dapp_source`: applies only for mobile apps where dApp transactions are made
-   * `in_app_browser` (this is browser within Leap mobile app), `mobile_browser`, `desktop_browser`
+   * `in_app_browser` (this is browser within NNWallet app), `mobile_browser`, `desktop_browser`
    */
   dapp_source?: DAPP_SOURCE;
 

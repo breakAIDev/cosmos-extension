@@ -29,7 +29,7 @@ function NonChadDetailsDrawer({ isShown, onClose }: EligibilityDrawerProps) {
       <div className='flex flex-col items-center'>
         {/* all raffles tab */}
         <div className='size-20'>
-          <HappyFrog />
+          <img src={HappyFrog} />
         </div>
 
         <span className='flex flex-col gap-3 text-center mb-7 mt-2'>
@@ -73,7 +73,7 @@ function ChadDetailsDrawer({ isShown, onClose }: EligibilityDrawerProps) {
               className='select-none -z-10 absolute inset-0 w-full h-full rounded-2xl overflow-hidden mx-auto'
             />
 
-            <CrownFrog className='my-8' />
+            <img src={CrownFrog} className='my-8' />
 
             <span className='flex flex-col gap-3 text-center'>
               <span className='font-bold text-xl'>

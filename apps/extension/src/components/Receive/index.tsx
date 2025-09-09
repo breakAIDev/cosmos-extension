@@ -62,6 +62,7 @@ export default function ReceiveToken({ forceChain }: { forceChain?: SupportedCha
     height: 250,
     width: 250,
     data: address ?? '',
+    image: Images.Logos.LeapLogo,
   };
 
   return (
@@ -94,7 +95,7 @@ export default function ReceiveToken({ forceChain }: { forceChain?: SupportedCha
             <div
               className='mt-2'
               onClick={() => {
-                window.open(`https://widget.swapped.com`);
+                window.open(`https://app.nnx.xyz/?tab=buy`);
               }}
             >
               <OnboardCard

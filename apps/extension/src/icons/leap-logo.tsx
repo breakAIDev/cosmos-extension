@@ -1,35 +1,7 @@
 import { IconProps } from '@phosphor-icons/react';
 import React from 'react';
 
-const LeapNavLogo = (props: IconProps) => (
-  <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
-  width="72" height="72" viewBox="0 0 72 72"
-  preserveAspectRatio="xMidYMid meet">
-    <g transform="translate(0.0,72) scale(0.1,-0.1)"
-    fill="#000000" stroke="none">
-      <path d="M153 576 l-28 -24 -5 -161 c-6 -186 -1 -217 35 -248 25 -22 34 -23
-      205 -23 175 0 180 1 207 24 l28 24 5 161 c6 186 1 217 -35 248 -25 22 -34 23
-      -205 23 -175 0 -180 -1 -207 -24z m256 -46 c38 -11 91 -64 91 -92 0 -15 -4
-      -17 -18 -9 -28 15 -97 -22 -113 -60 -10 -26 -9 -36 4 -65 9 -19 13 -34 8 -34
-      -23 0 -43 15 -57 42 -19 37 -30 29 -16 -11 13 -37 3 -39 -28 -6 -19 20 -22 31
-      -17 72 l5 48 -19 -24 c-19 -23 -19 -23 -19 -2 0 31 37 98 60 111 11 6 18 15
-      15 20 -11 18 55 24 104 10z m27 -220 c7 -7 14 -16 14 -21 0 -13 -34 -11 -48 3
-      -16 16 -15 81 1 97 10 10 13 4 15 -28 2 -22 10 -45 18 -51z m-213 -83 c3 10 5
-      2 6 -17 l1 -35 -19 24 -19 25 -5 -25 c-3 -19 -5 -17 -6 10 -1 33 0 34 18 17
-      18 -17 19 -17 24 1z m60 0 c3 10 5 2 6 -17 l1 -35 -19 24 -19 25 -5 -25 c-3
-      -19 -5 -17 -6 10 -1 33 0 34 18 17 18 -17 19 -17 24 1z m53 -23 c-9 -9 -20
-      -13 -24 -9 -4 4 -1 10 6 12 6 3 12 12 12 21 0 12 3 13 11 5 9 -9 7 -16 -5 -29z
-      m101 -1 c-3 -10 -5 -4 -5 12 0 17 2 24 5 18 2 -7 2 -21 0 -30z m20 0 c-3 -10
-      -5 -4 -5 12 0 17 2 24 5 18 2 -7 2 -21 0 -30z m78 3 c0 -14 -3 -22 -7 -20 -4
-      3 -8 17 -8 31 0 32 13 22 15 -11z m-170 -6 c-4 -12 -9 -19 -12 -17 -3 3 -2 15
-      2 27 4 12 9 19 12 17 3 -3 2 -15 -2 -27z m140 20 c3 -6 -1 -7 -9 -4 -10 4 -16
-      1 -16 -9 0 -8 6 -18 13 -20 9 -4 9 -6 0 -6 -16 -1 -26 17 -19 34 6 17 22 20
-      31 5z"/>
-      <path d="M382 478 c7 -19 45 -21 51 -4 5 12 -1 16 -24 16 -20 0 -29 -4 -27
-      -12z"/>
-    </g>
-  </svg>
-);
+import LeapNavLogo from './leap-logo.png';
 
 export const LeapLogoText = (props: IconProps) => {
   return (
@@ -54,7 +26,7 @@ export const LeapLogoText = (props: IconProps) => {
 export const LeapLogoFullSm = () => {
   return (
     <div className='flex items-start gap-[4.5px]'>
-      <LeapNavLogo className='h-[19px] w-[29px]' />
+      <img src={LeapNavLogo} className='h-[19px] w-[29px]' />
       {/* <LeapLogoText className='h-6 w-12' /> */}
     </div>
   );

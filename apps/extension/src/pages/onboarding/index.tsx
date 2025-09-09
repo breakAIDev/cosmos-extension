@@ -128,7 +128,7 @@ const OnboardingView = ({
       />
 
       <div className='flex flex-col gap-6 items-center justify-center flex-1'>
-        <HappyFrog id='leap-logo' className='size-[5.625rem]' style={{ transform: 'translateY(120px)' }} />
+          <img src={HappyFrog} id='leap-logo' className='size-[5.625rem]' style={{ transform: 'translateY(120px)' }} />
 
         <motion.span
           key='main-text'

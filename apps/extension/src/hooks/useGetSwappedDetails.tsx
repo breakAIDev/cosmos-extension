@@ -4,7 +4,7 @@ import axios from 'axios';
 import { getCountryLogo } from 'utils/getCountryLogo';
 
 const BASE_API = 'https://api.kado.money';
-const SWAPPED_API = 'https://widget.swapped.com/api/v1';
+const SWAPPED_API = 'https://app.nnx.xyz/?tab=buy/api/v1';
 
 type RequestQuoteArgs = {
   payment_method: 'credit-card';

@@ -32,7 +32,7 @@ export default function EmptyBookmarks({ title, subTitle, className }: EmptyBook
         className,
       )}
     >
-      <HappyFrog className='size-20 ' />
+      <img src={HappyFrog} className='size-20 ' />
 
       <span className='font-bold text-mdl mb-1'>{title}</span>
       <span className='text-sm font-medium text-center text-muted-foreground !leading-5 px-11'>{subTitle}</span>

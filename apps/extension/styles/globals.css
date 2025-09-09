@@ -655,7 +655,7 @@ input[type='number']::-webkit-outer-spin-button {
 }
 
 #light-node-progress-bar.paused div div:nth-child(2)::after {
-  background-image: url('../../extension/src/images/logos/leap-o-logo.png');
+  background-image: url('../../extension/src/images/logos/leap-logo.png');
   right: -3px;
   top: -6px;
   height: 15px;

@@ -50,7 +50,7 @@ function LoginView(props: {
       </div>
 
       <div className={'flex flex-col flex-1 gap-5 p-6 justify-center items-center w-full relative'}>
-        <HappyFrog
+        <img src={HappyFrog}
           className={cn(
             'size-28 transition-all duration-500 scale-100 translate-y-0 opacity-100',
             props.exitAnimationState === 'scale' && 'scale-150 translate-y-16',

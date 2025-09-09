@@ -14,11 +14,11 @@ import { usePageView } from 'hooks/analytics/usePageView';
 import { SeedPhrase } from 'hooks/wallet/seed-phrase/useSeedPhrase';
 import { Wallet } from 'hooks/wallet/useWallet';
 import { LockIcon } from 'icons/lock';
+import { Images } from 'images';
 import React, { Dispatch, ReactElement, SetStateAction, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { transition200 } from 'utils/motion-variants/global-layout-motions';
 import { uiErrorTags } from 'utils/sentry';
-
 type FormData = {
   readonly rawPassword: string;
 };
@@ -194,11 +194,12 @@ function QrCodeView({ qrData, setRevealed, setPassword }: EnterPasswordViewProps
           data={qrData as string}
           margin={0}
           qrOptions={{ errorCorrectionLevel: 'M' }}
+          image={Images.Logos.LeapLogo}
         />
       </div>
 
       <span className='text-xs font-medium text-secondary-800 text-center'>
-        Scan the QR code using the Leap mobile app to sync your primary accounts and settings.
+        Scan the QR code using the NNWallet app to sync your primary accounts and settings.
       </span>
     </>
   );
