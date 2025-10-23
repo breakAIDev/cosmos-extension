@@ -6,7 +6,7 @@
   "options_page": "index.html#/home",
   "web_accessible_resources": [
     {
-      "resources": ["injectLeap.js"],
+      "resources": ["injectNNWallet.js"],
       "matches": ["<all_urls>"]
     }
   ],

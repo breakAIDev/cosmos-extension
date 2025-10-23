@@ -30,7 +30,7 @@ import {
   osmosisProtoRegistry,
 } from '@leapwallet/cosmos-wallet-sdk/dist/browser/proto/osmosis';
 import { strideAminoConverters } from '@leapwallet/cosmos-wallet-sdk/dist/browser/proto/stride/client';
-import { LEAPBOARD_URL, LEAPBOARD_URL_OLD } from 'config/constants';
+import { NNWALLETBOARD_URL, NNWALLETBOARD_URL_OLD } from 'config/constants';
 import { SignMode } from 'cosmjs-types/cosmos/tx/signing/v1beta1/signing';
 import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
 import Long from 'long';
@@ -144,7 +144,7 @@ const registry = new Registry([
 
 import LogCosmosDappTx = LeapWalletApi.LogCosmosDappTx;
 
-const DAPPS_TO_SKIP_TXN_LOGGING = [LEAPBOARD_URL, LEAPBOARD_URL_OLD, 'swapfast.app'];
+const DAPPS_TO_SKIP_TXN_LOGGING = [NNWALLETBOARD_URL, NNWALLETBOARD_URL_OLD, 'swapfast.app'];
 
 function shouldSkipTxnLogging(origin: string): boolean {
   return DAPPS_TO_SKIP_TXN_LOGGING.some((dapp) => origin.trim().toLowerCase().includes(dapp));

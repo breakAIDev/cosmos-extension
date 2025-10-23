@@ -84,9 +84,9 @@ export default function OnboardingSuccess() {
             <h1 className='font-bold text-xxl'>You are all set!</h1>
 
             <span className='flex flex-col gap-y-1 text-muted-foreground text-md'>
-              <span>Discover Cosmos, Ethereum & more with Leap.</span>
+              <span>Discover Cosmos, Ethereum & more with NNWallet.</span>
               <span>
-                Open Leap with
+                Open NNWallet with
                 <span className='text-accent-foreground font-bold'> {ctrlKey}</span> +
                 <span className='text-accent-foreground font-bold'> Shift</span> +
                 <span className='text-accent-foreground font-bold'> L</span>
@@ -98,7 +98,7 @@ export default function OnboardingSuccess() {
         <Button
           className='w-full'
           onClick={() => {
-            handleSidePanelClick('https://app.leapwallet.io');
+            handleSidePanelClick('https://nnwallet.xyz');
           }}
         >
           Get started

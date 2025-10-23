@@ -228,9 +228,9 @@ export const IBCSettings: React.FC<IBCSettingsProps> = ({ className, targetChain
             </div>
           )}
           <div className='flex items-center'>
-            <Text size='xs' className='text-gray-700 dark:text-gray-300 capitalize'>
+            {/* <Text size='xs' className='text-gray-700 dark:text-gray-300 capitalize'>
               Need Help?
-            </Text>
+            </Text> */}
             <Tooltip
               content={
                 <p className='text-gray-500 dark:text-gray-100 text-sm'>

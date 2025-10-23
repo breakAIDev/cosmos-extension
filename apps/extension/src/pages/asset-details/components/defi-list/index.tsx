@@ -4,7 +4,7 @@ import { CardDivider } from '@leapwallet/leap-ui';
 import { CaretRight } from '@phosphor-icons/react';
 import { BigNumber } from 'bignumber.js';
 import Text from 'components/text';
-import { LEAPBOARD_URL } from 'config/constants';
+import { NNWALLETBOARD_URL } from 'config/constants';
 import React, { useMemo, useState } from 'react';
 
 import DefiRow from '../DefiRow/DefiRow';
@@ -132,7 +132,7 @@ function DefiList({ tokenName }: { tokenName: string }) {
         <div className='flex pr-3 flex-row items-center justify-end mr-3 group z-0 w-full cursor-pointer transition'>
           <div
             onClick={() => {
-              window.open(`${LEAPBOARD_URL}/explore/defi`, '_blank');
+              window.open(`${NNWALLETBOARD_URL}/explore/defi`, '_blank');
             }}
             className='flex flex-row items-center justify-end gap-2'
           >

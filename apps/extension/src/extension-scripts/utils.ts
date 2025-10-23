@@ -14,7 +14,7 @@ import { KeyChain } from '@leapwallet/leap-keychain';
 import { initStorage } from '@leapwallet/leap-keychain';
 import { base58 } from '@scure/base';
 import { COMPASS_CHAINS } from 'config/config';
-import { LEAPBOARD_URL, LEAPBOARD_URL_OLD } from 'config/constants';
+import { NNWALLETBOARD_URL, NNWALLETBOARD_URL_OLD } from 'config/constants';
 import { MessageTypes } from 'config/message-types';
 import { ACTIVE_CHAIN, ACTIVE_WALLET_ID, BETA_CHAINS, BG_RESPONSE, SELECTED_NETWORK } from 'config/storage-keys';
 import CryptoJs from 'crypto-js';
@@ -98,7 +98,7 @@ export async function checkChainConnections(
   msg: any,
   activeWalletId: string,
 ) {
-  const isLeapBoardOrigin = msg.origin === LEAPBOARD_URL || msg.origin === LEAPBOARD_URL_OLD;
+  const isNNWalletBoardOrigin = msg.origin === NNWALLETBOARD_URL || msg.origin === NNWALLETBOARD_URL_OLD;
   let isNewChainPresent = !activeWalletId;
   const chainsIds = await validateChains(chainIds);
   const validChainIds = Object.keys(chainsIds).filter((chainId) => !!chainsIds[chainId]);
@@ -112,7 +112,7 @@ export async function checkChainConnections(
     });
   }
 
-  if (validChainIds.length && isLeapBoardOrigin) {
+  if (validChainIds.length && isNNWalletBoardOrigin) {
     isNewChainPresent = false;
     await addToConnections(chainIds, [activeWalletId], msg.origin);
   }
@@ -528,7 +528,7 @@ export function requestEnableAccess(payload: {
   payloadId: string;
   ecosystem?: LineType;
   ethMethod?: string;
-  isLeap?: boolean;
+  isNNWallet?: boolean;
 }) {
   // Store the listener function in a variable so we can remove it later
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

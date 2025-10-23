@@ -97,7 +97,7 @@ export const GlobalLayout = observer((props: PropsWithChildren<GlobalLayoutProps
         <div className='fixed top-6 left-8 right-8 flex flex-row justify-between items-center'>
           <CompassFullLogo className='h-6 z-10' />
 
-          <Button variant={'ghost'} asChild className='gap-1.5 h-auto'>
+          {/* <Button variant={'ghost'} asChild className='gap-1.5 h-auto'>
             <a
               target='_blank'
               rel='noreferrer'
@@ -106,7 +106,7 @@ export const GlobalLayout = observer((props: PropsWithChildren<GlobalLayoutProps
               <Question size={24} />
               Help
             </a>
-          </Button>
+          </Button> */}
         </div>
       )}
     </>

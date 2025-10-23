@@ -25,7 +25,7 @@ export default defineConfig({
   themeConfig: {
     logo: {
       src: '/icon-128.png',
-      alt: 'Leap Cosmos Logo',
+      alt: 'NNWallet Cosmos Logo',
     },
     nav: nav(),
     sidebar: {
@@ -38,7 +38,7 @@ export default defineConfig({
     },
     socialLinks: [{ icon: 'github', link: 'https://github.com/leapwallet/leap-cosmos' }],
     footer: {
-      message: 'Made with ♥️ in India at LeapWallet.io',
+      message: 'Made with ♥️ in India at NNWallet.xyz',
     },
     algolia: {
       // appId: '8J64VVRP8K',

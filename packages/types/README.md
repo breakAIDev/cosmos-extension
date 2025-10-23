@@ -1,5 +1,5 @@
 ## @leapwallet/types
-This package provides type definitions for the Leap extension provider, making it easier to work with in TypeScript projects.
+This package provides type definitions for the NNWallet extension provider, making it easier to work with in TypeScript projects.
 
 ### Installation
 Before using @leapwallet/types, ensure you've installed it via your package manager. 

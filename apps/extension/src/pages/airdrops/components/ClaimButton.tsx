@@ -3,7 +3,7 @@ import { Buttons } from '@leapwallet/leap-ui';
 import { ArrowSquareOut } from '@phosphor-icons/react';
 import { captureException } from '@sentry/react';
 import { ButtonName, ButtonType, EventName } from 'config/analytics';
-import { LEAPBOARD_URL } from 'config/constants';
+import { NNWALLETBOARD_URL } from 'config/constants';
 import mixpanel from 'mixpanel-browser';
 import React from 'react';
 
@@ -14,7 +14,7 @@ interface ClaimButtonProps {
 export default function ClaimButton({ selectedAirdrop }: ClaimButtonProps) {
   const redirectURL =
     selectedAirdrop?.CTAInfo?.type === 'internal'
-      ? `${LEAPBOARD_URL}${selectedAirdrop?.CTAInfo?.href}`
+      ? `${NNWALLETBOARD_URL}${selectedAirdrop?.CTAInfo?.href}`
       : selectedAirdrop?.CTAInfo?.href;
 
   const trackCTAEvent = () => {

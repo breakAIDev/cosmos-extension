@@ -64,7 +64,7 @@ export const GlobalBannersAD = React.memo(({ show = true }: { show?: boolean }) 
   const chainName = isAggregatedView ? 'All Chains' : chain?.chainName ?? '';
 
   const { data: bannerConfig, status: bannerConfigStatus } = useBannerConfig();
-  const { leapBanners, isLeapBannersLoading } = useGetBannerData(chain?.chainId);
+  const { nnwalletBanners, isNNWalletBannersLoading } = useGetBannerData(chain?.chainId);
 
   const { data: numiaBanners, status: numiaStatus } = useGetNumiaBanner(
     [osmoWalletAddress ?? '', ethWalletAddress ?? ''],
@@ -73,14 +73,14 @@ export const GlobalBannersAD = React.memo(({ show = true }: { show?: boolean }) 
   );
 
   const bannerAds = useMemo(() => {
-    if (numiaStatus === 'loading' || isLeapBannersLoading) {
+    if (numiaStatus === 'loading' || isNNWalletBannersLoading) {
       return [];
     }
 
-    return [...(numiaBanners ?? []), ...(leapBanners ?? [])].filter(
+    return [...(numiaBanners ?? []), ...(nnwalletBanners ?? [])].filter(
       (banner) => banner?.visibleOn === 'ALL' || banner?.visibleOn === 'EXTENSION',
     );
-  }, [isLeapBannersLoading, leapBanners, numiaBanners, numiaStatus]);
+  }, [isNNWalletBannersLoading, nnwalletBanners, numiaBanners, numiaStatus]);
 
   const displayADs = useMemo(() => {
     return getDisplayAds(bannerAds, Array.from(disabledBannerAds));
@@ -323,7 +323,7 @@ export const GlobalBannersAD = React.memo(({ show = true }: { show?: boolean }) 
     fn().catch(console.error);
   }, [cosmosWalletAddress, seiWalletAddress]);
 
-  if (displayADs.length === 0 && (numiaStatus === 'loading' || isLeapBannersLoading)) {
+  if (displayADs.length === 0 && (numiaStatus === 'loading' || isNNWalletBannersLoading)) {
     return <BannersLoading />;
   }
 

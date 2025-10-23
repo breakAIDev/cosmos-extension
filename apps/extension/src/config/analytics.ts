@@ -40,7 +40,7 @@ export enum ButtonName {
   BRIDGE = 'bridge',
   BUY = 'fiat on-ramp',
   MOBILE_APP = 'mobile app',
-  LEAPBOARD = 'leapboard',
+  NNWALLETBOARD = 'nnwalletboard',
   EXPLORE_DEFI = 'dive into defi',
   EXPLORE_NFTS = 'explore nfts',
   EXPLORE_TOKENS = 'explore tokens',

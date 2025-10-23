@@ -161,7 +161,7 @@ module.exports = defineConfig({
         entry: {
           background: './src/extension-scripts/background.ts',
           contentScripts: './src/content-scripts/content-scripts.ts',
-          injectLeap: './src/content-scripts/inject-leap.ts',
+          injectNNWallet: './src/content-scripts/inject-nnwallet.ts',
         },
         define: {
           ...envVars,

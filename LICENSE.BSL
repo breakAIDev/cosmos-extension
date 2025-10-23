@@ -9,7 +9,7 @@ Parameters
 
 Licensor:             Hyphen Labs
 
-Licensed Work:        Leap Browser Extension.
+Licensed Work:        NNWallet Browser Extension.
                       The Licensed Work is (c) 2023 Hyphen Labs
 
 Change Date:          The earlier of 2027-08-01 or a date specified by

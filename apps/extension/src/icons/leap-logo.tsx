@@ -1,7 +1,7 @@
 import { IconProps } from '@phosphor-icons/react';
 import React from 'react';
 
-import LeapNavLogo from './leap-logo.png';
+import LeapNavLogo from '../images/logos/nnwallet-logo.png';
 
 export const LeapLogoText = (props: IconProps) => {
   return (
@@ -26,7 +26,7 @@ export const LeapLogoText = (props: IconProps) => {
 export const LeapLogoFullSm = () => {
   return (
     <div className='flex items-start gap-[4.5px]'>
-      <img src={LeapNavLogo} className='h-[19px] w-[29px]' />
+      <img src={LeapNavLogo} className='h-[29px] w-[29px]' />
       {/* <LeapLogoText className='h-6 w-12' /> */}
     </div>
   );

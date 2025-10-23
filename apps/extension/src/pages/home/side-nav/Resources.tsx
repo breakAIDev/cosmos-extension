@@ -14,7 +14,7 @@ const resources = [
     title: 'Support',
     titleIcon: HeadphoneIcon,
     onclick: () => {
-      window.open('https://leapwallet.notion.site/Leap-Wallet-Help-Center-Cosmos-ba1da3c05d3341eaa44a1850ed3260ee');
+      window.open('https://nnwallet.xyz/NNWallet-Help-Center-Cosmos-ba1da3c05d3341eaa44a1850ed3260ee');
     },
     enabled: true,
   },
@@ -23,7 +23,7 @@ const resources = [
     title: 'Twitter',
     titleIcon: XIcon,
     onclick: () => {
-      window.open('https://x.com/leap_wallet');
+      window.open('https://x.com/nnwallet');
     },
     enabled: true,
   },

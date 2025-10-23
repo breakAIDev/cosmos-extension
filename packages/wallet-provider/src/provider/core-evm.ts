@@ -15,7 +15,7 @@ const IDENTIFIER = process.env.APP?.includes('compass') ? 'compass' : 'leap';
 
 export class LeapEvm implements Ethereum {
   public isCompass: boolean = IDENTIFIER === 'compass';
-  public isLeap: boolean = IDENTIFIER === 'leap';
+  public isNNWallet: boolean = IDENTIFIER === 'leap';
   private inpageStream: WindowPostMessageStream;
   private origin: string;
   private requestQueue: { [key: string]: (EthereumRequestMessage & { requestQueueId: string })[] };
@@ -91,7 +91,7 @@ export class LeapEvm implements Ethereum {
         ...restMessage,
         origin,
         ecosystem: LINE_TYPE.ETHEREUM,
-        isLeap: this.isLeap,
+        isNNWallet: this.isNNWallet,
         isCompass: this.isCompass,
       });
 
@@ -202,7 +202,7 @@ export class LeapEvm implements Ethereum {
   toJSON() {
     return {
       name: 'LeapEvm',
-      isLeap: this.isLeap,
+      isNNWallet: this.isNNWallet,
       isCompass: this.isCompass,
     };
   }

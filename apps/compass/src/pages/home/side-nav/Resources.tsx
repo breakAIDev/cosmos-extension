@@ -16,7 +16,7 @@ const resources = [
     title: 'Support',
     titleIcon: Images.Nav.Support,
     onclick: () => {
-      window.open('https://leapwallet.notion.site/Leap-Wallet-Help-Center-Cosmos-ba1da3c05d3341eaa44a1850ed3260ee');
+      window.open('https://nnwallet.xyz/NNWallet-Help-Center-Cosmos-ba1da3c05d3341eaa44a1850ed3260ee');
     },
     enabled: !isCompassWallet(),
   },
@@ -24,7 +24,7 @@ const resources = [
     title: 'Twitter',
     titleIcon: Images.Nav.Twitter,
     onclick: () => {
-      window.open(isCompassWallet() ? 'https://twitter.com/compass_wallet' : 'https://twitter.com/leap_wallet');
+      window.open(isCompassWallet() ? 'https://twitter.com/compass_wallet' : 'https://twitter.com/nnwallet');
     },
     enabled: true,
   },

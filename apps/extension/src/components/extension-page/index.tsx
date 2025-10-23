@@ -56,7 +56,7 @@ export default function ExtensionPage(props: PropsWithChildren<ExtensionPageProp
                   }}
                 />
 
-                {
+                {/* {
                   <Label
                     imgSrc={Images.Misc.HelpIcon}
                     title={'Visit Help Center'}
@@ -68,7 +68,7 @@ export default function ExtensionPage(props: PropsWithChildren<ExtensionPageProp
                     }
                     isRounded={true}
                   />
-                }
+                } */}
               </div>
             )}
           </div>

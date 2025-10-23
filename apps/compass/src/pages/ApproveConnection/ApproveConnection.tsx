@@ -152,7 +152,7 @@ const ApproveConnection = () => {
         payloadId: string;
         ecosystem: LineType;
         ethMethod: string;
-        isLeap?: boolean;
+        isNNWallet?: boolean;
       };
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -194,7 +194,7 @@ const ApproveConnection = () => {
             payloadId: message.payload.payloadId,
             ecosystem: message.payload.ecosystem,
             ethMethod: message.payload.ethMethod,
-            isLeap: message.payload.isLeap,
+            isNNWallet: message.payload.isNNWallet,
           },
           status: 'success',
         });
@@ -232,7 +232,7 @@ const ApproveConnection = () => {
           payloadId: currentApprovalRequest.payloadId,
           ecosystem: currentApprovalRequest.ecosystem,
           ethMethod: currentApprovalRequest.ethMethod,
-          isLeap: currentApprovalRequest.isLeap,
+          isNNWallet: currentApprovalRequest.isNNWallet,
         },
         status: 'success',
       });

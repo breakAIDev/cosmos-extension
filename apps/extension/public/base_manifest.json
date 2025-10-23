@@ -2,11 +2,11 @@
   "manifest_version": 3,
   "name": "__NAME__",
   "description": "__DESCRIPTION__",
-  "version": "0.0.1",
+  "version": "1.0.1",
   "options_page": "index.html#/home",
   "web_accessible_resources": [
     {
-      "resources": ["injectLeap.js"],
+      "resources": ["injectNNWallet.js"],
       "matches": ["<all_urls>"]
     }
   ],

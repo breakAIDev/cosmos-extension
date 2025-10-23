@@ -65,14 +65,14 @@ export const InvestView: React.FC<InvestViewProps> = ({ data, displaySettings })
                 <div className='flex-[6] flex items-center pr-10 gap-2 my-3'>
                   <div className='flex w-[184px] items-center'>
                     <h3 className='text-sm font-medium text-gray-700 dark:text-gray-400'>{categoryData.label}</h3>
-                    <button
+                    {/* <button
                       className='ml-2 opacity-40'
                       onClick={() => {
                         setShowDescription(categoryId);
                       }}
                     >
                       <img src={HelpIcon} alt='help' className='h-[14px] w-[14px]' />
-                    </button>
+                    </button> */}
                   </div>
                   <p className='flex-[1] flex-shrink-0 dark:text-[#858585] text-gray-400 font-bold text-sm text-center'>
                     TVL

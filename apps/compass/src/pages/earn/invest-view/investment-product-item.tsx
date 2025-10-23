@@ -1,6 +1,6 @@
 import type { DappData, ProductData } from '@leapwallet/cosmos-wallet-hooks';
 import BigNumber from 'bignumber.js';
-import { LEAPBOARD_URL } from 'config/constants';
+import { NNWALLETBOARD_URL } from 'config/constants';
 import { useDefaultTokenLogo } from 'hooks/utility/useDefaultTokenLogo';
 import { RightArrow } from 'images/misc';
 import React from 'react';
@@ -20,7 +20,7 @@ export const InvestmentProductItem: React.FC<InvestmentProductItemProps> = ({ pr
         className='flex justify-start items-center py-3 gap-2 border-b border-b-gray-100 dark:border-b-gray-800 group-last-of-type/item:border-b-0'
         target='_blank'
         rel='noopener noreferrer'
-        href={product.dappCategory === 'liquidStaking' ? `${LEAPBOARD_URL}/staking/liquid` : product.productWebsite}
+        href={product.dappCategory === 'liquidStaking' ? `${NNWALLETBOARD_URL}/staking/liquid` : product.productWebsite}
       >
         <div
           className='flex items-center flex-[6] flex-grow-0 gap-2'

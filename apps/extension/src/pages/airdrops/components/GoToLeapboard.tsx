@@ -3,14 +3,14 @@ import { captureException } from '@sentry/react';
 import classNames from 'classnames';
 import Text from 'components/text';
 import { ButtonName, ButtonType, EventName } from 'config/analytics';
-import { LEAPBOARD_URL } from 'config/constants';
+import { NNWALLETBOARD_URL } from 'config/constants';
 import mixpanel from 'mixpanel-browser';
 import React from 'react';
 
 interface GoToLeapboardProps {
   className?: string;
 }
-const redirectURL = `${LEAPBOARD_URL}/airdrops`;
+const redirectURL = `${NNWALLETBOARD_URL}/airdrops`;
 
 export default function GoToLeapboard({ className = '' }: GoToLeapboardProps) {
   const trackCTAEvent = () => {
@@ -37,7 +37,7 @@ export default function GoToLeapboard({ className = '' }: GoToLeapboardProps) {
         trackCTAEvent();
       }}
     >
-      <img src='https://assets.leapwallet.io/Leapboard.png' alt='leapboard_logo' width={16} height={16} />
+      <img src='https://assets.leapwallet.io/Leapboard.png' alt='nnwalletboard_logo' width={16} height={16} />
       <Text size='xs' className='font-bold'>
         Go to NNWallet Dashboard
       </Text>

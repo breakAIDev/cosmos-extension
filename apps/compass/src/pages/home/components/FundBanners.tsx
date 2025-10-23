@@ -5,7 +5,7 @@ import { captureException } from '@sentry/react';
 import { useHardCodedActions } from 'components/search-modal';
 import Text from 'components/text';
 import { ButtonName, ButtonType, EventName, PageName } from 'config/analytics';
-import { AGGREGATED_CHAIN_KEY, LEAPBOARD_URL } from 'config/constants';
+import { AGGREGATED_CHAIN_KEY, NNWALLETBOARD_URL } from 'config/constants';
 import { useActiveChain } from 'hooks/settings/useActiveChain';
 import { useAddress } from 'hooks/wallet/useAddress';
 import mixpanel from 'mixpanel-browser';
@@ -55,7 +55,7 @@ const FundBanners = React.memo(() => {
   const transactUrl = useCallback(
     (type: 'swap' | 'bridge') => {
       if (type === 'swap') {
-        return `${LEAPBOARD_URL}/transact/${type}${isAggregatedView ? '' : `?destinationChainId=${chain?.chainId}`}`;
+        return `${NNWALLETBOARD_URL}/transact/${type}${isAggregatedView ? '' : `?destinationChainId=${chain?.chainId}`}`;
       }
 
       if (type === 'bridge') {

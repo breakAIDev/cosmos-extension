@@ -1,8 +1,8 @@
 
-![Leap_banner](https://github.com/leapwallet/cosmos-extension/assets/110881421/94f43d03-5c9d-4f3b-ba4d-0830e629317e)
+![NNWallet_banner](https://github.com/leapwallet/cosmos-extension/assets/110881421/94f43d03-5c9d-4f3b-ba4d-0830e629317e)
 
 
-## Leap🐸
+## NNWallet🐸
 > The Super Wallet for the Interchain
 
 Available as [Chrome/Brave Extension](https://chrome.google.com/webstore/detail/leap-cosmos-wallet/fcfcfllfndlomdhbehjjcoimbgofdncg/?utm_source=website&utm_medium=permanent-website&utm_campaign=permanent)

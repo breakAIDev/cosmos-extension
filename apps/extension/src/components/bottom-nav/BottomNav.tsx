@@ -2,7 +2,7 @@ import { useChainsStore, useFeatureFlags } from '@leapwallet/cosmos-wallet-hooks
 import { ThemeName, useTheme } from '@leapwallet/leap-ui';
 import { ArrowsLeftRight, CurrencyDollar, Pulse, Wallet } from '@phosphor-icons/react';
 import classNames from 'classnames';
-import { LEAPBOARD_URL } from 'config/constants';
+import { NNWALLETBOARD_URL } from 'config/constants';
 import { useActiveChain } from 'hooks/settings/useActiveChain';
 import { Images } from 'images';
 import { observer } from 'mobx-react-lite';
@@ -39,7 +39,7 @@ const BottomNav = observer(({ label, disabled: disabledAll }: BottomNavProps) =>
   const isDark = theme === ThemeName.DARK;
 
   const alphaRedirectHandler = useCallback(() => {
-    const redirectUrl = `${LEAPBOARD_URL}/airdrops`; // todo: change to alpha once added on leapboard
+    const redirectUrl = `${NNWALLETBOARD_URL}/airdrops`; // todo: change to alpha once added on nnwalletboard
     window.open(redirectUrl, '_blank');
   }, []);
 

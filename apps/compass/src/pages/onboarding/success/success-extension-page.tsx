@@ -47,7 +47,7 @@ export default function SuccessExtensionPage(props: PropsWithChildren<SuccessExt
                 }}
               />
 
-              {!isCompassWallet() && (
+              {/* {!isCompassWallet() && (
                 <Label
                   imgSrc={Images.Misc.HelpIcon}
                   title={'Visit Help Center'}
@@ -59,7 +59,7 @@ export default function SuccessExtensionPage(props: PropsWithChildren<SuccessExt
                   }
                   isRounded={true}
                 />
-              )}
+              )} */}
             </div>
           )}
         </div>

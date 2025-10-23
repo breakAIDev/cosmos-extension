@@ -67,7 +67,7 @@ function injectScript() {
   try {
     const container = document.head || document.documentElement;
     const scriptTag = document.createElement('script');
-    scriptTag.setAttribute('src', chrome.runtime.getURL('injectLeap.js'));
+    scriptTag.setAttribute('src', chrome.runtime.getURL('injectNNWallet.js'));
     container.insertBefore(scriptTag, container.children[0]);
     container.removeChild(scriptTag);
   } catch (e: any) {

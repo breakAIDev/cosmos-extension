@@ -34,8 +34,8 @@ export const ETHERMINT_CHAINS = [
   'planq_7070-2',
 ];
 
-export const LEAPBOARD_URL = 'https://app.leapwallet.io';
-export const LEAPBOARD_URL_OLD = 'https://cosmos.leapwallet.io';
+export const NNWALLETBOARD_URL = 'https://nnwallet.xyz';
+export const NNWALLETBOARD_URL_OLD = 'https://cosmos.leapwallet.io';
 
 export const FIXED_FEE_CHAINS = ['mayachain', 'thorchain'];
 export const SHOW_ETH_ADDRESS_CHAINS = ['dymension', 'humans', 'xrpl', 'initia', 'initiaEvm'];

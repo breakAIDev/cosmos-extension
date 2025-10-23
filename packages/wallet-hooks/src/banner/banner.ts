@@ -168,7 +168,7 @@ export async function postNumiaEvent(address: string, action: NumiaTrackAction, 
 export function useGetBannerData(chain: string) {
   const { data, status } = useGetBannerApi();
 
-  const { data: leapBanners, status: leapBannersStatus } = useQuery<BannerAD[]>(
+  const { data: nnwalletBanners, status: nnwalletBannersStatus } = useQuery<BannerAD[]>(
     [`${chain}-banner-ad-data`, chain, data],
     function () {
       /*
@@ -193,5 +193,5 @@ export function useGetBannerData(chain: string) {
     },
   );
 
-  return { leapBanners, isLeapBannersLoading: leapBannersStatus === 'loading' || status === 'loading' };
+  return { nnwalletBanners, isNNWalletBannersLoading: nnwalletBannersStatus === 'loading' || status === 'loading' };
 }

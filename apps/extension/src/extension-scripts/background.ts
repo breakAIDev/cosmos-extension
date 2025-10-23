@@ -172,7 +172,7 @@ const connectRemote = (remotePort: any) => {
         if (message.payload?.ecosystem === LINE_TYPE.ETHEREUM) {
           const store = await browser.storage.local.get([ACTIVE_WALLET, ACTIVE_CHAIN]);
           const lastEvmActiveChain = store[LAST_EVM_ACTIVE_CHAIN] ?? 'ethereum';
-          const activeChain: SupportedChain = message.payload?.isLeap
+          const activeChain: SupportedChain = message.payload?.isNNWallet
             ? lastEvmActiveChain
             : store[ACTIVE_CHAIN] ?? 'seiTestnet2';
           const seiEvmAddress = pubKeyToEvmAddressToShow(store[ACTIVE_WALLET].pubKeys?.[activeChain]);
@@ -1124,7 +1124,7 @@ const connectRemote = (remotePort: any) => {
             {
               error: getEvmError(
                 ETHEREUM_RPC_ERROR.INVALID_PARAMS,
-                `${payload.isLeap ? 'Leap' : 'Compass'} only supports ERC-20 asset type today.`,
+                `${payload.isNNWallet ? 'Leap' : 'Compass'} only supports ERC-20 asset type today.`,
               ),
             },
             payloadId,
@@ -1483,7 +1483,7 @@ const connectRemote = (remotePort: any) => {
                       payloadId: payloadId as unknown as string,
                       ecosystem: LINE_TYPE.ETHEREUM,
                       ethMethod: method,
-                      isLeap: payload.isLeap,
+                      isNNWallet: payload.isNNWallet,
                     });
                   } else {
                     if (!enableAccessRequests.has(queryString)) {
@@ -1674,7 +1674,7 @@ const connectRemote = (remotePort: any) => {
       }
 
       case ETHEREUM_METHOD_TYPE.WALLET__ADD_ETHEREUM_CHAIN: {
-        if (payload.isLeap) {
+        if (payload.isNNWallet) {
           if (payload.params && payload.params.length > 0) {
             const result = await addLeapEthereumChain(payload, evmChainIdMap, evmCustomOpenPopup);
             await switchEthereumChain(result?.success?.chainId, payload.origin, activeChainIdStorageKey);
@@ -1700,7 +1700,7 @@ const connectRemote = (remotePort: any) => {
           {
             error: getEvmError(
               ETHEREUM_RPC_ERROR.INTERNAL,
-              `${payload.isLeap ? 'Leap' : 'Compass'} does not support '${method}' method as of now.`,
+              `${payload.isNNWallet ? 'Leap' : 'Compass'} does not support '${method}' method as of now.`,
             ),
           },
           payloadId,

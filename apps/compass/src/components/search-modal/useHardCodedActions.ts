@@ -1,7 +1,7 @@
 import { sliceAddress, useAddress, useChainInfo, useFeatureFlags } from '@leapwallet/cosmos-wallet-hooks';
 import { captureException } from '@sentry/react';
 import { ButtonName, ButtonType, EventName, PageName } from 'config/analytics';
-import { AGGREGATED_CHAIN_KEY, LEAPBOARD_URL } from 'config/constants';
+import { AGGREGATED_CHAIN_KEY, NNWALLETBOARD_URL } from 'config/constants';
 import { useAuth } from 'context/auth-context';
 import { useActiveChain } from 'hooks/settings/useActiveChain';
 import mixpanel from 'mixpanel-browser';
@@ -45,7 +45,7 @@ export function useHardCodedActions() {
 
   function handleNftsClick(_redirectUrl?: string) {
     if (featureFlags?.nfts?.extension === 'redirect') {
-      const redirectUrl = _redirectUrl ?? `${LEAPBOARD_URL}/portfolio/nfts`;
+      const redirectUrl = _redirectUrl ?? `${NNWALLETBOARD_URL}/portfolio/nfts`;
       window.open(redirectUrl, '_blank');
     } else {
       navigate('/nfts');
@@ -54,7 +54,7 @@ export function useHardCodedActions() {
 
   function handleVoteClick(_redirectUrl?: string) {
     if (featureFlags?.gov?.extension === 'redirect') {
-      const redirectUrl = _redirectUrl ?? `${LEAPBOARD_URL}/portfolio/gov`;
+      const redirectUrl = _redirectUrl ?? `${NNWALLETBOARD_URL}/portfolio/gov`;
       window.open(redirectUrl, '_blank');
     } else {
       navigate('/gov');
@@ -87,8 +87,8 @@ export function useHardCodedActions() {
   function onSendClick(_redirectUrl?: string) {
     if (featureFlags?.ibc?.extension === 'redirect') {
       const fallbackUrl = activeChainInfo?.chainId
-        ? `${LEAPBOARD_URL}/transact/send?sourceChainId=${activeChainInfo.chainId}`
-        : `${LEAPBOARD_URL}/transact/send`;
+        ? `${NNWALLETBOARD_URL}/transact/send?sourceChainId=${activeChainInfo.chainId}`
+        : `${NNWALLETBOARD_URL}/transact/send`;
       const redirectUrl = _redirectUrl ?? fallbackUrl;
       window.open(redirectUrl, '_blank');
     } else {
