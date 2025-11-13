@@ -23,6 +23,8 @@ export const DefaultGasEstimates = {
 };
 
 export const defaultGasEstimates: Record<SupportedChain, GasEstimates> = {
+  // nnchain: DefaultGasEstimates,
+  nnterra: DefaultGasEstimates,
   cosmos: { ...DefaultGasEstimates, DEFAULT_GAS_TRANSFER: 80_000 },
   osmosis: DefaultGasEstimates,
   juno: { ...DefaultGasEstimates, DEFAULT_GAS_TRANSFER: 80_000 },

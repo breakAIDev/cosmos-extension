@@ -50,6 +50,8 @@ export class ChainTagsStore {
           'moo-1': ['Initia'],
           'inertia-2': ['Initia'],
           'inertiation-12': ['Initia'],
+          // 'NNCHAIN-1': ['Cosmos'],
+          'NNTERRA-1': ['Cosmos'],
           ...data.chainWiseMapping,
         };
         this.uniqueTags = data.allTags;

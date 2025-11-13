@@ -10,6 +10,8 @@ import { denoms, NativeDenom } from './denoms';
  */
 
 export type SupportedChain =
+  // | 'nnchain'
+  | 'nnterra'
   | 'cosmos'
   | 'osmosis'
   | 'secret'
@@ -143,6 +145,7 @@ export type SupportedChain =
   | 'citrea';
 
 export type AddressPrefix =
+  | 'nnc'
   | 'cosmos'
   | 'osmo'
   | 'secret'
@@ -263,6 +266,7 @@ export type AddressPrefix =
   | 'citrea';
 
 export type Denom =
+  | 'NNC-T'
   | 'JUNO'
   | 'OSMO'
   | 'SCRT'
@@ -479,6 +483,78 @@ export type ChainInfo = {
 };
 
 export const ChainInfos: Record<SupportedChain, ChainInfo> = {
+  // nnchain: {
+  //   chainId: 'NNCHAIN-1',
+  //   key: 'nnchain',
+  //   chainName: 'NNChain',
+  //   chainRegistryPath: 'nnchain',
+  //   chainSymbolImageUrl: 'https://coral-mad-reindeer-812.mypinata.cloud/ipfs/bafkreibxpvlshps3sua7bgctkupmszpxr7cnpcatsrchsvsztac6ux4wmu',
+  //   apis: {
+  //     rpc: 'http://155.133.26.60:26657',
+  //     rest: 'http://155.133.26.60:1317',
+  //   },
+  //   denom: 'NNC-T',
+  //   txExplorer: {
+  //     mainnet: {
+  //       name: 'NNTerra-1',
+  //       txUrl: 'http://72.61.161.82:3001/transactions',
+  //       accountUrl: 'http://72.61.161.82:3001/accounts',
+  //     },
+  //   },
+  //   bip44: {
+  //     coinType: '118',
+  //   },
+  //   addressPrefix: 'cosmos',
+  //   gasPriceStep: defaultGasPriceStep,
+  //   ibcChannelIds: {},
+  //   nativeDenoms: {
+  //     uNC: denoms.uNC,
+  //   },
+  //   theme: {
+  //     primaryColor: '#26d695',
+  //     gradient: 'linear-gradient(180deg, rgba(38, 214, 149, 0.32) 0%, rgba(38, 214, 149, 0) 100%)',
+  //   },
+  //   enabled: true,
+  // },
+  nnterra: {
+    chainId: 'NNTERRA-1',                // testnet chain-id (from /status.network)
+    testnetChainId: 'NNTERRA-1',
+    key: 'nnterra',
+    chainName: 'NN Terra',
+    chainRegistryPath: 'nnterra',
+    testnetChainRegistryPath: 'nnterra-testnet',
+    chainSymbolImageUrl: 'https://coral-mad-reindeer-812.mypinata.cloud/ipfs/bafkreidaeews47cj6awvbhpmr22bio7rjhgdtkvsl273rzoexwrawii43q',
+    apis: {      
+      restTest: 'http://155.133.26.60:1317',
+      rpcTest: 'http://155.133.26.60:26657',
+      alternateRestTest: 'http://217.76.63.246:1317',
+      alternateRpcTest: 'http://217.76.63.246:26669',
+    },
+    denom: 'NNC-T',                        // display/ticker (optional label)
+    txExplorer: {
+      testnet: {
+        name: 'NN Terra',
+        txUrl: 'http://72.61.161.82:3001/transactions',
+        accountUrl: 'http://72.61.161.82:3001/accounts',
+      },
+    },
+    bip44: { coinType: '118' },
+    addressPrefix: 'nnc',
+    gasPriceStep: defaultGasPriceStep,
+    ibcChannelIds: {
+      cosmos: ['channel-0'],
+      osmo: ['channel-1'],
+      juno: ['channel-2'],
+    },
+    nativeDenoms: {
+      uNC: denoms.uNC,                     // minimal denom (6 decimals)
+    },
+    theme: {
+      primaryColor: '#26d695',
+      gradient: 'linear-gradient(180deg, rgba(38, 214, 149, 0.32) 0%, rgba(38, 214, 149, 0) 100%)',
+    },
+    enabled: true,
+  },
   agoric: {
     chainId: 'agoric-3',
     key: 'agoric',

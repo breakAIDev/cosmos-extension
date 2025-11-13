@@ -7,6 +7,8 @@ export type FeeDenoms = Record<ChainNetwork, FeeDenom>;
 
 export const nativeFeeDenoms: FeeDenoms = {
   mainnet: {
+    // nnchain: 'uNC',
+    nnterra: 'uNC',
     akash: 'uakt',
     axelar: 'uaxl',
     juno: 'ujuno',
@@ -140,6 +142,8 @@ export const nativeFeeDenoms: FeeDenoms = {
     citrea: 'citrea-native',
   },
   testnet: {
+    // nnchain: 'uNC',
+    nnterra: 'uNC',
     akash: 'uakt',
     axelar: 'uaxl',
     juno: 'ujunox',

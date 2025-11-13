@@ -1,7 +1,7 @@
 import { DenomsRecord } from '../types';
 import { Cw20Denoms } from './cw20-denoms';
 
-export type SupportedDenoms = 'uatom' | 'uosmo' | 'uion' | 'uscrt' | 'ujuno' | 'ujunox' | 'ustars' | 'uusdc' | 'usdc';
+export type SupportedDenoms = 'uNC' | 'uatom' | 'uosmo' | 'uion' | 'uscrt' | 'ujuno' | 'ujunox' | 'ustars' | 'uusdc' | 'usdc';
 
 export type NativeDenom = {
   coinDenom: string;
@@ -18,6 +18,14 @@ export type NativeDenom = {
 export type Denoms = Record<SupportedDenoms, NativeDenom>;
 
 export const denoms: DenomsRecord = {
+  uNC: {
+    coinDenom: "NNC-T",
+    coinMinimalDenom: "uNC",
+    coinDecimals: 6,
+    coinGeckoId: "nnterra",
+    icon: "https://coral-mad-reindeer-812.mypinata.cloud/ipfs/bafkreihvtgia5ntqksyyenap3xo55fmjdm2p7ntjgegqqukmqq7rbefhvm",
+    chain: 'nnterra'
+  },
   axrp: {
     name: 'XRP',
     coinDenom: 'XRP',

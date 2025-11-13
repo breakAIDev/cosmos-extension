@@ -6,6 +6,8 @@ export type StakingDenoms = Record<ChainNetwork, StakingDenom>;
 
 export const stakingDenoms: StakingDenoms = {
   mainnet: {
+    // nnchain: ['uNC'],
+    nnterra: ['uNC'],
     akash: ['uakt'],
     axelar: ['uaxl'],
     juno: ['ujuno'],
@@ -139,6 +141,8 @@ export const stakingDenoms: StakingDenoms = {
     citrea: [],
   },
   testnet: {
+    // nnchain: ['uNC'],
+    nnterra: ['uNC'],
     akash: ['uakt'],
     axelar: ['uaxl'],
     juno: ['ujunox'],

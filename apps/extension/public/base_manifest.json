@@ -2,31 +2,34 @@
   "manifest_version": 3,
   "name": "__NAME__",
   "description": "__DESCRIPTION__",
-  "version": "1.0.1",
+  "version": "1.0.4",
+
   "options_page": "index.html#/home",
+
   "web_accessible_resources": [
     {
       "resources": ["injectNNWallet.js"],
       "matches": ["<all_urls>"]
     }
   ],
+
   "action": {
-    "default_icon": {
-      "128": "icon-128.png"
-    },
-    "default_popup": "index.html#/home"
+    "default_icon": { "128": "icon-128.png" }
   },
+
   "icons": {
     "16": "icon-16.png",
     "48": "icon-48.png",
     "128": "icon-128.png"
   },
+
   "background": {
     "service_worker": "background.js"
   },
+
   "content_scripts": [
     {
-      "matches": ["https://*/*", "http://*/*"],
+      "matches": ["<all_urls>"],
       "js": ["contentScripts.js"],
       "run_at": "document_start",
       "all_frames": true
@@ -40,7 +43,12 @@
     }
   },
   "permissions": ["storage", "sidePanel"],
+
+  "side_panel": {
+    "default_path": "sidePanel.html"
+  },
+
   "content_security_policy": {
-    "extension_pages": "object-src 'none'; script-src 'self' 'wasm-unsafe-eval'; img-src * 'self' data: https:; font-src https://fonts.gstatic.com; style-src 'self' https://fonts.googleapis.com  data: 'unsafe-inline'; connect-src * data: blob: filesystem:; media-src * data: blob: filesystem:; form-action 'self'; frame-ancestors 'none';frame-src https://newassets.hcaptcha.com https://www.google.com/; base-uri 'self'; default-src 'none'"
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'; img-src 'self' data: blob: https://assets.leapwallet.io https://raw.githubusercontent.com https://*.mypinata.cloud; style-src 'self' 'unsafe-inline'; connect-src * data: blob:; font-src 'self' data:; media-src 'self' data: blob:; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; default-src 'none'"
   }
 }

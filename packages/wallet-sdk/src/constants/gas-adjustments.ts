@@ -6,6 +6,8 @@ export type GasAdjustments = Record<SupportedChain, number>;
  * Gas adjustment for each network
  */
 export const gasAdjustments: GasAdjustments = {
+  // nnchain: 1.3,
+  nnterra: 1.3,
   chihuahua: 1.7,
   cosmos: 1.5,
   osmosis: 1.5,
