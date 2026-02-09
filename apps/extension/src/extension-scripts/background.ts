@@ -109,6 +109,17 @@ import { solanaRequestHandler } from './request-handlers/solana-request.handler'
 import { isBitcoinChain } from '@leapwallet/cosmos-wallet-store/dist/utils';
 import { suiRequestHandler } from './request-handlers/sui-request.handler';
 
+// --- Side Panel wiring: enable at install + context menu entry ---
+browser.runtime.onInstalled.addListener(async () => {
+  try { await chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }); } catch {}
+  try { await chrome.sidePanel.setOptions({ path: 'sidePanel.html', enabled: true }); } catch {}
+});
+
+browser.runtime.onStartup.addListener(async () => {
+  try { await chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }); } catch {}
+  try { await chrome.sidePanel.setOptions({ path: 'sidePanel.html', enabled: true }); } catch {}
+});
+
 const lightNode = new LightNode();
 lightNode.attachListener();
 

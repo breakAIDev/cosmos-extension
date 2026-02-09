@@ -8,9 +8,9 @@
   integrity sha512-/1iHy9TTr63gE1YcR5idjx8UREz1s0kFhydf3bBLCXyqjhkIc6igAzTOx3zPifCwFR87tsh/4Pa9cNts6d2otw==
 
 "@0no-co/graphqlsp@^1.12.13":
-  version "1.15.0"
-  resolved "https://registry.yarnpkg.com/@0no-co/graphqlsp/-/graphqlsp-1.15.0.tgz#c5d4592981e2df6b2e0cdcca33684199eed38bf7"
-  integrity sha512-SReJAGmOeXrHGod+9Odqrz4s43liK0b2DFUetb/jmYvxFpWmeNfFYo0seCh0jz8vG3p1pnYMav0+Tm7XwWtOJw==
+  version "1.15.1"
+  resolved "https://registry.yarnpkg.com/@0no-co/graphqlsp/-/graphqlsp-1.15.1.tgz#a8fe30d1eb2ac88380a1e23fe5aa65880179c79d"
+  integrity sha512-UBDBuVGpX5Ti0PjGnSAzkMG04psNYxKfJ+1bgF8HFPfHHpKNVl4GULHSNW0GTOngcYCYA70c+InoKw0qjHwmVQ==
   dependencies:
     "@gql.tada/internal" "^1.0.0"
     graphql "^15.5.0 || ^16.0.0 || ^17.0.0"
@@ -39,6 +39,7 @@
   resolved "https://registry.yarnpkg.com/@adraffy/ens-normalize/-/ens-normalize-1.11.1.tgz#6c2d657d4b2dfb37f8ea811dcb3e60843d4ac24a"
   integrity sha512-nhCBV3quEgesuf7c7KYfperqSS14T8bYuvJ8PcLJp6znkZpFc0AuW4qBtr8eKVyPPe/8RSr7sglCWPU5eaxwKQ==
 
+<<<<<<< Updated upstream
 "@algolia/abtesting@1.8.0":
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/@algolia/abtesting/-/abtesting-1.8.0.tgz#7b0d358ba857e3bc1330ff16b575585c6dfa3158"
@@ -48,6 +49,17 @@
     "@algolia/requester-browser-xhr" "5.42.0"
     "@algolia/requester-fetch" "5.42.0"
     "@algolia/requester-node-http" "5.42.0"
+=======
+"@algolia/abtesting@1.10.0":
+  version "1.10.0"
+  resolved "https://registry.yarnpkg.com/@algolia/abtesting/-/abtesting-1.10.0.tgz#7f4c915d3e3188e6af101e6f4e829cda795d3caf"
+  integrity sha512-mQT3jwuTgX8QMoqbIR7mPlWkqQqBPQaPabQzm37xg2txMlaMogK/4hCiiESGdg39MlHZOVHeV+0VJuE7f5UK8A==
+  dependencies:
+    "@algolia/client-common" "5.44.0"
+    "@algolia/requester-browser-xhr" "5.44.0"
+    "@algolia/requester-fetch" "5.44.0"
+    "@algolia/requester-node-http" "5.44.0"
+>>>>>>> Stashed changes
 
 "@algolia/autocomplete-core@1.17.7":
   version "1.17.7"
@@ -76,6 +88,7 @@
   resolved "https://registry.yarnpkg.com/@algolia/autocomplete-shared/-/autocomplete-shared-1.17.7.tgz#105e84ad9d1a31d3fb86ba20dc890eefe1a313a0"
   integrity sha512-o/1Vurr42U/qskRSuhBH+VKxMvkkUVTLU6WZQr+L5lGZZLYWyhdzWjW0iGXY7EkwRTjBqvN2EsR81yCTGV/kmg==
 
+<<<<<<< Updated upstream
 "@algolia/client-abtesting@5.42.0":
   version "5.42.0"
   resolved "https://registry.yarnpkg.com/@algolia/client-abtesting/-/client-abtesting-5.42.0.tgz#c72516e9a266faaf537d367c74dfd66b7a2d774a"
@@ -191,6 +204,123 @@
   integrity sha512-gkLNpU+b1pCIwk1hKTJz2NWQPT8gsfGhQasnZ5QVv4jd79fKRL/1ikd86P0AzuIQs9tbbhlMwxsSTyJmlq502w==
   dependencies:
     "@algolia/client-common" "5.42.0"
+=======
+"@algolia/client-abtesting@5.44.0":
+  version "5.44.0"
+  resolved "https://registry.yarnpkg.com/@algolia/client-abtesting/-/client-abtesting-5.44.0.tgz#33e35fb59bfdb5bef26eb38902de5bdae3766e1e"
+  integrity sha512-KY5CcrWhRTUo/lV7KcyjrZkPOOF9bjgWpMj9z98VA+sXzVpZtkuskBLCKsWYFp2sbwchZFTd3wJM48H0IGgF7g==
+  dependencies:
+    "@algolia/client-common" "5.44.0"
+    "@algolia/requester-browser-xhr" "5.44.0"
+    "@algolia/requester-fetch" "5.44.0"
+    "@algolia/requester-node-http" "5.44.0"
+
+"@algolia/client-analytics@5.44.0":
+  version "5.44.0"
+  resolved "https://registry.yarnpkg.com/@algolia/client-analytics/-/client-analytics-5.44.0.tgz#2fdf0d41ac39fd071a9cde7c9a118b2ffb3ce8d9"
+  integrity sha512-LKOCE8S4ewI9bN3ot9RZoYASPi8b78E918/DVPW3HHjCMUe6i+NjbNG6KotU4RpP6AhRWZjjswbOkWelUO+OoA==
+  dependencies:
+    "@algolia/client-common" "5.44.0"
+    "@algolia/requester-browser-xhr" "5.44.0"
+    "@algolia/requester-fetch" "5.44.0"
+    "@algolia/requester-node-http" "5.44.0"
+
+"@algolia/client-common@5.44.0":
+  version "5.44.0"
+  resolved "https://registry.yarnpkg.com/@algolia/client-common/-/client-common-5.44.0.tgz#aacc0fe3d07afae0d70bf7581b39d377f0bc0b7a"
+  integrity sha512-1yyJm4OYC2cztbS28XYVWwLXdwpLsMG4LoZLOltVglQ2+hc/i9q9fUDZyjRa2Bqt4DmkIfezagfMrokhyH4uxQ==
+
+"@algolia/client-insights@5.44.0":
+  version "5.44.0"
+  resolved "https://registry.yarnpkg.com/@algolia/client-insights/-/client-insights-5.44.0.tgz#350f93bab703fa102acf82685364732937369025"
+  integrity sha512-wVQWK6jYYsbEOjIMI+e5voLGPUIbXrvDj392IckXaCPvQ6vCMTXakQqOYCd+znQdL76S+3wHDo77HZWiAYKrtA==
+  dependencies:
+    "@algolia/client-common" "5.44.0"
+    "@algolia/requester-browser-xhr" "5.44.0"
+    "@algolia/requester-fetch" "5.44.0"
+    "@algolia/requester-node-http" "5.44.0"
+
+"@algolia/client-personalization@5.44.0":
+  version "5.44.0"
+  resolved "https://registry.yarnpkg.com/@algolia/client-personalization/-/client-personalization-5.44.0.tgz#b2c20dc59026babd695c571eb6015a8b46acb892"
+  integrity sha512-lkgRjOjOkqmIkebHjHpU9rLJcJNUDMm+eVSW/KJQYLjGqykEZxal+nYJJTBbLceEU2roByP/+27ZmgIwCdf0iA==
+  dependencies:
+    "@algolia/client-common" "5.44.0"
+    "@algolia/requester-browser-xhr" "5.44.0"
+    "@algolia/requester-fetch" "5.44.0"
+    "@algolia/requester-node-http" "5.44.0"
+
+"@algolia/client-query-suggestions@5.44.0":
+  version "5.44.0"
+  resolved "https://registry.yarnpkg.com/@algolia/client-query-suggestions/-/client-query-suggestions-5.44.0.tgz#d39d0b21fe6b38f8dab2f1f201db6d6e5225908f"
+  integrity sha512-sYfhgwKu6NDVmZHL1WEKVLsOx/jUXCY4BHKLUOcYa8k4COCs6USGgz6IjFkUf+niwq8NCECMmTC4o/fVQOalsA==
+  dependencies:
+    "@algolia/client-common" "5.44.0"
+    "@algolia/requester-browser-xhr" "5.44.0"
+    "@algolia/requester-fetch" "5.44.0"
+    "@algolia/requester-node-http" "5.44.0"
+
+"@algolia/client-search@5.44.0":
+  version "5.44.0"
+  resolved "https://registry.yarnpkg.com/@algolia/client-search/-/client-search-5.44.0.tgz#04ca43ee8181bf16f9df085286214ad3c06de126"
+  integrity sha512-/FRKUM1G4xn3vV8+9xH1WJ9XknU8rkBGlefruq9jDhYUAvYozKimhrmC2pRqw/RyHhPivmgZCRuC8jHP8piz4Q==
+  dependencies:
+    "@algolia/client-common" "5.44.0"
+    "@algolia/requester-browser-xhr" "5.44.0"
+    "@algolia/requester-fetch" "5.44.0"
+    "@algolia/requester-node-http" "5.44.0"
+
+"@algolia/ingestion@1.44.0":
+  version "1.44.0"
+  resolved "https://registry.yarnpkg.com/@algolia/ingestion/-/ingestion-1.44.0.tgz#f6bd13216c5a589414f43f9bec78db55cb022d90"
+  integrity sha512-5+S5ynwMmpTpCLXGjTDpeIa81J+R4BLH0lAojOhmeGSeGEHQTqacl/4sbPyDTcidvnWhaqtyf8m42ue6lvISAw==
+  dependencies:
+    "@algolia/client-common" "5.44.0"
+    "@algolia/requester-browser-xhr" "5.44.0"
+    "@algolia/requester-fetch" "5.44.0"
+    "@algolia/requester-node-http" "5.44.0"
+
+"@algolia/monitoring@1.44.0":
+  version "1.44.0"
+  resolved "https://registry.yarnpkg.com/@algolia/monitoring/-/monitoring-1.44.0.tgz#423fa61d68826a72cd5c468b45b232d8ba379775"
+  integrity sha512-xhaTN8pXJjR6zkrecg4Cc9YZaQK2LKm2R+LkbAq+AYGBCWJxtSGlNwftozZzkUyq4AXWoyoc0x2SyBtq5LRtqQ==
+  dependencies:
+    "@algolia/client-common" "5.44.0"
+    "@algolia/requester-browser-xhr" "5.44.0"
+    "@algolia/requester-fetch" "5.44.0"
+    "@algolia/requester-node-http" "5.44.0"
+
+"@algolia/recommend@5.44.0":
+  version "5.44.0"
+  resolved "https://registry.yarnpkg.com/@algolia/recommend/-/recommend-5.44.0.tgz#7e52b3e612bfd5bf82d14e05f577888a038279fa"
+  integrity sha512-GNcite/uOIS7wgRU1MT7SdNIupGSW+vbK9igIzMePvD2Dl8dy0O3urKPKIbTuZQqiVH1Cb84y5cgLvwNrdCj/Q==
+  dependencies:
+    "@algolia/client-common" "5.44.0"
+    "@algolia/requester-browser-xhr" "5.44.0"
+    "@algolia/requester-fetch" "5.44.0"
+    "@algolia/requester-node-http" "5.44.0"
+
+"@algolia/requester-browser-xhr@5.44.0":
+  version "5.44.0"
+  resolved "https://registry.yarnpkg.com/@algolia/requester-browser-xhr/-/requester-browser-xhr-5.44.0.tgz#a007b2c7b665224b04e61a1246fa015f06bd4100"
+  integrity sha512-YZHBk72Cd7pcuNHzbhNzF/FbbYszlc7JhZlDyQAchnX5S7tcemSS96F39Sy8t4O4WQLpFvUf1MTNedlitWdOsQ==
+  dependencies:
+    "@algolia/client-common" "5.44.0"
+
+"@algolia/requester-fetch@5.44.0":
+  version "5.44.0"
+  resolved "https://registry.yarnpkg.com/@algolia/requester-fetch/-/requester-fetch-5.44.0.tgz#055202db6b1ab37e042f207acb9e7f788e710089"
+  integrity sha512-B9WHl+wQ7uf46t9cq+vVM/ypVbOeuldVDq9OtKsX2ApL2g/htx6ImB9ugDOOJmB5+fE31/XPTuCcYz/j03+idA==
+  dependencies:
+    "@algolia/client-common" "5.44.0"
+
+"@algolia/requester-node-http@5.44.0":
+  version "5.44.0"
+  resolved "https://registry.yarnpkg.com/@algolia/requester-node-http/-/requester-node-http-5.44.0.tgz#3e2f56491303d1a94d172e98a1560af350950c01"
+  integrity sha512-MULm0qeAIk4cdzZ/ehJnl1o7uB5NMokg83/3MKhPq0Pk7+I0uELGNbzIfAkvkKKEYcHALemKdArtySF9eKzh/A==
+  dependencies:
+    "@algolia/client-common" "5.44.0"
+>>>>>>> Stashed changes
 
 "@alloc/quick-lru@^5.2.0":
   version "5.2.0"
@@ -2492,10 +2622,10 @@
   resolved "https://registry.yarnpkg.com/@gar/promisify/-/promisify-1.1.3.tgz#555193ab2e3bb3b6adc3d551c9c030d9e860daf6"
   integrity sha512-k2Ty1JcVojjJFwrg/ThKi2ujJ7XNLYaFGNB/bWT9wGR+oSMJHMa5w+CUq6p/pVrKeNNgA7pCqEcjSnHVoqJQFw==
 
-"@gql.tada/cli-utils@1.7.1":
-  version "1.7.1"
-  resolved "https://registry.yarnpkg.com/@gql.tada/cli-utils/-/cli-utils-1.7.1.tgz#2e849c4c5d7e0d4914b34d167a74e3022d0a79d1"
-  integrity sha512-wg5ysZNQxtNQm67T3laVWmZzLpGb7QfyYWZdaUD2r1OjDj5Bgftq7eQlplmH+hsdffjuUyhJw/b5XAjeE2mJtg==
+"@gql.tada/cli-utils@1.7.2":
+  version "1.7.2"
+  resolved "https://registry.yarnpkg.com/@gql.tada/cli-utils/-/cli-utils-1.7.2.tgz#3dcdc4baacaed8f499b65b4202fdccdaf7340273"
+  integrity sha512-Qbc7hbLvCz6IliIJpJuKJa9p05b2Jona7ov7+qofCsMRxHRZE1kpAmZMvL8JCI4c0IagpIlWNaMizXEQUe8XjQ==
   dependencies:
     "@0no-co/graphqlsp" "^1.12.13"
     "@gql.tada/internal" "1.0.8"
@@ -2599,9 +2729,15 @@
   integrity sha512-H9XAx3hc0BQHY6l+IFSWHDySypcXsvsuLhgYLUGywmJ5pswRVQJUHpOsobnLYp2ZUaUlKiKDrgWWhosOwAEM8Q==
 
 "@iconify-json/simple-icons@^1.2.21":
+<<<<<<< Updated upstream
   version "1.2.57"
   resolved "https://registry.yarnpkg.com/@iconify-json/simple-icons/-/simple-icons-1.2.57.tgz#4bb2527408a75ec7283c8740f26a5cdaf6291728"
   integrity sha512-/yWbO502M6WfvmcV5OjEgA4uoPN/76nrn7Hri/8g9L4GiNQ6VMgXWE9vFp4tDsmGMAe4ZCov3NbH6vJCgXZ1hA==
+=======
+  version "1.2.59"
+  resolved "https://registry.yarnpkg.com/@iconify-json/simple-icons/-/simple-icons-1.2.59.tgz#19b6a5eea538b74815d777839506f77f7455fc57"
+  integrity sha512-fYx/InyQsWFW4wVxWka3CGDJ6m/fXoTqWBSl+oA3FBXO5RhPAb6S3Y5bRgCPnrYevErH8VjAL0TZevIqlN2PhQ==
+>>>>>>> Stashed changes
   dependencies:
     "@iconify/types" "*"
 
@@ -2662,10 +2798,17 @@
     protobufjs "^7.0.0"
     rxjs "^7.4.0"
 
+<<<<<<< Updated upstream
 "@injectivelabs/exceptions@1.16.23", "@injectivelabs/exceptions@^1.14.11", "@injectivelabs/exceptions@^1.14.41", "@injectivelabs/exceptions@^1.14.5":
   version "1.16.23"
   resolved "https://registry.yarnpkg.com/@injectivelabs/exceptions/-/exceptions-1.16.23.tgz#751f5532a227ec36845521d8a36e9bbf51225ad7"
   integrity sha512-gAIHTpnf5s8rlIaDFuGU1kUVxgLTzQvVThqBahy8kPl/P3JpFeFoG2evxRxjInRI/4w61hQ7WJEYfqBggWRqvw==
+=======
+"@injectivelabs/exceptions@1.16.27", "@injectivelabs/exceptions@^1.14.11", "@injectivelabs/exceptions@^1.14.41", "@injectivelabs/exceptions@^1.14.5":
+  version "1.16.27"
+  resolved "https://registry.yarnpkg.com/@injectivelabs/exceptions/-/exceptions-1.16.27.tgz#da5e2641b9fcb5d886303262dd9d74826ce62a94"
+  integrity sha512-FrMazAJ5XWITybQ0TZP6FScHYLHlnWX6Ce3xAlfojfEanph2Cc+5bK8h6tlRto/Z6kaTCr31EjC27gx8iHXVyQ==
+>>>>>>> Stashed changes
   dependencies:
     http-status-codes "^2.3.0"
 
@@ -2706,12 +2849,21 @@
     protobufjs "^7.0.0"
     rxjs "^7.4.0"
 
+<<<<<<< Updated upstream
 "@injectivelabs/networks@1.16.23", "@injectivelabs/networks@^1.14.11", "@injectivelabs/networks@^1.14.41", "@injectivelabs/networks@^1.14.5":
   version "1.16.23"
   resolved "https://registry.yarnpkg.com/@injectivelabs/networks/-/networks-1.16.23.tgz#37485087d38d28c9f8ddf9229628b68e396f11a7"
   integrity sha512-8MaUB1vIgE0lMUnVzAHxKMmjqEoH3hLArqFemXswk+jAoUFeU3wVnxylAtL/vPspNEP7//RAFdqcGabDMCCjmA==
   dependencies:
     "@injectivelabs/ts-types" "1.16.23"
+=======
+"@injectivelabs/networks@1.16.27", "@injectivelabs/networks@^1.14.11", "@injectivelabs/networks@^1.14.41", "@injectivelabs/networks@^1.14.5":
+  version "1.16.27"
+  resolved "https://registry.yarnpkg.com/@injectivelabs/networks/-/networks-1.16.27.tgz#c66ac2290deec54fb099f13e7cda86ad72f995ba"
+  integrity sha512-Wjm1sMmoY8pi2zMWzvmPk2CLdp4Ez3DN4z/F+9N+8BPWH2rwuSKBnofk48kL+exoMM8XDlHWfe7d6e2oMego6g==
+  dependencies:
+    "@injectivelabs/ts-types" "1.16.27"
+>>>>>>> Stashed changes
 
 "@injectivelabs/sdk-ts@1.14.5":
   version "1.14.5"
@@ -2788,6 +2940,7 @@
     lodash.values "^4.3.0"
     shx "^0.3.2"
 
+<<<<<<< Updated upstream
 "@injectivelabs/ts-types@1.16.23", "@injectivelabs/ts-types@^1.14.11", "@injectivelabs/ts-types@^1.14.41", "@injectivelabs/ts-types@^1.14.5":
   version "1.16.23"
   resolved "https://registry.yarnpkg.com/@injectivelabs/ts-types/-/ts-types-1.16.23.tgz#7fefd58d805f9451337f0e9ba1df05f4796b73ba"
@@ -2802,16 +2955,32 @@
     "@injectivelabs/exceptions" "1.16.23"
     "@injectivelabs/networks" "1.16.23"
     "@injectivelabs/ts-types" "1.16.23"
+=======
+"@injectivelabs/ts-types@1.16.27", "@injectivelabs/ts-types@^1.14.11", "@injectivelabs/ts-types@^1.14.41", "@injectivelabs/ts-types@^1.14.5":
+  version "1.16.27"
+  resolved "https://registry.yarnpkg.com/@injectivelabs/ts-types/-/ts-types-1.16.27.tgz#ddbca640ce681c05fc3f54165db34174174553ac"
+  integrity sha512-hChtnoMQhj65g2K/uooZryRou8xtgjQO3391yY06zCv99A8HeaWQb/Tk6CmyaVfF02gi5GysPbPp2NX6JxulGw==
+
+"@injectivelabs/utils@^1.14.11", "@injectivelabs/utils@^1.14.41", "@injectivelabs/utils@^1.14.5":
+  version "1.16.27"
+  resolved "https://registry.yarnpkg.com/@injectivelabs/utils/-/utils-1.16.27.tgz#7d89e9a83e539c92beeacf04e2b04b12505cc265"
+  integrity sha512-Z+OAbXWGPB6YqieYVEXRaRlDwMGCZZiKkTkjMZZu9axik14WeMLjF9VjKISwuAeSTbbcSWXC2I1V5xyh+XTDaA==
+  dependencies:
+    "@bangjelkoski/store2" "^2.14.3"
+    "@injectivelabs/exceptions" "1.16.27"
+    "@injectivelabs/networks" "1.16.27"
+    "@injectivelabs/ts-types" "1.16.27"
+>>>>>>> Stashed changes
     axios "^1.8.1"
     bignumber.js "^9.1.2"
     http-status-codes "^2.3.0"
 
 "@inquirer/external-editor@^1.0.0":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@inquirer/external-editor/-/external-editor-1.0.2.tgz#dc16e7064c46c53be09918db639ff780718c071a"
-  integrity sha512-yy9cOoBnx58TlsPrIxauKIFQTiyH+0MK4e97y4sV9ERbI+zDxw7i2hxHLCIEGIE/8PPvDxGhgzIOTSOWcs6/MQ==
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@inquirer/external-editor/-/external-editor-1.0.3.tgz#c23988291ee676290fdab3fd306e64010a6d13b8"
+  integrity sha512-RWbSrDiYmO4LbejWY7ttpxczuwQyZLBUyygsA9Nsv95hpzUWwnNTVQmAq3xuh7vNwCp07UTmE5i11XAEExx4RA==
   dependencies:
-    chardet "^2.1.0"
+    chardet "^2.1.1"
     iconv-lite "^0.7.0"
 
 "@isaacs/cliui@^8.0.2":
@@ -3279,19 +3448,34 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
+<<<<<<< Updated upstream
 "@keplr-wallet/types@0.12.285":
   version "0.12.285"
   resolved "https://registry.yarnpkg.com/@keplr-wallet/types/-/types-0.12.285.tgz#5376cf74e001eab323ff3a97f25fb0b5551a2ec6"
   integrity sha512-MouTT/zgrs7Hta2tgms8OZdgJnsKnCKyRLFBcjwrpgMtuP2km5+lXzxc6qfEsbl4MRVhqt0zUXFwamPhwEi9Jw==
+=======
+"@keplr-wallet/types@0.12.290":
+  version "0.12.290"
+  resolved "https://registry.yarnpkg.com/@keplr-wallet/types/-/types-0.12.290.tgz#0681c7231a54bbbb470e01d799637ef20527f950"
+  integrity sha512-nWKbtgQzFiHhJF23XdgFi8YlZoXPM3zoUdNdLo5W1XHLd7T0CZdC54//L+eAPbQ+KI8FbJ/qvQRPSjyi0bzk6w==
+>>>>>>> Stashed changes
   dependencies:
     long "^4.0.0"
 
 "@keplr-wallet/unit@^0.12.143":
+<<<<<<< Updated upstream
   version "0.12.285"
   resolved "https://registry.yarnpkg.com/@keplr-wallet/unit/-/unit-0.12.285.tgz#b79c307cd06d226a46db8b1b47956fbe990641a5"
   integrity sha512-9QIaSzaBNAtVFTryo5/qxePX7yNZgZOYwecwE1xUkR49hbyv20x9Abfx7JDJNyg48Vfd4BxxPr0wIOg7Pn8TOA==
   dependencies:
     "@keplr-wallet/types" "0.12.285"
+=======
+  version "0.12.290"
+  resolved "https://registry.yarnpkg.com/@keplr-wallet/unit/-/unit-0.12.290.tgz#00cdaab87fbf2de1641ee2efd84dac51af2737e1"
+  integrity sha512-lRoWHD0jQdtuGkZQcDP/S9X/lPIKJr6+Z89tVwmw2BVccKYuYTZE2YlIFdZeny/emc1cL7NsXtIdXKQW73tEbA==
+  dependencies:
+    "@keplr-wallet/types" "0.12.290"
+>>>>>>> Stashed changes
     big-integer "^1.6.48"
     utility-types "^3.10.0"
 
@@ -5048,115 +5232,115 @@
   resolved "https://registry.yarnpkg.com/@reaviz/react-use-fuzzy/-/react-use-fuzzy-1.0.3.tgz#7362ca1f8f93d5f81fd26dcebb9df15300f35f03"
   integrity sha512-ON5RxiI0r9zNpEKHvxqT8zz3iI4kzc37NzB4t8lfXSWwCEkpzxWY9TB2JAdYp9LC3UW2tN9zxdMnaNBLz4atTw==
 
-"@rollup/rollup-android-arm-eabi@4.52.5":
-  version "4.52.5"
-  resolved "https://registry.yarnpkg.com/@rollup/rollup-android-arm-eabi/-/rollup-android-arm-eabi-4.52.5.tgz#0f44a2f8668ed87b040b6fe659358ac9239da4db"
-  integrity sha512-8c1vW4ocv3UOMp9K+gToY5zL2XiiVw3k7f1ksf4yO1FlDFQ1C2u72iACFnSOceJFsWskc2WZNqeRhFRPzv+wtQ==
+"@rollup/rollup-android-arm-eabi@4.53.2":
+  version "4.53.2"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-android-arm-eabi/-/rollup-android-arm-eabi-4.53.2.tgz#7131f3d364805067fd5596302aad9ebef1434b32"
+  integrity sha512-yDPzwsgiFO26RJA4nZo8I+xqzh7sJTZIWQOxn+/XOdPE31lAvLIYCKqjV+lNH/vxE2L2iH3plKxDCRK6i+CwhA==
 
-"@rollup/rollup-android-arm64@4.52.5":
-  version "4.52.5"
-  resolved "https://registry.yarnpkg.com/@rollup/rollup-android-arm64/-/rollup-android-arm64-4.52.5.tgz#25b9a01deef6518a948431564c987bcb205274f5"
-  integrity sha512-mQGfsIEFcu21mvqkEKKu2dYmtuSZOBMmAl5CFlPGLY94Vlcm+zWApK7F/eocsNzp8tKmbeBP8yXyAbx0XHsFNA==
+"@rollup/rollup-android-arm64@4.53.2":
+  version "4.53.2"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-android-arm64/-/rollup-android-arm64-4.53.2.tgz#7ede14d7fcf7c57821a2731c04b29ccc03145d82"
+  integrity sha512-k8FontTxIE7b0/OGKeSN5B6j25EuppBcWM33Z19JoVT7UTXFSo3D9CdU39wGTeb29NO3XxpMNauh09B+Ibw+9g==
 
-"@rollup/rollup-darwin-arm64@4.52.5":
-  version "4.52.5"
-  resolved "https://registry.yarnpkg.com/@rollup/rollup-darwin-arm64/-/rollup-darwin-arm64-4.52.5.tgz#8a102869c88f3780c7d5e6776afd3f19084ecd7f"
-  integrity sha512-takF3CR71mCAGA+v794QUZ0b6ZSrgJkArC+gUiG6LB6TQty9T0Mqh3m2ImRBOxS2IeYBo4lKWIieSvnEk2OQWA==
+"@rollup/rollup-darwin-arm64@4.53.2":
+  version "4.53.2"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-darwin-arm64/-/rollup-darwin-arm64-4.53.2.tgz#d59bf9ed582b38838e86a17f91720c17db6575b9"
+  integrity sha512-A6s4gJpomNBtJ2yioj8bflM2oogDwzUiMl2yNJ2v9E7++sHrSrsQ29fOfn5DM/iCzpWcebNYEdXpaK4tr2RhfQ==
 
-"@rollup/rollup-darwin-x64@4.52.5":
-  version "4.52.5"
-  resolved "https://registry.yarnpkg.com/@rollup/rollup-darwin-x64/-/rollup-darwin-x64-4.52.5.tgz#8e526417cd6f54daf1d0c04cf361160216581956"
-  integrity sha512-W901Pla8Ya95WpxDn//VF9K9u2JbocwV/v75TE0YIHNTbhqUTv9w4VuQ9MaWlNOkkEfFwkdNhXgcLqPSmHy0fA==
+"@rollup/rollup-darwin-x64@4.53.2":
+  version "4.53.2"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-darwin-x64/-/rollup-darwin-x64-4.53.2.tgz#a76278d9b9da9f84ea7909a14d93b915d5bbe01e"
+  integrity sha512-e6XqVmXlHrBlG56obu9gDRPW3O3hLxpwHpLsBJvuI8qqnsrtSZ9ERoWUXtPOkY8c78WghyPHZdmPhHLWNdAGEw==
 
-"@rollup/rollup-freebsd-arm64@4.52.5":
-  version "4.52.5"
-  resolved "https://registry.yarnpkg.com/@rollup/rollup-freebsd-arm64/-/rollup-freebsd-arm64-4.52.5.tgz#0e7027054493f3409b1f219a3eac5efd128ef899"
-  integrity sha512-QofO7i7JycsYOWxe0GFqhLmF6l1TqBswJMvICnRUjqCx8b47MTo46W8AoeQwiokAx3zVryVnxtBMcGcnX12LvA==
+"@rollup/rollup-freebsd-arm64@4.53.2":
+  version "4.53.2"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-freebsd-arm64/-/rollup-freebsd-arm64-4.53.2.tgz#1a94821a1f565b9eaa74187632d482e4c59a1707"
+  integrity sha512-v0E9lJW8VsrwPux5Qe5CwmH/CF/2mQs6xU1MF3nmUxmZUCHazCjLgYvToOk+YuuUqLQBio1qkkREhxhc656ViA==
 
-"@rollup/rollup-freebsd-x64@4.52.5":
-  version "4.52.5"
-  resolved "https://registry.yarnpkg.com/@rollup/rollup-freebsd-x64/-/rollup-freebsd-x64-4.52.5.tgz#72b204a920139e9ec3d331bd9cfd9a0c248ccb10"
-  integrity sha512-jr21b/99ew8ujZubPo9skbrItHEIE50WdV86cdSoRkKtmWa+DDr6fu2c/xyRT0F/WazZpam6kk7IHBerSL7LDQ==
+"@rollup/rollup-freebsd-x64@4.53.2":
+  version "4.53.2"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-freebsd-x64/-/rollup-freebsd-x64-4.53.2.tgz#aad2274680106b2b6549b1e35e5d3a7a9f1f16af"
+  integrity sha512-ClAmAPx3ZCHtp6ysl4XEhWU69GUB1D+s7G9YjHGhIGCSrsg00nEGRRZHmINYxkdoJehde8VIsDC5t9C0gb6yqA==
 
-"@rollup/rollup-linux-arm-gnueabihf@4.52.5":
-  version "4.52.5"
-  resolved "https://registry.yarnpkg.com/@rollup/rollup-linux-arm-gnueabihf/-/rollup-linux-arm-gnueabihf-4.52.5.tgz#ab1b522ebe5b7e06c99504cc38f6cd8b808ba41c"
-  integrity sha512-PsNAbcyv9CcecAUagQefwX8fQn9LQ4nZkpDboBOttmyffnInRy8R8dSg6hxxl2Re5QhHBf6FYIDhIj5v982ATQ==
+"@rollup/rollup-linux-arm-gnueabihf@4.53.2":
+  version "4.53.2"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-linux-arm-gnueabihf/-/rollup-linux-arm-gnueabihf-4.53.2.tgz#100fe4306399ffeec47318a3c9b8c0e5e8b07ddb"
+  integrity sha512-EPlb95nUsz6Dd9Qy13fI5kUPXNSljaG9FiJ4YUGU1O/Q77i5DYFW5KR8g1OzTcdZUqQQ1KdDqsTohdFVwCwjqg==
 
-"@rollup/rollup-linux-arm-musleabihf@4.52.5":
-  version "4.52.5"
-  resolved "https://registry.yarnpkg.com/@rollup/rollup-linux-arm-musleabihf/-/rollup-linux-arm-musleabihf-4.52.5.tgz#f8cc30b638f1ee7e3d18eac24af47ea29d9beb00"
-  integrity sha512-Fw4tysRutyQc/wwkmcyoqFtJhh0u31K+Q6jYjeicsGJJ7bbEq8LwPWV/w0cnzOqR2m694/Af6hpFayLJZkG2VQ==
+"@rollup/rollup-linux-arm-musleabihf@4.53.2":
+  version "4.53.2"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-linux-arm-musleabihf/-/rollup-linux-arm-musleabihf-4.53.2.tgz#b84634952604b950e18fa11fddebde898c5928d8"
+  integrity sha512-BOmnVW+khAUX+YZvNfa0tGTEMVVEerOxN0pDk2E6N6DsEIa2Ctj48FOMfNDdrwinocKaC7YXUZ1pHlKpnkja/Q==
 
-"@rollup/rollup-linux-arm64-gnu@4.52.5":
-  version "4.52.5"
-  resolved "https://registry.yarnpkg.com/@rollup/rollup-linux-arm64-gnu/-/rollup-linux-arm64-gnu-4.52.5.tgz#7af37a9e85f25db59dc8214172907b7e146c12cc"
-  integrity sha512-a+3wVnAYdQClOTlyapKmyI6BLPAFYs0JM8HRpgYZQO02rMR09ZcV9LbQB+NL6sljzG38869YqThrRnfPMCDtZg==
+"@rollup/rollup-linux-arm64-gnu@4.53.2":
+  version "4.53.2"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-linux-arm64-gnu/-/rollup-linux-arm64-gnu-4.53.2.tgz#dad6f2fb41c2485f29a98e40e9bd78253255dbf3"
+  integrity sha512-Xt2byDZ+6OVNuREgBXr4+CZDJtrVso5woFtpKdGPhpTPHcNG7D8YXeQzpNbFRxzTVqJf7kvPMCub/pcGUWgBjA==
 
-"@rollup/rollup-linux-arm64-musl@4.52.5":
-  version "4.52.5"
-  resolved "https://registry.yarnpkg.com/@rollup/rollup-linux-arm64-musl/-/rollup-linux-arm64-musl-4.52.5.tgz#a623eb0d3617c03b7a73716eb85c6e37b776f7e0"
-  integrity sha512-AvttBOMwO9Pcuuf7m9PkC1PUIKsfaAJ4AYhy944qeTJgQOqJYJ9oVl2nYgY7Rk0mkbsuOpCAYSs6wLYB2Xiw0Q==
+"@rollup/rollup-linux-arm64-musl@4.53.2":
+  version "4.53.2"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-linux-arm64-musl/-/rollup-linux-arm64-musl-4.53.2.tgz#0f3f77c8ce9fbf982f8a8378b70a73dc6704a706"
+  integrity sha512-+LdZSldy/I9N8+klim/Y1HsKbJ3BbInHav5qE9Iy77dtHC/pibw1SR/fXlWyAk0ThnpRKoODwnAuSjqxFRDHUQ==
 
-"@rollup/rollup-linux-loong64-gnu@4.52.5":
-  version "4.52.5"
-  resolved "https://registry.yarnpkg.com/@rollup/rollup-linux-loong64-gnu/-/rollup-linux-loong64-gnu-4.52.5.tgz#76ea038b549c5c6c5f0d062942627c4066642ee2"
-  integrity sha512-DkDk8pmXQV2wVrF6oq5tONK6UHLz/XcEVow4JTTerdeV1uqPeHxwcg7aFsfnSm9L+OO8WJsWotKM2JJPMWrQtA==
+"@rollup/rollup-linux-loong64-gnu@4.53.2":
+  version "4.53.2"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-linux-loong64-gnu/-/rollup-linux-loong64-gnu-4.53.2.tgz#870bb94e9dad28bb3124ba49bd733deaa6aa2635"
+  integrity sha512-8ms8sjmyc1jWJS6WdNSA23rEfdjWB30LH8Wqj0Cqvv7qSHnvw6kgMMXRdop6hkmGPlyYBdRPkjJnj3KCUHV/uQ==
 
-"@rollup/rollup-linux-ppc64-gnu@4.52.5":
-  version "4.52.5"
-  resolved "https://registry.yarnpkg.com/@rollup/rollup-linux-ppc64-gnu/-/rollup-linux-ppc64-gnu-4.52.5.tgz#d9a4c3f0a3492bc78f6fdfe8131ac61c7359ccd5"
-  integrity sha512-W/b9ZN/U9+hPQVvlGwjzi+Wy4xdoH2I8EjaCkMvzpI7wJUs8sWJ03Rq96jRnHkSrcHTpQe8h5Tg3ZzUPGauvAw==
+"@rollup/rollup-linux-ppc64-gnu@4.53.2":
+  version "4.53.2"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-linux-ppc64-gnu/-/rollup-linux-ppc64-gnu-4.53.2.tgz#188427d11abefc6c9926e3870b3e032170f5577c"
+  integrity sha512-3HRQLUQbpBDMmzoxPJYd3W6vrVHOo2cVW8RUo87Xz0JPJcBLBr5kZ1pGcQAhdZgX9VV7NbGNipah1omKKe23/g==
 
-"@rollup/rollup-linux-riscv64-gnu@4.52.5":
-  version "4.52.5"
-  resolved "https://registry.yarnpkg.com/@rollup/rollup-linux-riscv64-gnu/-/rollup-linux-riscv64-gnu-4.52.5.tgz#87ab033eebd1a9a1dd7b60509f6333ec1f82d994"
-  integrity sha512-sjQLr9BW7R/ZiXnQiWPkErNfLMkkWIoCz7YMn27HldKsADEKa5WYdobaa1hmN6slu9oWQbB6/jFpJ+P2IkVrmw==
+"@rollup/rollup-linux-riscv64-gnu@4.53.2":
+  version "4.53.2"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-linux-riscv64-gnu/-/rollup-linux-riscv64-gnu-4.53.2.tgz#9dec6eadbbb5abd3b76fe624dc4f006913ff4a7f"
+  integrity sha512-fMjKi+ojnmIvhk34gZP94vjogXNNUKMEYs+EDaB/5TG/wUkoeua7p7VCHnE6T2Tx+iaghAqQX8teQzcvrYpaQA==
 
-"@rollup/rollup-linux-riscv64-musl@4.52.5":
-  version "4.52.5"
-  resolved "https://registry.yarnpkg.com/@rollup/rollup-linux-riscv64-musl/-/rollup-linux-riscv64-musl-4.52.5.tgz#bda3eb67e1c993c1ba12bc9c2f694e7703958d9f"
-  integrity sha512-hq3jU/kGyjXWTvAh2awn8oHroCbrPm8JqM7RUpKjalIRWWXE01CQOf/tUNWNHjmbMHg/hmNCwc/Pz3k1T/j/Lg==
+"@rollup/rollup-linux-riscv64-musl@4.53.2":
+  version "4.53.2"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-linux-riscv64-musl/-/rollup-linux-riscv64-musl-4.53.2.tgz#b26ba1c80b6f104dc5bd83ed83181fc0411a0c38"
+  integrity sha512-XuGFGU+VwUUV5kLvoAdi0Wz5Xbh2SrjIxCtZj6Wq8MDp4bflb/+ThZsVxokM7n0pcbkEr2h5/pzqzDYI7cCgLQ==
 
-"@rollup/rollup-linux-s390x-gnu@4.52.5":
-  version "4.52.5"
-  resolved "https://registry.yarnpkg.com/@rollup/rollup-linux-s390x-gnu/-/rollup-linux-s390x-gnu-4.52.5.tgz#f7bc10fbe096ab44694233dc42a2291ed5453d4b"
-  integrity sha512-gn8kHOrku8D4NGHMK1Y7NA7INQTRdVOntt1OCYypZPRt6skGbddska44K8iocdpxHTMMNui5oH4elPH4QOLrFQ==
+"@rollup/rollup-linux-s390x-gnu@4.53.2":
+  version "4.53.2"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-linux-s390x-gnu/-/rollup-linux-s390x-gnu-4.53.2.tgz#dc83647189b68ad8d56a956a6fcaa4ee9c728190"
+  integrity sha512-w6yjZF0P+NGzWR3AXWX9zc0DNEGdtvykB03uhonSHMRa+oWA6novflo2WaJr6JZakG2ucsyb+rvhrKac6NIy+w==
 
-"@rollup/rollup-linux-x64-gnu@4.52.5", "@rollup/rollup-linux-x64-gnu@^4.24.4", "@rollup/rollup-linux-x64-gnu@^4.28.1":
-  version "4.52.5"
-  resolved "https://registry.yarnpkg.com/@rollup/rollup-linux-x64-gnu/-/rollup-linux-x64-gnu-4.52.5.tgz#a151cb1234cc9b2cf5e8cfc02aa91436b8f9e278"
-  integrity sha512-hXGLYpdhiNElzN770+H2nlx+jRog8TyynpTVzdlc6bndktjKWyZyiCsuDAlpd+j+W+WNqfcyAWz9HxxIGfZm1Q==
+"@rollup/rollup-linux-x64-gnu@4.53.2", "@rollup/rollup-linux-x64-gnu@^4.24.4", "@rollup/rollup-linux-x64-gnu@^4.28.1":
+  version "4.53.2"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-linux-x64-gnu/-/rollup-linux-x64-gnu-4.53.2.tgz#42c3b8c94e9de37bd103cb2e26fb715118ef6459"
+  integrity sha512-yo8d6tdfdeBArzC7T/PnHd7OypfI9cbuZzPnzLJIyKYFhAQ8SvlkKtKBMbXDxe1h03Rcr7u++nFS7tqXz87Gtw==
 
-"@rollup/rollup-linux-x64-musl@4.52.5":
-  version "4.52.5"
-  resolved "https://registry.yarnpkg.com/@rollup/rollup-linux-x64-musl/-/rollup-linux-x64-musl-4.52.5.tgz#7859e196501cc3b3062d45d2776cfb4d2f3a9350"
-  integrity sha512-arCGIcuNKjBoKAXD+y7XomR9gY6Mw7HnFBv5Rw7wQRvwYLR7gBAgV7Mb2QTyjXfTveBNFAtPt46/36vV9STLNg==
+"@rollup/rollup-linux-x64-musl@4.53.2":
+  version "4.53.2"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-linux-x64-musl/-/rollup-linux-x64-musl-4.53.2.tgz#d0e216ee1ea16bfafe35681b899b6a05258988e5"
+  integrity sha512-ah59c1YkCxKExPP8O9PwOvs+XRLKwh/mV+3YdKqQ5AMQ0r4M4ZDuOrpWkUaqO7fzAHdINzV9tEVu8vNw48z0lA==
 
-"@rollup/rollup-openharmony-arm64@4.52.5":
-  version "4.52.5"
-  resolved "https://registry.yarnpkg.com/@rollup/rollup-openharmony-arm64/-/rollup-openharmony-arm64-4.52.5.tgz#85d0df7233734df31e547c1e647d2a5300b3bf30"
-  integrity sha512-QoFqB6+/9Rly/RiPjaomPLmR/13cgkIGfA40LHly9zcH1S0bN2HVFYk3a1eAyHQyjs3ZJYlXvIGtcCs5tko9Cw==
+"@rollup/rollup-openharmony-arm64@4.53.2":
+  version "4.53.2"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-openharmony-arm64/-/rollup-openharmony-arm64-4.53.2.tgz#3acd0157cb8976f659442bfd8a99aca46f8a2931"
+  integrity sha512-4VEd19Wmhr+Zy7hbUsFZ6YXEiP48hE//KPLCSVNY5RMGX2/7HZ+QkN55a3atM1C/BZCGIgqN+xrVgtdak2S9+A==
 
-"@rollup/rollup-win32-arm64-msvc@4.52.5":
-  version "4.52.5"
-  resolved "https://registry.yarnpkg.com/@rollup/rollup-win32-arm64-msvc/-/rollup-win32-arm64-msvc-4.52.5.tgz#e62357d00458db17277b88adbf690bb855cac937"
-  integrity sha512-w0cDWVR6MlTstla1cIfOGyl8+qb93FlAVutcor14Gf5Md5ap5ySfQ7R9S/NjNaMLSFdUnKGEasmVnu3lCMqB7w==
+"@rollup/rollup-win32-arm64-msvc@4.53.2":
+  version "4.53.2"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-win32-arm64-msvc/-/rollup-win32-arm64-msvc-4.53.2.tgz#3eb9e7d4d0e1d2e0850c4ee9aa2d0ddf89a8effa"
+  integrity sha512-IlbHFYc/pQCgew/d5fslcy1KEaYVCJ44G8pajugd8VoOEI8ODhtb/j8XMhLpwHCMB3yk2J07ctup10gpw2nyMA==
 
-"@rollup/rollup-win32-ia32-msvc@4.52.5":
-  version "4.52.5"
-  resolved "https://registry.yarnpkg.com/@rollup/rollup-win32-ia32-msvc/-/rollup-win32-ia32-msvc-4.52.5.tgz#fc7cd40f44834a703c1f1c3fe8bcc27ce476cd50"
-  integrity sha512-Aufdpzp7DpOTULJCuvzqcItSGDH73pF3ko/f+ckJhxQyHtp67rHw3HMNxoIdDMUITJESNE6a8uh4Lo4SLouOUg==
+"@rollup/rollup-win32-ia32-msvc@4.53.2":
+  version "4.53.2"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-win32-ia32-msvc/-/rollup-win32-ia32-msvc-4.53.2.tgz#d69280bc6680fe19e0956e965811946d542f6365"
+  integrity sha512-lNlPEGgdUfSzdCWU176ku/dQRnA7W+Gp8d+cWv73jYrb8uT7HTVVxq62DUYxjbaByuf1Yk0RIIAbDzp+CnOTFg==
 
-"@rollup/rollup-win32-x64-gnu@4.52.5":
-  version "4.52.5"
-  resolved "https://registry.yarnpkg.com/@rollup/rollup-win32-x64-gnu/-/rollup-win32-x64-gnu-4.52.5.tgz#1a22acfc93c64a64a48c42672e857ee51774d0d3"
-  integrity sha512-UGBUGPFp1vkj6p8wCRraqNhqwX/4kNQPS57BCFc8wYh0g94iVIW33wJtQAx3G7vrjjNtRaxiMUylM0ktp/TRSQ==
+"@rollup/rollup-win32-x64-gnu@4.53.2":
+  version "4.53.2"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-win32-x64-gnu/-/rollup-win32-x64-gnu-4.53.2.tgz#d182ce91e342bad9cbb8b284cf33ac542b126ead"
+  integrity sha512-S6YojNVrHybQis2lYov1sd+uj7K0Q05NxHcGktuMMdIQ2VixGwAfbJ23NnlvvVV1bdpR2m5MsNBViHJKcA4ADw==
 
-"@rollup/rollup-win32-x64-msvc@4.52.5":
-  version "4.52.5"
-  resolved "https://registry.yarnpkg.com/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.52.5.tgz#1657f56326bbe0ac80eedc9f9c18fc1ddd24e107"
-  integrity sha512-TAcgQh2sSkykPRWLrdyy2AiceMckNf5loITqXxFI5VuQjS5tSuw3WlwdN8qv8vzjLAUTvYaH/mVjSFpbkFbpTg==
+"@rollup/rollup-win32-x64-msvc@4.53.2":
+  version "4.53.2"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.53.2.tgz#d9ab606437fd072b2cb7df7e54bcdc7f1ccbe8b4"
+  integrity sha512-k+/Rkcyx//P6fetPoLMb8pBeqJBNGx81uuf7iljX9++yNBVRDQgD04L+SVXmXmh5ZP4/WOp4mWF0kmi06PW2tA==
 
 "@rsbuild/core@1.1.13":
   version "1.1.13"
@@ -6631,9 +6815,15 @@
     "@types/node" "*"
 
 "@types/node@*", "@types/node@>=13.7.0":
+<<<<<<< Updated upstream
   version "24.10.0"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-24.10.0.tgz#6b79086b0dfc54e775a34ba8114dcc4e0221f31f"
   integrity sha512-qzQZRBqkFsYyaSWXuEHc2WR9c0a0CXwiE5FWUvn7ZM+vdy1uZLfCunD38UzhuB7YN/J11ndbDBcTmOdxJo9Q7A==
+=======
+  version "24.10.1"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-24.10.1.tgz#91e92182c93db8bd6224fca031e2370cef9a8f01"
+  integrity sha512-GNWcUTRBgIRJD5zj+Tq0fKOJ5XZajIiBroOF0yvj2bSU1WvNdYS/dn9UxwsujGW4JX06dnHyjV2y9rRaybH0iQ==
+>>>>>>> Stashed changes
   dependencies:
     undici-types "~7.16.0"
 
@@ -6932,9 +7122,15 @@
   integrity sha512-I4q9QU9MQv4oEOz4tAHJtNz1cwuLxn2F3xcc2iV5WdqLPpUnj30aUuxt1mAxYTG+oe8CZMV/+6rU4S4gRDzqtQ==
 
 "@types/yargs@^17.0.8":
+<<<<<<< Updated upstream
   version "17.0.34"
   resolved "https://registry.yarnpkg.com/@types/yargs/-/yargs-17.0.34.tgz#1c2f9635b71d5401827373a01ce2e8a7670ea839"
   integrity sha512-KExbHVa92aJpw9WDQvzBaGVE2/Pz+pLZQloT2hjL8IqsZnV62rlPOYvNnLmf/L2dyllfVUOVBj64M0z/46eR2A==
+=======
+  version "17.0.35"
+  resolved "https://registry.yarnpkg.com/@types/yargs/-/yargs-17.0.35.tgz#07013e46aa4d7d7d50a49e15604c1c5340d4eb24"
+  integrity sha512-qUHkeCyQFxMXg79wQfTtfndEC+N9ZZg76HJftDJp+qH2tV7Gj4OJi7l+PiWwJ+pWtW8GwSmqsDj/oymhrTWXjg==
+>>>>>>> Stashed changes
   dependencies:
     "@types/yargs-parser" "*"
 
@@ -7177,6 +7373,7 @@
     estree-walker "^2.0.2"
     source-map-js "^1.0.2"
 
+<<<<<<< Updated upstream
 "@vue/compiler-core@3.5.23":
   version "3.5.23"
   resolved "https://registry.yarnpkg.com/@vue/compiler-core/-/compiler-core-3.5.23.tgz#5c468952070c63eebf044244821e5f6f089b9569"
@@ -7184,6 +7381,15 @@
   dependencies:
     "@babel/parser" "^7.28.5"
     "@vue/shared" "3.5.23"
+=======
+"@vue/compiler-core@3.5.24":
+  version "3.5.24"
+  resolved "https://registry.yarnpkg.com/@vue/compiler-core/-/compiler-core-3.5.24.tgz#1853f4b7d7090033cd9041aab6e7e8017d66c39c"
+  integrity sha512-eDl5H57AOpNakGNAkFDH+y7kTqrQpJkZFXhWZQGyx/5Wh7B1uQYvcWkvZi11BDhscPgj8N7XV3oRwiPnx1Vrig==
+  dependencies:
+    "@babel/parser" "^7.28.5"
+    "@vue/shared" "3.5.24"
+>>>>>>> Stashed changes
     entities "^4.5.0"
     estree-walker "^2.0.2"
     source-map-js "^1.2.1"
@@ -7196,6 +7402,7 @@
     "@vue/compiler-core" "3.3.4"
     "@vue/shared" "3.3.4"
 
+<<<<<<< Updated upstream
 "@vue/compiler-dom@3.5.23":
   version "3.5.23"
   resolved "https://registry.yarnpkg.com/@vue/compiler-dom/-/compiler-dom-3.5.23.tgz#a67862d731a875509e219715700f3a5b56c28ad6"
@@ -7203,6 +7410,15 @@
   dependencies:
     "@vue/compiler-core" "3.5.23"
     "@vue/shared" "3.5.23"
+=======
+"@vue/compiler-dom@3.5.24":
+  version "3.5.24"
+  resolved "https://registry.yarnpkg.com/@vue/compiler-dom/-/compiler-dom-3.5.24.tgz#b02e98749c377d6d2ba30dc2e94ce0f5b0af060c"
+  integrity sha512-1QHGAvs53gXkWdd3ZMGYuvQFXHW4ksKWPG8HP8/2BscrbZ0brw183q2oNWjMrSWImYLHxHrx1ItBQr50I/q2zw==
+  dependencies:
+    "@vue/compiler-core" "3.5.24"
+    "@vue/shared" "3.5.24"
+>>>>>>> Stashed changes
 
 "@vue/compiler-sfc@2.7.16":
   version "2.7.16"
@@ -7231,6 +7447,7 @@
     postcss "^8.1.10"
     source-map-js "^1.0.2"
 
+<<<<<<< Updated upstream
 "@vue/compiler-sfc@3.5.23":
   version "3.5.23"
   resolved "https://registry.yarnpkg.com/@vue/compiler-sfc/-/compiler-sfc-3.5.23.tgz#7252082823f681d1a54c58c0f8c59ae57af071c4"
@@ -7241,6 +7458,18 @@
     "@vue/compiler-dom" "3.5.23"
     "@vue/compiler-ssr" "3.5.23"
     "@vue/shared" "3.5.23"
+=======
+"@vue/compiler-sfc@3.5.24":
+  version "3.5.24"
+  resolved "https://registry.yarnpkg.com/@vue/compiler-sfc/-/compiler-sfc-3.5.24.tgz#7cc3329b672b7b75d04a71eabe81bc84209dfa9f"
+  integrity sha512-8EG5YPRgmTB+YxYBM3VXy8zHD9SWHUJLIGPhDovo3Z8VOgvP+O7UP5vl0J4BBPWYD9vxtBabzW1EuEZ+Cqs14g==
+  dependencies:
+    "@babel/parser" "^7.28.5"
+    "@vue/compiler-core" "3.5.24"
+    "@vue/compiler-dom" "3.5.24"
+    "@vue/compiler-ssr" "3.5.24"
+    "@vue/shared" "3.5.24"
+>>>>>>> Stashed changes
     estree-walker "^2.0.2"
     magic-string "^0.30.21"
     postcss "^8.5.6"
@@ -7254,6 +7483,7 @@
     "@vue/compiler-dom" "3.3.4"
     "@vue/shared" "3.3.4"
 
+<<<<<<< Updated upstream
 "@vue/compiler-ssr@3.5.23":
   version "3.5.23"
   resolved "https://registry.yarnpkg.com/@vue/compiler-ssr/-/compiler-ssr-3.5.23.tgz#0968b61898fb57a5b26ce84b8ab4757569e100b4"
@@ -7261,6 +7491,15 @@
   dependencies:
     "@vue/compiler-dom" "3.5.23"
     "@vue/shared" "3.5.23"
+=======
+"@vue/compiler-ssr@3.5.24":
+  version "3.5.24"
+  resolved "https://registry.yarnpkg.com/@vue/compiler-ssr/-/compiler-ssr-3.5.24.tgz#3891f2479928751353b946e491e048f33d0249a8"
+  integrity sha512-trOvMWNBMQ/odMRHW7Ae1CdfYx+7MuiQu62Jtu36gMLXcaoqKvAyh+P73sYG9ll+6jLB6QPovqoKGGZROzkFFg==
+  dependencies:
+    "@vue/compiler-dom" "3.5.24"
+    "@vue/shared" "3.5.24"
+>>>>>>> Stashed changes
 
 "@vue/component-compiler-utils@^3.1.0", "@vue/component-compiler-utils@^3.3.0":
   version "3.3.0"
@@ -7279,18 +7518,18 @@
     prettier "^1.18.2 || ^2.0.0"
 
 "@vue/devtools-api@^7.7.0":
-  version "7.7.7"
-  resolved "https://registry.yarnpkg.com/@vue/devtools-api/-/devtools-api-7.7.7.tgz#5ef5f55f60396220725a273548c0d7ee983d5d34"
-  integrity sha512-lwOnNBH2e7x1fIIbVT7yF5D+YWhqELm55/4ZKf45R9T8r9dE2AIOy8HKjfqzGsoTHFbWbr337O4E0A0QADnjBg==
+  version "7.7.9"
+  resolved "https://registry.yarnpkg.com/@vue/devtools-api/-/devtools-api-7.7.9.tgz#999dbea50da6b00cf59a1336f11fdc2b43d9e063"
+  integrity sha512-kIE8wvwlcZ6TJTbNeU2HQNtaxLx3a84aotTITUuL/4bzfPxzajGBOoqjMhwZJ8L9qFYDU/lAYMEEm11dnZOD6g==
   dependencies:
-    "@vue/devtools-kit" "^7.7.7"
+    "@vue/devtools-kit" "^7.7.9"
 
-"@vue/devtools-kit@^7.7.7":
-  version "7.7.7"
-  resolved "https://registry.yarnpkg.com/@vue/devtools-kit/-/devtools-kit-7.7.7.tgz#41a64f9526e9363331c72405544df020ce2e3641"
-  integrity sha512-wgoZtxcTta65cnZ1Q6MbAfePVFxfM+gq0saaeytoph7nEa7yMXoi6sCPy4ufO111B9msnw0VOWjPEFCXuAKRHA==
+"@vue/devtools-kit@^7.7.9":
+  version "7.7.9"
+  resolved "https://registry.yarnpkg.com/@vue/devtools-kit/-/devtools-kit-7.7.9.tgz#bc218a815616e8987df7ab3e10fc1fb3b8706c58"
+  integrity sha512-PyQ6odHSgiDVd4hnTP+aDk2X4gl2HmLDfiyEnn3/oV+ckFDuswRs4IbBT7vacMuGdwY/XemxBoh302ctbsptuA==
   dependencies:
-    "@vue/devtools-shared" "^7.7.7"
+    "@vue/devtools-shared" "^7.7.9"
     birpc "^2.3.0"
     hookable "^5.5.3"
     mitt "^3.0.1"
@@ -7298,10 +7537,10 @@
     speakingurl "^14.0.1"
     superjson "^2.2.2"
 
-"@vue/devtools-shared@^7.7.7":
-  version "7.7.7"
-  resolved "https://registry.yarnpkg.com/@vue/devtools-shared/-/devtools-shared-7.7.7.tgz#ff14aa8c1262ebac8c0397d3b09f767cd489750c"
-  integrity sha512-+udSj47aRl5aKb0memBvcUG9koarqnxNM5yjuREvqwK6T3ap4mn3Zqqc17QrBFTqSMjr3HK1cvStEZpMDpfdyw==
+"@vue/devtools-shared@^7.7.9":
+  version "7.7.9"
+  resolved "https://registry.yarnpkg.com/@vue/devtools-shared/-/devtools-shared-7.7.9.tgz#fa4c096b744927081a7dda5fcf05f34b1ae6ca14"
+  integrity sha512-iWAb0v2WYf0QWmxCGy0seZNDPdO3Sp5+u78ORnyeonS6MT4PC7VPrryX2BpMJrwlDeaZ6BD4vP4XKjK0SZqaeA==
   dependencies:
     rfdc "^1.4.1"
 
@@ -7323,12 +7562,21 @@
   dependencies:
     "@vue/shared" "3.3.4"
 
+<<<<<<< Updated upstream
 "@vue/reactivity@3.5.23":
   version "3.5.23"
   resolved "https://registry.yarnpkg.com/@vue/reactivity/-/reactivity-3.5.23.tgz#d2a7b7cae73168ec3bf513e7395d790046213ef8"
   integrity sha512-ji5w0qvrPyBmBx5Ldv4QGNsw0phgRreEvjt0iUf1lei2Sm8//9ZAi78uM2ZjsT5gk0YZilLuoRCIMvtuZlHMJw==
   dependencies:
     "@vue/shared" "3.5.23"
+=======
+"@vue/reactivity@3.5.24":
+  version "3.5.24"
+  resolved "https://registry.yarnpkg.com/@vue/reactivity/-/reactivity-3.5.24.tgz#d2de10045f3ec05108787b6c90701b3f3bc401f8"
+  integrity sha512-BM8kBhtlkkbnyl4q+HiF5R5BL0ycDPfihowulm02q3WYp2vxgPcJuZO866qa/0u3idbMntKEtVNuAUp5bw4teg==
+  dependencies:
+    "@vue/shared" "3.5.24"
+>>>>>>> Stashed changes
 
 "@vue/runtime-core@3.3.4":
   version "3.3.4"
@@ -7338,6 +7586,7 @@
     "@vue/reactivity" "3.3.4"
     "@vue/shared" "3.3.4"
 
+<<<<<<< Updated upstream
 "@vue/runtime-core@3.5.23":
   version "3.5.23"
   resolved "https://registry.yarnpkg.com/@vue/runtime-core/-/runtime-core-3.5.23.tgz#f8c3e39398bec1662586c927de23cdaa47d7c4f8"
@@ -7345,6 +7594,15 @@
   dependencies:
     "@vue/reactivity" "3.5.23"
     "@vue/shared" "3.5.23"
+=======
+"@vue/runtime-core@3.5.24":
+  version "3.5.24"
+  resolved "https://registry.yarnpkg.com/@vue/runtime-core/-/runtime-core-3.5.24.tgz#902ff6f6372a14b190aeb501a57467759bc58241"
+  integrity sha512-RYP/byyKDgNIqfX/gNb2PB55dJmM97jc9wyF3jK7QUInYKypK2exmZMNwnjueWwGceEkP6NChd3D2ZVEp9undQ==
+  dependencies:
+    "@vue/reactivity" "3.5.24"
+    "@vue/shared" "3.5.24"
+>>>>>>> Stashed changes
 
 "@vue/runtime-dom@3.3.4":
   version "3.3.4"
@@ -7355,6 +7613,7 @@
     "@vue/shared" "3.3.4"
     csstype "^3.1.1"
 
+<<<<<<< Updated upstream
 "@vue/runtime-dom@3.5.23":
   version "3.5.23"
   resolved "https://registry.yarnpkg.com/@vue/runtime-dom/-/runtime-dom-3.5.23.tgz#65e6e545a2280de672939fc2dedf49df402c0cd5"
@@ -7363,6 +7622,16 @@
     "@vue/reactivity" "3.5.23"
     "@vue/runtime-core" "3.5.23"
     "@vue/shared" "3.5.23"
+=======
+"@vue/runtime-dom@3.5.24":
+  version "3.5.24"
+  resolved "https://registry.yarnpkg.com/@vue/runtime-dom/-/runtime-dom-3.5.24.tgz#b27414fd0be2c9b58c701a67ba4db96b78819e9b"
+  integrity sha512-Z8ANhr/i0XIluonHVjbUkjvn+CyrxbXRIxR7wn7+X7xlcb7dJsfITZbkVOeJZdP8VZwfrWRsWdShH6pngMxRjw==
+  dependencies:
+    "@vue/reactivity" "3.5.24"
+    "@vue/runtime-core" "3.5.24"
+    "@vue/shared" "3.5.24"
+>>>>>>> Stashed changes
     csstype "^3.1.3"
 
 "@vue/server-renderer@3.3.4":
@@ -7373,6 +7642,7 @@
     "@vue/compiler-ssr" "3.3.4"
     "@vue/shared" "3.3.4"
 
+<<<<<<< Updated upstream
 "@vue/server-renderer@3.5.23":
   version "3.5.23"
   resolved "https://registry.yarnpkg.com/@vue/server-renderer/-/server-renderer-3.5.23.tgz#85fdc651f603dd5971eb0a0fe54bb7f0096fc33c"
@@ -7380,16 +7650,32 @@
   dependencies:
     "@vue/compiler-ssr" "3.5.23"
     "@vue/shared" "3.5.23"
+=======
+"@vue/server-renderer@3.5.24":
+  version "3.5.24"
+  resolved "https://registry.yarnpkg.com/@vue/server-renderer/-/server-renderer-3.5.24.tgz#efc5f8dc2776b91f04bf3249be95afe6e83a02a8"
+  integrity sha512-Yh2j2Y4G/0/4z/xJ1Bad4mxaAk++C2v4kaa8oSYTMJBJ00/ndPuxCnWeot0/7/qafQFLh5pr6xeV6SdMcE/G1w==
+  dependencies:
+    "@vue/compiler-ssr" "3.5.24"
+    "@vue/shared" "3.5.24"
+>>>>>>> Stashed changes
 
 "@vue/shared@3.3.4":
   version "3.3.4"
   resolved "https://registry.yarnpkg.com/@vue/shared/-/shared-3.3.4.tgz#06e83c5027f464eef861c329be81454bc8b70780"
   integrity sha512-7OjdcV8vQ74eiz1TZLzZP4JwqM5fA94K6yntPS5Z25r9HDuGNzaGdgvwKYq6S+MxwF0TFRwe50fIR/MYnakdkQ==
 
+<<<<<<< Updated upstream
 "@vue/shared@3.5.23", "@vue/shared@^3.5.13":
   version "3.5.23"
   resolved "https://registry.yarnpkg.com/@vue/shared/-/shared-3.5.23.tgz#7678dd36f3d26c541801a73088ab0841889ffae0"
   integrity sha512-0YZ1DYuC5o/YJPf6pFdt2KYxVGDxkDbH/1NYJnVJWUkzr8ituBEmFVQRNX2gCaAsFEjEDnLkWpgqlZA7htgS/g==
+=======
+"@vue/shared@3.5.24", "@vue/shared@^3.5.13":
+  version "3.5.24"
+  resolved "https://registry.yarnpkg.com/@vue/shared/-/shared-3.5.24.tgz#45ea9e6e037e53cfb8141ffa6bcad75b8be11e9c"
+  integrity sha512-9cwHL2EsJBdi8NY22pngYYWzkTDhld6fAD6jlaeloNGciNSJL6bLpbxVgXl96X00Jtc6YWQv96YA/0sxex/k1A==
+>>>>>>> Stashed changes
 
 "@vue/vue-loader-v15@npm:vue-loader@^15.9.7":
   version "15.11.1"
@@ -8021,9 +8307,9 @@ abitype@1.1.0:
   integrity sha512-6Vh4HcRxNMLA0puzPjM5GBgT4aAcFGKZzSgAXvuZ27shJP6NEpielTuqbBmZILR5/xd0PizkBGy5hReKz9jl5A==
 
 abitype@^1.0.9:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/abitype/-/abitype-1.1.1.tgz#b50ed400f8bfca5452eb4033445c309d3e1117c8"
-  integrity sha512-Loe5/6tAgsBukY95eGaPSDmQHIjRZYQq8PB1MpsNccDIK8WiV+Uw6WzaIXipvaxTEL2yEB0OpEaQv3gs8pkS9Q==
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/abitype/-/abitype-1.1.2.tgz#8386138c13c05130e4fdba4ea3a1dbaee0c88655"
+  integrity sha512-mqpSSIuddHs7t3IgsAweIZgYIQT4RhpIzrdcSN4fvHp9d77O0mglAAQ7fnI3r/hHIvgMwdpJAKr2T9K9leccYw==
 
 abort-controller@^3.0.0:
   version "3.0.0"
@@ -8168,6 +8454,7 @@ ajv@^8.0.0, ajv@^8.9.0:
     require-from-string "^2.0.2"
 
 algoliasearch@^5.14.2:
+<<<<<<< Updated upstream
   version "5.42.0"
   resolved "https://registry.yarnpkg.com/algoliasearch/-/algoliasearch-5.42.0.tgz#c30247e6480030471dfa2899f591878ff2fc5e15"
   integrity sha512-X5+PtWc9EJIPafT/cj8ZG+6IU3cjRRnlHGtqMHK/9gsiupQbAyYlH5y7qt/FtsAhfX5AICHffZy69ZAsVrxWkQ==
@@ -8186,6 +8473,26 @@ algoliasearch@^5.14.2:
     "@algolia/requester-browser-xhr" "5.42.0"
     "@algolia/requester-fetch" "5.42.0"
     "@algolia/requester-node-http" "5.42.0"
+=======
+  version "5.44.0"
+  resolved "https://registry.yarnpkg.com/algoliasearch/-/algoliasearch-5.44.0.tgz#25017f7ea7afcd35b35fb5a790a78694e5dddf4b"
+  integrity sha512-f8IpsbdQjzTjr/4mJ/jv5UplrtyMnnciGax6/B0OnLCs2/GJTK13O4Y7Ff1AvJVAaztanH+m5nzPoUq6EAy+aA==
+  dependencies:
+    "@algolia/abtesting" "1.10.0"
+    "@algolia/client-abtesting" "5.44.0"
+    "@algolia/client-analytics" "5.44.0"
+    "@algolia/client-common" "5.44.0"
+    "@algolia/client-insights" "5.44.0"
+    "@algolia/client-personalization" "5.44.0"
+    "@algolia/client-query-suggestions" "5.44.0"
+    "@algolia/client-search" "5.44.0"
+    "@algolia/ingestion" "1.44.0"
+    "@algolia/monitoring" "1.44.0"
+    "@algolia/recommend" "5.44.0"
+    "@algolia/requester-browser-xhr" "5.44.0"
+    "@algolia/requester-fetch" "5.44.0"
+    "@algolia/requester-node-http" "5.44.0"
+>>>>>>> Stashed changes
 
 align-text@^0.1.1, align-text@^0.1.3:
   version "0.1.4"
@@ -8519,13 +8826,13 @@ autoprefixer@10.4.4:
     postcss-value-parser "^4.2.0"
 
 autoprefixer@^10.2.4:
-  version "10.4.21"
-  resolved "https://registry.yarnpkg.com/autoprefixer/-/autoprefixer-10.4.21.tgz#77189468e7a8ad1d9a37fbc08efc9f480cf0a95d"
-  integrity sha512-O+A6LWV5LDHSJD3LjHYoNi4VLsj/Whi7k6zG12xTYaU4cQ8oxQGckXNX8cRHK5yOZ/ppVHe0ZBXGzSV9jXdVbQ==
+  version "10.4.22"
+  resolved "https://registry.yarnpkg.com/autoprefixer/-/autoprefixer-10.4.22.tgz#90b27ab55ec0cf0684210d1f056f7d65dac55f16"
+  integrity sha512-ARe0v/t9gO28Bznv6GgqARmVqcWOV3mfgUPn9becPHMiD3o9BwlRgaeccZnwTpZ7Zwqrm+c1sUSsMxIzQzc8Xg==
   dependencies:
-    browserslist "^4.24.4"
-    caniuse-lite "^1.0.30001702"
-    fraction.js "^4.3.7"
+    browserslist "^4.27.0"
+    caniuse-lite "^1.0.30001754"
+    fraction.js "^5.3.4"
     normalize-range "^0.1.2"
     picocolors "^1.1.1"
     postcss-value-parser "^4.2.0"
@@ -8729,10 +9036,17 @@ base64url@^3.0.1:
   resolved "https://registry.yarnpkg.com/base64url/-/base64url-3.0.1.tgz#6399d572e2bc3f90a9a8b22d5dbb0a32d33f788d"
   integrity sha512-ir1UPr3dkwexU7FdV8qBBbNDRUhMmIekYMFZfi+C/sLNnRESKPl23nB9b2pltqfOQNnGzsDdId90AEtG5tCx4A==
 
+<<<<<<< Updated upstream
 baseline-browser-mapping@^2.8.19:
   version "2.8.25"
   resolved "https://registry.yarnpkg.com/baseline-browser-mapping/-/baseline-browser-mapping-2.8.25.tgz#947dc6f81778e0fa0424a2ab9ea09a3033e71109"
   integrity sha512-2NovHVesVF5TXefsGX1yzx1xgr7+m9JQenvz6FQY3qd+YXkKkYiv+vTCc7OriP9mcDZpTC5mAOYN4ocd29+erA==
+=======
+baseline-browser-mapping@^2.8.25:
+  version "2.8.29"
+  resolved "https://registry.yarnpkg.com/baseline-browser-mapping/-/baseline-browser-mapping-2.8.29.tgz#d8800b71399c783cb1bf2068c2bcc3b6cfd7892c"
+  integrity sha512-sXdt2elaVnhpDNRDz+1BDx1JQoJRuNk7oVlAlbGiFkLikHCAQiccexF/9e91zVi6RCgqspl04aP+6Cnl9zRLrA==
+>>>>>>> Stashed changes
 
 batch@0.6.1:
   version "0.6.1"
@@ -8839,9 +9153,15 @@ bip39@^3.0.4, bip39@^3.1.0:
     "@noble/hashes" "^1.2.0"
 
 birpc@^2.3.0:
+<<<<<<< Updated upstream
   version "2.7.0"
   resolved "https://registry.yarnpkg.com/birpc/-/birpc-2.7.0.tgz#0dee0015e9b33910f275da2e8a2dc1b512a2ab0c"
   integrity sha512-tub/wFGH49vNCm0xraykcY3TcRgX/3JsALYq/Lwrtti+bTyFHkCUAWF5wgYoie8P41wYwig2mIKiqoocr1EkEQ==
+=======
+  version "2.8.0"
+  resolved "https://registry.yarnpkg.com/birpc/-/birpc-2.8.0.tgz#064c90bda7912ef8aebd544f174ae1c9bc230c71"
+  integrity sha512-Bz2a4qD/5GRhiHSwj30c/8kC8QGj12nNDwz3D4ErQ4Xhy35dsSDvF+RA/tWpjyU0pdGtSDiEk6B5fBGE1qNVhw==
+>>>>>>> Stashed changes
 
 bitcoinjs-lib@6.1.3:
   version "6.1.3"
@@ -9047,15 +9367,15 @@ browserify-sign@^4.0.0, browserify-sign@^4.2.3:
     readable-stream "^2.3.8"
     safe-buffer "^5.2.1"
 
-browserslist@^4.0.0, browserslist@^4.14.5, browserslist@^4.16.3, browserslist@^4.20.2, browserslist@^4.21.4, browserslist@^4.24.0, browserslist@^4.24.4, browserslist@^4.26.3:
-  version "4.27.0"
-  resolved "https://registry.yarnpkg.com/browserslist/-/browserslist-4.27.0.tgz#755654744feae978fbb123718b2f139bc0fa6697"
-  integrity sha512-AXVQwdhot1eqLihwasPElhX2tAZiBjWdJ9i/Zcj2S6QYIjkx62OKSfnobkriB81C3l4w0rVy3Nt4jaTBltYEpw==
+browserslist@^4.0.0, browserslist@^4.14.5, browserslist@^4.16.3, browserslist@^4.20.2, browserslist@^4.21.4, browserslist@^4.24.0, browserslist@^4.26.3, browserslist@^4.27.0, browserslist@^4.28.0:
+  version "4.28.0"
+  resolved "https://registry.yarnpkg.com/browserslist/-/browserslist-4.28.0.tgz#9cefece0a386a17a3cd3d22ebf67b9deca1b5929"
+  integrity sha512-tbydkR/CxfMwelN0vwdP/pLkDwyAASZ+VfWm4EOwlB6SWhx1sYnWLqo8N5j0rAzPfzfRaxt0mM/4wPU/Su84RQ==
   dependencies:
-    baseline-browser-mapping "^2.8.19"
-    caniuse-lite "^1.0.30001751"
-    electron-to-chromium "^1.5.238"
-    node-releases "^2.0.26"
+    baseline-browser-mapping "^2.8.25"
+    caniuse-lite "^1.0.30001754"
+    electron-to-chromium "^1.5.249"
+    node-releases "^2.0.27"
     update-browserslist-db "^1.1.4"
 
 bs-logger@0.x:
@@ -9311,10 +9631,17 @@ caniuse-api@^3.0.0:
     lodash.memoize "^4.1.2"
     lodash.uniq "^4.5.0"
 
+<<<<<<< Updated upstream
 caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001317, caniuse-lite@^1.0.30001616, caniuse-lite@^1.0.30001702, caniuse-lite@^1.0.30001751:
   version "1.0.30001754"
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001754.tgz#7758299d9a72cce4e6b038788a15b12b44002759"
   integrity sha512-x6OeBXueoAceOmotzx3PO4Zpt4rzpeIFsSr6AAePTZxSkXiYDUmpypEl7e2+8NCd9bD7bXjqyef8CJYPC1jfxg==
+=======
+caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001317, caniuse-lite@^1.0.30001616, caniuse-lite@^1.0.30001702, caniuse-lite@^1.0.30001754:
+  version "1.0.30001755"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001755.tgz#c01cfb1c30f5acf1229391666ec03492f4c332ff"
+  integrity sha512-44V+Jm6ctPj7R52Na4TLi3Zri4dWUljJd+RDm+j8LtNCc/ihLCT+X1TzoOAkRETEWqjuLnh9581Tl80FvK7jVA==
+>>>>>>> Stashed changes
 
 canvas-confetti@^1.9.2:
   version "1.9.4"
@@ -9423,7 +9750,11 @@ chardet@^0.7.0:
   resolved "https://registry.yarnpkg.com/chardet/-/chardet-0.7.0.tgz#90094849f0937f2eedc2425d0d28a9e5f0cbad9e"
   integrity sha512-mT8iDcrh03qDGRRmoA2hmBJnxpllMR+0/0qlzjqZES6NdiWDcZkCNAk4rPFZ9Q85r27unkiNNg8ZOiwZXBHwcA==
 
+<<<<<<< Updated upstream
 chardet@^2.1.0:
+=======
+chardet@^2.1.1:
+>>>>>>> Stashed changes
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/chardet/-/chardet-2.1.1.tgz#5c75593704a642f71ee53717df234031e65373c8"
   integrity sha512-PsezH1rqdV9VvyNhxxOW32/d75r01NY7TQCmOqomRo15ZSOKbpTFVsfjghxo6JloQUCGnH4k1LGu0R4yCLlWQQ==
@@ -9989,16 +10320,16 @@ copyfiles@^2.4.1:
     yargs "^16.1.0"
 
 core-js-compat@^3.21.0, core-js-compat@^3.22.1:
-  version "3.46.0"
-  resolved "https://registry.yarnpkg.com/core-js-compat/-/core-js-compat-3.46.0.tgz#0c87126a19a1af00371e12b02a2b088a40f3c6f7"
-  integrity sha512-p9hObIIEENxSV8xIu+V68JjSeARg6UVMG5mR+JEUguG3sI6MsiS1njz2jHmyJDvA+8jX/sytkBHup6kxhM9law==
+  version "3.47.0"
+  resolved "https://registry.yarnpkg.com/core-js-compat/-/core-js-compat-3.47.0.tgz#698224bbdbb6f2e3f39decdda4147b161e3772a3"
+  integrity sha512-IGfuznZ/n7Kp9+nypamBhvwdwLsW6KC8IOaURw2doAK5e98AG3acVLdh0woOnEqCfUtS+Vu882JE4k/DAm3ItQ==
   dependencies:
-    browserslist "^4.26.3"
+    browserslist "^4.28.0"
 
 core-js@^3.25.1:
-  version "3.46.0"
-  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.46.0.tgz#323a092b96381a9184d0cd49ee9083b2f93373bb"
-  integrity sha512-vDMm9B0xnqqZ8uSBpZ8sNtRtOdmfShrvT6h2TuQGLs0Is+cR0DYbj/KWP6ALVNbWPpqA/qPLoOuppJN07humpA==
+  version "3.47.0"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.47.0.tgz#436ef07650e191afeb84c24481b298bd60eb4a17"
+  integrity sha512-c3Q2VVkGAUyupsjRnaNX6u8Dq2vAdzm9iuPj5FW0fRxzlxgq9Q39MDq10IvmQSpLgHQNyQzQmOo6bgGHmH3NNg==
 
 core-js@~3.39.0:
   version "3.39.0"
@@ -10333,9 +10664,9 @@ csso@^4.2.0:
     css-tree "^1.1.2"
 
 csstype@^3.0.2, csstype@^3.1.0, csstype@^3.1.1, csstype@^3.1.3:
-  version "3.1.3"
-  resolved "https://registry.yarnpkg.com/csstype/-/csstype-3.1.3.tgz#d80ff294d114fb0e6ac500fbf85b60137d7eff81"
-  integrity sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==
+  version "3.2.3"
+  resolved "https://registry.yarnpkg.com/csstype/-/csstype-3.2.3.tgz#ec48c0f3e993e50648c86da559e2610995cf989a"
+  integrity sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==
 
 currency.js@2.0.4:
   version "2.0.4"
@@ -11001,10 +11332,17 @@ ejs@^3.1.7:
   dependencies:
     jake "^10.8.5"
 
+<<<<<<< Updated upstream
 electron-to-chromium@^1.5.238:
   version "1.5.247"
   resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.247.tgz#8b3e33193b3784288216419776c573c7c2f24393"
   integrity sha512-bCkfEJNE5EOhEsGpgbvgUAXYP/uAZeN9GCd9bPGjm2/uiLdpoiZnxrBTbWT1nbZs1y6UqN7hatM3hOB4X1kXUQ==
+=======
+electron-to-chromium@^1.5.249:
+  version "1.5.255"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.255.tgz#fe9294ce172241eb50733bc00f2bd00d9c1e4ec7"
+  integrity sha512-Z9oIp4HrFF/cZkDPMpz2XSuVpc1THDpT4dlmATFlJUIBVCy9Vap5/rIXsASP1CscBacBqhabwh8vLctqBwEerQ==
+>>>>>>> Stashed changes
 
 ellipsize@^0.2.0:
   version "0.2.0"
@@ -12346,9 +12684,9 @@ fork-ts-checker-webpack-plugin@^6.4.0:
     tapable "^1.0.0"
 
 form-data@^4.0.0:
-  version "4.0.4"
-  resolved "https://registry.yarnpkg.com/form-data/-/form-data-4.0.4.tgz#784cdcce0669a9d68e94d11ac4eea98088edd2c4"
-  integrity sha512-KrGhL9Q4zjj0kiUt5OO4Mr/A/jlI2jDYs5eHBpYHPcBEVSiipAvn2Ko2HnPe20rmcuuvMHNdZFp+4IlGTMF0Ow==
+  version "4.0.5"
+  resolved "https://registry.yarnpkg.com/form-data/-/form-data-4.0.5.tgz#b49e48858045ff4cbf6b03e1805cebcad3679053"
+  integrity sha512-8RipRLol37bNs2bhoV67fiTEvdTrbMUYcFTiy3+wuuOnUog2QBHCZWXDRijWQfAkhBj2Uf5UnVaiWwA5vdd82w==
   dependencies:
     asynckit "^0.4.0"
     combined-stream "^1.0.8"
@@ -12361,10 +12699,15 @@ forwarded@0.2.0:
   resolved "https://registry.yarnpkg.com/forwarded/-/forwarded-0.2.0.tgz#2269936428aad4c15c7ebe9779a84bf0b2a81811"
   integrity sha512-buRG0fpBtRHSTCOASe6hD258tEubFoRLb4ZNA6NxMVHNw2gOcwHo9wyablzMzOA5z9xA9L1KNjk/Nt6MT9aYow==
 
-fraction.js@^4.2.0, fraction.js@^4.3.7:
+fraction.js@^4.2.0:
   version "4.3.7"
   resolved "https://registry.yarnpkg.com/fraction.js/-/fraction.js-4.3.7.tgz#06ca0085157e42fda7f9e726e79fefc4068840f7"
   integrity sha512-ZsDfxO51wGAXREY55a7la9LScWpwv9RxIrYABrlvOFBlH/ShPnrtsXeuUIfXKKOVicNxQ+o8JTbJvjS4M89yew==
+
+fraction.js@^5.3.4:
+  version "5.3.4"
+  resolved "https://registry.yarnpkg.com/fraction.js/-/fraction.js-5.3.4.tgz#8c0fcc6a9908262df4ed197427bdeef563e0699a"
+  integrity sha512-1X1NTtiJphryn/uLQz3whtY6jK3fTqoE3ohKs0tT+Ujr1W59oopxmoEh7Lu5p6vBaPbgoM0bzveAW4Qi5RyWDQ==
 
 framer-motion@11.13.1, framer-motion@7.8.0, framer-motion@^10.16.16, framer-motion@^11.0.6, framer-motion@^6.3.3, framer-motion@^7.6.7:
   version "11.13.1"
@@ -12674,9 +13017,9 @@ glob@7.1.4:
     path-is-absolute "^1.0.0"
 
 glob@^10.2.2, glob@^10.3.10:
-  version "10.4.5"
-  resolved "https://registry.yarnpkg.com/glob/-/glob-10.4.5.tgz#f4d9f0b90ffdbab09c9d77f5f29b4262517b0956"
-  integrity sha512-7Bv8RF0k6xjo7d4A/PxYLbUCfb6c+Vpd2/mB2yRDlew7Jb5hEXiCD9ibfO7wpk8i4sevK6DFny9h7EYbM3/sHg==
+  version "10.5.0"
+  resolved "https://registry.yarnpkg.com/glob/-/glob-10.5.0.tgz#8ec0355919cd3338c28428a23d4f24ecc5fe738c"
+  integrity sha512-DfXN8DfhJ7NH3Oe7cFmu3NCu1wKbkReJ8TorzSAFbSKrlNaQSKfIzqYqVY8zlbs2NLBbWpRiU52GX2PbaBVNkg==
   dependencies:
     foreground-child "^3.1.0"
     jackspeak "^3.1.2"
@@ -12785,13 +13128,13 @@ got@^11.8.6:
     responselike "^2.0.0"
 
 gql.tada@^1.8.2:
-  version "1.8.13"
-  resolved "https://registry.yarnpkg.com/gql.tada/-/gql.tada-1.8.13.tgz#a724bbdaebe1d851d80bf59c5e8614956914b883"
-  integrity sha512-fYoorairdPgxtE7Sf1X9/6bSN9Kt2+PN8KLg3hcF8972qFnawwUgs1OLVU8efZMHwL7EBHhhKBhrsGPlOs2lZQ==
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/gql.tada/-/gql.tada-1.9.0.tgz#94555d50cf6e969db25c8e88bf0b3fe603732bf4"
+  integrity sha512-1LMiA46dRs5oF7Qev6vMU32gmiNvM3+3nHoQZA9K9j2xQzH8xOAWnnJrLSbZOFHTSdFxqn86TL6beo1/7ja/aA==
   dependencies:
     "@0no-co/graphql.web" "^1.0.5"
     "@0no-co/graphqlsp" "^1.12.13"
-    "@gql.tada/cli-utils" "1.7.1"
+    "@gql.tada/cli-utils" "1.7.2"
     "@gql.tada/internal" "1.0.8"
 
 graceful-fs@4.2.11, graceful-fs@^4.1.11, graceful-fs@^4.1.15, graceful-fs@^4.1.2, graceful-fs@^4.1.6, graceful-fs@^4.2.0, graceful-fs@^4.2.11, graceful-fs@^4.2.4, graceful-fs@^4.2.6, graceful-fs@^4.2.9:
@@ -13116,9 +13459,9 @@ html-webpack-plugin@5.5.0:
     tapable "^2.0.0"
 
 html-webpack-plugin@^5.1.0:
-  version "5.6.4"
-  resolved "https://registry.yarnpkg.com/html-webpack-plugin/-/html-webpack-plugin-5.6.4.tgz#d8cb0f7edff7745ae7d6cccb0bff592e9f7f7959"
-  integrity sha512-V/PZeWsqhfpE27nKeX9EO2sbR+D17A+tLf6qU+ht66jdUsN0QLKJN27Z+1+gHrVMKgndBahes0PU6rRihDgHTw==
+  version "5.6.5"
+  resolved "https://registry.yarnpkg.com/html-webpack-plugin/-/html-webpack-plugin-5.6.5.tgz#d57defb83cabbf29bf56b2d4bf10b67b650066be"
+  integrity sha512-4xynFbKNNk+WlzXeQQ+6YYsH2g7mpfPszQZUi3ovKlj+pDmngQ7vRXjrrmGROabmKwyQkcgcX5hqfOwHbFmK5g==
   dependencies:
     "@types/html-minifier-terser" "^6.0.0"
     html-minifier-terser "^6.0.2"
@@ -13488,9 +13831,9 @@ invert-color@^2.0.0:
   integrity sha512-9s6IATlhOAr0/0MPUpLdMpk81ixIu8IqwPwORssXBauFT/4ff/iyEOcojd0UYuPwkDbJvL1+blIZGhqVIaAm5Q==
 
 ip-address@^10.0.1:
-  version "10.0.1"
-  resolved "https://registry.yarnpkg.com/ip-address/-/ip-address-10.0.1.tgz#a8180b783ce7788777d796286d61bce4276818ed"
-  integrity sha512-NWv9YLW4PoW2B7xtzaS3NCot75m6nK7Icdv0o3lfMceJVRfSoQwqD4wEH5rLwoKJwUiZ/rfpiVBhnaF0FK4HoA==
+  version "10.1.0"
+  resolved "https://registry.yarnpkg.com/ip-address/-/ip-address-10.1.0.tgz#d8dcffb34d0e02eb241427444a6e23f5b0595aa4"
+  integrity sha512-XXADHxXmvT9+CRxhXg56LJovE+bmWnEWB78LB83VZTprKTmaC5QfruXocxzTZ2Kl0DNwKuBdlIhjL8LeY8Sf8Q==
 
 ipaddr.js@1.9.1:
   version "1.9.1"
@@ -14828,7 +15171,7 @@ js-sha3@0.8.0, js-sha3@^0.8.0:
   resolved "https://registry.yarnpkg.com/js-tokens/-/js-tokens-4.0.0.tgz#19203fb59991df98e3a287050d4647cdeaf32499"
   integrity sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==
 
-js-yaml@4.1.0, js-yaml@^4.1.0:
+js-yaml@4.1.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-4.1.0.tgz#c1fb65f8f5017901cdd2c951864ba18458a10602"
   integrity sha512-wpxZs9NoxZaJESJGIZTyDEaYpl0FKSA+FB9aJiyemKhMwkxQg63h4T1KJgUGHpTqPDNRcmmYLugrRjJlBtWvRA==
@@ -14836,12 +15179,19 @@ js-yaml@4.1.0, js-yaml@^4.1.0:
     argparse "^2.0.1"
 
 js-yaml@^3.10.0, js-yaml@^3.13.1:
-  version "3.14.1"
-  resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-3.14.1.tgz#dae812fdb3825fa306609a8717383c50c36a0537"
-  integrity sha512-okMH7OXXJ7YrN9Ok3/SXrnu4iX9yOk+25nqX4imS2npuvTYDmo/QEZoqwZkYaIDk3jVvBOTOIEgEhaLOynBS9g==
+  version "3.14.2"
+  resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-3.14.2.tgz#77485ce1dd7f33c061fd1b16ecea23b55fcb04b0"
+  integrity sha512-PMSmkqxr106Xa156c2M265Z+FTrPl+oxd/rgOQy2tijQeK5TxQ43psO1ZCwhVOSdnn+RzkzlRz/eY4BgJBYVpg==
   dependencies:
     argparse "^1.0.7"
     esprima "^4.0.0"
+
+js-yaml@^4.1.0:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-4.1.1.tgz#854c292467705b699476e1a2decc0c8a3458806b"
+  integrity sha512-qQKT4zQxXl8lLwBtHMWwaTcGfFOZviOJet3Oy/xmGk2gZH677CJM9EvtfdSkgWcATZhj/55JZ0rmy3myCT5lsA==
+  dependencies:
+    argparse "^2.0.1"
 
 jsbi@^3.1.5:
   version "3.2.5"
@@ -15265,7 +15615,7 @@ load-json-file@^4.0.0:
     pify "^3.0.0"
     strip-bom "^3.0.0"
 
-loader-runner@^4.1.0, loader-runner@^4.2.0:
+loader-runner@^4.1.0, loader-runner@^4.2.0, loader-runner@^4.3.1:
   version "4.3.1"
   resolved "https://registry.yarnpkg.com/loader-runner/-/loader-runner-4.3.1.tgz#6c76ed29b0ccce9af379208299f07f876de737e3"
   integrity sha512-IWqP2SCPhyVFTBtRcgMHdzlf9ul25NwaFx4wCEH/KjAXuuHY4yNjvPXsBokp8jCB936PyWRaPKUNh8NvylLp2Q==
@@ -16736,7 +17086,11 @@ node-machine-id@1.1.12:
   resolved "https://registry.yarnpkg.com/node-machine-id/-/node-machine-id-1.1.12.tgz#37904eee1e59b320bb9c5d6c0a59f3b469cb6267"
   integrity sha512-QNABxbrPa3qEIfrE6GOJ7BYIuignnJw7iQ2YPbc3Nla1HzRJjXzZOiikfF8m7eAMfichLt3M4VgLOetqgDmgGQ==
 
+<<<<<<< Updated upstream
 node-releases@^2.0.26:
+=======
+node-releases@^2.0.27:
+>>>>>>> Stashed changes
   version "2.0.27"
   resolved "https://registry.yarnpkg.com/node-releases/-/node-releases-2.0.27.tgz#eedca519205cf20f650f61d56b070db111231e4e"
   integrity sha512-nmh3lCkYZ3grZvqcCH+fjmQ7X+H0OeZgP40OierEaAptX4XofMh5kwNbWh7lBduUzCcV/8kZ+NDLCwm2iorIlA==
@@ -19310,34 +19664,34 @@ rollup@^0.25.8:
     source-map-support "^0.3.2"
 
 rollup@^4.20.0:
-  version "4.52.5"
-  resolved "https://registry.yarnpkg.com/rollup/-/rollup-4.52.5.tgz#96982cdcaedcdd51b12359981f240f94304ec235"
-  integrity sha512-3GuObel8h7Kqdjt0gxkEzaifHTqLVW56Y/bjN7PSQtkKr0w3V/QYSdt6QWYtd7A1xUtYQigtdUfgj1RvWVtorw==
+  version "4.53.2"
+  resolved "https://registry.yarnpkg.com/rollup/-/rollup-4.53.2.tgz#98e73ee51e119cb9d88b07d026c959522416420a"
+  integrity sha512-MHngMYwGJVi6Fmnk6ISmnk7JAHRNF0UkuucA0CUW3N3a4KnONPEZz+vUanQP/ZC/iY1Qkf3bwPWzyY84wEks1g==
   dependencies:
     "@types/estree" "1.0.8"
   optionalDependencies:
-    "@rollup/rollup-android-arm-eabi" "4.52.5"
-    "@rollup/rollup-android-arm64" "4.52.5"
-    "@rollup/rollup-darwin-arm64" "4.52.5"
-    "@rollup/rollup-darwin-x64" "4.52.5"
-    "@rollup/rollup-freebsd-arm64" "4.52.5"
-    "@rollup/rollup-freebsd-x64" "4.52.5"
-    "@rollup/rollup-linux-arm-gnueabihf" "4.52.5"
-    "@rollup/rollup-linux-arm-musleabihf" "4.52.5"
-    "@rollup/rollup-linux-arm64-gnu" "4.52.5"
-    "@rollup/rollup-linux-arm64-musl" "4.52.5"
-    "@rollup/rollup-linux-loong64-gnu" "4.52.5"
-    "@rollup/rollup-linux-ppc64-gnu" "4.52.5"
-    "@rollup/rollup-linux-riscv64-gnu" "4.52.5"
-    "@rollup/rollup-linux-riscv64-musl" "4.52.5"
-    "@rollup/rollup-linux-s390x-gnu" "4.52.5"
-    "@rollup/rollup-linux-x64-gnu" "4.52.5"
-    "@rollup/rollup-linux-x64-musl" "4.52.5"
-    "@rollup/rollup-openharmony-arm64" "4.52.5"
-    "@rollup/rollup-win32-arm64-msvc" "4.52.5"
-    "@rollup/rollup-win32-ia32-msvc" "4.52.5"
-    "@rollup/rollup-win32-x64-gnu" "4.52.5"
-    "@rollup/rollup-win32-x64-msvc" "4.52.5"
+    "@rollup/rollup-android-arm-eabi" "4.53.2"
+    "@rollup/rollup-android-arm64" "4.53.2"
+    "@rollup/rollup-darwin-arm64" "4.53.2"
+    "@rollup/rollup-darwin-x64" "4.53.2"
+    "@rollup/rollup-freebsd-arm64" "4.53.2"
+    "@rollup/rollup-freebsd-x64" "4.53.2"
+    "@rollup/rollup-linux-arm-gnueabihf" "4.53.2"
+    "@rollup/rollup-linux-arm-musleabihf" "4.53.2"
+    "@rollup/rollup-linux-arm64-gnu" "4.53.2"
+    "@rollup/rollup-linux-arm64-musl" "4.53.2"
+    "@rollup/rollup-linux-loong64-gnu" "4.53.2"
+    "@rollup/rollup-linux-ppc64-gnu" "4.53.2"
+    "@rollup/rollup-linux-riscv64-gnu" "4.53.2"
+    "@rollup/rollup-linux-riscv64-musl" "4.53.2"
+    "@rollup/rollup-linux-s390x-gnu" "4.53.2"
+    "@rollup/rollup-linux-x64-gnu" "4.53.2"
+    "@rollup/rollup-linux-x64-musl" "4.53.2"
+    "@rollup/rollup-openharmony-arm64" "4.53.2"
+    "@rollup/rollup-win32-arm64-msvc" "4.53.2"
+    "@rollup/rollup-win32-ia32-msvc" "4.53.2"
+    "@rollup/rollup-win32-x64-gnu" "4.53.2"
+    "@rollup/rollup-win32-x64-msvc" "4.53.2"
     fsevents "~2.3.2"
 
 rollup@~2.78.0:
@@ -21645,9 +21999,15 @@ viem@2.5.0:
     ws "8.13.0"
 
 viem@^2.23.2:
+<<<<<<< Updated upstream
   version "2.38.6"
   resolved "https://registry.yarnpkg.com/viem/-/viem-2.38.6.tgz#ab315bef8f872bce86f0f145e9b008b5e94f1904"
   integrity sha512-aqO6P52LPXRjdnP6rl5Buab65sYa4cZ6Cpn+k4OLOzVJhGIK8onTVoKMFMT04YjDfyDICa/DZyV9HmvLDgcjkw==
+=======
+  version "2.39.2"
+  resolved "https://registry.yarnpkg.com/viem/-/viem-2.39.2.tgz#c8f747bf22ae2ca46011a8e8ae22f26085ae3fba"
+  integrity sha512-EJPt+T0AkMxKvBRPFHYMLMuvcHiIhoYItkioHRGCkkm6LBSwlK6l9DNzoKA9S09LP003BiMeYddVjVso+lg2Og==
+>>>>>>> Stashed changes
   dependencies:
     "@noble/curves" "1.9.1"
     "@noble/hashes" "1.8.0"
@@ -21770,6 +22130,7 @@ vue@^2.7.7:
     csstype "^3.1.0"
 
 vue@^3.5.13:
+<<<<<<< Updated upstream
   version "3.5.23"
   resolved "https://registry.yarnpkg.com/vue/-/vue-3.5.23.tgz#0e0e8bc436b175cf24056a1ba4ab961bdbec5947"
   integrity sha512-CfvZv/vI52xUhumUvHtD6iFIS78nGWfX4IJnHfBGhpqMI0CwDq2YEngXOeaBFMRmiArcqczuVrLxurvesTYT9w==
@@ -21779,6 +22140,17 @@ vue@^3.5.13:
     "@vue/runtime-dom" "3.5.23"
     "@vue/server-renderer" "3.5.23"
     "@vue/shared" "3.5.23"
+=======
+  version "3.5.24"
+  resolved "https://registry.yarnpkg.com/vue/-/vue-3.5.24.tgz#1b93af349faa064f46e70ac5b0caaa3d0952bbf3"
+  integrity sha512-uTHDOpVQTMjcGgrqFPSb8iO2m1DUvo+WbGqoXQz8Y1CeBYQ0FXf2z1gLRaBtHjlRz7zZUBHxjVB5VTLzYkvftg==
+  dependencies:
+    "@vue/compiler-dom" "3.5.24"
+    "@vue/compiler-sfc" "3.5.24"
+    "@vue/runtime-dom" "3.5.24"
+    "@vue/server-renderer" "3.5.24"
+    "@vue/shared" "3.5.24"
+>>>>>>> Stashed changes
 
 walker@^1.0.8:
   version "1.0.8"
@@ -22054,9 +22426,9 @@ webpack@5.70.0:
     webpack-sources "^3.2.3"
 
 webpack@^5.54.0, webpack@^5.91.0:
-  version "5.102.1"
-  resolved "https://registry.yarnpkg.com/webpack/-/webpack-5.102.1.tgz#1003a3024741a96ba99c37431938bf61aad3d988"
-  integrity sha512-7h/weGm9d/ywQ6qzJ+Xy+r9n/3qgp/thalBbpOi5i223dPXKi04IBtqPN9nTd+jBc7QKfvDbaBnFipYp4sJAUQ==
+  version "5.103.0"
+  resolved "https://registry.yarnpkg.com/webpack/-/webpack-5.103.0.tgz#17a7c5a5020d5a3a37c118d002eade5ee2c6f3da"
+  integrity sha512-HU1JOuV1OavsZ+mfigY0j8d1TgQgbZ6M+J75zDkpEAwYeXjWSqrGJtgnPblJjd/mAyTNQ7ygw0MiKOn6etz8yw==
   dependencies:
     "@types/eslint-scope" "^3.7.7"
     "@types/estree" "^1.0.8"
@@ -22075,7 +22447,7 @@ webpack@^5.54.0, webpack@^5.91.0:
     glob-to-regexp "^0.4.1"
     graceful-fs "^4.2.11"
     json-parse-even-better-errors "^2.3.1"
-    loader-runner "^4.2.0"
+    loader-runner "^4.3.1"
     mime-types "^2.1.27"
     neo-async "^2.6.2"
     schema-utils "^4.3.3"

@@ -534,8 +534,8 @@ export const ChainInfos: Record<SupportedChain, ChainInfo> = {
     txExplorer: {
       testnet: {
         name: 'NN Terra',
-        txUrl: 'http://72.61.161.82:3001/transactions',
-        accountUrl: 'http://72.61.161.82:3001/accounts',
+        txUrl: ' https://www.nnscan.org/transactions',
+        accountUrl: 'https://www.nnscan.org/accounts',
       },
     },
     bip44: { coinType: '118' },
